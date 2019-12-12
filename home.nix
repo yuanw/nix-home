@@ -53,11 +53,6 @@ in rec {
       userName = "Yuan Wang";
       userEmail = "me@yuanwang.ca";
 
-      signing = {
-        key = "3AA5C34371567BD2";
-        signByDefault = true;
-      };
-
       aliases = {
         co         = "checkout";
         w          = "status -sb";
@@ -68,7 +63,6 @@ in rec {
 
       extraConfig = {
         branch.autosetupmerge = true;
-        commit.gpgsign        = true;
         github.user           = "yuanwang-wf";
         credential.helper     = "osxkeychain";
 
