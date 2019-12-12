@@ -1,0 +1,13 @@
+#+TITLE: nix home-manager config
+
+* How to use it
+
+#+BEGIN_SRC shell
+git clone g
+ln -s `pwd` ~/.config/nixpkgs
+#+END_SRC
+
+* References:
+https://github.com/rycee/home-manager
+https://github.com/jwiegley/nix-config
+https://github.com/yrashk/nix-home
