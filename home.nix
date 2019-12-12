@@ -16,21 +16,7 @@ in rec {
     };
   };
 
-  # Let Home Manager install and manage itself.
-  home.packages = [
-    pkgs.ispell
-    pkgs.ffmpeg
-    pkgs.gifsicle
-    pkgs.htop
-    pkgs.nix-prefetch-git
-    pkgs.sass
-    pkgs.silver-searcher
-    pkgs.stack
-    pkgs.texlive.combined.scheme-full
-    pkgs.tree
-    pkgs.unzip
-    pkgs.lorri
-  ];
+  home.packages = import ./packages.nix { pkgs = pkgs;};
 
   programs = {
     home-manager = {
@@ -52,7 +38,7 @@ in rec {
     git = {
       enable = true;
       userName = "Yuan Wang";
-      userEmail = "me@yuanwang.ca";
+      userEmail = "yuan.wang@workiva.com";
 
       aliases = {
         co         = "checkout";

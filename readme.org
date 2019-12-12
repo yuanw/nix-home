@@ -7,6 +7,8 @@ git clone g
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
 
+move all packages declartion in a different file
+
 * References:
 https://github.com/rycee/home-manager
 https://github.com/jwiegley/nix-config
