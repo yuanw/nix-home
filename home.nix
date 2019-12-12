@@ -25,6 +25,7 @@ in rec {
     pkgs.nix-prefetch-git
     pkgs.sass
     pkgs.silver-searcher
+    pkgs.stack
     pkgs.texlive.combined.scheme-full
     pkgs.tree
     pkgs.unzip
