@@ -14,9 +14,15 @@ in rec {
       allowBroken = false;
       allowUnsupportedSystem = false;
     };
+
+    overlays =
+      let path = ./overlays_; in with builtins;
+            map (n: import (path + ("/" + n)))
+              (filter (n: match ".*\\.nix" n != null ||
+                          pathExists (path + ("/" + n + "/default.nix")))
+                (attrNames (readDir path)));
   };
 
-  # Let Home Manager install and manage itself.
   home.packages = [
     pkgs.ispell
     pkgs.ffmpeg
@@ -30,6 +36,9 @@ in rec {
     pkgs.tree
     pkgs.unzip
     pkgs.lorri
+
+    pkgs.pass
+    pkgs.pass-git-helper
   ];
 
   programs = {

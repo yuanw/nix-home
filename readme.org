@@ -7,7 +7,16 @@ git clone g
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
 
+
+* Log 
+** Add pass-git-helper
+https://github.com/Gabriel439/haskell-nix/blob/master/project0/README.md#pinning-nixpkgs
+#+BEGIN_SRC shell
+nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2c072ff2cbde896462dd7b1da9f  > pass-git-helper.json
+#+END_SRC
+
+
 * References:
-https://github.com/rycee/home-manager
-https://github.com/jwiegley/nix-config
-https://github.com/yrashk/nix-home
+- https://github.com/rycee/home-manager
+- https://github.com/jwiegley/nix-config
+- https://github.com/yrashk/nix-home
