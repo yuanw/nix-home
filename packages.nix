@@ -8,6 +8,7 @@ with pkgs;
   ispell
   ffmpeg
   fd
+  less
   gifsicle
   htop
   lorri
@@ -20,4 +21,5 @@ with pkgs;
   tree
   wget
   unzip
+  OnePassword-op
 ]

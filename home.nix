@@ -56,6 +56,9 @@ in rec {
       };
 
       extraConfig = {
+        core = {
+          editor = "emacs -nw";
+        };
         branch.autosetupmerge = true;
         github.user           = "yuanwang-wf";
         credential.helper     = "osxkeychain";
