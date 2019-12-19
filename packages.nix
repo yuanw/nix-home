@@ -22,4 +22,7 @@ with pkgs;
   wget
   unzip
   OnePassword-op
+
+  pass
+  pass-git-helper
 ]

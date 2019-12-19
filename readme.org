@@ -6,8 +6,6 @@ git clone
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
 
-move all packages declartion in a different file
-
 
 * In General
 ** How to pin down git branch
@@ -20,9 +18,19 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 openssl dgst -r -sha256
 shasum -a 256
 #+END_SRC
+=======
+
+* Log 
+** Add pass-git-helper
+https://github.com/Gabriel439/haskell-nix/blob/master/project0/README.md#pinning-nixpkgs
+#+BEGIN_SRC shell
+nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2c072ff2cbde896462dd7b1da9f  > pass-git-helper.json
+#+END_SRC
+
 
 * References:
 - https://github.com/rycee/home-manager
 - https://github.com/jwiegley/nix-config
 - https://github.com/yrashk/nix-home
 - https://github.com/bkase/life
+
