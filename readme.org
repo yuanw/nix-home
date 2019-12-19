@@ -3,13 +3,22 @@
 * How to use it
 
 #+BEGIN_SRC shell
-git clone g
+git clone 
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
 
 move all packages declartion in a different file
 
+
+* Logs
+** Lorri
+pin down version
+
+#+BEGIN_SRC shell
+nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d5670677ee3e8b84e4f > lorri.json
+#+END_SRC
 * References:
 https://github.com/rycee/home-manager
 https://github.com/jwiegley/nix-config
 https://github.com/yrashk/nix-home
+https://github.com/bkase/life

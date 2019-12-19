@@ -14,6 +14,13 @@ in rec {
       allowBroken = false;
       allowUnsupportedSystem = false;
     };
+
+    overlays =
+      let path = ./overlays_ ; in with builtins;
+            map (n: import (path + ("/" + n)))
+              (filter (n: match ".*\\.nix" n != null ||
+                          pathExists (path + ("/" + n + "/default.nix")))
+                (attrNames (readDir path)));
   };
 
   home.packages = import ./packages.nix { pkgs = pkgs;};
@@ -52,7 +59,6 @@ in rec {
         branch.autosetupmerge = true;
         github.user           = "yuanwang-wf";
         credential.helper     = "osxkeychain";
-
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
