@@ -25,6 +25,10 @@ in rec {
 
   home.packages = import ./packages.nix { pkgs = pkgs;};
 
+  home.file.".ghci".text = ''
+                         :set prompt "λ> "
+                         '';
+
   programs = {
     home-manager = {
       enable = true;
