@@ -21,8 +21,10 @@ with pkgs;
   tree
   wget
   unzip
-  OnePassword-op
 
+  CopyQ
+  
+  OnePassword-op
   pass
   pass-git-helper
 ]
