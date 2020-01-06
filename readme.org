@@ -33,4 +33,6 @@ nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2
 - https://github.com/jwiegley/nix-config
 - https://github.com/yrashk/nix-home
 - https://github.com/bkase/life
+- https://github.com/tviti/nix-cfg
+
 

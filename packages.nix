@@ -21,9 +21,12 @@ with pkgs;
   tree
   wget
   unzip
+  graphviz
 
-  CopyQ
-  
+  hledger
+  hledger-web
+  hledger-ui
+
   OnePassword-op
   pass
   pass-git-helper
