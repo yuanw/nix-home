@@ -27,10 +27,17 @@ https://github.com/Gabriel439/haskell-nix/blob/master/project0/README.md#pinning
 nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2c072ff2cbde896462dd7b1da9f  > pass-git-helper.json
 #+END_SRC
 
+** Install Knative
+example to install go executable
+
+https://github.com/derailed/k9s
+https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k9s/default.nix
 
 * References:
 - https://github.com/rycee/home-manager
 - https://github.com/jwiegley/nix-config
 - https://github.com/yrashk/nix-home
 - https://github.com/bkase/life
+- https://github.com/tviti/nix-cfg
+
 
