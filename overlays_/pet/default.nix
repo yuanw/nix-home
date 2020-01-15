@@ -15,11 +15,10 @@ self: super: {
     subPackages = [ "." ];
 
     meta = with super.lib; {
-                               description = "Simple command-line snippet manager, written in Go";
-                               homepage = https://github.com/knqyf263/pet;
-                               license = licenses.mit;
-                               maintainers = with maintainers; [ kalbasit ];
-                               platforms = platforms.linux ++ platforms.darwin;
-                             };
+      description = "Simple command-line snippet manager, written in Go";
+      homepage = https://github.com/knqyf263/pet;
+      license = licenses.mit;
+      platforms = platforms.linux ++ platforms.darwin;
+    };
   };
 }
