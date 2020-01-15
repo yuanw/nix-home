@@ -30,4 +30,7 @@ with pkgs;
   OnePassword-op
   pass
   pass-git-helper
+
+  kubectl
+  minikube
 ]
