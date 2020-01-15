@@ -10,6 +10,7 @@ with pkgs;
   fd
   less
   gifsicle
+  graphviz
   htop
   lorri
   nix-prefetch-git
@@ -27,4 +28,6 @@ with pkgs;
   OnePassword-op
   pass
   pass-git-helper
+
+  pet
 ]

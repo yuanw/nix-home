@@ -45,7 +45,7 @@ in rec {
     git = {
       enable = true;
       userName = "Yuan Wang";
-      userEmail = "yuan.wang@workiva.com";
+      userEmail = "me@yuanwang.ca";
 
       aliases = {
         co         = "checkout";
