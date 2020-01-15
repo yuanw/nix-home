@@ -32,8 +32,10 @@ with pkgs;
   pass
   pass-git-helper
 
+  HandBrake
 
   pet
-  kubectl
-  minikube
+  knative
+  #kubectl
+  #minikube
 ]

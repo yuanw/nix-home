@@ -36,4 +36,20 @@ CopyQ = self.installApplication rec {
   '';
   homepage = https://hluk.github.io/CopyQ/;
 };
+
+HandBrake = self.installApplication rec {
+  name = "HandBrake";
+  version = "1.3.1";
+  sourceRoot = "HandBrake.app";
+  src = super.fetchurl {
+    url = "https://github.com/HandBrake/HandBrake/releases/download/${version}/HandBrake-${version}.dmg";
+    sha256 = "0vm2f7sbb2i5icsmc06q698myclp455cj855kw93cj2s33bfn4xp";
+    # date = 2020-01-15T16:31:05-0800;
+  };
+  description = ''
+    HandBrake is a tool for converting video from nearly any format to a
+    selection of modern, widely supported codecs
+  '';
+  homepage = https://handbrake.fr;
+};
 }
