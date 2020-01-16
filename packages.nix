@@ -35,7 +35,9 @@ with pkgs;
   HandBrake
 
   pet
+
   knative
-  #kubectl
-  #minikube
+  kubectl
+  minikube
+  Docker
 ]

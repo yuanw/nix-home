@@ -52,4 +52,21 @@ HandBrake = self.installApplication rec {
   '';
   homepage = https://handbrake.fr;
 };
+
+
+Docker = self.installApplication rec {
+  name = "Docker";
+  version = "2.1.0.5";
+  sourceRoot = "Docker.app";
+  src = super.fetchurl {
+    url = https://download.docker.com/mac/stable/Docker.dmg;
+    sha256 = "1nhvxi4j6sqmln5yv1d97p2ljnii2ip0k49pmhikabb75bkrhw4g";
+    # date = 2019-10-23T09:49:21-0700;
+  };
+  description = ''
+    Docker CE for Mac is an easy-to-install desktop app for building,
+    debugging, and testing Dockerized apps on a Mac
+  '';
+  homepage = https://store.docker.com/editions/community/docker-ce-desktop-mac;
+};
 }
