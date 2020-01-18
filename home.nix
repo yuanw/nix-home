@@ -25,9 +25,20 @@ in rec {
 
   home.packages = import ./packages.nix { pkgs = pkgs;};
 
-  home.file.".ghci".text = ''
+  home.file = {
+    ".ghci".text = ''
                          :set prompt "λ> "
                          '';
+    ".config/zsh/.zshrc".source = ./zsh_config;
+
+    ".config/ohmyzsh_custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
+                             owner = "romkatv";
+                             repo = "powerlevel10k";
+                             rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
+                             sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
+                           };
+
+  };
 
   programs = {
     home-manager = {
@@ -44,6 +55,16 @@ in rec {
 
     gpg = {
       enable = true;
+    };
+
+    zsh = rec {
+      enable = true;
+      dotDir = ".config/zsh";
+
+      oh-my-zsh = {
+        enable = true;
+        custom = ".config/ohmyzsh_custom";
+      };
     };
 
     git = {
