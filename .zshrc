@@ -9,7 +9,7 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/Users/yuan/.oh-my-zsh"
+# export ZSH="/Users/yuan/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -103,7 +103,6 @@ fi
 #
 # Example aliases
 alias zshconfig="code ~/.zshrc"
-alias ohmyzsh="code ~/.oh-my-zsh"
 
 export PATH="$HOME/.pyenv/bin:$PATH"
 export PATH=~/.local/bin:$PATH

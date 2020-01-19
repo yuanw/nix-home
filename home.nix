@@ -29,7 +29,7 @@ in rec {
     ".ghci".text = ''
                          :set prompt "λ> "
                          '';
-    ".config/zsh/.zshrc".source = ./zsh_config;
+    ".config/zsh/.zshrc".source = ./.zshrc;
 
     ".config/ohmyzsh_custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
                              owner = "romkatv";
