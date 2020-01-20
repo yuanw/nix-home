@@ -40,4 +40,9 @@ with pkgs;
   kubectl
   minikube
   Docker
+
+  rustc
+  cargo
+
+  haskellPackages.Agda
 ]
