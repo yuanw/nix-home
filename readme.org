@@ -58,3 +58,8 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 - https://github.com/tviti/nix-cfg
 
 
+
+* TODOs
+** TODO finish wire zsh 
+** TODO install google-cloud-sdk, wire path, and zsh shell completion
+** TODO https://github.com/zsh-users/zsh-history-substring-search
