@@ -33,4 +33,5 @@ with pkgs;
 
   kubectl
   minikube
+  pet
 ]

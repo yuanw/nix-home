@@ -8,6 +8,23 @@ ln -s `pwd` ~/.config/nixpkgs
 
 
 * In General
+** home-manager's channle version must match the nixpgs version
+For example: 
+if we are using 19.09 channel, our home-manager channel should
+#+BEGIN_SRC shell
+home-manager https://github.com/rycee/home-manager/archive/release-19.09.tar.gz
+nixpkgs https://nixos.org/channels/nixpkgs-19.09-darwin
+#+END_SRC
+
+otherwise, there can be unexpected issues.
+
+** Update
+
+#+BEGIN_SRC shell
+nix-channel --update home-manager
+home-manager switch
+#+END_SRC
+
 ** How to pin down git branch
 #+BEGIN_SRC shell
 nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d5670677ee3e8b84e4f > lorri.json
