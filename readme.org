@@ -63,3 +63,4 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 ** TODO finish wire zsh 
 ** TODO install google-cloud-sdk, wire path, and zsh shell completion
 ** TODO https://github.com/zsh-users/zsh-history-substring-search
+** TODO wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
