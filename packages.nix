@@ -13,9 +13,7 @@ with pkgs;
   htop
   lorri
   nix-prefetch-git
-  ripgrep
   sass
-  silver-searcher
   stack
   texlive.combined.scheme-full
   tree
@@ -37,5 +35,7 @@ with pkgs;
 
   pet
   fzf
+  ripgrep
   autojump
+  silver-searcher
 ]
