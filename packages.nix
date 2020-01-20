@@ -34,5 +34,8 @@ with pkgs;
 
   kubectl
   minikube
+
   pet
+  fzf
+  autojump
 ]
