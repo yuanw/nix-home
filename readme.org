@@ -18,7 +18,6 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 openssl dgst -r -sha256
 shasum -a 256
 #+END_SRC
-=======
 
 * Log 
 ** Add pass-git-helper
