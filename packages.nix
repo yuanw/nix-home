@@ -22,6 +22,7 @@ with pkgs;
   wget
   unzip
   graphviz
+  plantuml
 
   hledger
   hledger-web
