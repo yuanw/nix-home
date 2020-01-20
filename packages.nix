@@ -7,7 +7,6 @@ with pkgs;
   coreutils
   ispell
   ffmpeg
-  fd
   less
   gifsicle
   htop
@@ -33,7 +32,10 @@ with pkgs;
   kubectl
   minikube
 
+  google-cloud-sdk
+
   pet
+  fd
   fzf
   ripgrep
   autojump
