@@ -7,22 +7,20 @@ with pkgs;
   coreutils
   ispell
   ffmpeg
-  fd
   less
   gifsicle
   graphviz
   htop
   lorri
   nix-prefetch-git
-  ripgrep
   sass
-  silver-searcher
   stack
   texlive.combined.scheme-full
   tree
   wget
   unzip
   graphviz
+  plantuml
 
   hledger
   hledger-web
@@ -34,15 +32,24 @@ with pkgs;
 
   HandBrake
 
-  pet
-  fzf
-  autojump
 
   knative
   kubectl
   minikube
+
   Docker
 
   rustc
   cargo
+
+
+  google-cloud-sdk
+
+  # productivity
+  pet
+  fd
+  fzf
+  ripgrep
+  autojump
+  silver-searcher
 ]
