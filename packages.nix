@@ -40,4 +40,8 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
+
+  # rust
+  rustc
+  cargo
 ]
