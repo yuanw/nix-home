@@ -35,6 +35,8 @@ with pkgs;
   HandBrake
 
   pet
+  fzf
+  autojump
 
   knative
   kubectl
@@ -43,6 +45,4 @@ with pkgs;
 
   rustc
   cargo
-
-  haskellPackages.Agda
 ]

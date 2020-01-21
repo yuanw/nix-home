@@ -15,7 +15,7 @@ fi
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME=powerlevel10k/powerlevel10k
+
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -75,7 +75,8 @@ ZSH_THEME=powerlevel10k/powerlevel10k
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git iterm2 osx history zsh-autosuggestions)
+# TODO add back zsh-autosuggestions in nix
+plugins=(git iterm2 osx history)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -111,20 +112,6 @@ eval "$(pyenv init -)"
 # eval "$(pyenv virtualenv-init -)"
 export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
-. /Users/yuan/.nix-profile/etc/profile.d/nix.sh
-
-# https://iterm2.com/documentation-shell-integration.html
-source ~/.iterm2_shell_integration.zsh
-
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-eval "$(direnv hook zsh)"
-
-function prev() {
-  PREV=$(fc -lrn | head -n 1)
-  sh -c "pet new `printf %q "$PREV"`"
-}
 
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!

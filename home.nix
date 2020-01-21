@@ -29,9 +29,12 @@ in rec {
     ".ghci".text = ''
                          :set prompt "λ> "
                          '';
-    ".config/zsh/.zshrc".source = ./.zshrc;
 
-    ".config/ohmyzsh_custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
+    ".p10k.zsh".source  = ./.p10k.zsh;
+
+    # powerlevel10k is not avaiable at nixos-19.09
+    # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
+    ".config/zsh/custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
                              owner = "romkatv";
                              repo = "powerlevel10k";
                              rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
@@ -60,10 +63,43 @@ in rec {
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";
+      plugins = [
+        { name = "iterm2_shell_integration";
+          src = pkgs.fetchurl {
+            url = https://iterm2.com/shell_integration/zsh;
+            sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
+            # date = 2020-01-07T15:59:09-0800;
+          };
+        }
+      ];
 
+      enableAutosuggestions = true;
+      history = {
+        size = 50000;
+        save = 500000;
+        path = "${dotDir}/history";
+        ignoreDups = true;
+        share = true;
+      };
+
+      initExtra = lib.mkBefore ''
+        export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+        . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+        eval "$(direnv hook zsh)"
+
+        function prev() {
+           PREV=$(fc -lrn | head -n 1)
+           sh -c "pet new `printf %q "$PREV"`"
+        }
+
+     '';
+   
       oh-my-zsh = {
         enable = true;
-        custom = ".config/ohmyzsh_custom";
+        plugins =["git" "history"];
+        custom = "$HOME/.config/zsh/custom";
+        theme = "powerlevel10k/powerlevel10k";
       };
     };
 
