@@ -30,18 +30,12 @@ with pkgs;
   pass
   pass-git-helper
 
-  HandBrake
+  #HandBrake
 
-
-  knative
-  kubectl
-  minikube
-
-  Docker
-
-  rustc
-  cargo
-
+  #knative
+  #kubectl
+  #minikube
+  #Docker
 
   google-cloud-sdk
 
