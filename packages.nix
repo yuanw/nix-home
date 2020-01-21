@@ -9,6 +9,7 @@ with pkgs;
   ffmpeg
   less
   gifsicle
+  graphviz
   htop
   lorri
   nix-prefetch-git
@@ -29,11 +30,22 @@ with pkgs;
   pass
   pass-git-helper
 
+  HandBrake
+
+
+  knative
   kubectl
   minikube
 
+  Docker
+
+  rustc
+  cargo
+
+
   google-cloud-sdk
 
+  # productivity
   pet
   fd
   fzf

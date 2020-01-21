@@ -35,7 +35,6 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 openssl dgst -r -sha256
 shasum -a 256
 #+END_SRC
-=======
 
 * Log 
 ** Add pass-git-helper
@@ -44,8 +43,38 @@ https://github.com/Gabriel439/haskell-nix/blob/master/project0/README.md#pinning
 nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2c072ff2cbde896462dd7b1da9f  > pass-git-helper.json
 #+END_SRC
 
-** Install Knative
+** Install go package (Knative)
+
+#+begin_src 
+self: super: {
+  pet = super.buildGoModule rec {
+    name = "pet-${version}";
+    version = "0.3.6";
+
+    src = super.fetchFromGitHub {
+      owner = "knqyf263";
+      repo = "pet";
+      rev = "v${version}";
+      sha256 = "1na3az7vicjq1rxd3ybid47yrblsdazgli0dchkbwh8zchwhqj33";
+    };
+
+    modSha256 = "06ham8lsx5c1vk5jkwp1aa9g4q4g7sfq7gxz2gkffa98x2vlawyf";
+
+    subPackages = [ "." ];
+
+    meta = with super.lib; {
+      description = "Simple command-line snippet manager, written in Go";
+      homepage = https://github.com/knqyf263/pet;
+      license = licenses.mit;
+      platforms = platforms.linux ++ platforms.darwin;
+    };
+  };
+}
+#+end_src
+
 example to install go executable
+
+
 
 https://github.com/derailed/k9s
 https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k9s/default.nix
@@ -58,7 +87,9 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 - https://github.com/tviti/nix-cfg
 
 * TODOs
-** TODO finish wire zsh 
+** DONE finish wire zsh 
+   CLOSED: [2020-01-20 Mon 20:43]
 ** TODO install google-cloud-sdk, wire path, and zsh shell completion
 ** TODO https://github.com/zsh-users/zsh-history-substring-search
-** TODO wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
+** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
+   CLOSED: [2020-01-20 Mon 20:52]

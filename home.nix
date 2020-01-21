@@ -4,6 +4,6 @@
   imports = [ ./user-common.nix ];
   programs.git = {
     enable = true;
-    userEmail = "yuan.wang@workiva.com";
+    userEmail = "me@yuanwang.ca";
   };
 }
