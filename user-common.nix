@@ -104,8 +104,9 @@ in rec {
 
       initExtra = lib.mkBefore ''
         export MANPATH="/usr/local/man:$MANPATH"
+        export GOPATH="$HOME/go-workspace"
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH"
+        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin"
 
         . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -125,7 +126,7 @@ in rec {
         [[ -s "/Users/yuanwang/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/yuanwang/.sdkman/bin/sdkman-init.sh"
 
      '';
-   
+
       oh-my-zsh = {
         enable = true;
         plugins =["git" "pyenv" "history" "autojump"
@@ -152,7 +153,8 @@ in rec {
           pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;
-        credential.helper     = "osxkeychain";
+        # credential.helper     = "osxkeychain";
+        credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
