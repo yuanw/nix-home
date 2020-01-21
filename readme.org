@@ -87,7 +87,9 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 - https://github.com/tviti/nix-cfg
 
 * TODOs
-** TODO finish wire zsh 
+** DONE finish wire zsh 
+   CLOSED: [2020-01-20 Mon 20:43]
 ** TODO install google-cloud-sdk, wire path, and zsh shell completion
 ** TODO https://github.com/zsh-users/zsh-history-substring-search
-** TODO wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
+** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
+   CLOSED: [2020-01-20 Mon 20:52]

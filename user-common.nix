@@ -72,6 +72,10 @@ in rec {
         }
       ];
 
+      sessionVariables = {
+        PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar"; 
+      };
+
       enableAutosuggestions = true;
       history = {
         size = 50000;
@@ -103,9 +107,7 @@ in rec {
     };
 
     git = {
-      enable = true;
       userName = "Yuan Wang";
-      userEmail = "me@yuanwang.ca";
 
       aliases = {
         co         = "checkout";
