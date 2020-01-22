@@ -5,5 +5,8 @@
   programs.git = {
     enable = true;
     userEmail = "me@yuanwang.ca";
+    extraConfig = {
+      github.user = "yuanw";
+    };
   };
 }

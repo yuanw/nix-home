@@ -73,7 +73,8 @@ in rec {
       ];
 
       sessionVariables = {
-        PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar"; 
+        PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
+        LANG = "en_US.UTF-8";
       };
 
       enableAutosuggestions = true;
@@ -123,8 +124,8 @@ in rec {
           pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;
-        github.user           = "yuanwang-wf";
-        credential.helper     = "osxkeychain";
+        # credential.helper     = "osxkeychain";
+        credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
