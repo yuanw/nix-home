@@ -52,4 +52,6 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
+
+  emacs
 ]
