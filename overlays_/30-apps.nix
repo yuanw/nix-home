@@ -60,7 +60,7 @@ Docker = self.installApplication rec {
   sourceRoot = "Docker.app";
   src = super.fetchurl {
     url = https://download.docker.com/mac/stable/Docker.dmg;
-    sha256 = "1nhvxi4j6sqmln5yv1d97p2ljnii2ip0k49pmhikabb75bkrhw4g";
+    sha256 = "0b80j320wnidc13w38b1m68r2adf7skgxnmhk8zbxmrksn7nrrgh";
     # date = 2019-10-23T09:49:21-0700;
   };
   description = ''

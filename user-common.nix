@@ -88,7 +88,7 @@ in rec {
 
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-        . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
+        export NIX_PATH=$HOME/.nix-defexpr/channels:$NIX_PATH
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
         eval "$(direnv hook zsh)"
 

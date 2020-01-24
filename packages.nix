@@ -22,18 +22,18 @@ with pkgs;
   graphviz
   plantuml
 
-  hledger
-  hledger-web
-  hledger-ui
+  #hledger
+  #hledger-web
+  #hledger-ui
 
-  OnePassword-op
+  #OnePassword-op
   pass
   pass-git-helper
 
   HandBrake
 
 
-  knative
+  #knative
   kubectl
   minikube
 
