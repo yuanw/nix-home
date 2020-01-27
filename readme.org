@@ -81,10 +81,12 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 
 * References:
 - https://github.com/rycee/home-manager
+- https://rycee.gitlab.io/home-manager/index.html
 - https://github.com/jwiegley/nix-config
 - https://github.com/yrashk/nix-home
 - https://github.com/bkase/life
 - https://github.com/tviti/nix-cfg
+- https://github.com/danieldk/nix-home
 
 * TODOs
 ** DONE finish wire zsh 

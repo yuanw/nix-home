@@ -37,6 +37,9 @@ with pkgs;
   #minikube
   #Docker
 
+  #alacritty
+
+  dart
   google-cloud-sdk
 
   # productivity
@@ -46,6 +49,11 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
+
+  # Fonts
+  fontconfig
+  lato
+  source-code-pro
 
   # rust
   rustc

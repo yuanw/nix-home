@@ -31,17 +31,6 @@ in rec {
 
     ".p10k.zsh".source  = ./.p10k.zsh;
 
-    # TODO try move this to zsh.plugins
-    # powerlevel10k is not avaiable at nixos-19.09
-    # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
-    ".config/zsh/custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
-                             owner = "romkatv";
-                             repo = "powerlevel10k";
-                             rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
-                             sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
-    };
-
-
     ".config/zsh/custom/plugins/zsh-history-substring-search".source = pkgs.fetchFromGitHub {
       owner = "zsh-users";
       repo = "zsh-history-substring-search";
@@ -51,9 +40,23 @@ in rec {
 
   };
 
+  fonts.fontconfig.enable = true;
+
   programs = {
     home-manager = {
       enable = true;
+    };
+
+    alacritty = {
+      enable = true;
+      settings = {
+        font = {
+          size = 20.0;
+        };
+        shell = {
+          program =  "${pkgs.zsh}/bin/zsh";
+        };
+      };
     };
 
     direnv = {
@@ -79,6 +82,19 @@ in rec {
             # date = 2020-01-07T15:59:09-0800;
           };
         }
+
+        # powerlevel10k is not avaiable at nixos-19.09
+        # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
+        {
+          file = "powerlevel10k.zsh-theme";
+          name = "powerlevel10k";
+          src = pkgs.fetchFromGitHub {
+            owner = "romkatv";
+            repo = "powerlevel10k";
+            rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
+            sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
+          };
+        }
       ];
 
       enableAutosuggestions = true;
@@ -92,6 +108,7 @@ in rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
+        DART_SDK = "${pkgs.dart}";
         LANG = "en_US.UTF-8";
       };
 
@@ -107,6 +124,10 @@ in rec {
         export GOPATH="$HOME/go-workspace"
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin"
+
+
+        eval "$(pyenv init -)"
+        export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
         . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -129,10 +150,12 @@ in rec {
 
       oh-my-zsh = {
         enable = true;
-        plugins =["git" "pyenv" "history" "autojump"
+        plugins =["git"
+                  #"pyenv"
+                  "history"
+                  "autojump"
                   "history-substring-search"];
         custom = "$HOME/.config/zsh/custom";
-        theme = "powerlevel10k/powerlevel10k";
       };
     };
 
@@ -153,7 +176,6 @@ in rec {
           pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;
-        # credential.helper     = "osxkeychain";
         credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
