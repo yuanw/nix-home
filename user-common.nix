@@ -138,6 +138,16 @@ in rec {
            sh -c "pet new `printf %q "$PREV"`"
         }
 
+        function dartUpgrade() {
+           pub cache repair
+           pub global activate dart_language_server
+           pub global activate webdev_proxy
+           pub global activate webdev
+
+
+        }
+
+
         function bigskyTest {
                  python manage.py test $1 --http-integration --traceback -v 2
         }
