@@ -17,6 +17,7 @@ with pkgs;
   stack
   texlive.combined.scheme-full
   tree
+  broot
   wget
   unzip
   graphviz
@@ -31,13 +32,15 @@ with pkgs;
   pass-git-helper
 
   #HandBrake
+  stretchly
 
   #knative
   #kubectl
   #minikube
   #Docker
 
-  #alacritty
+  nixops
+
 
   dart
   google-cloud-sdk
@@ -49,6 +52,7 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
+  gh
 
   # Fonts
   fontconfig

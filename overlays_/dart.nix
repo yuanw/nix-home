@@ -16,8 +16,16 @@ dart = with super; stdenv.mkDerivation rec {
 
 
   installPhase = ''
-    mkdir -p $out
-    cp -R * $out/
+    mkdir -p $out/dart
+    cp -R * $out/dart/
+
+     # create wrappers with correct env
+    for program in dart dart2js dart2native dartanalyzer dartaotruntime dartdevc dartdoc dartfmt pub; do
+        programPath="$out/dart/bin/$program"
+        binaryPath="$out/bin/$program"
+        mkdir -p $out/bin
+        ln -s $programPath $binaryPath
+    done
   '';
 
   libPath = super.stdenv.lib.makeLibraryPath [ super.stdenv.cc.cc ];
@@ -33,6 +41,7 @@ dart = with super; stdenv.mkDerivation rec {
       mixins, abstract classes, reified generics, and optional typing.
     '';
     license = stdenv.lib.licenses.bsd3;
+    platforms = ["x86_64-darwin" ];
   };
 };
 }

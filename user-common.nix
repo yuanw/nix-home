@@ -108,7 +108,7 @@ in rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
-        DART_SDK = "${pkgs.dart}";
+        DART_SDK = "${pkgs.dart}/bin";
         LANG = "en_US.UTF-8";
       };
 
