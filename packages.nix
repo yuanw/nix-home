@@ -33,6 +33,7 @@ with pkgs;
 
   #HandBrake
   stretchly
+  VLC
 
   #knative
   #kubectl
@@ -53,6 +54,8 @@ with pkgs;
   autojump
   silver-searcher
   gh
+
+  # castero
 
   # Fonts
   fontconfig

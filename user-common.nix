@@ -47,6 +47,7 @@ in rec {
       enable = true;
     };
 
+    # https://hugoreeves.com/posts/2019/nix-home/
     alacritty = {
       enable = true;
       settings = {
@@ -56,6 +57,13 @@ in rec {
         shell = {
           program =  "${pkgs.zsh}/bin/zsh";
         };
+        key_bindings = [
+          {
+            key = "N";
+            mods = "Command";
+            action= "SpawnNewInstance";
+          }
+        ];
       };
     };
 

@@ -82,4 +82,16 @@ stretchly = self.installApplication rec {
   description = "break time reminder app";
   homepage = https://hovancik.net/stretchly/;
 };
+
+VLC = self.installApplication rec {
+  name = "VLC";
+  version = "3.0.8";
+  sourceRoot = "VLC.app";
+  src = super.fetchurl {
+    url = "https://get.videolan.org/vlc/3.0.8/macosx/vlc-${version}.dmg";
+    sha256 = "0s6075fhnbksigfcwlglx25fm1yj2sdgmy554ygw9k8jrlvsyaj2";
+  };
+  description = "free and open sources cross-platform multimedia player";
+  homepage = https://www.videolan.org/vlc/;
+};
 }
