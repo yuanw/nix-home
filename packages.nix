@@ -31,18 +31,17 @@ with pkgs;
   pass
   pass-git-helper
 
+  #Apps
   #HandBrake
   stretchly
   VLC
+  CopyQ
+  #Docker
 
   #knative
   #kubectl
   #minikube
-  #Docker
-
   nixops
-
-
   dart
   google-cloud-sdk
 
@@ -54,6 +53,7 @@ with pkgs;
   autojump
   silver-searcher
   gh
+  docker-credential-pass
 
   # castero
 

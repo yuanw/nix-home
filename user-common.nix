@@ -75,6 +75,10 @@ in rec {
       enable = true;
     };
 
+    go = {
+      enable = true;
+    };
+
     gpg = {
       enable = true;
     };

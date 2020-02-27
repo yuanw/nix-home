@@ -1,7 +1,7 @@
 self: super: {
 
-installApplication = 
-  { name, appname ? name, version, src, description, homepage, 
+installApplication =
+  { name, appname ? name, version, src, description, homepage,
     postInstall ? "", sourceRoot ? ".", ... }:
   with super; stdenv.mkDerivation {
     name = "${name}-${version}";
@@ -24,11 +24,12 @@ installApplication =
 
 CopyQ = self.installApplication rec {
   name = "CopyQ";
-  version = "3.9.3";
+  version = "3.10.0";
   sourceRoot = "CopyQ.app";
   src = super.fetchurl {
     url = "https://github.com/hluk/CopyQ/releases/download/v${version}/CopyQ.dmg";
-    sha256 = "d18188201a2a40ca65f5e289149d0166785a5aa7376b77b6a690b40189c50520";
+    sha256 = "13c4y43cbwxnlc04xpr7x3fn27cfcjn3mwnyvnr7bnaabhqbczb4";
+    #sha256 = "d18188201a2a40ca65f5e289149d0166785a5aa7376b77b6a690b40189c50520";
     # date = 2019-10-23T09:49:21-0700;
   };
   description = ''
