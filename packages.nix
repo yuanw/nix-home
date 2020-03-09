@@ -21,6 +21,7 @@ with pkgs;
   unzip
   graphviz
   plantuml
+  #zulu11.2.3-jdk11.0.1
 
   #hledger
   #hledger-web
@@ -36,7 +37,6 @@ with pkgs;
   #knative
   kubectl
   minikube
-
   Docker
 
   rustc
@@ -52,6 +52,9 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
+  python3
 
-  emacs
+  #emacs
+  vscode
+  emacsGit
 ]

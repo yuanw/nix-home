@@ -30,6 +30,7 @@ in rec {
                          '';
 
     ".p10k.zsh".source  = ./.p10k.zsh;
+    ".emacs.d/private/org-roam/packages.el".source = ./org-roam.el;
 
     # powerlevel10k is not avaiable at nixos-19.09
     # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
