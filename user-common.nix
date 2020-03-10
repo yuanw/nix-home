@@ -57,13 +57,6 @@ in rec {
         shell = {
           program =  "${pkgs.zsh}/bin/zsh";
         };
-        key_bindings = [
-          {
-            key = "N";
-            mods = "Command";
-            action= "SpawnNewInstance";
-          }
-        ];
       };
     };
 
@@ -103,8 +96,8 @@ in rec {
           src = pkgs.fetchFromGitHub {
             owner = "romkatv";
             repo = "powerlevel10k";
-            rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
-            sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
+            rev = "7306efb94ba739f714972038ad74c48d2bebfdd6";
+            sha256 = "1w2iy9anc3cxb5kffrdz8knml8nsl6v3lcrdsigfzfp0zignb4cw";
           };
         }
       ];
@@ -136,8 +129,6 @@ in rec {
         export GOPATH="$HOME/go-workspace"
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin"
-
-
         eval "$(pyenv init -)"
         export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
@@ -155,8 +146,6 @@ in rec {
            pub global activate dart_language_server
            pub global activate webdev_proxy
            pub global activate webdev
-
-
         }
 
 

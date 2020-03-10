@@ -34,7 +34,6 @@ with pkgs;
   #Apps
   #HandBrake
   stretchly
-  VLC
   CopyQ
   #Docker
 
@@ -44,6 +43,7 @@ with pkgs;
   nixops
   dart
   google-cloud-sdk
+  emacs
 
   # productivity
   pet
@@ -54,8 +54,6 @@ with pkgs;
   silver-searcher
   gh
   docker-credential-pass
-
-  # castero
 
   # Fonts
   fontconfig
