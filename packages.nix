@@ -22,6 +22,7 @@ with pkgs;
   graphviz
   plantuml
   #zulu11.2.3-jdk11.0.1
+  haskellPackages.niv
 
   #hledger
   #hledger-web
