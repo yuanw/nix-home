@@ -23,6 +23,7 @@ with pkgs;
   plantuml
   #zulu11.2.3-jdk11.0.1
   haskellPackages.niv
+  nixpkgs-fmt
 
   #hledger
   #hledger-web
@@ -55,7 +56,7 @@ with pkgs;
   silver-searcher
   python3
 
-  #emacs
+  emacs
   vscode
-  emacsGit
+  #emacsGit
 ]
