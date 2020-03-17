@@ -56,7 +56,7 @@ with pkgs;
   silver-searcher
   python3
 
-  emacs
+  #emacs
   vscode
-  #emacsGit
+  emacsGit
 ]

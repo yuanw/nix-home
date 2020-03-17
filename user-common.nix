@@ -87,6 +87,11 @@ in rec {
         share = true;
       };
 
+      shellAliases = {
+        ed = "${pkgs.emacs}/bin/emacs --daemon";
+        ec = "${pkgs.emacs}/bin/emacsclient -c";
+      };
+
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
