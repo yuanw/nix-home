@@ -88,7 +88,7 @@ in rec {
       };
 
       shellAliases = {
-        ed = "${pkgs.emacs}/bin/emacs --daemon";
+        emd = "${pkgs.emacs}/bin/emacs --daemon";
         ec = "${pkgs.emacs}/bin/emacsclient -c";
       };
 

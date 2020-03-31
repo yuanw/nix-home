@@ -5,6 +5,7 @@ with pkgs;
   cacert
   clang
   coreutils
+  moreutils
   ispell
   ffmpeg
   less
@@ -21,7 +22,6 @@ with pkgs;
   unzip
   graphviz
   plantuml
-  #zulu11.2.3-jdk11.0.1
   haskellPackages.niv
   nixpkgs-fmt
 
@@ -34,6 +34,7 @@ with pkgs;
   pass-git-helper
 
   HandBrake
+  wifi-password
 
 
   #knative
@@ -47,6 +48,13 @@ with pkgs;
 
   google-cloud-sdk
 
+  #x11
+  #xquartz
+  #xorg.xhost
+  #xorg.xauth
+  #ratpoison
+  #prooftree
+
   # productivity
   pet
   fd
@@ -55,8 +63,9 @@ with pkgs;
   autojump
   silver-searcher
   python3
+  gitAndTools.pre-commit
 
-  #emacs
+  emacs
   vscode
-  emacsGit
+  #emacsGit
 ]
