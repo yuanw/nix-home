@@ -3,7 +3,7 @@ self: super: {
 dart = with super; stdenv.mkDerivation rec {
 
   pname = "dart";
-  version = "2.7.1";
+  version = "2.7.2";
 
   nativeBuildInputs = [
     unzip
@@ -11,7 +11,7 @@ dart = with super; stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-x64-release.zip";
-    sha256 = "4eb7f0fd651bcafe3cf0df8530eea5891ff7aebb5d88f83cf104d808e5983a0b";
+    sha256 = "111zl075qdk2zd4d4mmfkn30jmzsri9nq3nspnmc2l245gdq34jj";
   };
 
 
@@ -19,13 +19,13 @@ dart = with super; stdenv.mkDerivation rec {
     mkdir -p $out/dart
     cp -R * $out/dart/
 
-     # create wrappers with correct env
-    for program in dart dart2js dart2native dartanalyzer dartaotruntime dartdevc dartdoc dartfmt pub; do
-        programPath="$out/dart/bin/$program"
-        binaryPath="$out/bin/$program"
-        mkdir -p $out/bin
-        ln -s $programPath $binaryPath
-    done
+    # create wrappers with correct env
+    #for program in dart dart2js dart2native dartanalyzer dartaotruntime dartdevc dartdoc dartfmt pub; do
+    #    programPath="$out/dart/bin/$program"
+    #    binaryPath="$out/bin/$program"
+    #    mkdir -p $out/bin
+    #    ln -s $programPath $binaryPath
+    #done
   '';
 
   libPath = super.stdenv.lib.makeLibraryPath [ super.stdenv.cc.cc ];

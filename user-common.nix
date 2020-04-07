@@ -22,7 +22,9 @@ in rec {
                 (attrNames (readDir path)));
   };
 
-  home.packages = import ./packages.nix { pkgs = pkgs;};
+  home.packages = import ./packages.nix { pkgs = pkgs;} ++ [
+     (import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/ghc-8.8") {}).ghcide-ghc883
+  ];
 
   home.file = {
     ".ghci".text = ''
@@ -113,7 +115,7 @@ in rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
-        DART_SDK = "${pkgs.dart}/bin";
+        DART_SDK = "${pkgs.dart}/dart";
         LANG = "en_US.UTF-8";
       };
 
@@ -122,13 +124,15 @@ in rec {
         pubcleanlock = ''git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
         pubclean = ''rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
         repub= "pubclean; pub get";
+        emd = "${pkgs.emacs}/bin/emacs --daemon";
+        ec = "${pkgs.emacs}/bin/emacsclient -c";
       };
 
       initExtra = lib.mkBefore ''
         export MANPATH="/usr/local/man:$MANPATH"
         export GOPATH="$HOME/go-workspace"
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin"
+        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin"
         eval "$(pyenv init -)"
         export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
@@ -179,12 +183,13 @@ in rec {
         l          = "log --graph --pretty=format:'%Cred%h%Creset"
                      + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
                      + " --abbrev-commit --date=relative --show-notes=*";
+        clone      = "clone --recursive";
       };
 
       extraConfig = {
         core = {
-          editor = "emacs -nw";
-          pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
+          editor = "${pkgs.emacs26}/bin/emacsclient -s ${tmp_directory}/emacs501/server";
+          pager  = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;
         credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";

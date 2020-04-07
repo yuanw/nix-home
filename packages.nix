@@ -5,6 +5,7 @@ with pkgs;
   cacert
   clang
   coreutils
+  
   ispell
   ffmpeg
   less
@@ -22,6 +23,8 @@ with pkgs;
   unzip
   graphviz
   plantuml
+  xquartz
+  gitAndTools.pre-commit
 
   hledger
   hledger-web
