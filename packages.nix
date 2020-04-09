@@ -23,6 +23,7 @@ with pkgs;
   graphviz
   plantuml
   haskellPackages.niv
+  haskellPackages.hoogle
   nixpkgs-fmt
 
   #hledger

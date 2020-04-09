@@ -5,6 +5,7 @@ let home_directory = builtins.getEnv "HOME";
     tmp_directory = "/tmp";
     ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     lib = pkgs.stdenv.lib;
+    all-hies = import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master") {};
 
 in rec {
   nixpkgs = {
@@ -22,7 +23,10 @@ in rec {
                 (attrNames (readDir path)));
   };
 
-  home.packages = import ./packages.nix { pkgs = pkgs;};
+  home.packages = import ./packages.nix { pkgs = pkgs;} ++ [
+    (all-hies.selection { selector = p: { inherit (p) ghc865 ghc882; }; })
+    (import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/ghc-8.8") {}).ghcide-ghc883
+  ];
 
   home.file = {
     ".ghci".text = ''
@@ -30,7 +34,6 @@ in rec {
                          '';
 
     ".p10k.zsh".source  = ./.p10k.zsh;
-    ".emacs.d/private/org-roam/packages.el".source = ./org-roam.el;
 
     # powerlevel10k is not avaiable at nixos-19.09
     # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
@@ -50,6 +53,7 @@ in rec {
 
     direnv = {
       enable = true;
+      enableZshIntegration = true;
     };
 
     jq = {
@@ -96,7 +100,6 @@ in rec {
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
         [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-        eval "$(direnv hook zsh)"
 
         function prev() {
            PREV=$(fc -lrn | head -n 1)
