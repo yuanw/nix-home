@@ -15,11 +15,11 @@ self: super: {
 
 
     buildFlagsArray = ''
-    -ldflags=
-      -s -w
-      -X github.com/knative/client/cmd.version=${version}
-      -X github.com/knative/client/cmd.commit=${rev}
-  '';
+      -ldflags=
+        -s -w
+        -X github.com/knative/client/cmd.version=${version}
+        -X github.com/knative/client/cmd.commit=${rev}
+    '';
 
 
     meta = with super.lib; {

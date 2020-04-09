@@ -10,13 +10,13 @@ self: super: {
     };
     buildInputs = [ self.unzip ];
     unpackPhase = ''
-    unzip ${src}
-  '';
+      unzip ${src}
+    '';
     buildPhase = "";
     installPhase = ''
-    mkdir -p $out/bin
-    cp op $out/bin
-  '';
+      mkdir -p $out/bin
+      cp op $out/bin
+    '';
   };
 
 }
