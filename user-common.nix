@@ -71,16 +71,18 @@ rec {
       enable = true;
       dotDir = ".config/zsh";
       plugins = [
-        #".config/zsh/custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
-        #                         owner = "romkatv";
-        #                         repo = "powerlevel10k";
-        #                         rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
-        #                         sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
-        #                       };
         {
           name = "powerlevel10k";
-          src = pkgs.zsh-powerlevel10k;
-          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+          # src = pkgs.zsh-powerlevel10k;
+          src = pkgs.fetchFromGitHub {
+              owner = "romkatv";
+              repo = "powerlevel10k";
+              rev = "d53355cd30acf8888bc1cf5caccea52f486c5584";
+              sha256 = "03v8qlblgdazbm16gwr87blm5nxizza61f8w6hjyhgrx51ly9ln5";
+              # "date": "2020-03-15T08:43:52+01:00"
+          };
+          #file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+          file = "powerlevel10k.zsh-theme";
         }
         {
           name = "powerlevel10k-config";
