@@ -33,16 +33,16 @@ in rec {
                          :set prompt "λ> "
                          '';
 
-    ".p10k.zsh".source  = ./.p10k.zsh;
+    ".p10k.zsh".source  = ./p10k-config.zsh;
 
     # powerlevel10k is not avaiable at nixos-19.09
     # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
-    ".config/zsh/custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
-                             owner = "romkatv";
-                             repo = "powerlevel10k";
-                             rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
-                             sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
-                           };
+    #".config/zsh/custom/themes/powerlevel10k".source = pkgs.fetchFromGitHub {
+    #                         owner = "romkatv";
+    #                         repo = "powerlevel10k";
+    #                         rev = "f1da8c41acb896f14024b1b07de4f9293fd06377";
+    #                         sha256 = "1x6r1zhxhf0jk0adp35qjsw520sbvrfqrisbg9qz0kh7k8xc6rzl";
+    #                       };
 
   };
 
@@ -74,6 +74,11 @@ in rec {
             sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
             # date = 2020-01-07T15:59:09-0800;
           };
+        }
+        {
+          name = "powerlevel10k";
+          src = pkgs.zsh-powerlevel10k;
+          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
         }
       ];
 
@@ -112,7 +117,6 @@ in rec {
         enable = true;
         plugins =["git" "history"];
         custom = "$HOME/.config/zsh/custom";
-        theme = "powerlevel10k/powerlevel10k";
       };
     };
 
