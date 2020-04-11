@@ -38,7 +38,7 @@ with pkgs;
   wifi-password
 
 
-  #knative
+  knative
   kubectl
   minikube
   Docker
