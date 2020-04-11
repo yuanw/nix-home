@@ -122,6 +122,12 @@ example to install go executable
 https://github.com/derailed/k9s
 https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k9s/default.nix
 
+* Overlays
+- https://nixos.wiki/wiki/Overlays
+- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
+- https://nixos.org/nixpkgs/manual/#chap-overlays
+- https://www.youtube.com/watch?v=W85mF1zWA2o
+- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
 * References:
 - https://github.com/rycee/home-manager
 - https://github.com/jwiegley/nix-config
@@ -132,9 +138,10 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 * TODOs
 ** DONE finish wire zsh 
    CLOSED: [2020-01-20 Mon 20:43]
-** TODO install google-cloud-sdk, wire path, and zsh shell completion
+** DONE install google-cloud-sdk, wire path, and zsh shell completion
 ** TODO https://github.com/zsh-users/zsh-history-substring-search
 ** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
    CLOSED: [2020-01-20 Mon 20:52]
 
 darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
+https://www.sam.today/blog/derivations-102-learning-nix-pt-4/

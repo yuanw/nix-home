@@ -66,7 +66,8 @@ with pkgs;
   python3
   gitAndTools.pre-commit
 
-  emacs
+  #emacs
   vscode
   #emacsGit
+  emacs72
 ]

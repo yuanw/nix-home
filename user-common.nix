@@ -28,7 +28,11 @@ rec {
               n: match ".*\\.nix" n != null || pathExists (path + ("/" + n + "/default.nix"))
             )
               (attrNames (readDir path))
-          );
+          ) ++ [
+             (import (builtins.fetchTarball {
+      url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+    }))
+          ];
   };
 
   home.packages = import ./packages.nix { pkgs = pkgs; } ++ [
