@@ -42,6 +42,8 @@ with pkgs;
   kubectl
   minikube
   Docker
+  kubernetes-helm
+  istio
 
   rustc
   cargo
