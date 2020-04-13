@@ -1,12 +1,15 @@
 { pkgs, ... }:
 
-let home_directory = builtins.getEnv "HOME";
-    log_directory = "${home_directory}/Library/Logs";
-    tmp_directory = "/tmp";
-    ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
-    lib = pkgs.stdenv.lib;
+let
+  home_directory = builtins.getEnv "HOME";
+  log_directory = "${home_directory}/Library/Logs";
+  tmp_directory = "/tmp";
+  ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+  lib = pkgs.stdenv.lib;
+  all-hies = import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master") {};
 
-in rec {
+in
+rec {
   nixpkgs = {
     config = {
       allowUnfree = true;
@@ -15,29 +18,43 @@ in rec {
     };
 
     overlays =
-      let path = ./overlays_; in with builtins;
-            map (n: import (path + ("/" + n)))
-              (filter (n: match ".*\\.nix" n != null ||
-                          pathExists (path + ("/" + n + "/default.nix")))
-                (attrNames (readDir path)));
+      let
+        path = ./overlays_;
+      in
+        with builtins;
+        map (n: import (path + ("/" + n)))
+          (
+            filter (
+              n: match ".*\\.nix" n != null || pathExists (path + ("/" + n + "/default.nix"))
+            )
+              (attrNames (readDir path))
+          ) ++ [
+          (
+            import (
+              builtins.fetchTarball {
+                url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
+              }
+            )
+          )
+        ];
   };
 
-  home.packages = import ./packages.nix { pkgs = pkgs;} ++ [
-     (import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/ghc-8.8") {}).ghcide-ghc883
+
+  home.packages = import ./packages.nix { pkgs = pkgs; } ++ [
+    (all-hies.selection { selector = p: { inherit (p) ghc865 ghc882; }; })
+    (import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/ghc-8.8") {}).ghcide-ghc883
   ];
 
   home.file = {
     ".ghci".text = ''
-                         :set prompt "λ> "
-                         '';
+      :set prompt "λ> "
+    '';
 
-    ".p10k.zsh".source  = ./.p10k.zsh;
 
-    ".config/zsh/custom/plugins/zsh-history-substring-search".source = pkgs.fetchFromGitHub {
-      owner = "zsh-users";
-      repo = "zsh-history-substring-search";
-      rev = "0f80b8eb3368b46e5e573c1d91ae69eb095db3fb";
-      sha256 = "0y8va5kc2ram38hbk2cibkk64ffrabfv1sh4xm7pjspsba9n5p1y";
+    ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source = pkgs.fetchurl {
+      url = https://iterm2.com/shell_integration/zsh;
+      sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
+      # date = 2020-01-07T15:59:09-0800;
     };
 
   };
@@ -64,6 +81,7 @@ in rec {
 
     direnv = {
       enable = true;
+      enableZshIntegration = true;
     };
 
     jq = {
@@ -82,27 +100,26 @@ in rec {
       enable = true;
       dotDir = ".config/zsh";
       plugins = [
-        { name = "iterm2_shell_integration";
-          src = pkgs.fetchurl {
-            url = https://iterm2.com/shell_integration/zsh;
-            sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
-            # date = 2020-01-07T15:59:09-0800;
-          };
-        }
-
-        # powerlevel10k is not avaiable at nixos-19.09
-        # https://nixos.org/nixos/packages.html?channel=nixos-19.09&query=powerlevel10k
         {
-          file = "powerlevel10k.zsh-theme";
           name = "powerlevel10k";
+          # src = pkgs.zsh-powerlevel10k;
           src = pkgs.fetchFromGitHub {
             owner = "romkatv";
             repo = "powerlevel10k";
-            rev = "7306efb94ba739f714972038ad74c48d2bebfdd6";
-            sha256 = "1w2iy9anc3cxb5kffrdz8knml8nsl6v3lcrdsigfzfp0zignb4cw";
+            rev = "d53355cd30acf8888bc1cf5caccea52f486c5584";
+            sha256 = "03v8qlblgdazbm16gwr87blm5nxizza61f8w6hjyhgrx51ly9ln5";
+            # "date": "2020-03-15T08:43:52+01:00"
           };
+          #file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+          file = "powerlevel10k.zsh-theme";
+        }
+        {
+          name = "powerlevel10k-config";
+          src = lib.cleanSource ./p10k-config;
+          file = "p10k.zsh";
         }
       ];
+
 
       enableAutosuggestions = true;
       history = {
@@ -112,6 +129,7 @@ in rec {
         ignoreDups = true;
         share = true;
       };
+
 
       sessionVariables = {
         PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
@@ -124,8 +142,6 @@ in rec {
         pubcleanlock = ''git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
         pubclean = ''rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
         repub= "pubclean; pub get";
-        emd = "${pkgs.emacs}/bin/emacs --daemon";
-        ec = "${pkgs.emacs}/bin/emacsclient -c";
       };
 
       initExtra = lib.mkBefore ''
@@ -137,8 +153,7 @@ in rec {
         export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
         . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
-        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-        eval "$(direnv hook zsh)"
+        export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
 
         function prev() {
            PREV=$(fc -lrn | head -n 1)
@@ -178,6 +193,7 @@ in rec {
       userName = "Yuan Wang";
 
       aliases = {
+
         co         = "checkout";
         w          = "status -sb";
         l          = "log --graph --pretty=format:'%Cred%h%Creset"
@@ -196,5 +212,5 @@ in rec {
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
- };
+  };
 }

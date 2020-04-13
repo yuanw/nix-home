@@ -1,11 +1,11 @@
-{pkgs}:
+{ pkgs }:
 
 with pkgs;
 [
   cacert
   clang
   coreutils
-  
+  moreutils
   ispell
   ffmpeg
   less
@@ -26,11 +26,15 @@ with pkgs;
   xquartz
   gitAndTools.pre-commit
 
-  hledger
-  hledger-web
-  hledger-ui
+#  haskellPackages.niv
+#  haskellPackages.hoogle
+#  nixpkgs-fmt
 
-  OnePassword-op
+  #hledger
+  #hledger-web
+  #hledger-ui
+
+  #OnePassword-op
   pass
   pass-git-helper
 
@@ -38,15 +42,29 @@ with pkgs;
   #HandBrake
   stretchly
   CopyQ
-  #Docker
+  #wifi-password
+
 
   #knative
   #kubectl
   #minikube
+  #Docker
+  #kubernetes-helm
+  #istio
+
+  rustc
+  cargo
+
   nixops
   dart
   google-cloud-sdk
-  emacs
+
+  #x11
+  #xquartz
+  #xorg.xhost
+  #xorg.xauth
+  #ratpoison
+  #prooftree
 
   # productivity
   pet
@@ -66,4 +84,11 @@ with pkgs;
   # rust
   rustc
   cargo
+  python3
+  #gitAndTools.pre-commit
+
+  #emacs
+  #vscode
+  #emacsGit
+  emacs72
 ]

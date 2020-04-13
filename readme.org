@@ -1,11 +1,54 @@
 #+TITLE: nix home-manager config
 
+
+* Install
+
+*** Install multi-user Nix
+
+#+begin_src sh
+sh <(curl https://nixos.org/nix/install) --daemon
+#+end_src
+
+*** Add the Nix system path to =.bashrc=
+
+#+begin_src sh
+echo 'export PATH=$PATH:/nix/var/nix/profiles/default/bin' > .bashrc
+chmod +x .bashrc
+#+end_src
+
+*** Add yourself as a trusted user to =/etc/nix/nix.conf=
+
+On the new machine, run:
+
+#+begin_src conf
+sudo cat >> /etc/nix/nix.conf <<EOF
+trusted-users = $USER @admin
+allowed-users = *
+EOF
+#+end_src
+
+Then run:
+#+begin_src sh
+sudo killall nix-daemon
+#+end_src
+
+*** set NIX_SSL_CERT_FILE
+
+#+begin_src sh
+export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+#+end_src
+
+*** Add nixpkgs channel
+#+begin_src sh
+nix-channel --add https://nixos.org/channels/nixpkgs-unstable
+nix-channel --update
+#+end_src
+
 * How to use it
 #+BEGIN_SRC shell
 git clone 
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
-
 
 * In General
 ** home-manager's channle version must match the nixpgs version
@@ -79,6 +122,12 @@ example to install go executable
 https://github.com/derailed/k9s
 https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k9s/default.nix
 
+* Overlays
+- https://nixos.wiki/wiki/Overlays
+- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
+- https://nixos.org/nixpkgs/manual/#chap-overlays
+- https://www.youtube.com/watch?v=W85mF1zWA2o
+- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
 * References:
 - https://github.com/rycee/home-manager
 - https://rycee.gitlab.io/home-manager/index.html
@@ -91,7 +140,10 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 * TODOs
 ** DONE finish wire zsh 
    CLOSED: [2020-01-20 Mon 20:43]
-** TODO install google-cloud-sdk, wire path, and zsh shell completion
+** DONE install google-cloud-sdk, wire path, and zsh shell completion
 ** TODO https://github.com/zsh-users/zsh-history-substring-search
 ** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
    CLOSED: [2020-01-20 Mon 20:52]
+
+darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
+https://www.sam.today/blog/derivations-102-learning-nix-pt-4/

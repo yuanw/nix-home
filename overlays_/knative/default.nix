@@ -1,32 +1,23 @@
 self: super: {
-  knative = super.buildGoModule rec {
-    name = "knative-${version}";
-    version = "0.11.0";
-    rev = "b10580ff726276f893bf93c22a9bc4f562e84cc0";
 
-    src = super.fetchFromGitHub {
-      owner = "knative";
-      repo = "client";
-      rev = "v${version}";
-      sha256 = "0wwvx6yvyr80grnxi7lpwyv7rp322a7vk9c6fwzq4jvp26d1ndri";
+  knative = super.stdenv.mkDerivation rec {
+    name = "knative";
+    version = "0.13.1";
+
+    src = super.fetchurl {
+      url = "https://github.com/knative/client/releases/download/${version}/kn-darwin-amd64";
+      sha256 = "199b98gg5s2z1b6dy5ixsbync8vrn648dsv99xkd62hfphk78n28";
     };
-
-    modSha256 = "1db3s5r6njyns7ka7sy4cqx89w22nwc41gg64yzdx8zi81aqgwzc";
-
-
-    buildFlagsArray = ''
-    -ldflags=
-      -s -w
-      -X github.com/knative/client/cmd.version=${version}
-      -X github.com/knative/client/cmd.commit=${rev}
-  '';
-
-
-    meta = with super.lib; {
-      description = "Knative developer experience, docs, reference Knative CLI implementation ";
-      homepage = https://github.com/knative/client;
-      license = licenses.mit;
-      platforms = platforms.linux ++ platforms.darwin;
+    dontUnpack = true;
+    buildPhase = "";
+    installPhase = ''
+      mkdir -p $out/bin
+      cp ${src} $out/bin/kn
+      chmod +x $out/bin/kn
+    '';
+    meta = {
+      homepage = https://istio.io;
+      description = "Connect, secure, control, and observe services";
     };
   };
 }
