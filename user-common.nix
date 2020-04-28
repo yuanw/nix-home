@@ -204,7 +204,7 @@ rec {
 
       extraConfig = {
         core = {
-          editor = "${pkgs.emacs26}/bin/emacsclient -s ${tmp_directory}/emacs501/server";
+          editor = "${pkgs.emacs}/bin/emacsclient -a '' -c";
           pager  = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;

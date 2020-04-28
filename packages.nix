@@ -84,11 +84,11 @@ with pkgs;
   # rust
   rustc
   cargo
-  python3
+  #python3
   #gitAndTools.pre-commit
 
   #emacs
   #vscode
-  #emacsGit
-  emacs72
+  emacsUnstable
+  #emacs72
 ]
