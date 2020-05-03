@@ -101,6 +101,7 @@ rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
+        ASPELL_CONF="data-dir ${pkgs.aspell}";
         LANG = "en_US.UTF-8";
       };
 
@@ -115,7 +116,7 @@ rec {
 
       shellAliases = {
         emd = "${pkgs.emacs}/bin/emacs --daemon";
-        ec = "${pkgs.emacs}/bin/emacsclient -c";
+        ec = "${pkgs.emacs}/bin/emacsclient -a '' -c";
       };
 
       initExtra = lib.mkBefore ''

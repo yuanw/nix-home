@@ -1,7 +1,7 @@
 self: super: {
 
   istio = super.stdenv.mkDerivation rec {
-    name = "istio";
+    name = "istio-${version}";
     version = "1.5.1";
 
     src = super.fetchurl {

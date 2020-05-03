@@ -7,6 +7,7 @@ with pkgs;
   coreutils
   moreutils
   ispell
+  aspell
   ffmpeg
   less
   gifsicle
@@ -68,8 +69,6 @@ with pkgs;
   python3
   gitAndTools.pre-commit
 
-  #emacs
   vscode
-  #emacsGit
-  emacs72
+  emacsUnstable
 ]
