@@ -37,7 +37,6 @@ with pkgs;
 
   HandBrake
   wifi-password
-  Slate
 
 
   knative
@@ -47,8 +46,8 @@ with pkgs;
   kubernetes-helm
   istio
 
-  rustc
-  cargo
+  #rustc
+  #cargo
 
 
   google-cloud-sdk
