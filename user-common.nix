@@ -101,7 +101,7 @@ rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
-        ASPELL_CONF="data-dir ${pkgs.aspell}";
+        ASPELL_CONF = "data-dir ${pkgs.aspell}";
         LANG = "en_US.UTF-8";
       };
 

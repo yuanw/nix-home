@@ -52,7 +52,6 @@ self: super: {
     src = super.fetchurl {
       url = "https://github.com/HandBrake/HandBrake/releases/download/${version}/HandBrake-${version}.dmg";
       sha256 = "0vm2f7sbb2i5icsmc06q698myclp455cj855kw93cj2s33bfn4xp";
-      # date = 2020-01-15T16:31:05-0800;
     };
     description = ''
       HandBrake is a tool for converting video from nearly any format to a
@@ -76,5 +75,20 @@ self: super: {
       debugging, and testing Dockerized apps on a Mac
     '';
     homepage = https://store.docker.com/editions/community/docker-ce-desktop-mac;
+  };
+
+  Slate = self.installApplication rec {
+    name = "Slate";
+    version = "1.0.25";
+    sourceRoot = "Slate.app";
+    src = super.fetchurl {
+      url = http://slate.ninjamonkeysoftware.com/Slate.dmg;
+      sha256 = "0gr27s0a150sy2rf0vqw0mw32k21wh4v7b1n2ngzfr0wbdfkg3j2";
+      # date = 2019-02-07T09:26:28-0800;
+    };
+    description = ''
+      A window management application (replacement for Divvy/SizeUp/ShiftIt)
+    '';
+    homepage = https://github.com/jigish/slate;
   };
 }

@@ -37,6 +37,7 @@ with pkgs;
 
   HandBrake
   wifi-password
+  Slate
 
 
   knative
