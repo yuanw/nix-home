@@ -67,7 +67,7 @@ self: super: {
     sourceRoot = "Docker.app";
     src = super.fetchurl {
       url = https://download.docker.com/mac/stable/Docker.dmg;
-      sha256 = "0b80j320wnidc13w38b1m68r2adf7skgxnmhk8zbxmrksn7nrrgh";
+      sha256 = "14dgvicl56lzr0p0g1ha7zkqv7wk3kxl90a6zk2cswyxn93br04s";
       # date = 2019-10-23T09:49:21-0700;
     };
     description = ''

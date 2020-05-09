@@ -39,12 +39,12 @@ with pkgs;
   wifi-password
 
 
-  knative
+  #knative
   kubectl
   minikube
   Docker
   kubernetes-helm
-  istio
+  #istio
 
   #rustc
   #cargo
