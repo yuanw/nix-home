@@ -26,6 +26,9 @@ with pkgs;
   xquartz
   gitAndTools.pre-commit
 
+  #python
+  python37Packages.pylint
+
 #  haskellPackages.niv
 #  haskellPackages.hoogle
 #  nixpkgs-fmt
