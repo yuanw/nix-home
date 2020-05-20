@@ -40,10 +40,7 @@ rec {
   };
 
 
-  home.packages = import ./packages.nix { pkgs = pkgs; } ++ [
-    (all-hies.selection { selector = p: { inherit (p) ghc865 ghc882; }; })
-    (import (builtins.fetchTarball "https://github.com/cachix/ghcide-nix/tarball/ghc-8.8") {}).ghcide-ghc883
-  ];
+  home.packages = import ./packages.nix { pkgs = pkgs; };
 
   home.file = {
     ".ghci".text = ''
@@ -89,7 +86,7 @@ rec {
     };
 
     go = {
-      enable = true;
+      enable = false;
     };
 
     gpg = {

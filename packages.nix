@@ -47,27 +47,13 @@ with pkgs;
   CopyQ
   #wifi-password
 
-
-  #knative
-  #kubectl
-  #minikube
-  #Docker
-  #kubernetes-helm
-  #istio
-
-  rustc
-  cargo
+  #rustc
+  #cargo
 
   nixops
   dart
   google-cloud-sdk
 
-  #x11
-  #xquartz
-  #xorg.xhost
-  #xorg.xauth
-  #ratpoison
-  #prooftree
 
   # productivity
   pet
@@ -84,14 +70,5 @@ with pkgs;
   lato
   source-code-pro
 
-  # rust
-  rustc
-  cargo
-  #python3
-  #gitAndTools.pre-commit
-
-  #emacs
-  #vscode
   emacsUnstable
-  #emacs72
 ]
