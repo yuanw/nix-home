@@ -64,6 +64,7 @@ with pkgs;
   silver-searcher
   gh
   docker-credential-pass
+  universal-ctags
 
   # Fonts
   fontconfig
