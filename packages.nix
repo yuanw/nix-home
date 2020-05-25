@@ -27,9 +27,9 @@ with pkgs;
   haskellPackages.hoogle
   nixpkgs-fmt
 
-  #hledger
-  #hledger-web
-  #hledger-ui
+  hledger
+  hledger-web
+  hledger-ui
 
   #OnePassword-op
   pass
