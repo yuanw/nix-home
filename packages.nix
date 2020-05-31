@@ -7,7 +7,8 @@ with pkgs;
   coreutils
   moreutils
   ispell
-  aspell
+  # disable aspell for now due the tex-check-comment unknown key
+  # aspell
   ffmpeg
   less
   gifsicle

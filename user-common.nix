@@ -1,12 +1,10 @@
 { pkgs, ... }:
-
 let
   home_directory = builtins.getEnv "HOME";
   log_directory = "${home_directory}/Library/Logs";
   tmp_directory = "/tmp";
   ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   lib = pkgs.stdenv.lib;
-
 in
 rec {
   nixpkgs = {
