@@ -38,6 +38,7 @@ with pkgs;
 
   HandBrake
   wifi-password
+  stretchly
 
 
   #knative
