@@ -9,6 +9,8 @@ with pkgs;
   ispell
   # disable aspell for now due the tex-check-comment unknown key
   # aspell
+  # aspellDicts.en
+  (aspellWithDicts (ds: [ ds.en ]))
   ffmpeg
   less
   gifsicle
