@@ -7,7 +7,7 @@
     userEmail = "me@yuanwang.ca";
 
     signing = {
-      key = "9254E38FE868F77C";
+      key = "BF2ADAA2A98F45E7";
       signByDefault = true;
     };
 

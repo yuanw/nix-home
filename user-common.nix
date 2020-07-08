@@ -3,7 +3,7 @@ let
   home_directory = builtins.getEnv "HOME";
   log_directory = "${home_directory}/Library/Logs";
   tmp_directory = "/tmp";
-  ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+  #ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   lib = pkgs.stdenv.lib;
 in
 rec {
@@ -45,7 +45,7 @@ rec {
 
     ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source = pkgs.fetchurl {
       url = https://iterm2.com/shell_integration/zsh;
-      sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
+      sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
       # date = 2020-01-07T15:59:09-0800;
     };
 
@@ -148,9 +148,8 @@ rec {
           pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
         };
         branch.autosetupmerge = true;
-        # credential.helper     = "osxkeychain";
-        credential.helper = "${pkgs.pass-git-helper}/bin/pass-git-helper";
-        "url \"git@github.com:\"".insteadOf = "https://github.com/";
+        credential.helper = "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
+        # "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
   };

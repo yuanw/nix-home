@@ -2,14 +2,12 @@
 
 with pkgs;
 [
-  cacert
+  #cacert
   clang
   coreutils
   moreutils
-  ispell
-  # disable aspell for now due the tex-check-comment unknown key
-  # aspell
-  # aspellDicts.en
+  gnutls
+
   (aspellWithDicts (ds: [ ds.en ]))
   ffmpeg
   less
@@ -20,23 +18,23 @@ with pkgs;
   nix-prefetch-git
   sass
   stack
-  texlive.combined.scheme-full
+  texlive.combined.scheme-medium
   tree
   wget
   unzip
   graphviz
   plantuml
-  haskellPackages.niv
-  haskellPackages.hoogle
+  #haskellPackages.niv
+  #haskellPackages.hoogle
   nixpkgs-fmt
+  xclip
 
-  hledger
-  hledger-web
-  hledger-ui
+  #hledger
+  #hledger-web
+  #hledger-ui
 
   #OnePassword-op
   pass
-  pass-git-helper
 
   HandBrake
   wifi-password
@@ -44,17 +42,17 @@ with pkgs;
 
 
   #knative
-  kubectl
-  minikube
-  Docker
-  kubernetes-helm
+  #kubectl
+  #minikube
+  #Docker
+  #kubernetes-helm
   #istio
 
   #rustc
   #cargo
 
 
-  google-cloud-sdk
+  #google-cloud-sdk
 
   #x11
   #xquartz
@@ -72,7 +70,11 @@ with pkgs;
   silver-searcher
   python3
   gitAndTools.pre-commit
-
+  gitAndTools.pass-git-helper
   vscode
   emacsUnstable
+  sqlite
+  editorconfig-core-c
+  languagetool
+  zstd
 ]
