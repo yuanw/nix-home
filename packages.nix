@@ -7,9 +7,11 @@ with pkgs;
   coreutils
   moreutils
   ispell
+  imagemagick
   ffmpeg
   less
   gifsicle
+  ghostscript
   graphviz
   htop
   lorri
@@ -53,6 +55,10 @@ with pkgs;
   nixops
   dart
   google-cloud-sdk
+
+  mu
+  offlineimap
+  notmuch
 
 
   # productivity
