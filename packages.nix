@@ -11,7 +11,7 @@ with pkgs;
   ffmpeg
   less
   gifsicle
-  ghostscript
+  #ghostscript
   graphviz
   htop
   lorri
@@ -59,6 +59,8 @@ with pkgs;
   mu
   offlineimap
   notmuch
+
+  z-lua
 
 
   # productivity
