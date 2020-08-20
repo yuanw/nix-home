@@ -60,7 +60,7 @@ with pkgs;
   offlineimap
   notmuch
 
-  z-lua
+  #z-lua
 
 
   # productivity

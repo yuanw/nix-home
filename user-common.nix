@@ -65,7 +65,7 @@ rec {
 
     # https://hugoreeves.com/posts/2019/nix-home/
     alacritty = {
-      enable = true;
+      enable = false;
       settings = {
         font = {
           size = 20.0;
@@ -91,6 +91,11 @@ rec {
 
     gpg = {
       enable = true;
+    };
+
+    z-lua = {
+      enable = true;
+      enableZshIntegration = true;
     };
 
     zsh = rec {
