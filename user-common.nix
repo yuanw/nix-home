@@ -150,7 +150,7 @@ rec {
         export MANPATH="/usr/local/man:$MANPATH"
         export GOPATH="$HOME/go-workspace"
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin"
+        export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
         eval "$(pyenv init -)"
         export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
