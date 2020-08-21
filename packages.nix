@@ -45,7 +45,7 @@ with pkgs;
 
   #Apps
   #HandBrake
-  stretchly
+  Stretchly
   CopyQ
   #wifi-password
 
@@ -60,8 +60,6 @@ with pkgs;
   offlineimap
   notmuch
 
-  #z-lua
-
 
   # productivity
   pet
@@ -73,6 +71,7 @@ with pkgs;
   gh
   docker-credential-pass
   universal-ctags
+  pandoc
 
   # Fonts
   fontconfig

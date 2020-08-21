@@ -81,14 +81,13 @@ self: super: {
   };
 
 
-stretchly = self.installApplication rec {
-  name = "stretchly";
-  version = "0.21.1";
-  sourceRoot = "stretchly.app";
+Stretchly = self.installApplication rec {
+  name = "Stretchly";
+  version = "1.0.0";
+  sourceRoot = "Stretchly.app";
   src = super.fetchurl {
-    url = "https://github.com/hovancik/stretchly/releases/download/v${version}/stretchly-${version}-mac.zip";
-    sha256 = "b3c36fcabbc33b13f9aca772c674301a3f13b1263318399bbb298565170030dd";
-    # date = 2020-01-16T09:49:21-0700;
+    url = "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
+    sha256 = "15fsb3qmjd9jvfdfig01nx4i16j383csya0smgxabcidxg8m7q40";
   };
   description = "break time reminder app";
   homepage = https://hovancik.net/stretchly/;
