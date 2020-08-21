@@ -122,7 +122,6 @@ rec {
         }
       ];
 
-
       enableAutosuggestions = true;
       history = {
         size = 50000;
@@ -206,9 +205,11 @@ rec {
 
       extraConfig = {
         core = {
-          editor = "${pkgs.emacs}/bin/emacsclient -a '' -c";
-          pager  = "${pkgs.less}/bin/less --tabs=4 -RFX";
+          editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
+          pager  = "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
+
+        interactive.diffFilter = "${pkgs.gitAndTools.delta}/bin/delta --color-only";
         branch.autosetupmerge = true;
         credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";

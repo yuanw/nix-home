@@ -26,7 +26,9 @@ with pkgs;
   graphviz
   plantuml
   xquartz
+
   gitAndTools.pre-commit
+  gitAndTools.delta
 
   #python
   python37Packages.pylint
