@@ -70,7 +70,8 @@ with pkgs;
   ripgrep
   autojump
   silver-searcher
-  gh
+  gitAndTools.gh
+
   docker-credential-pass
   universal-ctags
   pandoc
