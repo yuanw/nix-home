@@ -69,6 +69,11 @@ rec {
       enable = true;
     };
 
+    z-lua = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";

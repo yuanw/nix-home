@@ -18,7 +18,7 @@ with pkgs;
   nix-prefetch-git
   sass
   stack
-  texlive.combined.scheme-medium
+  texlive.combined.scheme-full
   tree
   wget
   unzip
