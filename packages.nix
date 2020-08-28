@@ -80,9 +80,10 @@ with pkgs;
   pandoc
 
   # Fonts
-  fontconfig
+  #fontconfig
   lato
   source-code-pro
+  font-awesome
 
   emacsUnstable
 ]
