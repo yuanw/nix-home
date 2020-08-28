@@ -11,7 +11,6 @@ with pkgs;
   ffmpeg
   less
   gifsicle
-  #ghostscript
   graphviz
   htop
   lorri
@@ -22,11 +21,14 @@ with pkgs;
   tree
   broot
   wget
+  shellcheck
   unzip
   graphviz
   plantuml
   xquartz
-
+  #editorconfig-core-c
+  python38Packages.editorconfig
+  
   gitAndTools.pre-commit
   gitAndTools.delta
 
@@ -55,6 +57,7 @@ with pkgs;
   #cargo
 
   nixops
+  nixfmt
   dart
   google-cloud-sdk
 
