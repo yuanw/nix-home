@@ -36,6 +36,7 @@ rec {
         ];
   };
 
+
   home.packages = import ./packages.nix { pkgs = pkgs; };
 
   home.file = {
@@ -50,6 +51,8 @@ rec {
     };
 
   };
+
+  fonts.fontconfig.enable = true;
 
   programs = {
     home-manager = {

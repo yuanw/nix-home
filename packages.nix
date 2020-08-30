@@ -16,6 +16,7 @@ with pkgs;
   htop
   lorri
   nix-prefetch-git
+  nixfmt
   sass
   stack
   texlive.combined.scheme-full
@@ -62,6 +63,7 @@ with pkgs;
   #prooftree
 
   # productivity
+  pandoc
   pet
   fd
   fzf
@@ -73,8 +75,18 @@ with pkgs;
   gitAndTools.pass-git-helper
   vscode
   emacsUnstable
+  shellcheck
   sqlite
   editorconfig-core-c
   languagetool
   zstd
+
+  # Fonts
+  fontconfig
+  lato
+  source-code-pro
+  font-awesome
+  material-design-icons
+  weather-icons
+  zlib
 ]
