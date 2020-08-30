@@ -69,7 +69,8 @@ with pkgs;
   fzf
   ripgrep
   autojump
-  silver-searcher
+
+  #silver-searcher
   python3
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
@@ -88,5 +89,7 @@ with pkgs;
   font-awesome
   material-design-icons
   weather-icons
+  nerdfonts
+
   zlib
 ]

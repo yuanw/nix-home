@@ -117,8 +117,8 @@ rec {
       };
 
       shellAliases = {
-        emd = "${pkgs.emacs}/bin/emacs --daemon";
-        ec = "${pkgs.emacs}/bin/emacsclient -a '' -c";
+        emd = "${pkgs.emacsUnstable}/bin/emacs --daemon";
+        ec = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
       };
 
       initExtra = lib.mkBefore ''
@@ -152,8 +152,8 @@ rec {
 
       extraConfig = {
         core = {
-          editor = "emacs -nw";
-          pager = "${pkgs.less}/bin/less --tabs=4 -RFX";
+          editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
+          pager  = "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
         branch.autosetupmerge = true;
         credential.helper = "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
