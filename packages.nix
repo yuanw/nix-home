@@ -75,7 +75,7 @@ with pkgs;
   silver-searcher
   gitAndTools.gh
 
-  docker-credential-pass
+  #docker-credential-pass
   universal-ctags
   pandoc
 
