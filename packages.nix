@@ -6,7 +6,9 @@ with pkgs;
   clang
   coreutils
   moreutils
-  ispell
+  gnutls
+
+  (aspellWithDicts (ds: [ ds.en ]))
   imagemagick
   ffmpeg
   less
@@ -35,13 +37,9 @@ with pkgs;
   #python
   python37Packages.pylint
 
-#  haskellPackages.niv
-#  haskellPackages.hoogle
-#  nixpkgs-fmt
+  nixpkgs-fmt
 
-  #hledger
-  #hledger-web
-  #hledger-ui
+
 
   #OnePassword-op
   pass
@@ -52,9 +50,6 @@ with pkgs;
   Stretchly
   CopyQ
   #wifi-password
-
-  #rustc
-  #cargo
 
   nixops
   nixfmt
@@ -72,7 +67,7 @@ with pkgs;
   fzf
   ripgrep
   autojump
-  silver-searcher
+  #silver-searcher
   gitAndTools.gh
 
   #docker-credential-pass
