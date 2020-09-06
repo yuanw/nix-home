@@ -5,8 +5,7 @@ let
   tmp_directory = "/tmp";
   #ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   lib = pkgs.stdenv.lib;
-in
-rec {
+in rec {
   nixpkgs = {
     config = {
       allowUnfree = true;
@@ -14,28 +13,18 @@ rec {
       allowUnsupportedSystem = false;
     };
 
-    overlays =
-      let
-        path = ./overlays_;
-      in
-        with builtins;
-        map (n: import (path + ("/" + n)))
-          (
-            filter (
-              n: match ".*\\.nix" n != null || pathExists (path + ("/" + n + "/default.nix"))
-            )
-              (attrNames (readDir path))
-          ) ++ [
-          (
-            import (
-              builtins.fetchTarball {
-                url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-              }
-            )
-          )
-        ];
+    overlays = let path = ./overlays_;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
+        (import (builtins.fetchTarball {
+          url =
+            "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+        }))
+      ];
   };
-
 
   home.packages = import ./packages.nix { pkgs = pkgs; };
 
@@ -44,33 +33,28 @@ rec {
       :set prompt "λ> "
     '';
 
-    ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source = pkgs.fetchurl {
-      url = https://iterm2.com/shell_integration/zsh;
-      sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
-      # date = 2020-01-07T15:59:09-0800;
-    };
+    ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source =
+      pkgs.fetchurl {
+        url = "https://iterm2.com/shell_integration/zsh";
+        sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
+        # date = 2020-01-07T15:59:09-0800;
+      };
 
   };
 
   fonts.fontconfig.enable = true;
 
   programs = {
-    home-manager = {
-      enable = true;
-    };
+    home-manager = { enable = true; };
 
     direnv = {
       enable = true;
       enableZshIntegration = true;
     };
 
-    jq = {
-      enable = true;
-    };
+    jq = { enable = true; };
 
-    gpg = {
-      enable = true;
-    };
+    gpg = { enable = true; };
 
     z-lua = {
       enable = true;
@@ -116,11 +100,6 @@ rec {
         share = true;
       };
 
-      shellAliases = {
-        emd = "${pkgs.emacsUnstable}/bin/emacs --daemon";
-        ec = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
-      };
-
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
         export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
@@ -146,17 +125,19 @@ rec {
         co = "checkout";
         w = "status -sb";
         l = "log --graph --pretty=format:'%Cred%h%Creset"
-        + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
-        + " --abbrev-commit --date=relative --show-notes=*";
+          + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
+          + " --abbrev-commit --date=relative --show-notes=*";
       };
 
       extraConfig = {
         core = {
           editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
-          pager  = "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
+          pager =
+            "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
         branch.autosetupmerge = true;
-        credential.helper = "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
+        credential.helper =
+          "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
         # "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };

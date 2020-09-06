@@ -11,8 +11,6 @@
       signByDefault = true;
     };
 
-    extraConfig = {
-      github.user = "yuanw";
-    };
+    extraConfig = { github.user = "yuanw"; };
   };
 }

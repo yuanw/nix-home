@@ -1,7 +1,6 @@
 { pkgs }:
 
-with pkgs;
-[
+with pkgs; [
   #cacert
   clang
   coreutils
@@ -16,12 +15,14 @@ with pkgs;
   htop
   lorri
   nix-prefetch-git
+  cachix
   nixfmt
   sass
   stack
   texlive.combined.scheme-full
   tree
   wget
+  unrar
   unzip
   graphviz
   plantuml
@@ -29,38 +30,11 @@ with pkgs;
   #haskellPackages.hoogle
   nixpkgs-fmt
   xclip
-
-  #hledger
-  #hledger-web
-  #hledger-ui
-
-  #OnePassword-op
   pass
 
   HandBrake
   wifi-password
   stretchly
-
-
-  #knative
-  #kubectl
-  #minikube
-  #Docker
-  #kubernetes-helm
-  #istio
-
-  #rustc
-  #cargo
-
-
-  #google-cloud-sdk
-
-  #x11
-  #xquartz
-  #xorg.xhost
-  #xorg.xauth
-  #ratpoison
-  #prooftree
 
   # productivity
   pandoc
@@ -70,7 +44,6 @@ with pkgs;
   ripgrep
   autojump
 
-  #silver-searcher
   python3
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
