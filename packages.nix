@@ -53,6 +53,8 @@ with pkgs;
 
   nixops
   nixfmt
+  nox
+  niv
   dart
   google-cloud-sdk
 
