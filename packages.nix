@@ -3,9 +3,9 @@
 with pkgs; [
   #cacert
   clang
-  coreutils
+  coreutils-prefixed
   moreutils
-  gnutls
+  #gnutls
 
   (aspellWithDicts (ds: [ ds.en ]))
   ffmpeg
@@ -26,8 +26,8 @@ with pkgs; [
   unzip
   graphviz
   plantuml
-  #haskellPackages.niv
-  #haskellPackages.hoogle
+ # haskell-language-server-wrapper
+  haskell-language-server
   nixpkgs-fmt
   xclip
   pass

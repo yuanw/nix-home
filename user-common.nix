@@ -50,6 +50,7 @@ in rec {
     direnv = {
       enable = true;
       enableZshIntegration = true;
+      enableNixDirenvIntegration = true;
     };
 
     jq = { enable = true; };
