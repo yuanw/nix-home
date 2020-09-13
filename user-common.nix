@@ -13,8 +13,7 @@ in rec {
       allowUnsupportedSystem = false;
     };
 
-    overlays = let path = ./overlays_;
-    in with builtins;
+    overlays = let path = ./overlays; in with builtins;
     map (n: import (path + ("/" + n))) (filter (n:
       match ".*\\.nix" n != null
       || pathExists (path + ("/" + n + "/default.nix")))
@@ -102,7 +101,7 @@ in rec {
       };
 
       initExtra = lib.mkBefore ''
-        export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
+        export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin:$HOME/haskell-language-server
         export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
 
         function prev() {

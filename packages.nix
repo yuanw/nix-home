@@ -27,10 +27,11 @@ with pkgs; [
   graphviz
   plantuml
  # haskell-language-server-wrapper
-  haskell-language-server
+  #haskell-language-server
   nixpkgs-fmt
   xclip
   pass
+  emojify
 
   HandBrake
   wifi-password
