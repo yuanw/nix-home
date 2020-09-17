@@ -33,6 +33,7 @@ with pkgs;
   
   gitAndTools.pre-commit
   gitAndTools.delta
+  gitAndTools.gh
 
   #python
   python37Packages.pylint
