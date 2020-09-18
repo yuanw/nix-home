@@ -28,6 +28,7 @@ with pkgs; [
   plantuml
  # haskell-language-server-wrapper
   #haskell-language-server
+  haskellPackages.cabal-fmt
   nixpkgs-fmt
   xclip
   pass
@@ -46,6 +47,7 @@ with pkgs; [
   autojump
 
   python3
+  gitAndTools.gh
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
   vscode

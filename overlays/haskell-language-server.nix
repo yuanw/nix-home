@@ -6,24 +6,17 @@ self: super: {
       pname = "haskell-language-server";
       version = "0.4.0";
 
-      sourceRoot = ".";
-
-      dontConfigure = true;
-
       buildInputs = [ gzip ];
 
-      srcs = [
-        (fetchurl {
-          url =
-            "https://github.com/haskell/haskell-language-server/releases/download/0.4.0/haskell-language-server-macOS-8.6.5.gz";
-          sha256 = "12q1sl3pippx2jqpbnr8d8zc33xflrvwk398519n1vvjdqkx4yf8";
-        })
-        (fetchurl {
-          url =
-            "https://github.com/haskell/haskell-language-server/releases/download/0.4.0/haskell-language-server-wrapper-macOS.gz";
-          sha256 = "1mkbm5nw3hfwrsmqdhjh5j0f6v2j10gaj5r28j615kx4ayc8xnf1";
-        })
-      ];
+      srcs = fetchFromGitHub {
+        owner = "haskell";
+        repo = "haskell-language-server";
+        # The git tag to fetch
+        rev = "${version}";
+        # Hashes must be specified so that the build is purely functional
+        sha256 = "0l53fm1j72hcaais2k8499gcgqndxy93nkbw4r5mkpm6hn2qa9xw";
+      };
+
 
       phases = [ "unpackPhase" "installPhase" ];
 
