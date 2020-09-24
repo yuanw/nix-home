@@ -18,8 +18,8 @@ with pkgs;
   lorri
   nix-prefetch-git
   sass
-  stack
-  texlive.combined.scheme-full
+  #stack
+  #texlive.combined.scheme-medium
   tree
   broot
   wget
@@ -27,16 +27,17 @@ with pkgs;
   unzip
   graphviz
   plantuml
-  xquartz
+  #xquartz
   #editorconfig-core-c
-  python38Packages.editorconfig
+  #python38Packages.editorconfig
   
   gitAndTools.pre-commit
   gitAndTools.delta
-  gitAndTools.gh
+  #gitAndTools.gh
+  gh
 
   #python
-  python37Packages.pylint
+  #python37Packages.pylint
 
   nixpkgs-fmt
 
@@ -71,7 +72,7 @@ with pkgs;
   ripgrep
   autojump
   #silver-searcher
-  gitAndTools.gh
+  #gitAndTools.gh
 
   #docker-credential-pass
   universal-ctags
@@ -81,7 +82,7 @@ with pkgs;
   #fontconfig
   lato
   source-code-pro
-  font-awesome
+  #font-awesome
 
   emacsUnstable
 ]

@@ -56,24 +56,9 @@ rec {
 
   };
 
-  fonts.fontconfig.enable = true;
-
   programs = {
     home-manager = {
       enable = true;
-    };
-
-    # https://hugoreeves.com/posts/2019/nix-home/
-    alacritty = {
-      enable = false;
-      settings = {
-        font = {
-          size = 20.0;
-        };
-        shell = {
-          program =  "${pkgs.zsh}/bin/zsh";
-        };
-      };
     };
 
     direnv = {
@@ -93,7 +78,7 @@ rec {
       enable = true;
     };
 
-    z-lua = {
+    zoxide = {
       enable = true;
       enableZshIntegration = true;
     };
@@ -134,7 +119,7 @@ rec {
 
       sessionVariables = {
         PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
-        DART_SDK = "${pkgs.dart}/dart";
+        DART_SDK = "${pkgs.dart}";
         LANG = "en_US.UTF-8";
       };
 

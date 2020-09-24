@@ -3,7 +3,7 @@ self: super: {
 dart = with super; stdenv.mkDerivation rec {
 
   pname = "dart";
-  version = "2.7.2";
+  version = "2.9.3";
 
   nativeBuildInputs = [
     unzip
@@ -11,13 +11,13 @@ dart = with super; stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-x64-release.zip";
-    sha256 = "111zl075qdk2zd4d4mmfkn30jmzsri9nq3nspnmc2l245gdq34jj";
+    sha256 = "1b5p6jn6fpk95nd6qjclwmdsjdywcs7nzvgzlqmcyjq2bfazk7zj";
   };
 
 
   installPhase = ''
-    mkdir -p $out/dart
-    cp -R * $out/dart/
+    mkdir -p $out
+    cp -R * $out/
 
     # create wrappers with correct env
     #for program in dart dart2js dart2native dartanalyzer dartaotruntime dartdevc dartdoc dartfmt pub; do
