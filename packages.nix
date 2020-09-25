@@ -19,7 +19,7 @@ with pkgs;
   nix-prefetch-git
   sass
   #stack
-  #texlive.combined.scheme-medium
+  texlive.combined.scheme-medium
   tree
   broot
   wget
@@ -27,13 +27,11 @@ with pkgs;
   unzip
   graphviz
   plantuml
-  #xquartz
-  #editorconfig-core-c
-  #python38Packages.editorconfig
+  editorconfig-core-c
   
   gitAndTools.pre-commit
   gitAndTools.delta
-  #gitAndTools.gh
+  gitAndTools.pass-git-helper
   gh
 
   #python
@@ -45,7 +43,7 @@ with pkgs;
 
   #OnePassword-op
   pass
-  pass-git-helper
+  #pass-git-helper
 
   #Apps
   #HandBrake
@@ -71,8 +69,6 @@ with pkgs;
   fzf
   ripgrep
   autojump
-  #silver-searcher
-  #gitAndTools.gh
 
   #docker-credential-pass
   universal-ctags

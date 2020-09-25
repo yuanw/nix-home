@@ -167,7 +167,7 @@ rec {
       oh-my-zsh = {
         enable = true;
         plugins =["git"
-                  #"pyenv"
+                  "pyenv"
                   "history"
                   "autojump"
                   "history-substring-search"];
@@ -196,7 +196,7 @@ rec {
 
         interactive.diffFilter = "${pkgs.gitAndTools.delta}/bin/delta --color-only";
         branch.autosetupmerge = true;
-        credential.helper     = "${pkgs.pass-git-helper}/bin/pass-git-helper";
+        credential.helper     = "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
