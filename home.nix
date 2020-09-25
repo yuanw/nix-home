@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  imports = [ ./user-common.nix ];
+  imports = [ ./common.nix ];
   programs.git = {
     enable = true;
     userEmail = "yuan.wang@workiva.com";
@@ -11,8 +11,6 @@
       signByDefault = true;
     };
 
-    extraConfig = {
-      github.user           = "yuanwang-wf";
-    };
+    extraConfig = { github.user = "yuanwang-wf"; };
   };
 }

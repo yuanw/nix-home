@@ -6,10 +6,11 @@ let
   tmp_directory = "/tmp";
   ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   lib = pkgs.stdenv.lib;
-  all-hies = import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master") {};
+  all-hies =
+    import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master")
+    { };
 
-in
-rec {
+in rec {
   nixpkgs = {
     config = {
       allowUnfree = true;
@@ -17,28 +18,18 @@ rec {
       allowUnsupportedSystem = false;
     };
 
-    overlays =
-      let
-        path = ./overlays_;
-      in
-        with builtins;
-        map (n: import (path + ("/" + n)))
-          (
-            filter (
-              n: match ".*\\.nix" n != null || pathExists (path + ("/" + n + "/default.nix"))
-            )
-              (attrNames (readDir path))
-          ) ++ [
-          (
-            import (
-              builtins.fetchTarball {
-                url = https://github.com/nix-community/emacs-overlay/archive/master.tar.gz;
-              }
-            )
-          )
-        ];
+    overlays = let path = ./overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
+        (import (builtins.fetchTarball {
+          url =
+            "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+        }))
+      ];
   };
-
 
   home.packages = import ./packages.nix { pkgs = pkgs; };
 
@@ -47,36 +38,28 @@ rec {
       :set prompt "λ> "
     '';
 
-
-    ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source = pkgs.fetchurl {
-      url = https://iterm2.com/shell_integration/zsh;
-      sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
-      # date = 2020-01-07T15:59:09-0800;
-    };
+    ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source =
+      pkgs.fetchurl {
+        url = "https://iterm2.com/shell_integration/zsh";
+        sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
+        # date = 2020-01-07T15:59:09-0800;
+      };
 
   };
 
   programs = {
-    home-manager = {
-      enable = true;
-    };
+    home-manager = { enable = true; };
 
     direnv = {
       enable = true;
       enableZshIntegration = true;
     };
 
-    jq = {
-      enable = true;
-    };
+    jq = { enable = true; };
 
-    go = {
-      enable = false;
-    };
+    go = { enable = false; };
 
-    gpg = {
-      enable = true;
-    };
+    gpg = { enable = true; };
 
     zoxide = {
       enable = true;
@@ -116,18 +99,19 @@ rec {
         share = true;
       };
 
-
       sessionVariables = {
-        PLANTUML_JAR_PATH =  "${pkgs.plantuml}/lib/plantuml.jar";
+        PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         DART_SDK = "${pkgs.dart}";
         LANG = "en_US.UTF-8";
       };
 
       shellAliases = {
         ddev = "pub run dart_dev";
-        pubcleanlock = ''git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
-        pubclean = ''rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
-        repub= "pubclean; pub get";
+        pubcleanlock = ''
+          git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
+        pubclean = ''
+          rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
+        repub = "pubclean; pub get";
       };
 
       initExtra = lib.mkBefore ''
@@ -162,15 +146,12 @@ rec {
         export SDKMAN_DIR="/Users/yuanwang/.sdkman"
         [[ -s "/Users/yuanwang/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/yuanwang/.sdkman/bin/sdkman-init.sh"
 
-     '';
+      '';
 
       oh-my-zsh = {
         enable = true;
-        plugins =["git"
-                  "pyenv"
-                  "history"
-                  "autojump"
-                  "history-substring-search"];
+        plugins =
+          [ "git" "pyenv" "history" "autojump" "history-substring-search" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
@@ -180,23 +161,26 @@ rec {
 
       aliases = {
 
-        co         = "checkout";
-        w          = "status -sb";
-        l          = "log --graph --pretty=format:'%Cred%h%Creset"
-                     + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
-                     + " --abbrev-commit --date=relative --show-notes=*";
-        clone      = "clone --recursive";
+        co = "checkout";
+        w = "status -sb";
+        l = "log --graph --pretty=format:'%Cred%h%Creset"
+          + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
+          + " --abbrev-commit --date=relative --show-notes=*";
+        clone = "clone --recursive";
       };
 
       extraConfig = {
         core = {
           editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
-          pager  = "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
+          pager =
+            "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
 
-        interactive.diffFilter = "${pkgs.gitAndTools.delta}/bin/delta --color-only";
+        interactive.diffFilter =
+          "${pkgs.gitAndTools.delta}/bin/delta --color-only";
         branch.autosetupmerge = true;
-        credential.helper     = "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
+        credential.helper =
+          "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
         "url \"git@github.com:\"".insteadOf = "https://github.com/";
       };
     };
