@@ -1,46 +1,42 @@
 self: super: {
 
   haskell-language-server = with super;
-    stdenv.mkDerivation rec {
-
-      pname = "haskell-language-server";
-      version = "0.4.0";
-
-      buildInputs = [ gzip ];
-
-      srcs = fetchFromGitHub {
-        owner = "haskell";
-        repo = "haskell-language-server";
-        # The git tag to fetch
-        rev = "${version}";
-        # Hashes must be specified so that the build is purely functional
-        sha256 = "0l53fm1j72hcaais2k8499gcgqndxy93nkbw4r5mkpm6hn2qa9xw";
-      };
-
-
-      phases = [ "unpackPhase" "installPhase" ];
-
-      unpackPhase = ''
-        runHook preUnpack
-        for _src in $srcs; do
-          if [ -f "$_src" ]; then
-             gunzip $_src
-          else
-             echo "$_src doesnt exist"
-          fi
-        done
-        runHook postUnpack
-      '';
-
-      installPhase = ''
-        runHook preInstall
-        mkdir -p $out/bin
-        cp haskell-language-server-wrapper-macOS $out/bin/
-        runHook postInstall
-      '';
-
-      meta = {
-        homepage = "https://github.com/haskell/haskell-language-server/";
-      };
-    };
+     stdenv.mkDerivation  rec {
+        pname = "haskell-language-server";
+  version = "0.4.0.0";
+  src = fetchgit {
+    url = "https://github.com/haskell/haskell-language-server.git";
+    sha256 = "1fh9k9b3880m6ql4i10yn2yanskk9xhrakrrddqvainhcf2ik8hl";
+    rev = "c4576992f443a9abe48ffcfa0e2d2b9bce15d7ae";
+    fetchSubmodules = true;
+  };
+  isLibrary = true;
+  isExecutable = true;
+  libraryHaskellDepends = [
+    aeson base binary brittany bytestring containers data-default
+    deepseq Diff directory extra filepath floskell fourmolu ghc
+    ghc-boot-th ghcide gitrev hashable haskell-lsp hie-bios hslogger
+    lens optparse-simple ormolu process regex-tdfa retrie
+    safe-exceptions shake stylish-haskell temporary text time
+    transformers unix unordered-containers
+  ];
+  executableHaskellDepends = [
+    base binary containers data-default directory extra filepath ghc
+    ghc-paths ghcide gitrev hashable haskell-lsp hie-bios hslogger
+    optparse-applicative process safe-exceptions shake text time
+    unordered-containers
+  ];
+  testHaskellDepends = [
+    aeson base blaze-markup bytestring containers data-default
+    directory filepath haskell-lsp haskell-lsp-types hie-bios hslogger
+    hspec hspec-core lens lsp-test process stm tasty tasty-ant-xml
+    tasty-expected-failure tasty-golden tasty-hunit tasty-rerun
+    temporary text transformers unorde
+    red-containers yaml
+  ];
+  testToolDepends = [ ghcide ];
+  homepage = "https://github.com/haskell/haskell-language-server#readme";
+  description = "LSP server for GHC";
+  license = stdenv.lib.licenses.asl20;
+  };
 }

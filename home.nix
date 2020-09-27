@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  imports = [ ./user-common.nix ];
+  imports = [ ./common.nix ];
   programs.git = {
     enable = true;
     userEmail = "me@yuanwang.ca";

@@ -26,9 +26,9 @@ with pkgs; [
   unzip
   graphviz
   plantuml
- # haskell-language-server-wrapper
+  #haskell-language-server-wrapper
   #haskell-language-server
-  haskellPackages.cabal-fmt
+  #haskellPackages.cabal-fmt
   nixpkgs-fmt
   xclip
   pass
