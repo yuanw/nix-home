@@ -13,7 +13,6 @@ with pkgs; [
   gifsicle
   graphviz
   htop
-  lorri
   nix-prefetch-git
   cachix
   nixfmt
