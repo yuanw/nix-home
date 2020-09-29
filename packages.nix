@@ -18,7 +18,7 @@ with pkgs; [
   nixfmt
   sass
   stack
-  texlive.combined.scheme-full
+  #texlive.combined.scheme-full
   tree
   wget
   unrar
@@ -50,7 +50,7 @@ with pkgs; [
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
   vscode
-  emacsUnstable
+  #emacsUnstable
   shellcheck
   sqlite
   editorconfig-core-c

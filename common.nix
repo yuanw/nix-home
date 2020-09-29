@@ -17,12 +17,7 @@ in rec {
     map (n: import (path + ("/" + n))) (filter (n:
       match ".*\\.nix" n != null
       || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path))) ++ [
-        (import (builtins.fetchTarball {
-          url =
-            "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-        }))
-      ];
+      (attrNames (readDir path)));
   };
 
   home.packages = import ./packages.nix { pkgs = pkgs; };
@@ -53,6 +48,11 @@ in rec {
     };
 
     jq = { enable = true; };
+
+    emacs = {
+      enable = true;
+      package = pkgs.emacsMacport;
+    };
 
     gpg = { enable = true; };
 
@@ -131,7 +131,7 @@ in rec {
 
       extraConfig = {
         core = {
-          editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
+          editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
