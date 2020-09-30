@@ -2,7 +2,7 @@
 
 with pkgs;
 [
-  cacert
+  #cacert
   clang
   coreutils
   moreutils
@@ -38,7 +38,8 @@ with pkgs;
   #python37Packages.pylint
 
   nixpkgs-fmt
-
+  docker-credential-helpers
+  #yabai
 
 
   #OnePassword-op
@@ -70,7 +71,7 @@ with pkgs;
   ripgrep
   autojump
 
-  #docker-credential-pass
+
   universal-ctags
   pandoc
 

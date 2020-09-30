@@ -41,7 +41,7 @@ in rec {
     ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source =
       pkgs.fetchurl {
         url = "https://iterm2.com/shell_integration/zsh";
-        sha256 = "1qm7khz19dhwgz4aln3yy5hnpdh6pc8nzxp66m1za7iifq9wrvil";
+        sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
         # date = 2020-01-07T15:59:09-0800;
       };
 
