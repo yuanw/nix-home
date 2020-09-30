@@ -11,7 +11,10 @@
 
   # Auto upgrade nix package and the daemon service.
   services.lorri = { enable = true; };
-  services.skhd = { enable = true; };
+  services.skhd = {
+    enable = true;
+    skhdConfig = "cmd - e : open ~/.nix-profile/Applications/Emacs.app";
+  };
   services.yabai = {
     enable = true;
     package = pkgs.yabai;
@@ -60,7 +63,8 @@
 
   # Create /etc/bashrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
-  # programs.fish.enable = true;
+  programs.bash.enable = false;
+  time.timeZone = "America/Regina";
 
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog

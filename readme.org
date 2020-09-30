@@ -1,41 +1,13 @@
-#+TITLE: nix home-manager config
+#+TITLE: nix config on MacOS
 
+using nix-darwin and home-manger
 
 * Install
 
-*** Install multi-user Nix
+*** Install single-user Nix
 
 #+begin_src sh
-sh <(curl https://nixos.org/nix/install) --daemon
-#+end_src
-
-*** Add the Nix system path to =.bashrc=
-
-#+begin_src sh
-echo 'export PATH=$PATH:/nix/var/nix/profiles/default/bin' > .bashrc
-chmod +x .bashrc
-#+end_src
-
-*** Add yourself as a trusted user to =/etc/nix/nix.conf=
-
-On the new machine, run:
-
-#+begin_src conf
-sudo cat >> /etc/nix/nix.conf <<EOF
-trusted-users = $USER @admin
-allowed-users = *
-EOF
-#+end_src
-
-Then run:
-#+begin_src sh
-sudo killall nix-daemon
-#+end_src
-
-*** set NIX_SSL_CERT_FILE
-
-#+begin_src sh
-export NIX_SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+sh <(curl https://nixos.org/nix/install)
 #+end_src
 
 *** Add nixpkgs channel
@@ -44,15 +16,17 @@ nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 #+end_src
 
+** Install nix-darwin
+
 * How to use it
 #+BEGIN_SRC shell
-git clone 
+git clone
 ln -s `pwd` ~/.config/nixpkgs
 #+END_SRC
 
 * In General
-** home-manager's channle version must match the nixpgs version
-For example: 
+** home-manager's channel version must match the nixpkgs version
+For example:
 if we are using 19.09 channel, our home-manager channel should
 #+BEGIN_SRC shell
 home-manager https://github.com/rycee/home-manager/archive/release-19.09.tar.gz
@@ -79,48 +53,7 @@ openssl dgst -r -sha256
 shasum -a 256
 #+END_SRC
 
-* Log 
-** Add pass-git-helper
-https://github.com/Gabriel439/haskell-nix/blob/master/project0/README.md#pinning-nixpkgs
-#+BEGIN_SRC shell
-nix-prefetch-git https://github.com/languitar/pass-git-helper.git 713d67d73662f2c072ff2cbde896462dd7b1da9f  > pass-git-helper.json
-#+END_SRC
-
-** Install go package (Knative)
-
-#+begin_src 
-self: super: {
-  pet = super.buildGoModule rec {
-    name = "pet-${version}";
-    version = "0.3.6";
-
-    src = super.fetchFromGitHub {
-      owner = "knqyf263";
-      repo = "pet";
-      rev = "v${version}";
-      sha256 = "1na3az7vicjq1rxd3ybid47yrblsdazgli0dchkbwh8zchwhqj33";
-    };
-
-    modSha256 = "06ham8lsx5c1vk5jkwp1aa9g4q4g7sfq7gxz2gkffa98x2vlawyf";
-
-    subPackages = [ "." ];
-
-    meta = with super.lib; {
-      description = "Simple command-line snippet manager, written in Go";
-      homepage = https://github.com/knqyf263/pet;
-      license = licenses.mit;
-      platforms = platforms.linux ++ platforms.darwin;
-    };
-  };
-}
-#+end_src
-
-example to install go executable
-
-
-
-https://github.com/derailed/k9s
-https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluster/k9s/default.nix
+* Log
 
 * Overlays
 - https://nixos.wiki/wiki/Overlays
@@ -128,20 +61,28 @@ https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/networking/cluste
 - https://nixos.org/nixpkgs/manual/#chap-overlays
 - https://www.youtube.com/watch?v=W85mF1zWA2o
 - https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
+
 * References:
 - https://github.com/rycee/home-manager
+- https://rycee.gitlab.io/home-manager/index.html
 - https://github.com/jwiegley/nix-config
-- https://github.com/yrashk/nix-home
+
+
 - https://github.com/bkase/life
 - https://github.com/tviti/nix-cfg
+- https://github.com/danieldk/nix-home
+- https://github.com/LnL7/dotfiles
+- https://github.com/cmacrae/config
 
-* TODOs
-** DONE finish wire zsh 
-   CLOSED: [2020-01-20 Mon 20:43]
-** DONE install google-cloud-sdk, wire path, and zsh shell completion
-** TODO https://github.com/zsh-users/zsh-history-substring-search
-** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
-   CLOSED: [2020-01-20 Mon 20:52]
+- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
-darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
-https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
+* Items of TODO
+** TODO install stretchly
+** TODO Replace emacsUnstable with emacsMacPort
+~open ~/.nix-profile/Applications/Emacs.app~
+** TODO setup yabai
+- https://www.youtube.com/watch?v=AdwhjIg_Xe4
+- https://github.com/stephen-huan/macos-dotfiles
+- https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
+* Common commands
+- darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
