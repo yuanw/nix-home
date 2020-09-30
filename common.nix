@@ -6,10 +6,6 @@ let
   tmp_directory = "/tmp";
   ca-bundle_crt = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
   lib = pkgs.stdenv.lib;
-  all-hies =
-    import (fetchTarball "https://github.com/infinisil/all-hies/tarball/master")
-    { };
-
 in rec {
   nixpkgs = {
     config = {
@@ -23,12 +19,7 @@ in rec {
     map (n: import (path + ("/" + n))) (filter (n:
       match ".*\\.nix" n != null
       || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path))) ++ [
-        (import (builtins.fetchTarball {
-          url =
-            "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
-        }))
-      ];
+      (attrNames (readDir path)));
   };
 
   home.packages = import ./packages.nix { pkgs = pkgs; };
@@ -60,6 +51,8 @@ in rec {
     go = { enable = false; };
 
     gpg = { enable = true; };
+
+    kitty = {enable = true;};
 
     zoxide = {
       enable = true;
@@ -171,7 +164,7 @@ in rec {
 
       extraConfig = {
         core = {
-          editor = "${pkgs.emacsUnstable}/bin/emacsclient -a '' -c";
+          editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };

@@ -77,9 +77,9 @@ with pkgs;
 
   # Fonts
   #fontconfig
-  lato
-  source-code-pro
+  #lato
+  #source-code-pro
   #font-awesome
 
-  emacsUnstable
+  emacsMacport
 ]

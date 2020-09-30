@@ -77,10 +77,14 @@ shasum -a 256
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * Items of TODO
-** TODO Replace emacsUnstable with emacsMacPort
-** TODO setup yabai
+** TODO wire font
+- Add private directory for paid font
+** DONE Replace emacsUnstable with emacsMacPort
+** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
 - https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
+- https://github.com/koekeishiya/skhd
+- https://gist.github.com/knowler/ef937408198d4ee38ce111ae1a3da750
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix

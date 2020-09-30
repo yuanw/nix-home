@@ -13,7 +13,10 @@
   # services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
   services.lorri = { enable = true; };
-  services.skhd = { enable = true; };
+  services.skhd = {
+    enable = true;
+    skhdConfig = "cmd - e : open ~/.nix-profile/Applications/Emacs.app";
+  };
   services.yabai = {
     enable = true;
     package = pkgs.yabai;
