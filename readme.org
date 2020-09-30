@@ -77,10 +77,5 @@ shasum -a 256
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * TODOs
-** TODO https://github.com/zsh-users/zsh-history-substring-search
-** DONE wire plantuml jar "${pkgs.plantuml}/lib/plantuml.jar"
-   CLOSED: [2020-01-20 Mon 20:52]
-
-
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
