@@ -9,6 +9,15 @@
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin/configuration.nix
   environment.darwinConfig = "$HOME/.config/nixpkgs/darwin-configuration.nix";
 
+  fonts = {
+    fonts = [
+      pkgs.material-design-icons
+      pkgs.weather-icons
+      pkgs.font-awesome
+      pkgs.emacs-all-the-icons-fonts
+    ];
+  };
+
   # Auto upgrade nix package and the daemon service.
   # services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;

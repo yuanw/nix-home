@@ -1,6 +1,6 @@
-#+TITLE: nix config on MacOS
+#+TITLE: Nix configuration for MacOS
 
-using nix-darwin and home-manger
+using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and home-manger
 
 * Install
 
@@ -16,13 +16,10 @@ nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 #+end_src
 
-** Install nix-darwin
+*** TODO add note about latest OS and the workaround
 
-* How to use it
-#+BEGIN_SRC shell
-git clone 
-ln -s `pwd` ~/.config/nixpkgs
-#+END_SRC
+** Install nix-darwin
+** Download EssentialPragmataPro font to ~private~ directory (optional)
 
 * In General
 ** home-manager's channel version must match the nixpkgs version
@@ -47,13 +44,9 @@ home-manager switch
 nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d5670677ee3e8b84e4f > lorri.json
 #+END_SRC
 
-** How to get sha256 of file
-#+BEGIN_SRC
-openssl dgst -r -sha256
-shasum -a 256
-#+END_SRC
 
-* Log 
+* Caveats
+** ~services.nix~ doesn't seem work with single user mode
 
 * Overlays
 - https://nixos.wiki/wiki/Overlays
@@ -62,12 +55,12 @@ shasum -a 256
 - https://www.youtube.com/watch?v=W85mF1zWA2o
 - https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
 
-* References:
-- https://github.com/rycee/home-manager
+* References and Manual:
+- https://daiderd.com/nix-darwin/manual/index.html#sec-options
 - https://rycee.gitlab.io/home-manager/index.html
+
+* Examples
 - https://github.com/jwiegley/nix-config
-
-
 - https://github.com/bkase/life
 - https://github.com/tviti/nix-cfg
 - https://github.com/danieldk/nix-home
@@ -77,13 +70,16 @@ shasum -a 256
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * Items of TODO
+** TODO integrate home-manager with nix-darwin
 ** TODO wire font
 - Add private directory for paid font
+  https://daiderd.com/nix-darwin/manual/index.html#opt-fonts.enableFontDir
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
 - https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
 - https://github.com/koekeishiya/skhd
 - https://gist.github.com/knowler/ef937408198d4ee38ce111ae1a3da750
+  
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
