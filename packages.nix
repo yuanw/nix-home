@@ -15,7 +15,6 @@ with pkgs;
   gifsicle
   graphviz
   htop
-  lorri
   nix-prefetch-git
   sass
   #stack
@@ -32,19 +31,13 @@ with pkgs;
   gitAndTools.pre-commit
   gitAndTools.delta
   gitAndTools.pass-git-helper
-  gh
+  gitAndTools.gh
 
-  #python
-  #python37Packages.pylint
 
   nixpkgs-fmt
   docker-credential-helpers
-  #yabai
 
-
-  #OnePassword-op
   pass
-  #pass-git-helper
 
   #Apps
   #HandBrake
@@ -74,12 +67,6 @@ with pkgs;
 
   universal-ctags
   pandoc
-
-  # Fonts
-  #fontconfig
-  #lato
-  #source-code-pro
-  #font-awesome
 
   emacsMacport
 ]
