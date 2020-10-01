@@ -13,7 +13,8 @@ in rec {
       allowUnsupportedSystem = false;
     };
 
-    overlays = let path = ./overlays; in with builtins;
+    overlays = let path = ./overlays;
+    in with builtins;
     map (n: import (path + ("/" + n))) (filter (n:
       match ".*\\.nix" n != null
       || pathExists (path + ("/" + n + "/default.nix")))
@@ -36,8 +37,6 @@ in rec {
 
   };
 
-  fonts.fontconfig.enable = true;
-
   programs = {
     home-manager = { enable = true; };
 
@@ -55,6 +54,8 @@ in rec {
     };
 
     gpg = { enable = true; };
+
+    pet = {enable = true;};
 
     z-lua = {
       enable = true;

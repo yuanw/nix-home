@@ -1,7 +1,0 @@
-{
-    "fetchSubmodules": false,
-    "sha256": "1zn17brz16r2klkcaqmy4fl8kx5r5lka1nwx497jckb88k81k2hj",
-    "date": "2019-12-17T13:39:04-08:00",
-    "rev": "b10580ff726276f893bf93c22a9bc4f562e84cc0",
-    "url": "https://github.com/knative/client.git"
-}

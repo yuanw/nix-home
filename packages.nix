@@ -1,7 +1,6 @@
 { pkgs }:
 
-with pkgs;
-[
+with pkgs; [
   #cacert
   clang
   coreutils-prefixed
@@ -55,30 +54,18 @@ with pkgs;
   offlineimap
   notmuch
 
-
   # productivity
   pandoc
-  pet
   fd
   fzf
   ripgrep
   autojump
   vscode
-  
+
   shellcheck
   sqlite
   editorconfig-core-c
+  fontconfig
   languagetool
   zstd
-
-  # Fonts
-  #fontconfig
-  #lato
-  #source-code-pro
-  #font-awesome
-  #material-design-icons
-  #weather-icons
-  #nerdfonts
-  #zlib
-  emacsMacport
 ]
