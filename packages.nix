@@ -68,4 +68,5 @@ with pkgs; [
   fontconfig
   languagetool
   zstd
+
 ]

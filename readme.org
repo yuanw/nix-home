@@ -79,6 +79,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 - https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
 - https://github.com/koekeishiya/skhd
 - https://gist.github.com/knowler/ef937408198d4ee38ce111ae1a3da750
+  https://piratefache.ch/chunkwm-is-dead-reborn-as-yabai/
   
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix

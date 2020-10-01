@@ -35,7 +35,17 @@ with lib; {
   services.lorri = { enable = true; };
   services.skhd = {
     enable = true;
-    skhdConfig = "cmd - e : open ~/.nix-profile/Applications/Emacs.app";
+    skhdConfig = ''
+      cmd - e : open ~/.nix-profile/Applications/Emacs.app
+
+      # focus window
+      cmd + ctrl - h : yabai -m window --focus west
+      cmd + ctrl - j : yabai -m window --focus south || yabai -m display --focus prev
+      cmd + ctrl - k : yabai -m window --focus north || yabai -m display --focus next
+      cmd + ctrl - l : yabai -m window --focus east
+      cmd + ctrl - 0x21 : yabai -m window --focus stack.prev # this is [
+      cmd + ctrl - 0x1E : yabai -m window --focus stack.next # this is ]
+          '';
   };
 
   services.spacebar.enable = true;
@@ -43,8 +53,8 @@ with lib; {
   services.spacebar.config = {
     debug_output = "on";
     clock_format = "%R";
-    space_icon_strip = "   ";
-    text_font = ''"Menlo:Bold:12.0"'';
+    space_icon_strip = "    ";
+    text_font = ''"Essential PragmataPro:Regular:12.0"'';
     icon_font = ''"FontAwesome:Regular:12.0"'';
     background_color = "0xff202020";
     foreground_color = "0xffa8a8a8";
