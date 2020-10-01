@@ -15,6 +15,7 @@
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin/configuration.nix
   environment.darwinConfig = "$HOME/.config/nixpkgs/darwin-configuration.nix";
 
+  # this is computer level Font, there is also user level font
   fonts = {
     enableFontDir = true;
     fonts = [
