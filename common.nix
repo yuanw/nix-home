@@ -38,16 +38,12 @@ in rec {
   };
 
   programs = {
-    home-manager = { enable = true; };
-
     direnv = {
       enable = true;
       enableZshIntegration = true;
       enableNixDirenvIntegration = true;
     };
-
-    jq = { enable = true; };
-
+    
     emacs = {
       enable = true;
       package = pkgs.emacsMacport;
@@ -55,9 +51,13 @@ in rec {
 
     gpg = { enable = true; };
 
+    home-manager = { enable = true; };
+
+    jq = {enable = true;};
+    kitty = {enable = true;};
     pet = {enable = true;};
 
-    z-lua = {
+    zoxide = {
       enable = true;
       enableZshIntegration = true;
     };
