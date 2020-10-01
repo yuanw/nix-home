@@ -1,6 +1,7 @@
 { pkgs }:
 
-with pkgs; [
+with pkgs;
+[
   #cacert
   clang
   coreutils-prefixed
@@ -8,6 +9,7 @@ with pkgs; [
   #gnutls
 
   (aspellWithDicts (ds: [ ds.en ]))
+  imagemagick
   ffmpeg
   less
   gifsicle
@@ -17,25 +19,42 @@ with pkgs; [
   cachix
   nixfmt
   sass
-  stack
-  #texlive.combined.scheme-full
+  #stack
+  texlive.combined.scheme-medium
   tree
+  broot
   wget
   unrar
   unzip
   graphviz
   plantuml
-  #haskell-language-server-wrapper
-  #haskell-language-server
-  #haskellPackages.cabal-fmt
-  nixpkgs-fmt
   xclip
   pass
   emojify
 
-  HandBrake
-  wifi-password
-  stretchly
+  shellcheck
+  editorconfig-core-c
+  gitAndTools.pre-commit
+  gitAndTools.delta
+  gitAndTools.pass-git-helper
+  gitAndTools.gh
+
+  nixpkgs-fmt
+
+  #Apps
+  #HandBrake
+  #wifi-password
+
+  #nixops
+  #nixfmt
+  #nox
+  #niv
+  #google-cloud-sdk
+
+  mu
+  offlineimap
+  notmuch
+
 
   # productivity
   pandoc
@@ -44,13 +63,8 @@ with pkgs; [
   fzf
   ripgrep
   autojump
-
-  python3
-  gitAndTools.gh
-  gitAndTools.pre-commit
-  gitAndTools.pass-git-helper
   vscode
-  #emacsUnstable
+  
   shellcheck
   sqlite
   editorconfig-core-c
@@ -58,13 +72,13 @@ with pkgs; [
   zstd
 
   # Fonts
-  fontconfig
-  lato
-  source-code-pro
-  font-awesome
-  material-design-icons
-  weather-icons
-  nerdfonts
-
-  zlib
+  #fontconfig
+  #lato
+  #source-code-pro
+  #font-awesome
+  #material-design-icons
+  #weather-icons
+  #nerdfonts
+  #zlib
+  emacsMacport
 ]

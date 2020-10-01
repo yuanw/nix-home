@@ -3,13 +3,33 @@
 {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
+  nixpkgs.overlays = let path = ./overlays;
+  in with builtins;
+  map (n: import (path + ("/" + n))) (filter (n:
+    match ".*\\.nix" n != null
+    || pathExists (path + ("/" + n + "/default.nix")))
+    (attrNames (readDir path)));
   environment.systemPackages = [ ];
 
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
   environment.darwinConfig = "$HOME/.config/nixpkgs/darwin-configuration.nix";
 
+  # this is computer level Font, there is also user level font
+  fonts = {
+    enableFontDir = true;
+    fonts = [
+      pkgs.material-design-icons
+      pkgs.weather-icons
+      pkgs.font-awesome
+      pkgs.emacs-all-the-icons-fonts
+      pkgs.pragmata-pro-font
+    ];
+  };
+
   # Auto upgrade nix package and the daemon service.
+  # services.nix-daemon.enable = true;
+  # nix.package = pkgs.nix;
   services.lorri = { enable = true; };
   services.skhd = {
     enable = true;
@@ -57,9 +77,6 @@
       # Any other arbitrary config here
     '';
   };
-  #services.nix-daemon.enable = false;
-  #nix.package = pkgs.nix;
-  #nix.trustedUsers = [ "root" "yuanwang" ];
 
   # Create /etc/bashrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina

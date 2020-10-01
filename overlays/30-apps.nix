@@ -11,6 +11,7 @@ self: super: {
     , sourceRoot ? "."
     , ...
     }:
+
       with super; stdenv.mkDerivation {
         name = "${name}-${version}";
         version = "${version}";
@@ -30,34 +31,20 @@ self: super: {
         };
       };
 
+
   CopyQ = self.installApplication rec {
     name = "CopyQ";
-    version = "3.9.3";
+  version = "3.10.0";
     sourceRoot = "CopyQ.app";
     src = super.fetchurl {
       url = "https://github.com/hluk/CopyQ/releases/download/v${version}/CopyQ.dmg";
-      sha256 = "d18188201a2a40ca65f5e289149d0166785a5aa7376b77b6a690b40189c50520";
+    sha256 = "13c4y43cbwxnlc04xpr7x3fn27cfcjn3mwnyvnr7bnaabhqbczb4";
       # date = 2019-10-23T09:49:21-0700;
     };
     description = ''
       CopyQ is advanced clipboard manager with editing and scripting features.
     '';
     homepage = https://hluk.github.io/CopyQ/;
-  };
-
-  HandBrake = self.installApplication rec {
-    name = "HandBrake";
-    version = "1.3.1";
-    sourceRoot = "HandBrake.app";
-    src = super.fetchurl {
-      url = "https://github.com/HandBrake/HandBrake/releases/download/${version}/HandBrake-${version}.dmg";
-      sha256 = "0vm2f7sbb2i5icsmc06q698myclp455cj855kw93cj2s33bfn4xp";
-    };
-    description = ''
-      HandBrake is a tool for converting video from nearly any format to a
-      selection of modern, widely supported codecs
-    '';
-    homepage = https://handbrake.fr;
   };
 
 
@@ -77,16 +64,16 @@ self: super: {
     homepage = https://store.docker.com/editions/community/docker-ce-desktop-mac;
   };
 
-  stretchly = self.installApplication rec {
-    name = "stretchly";
-    version = "0.21.1";
-    sourceRoot = "stretchly.app";
-    src = super.fetchurl {
-      url = "https://github.com/hovancik/stretchly/releases/download/v${version}/stretchly-${version}-mac.zip";
-      sha256 = "b3c36fcabbc33b13f9aca772c674301a3f13b1263318399bbb298565170030dd";
-      # date = 2020-01-16T09:49:21-0700;
-    };
-    description = "break time reminder app";
-    homepage = https://hovancik.net/stretchly/;
+
+Stretchly = self.installApplication rec {
+  name = "Stretchly";
+  version = "1.0.0";
+  sourceRoot = "Stretchly.app";
+  src = super.fetchurl {
+    url = "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
+    sha256 = "15fsb3qmjd9jvfdfig01nx4i16j383csya0smgxabcidxg8m7q40";
   };
+  description = "break time reminder app";
+  homepage = https://hovancik.net/stretchly/;
+};
 }
