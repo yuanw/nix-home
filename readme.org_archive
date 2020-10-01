@@ -1,0 +1,26 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /Users/yuanwang/.config/nixpkgs/readme.org
+
+
+* DONE Replace emacsUnstable with emacsMacPort
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2020-09-30 Wed 22:51
+  :ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+  :ARCHIVE_OLPATH: Items of TODO
+  :ARCHIVE_CATEGORY: readme
+  :ARCHIVE_TODO: DONE
+  :END:
+~open ~/.nix-profile/Applications/Emacs.app~
+
+* DONE wire font
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2020-09-30 Wed 22:51
+  :ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+  :ARCHIVE_OLPATH: Items of TODO
+  :ARCHIVE_CATEGORY: readme
+  :ARCHIVE_TODO: DONE
+  :END:
+- Add private directory for paid font
+  https://daiderd.com/nix-darwin/manual/index.html#opt-fonts.enableFontDir

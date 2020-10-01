@@ -19,7 +19,7 @@ nix-channel --update
 *** TODO add note about latest OS and the workaround
 
 ** Install nix-darwin
-** Download EssentialPragmataPro font to ~private~ directory (optional)
+** Download EssentialPragmataPro zip file to ~private~ directory (optional)
 
 * In General
 ** home-manager's channel version must match the nixpkgs version
@@ -47,6 +47,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 
 * Caveats
 ** ~services.nix~ doesn't seem work with single user mode
+** ~fontconfig~ doesn't work for MacOS ?
 
 * Overlays
 - https://nixos.wiki/wiki/Overlays
@@ -71,12 +72,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 
 * Items of TODO
 ** TODO install stretchly
-** DONE Replace emacsUnstable with emacsMacPort
-~open ~/.nix-profile/Applications/Emacs.app~
 ** TODO integrate home-manager with nix-darwin
-** TODO wire font
-- Add private directory for paid font
-  https://daiderd.com/nix-darwin/manual/index.html#opt-fonts.enableFontDir
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
