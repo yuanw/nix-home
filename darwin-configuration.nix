@@ -3,6 +3,12 @@
 {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
+  nixpkgs.overlays = let path = ./overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
   environment.systemPackages = [ ];
 
   # Use a custom configuration.nix location.
@@ -10,11 +16,13 @@
   environment.darwinConfig = "$HOME/.config/nixpkgs/darwin-configuration.nix";
 
   fonts = {
+    enableFontDir = true;
     fonts = [
       pkgs.material-design-icons
       pkgs.weather-icons
       pkgs.font-awesome
       pkgs.emacs-all-the-icons-fonts
+      pkgs.pragmata-pro-font
     ];
   };
 
