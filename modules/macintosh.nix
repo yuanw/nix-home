@@ -1,11 +1,14 @@
 { config, lib, pkgs, ... }:
-let
-
+let homeDir = builtins.getEnv ("HOME");
 in with pkgs.stdenv;
 with lib; {
+  # Used for backwards compatibility, please read the changelog before changing.
+  # $ darwin-rebuild changelog
+  system.stateVersion = 4;
+
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
-  nixpkgs.overlays = let path = ./overlays;
+  nixpkgs.overlays = let path = ../overlays;
   in with builtins;
   map (n: import (path + ("/" + n))) (filter (n:
     match ".*\\.nix" n != null
@@ -15,12 +18,17 @@ with lib; {
 
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
-  environment.darwinConfig = "$HOME/.config/nixpkgs/darwin-configuration.nix";
+  environment.darwinConfig =
+    "$HOME/.config/nixpkgs/machines/home/configuration.nix";
 
-  nix.nixPath = [
-    { darwin-config = "${config.environment.darwinConfig}"; }
-    "$HOME/.nix-defexpr/channels"
-  ];
+  # Create /etc/bashrc that loads the nix-darwin environment.
+  programs.zsh.enable = true; # default shell on catalina
+  programs.bash.enable = false;
+  time.timeZone = "America/Regina";
+  users.users.yuanwang.shell = pkgs.zsh;
+  users.users.yuanwang.home = homeDir;
+
+  nixpkgs.config.allowUnfree = true;
 
   # this is computer level Font, there is also user level font. Nix-darwin cannot manage them yet
   fonts = {
@@ -117,11 +125,6 @@ with lib; {
     '';
   };
 
-  # Create /etc/bashrc that loads the nix-darwin environment.
-  programs.zsh.enable = true; # default shell on catalina
-  programs.bash.enable = false;
-  time.timeZone = "America/Regina";
-
   system.defaults = {
     dock = {
       autohide = true;
@@ -145,7 +148,116 @@ with lib; {
     NSGlobalDomain._HIHideMenuBar = true;
   };
 
-  # Used for backwards compatibility, please read the changelog before changing.
-  # $ darwin-rebuild changelog
-  system.stateVersion = 4;
+  home-manager.users.yuanwang = {
+    home.packages = (import ./packages.nix { inherit pkgs; });
+
+    home.file = {
+      ".ghci".text = ''
+        :set prompt "λ> "
+      '';
+
+      ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source =
+        pkgs.fetchurl {
+          url = "https://iterm2.com/shell_integration/zsh";
+          sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
+          # date = 2020-01-07T15:59:09-0800;
+        };
+
+    };
+
+    programs = {
+      direnv = {
+        enable = true;
+        enableZshIntegration = true;
+        enableNixDirenvIntegration = true;
+      };
+
+      emacs = {
+        enable = true;
+        package = pkgs.emacsMacport;
+      };
+
+      gpg = { enable = true; };
+
+      home-manager = { enable = true; };
+
+      jq = { enable = true; };
+      kitty = { enable = true; };
+      pet = { enable = true; };
+
+      zoxide = {
+        enable = true;
+        enableZshIntegration = true;
+      };
+
+      zsh = rec {
+        enable = true;
+        dotDir = ".config/zsh";
+        plugins = [
+          {
+            name = "powerlevel10k";
+            # src = pkgs.zsh-powerlevel10k;
+            src = pkgs.fetchFromGitHub {
+              owner = "romkatv";
+              repo = "powerlevel10k";
+              rev = "d53355cd30acf8888bc1cf5caccea52f486c5584";
+              sha256 = "03v8qlblgdazbm16gwr87blm5nxizza61f8w6hjyhgrx51ly9ln5";
+              # "date": "2020-03-15T08:43:52+01:00"
+            };
+            #file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+            file = "powerlevel10k.zsh-theme";
+          }
+          {
+            name = "powerlevel10k-config";
+            src = lib.cleanSource ../conf.d/p10k-config;
+            file = "p10k.zsh";
+          }
+        ];
+
+        sessionVariables = {
+          PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
+          ASPELL_CONF = "data-dir ${pkgs.aspell}";
+          LANG = "en_US.UTF-8";
+        };
+
+        enableAutosuggestions = true;
+        history = {
+          size = 50000;
+          save = 500000;
+          path = "${dotDir}/history";
+          ignoreDups = true;
+          share = true;
+        };
+
+        initExtra = lib.mkBefore ''
+          export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
+          export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
+
+          function prev() {
+             PREV=$(fc -lrn | head -n 1)
+             sh -c "pet new `printf %q "$PREV"`"
+          }
+
+        '';
+
+        oh-my-zsh = {
+          enable = true;
+          plugins = [ "git" "history" ];
+          custom = "$HOME/.config/zsh/custom";
+        };
+      };
+    };
+
+    programs.git = {
+      enable = true;
+      userEmail = "me@yuanwang.ca";
+
+      signing = {
+        key = "BF2ADAA2A98F45E7";
+        signByDefault = true;
+      };
+
+      extraConfig = { github.user = "yuanw"; };
+    };
+  };
 }
