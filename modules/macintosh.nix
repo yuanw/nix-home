@@ -8,12 +8,6 @@ with lib; {
 
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
-  nixpkgs.overlays = let path = ../overlays;
-  in with builtins;
-  map (n: import (path + ("/" + n))) (filter (n:
-    match ".*\\.nix" n != null
-    || pathExists (path + ("/" + n + "/default.nix")))
-    (attrNames (readDir path)));
   environment.systemPackages = [ ];
 
   # Use a custom configuration.nix location.
@@ -28,7 +22,21 @@ with lib; {
   users.users.yuanwang.shell = pkgs.zsh;
   users.users.yuanwang.home = homeDir;
 
-  nixpkgs.config.allowUnfree = true;
+  nixpkgs = {
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
+
+    config = {
+      allowUnfree = true;
+      allowBroken = false;
+      allowUnsupportedSystem = false;
+    };
+
+  };
 
   # this is computer level Font, there is also user level font. Nix-darwin cannot manage them yet
   fonts = {
@@ -177,6 +185,39 @@ with lib; {
         package = pkgs.emacsMacport;
       };
 
+      git = {
+        enable = true;
+        userName = "Yuan Wang";
+
+        userEmail = "me@yuanwang.ca";
+
+        signing = {
+          key = "BF2ADAA2A98F45E7";
+          signByDefault = true;
+        };
+
+        aliases = {
+          co = "checkout";
+          w = "status -sb";
+          l = "log --graph --pretty=format:'%Cred%h%Creset"
+            + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
+            + " --abbrev-commit --date=relative --show-notes=*";
+        };
+
+        extraConfig = {
+          github.user = "yuanw";
+          core = {
+            editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
+            pager =
+              "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
+          };
+          branch.autosetupmerge = true;
+          credential.helper =
+            "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
+          # "url \"git@github.com:\"".insteadOf = "https://github.com/";
+        };
+      };
+
       gpg = { enable = true; };
 
       home-manager = { enable = true; };
@@ -246,18 +287,6 @@ with lib; {
           custom = "$HOME/.config/zsh/custom";
         };
       };
-    };
-
-    programs.git = {
-      enable = true;
-      userEmail = "me@yuanwang.ca";
-
-      signing = {
-        key = "BF2ADAA2A98F45E7";
-        signByDefault = true;
-      };
-
-      extraConfig = { github.user = "yuanw"; };
     };
   };
 }
