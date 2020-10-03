@@ -58,12 +58,13 @@ self: super: {
 
   Stretchly = self.installApplication rec {
     name = "Stretchly";
-    version = "1.0.0";
+    version = "1.2.0";
     sourceRoot = "Stretchly.app";
     src = super.fetchurl {
+      # https://github.com/hovancik/stretchly/releases/download/v1.2.0/Stretchly-1.2.0.dmg
       url =
         "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
-      sha256 = "15fsb3qmjd9jvfdfig01nx4i16j383csya0smgxabcidxg8m7q40";
+      sha256 = "1xn0jrm75pk1hhadk6ikmjgcqlw54physc5q4xaipxl6aashkcjl";
     };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";

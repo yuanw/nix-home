@@ -43,6 +43,7 @@ with pkgs; [
   #Apps
   #HandBrake
   #wifi-password
+  Stretchly
 
   #nixops
   #nixfmt
@@ -68,5 +69,4 @@ with pkgs; [
   fontconfig
   languagetool
   zstd
-
 ]

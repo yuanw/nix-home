@@ -32,11 +32,11 @@ nixpkgs https://nixos.org/channels/nixpkgs-19.09-darwin
 
 otherwise, there can be unexpected issues.
 
-** Update
+** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
 #+BEGIN_SRC shell
-nix-channel --update home-manager
-home-manager switch
+nix-channel --update darwin
+darwin-rebuild changelog
 #+END_SRC
 
 ** How to pin down git branch
@@ -71,9 +71,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * Items of TODO
-** TODO update ~NIX_PATH~
 ** TODO install stretchly
-** TODO integrate home-manager with nix-darwin
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles

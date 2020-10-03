@@ -24,3 +24,21 @@ Archived entries from file /Users/yuanwang/.config/nixpkgs/readme.org
   :END:
 - Add private directory for paid font
   https://daiderd.com/nix-darwin/manual/index.html#opt-fonts.enableFontDir
+
+* DONE integrate home-manager with nix-darwin
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-03 Sat 16:12
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+
+* KILL update ~NIX_PATH~
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-03 Sat 16:14
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: KILL
+:END:
