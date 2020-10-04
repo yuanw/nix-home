@@ -13,7 +13,7 @@ with lib; {
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
   environment.darwinConfig =
-    "$HOME/.config/nixpkgs/machines/home/configuration.nix";
+    "${homeDir}/.config/nixpkgs/machines/${config.networking.hostName}/configuration.nix";
 
   # Create /etc/bashrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
