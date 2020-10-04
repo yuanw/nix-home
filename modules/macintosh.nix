@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
-let homeDir = builtins.getEnv ("HOME");
+let 
+    homeDir = builtins.getEnv ("HOME");
+    configDir = ../conf.d;
 in with pkgs.stdenv;
 with lib; {
   # Used for backwards compatibility, please read the changelog before changing.
@@ -181,6 +183,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
+      ".doom.d".source = configDir + "/doom";
     };
 
     programs = {

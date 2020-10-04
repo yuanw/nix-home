@@ -51,6 +51,8 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 - https://github.com/stephen-huan/macos-dotfiles/tree/master/.config/kitty
 
 - https://github.com/koekeishiya/dotfiles/tree/master/kitty
+** Editor - Doom emacs
+
 * Caveats
 ** ~services.nix~ doesn't seem work with single user mode
 ** ~fontconfig~ doesn't work for MacOS ?
