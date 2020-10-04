@@ -48,6 +48,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 * Caveats
 ** ~services.nix~ doesn't seem work with single user mode
 ** ~fontconfig~ doesn't work for MacOS ?
+** Exclude Nix directory from Spotlight index
 
 * Overlays
 - https://nixos.wiki/wiki/Overlays

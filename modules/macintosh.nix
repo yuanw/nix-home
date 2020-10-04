@@ -241,19 +241,6 @@ with lib; {
         dotDir = ".config/zsh";
         plugins = [
           {
-            name = "powerlevel10k";
-            # src = pkgs.zsh-powerlevel10k;
-            src = pkgs.fetchFromGitHub {
-              owner = "romkatv";
-              repo = "powerlevel10k";
-              rev = "d53355cd30acf8888bc1cf5caccea52f486c5584";
-              sha256 = "03v8qlblgdazbm16gwr87blm5nxizza61f8w6hjyhgrx51ly9ln5";
-              # "date": "2020-03-15T08:43:52+01:00"
-            };
-            #file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-            file = "powerlevel10k.zsh-theme";
-          }
-          {
             name = "powerlevel10k-config";
             src = lib.cleanSource ../conf.d/p10k-config;
             file = "p10k.zsh";
