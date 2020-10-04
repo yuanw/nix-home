@@ -45,8 +45,12 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 #+END_SRC
 
 * Content
+** Shell - zsh
 ** Window Manager (Yabai + skhd + spacebar)
 ** Terminal Emulator - Kitty
+- https://github.com/stephen-huan/macos-dotfiles/tree/master/.config/kitty
+
+- https://github.com/koekeishiya/dotfiles/tree/master/kitty
 * Caveats
 ** ~services.nix~ doesn't seem work with single user mode
 ** ~fontconfig~ doesn't work for MacOS ?
@@ -76,7 +80,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 
 * Items of TODO
 ** TODO give move doom emacs configuration
-** TODO Kitty Configuration
+** STRT Kitty Configuration
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
