@@ -57,7 +57,9 @@ with lib; {
   services.skhd = {
     enable = true;
     skhdConfig = ''
+      # launchers
       cmd - e : open ~/.nix-profile/Applications/Emacs.app
+      cmd + ctrl - return : kitty --single-instance
 
       # focus window
       cmd + ctrl - h : yabai -m window --focus west
@@ -74,7 +76,7 @@ with lib; {
   services.spacebar.config = {
     debug_output = "on";
     clock_format = "%R";
-    space_icon_strip = "    ";
+    space_icon_strip = "I II III IV V";
     text_font = ''"Essential PragmataPro:Regular:12.0"'';
     icon_font = ''"FontAwesome:Regular:12.0"'';
     background_color = "0xff202020";
@@ -176,6 +178,9 @@ with lib; {
           # date = 2020-01-07T15:59:09-0800;
         };
 
+      ".config/kitty/dracula.conf".source =
+        lib.cleanSource ../conf.d/kitty/dracula.conf;
+
     };
 
     programs = {
@@ -228,7 +233,12 @@ with lib; {
       home-manager = { enable = true; };
 
       jq = { enable = true; };
-      kitty = { enable = true; };
+
+      kitty = {
+        enable = true;
+        extraConfig = "include dracula.conf";
+      };
+
       pet = { enable = true; };
 
       zoxide = {
@@ -239,13 +249,11 @@ with lib; {
       zsh = rec {
         enable = true;
         dotDir = ".config/zsh";
-        plugins = [
-          {
-            name = "powerlevel10k-config";
-            src = lib.cleanSource ../conf.d/p10k-config;
-            file = "p10k.zsh";
-          }
-        ];
+        plugins = [{
+          name = "powerlevel10k-config";
+          src = lib.cleanSource ../conf.d/p10k-config;
+          file = "p10k.zsh";
+        }];
 
         sessionVariables = {
           PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
@@ -262,8 +270,8 @@ with lib; {
           share = true;
         };
 
-        initExtraBeforeCompInit = "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-
+        initExtraBeforeCompInit =
+          "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
 
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
