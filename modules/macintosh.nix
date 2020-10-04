@@ -137,7 +137,12 @@ with lib; {
     dock = {
       autohide = true;
       mru-spaces = false;
+      orientation = "left";
+      mineffect = "scale";
+      showhidden = true;
+      launchanim = false;
       minimize-to-application = true;
+      show-process-indicators = true;
     };
 
     screencapture.location = "/tmp";
