@@ -262,6 +262,9 @@ with lib; {
           share = true;
         };
 
+        initExtraBeforeCompInit = "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+
+
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
