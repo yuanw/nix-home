@@ -293,11 +293,7 @@ with lib; {
           function bigskyTest {
               python manage.py test $1 --http-integration --traceback -v 2
           }
-
-          #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-          export SDKMAN_DIR="/Users/yuanwang/.sdkman"
-          [[ -s "/Users/yuanwang/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/yuanwang/.sdkman/bin/sdkman-init.sh"
-               '';
+          '';
 
         oh-my-zsh = {
           enable = true;

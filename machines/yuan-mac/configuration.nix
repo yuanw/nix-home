@@ -3,4 +3,14 @@
 {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "yuan-mac";
+   home-manager.users.yuanwang.programs.git = {
+    userEmail = "me@yuanwang.ca";
+
+    signing = {
+      key = "BF2ADAA2A98F45E7";
+      signByDefault = true;
+    };
+
+    extraConfig = { github.user = "yuanw"; };
+  };
 }
