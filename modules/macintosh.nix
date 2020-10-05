@@ -158,7 +158,7 @@ with lib; {
     };
 
     trackpad = {
-      Clicking = true;
+      Clicking = false;
       TrackpadThreeFingerDrag = true;
     };
 

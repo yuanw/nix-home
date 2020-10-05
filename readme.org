@@ -53,6 +53,7 @@ nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d56706
 - https://github.com/koekeishiya/dotfiles/tree/master/kitty
 ** Editor - Doom emacs
 https://tecosaur.github.io/emacs-config/config.html
+
 * Caveats
 ** ~services.nix~ doesn't seem work with single user mode
 ** ~fontconfig~ doesn't work for MacOS ?
@@ -81,7 +82,8 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * Items of TODO
-** TODO give move doom emacs configuration
+** TODO using ~niv~
+** DONE give move doom emacs configuration
 ** STRT Kitty Configuration
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
