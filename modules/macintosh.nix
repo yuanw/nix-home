@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
-let 
-    homeDir = builtins.getEnv ("HOME");
-    configDir = ../conf.d;
+let
+  homeDir = builtins.getEnv ("HOME");
+  configDir = ../conf.d;
 in with pkgs.stdenv;
 with lib; {
   # Used for backwards compatibility, please read the changelog before changing.
@@ -183,7 +183,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
-      ".doom.d".source = configDir + "/doom";
+      #".doom.d".source = configDir + "/doom";
     };
 
     programs = {
@@ -202,13 +202,6 @@ with lib; {
         enable = true;
         userName = "Yuan Wang";
 
-        userEmail = "me@yuanwang.ca";
-
-        signing = {
-          key = "BF2ADAA2A98F45E7";
-          signByDefault = true;
-        };
-
         aliases = {
           co = "checkout";
           w = "status -sb";
@@ -218,7 +211,6 @@ with lib; {
         };
 
         extraConfig = {
-          github.user = "yuanw";
           core = {
             editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
             pager =
@@ -242,7 +234,7 @@ with lib; {
         extraConfig = "include dracula.conf";
       };
 
-      pet = { enable = true; };
+      #pet = { enable = true; };
 
       zoxide = {
         enable = true;
@@ -261,6 +253,7 @@ with lib; {
         sessionVariables = {
           PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
           ASPELL_CONF = "data-dir ${pkgs.aspell}";
+          DART_SDK = "${pkgs.dart}";
           LANG = "en_US.UTF-8";
         };
 
@@ -277,19 +270,39 @@ with lib; {
           "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
 
         initExtra = lib.mkBefore ''
-          export PATH=$PATH:/usr/local/bin:/usr/local/sbin:$HOME/.emacs.d/bin:$HOME/.local/bin
+          export GOPATH="$HOME/go-workspace"
+          export PATH=$PATH:/usr/local/bin:/usr/local/sbin
+          export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
+          eval "$(pyenv init -)"
+          export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
+          . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
+
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
 
           function prev() {
-             PREV=$(fc -lrn | head -n 1)
-             sh -c "pet new `printf %q "$PREV"`"
+              PREV=$(fc -lrn | head -n 1)
+              sh -c "pet new `printf %q "$PREV"`"
           }
 
-        '';
+          function dartUpgrade() {
+              pub cache repair
+              pub global activate dart_language_server
+              pub global activate webdev_proxy
+              pub global activate webdev
+          }
+          function bigskyTest {
+              python manage.py test $1 --http-integration --traceback -v 2
+          }
+
+          #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+          export SDKMAN_DIR="/Users/yuanwang/.sdkman"
+          [[ -s "/Users/yuanwang/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/yuanwang/.sdkman/bin/sdkman-init.sh"
+               '';
 
         oh-my-zsh = {
           enable = true;
-          plugins = [ "git" "history" ];
+          plugins =
+            [ "git" "pyenv" "history" "autojump" "history-substring-search" ];
           custom = "$HOME/.config/zsh/custom";
         };
       };
