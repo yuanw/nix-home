@@ -3,7 +3,7 @@
 {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "wf17084";
-  services.yabai.enableScriptingAddition = false;
+  #services.yabai.enableScriptingAddition = false;
 
   home-manager.users.yuanwang.programs.git = {
     userEmail = "yuan.wang@workiva.com";

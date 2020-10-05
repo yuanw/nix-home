@@ -183,7 +183,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
-      ".doom.d".source = configDir + "/doom";
+      #".doom.d".source = configDir + "/doom";
     };
 
     programs = {
@@ -202,13 +202,6 @@ with lib; {
         enable = true;
         userName = "Yuan Wang";
 
-        userEmail = "me@yuanwang.ca";
-
-        signing = {
-          key = "BF2ADAA2A98F45E7";
-          signByDefault = true;
-        };
-
         aliases = {
           co = "checkout";
           w = "status -sb";
@@ -218,7 +211,6 @@ with lib; {
         };
 
         extraConfig = {
-          github.user = "yuanw";
           core = {
             editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
             pager =
@@ -242,7 +234,7 @@ with lib; {
         extraConfig = "include dracula.conf";
       };
 
-      pet = { enable = true; };
+      #pet = { enable = true; };
 
       zoxide = {
         enable = true;
@@ -283,7 +275,7 @@ with lib; {
           export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
           eval "$(pyenv init -)"
           export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
-          . ${home_directory}/.nix-profile/etc/profile.d/nix.sh
+          . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
 
