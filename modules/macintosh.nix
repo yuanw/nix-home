@@ -12,6 +12,13 @@ with lib; {
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ ];
 
+
+  environment.etc.hosts.enable = true;
+  environment.etc.hosts.text = let
+    hostsPath = https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts;
+    hostsFile = builtins.fetchurl hostsPath;
+  in builtins.readFile "${hostsFile}";
+
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
   environment.darwinConfig =
@@ -183,7 +190,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
-      #".doom.d".source = configDir + "/doom";
+      ".doom.d".source = configDir + "/doom";
     };
 
     programs = {
@@ -273,8 +280,6 @@ with lib; {
           export GOPATH="$HOME/go-workspace"
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
           export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
-          eval "$(pyenv init -)"
-          export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
@@ -298,7 +303,7 @@ with lib; {
         oh-my-zsh = {
           enable = true;
           plugins =
-            [ "git" "pyenv" "history" "autojump" "history-substring-search" ];
+            [ "git" "history" "autojump" "history-substring-search" ];
           custom = "$HOME/.config/zsh/custom";
         };
       };
