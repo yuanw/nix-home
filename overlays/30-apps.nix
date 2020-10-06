@@ -1,4 +1,5 @@
-self: super: {
+let sources = import ../nix/sources.nix;
+in self: super: {
 
   installApplication = { name, appname ? name, version, src, description
     , homepage, postInstall ? "", sourceRoot ? ".", ... }:
@@ -60,12 +61,7 @@ self: super: {
     name = "Stretchly";
     version = "1.2.0";
     sourceRoot = "Stretchly.app";
-    src = super.fetchurl {
-      # https://github.com/hovancik/stretchly/releases/download/v1.2.0/Stretchly-1.2.0.dmg
-      url =
-        "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
-      sha256 = "1xn0jrm75pk1hhadk6ikmjgcqlw54physc5q4xaipxl6aashkcjl";
-    };
+    src = super.fetchurl { inherit (sources.Stretchly) url sha256; };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";
   };
