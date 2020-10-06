@@ -84,6 +84,8 @@ https://tecosaur.github.io/emacs-config/config.html
 * Items of TODO
 ** TODO using ~niv~
 https://github.com/mjlbach/nix-dotfiles/tree/master/nixpkgs
+https://github.com/nmattia/niv#how-do-i-import-a-subpath-of-a-source
+~niv add Stretchly -v 1.2.0 -t 'https://github.com/hovancik/stretchly/releases/download/v<version>/Stretchly-<version>.dmg'~
 ** TODO try to turn some config into a module
 https://github.com/danieldk/nix-home/blob/master/modules/emacs-init.nix
 ** DONE give move doom emacs configuration
