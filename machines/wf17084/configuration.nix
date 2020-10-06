@@ -1,5 +1,8 @@
-{ config, lib, pkgs, ... }:
-
+let
+  sources = import ../nix/sources.nix;
+  pkgs = import sources.nixpkgs { };
+in
+{ config, lib, ... }:
 {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "wf17084";

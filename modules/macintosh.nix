@@ -293,7 +293,7 @@ with lib; {
           function bigskyTest {
               python manage.py test $1 --http-integration --traceback -v 2
           }
-          '';
+        '';
 
         oh-my-zsh = {
           enable = true;
