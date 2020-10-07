@@ -257,6 +257,15 @@ with lib; {
           LANG = "en_US.UTF-8";
         };
 
+        shellAliases = {
+          ddev = "pub run dart_dev";
+          pubcleanlock = ''
+            git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
+          pubclean = ''
+            rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
+          repub = "pubclean; pub get";
+        };
+
         enableAutosuggestions = true;
         history = {
           size = 50000;
@@ -273,8 +282,6 @@ with lib; {
           export GOPATH="$HOME/go-workspace"
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
           export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
-          eval "$(pyenv init -)"
-          export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
@@ -293,11 +300,7 @@ with lib; {
           function bigskyTest {
               python manage.py test $1 --http-integration --traceback -v 2
           }
-
-          #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-          export SDKMAN_DIR="/Users/yuanwang/.sdkman"
-          [[ -s "/Users/yuanwang/.sdkman/bin/sdkman-init.sh" ]] && source "/Users/yuanwang/.sdkman/bin/sdkman-init.sh"
-               '';
+        '';
 
         oh-my-zsh = {
           enable = true;
