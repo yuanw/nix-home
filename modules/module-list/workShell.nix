@@ -10,6 +10,7 @@ in {
   config = {
     home-manager.users.yuanwang.programs.zsh.initExtra = mkAfter ''
       eval "$(pyenv init -)"
+      export GOPATH="$HOME/go-workspace"
       export PYENV_ROOT="$HOME/.pyenv" # needed by pipenv
 
       #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!

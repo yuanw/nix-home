@@ -289,7 +289,6 @@ with lib; {
           "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
 
         initExtra = lib.mkBefore ''
-          export GOPATH="$HOME/go-workspace"
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
           export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
