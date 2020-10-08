@@ -3,7 +3,11 @@ let
   homeDir = builtins.getEnv ("HOME");
   configDir = ../conf.d;
 in with pkgs.stdenv;
-with lib; {
+  with lib; {
+
+    imports = [
+      ./module-list
+    ];
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
@@ -62,6 +66,7 @@ with lib; {
       # launchers
       cmd - e : open ~/.nix-profile/Applications/Emacs.app
       cmd + ctrl - return : kitty --single-instance
+      cmd + ctrl - v: osascript -e 'tell application "Viscosity" to connect "work"'
 
       # focus window
       cmd + ctrl - h : yabai -m window --focus west
