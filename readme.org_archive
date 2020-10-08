@@ -72,3 +72,17 @@ https://github.com/nmattia/niv#how-do-i-import-a-subpath-of-a-source
 :ARCHIVE_CATEGORY: readme
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE try to turn some config into a module
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-08 Thu 14:34
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+- https://github.com/danieldk/nix-home/blob/master/modules/emacs-init.nix
+- https://github.com/nix-community/home-manager/blob/f0fc2a8702d03211974e597f2f5df1258e6669cb/modules/modules.nix
+- https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
+  - https://rycee.gitlab.io/home-manager/index.html#ch-writing-modules
+

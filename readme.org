@@ -82,12 +82,8 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * Items of TODO
-** TODO try to turn some config into a module
-- https://github.com/danieldk/nix-home/blob/master/modules/emacs-init.nix
-- https://github.com/nix-community/home-manager/blob/f0fc2a8702d03211974e597f2f5df1258e6669cb/modules/modules.nix
-- https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
-  - https://rycee.gitlab.io/home-manager/index.html#ch-writing-modules
-
+** TODO add module for doom-emacs
+** TODO add module for hosts file
 ** STRT Kitty Configuration
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
