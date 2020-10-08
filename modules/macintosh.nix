@@ -4,6 +4,8 @@ let
   configDir = ../conf.d;
 in with pkgs.stdenv;
 with lib; {
+
+  imports = [ ./module-list ];
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
@@ -12,10 +14,10 @@ with lib; {
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ ];
 
-
   environment.etc.hosts.enable = true;
   environment.etc.hosts.text = let
-    hostsPath = https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts;
+    hostsPath =
+      "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts";
     hostsFile = builtins.fetchurl hostsPath;
   in builtins.readFile "${hostsFile}";
 
@@ -69,6 +71,7 @@ with lib; {
       # launchers
       cmd - e : open ~/.nix-profile/Applications/Emacs.app
       cmd + ctrl - return : kitty --single-instance
+      cmd + ctrl - v: osascript -e 'tell application "Viscosity" to connect "work"'
 
       # focus window
       cmd + ctrl - h : yabai -m window --focus west
@@ -264,6 +267,15 @@ with lib; {
           LANG = "en_US.UTF-8";
         };
 
+        shellAliases = {
+          ddev = "pub run dart_dev";
+          pubcleanlock = ''
+            git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
+          pubclean = ''
+            rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
+          repub = "pubclean; pub get";
+        };
+
         enableAutosuggestions = true;
         history = {
           size = 50000;
@@ -302,8 +314,7 @@ with lib; {
 
         oh-my-zsh = {
           enable = true;
-          plugins =
-            [ "git" "history" "autojump" "history-substring-search" ];
+          plugins = [ "git" "history" "autojump" "history-substring-search" ];
           custom = "$HOME/.config/zsh/custom";
         };
       };

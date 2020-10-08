@@ -104,3 +104,5 @@ https://tecosaur.github.io/emacs-config/config.html
 ** How to update sources
 ~nix-shell -p niv -run "niv update"~
 ~niv update ghc -v 8.6.2~
+** How to format all nix file
+~fd -e nix -x nixfmt~
