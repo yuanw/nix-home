@@ -1,7 +1,6 @@
-{
+
+let sources = import ../nix/sources.nix;
+in {
   macintosh = ./macintosh.nix;
-  home-manager = "${
-      builtins.fetchTarball
-      "https://github.com/nix-community/home-manager/archive/master.tar.gz"
-    }/nix-darwin";
+  home-manager = sources.home-manager + "/nix-darwin";
 }

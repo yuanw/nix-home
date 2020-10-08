@@ -51,3 +51,24 @@ Archived entries from file /Users/yuanwang/.config/nixpkgs/readme.org
 :ARCHIVE_CATEGORY: readme
 :ARCHIVE_TODO: DONE
 :END:
+
+* TODO using ~niv~
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-05 Mon 22:30
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: TODO
+:END:
+https://github.com/mjlbach/nix-dotfiles/tree/master/nixpkgs
+https://github.com/nmattia/niv#how-do-i-import-a-subpath-of-a-source
+~niv add Stretchly -v 1.2.0 -t 'https://github.com/hovancik/stretchly/releases/download/v<version>/Stretchly-<version>.dmg'~
+
+* DONE give move doom emacs configuration
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-05 Mon 22:30
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
