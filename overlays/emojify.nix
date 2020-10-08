@@ -15,7 +15,7 @@ self: super: {
         sha256 = "0l53fm1j72hcaais2k8499gcgqndxy93nkbw4r5mkpm6hn2qa9xw";
       };
 
-       # We override the install phase, as the emojify project doesn't use make
+      # We override the install phase, as the emojify project doesn't use make
       installPhase = ''
         # Make the output directory
         mkdir -p $out/bin

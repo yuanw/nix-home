@@ -1,7 +1,5 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./workShell.nix
-  ];
+  imports = [ ./workShell.nix ];
 }

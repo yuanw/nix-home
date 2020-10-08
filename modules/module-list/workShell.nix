@@ -5,9 +5,7 @@ let
   homeDir = builtins.getEnv ("HOME");
   cfg = config.programs.workivaShell;
 in {
-  options.programs.workShell = {
-    enable = mkEnableOption "workivaShell";
-  };
+  options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = {
     home-manager.users.yuanwang.programs.zsh.initExtra = mkAfter ''

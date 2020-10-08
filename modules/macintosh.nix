@@ -3,11 +3,9 @@ let
   homeDir = builtins.getEnv ("HOME");
   configDir = ../conf.d;
 in with pkgs.stdenv;
-  with lib; {
+with lib; {
 
-    imports = [
-      ./module-list
-    ];
+  imports = [ ./module-list ];
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
