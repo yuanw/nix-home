@@ -14,10 +14,10 @@ with lib; {
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ ];
 
-
   environment.etc.hosts.enable = true;
   environment.etc.hosts.text = let
-    hostsPath = https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts;
+    hostsPath =
+      "https://raw.githubusercontent.com/StevenBlack/hosts/master/alternates/fakenews-gambling/hosts";
     hostsFile = builtins.fetchurl hostsPath;
   in builtins.readFile "${hostsFile}";
 
@@ -314,8 +314,7 @@ with lib; {
 
         oh-my-zsh = {
           enable = true;
-          plugins =
-            [ "git" "history" "autojump" "history-substring-search" ];
+          plugins = [ "git" "history" "autojump" "history-substring-search" ];
           custom = "$HOME/.config/zsh/custom";
         };
       };
