@@ -1,6 +1,6 @@
 #+TITLE: Nix configuration for MacOS
 
-using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and home-manger
+using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
 
 * Install
 
