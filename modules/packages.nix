@@ -44,7 +44,6 @@ with pkgs; [
   #HandBrake
   #wifi-password
   Stretchly
-  dart
 
   #nixops
   #nixfmt
