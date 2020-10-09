@@ -193,7 +193,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
-      #".doom.d".source = configDir + "/doom";
+      ".doom.d".source = configDir + "/doom";
     };
 
     programs = {

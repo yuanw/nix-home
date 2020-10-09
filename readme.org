@@ -59,12 +59,17 @@ https://tecosaur.github.io/emacs-config/config.html
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
 
+* How to write custom module
+ - https://github.com/hlissner/dotfiles/blob/e006f1a12ee74eed39dbaeda902b56c9e81201f2/modules/default.nix
+ - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
+ - https://nixos.wiki/wiki/Module
 * Overlays
 - https://nixos.wiki/wiki/Overlays
 - https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
 - https://nixos.org/nixpkgs/manual/#chap-overlays
 - https://www.youtube.com/watch?v=W85mF1zWA2o
 - https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
+- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * References and Manual:
 - https://daiderd.com/nix-darwin/manual/index.html#sec-options
@@ -78,8 +83,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/LnL7/dotfiles
 - https://github.com/cmacrae/config
 - https://github.com/peel/dotfiles
-
-- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
+- https://github.com/hlissner/dotfiles/ (NixOS)
 
 * Items of TODO
 ** TODO add module for doom-emacs
@@ -93,6 +97,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://gist.github.com/knowler/ef937408198d4ee38ce111ae1a3da750
   https://piratefache.ch/chunkwm-is-dead-reborn-as-yabai/
 ** TODO integrate with github action CI ?
+
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
 ** How to refresh ~Dock.app~
