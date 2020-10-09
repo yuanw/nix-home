@@ -193,7 +193,7 @@ with lib; {
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
 
-      ".doom.d".source = configDir + "/doom";
+      #".doom.d".source = configDir + "/doom";
     };
 
     programs = {
@@ -263,17 +263,7 @@ with lib; {
         sessionVariables = {
           PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
           ASPELL_CONF = "data-dir ${pkgs.aspell}";
-          DART_SDK = "${pkgs.dart}";
           LANG = "en_US.UTF-8";
-        };
-
-        shellAliases = {
-          ddev = "pub run dart_dev";
-          pubcleanlock = ''
-            git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
-          pubclean = ''
-            rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
-          repub = "pubclean; pub get";
         };
 
         enableAutosuggestions = true;
@@ -290,7 +280,7 @@ with lib; {
 
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-          export PATH="$HOME/.local/bin:$HOME/.pub-cache/bin:$PATH:$GOPATH/bin:$DART_SDK:$DART_SDK/bin:$HOME/.emacs.d/bin"
+          export PATH=$HOME/.local/bin:$PATH:$GOPATH/bin:$HOME/.emacs.d/bin
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
@@ -300,12 +290,6 @@ with lib; {
               sh -c "pet new `printf %q "$PREV"`"
           }
 
-          function dartUpgrade() {
-              pub cache repair
-              pub global activate dart_language_server
-              pub global activate webdev_proxy
-              pub global activate webdev
-          }
           function bigskyTest {
               python manage.py test $1 --http-integration --traceback -v 2
           }

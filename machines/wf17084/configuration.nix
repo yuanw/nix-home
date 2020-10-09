@@ -7,6 +7,7 @@ in { config, lib, ... }: {
   #services.yabai.enableScriptingAddition = false;
   #
   programs.workShell.enable = true;
+  programs.dart.enable = true;
 
   home-manager.users.yuanwang.programs.git = {
     userEmail = "yuan.wang@workiva.com";
