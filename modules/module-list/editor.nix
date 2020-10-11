@@ -1,3 +1,5 @@
+# most of this is stealed from hlissner emacs module
+# https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 { config, lib, pkgs, ... }:
 let
   homeDir = builtins.getEnv ("HOME");
