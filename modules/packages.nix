@@ -5,10 +5,7 @@ with pkgs; [
   clang
   coreutils-prefixed
   moreutils
-  #gnutls
 
-  (aspellWithDicts (ds: [ ds.en ]))
-  imagemagick
   ffmpeg
   less
   gifsicle
@@ -19,7 +16,6 @@ with pkgs; [
   nixfmt
   sass
   #stack
-  texlive.combined.scheme-medium
   tree
   broot
   wget
@@ -29,10 +25,8 @@ with pkgs; [
   plantuml
   xclip
   pass
-  emojify
 
   shellcheck
-  editorconfig-core-c
   gitAndTools.pre-commit
   gitAndTools.delta
   gitAndTools.pass-git-helper
@@ -57,16 +51,11 @@ with pkgs; [
 
   # productivity
   pandoc
-  fd
   fzf
-  ripgrep
+
   autojump
   vscode
 
   shellcheck
-  sqlite
-  editorconfig-core-c
   fontconfig
-  languagetool
-  zstd
 ]

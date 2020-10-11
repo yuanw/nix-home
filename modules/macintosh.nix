@@ -56,7 +56,6 @@ with lib; {
       pkgs.material-design-icons
       pkgs.weather-icons
       pkgs.font-awesome
-      pkgs.emacs-all-the-icons-fonts
       pkgs.pragmata-pro-font
     ];
   };
@@ -215,7 +214,7 @@ with lib; {
 
         extraConfig = {
           core = {
-            editor = "${pkgs.emacsMacport}/bin/emacsclient -a '' -c";
+            editor = "emacsclient -a '' -c";
             pager =
               "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
           };
@@ -273,7 +272,7 @@ with lib; {
 
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-          export PATH=$HOME/.local/bin:$PATH:$GOPATH/bin
+          export PATH=$PATH:$HOME/.local/bin
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels

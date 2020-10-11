@@ -22,6 +22,32 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
+
+    home-manager.users.yuanwang.home.packages = with pkgs; [
+      git
+      (ripgrep.override { withPCRE2 = true; })
+      gnutls # for TLS connectivity
+
+      ## Optional dependencies
+      fd # faster projectile indexing
+      imagemagick # for image-dired
+      zstd
+      ## Module dependencies
+      # :checkers spell
+      (aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]))
+      # :checkers grammar
+      languagetool
+      # :tools editorconfig
+      editorconfig-core-c # per-project style config
+      # :tools lookup & :lang org +roam
+      sqlite
+
+      # :lang latex & :lang org (latex previews)
+      texlive.combined.scheme-medium
+    ];
+
+    fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+
     home-manager.users.yuanwang.programs.emacs = {
       enable = true;
       package = cfg.pkg;
@@ -32,7 +58,7 @@ in with lib; {
 
     home-manager.users.yuanwang.programs.zsh = {
       initExtra = ''
-        export PATH=$HOME/.emacs.d/bin
+        export PATH=$PATH:$HOME/.emacs.d/bin
       '';
     };
   };
