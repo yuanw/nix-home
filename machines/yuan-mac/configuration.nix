@@ -4,6 +4,10 @@ let
 in { config, lib, ... }: {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "yuan-mac";
+  programs.editors.emacs = {
+    enable = true;
+    enableDoomConfig = true;
+  };
   home-manager.users.yuanwang.programs.git = {
     userEmail = "me@yuanwang.ca";
 

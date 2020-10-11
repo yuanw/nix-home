@@ -28,7 +28,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.yuanwang.home.packages = [ cfg.package ];
-    home-manager.users.yuanwang.programs.zsh = mkIf cfg.enableZshIntegration  {
+    home-manager.users.yuanwang.programs.zsh = mkIf cfg.enableZshIntegration {
       sessionVariables = { DART_SDK = "${cfg.package}"; };
       shellAliases = {
         ddev = "pub run dart_dev";

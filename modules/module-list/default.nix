@@ -1,7 +1,5 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./dart.nix
-    ./workShell.nix ];
+  imports = [ ./dart.nix ./editor.nix ./workShell.nix ];
 }

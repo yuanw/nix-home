@@ -7,7 +7,7 @@ let
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
-  config = {
+  config = mkIf config.programs.workShell.enable {
     home-manager.users.yuanwang.programs.zsh.initExtra = mkAfter ''
       eval "$(pyenv init -)"
       export GOPATH="${homeDir}/go-workspace"

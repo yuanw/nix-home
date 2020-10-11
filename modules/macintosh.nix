@@ -192,8 +192,6 @@ with lib; {
 
       ".config/kitty/dracula.conf".source =
         lib.cleanSource ../conf.d/kitty/dracula.conf;
-
-      ".doom.d".source = configDir + "/doom";
     };
 
     programs = {
@@ -201,11 +199,6 @@ with lib; {
         enable = true;
         enableZshIntegration = true;
         enableNixDirenvIntegration = true;
-      };
-
-      emacs = {
-        enable = true;
-        package = pkgs.emacsMacport;
       };
 
       git = {
