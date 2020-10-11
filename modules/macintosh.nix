@@ -289,10 +289,6 @@ with lib; {
               PREV=$(fc -lrn | head -n 1)
               sh -c "pet new `printf %q "$PREV"`"
           }
-
-          function bigskyTest {
-              python manage.py test $1 --http-integration --traceback -v 2
-          }
         '';
 
         oh-my-zsh = {
