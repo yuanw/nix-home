@@ -95,3 +95,14 @@ https://github.com/nmattia/niv#how-do-i-import-a-subpath-of-a-source
 :ARCHIVE_CATEGORY: readme
 :ARCHIVE_TODO: DONE
 :END:
+
+* DONE add module for hosts file
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-10 Sat 22:56
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+repo https://github.com/StevenBlack/hosts
+
