@@ -43,10 +43,8 @@ darwin-rebuild changelog
 ** Hosts file management
 ** Shell - zsh with p10k
 ** Window Manager (Yabai + skhd + spacebar)
-** Terminal Emulator - Kitty
-- https://github.com/stephen-huan/macos-dotfiles/tree/master/.config/kitty
+** Terminal Emulator - Alacritty
 
-- https://github.com/koekeishiya/dotfiles/tree/master/kitty
 ** Editor - Doom emacs
 https://tecosaur.github.io/emacs-config/config.html
 
