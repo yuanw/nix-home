@@ -29,5 +29,11 @@ in with lib; {
 
     home-manager.users.yuanwang.home.file =
       mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
+
+    home-manager.users.yuanwang.programs.zsh = {
+      initExtra = ''
+        export PATH=$HOME/.emacs.d/bin
+      '';
+    };
   };
 }

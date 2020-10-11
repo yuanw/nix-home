@@ -273,7 +273,7 @@ with lib; {
 
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-          export PATH=$HOME/.local/bin:$PATH:$GOPATH/bin:$HOME/.emacs.d/bin
+          export PATH=$HOME/.local/bin:$PATH:$GOPATH/bin
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
