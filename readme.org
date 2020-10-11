@@ -39,14 +39,9 @@ nix-channel --update darwin
 darwin-rebuild changelog
 #+END_SRC
 
-** How to pin down git branch
-#+BEGIN_SRC shell
-nix-prefetch-git https://github.com/target/lorri.git 61caab4d1a79fe7ec9470d5670677ee3e8b84e4f > lorri.json
-#+END_SRC
-
 * Content
 ** Hosts file management
-** Shell - zsh
+** Shell - zsh with p10k
 ** Window Manager (Yabai + skhd + spacebar)
 ** Terminal Emulator - Kitty
 - https://github.com/stephen-huan/macos-dotfiles/tree/master/.config/kitty

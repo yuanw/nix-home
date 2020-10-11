@@ -13,6 +13,7 @@ with lib; {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [ ];
+
   # Use a custom configuration.nix location.
   # $ darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
   environment.darwinConfig =
@@ -61,7 +62,7 @@ with lib; {
     skhdConfig = ''
       # launchers
       cmd - e : open ~/.nix-profile/Applications/Emacs.app
-      cmd + ctrl - return : kitty --single-instance
+      cmd + ctrl - return : open ~/.nix-profile/Applications/Alacritty.app
       cmd + ctrl - v: osascript -e 'tell application "Viscosity" to connect "work"'
 
       # focus window
@@ -146,8 +147,10 @@ with lib; {
       mineffect = "scale";
       showhidden = true;
       launchanim = false;
+      show-recents = false;
       minimize-to-application = true;
       show-process-indicators = true;
+      mouse-over-hilite-stack = false;
     };
 
     screencapture.location = "/tmp";
@@ -159,11 +162,12 @@ with lib; {
     };
 
     trackpad = {
-      Clicking = false;
+      Clicking = true;
       TrackpadThreeFingerDrag = true;
     };
 
     NSGlobalDomain._HIHideMenuBar = true;
+    NSGlobalDomain."com.apple.mouse.tapBehavior" = null;
   };
 
   home-manager.users.yuanwang = {
@@ -223,9 +227,63 @@ with lib; {
 
       jq = { enable = true; };
 
-      kitty = {
+      alacritty = {
         enable = true;
-        extraConfig = "include dracula.conf";
+        settings = {
+          font = {
+            normal = {
+              family = "Essential PragmataPro";
+
+            };
+            size = 20;
+          };
+          # https://github.com/dracula/alacritty/blob/master/dracula.yml
+          colors = {
+            primary.background = "0x282c34";
+            primary.foreground = "0xabb2bf";
+
+            cursor.text = "0x44475a";
+            cursor.cursor = "0xf8f8f2";
+
+            selection = {
+              text = "0xf8f8f2";
+              background = "0x44475a";
+            };
+            normal = {
+              black = "0x000000";
+              red = "0xff5555";
+              green = "0x50fa7b";
+              yellow = "0xf1fa8c";
+              blue = "0xbd93f9";
+              magenta = "0xff79c6";
+              cyan = "0x8be9fd";
+              white = "0xbfbfbf";
+            };
+
+            bright = {
+              black = "0x4d4d4d";
+              red = "0xff6e67";
+              green = "0x5af78e";
+              yellow = "0xf4f99d";
+              blue = "0xcaa9fa";
+              magenta = "0xff92d0";
+              cyan = "0x9aedfe";
+              white = "0xe6e6e6";
+            };
+
+            dim = {
+              black = "0x14151b";
+              red = "0xff2222";
+              green = "0x1ef956";
+              yellow = "0xebf85b";
+              blue = "0x4d5b86";
+              magenta = "0xff46b0";
+              cyan = "0x59dffc";
+              white = "0xe6e6d1";
+            };
+
+          };
+        };
       };
 
       #pet = { enable = true; };
