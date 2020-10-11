@@ -18,6 +18,18 @@
         "url": "https://github.com/nix-community/home-manager/archive/0006da1381b87844c944fe8b925ec864ccf19348.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "hosts": {
+        "branch": "master",
+        "description": "Consolidating and extending hosts files from several well-curated sources. You can optionally pick extensions to block pornography, social media, and other categories.",
+        "homepage": "",
+        "owner": "StevenBlack",
+        "repo": "hosts",
+        "rev": "5a5016ab5bf0166e004147cb49ccd0114ed29b72",
+        "sha256": "07pjj28bqpn5ldh8f49n3m99ifwq1r24sqkvlfb19pgahirnd3ws",
+        "type": "tarball",
+        "url": "https://github.com/StevenBlack/hosts/archive/5a5016ab5bf0166e004147cb49ccd0114ed29b72.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",

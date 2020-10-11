@@ -4,6 +4,7 @@ let
 in { config, lib, ... }: {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "yuan-mac";
+  programs.stevenBlackHosts.enable = true;
   programs.editors.emacs = {
     enable = true;
     enableDoomConfig = true;

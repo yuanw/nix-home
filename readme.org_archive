@@ -86,3 +86,12 @@ https://github.com/nmattia/niv#how-do-i-import-a-subpath-of-a-source
 - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
   - https://rycee.gitlab.io/home-manager/index.html#ch-writing-modules
 
+
+* DONE add module for doom-emacs
+:PROPERTIES:
+:ARCHIVE_TIME: 2020-10-10 Sat 22:19
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:

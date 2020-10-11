@@ -86,8 +86,8 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/hlissner/dotfiles/ (NixOS)
 
 * Items of TODO
-** TODO add module for doom-emacs
 ** TODO add module for hosts file
+repo https://github.com/StevenBlack/hosts
 ** STRT Kitty Configuration
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
