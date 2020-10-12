@@ -16,6 +16,8 @@ nix-channel --add https://nixos.org/channels/nixpkgs-unstable
 nix-channel --update
 #+end_src
 
+#+RESULTS:
+
 *** TODO add note about latest OS and the workaround
 
 ** Install nix-darwin

@@ -81,7 +81,7 @@ with lib; {
     debug_output = "on";
     clock_format = "%R";
     space_icon_strip = "I II III IV V";
-    text_font = ''"Essential PragmataPro:Regular:12.0"'';
+    text_font = ''"PragmataPro Mono:Regular:12.0"'';
     icon_font = ''"FontAwesome:Regular:12.0"'';
     background_color = "0xff202020";
     foreground_color = "0xffa8a8a8";
@@ -184,9 +184,6 @@ with lib; {
           sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
           # date = 2020-01-07T15:59:09-0800;
         };
-
-      ".config/kitty/dracula.conf".source =
-        lib.cleanSource ../conf.d/kitty/dracula.conf;
     };
 
     programs = {
@@ -232,7 +229,7 @@ with lib; {
         settings = {
           font = {
             normal = {
-              family = "Essential PragmataPro";
+              family = "PragmataPro Mono";
 
             };
             size = 20;
