@@ -45,6 +45,19 @@ darwin-rebuild changelog
 ** Hosts file management
 ** Shell - zsh with p10k
 ** Window Manager (Yabai + skhd + spacebar)
+Hotkey ideas
+- open terminal
+- restart yabai
+ #+begin_src shell
+alt + shift - r : \
+    launchctl kickstart -k "gui/${UID}/homebrew.mxcl.yabai"; \
+    skhd --reload
+ #+end_src
+ org.nixos.yabai-sa
+
+ https://gist.github.com/dskindell/374b2a3d8fd9bc4ebc33be4a4486b31e
+https://eclecticlight.co/2019/08/27/kickstarting-and-tearing-down-with-launchctl/
+
 ** Terminal Emulator - Alacritty
 
 ** Editor - Doom emacs
@@ -82,6 +95,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/hlissner/dotfiles/ (NixOS)
 
 * Items of TODO
+** TODO add module for terminal emulator
 ** STRT setup yabai and skhd
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
