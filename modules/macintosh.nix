@@ -233,9 +233,7 @@ with lib; {
           # "url \"git@github.com:\"".insteadOf = "https://github.com/";
         };
 
-        ignores = [
-          ".DS_Store"
-        ];
+        ignores = [ ".DS_Store" ];
       };
 
       gpg = { enable = true; };
@@ -300,7 +298,10 @@ with lib; {
         };
       };
 
-      tmux = { enable = true; };
+      tmux = {
+        enable = true;
+        terminal = "screen-256color";
+      };
 
       zoxide = {
         enable = true;
