@@ -166,7 +166,7 @@ with lib; {
       show-recents = false;
       minimize-to-application = true;
       show-process-indicators = true;
-      mouse-over-hilite-stack = false;
+      #mouse-over-hilite-stack = false;
     };
 
     screencapture.location = "/tmp";
