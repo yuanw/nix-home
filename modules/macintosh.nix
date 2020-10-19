@@ -235,6 +235,7 @@ with lib; {
 
         ignores = [
           ".DS_Store"
+          ".direnv"
         ];
       };
 
