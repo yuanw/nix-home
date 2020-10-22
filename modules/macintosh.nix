@@ -309,7 +309,6 @@ with lib; {
       zoxide = {
         enable = true;
         enableZshIntegration = true;
-        historyLimit = 5000;
       };
 
       zsh = rec {
