@@ -233,7 +233,10 @@ with lib; {
           # "url \"git@github.com:\"".insteadOf = "https://github.com/";
         };
 
-        ignores = [ ".DS_Store" ];
+        ignores = [
+          ".direnv"
+          ".DS_Store"
+        ];
       };
 
       gpg = { enable = true; };

@@ -12,10 +12,10 @@
         "homepage": "https://rycee.gitlab.io/home-manager/",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "e7d5531cfa770afc591f8dc5542eb4fba9962885",
-        "sha256": "0gx4pl4hfl08kswalzqbbrzcgpjzkd84h7r4nvvf5hkkhflx5ng5",
+        "rev": "9bf1f40af124573a54fd208b1f539eb694ef31a6",
+        "sha256": "03rf762b2c9lb0ngnq1jsr2fxjw3vmrbhhpb13g8pwrpkf15646l",
         "type": "tarball",
-        "url": "https://github.com/nix-community/home-manager/archive/e7d5531cfa770afc591f8dc5542eb4fba9962885.tar.gz",
+        "url": "https://github.com/nix-community/home-manager/archive/9bf1f40af124573a54fd208b1f539eb694ef31a6.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "hosts": {
@@ -24,10 +24,10 @@
         "homepage": "",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "750faf4b129f3285cc659d02ce4560fdb7341e8e",
-        "sha256": "0iinr4mj7nqffk4igmjxwrynyarffgdckxw5vsyb5rc1527439z6",
+        "rev": "1cd35b6c75db3ac5256a6f724fb91af633418359",
+        "sha256": "0al0qlclly4frnsl7yh495876algpz9y1549p52cgbnphfdcj6ij",
         "type": "tarball",
-        "url": "https://github.com/StevenBlack/hosts/archive/750faf4b129f3285cc659d02ce4560fdb7341e8e.tar.gz",
+        "url": "https://github.com/StevenBlack/hosts/archive/1cd35b6c75db3ac5256a6f724fb91af633418359.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
