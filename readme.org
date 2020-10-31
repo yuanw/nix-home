@@ -97,6 +97,13 @@ https://tecosaur.github.io/emacs-config/config.html
 * Items of TODO
 ** TODO integrate https://github.com/vjeantet/alerter
 with emacs
+
+https://developer.apple.com/library/archive/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/DisplayNotifications.html#//apple_ref/doc/uid/TP40016239-CH61-SW1
+
+https://christiantietze.de/posts/2019/12/emacs-notifications/
+
+https://github.com/jwiegley/alert
+
 https://lists.gnu.org/archive/html/emacs-orgmode/2013-02/msg00644.html
 ** TODO add module for terminal emulator
 ** STRT setup yabai and skhd
