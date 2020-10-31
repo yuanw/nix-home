@@ -327,6 +327,10 @@ with lib; {
           GITSTATUS_LOG_LEVEL = "DEBUG";
         };
 
+        shellAliases = {
+          alerter = "${pkgs.alerter}/alerter";
+        };
+
         enableAutosuggestions = true;
         history = {
           size = 50000;
