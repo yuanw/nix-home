@@ -324,7 +324,10 @@ with lib; {
           PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
           ASPELL_CONF = "data-dir ${pkgs.aspell}";
           LANG = "en_US.UTF-8";
-          GITSTATUS_LOG_LEVEL = "DEBUG";
+        };
+
+        shellAliases = {
+          alerter = "${pkgs.alerter}/alerter";
         };
 
         enableAutosuggestions = true;

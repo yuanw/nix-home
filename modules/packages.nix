@@ -50,6 +50,7 @@ with pkgs; [
   mu
   offlineimap
   notmuch
+  google-cloud-sdk
 
   # productivity
   pandoc
