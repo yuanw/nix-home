@@ -41,12 +41,6 @@ with pkgs; [
   #wifi-password
   Stretchly
 
-  #nixops
-  #nixfmt
-  #nox
-  #niv
-  #google-cloud-sdk
-
   mu
   offlineimap
   notmuch
@@ -54,7 +48,6 @@ with pkgs; [
 
   # productivity
   pandoc
-  fzf
 
   autojump
   vscode

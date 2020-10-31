@@ -1,7 +1,4 @@
-let
-  sources = import ../nix/sources.nix;
-  pkgs = import sources.nixpkgs { };
-in { config, lib, ... }: {
+{ config, lib, ... }: {
   imports = lib.attrValues (import ../../modules);
   networking.hostName = "yuan-mac";
   programs.stevenBlackHosts.enable = true;

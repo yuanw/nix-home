@@ -1,7 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 let
   homeDir = builtins.getEnv ("HOME");
   configDir = ../conf.d;
+  sources = import ../nix/sources.nix;
+  pkgs = import sources.nixpkgs { };
 in with pkgs.stdenv;
 with lib; {
 
