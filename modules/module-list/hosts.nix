@@ -4,7 +4,8 @@ with lib;
 let
   sources = import ../../nix/sources.nix;
   cfg = config.programs.stevenBlackHosts;
-in {
+in
+{
   options.programs.stevenBlackHosts = {
     enable = mkEnableOption "stevenBlackHosts";
     # possible values

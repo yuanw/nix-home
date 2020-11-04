@@ -5,7 +5,8 @@ let
   homeDir = builtins.getEnv ("HOME");
   configDir = ../../conf.d;
   cfg = config.programs.editors.emacs;
-in with lib; {
+in
+with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
       type = types.bool;
