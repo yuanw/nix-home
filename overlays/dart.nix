@@ -1,4 +1,4 @@
-self: super: {
+_: super: {
 
   dart = with super;
     stdenv.mkDerivation rec {

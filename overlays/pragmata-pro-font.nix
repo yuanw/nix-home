@@ -1,4 +1,4 @@
-self: super: {
+_: super: {
   pragmata-pro-font = with super;
     stdenv.mkDerivation rec {
       nativeBuildInputs = [ unzip ];

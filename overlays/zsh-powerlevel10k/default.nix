@@ -1,10 +1,9 @@
-self: super:
-{
+_: super: {
 
   # To make use of this derivation, use
   # `programs.zsh.promptInit = "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";`
 
-  zsh-powerlevel10k = super.zsh-powerlevel10k.overrideAttrs (old: {
+  zsh-powerlevel10k = super.zsh-powerlevel10k.overrideAttrs (_: {
     version = "1.13.1";
     src = super.fetchFromGitHub {
       owner = "romkatv";

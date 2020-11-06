@@ -1,4 +1,4 @@
-self: super: {
+_: super: {
 
   alerter = with super;
     stdenv.mkDerivation rec {
