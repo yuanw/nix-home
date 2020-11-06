@@ -42,6 +42,18 @@
         "url": "https://github.com/nmattia/niv/archive/20c899271f288d33114760bc298838575fc6c7f9.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "nix-darwin": {
+        "branch": "master",
+        "description": "nix modules for darwin",
+        "homepage": "",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "1145503ef97c41b3358ed2f49fcdd17ec45a460a",
+        "sha256": "0hg1mbchwzxy46jjpjpbnjzc09b28aqw23p5zz7jprl44vqxwwwn",
+        "type": "tarball",
+        "url": "https://github.com/LnL7/nix-darwin/archive/1145503ef97c41b3358ed2f49fcdd17ec45a460a.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "nixpkgs": {
         "branch": "nixos-unstable",
         "description": "Nix Packages collection",

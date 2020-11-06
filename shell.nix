@@ -7,6 +7,7 @@ let
     ${format}/bin/format
     ${lint}/bin/lint
     darwin-rebuild switch --show-trace \
+      -I darwin=${sources.nix-darwin} \
       -I nixpkgs=${sources.nixpkgs}
   '';
 in
@@ -14,4 +15,5 @@ pkgs.mkShell {
   buildInputs = with pkgs; [
     niv
     rebuild
-  ];}
+  ];
+}
