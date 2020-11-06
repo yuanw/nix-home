@@ -93,7 +93,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/cmacrae/config
 - https://github.com/peel/dotfiles
 - https://github.com/hlissner/dotfiles/ (NixOS)
-
+- https://github.com/Nimor111/nixos-config
 * Items of TODO
 ** TODO integrate https://github.com/vjeantet/alerter
 with emacs
