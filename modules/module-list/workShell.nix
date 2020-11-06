@@ -4,7 +4,8 @@ with lib;
 let
   homeDir = builtins.getEnv ("HOME");
   cfg = config.programs.workivaShell;
-in {
+in
+{
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {

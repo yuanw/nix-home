@@ -4,7 +4,8 @@ with lib;
 let
   homeDir = builtins.getEnv ("HOME");
   cfg = config.programs.dart;
-in {
+in
+{
   options.programs.dart = {
     enable = mkEnableOption "dart";
     package = mkOption {

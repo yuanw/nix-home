@@ -2,7 +2,8 @@
 let
   homeDir = builtins.getEnv ("HOME");
   configDir = ../conf.d;
-in with pkgs.stdenv;
+in
+with pkgs.stdenv;
 with lib; {
 
   imports = [ ./module-list ];
@@ -27,12 +28,15 @@ with lib; {
   users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays = let path = ../overlays;
-    in with builtins;
-    map (n: import (path + ("/" + n))) (filter (n:
-      match ".*\\.nix" n != null
-      || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path)));
+    overlays =
+      let path = ../overlays;
+      in
+      with builtins;
+      map (n: import (path + ("/" + n))) (filter
+        (n:
+          match ".*\\.nix" n != null
+          || pathExists (path + ("/" + n + "/default.nix")))
+        (attrNames (readDir path)));
 
     config = {
       allowUnfree = true;
@@ -193,13 +197,6 @@ with lib; {
       ".ghci".text = ''
         :set prompt "λ> "
       '';
-
-      ".config/zsh/custom/plugins/iterm2/iterm2.plugin.zsh".source =
-        pkgs.fetchurl {
-          url = "https://iterm2.com/shell_integration/zsh";
-          sha256 = "1gw3rk0dsss3vl92wxpda7br8gmwrx6jk41xm3i3rh6p2d7r97z0";
-          # date = 2020-01-07T15:59:09-0800;
-        };
     };
 
     programs = {
