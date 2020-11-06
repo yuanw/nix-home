@@ -1,4 +1,4 @@
-self: super: {
+_: super: {
 
   emojify = with super;
     stdenv.mkDerivation rec {

@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 let
   homeDir = builtins.getEnv ("HOME");
-  configDir = ../conf.d;
 in
 with pkgs.stdenv;
 with lib; {

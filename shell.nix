@@ -1,19 +1,19 @@
 { sources ? import ./nix/sources.nix }:
 let
   pkgs = import sources.nixpkgs { };
-  files = "$(find . -name '*.nix')";
-  format = pkgs.writeShellScriptBin "format" "nixpkgs-fmt ${files}";
-  lint = pkgs.writeShellScriptBin "lint" "nix-linter ${files} && echo No lint errors!";
-  cleanup = pkgs.writeShellScriptBin "cleanup" ''
-    set -e
+  format = pkgs.writeShellScriptBin "format" "${pkgs.fd}/bin/fd --exclude '/nix/sources.nix' -e nix -x ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
+  lint = pkgs.writeShellScriptBin "lint" "${pkgs.fd}/bin/fd --exclude '/nix/sources.nix' -e nix -x ${pkgs.nix-linter}/bin/nix-linter && echo No lint errors!";
+  rebuild = pkgs.writeShellScriptBin "rebuild" ''
     ${format}/bin/format
+    ${lint}/bin/lint
+    darwin-rebuild switch --show-trace \
+      -I darwin=${sources.nix-darwin} \
+      -I nixpkgs=${sources.nixpkgs}
   '';
 in
 pkgs.mkShell {
-  buildInputs = [
-    pkgs.niv
-    pkgs.nixpkgs-fmt
-    pkgs.nix-linter
-    cleanup
+  buildInputs = with pkgs; [
+    niv
+    rebuild
   ];
 }

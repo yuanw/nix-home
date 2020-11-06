@@ -2,7 +2,6 @@
 
 with lib;
 let
-  homeDir = builtins.getEnv ("HOME");
   cfg = config.programs.dart;
 in
 {
