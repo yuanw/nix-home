@@ -31,7 +31,7 @@ with pkgs; [
   gitAndTools.delta
   gitAndTools.pass-git-helper
   gitAndTools.gh
-  gitAndTools.gitstatus
+  #gitAndTools.gitstatus
 
 
   nixpkgs-fmt
