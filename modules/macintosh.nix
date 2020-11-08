@@ -5,7 +5,7 @@ in
 with pkgs.stdenv;
 with lib; {
 
-  imports = [ ./module-list ];
+  imports = [ ./modules ];
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
@@ -89,7 +89,7 @@ with lib; {
 
 
 
-                  cmd + ctrl - 0x21 : yabai -m window --focus stack.prev # this is [
+      cmd + ctrl - 0x21 : yabai -m window --focus stack.prev # this is [
                   cmd + ctrl - 0x1E : yabai -m window --focus stack.next # this is ]
     '';
   };
@@ -343,8 +343,6 @@ with lib; {
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
           export PATH=$PATH:$HOME/.local/bin
           . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
-
-          export NIX_PATH=$NIX_PATH:$HOME/.nix-defexpr/channels
 
           function prev() {
               PREV=$(fc -lrn | head -n 1)

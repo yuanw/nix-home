@@ -12,6 +12,7 @@ let
   '';
 in
 pkgs.mkShell {
+  name = "nix-darwin-shell";
   buildInputs = with pkgs; [
     niv
     rebuild
