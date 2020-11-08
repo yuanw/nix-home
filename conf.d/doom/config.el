@@ -26,11 +26,23 @@
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-dracula)
 
+(defun +org/opened-buffer-files ()
+  "Return the list of files currently opened in Emacs."
+  (delq nil
+        (mapcar (lambda (x)
+                  (if (and (buffer-file-name x)
+                           (string-match "\\.org$"
+                                         (buffer-file-name x)))
+                      (buffer-file-name x)))
+                (buffer-list))))
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org-notes"
-      org-roam-dailies-directory (concat org-directory "dailies")
-      org-agenda-files (directory-files-recursively org-directory "\.org$"))
+(setq org-directory "~/org-notes/"
+      org-roam-dailies-directory (concat org-directory "dailies/")
+      org-roam-directory (concat org-directory "roam/")
+      org-default-notes-file (concat org-directory "journal/Dropbox/org/inbox.org"))
+      org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
 
 
 ;;; :tools direnv
