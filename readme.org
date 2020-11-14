@@ -109,6 +109,8 @@ https://github.com/jwiegley/nix-config/blob/597b1565c2f244f894a7d43d6402051a0a53
 $(nix-build --no-out-link)/sw/bin/darwin-rebuild build
 $(nix-build --no-out-link)/sw/bin/darwin-rebuild switch
 #+end_src
+** TODO install Iosevka font
+https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 
 * Common commands
 - darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix

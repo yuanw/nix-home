@@ -4,7 +4,7 @@
   programs.stevenBlackHosts.enable = true;
   programs.editors.emacs = {
     enable = true;
-    enableDoomConfig = true;
+    enableDoomConfig = false;
   };
   home-manager.users.yuanwang.programs = {
     pet.enable = true;
