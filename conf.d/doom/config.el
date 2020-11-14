@@ -41,7 +41,7 @@
 (setq org-directory "~/org-notes/"
       org-roam-dailies-directory (concat org-directory "dailies/")
       org-roam-directory (concat org-directory "roam/")
-      org-default-notes-file (concat org-directory "journal/Dropbox/org/inbox.org"))
+      org-default-notes-file (concat org-directory "journal/Dropbox/org/inbox.org")
       org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
 
 
@@ -68,10 +68,10 @@
 ;;
 ;; You can also try 'gd' (or 'C-c g d') to jump to their definition and see how
 ;; they are implemented.
-(use-package lsp-haskell
- :ensure t
- :config
- (setq lsp-haskell-process-path-hie "haskell-language-server-wrapper")
- ;; Comment/uncomment this line to see interactions between lsp client/server.
- ;;(setq lsp-log-io t)
-)
+;; (use-package lsp-haskell
+;;  :ensure t
+;;  :config
+;;  (setq lsp-haskell-process-path-hie "haskell-language-server-wrapper")
+;;  ;; Comment/uncomment this line to see interactions between lsp client/server.
+;;  ;;(setq lsp-log-io t)
+;;)

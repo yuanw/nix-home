@@ -59,7 +59,7 @@ with lib; {
   # Auto upgrade nix package and the daemon service.
   # services.nix-daemon.enable = true;
   # nix.package = pkgs.nix;
-  services.lorri = { enable = true; };
+  # services.lorri = { enable = true; };
   services.skhd = {
     enable = true;
     skhdConfig = ''

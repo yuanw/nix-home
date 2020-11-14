@@ -54,10 +54,11 @@ with pkgs; [
 
   # productivity
   pandoc
-  fzf
+  #fzf
 
   autojump
   vscode
+  haskell-language-server
 
   shellcheck
   fontconfig

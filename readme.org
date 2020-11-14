@@ -1,4 +1,4 @@
-#+TITLE: Nix configuration for MacOS
+#+TITLE: My nix-darwin configuration
 
 using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
 
@@ -15,7 +15,6 @@ sh <(curl https://nixos.org/nix/install)
 https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 ** Install nix-darwin
 ** Download PragmataPro zip file to ~private~ directory (optional)
-
 
 * [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
