@@ -1,6 +1,5 @@
 { config, lib, pkgs, ... }:
-let
-  homeDir = builtins.getEnv ("HOME");
+let homeDir = builtins.getEnv ("HOME");
 in
 with pkgs.stdenv;
 with lib; {
@@ -180,13 +179,17 @@ with lib; {
       FXEnableExtensionChangeWarning = false;
     };
 
-    trackpad = {
-      Clicking = true;
-      TrackpadThreeFingerDrag = true;
-    };
+    #trackpad = {
+    #  Clicking = true;
+    #  TrackpadThreeFingerDrag = true;
+    #};
 
     NSGlobalDomain._HIHideMenuBar = true;
-    NSGlobalDomain."com.apple.mouse.tapBehavior" = null;
+    #NSGlobalDomain."com.apple.mouse.tapBehavior" = null;
+  };
+  system.keyboard = {
+    enableKeyMapping = true;
+    remapCapsLockToControl = true;
   };
 
   home-manager.users.yuanwang = {
@@ -229,10 +232,7 @@ with lib; {
           # "url \"git@github.com:\"".insteadOf = "https://github.com/";
         };
 
-        ignores = [
-          ".direnv"
-          ".DS_Store"
-        ];
+        ignores = [ ".direnv" ".DS_Store" ];
       };
 
       gpg = { enable = true; };
@@ -323,9 +323,7 @@ with lib; {
           GITSTATUS_LOG_LEVEL = "DEBUG";
         };
 
-        shellAliases = {
-          alerter = "${pkgs.alerter}/alerter";
-        };
+        shellAliases = { alerter = "${pkgs.alerter}/alerter"; };
 
         enableAutosuggestions = true;
         history = {
