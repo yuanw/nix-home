@@ -12,7 +12,8 @@ let
       -I darwin=${sources.nix-darwin} \
       -I nixpkgs=${sources.nixpkgs}
   '';
-in pkgs.mkShell {
+in
+pkgs.mkShell {
   name = "nix-darwin-shell";
   buildInputs = with pkgs; [ niv rebuild ];
 }
