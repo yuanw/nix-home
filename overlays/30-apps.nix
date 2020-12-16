@@ -69,7 +69,7 @@ self: super: {
 
   Stretchly = self.installApplication rec {
     name = "Stretchly";
-    version = "1.2.0";
+    version = sources.Stretchly.version;
     sourceRoot = "Stretchly.app";
     src = super.fetchurl { inherit (sources.Stretchly) url sha256; };
     description = "break time reminder app";
