@@ -75,7 +75,7 @@
   # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.yuan = {
+  users.users.yuanwang = {
     isNormalUser = true;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
@@ -110,5 +110,22 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.09"; # Did you read the comment?
+  programs.editors.emacs = {
+    enable = true;
+    enableDoomConfig = false;
+  };
+  home-manager.users.yuanwang.programs = {
+    pet.enable = true;
 
+    git = {
+      userEmail = "me@yuanwang.ca";
+
+      signing = {
+        key = "BF2ADAA2A98F45E7";
+        signByDefault = true;
+      };
+
+      extraConfig = { github.user = "yuanw"; };
+    };
+  };
 }

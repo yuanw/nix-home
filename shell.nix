@@ -26,7 +26,7 @@ let
     pkgs.writeShellScriptBin "rebuild" ''
       ${format}/bin/format
       ${lint}/bin/lint
-      ${rebuildNix}/bin/rebuildNix}
+      ${rebuildNix}/bin/rebuildNix
     '';
 
 in pkgs.mkShell {
