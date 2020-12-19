@@ -12,26 +12,24 @@ let
           -I nixpkgs=${sources.nixpkgs}
   '';
   rebuildNix = pkgs.writeShellScriptBin "rebuildNix" ''
-    darwin-rebuild switch --show-trace \
-          -I nixos-config=machines/$(hostname).nix
+    nixos-rebuild switch --show-trace \
+          -I nixos-config=machines/$(hostname).nix \
           -I nixpkgs=${sources.nixpkgs}
   '';
-  rebuild =
-    if pkgs.stdenvNoCC.isDarwin then
-      pkgs.writeShellScriptBin "rebuild" ''
-        ${format}/bin/format
-        ${lint}/bin/lint
-        ${rebuildDarwin}/bin/rebuildDarwin
-      ''
-    else
-      pkgs.writeShellScriptBin "rebuild" ''
-        ${format}/bin/format
-        ${lint}/bin/lint
-        ${rebuildNix}/bin/rebuildNix}
-      '';
+  rebuild = if pkgs.stdenvNoCC.isDarwin then
+    pkgs.writeShellScriptBin "rebuild" ''
+      ${format}/bin/format
+      ${lint}/bin/lint
+      ${rebuildDarwin}/bin/rebuildDarwin
+    ''
+  else
+    pkgs.writeShellScriptBin "rebuild" ''
+      ${format}/bin/format
+      ${lint}/bin/lint
+      ${rebuildNix}/bin/rebuildNix}
+    '';
 
-in
-pkgs.mkShell {
+in pkgs.mkShell {
   name = "dotfiles";
   buildInputs = with pkgs; [ niv rebuild rebuildDarwin rebuildNix ];
 }

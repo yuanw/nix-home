@@ -5,18 +5,17 @@
 { config, pkgs, ... }:
 
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+    ../../modules
+  ];
 
   nixpkgs.config.allowUnfree = true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
 
   boot.loader.grub = {
     enable = true;
@@ -33,7 +32,8 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   networking.hostName = "asche"; # Define your hostname.
-  networking.networkmanager.enable = true; # Enables wireless support via wpa_supplicant.
+  networking.networkmanager.enable =
+    true; # Enables wireless support via wpa_supplicant.
 
   # Set your time zone.
   time.timeZone = "America/Regina";
@@ -60,7 +60,6 @@
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3.enable = true;
 
-
   # Configure keymap in X11
   services.xserver.layout = "us";
   services.xserver.xkbOptions = "eurosign:e";
@@ -83,12 +82,7 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [
-    wget
-    vim
-    firefox
-    _1password-gui
-  ];
+  environment.systemPackages = with pkgs; [ wget vim firefox _1password-gui ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
