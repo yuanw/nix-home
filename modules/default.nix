@@ -6,5 +6,5 @@ in {
   home-manager = if pkgs.stdenvNoCC.isDarwin then
     sources.home-manager + "/nix-darwin"
   else
-    sources.home-manager + "/nix-darwin";
+    sources.home-manager + "/nixos";
 }
