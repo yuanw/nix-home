@@ -12,10 +12,10 @@
         "homepage": "https://rycee.gitlab.io/home-manager/",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "66a68b4a58f7c554bd7746acd51ff7cc02840b0a",
-        "sha256": "16c54als3qlhrsq9akm9cdm1y50d7czsny7nnn7dprp3ry2agpdb",
+        "rev": "e87bccabc318475ab712470657b85435354b53f7",
+        "sha256": "05kky25r92kcgj0sq0dswhs58bihmp8s34lfbfsl00g09w63iqqb",
         "type": "tarball",
-        "url": "https://github.com/nix-community/home-manager/archive/66a68b4a58f7c554bd7746acd51ff7cc02840b0a.tar.gz",
+        "url": "https://github.com/nix-community/home-manager/archive/e87bccabc318475ab712470657b85435354b53f7.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "hosts": {
@@ -24,10 +24,10 @@
         "homepage": "",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "b19a01ef737afa3fc1ef0d9c66594f57f396daae",
-        "sha256": "0vhfi81rkcm0pdiy150paq8qyi9p72x986k543rx3c2vpadxn4g7",
+        "rev": "2741273b206c6c98a7981ca5d96587b306c7ce2f",
+        "sha256": "1kkfmc6xw48p3c0aw75syhddqz1rp0pf4r9vn8v3ndsh6gkv72li",
         "type": "tarball",
-        "url": "https://github.com/StevenBlack/hosts/archive/b19a01ef737afa3fc1ef0d9c66594f57f396daae.tar.gz",
+        "url": "https://github.com/StevenBlack/hosts/archive/2741273b206c6c98a7981ca5d96587b306c7ce2f.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -48,22 +48,22 @@
         "homepage": "",
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "rev": "465539ad1d1ad458bd2179e5b10ad1d487f92e0a",
-        "sha256": "1cg367fdnabd8vca6jjcssszn832q60xw4v7sdl3gwiyapisicw7",
+        "rev": "6dd655466d423702bad41982cb3a7763f77c8e7d",
+        "sha256": "0kl26pzvf95hh7n1f176f9m8287k23psa3m767vzlibx313j0y5q",
         "type": "tarball",
-        "url": "https://github.com/LnL7/nix-darwin/archive/465539ad1d1ad458bd2179e5b10ad1d487f92e0a.tar.gz",
+        "url": "https://github.com/LnL7/nix-darwin/archive/6dd655466d423702bad41982cb3a7763f77c8e7d.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
-        "branch": "nixos-unstable",
+        "branch": "release-20.09",
         "description": "Nix Packages collection",
         "homepage": null,
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e9158eca70ae59e73fae23be5d13d3fa0cfc78b4",
-        "sha256": "0cnmvnvin9ixzl98fmlm3g17l6w95gifqfb3rfxs55c0wj2ddy53",
+        "rev": "7d57790bc12edaa8cbb76c38b28b59535492864e",
+        "sha256": "1pkms2l3fxhn4mpxmknkirbxzgvmhg5qz4mlgn12aqsn3mxf4ag4",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/e9158eca70ae59e73fae23be5d13d3fa0cfc78b4.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/7d57790bc12edaa8cbb76c38b28b59535492864e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }

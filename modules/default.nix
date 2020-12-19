@@ -1,6 +1,12 @@
-let sources = import ../nix/sources.nix;
+let
+  sources = import ../nix/sources.nix;
+  pkgs = import sources.nixpkgs { };
 in
 {
-  macintosh = ./macintosh.nix;
-  home-manager = sources.home-manager + "/nix-darwin";
+  os = ./macintosh.nix;
+  home-manager =
+    if pkgs.stdenvNoCC.isDarwin then
+      sources.home-manager + "/nix-darwin"
+    else
+      sources.home-manager + "/nix-darwin";
 }
