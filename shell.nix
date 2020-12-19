@@ -8,12 +8,14 @@ let
   rebuild = pkgs.writeShellScriptBin "rebuild" ''
     ${format}/bin/format
     ${lint}/bin/lint
-    darwin-rebuild switch --show-trace \
+    ${
+      if pkgs.stdenvNoCC.isDarwin then "darwin" else "nixos"
+    }-rebuild switch --show-trace \
       -I darwin=${sources.nix-darwin} \
-      -I nixpkgs=${sources.nixpkgs}
+      -I nixpkgs=${sources.nixpkgs} \
+      -I nixos-config=machines/$(hostname).nix
   '';
-in
-pkgs.mkShell {
-  name = "nix-darwin-shell";
+in pkgs.mkShell {
+  name = "dotfiles";
   buildInputs = with pkgs; [ niv rebuild ];
 }
