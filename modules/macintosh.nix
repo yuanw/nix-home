@@ -22,6 +22,7 @@ with lib; {
   programs.zsh.enable = true; # default shell on catalina
   programs.bash.enable = false;
   time.timeZone = "America/Regina";
+  nix.trustedUsers = [ "root" "yuanwang" ];
   users.users.yuanwang.shell = pkgs.zsh;
   users.users.yuanwang.home = homeDir;
 
@@ -117,7 +118,7 @@ with lib; {
   services.yabai = {
     enable = true;
     package = pkgs.yabai;
-    enableScriptingAddition = true;
+    enableScriptingAddition = false;
     config = {
       focus_follows_mouse = "autoraise";
       mouse_follows_focus = "off";

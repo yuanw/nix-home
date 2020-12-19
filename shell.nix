@@ -5,7 +5,8 @@ let
     "${pkgs.fd}/bin/fd --exclude '/nix/sources.nix' -e nix -x ${pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
   lint = pkgs.writeShellScriptBin "lint"
     "${pkgs.fd}/bin/fd --exclude '/nix/sources.nix' -e nix -x ${pkgs.nix-linter}/bin/nix-linter && echo No lint errors!";
-  rebuildDarwin = pkgs.writeShellScriptBin "rebuildDarin" ''
+  rebuildDarwin = pkgs.writeShellScriptBin "rebuildDarwin" ''
+
     darwin-rebuild switch --show-trace \
           -I darwin=${sources.nix-darwin} \
           -I nixpkgs=${sources.nixpkgs}
@@ -15,13 +16,22 @@ let
           -I nixos-config=machines/$(hostname).nix
           -I nixpkgs=${sources.nixpkgs}
   '';
-  rebuild = pkgs.writeShellScriptBin "rebuild" ''
-    ${format}/bin/format
-    ${lint}/bin/lint
-    ${if pkgs.stdenvNoCC.isDarwin then "rebuildDarwin" else "rebuildNix"}
-  '';
+  rebuild =
+    if pkgs.stdenvNoCC.isDarwin then
+      pkgs.writeShellScriptBin "rebuild" ''
+        ${format}/bin/format
+        ${lint}/bin/lint
+        ${rebuildDarwin}/bin/rebuildDarwin
+      ''
+    else
+      pkgs.writeShellScriptBin "rebuild" ''
+        ${format}/bin/format
+        ${lint}/bin/lint
+        ${rebuildNix}/bin/rebuildNix}
+      '';
+
 in
 pkgs.mkShell {
   name = "dotfiles";
-  buildInputs = with pkgs; [ niv rebuild ];
+  buildInputs = with pkgs; [ niv rebuild rebuildDarwin rebuildNix ];
 }
