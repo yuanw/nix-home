@@ -13,7 +13,7 @@ let
   '';
   rebuildNix = pkgs.writeShellScriptBin "rebuildNix" ''
     nixos-rebuild switch --show-trace \
-          -I nixos-config=machines/$(hostname).nix \
+          -I nixos-config=./machines/$(hostname).nix \
           -I nixpkgs=${sources.nixpkgs}
   '';
   rebuild = if pkgs.stdenvNoCC.isDarwin then
