@@ -40,7 +40,7 @@ with pkgs; [
   #wifi-password
   #Stretchly
   firefox
-
+  _1password-gui
   #nixops
   #nixfmt
   #nox
@@ -57,7 +57,7 @@ with pkgs; [
   #fzf
 
   autojump
-  vscode
+  #vscode
   haskell-language-server
 
   shellcheck
