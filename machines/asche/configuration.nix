@@ -3,12 +3,13 @@
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
 { config, pkgs, ... }:
-
-{
+let sources = import ../../nix/sources.nix;
+in {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ../../modules
+    "${sources.home-manager}/nixos"
+    ../../modules/common.nix
   ];
 
   # nixpkgs.config.allowUnfree = true;

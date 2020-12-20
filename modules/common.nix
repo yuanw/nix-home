@@ -1,7 +1,8 @@
 { config, lib, pkgs, ... }:
 let homeDir = builtins.getEnv ("HOME");
-in with pkgs.stdenv;
-with lib; rec {
+in
+with pkgs.stdenv;
+with lib; {
 
   imports = [ ./modules ];
   # Create /etc/bashrc that loads the nix-darwin environment.
@@ -13,12 +14,15 @@ with lib; rec {
   users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays = let path = ../overlays;
-    in with builtins;
-    map (n: import (path + ("/" + n))) (filter (n:
-      match ".*\\.nix" n != null
-      || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path)));
+    overlays =
+      let path = ../overlays;
+      in
+      with builtins;
+      map (n: import (path + ("/" + n))) (filter
+        (n:
+          match ".*\\.nix" n != null
+          || pathExists (path + ("/" + n + "/default.nix")))
+        (attrNames (readDir path)));
 
     config = {
       allowUnfree = true;

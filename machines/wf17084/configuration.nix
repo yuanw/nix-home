@@ -1,5 +1,5 @@
 { lib, ... }: {
-  imports = lib.attrValues (import ../../modules);
+  imports = lib.attrValues (import ../../modules/macintosh.nix);
   networking.hostName = "wf17084";
 
   programs = {

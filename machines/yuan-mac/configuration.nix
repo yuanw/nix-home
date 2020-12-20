@@ -1,5 +1,5 @@
 { lib, ... }: {
-  imports = lib.attrValues (import ../../modules);
+  imports = [ ../../modules/macintosh.nix ];
   networking.hostName = "yuan-mac";
   programs.stevenBlackHosts.enable = true;
   programs.editors.emacs = {

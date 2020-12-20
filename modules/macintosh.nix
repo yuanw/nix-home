@@ -1,9 +1,12 @@
 { config, lib, pkgs, ... }:
-let homeDir = builtins.getEnv ("HOME");
-in with pkgs.stdenv;
+let
+  homeDir = builtins.getEnv ("HOME");
+  sources = import ../nix/sources.nix;
+in
+with pkgs.stdenv;
 with lib; {
 
-  imports = [ ./common.nix ];
+  imports = [ "${sources.home-manager}/nix-darwin" ./common.nix ];
   # Used for backwards compatibility, please read the changelog before changing.
   # $ darwin-rebuild changelog
   system.stateVersion = 4;
