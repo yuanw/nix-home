@@ -78,12 +78,13 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.yuanwang = {
     isNormalUser = true;
+    home = "/home/yuanwang";
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim firefox _1password-gui ];
+  environment.systemPackages = with pkgs; [ wget vim ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
