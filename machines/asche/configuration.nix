@@ -114,6 +114,7 @@ in {
   programs.editors.emacs = {
     enable = true;
     enableDoomConfig = false;
+    pkg = pkgs.emacsPgtkGcc;
   };
   home-manager.users.yuanwang.programs = {
     pet.enable = true;

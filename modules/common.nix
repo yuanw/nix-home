@@ -1,5 +1,7 @@
 { config, lib, pkgs, ... }:
-let homeDir = builtins.getEnv ("HOME");
+let
+  homeDir = builtins.getEnv ("HOME");
+  sources = import ../nix/sources.nix;
 in
 with pkgs.stdenv;
 with lib; {
@@ -7,7 +9,7 @@ with lib; {
   imports = [ ./modules ];
   # Create /etc/bashrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
-  programs.bash.enable = false;
+  # programs.bash.enable = false;
   time.timeZone = "America/Regina";
 
   users.users.yuanwang.shell = pkgs.zsh;
@@ -18,11 +20,17 @@ with lib; {
       let path = ../overlays;
       in
       with builtins;
-      map (n: import (path + ("/" + n))) (filter
-        (n:
-          match ".*\\.nix" n != null
-          || pathExists (path + ("/" + n + "/default.nix")))
-        (attrNames (readDir path)));
+      map (n: import (path + ("/" + n)))
+        (filter
+          (n:
+            match ".*\\.nix" n != null
+            || pathExists (path + ("/" + n + "/default.nix")))
+          (attrNames (readDir path))) ++ [
+        (import (builtins.fetchTarball {
+          url =
+            "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
+        }))
+      ];
 
     config = {
       allowUnfree = true;
