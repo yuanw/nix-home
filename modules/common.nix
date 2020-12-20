@@ -1,9 +1,8 @@
 { config, lib, pkgs, ... }:
 let
-  homeDir = builtins.getEnv ("HOME");
+  #homeDir = builtins.getEnv ("HOME");
   sources = import ../nix/sources.nix;
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ];
@@ -13,19 +12,15 @@ with lib; {
   time.timeZone = "America/Regina";
 
   users.users.yuanwang.shell = pkgs.zsh;
-  users.users.yuanwang.home = homeDir;
+  #users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n)))
-        (filter
-          (n:
-            match ".*\\.nix" n != null
-            || pathExists (path + ("/" + n + "/default.nix")))
-          (attrNames (readDir path))) ++ [
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
         (import (builtins.fetchTarball {
           url =
             "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
@@ -170,7 +165,7 @@ with lib; {
           GITSTATUS_LOG_LEVEL = "DEBUG";
         };
 
-        shellAliases = { alerter = "${pkgs.alerter}/alerter"; };
+        #shellAliases = { alerter = "${pkgs.alerter}/alerter"; };
 
         enableAutosuggestions = true;
         history = {
@@ -187,7 +182,6 @@ with lib; {
         initExtra = lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin
           export PATH=$PATH:$HOME/.local/bin
-          . ${homeDir}/.nix-profile/etc/profile.d/nix.sh
 
           function prev() {
               PREV=$(fc -lrn | head -n 1)

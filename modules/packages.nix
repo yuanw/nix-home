@@ -33,13 +33,12 @@ with pkgs; [
   gitAndTools.gh
   #gitAndTools.gitstatus
 
-
   nixpkgs-fmt
 
   #Apps
   #HandBrake
   #wifi-password
-  Stretchly
+  #Stretchly
 
   #nixops
   #nixfmt
