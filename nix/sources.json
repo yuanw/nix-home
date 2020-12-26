@@ -1,10 +1,10 @@
 {
     "Stretchly": {
-        "sha256": "1i99y35rp2vjw17lr3d0g330ilfc86fp8nxibka4kkhrlhqipqya",
+        "sha256": "0bbk1p4d3vmbsxh9782jmyhfxng0grpzgdf6l9kxspsl0xppjyw3",
         "type": "file",
-        "url": "https://github.com/hovancik/stretchly/releases/download/v1.3.0/Stretchly-1.3.0.dmg",
+        "url": "https://github.com/hovancik/stretchly/releases/download/v1.4.0/Stretchly-1.4.0.dmg",
         "url_template": "https://github.com/hovancik/stretchly/releases/download/v<version>/Stretchly-<version>.dmg",
-        "version": "1.3.0"
+        "version": "1.4.0"
     },
     "home-manager": {
         "branch": "master",
@@ -12,10 +12,10 @@
         "homepage": "https://rycee.gitlab.io/home-manager/",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "66a68b4a58f7c554bd7746acd51ff7cc02840b0a",
-        "sha256": "16c54als3qlhrsq9akm9cdm1y50d7czsny7nnn7dprp3ry2agpdb",
+        "rev": "bcbf09a2021712a501681fa984f659fddad3c2e8",
+        "sha256": "0ih2rp30ldvf4klpiphc1civ5f18flc1a541lw81y23nhrgny55a",
         "type": "tarball",
-        "url": "https://github.com/nix-community/home-manager/archive/66a68b4a58f7c554bd7746acd51ff7cc02840b0a.tar.gz",
+        "url": "https://github.com/nix-community/home-manager/archive/bcbf09a2021712a501681fa984f659fddad3c2e8.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "hosts": {
@@ -24,10 +24,10 @@
         "homepage": "",
         "owner": "StevenBlack",
         "repo": "hosts",
-        "rev": "b19a01ef737afa3fc1ef0d9c66594f57f396daae",
-        "sha256": "0vhfi81rkcm0pdiy150paq8qyi9p72x986k543rx3c2vpadxn4g7",
+        "rev": "a204d5a1e9049dd12378fa5f9c5ab3fc6bf3d63e",
+        "sha256": "0jv0c0d7mnwxb5g2jhmmfc81nl0qnq1mcmzxlj71kgvikjz48rgi",
         "type": "tarball",
-        "url": "https://github.com/StevenBlack/hosts/archive/b19a01ef737afa3fc1ef0d9c66594f57f396daae.tar.gz",
+        "url": "https://github.com/StevenBlack/hosts/archive/a204d5a1e9049dd12378fa5f9c5ab3fc6bf3d63e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "niv": {
@@ -48,10 +48,10 @@
         "homepage": "",
         "owner": "LnL7",
         "repo": "nix-darwin",
-        "rev": "465539ad1d1ad458bd2179e5b10ad1d487f92e0a",
-        "sha256": "1cg367fdnabd8vca6jjcssszn832q60xw4v7sdl3gwiyapisicw7",
+        "rev": "8834df431736c3037bbef017b24c62bc4ace4645",
+        "sha256": "0mxpj7a00qawq02wr8gz0ij2ix3m5r3z33wbi46s9ackknalvnih",
         "type": "tarball",
-        "url": "https://github.com/LnL7/nix-darwin/archive/465539ad1d1ad458bd2179e5b10ad1d487f92e0a.tar.gz",
+        "url": "https://github.com/LnL7/nix-darwin/archive/8834df431736c3037bbef017b24c62bc4ace4645.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
     "nixpkgs": {
@@ -60,10 +60,10 @@
         "homepage": null,
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e9158eca70ae59e73fae23be5d13d3fa0cfc78b4",
-        "sha256": "0cnmvnvin9ixzl98fmlm3g17l6w95gifqfb3rfxs55c0wj2ddy53",
+        "rev": "84917aa00bf23c88e5874c683abe05edb0ba4078",
+        "sha256": "1x3qh815d7k9yc72zpn5cfaaq2b1942q4pka6rx8b5i33yz4m61q",
         "type": "tarball",
-        "url": "https://github.com/NixOS/nixpkgs/archive/e9158eca70ae59e73fae23be5d13d3fa0cfc78b4.tar.gz",
+        "url": "https://github.com/NixOS/nixpkgs/archive/84917aa00bf23c88e5874c683abe05edb0ba4078.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     }
 }
