@@ -301,21 +301,25 @@ with lib; {
         enable = true;
         terminal = "screen-256color";
         clock24 = true;
-        plugins = with pkgs.tmuxPlugins; [
-          sensible
-          yank
-          {
-            plugin = dracula;
-            extraConfig = ''
-              set -g @dracula-show-battery false
-              set -g @dracula-show-powerline true
-              set -g @dracula-refresh-rate 10
-            '';
-          }
-        ];
+        escapeTime = 1;
+        shortcut = "a";
+        plugins = with pkgs.tmuxPlugins;
+          [
+            #sensible
+            #yank
+            {
+              plugin = dracula;
+              extraConfig = ''
+                set -g @dracula-show-battery false
+                set -g @dracula-show-powerline false
+                set -g @dracula-refresh-rate 10
+              '';
+            }
+          ];
 
         extraConfig = ''
-          set -g mouse on
+          bind | split-window -h
+          bind - split-window -v
         '';
       };
 
