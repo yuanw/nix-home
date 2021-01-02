@@ -2,7 +2,8 @@
 let
   #homeDir = builtins.getEnv ("HOME");
   sources = import ../nix/sources.nix;
-in with pkgs.stdenv;
+in
+with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ];
@@ -15,12 +16,16 @@ with lib; {
   #users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays = let path = ../overlays;
-    in with builtins;
-    map (n: import (path + ("/" + n))) (filter (n:
-      match ".*\\.nix" n != null
-      || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path))) ++ [
+    overlays =
+      let path = ../overlays;
+      in
+      with builtins;
+      map (n: import (path + ("/" + n)))
+        (filter
+          (n:
+            match ".*\\.nix" n != null
+            || pathExists (path + ("/" + n + "/default.nix")))
+          (attrNames (readDir path))) ++ [
         (import (builtins.fetchTarball {
           url =
             "https://github.com/nix-community/emacs-overlay/archive/master.tar.gz";
@@ -41,7 +46,10 @@ with lib; {
       ".ghci".text = ''
         :set prompt "λ> "
       '';
+
+
     };
+
 
     programs = {
       direnv = {
@@ -77,7 +85,7 @@ with lib; {
         ignores = [ ".direnv" ".DS_Store" ];
       };
 
-      gpg = { enable = true; };
+      #gpg = { enable = true; };
 
       home-manager = { enable = true; };
 

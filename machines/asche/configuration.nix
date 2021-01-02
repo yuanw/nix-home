@@ -4,7 +4,8 @@
 
 { config, pkgs, ... }:
 let sources = import ../../nix/sources.nix;
-in {
+in
+{
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -84,15 +85,18 @@ in {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim ];
+  environment.systemPackages = with pkgs; [ wget vim gnupg pinentry ];
+
+  fonts.fonts = with pkgs; [ pragmata-pro-font ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
+  # programs.ssh.startAgent = false;
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   # List services that you want to enable:
 

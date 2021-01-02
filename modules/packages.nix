@@ -40,13 +40,13 @@ with pkgs; [
   #wifi-password
   #Stretchly
   firefox
-  _1password-gui
+  _1password
   #nixops
   #nixfmt
   #nox
   #niv
   #google-cloud-sdk
-
+  pinentry-gtk2
   mu
   offlineimap
   notmuch
