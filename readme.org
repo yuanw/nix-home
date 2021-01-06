@@ -1,6 +1,7 @@
-#+TITLE: My nix-darwin configuration
+#+TITLE: My nix-darwin/NixOS configuration
 
 using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
+using nix and home-manager to manage dotfiles on NixOS
 
 * Install
 
@@ -113,6 +114,6 @@ $(nix-build --no-out-link)/sw/bin/darwin-rebuild switch
 https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 
 * Common commands
-- darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
+** ~sudo rebuild~
 ** How to refresh ~Dock.app~
 ~killall Dock~

@@ -61,6 +61,7 @@ in
   services.xserver.enable = true;
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3.enable = true;
+  #services.xserver.windowManager.xmonad.enable = true;
 
   # Configure keymap in X11
   services.xserver.layout = "us";
@@ -83,9 +84,14 @@ in
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };
 
+  nix = {
+    trustedUsers = [ "root" "yuanwang" ];
+    allowedUsers = [ "root" "yuanwang" ];
+  };
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim gnupg pinentry ];
+  environment.systemPackages = with pkgs; [ wget vim gnupg ];
 
   fonts.fonts = with pkgs; [ pragmata-pro-font ];
 
@@ -96,6 +102,7 @@ in
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
+    pinentryFlavor = "gnome3";
   };
 
   # List services that you want to enable:

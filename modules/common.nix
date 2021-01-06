@@ -46,10 +46,15 @@ with lib; {
       ".ghci".text = ''
         :set prompt "λ> "
       '';
-
-
     };
 
+    xsession = {
+      enable = true;
+      windowManager.xmonad = {
+        enable = true;
+        enableContribAndExtras = true;
+      };
+    };
 
     programs = {
       direnv = {
