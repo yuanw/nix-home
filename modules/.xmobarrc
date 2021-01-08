@@ -1,4 +1,4 @@
-Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
+Config { font = "xft:PragmataPro:size=18:bold"
         , borderColor = "black"
         , border = TopB
         , bgColor = "black"
