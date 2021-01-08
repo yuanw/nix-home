@@ -117,3 +117,9 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 ** ~sudo rebuild~
 ** How to refresh ~Dock.app~
 ~killall Dock~
+* NixOS Config
+** Xmobar
+- https://xmobar.org/#configurations-written-in-pure-haskell
+- https://wiki.archlinux.org/index.php/Xmobar
+** TODO wire a wallpaper with ~feh~
+https://wiki.archlinux.org/index.php/Xmobar
