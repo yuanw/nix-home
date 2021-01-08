@@ -2,6 +2,15 @@
 let
   #homeDir = builtins.getEnv ("HOME");
   sources = import ../nix/sources.nix;
+  haskellPkgs = with pkgs.haskellPackages; [
+    cabal2nix
+    cabal-install
+    ghc
+    haskell-language-server
+    hoogle
+    xmobar
+    nix-tree
+  ];
 in
 with pkgs.stdenv;
 with lib; {
@@ -38,12 +47,32 @@ with lib; {
     };
 
   };
+
   home-manager.users.yuanwang = {
-    home.packages = (import ./packages.nix { inherit pkgs; });
+    home.packages = (import ./packages.nix { inherit pkgs; }) ++ haskellPkgs;
 
     home.file = {
       ".ghci".text = ''
         :set prompt "λ> "
+      '';
+      ".xmobarrc".source = ./.xmobarrc;
+      ".stalonetrayrc".text = ''
+        decorations none
+        transparent false
+        dockapp_mode none
+        geometry 5x1-400+0
+        max_geometry 5x1-325-10
+        background "#000000"
+        kludges force_icons_size
+        grow_gravity NE
+        icon_gravity NE
+        icon_size 12
+        sticky true
+        #window_strut none
+        window_type dock
+        window_layer bottom
+        #no_shrink false
+        skip_taskbar true
       '';
     };
 

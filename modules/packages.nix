@@ -58,8 +58,7 @@ with pkgs; [
 
   autojump
   #vscode
-  haskell-language-server
-
+  stalonetray
   shellcheck
   fontconfig
 ]
