@@ -1,0 +1,3 @@
+#+TITLE: XMonad Config
+
+https://mwhittaker.github.io/blog/gnome_with_xmonad_on_ubuntu_12_04/
