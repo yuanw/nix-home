@@ -27,7 +27,7 @@ in
     device = "nodev";
     font =
       "${pkgs.pragmata-pro-font}/share/fonts/PragmataPro/PragmataPro_Mono_R_0828.ttf";
-    fontSize = 32;
+    fontSize = 48;
   };
 
   boot.initrd.luks.devices.home = {
