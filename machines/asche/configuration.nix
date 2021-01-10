@@ -13,7 +13,7 @@ in
     ../../modules/common.nix
   ];
 
-  # nixpkgs.config.allowUnfree = true;
+  # nixpkgs.config.allowUnfree= true;
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -25,6 +25,9 @@ in
     efiSupport = true;
     enableCryptodisk = true;
     device = "nodev";
+    font =
+      "${pkgs.pragmata-pro-font}/share/fonts/PragmataPro/PragmataPro_Mono_R_0828.ttf";
+    fontSize = 32;
   };
 
   boot.initrd.luks.devices.home = {

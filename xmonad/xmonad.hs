@@ -11,7 +11,6 @@ import qualified Data.Map as M
 import Data.Monoid
 import System.Exit
 import XMonad
-import XMonad.Config.Gnome
 import XMonad.Hooks.EwmhDesktops (ewmh)
 import XMonad.Hooks.ManageDocks
 import qualified XMonad.StackSet as W
@@ -244,7 +243,7 @@ myStartupHook = return ()
 --
 main = do
   xmproc <- spawnPipe "xmobar"
-  xmonad gnomeConfig
+  xmonad $ docks defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
