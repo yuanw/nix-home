@@ -15,7 +15,7 @@ in
 with pkgs.stdenv;
 with lib; {
 
-  imports = [ ./modules ];
+  imports = [ ./modules ./dev/python.nix ];
   # Create /etc/bashrc that loads the nix-darwin environment.
   programs.zsh.enable = true; # default shell on catalina
   # programs.bash.enable = false;

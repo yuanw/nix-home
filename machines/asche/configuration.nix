@@ -126,6 +126,7 @@ in
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "20.09"; # Did you read the comment?
+  programs.python.enable = true;
   programs.editors.emacs = {
     enable = true;
     enableDoomConfig = false;
