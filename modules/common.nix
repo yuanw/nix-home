@@ -48,7 +48,7 @@ with lib; {
 
   };
 
-  home-manager.users.yuanwang = {
+  home-manager.users.yuanwang = rec {
     home.packages = (import ./packages.nix { inherit pkgs; }) ++ haskellPkgs;
 
     home.file = {
@@ -94,6 +94,11 @@ with lib; {
       opacityRule = [ "100:name *= 'i3lock'" ];
       shadow = true;
       shadowOpacity = "0.75";
+    };
+
+    services.dropbox = {
+      enable = true;
+      path = "/home/yuanwang/org/Dropbox";
     };
     programs = {
       direnv = {

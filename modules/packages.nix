@@ -62,5 +62,4 @@ with pkgs; [
   shellcheck
   fontconfig
   stretchly
-  dropbox-cli
 ]

@@ -13,6 +13,7 @@ let
           -I nixpkgs=${sources.nixpkgs}
   '';
   rebuildNix = pkgs.writeShellScriptBin "rebuildNix" ''
+    export NIXPKGS_ALLOW_UNFREE=1
     nixos-rebuild switch --show-trace \
           -I nixos-config=./machines/$(hostname)/configuration.nix \
           -I nixpkgs=${sources.nixpkgs}

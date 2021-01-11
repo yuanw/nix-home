@@ -124,3 +124,5 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 - https://wiki.archlinux.org/index.php/Xmobar
 ** TODO wire a wallpaper with ~feh~
 https://wiki.archlinux.org/index.php/Xmobar
+https://help.dropbox.com/installs-integrations/desktop/move-dropbox-folder
+https://help.dropbox.com/installs-integrations/desktop/view-preferences
