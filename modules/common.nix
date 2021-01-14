@@ -84,6 +84,10 @@ with lib; {
         config = ../xmonad/xmonad.hs;
       };
     };
+    services.udiskie = {
+      enable = true;
+      tray = "always";
+    };
     services.picom = {
       enable = true;
       activeOpacity = "1.0";
@@ -97,7 +101,7 @@ with lib; {
     };
 
     services.dropbox = {
-      enable = true;
+      enable = false;
       path = "/home/yuanwang/org/Dropbox";
     };
     programs = {

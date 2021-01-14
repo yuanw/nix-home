@@ -60,15 +60,41 @@ in
     keyMap = "us";
   };
 
+  services = {
+    gnome3.gnome-keyring.enable = true;
+    upower.enable = true;
+    blueman.enable = true;
+
+    dbus = {
+      enable = true;
+      socketActivated = true;
+      packages = [ pkgs.gnome3.dconf ];
+    };
+    xserver = {
+      enable = true;
+      layout = "us";
+
+      windowManager.xmonad = {
+        enable = true;
+        enableContribAndExtras = true;
+      };
+
+      displayManager.defaultSession = "none+xmonad";
+      libinput = {
+        enable = true;
+        disableWhileTyping = true;
+      };
+    };
+  };
   # Enable the GNOME 3 Desktop Environment.
-  services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome3.enable = true;
+  #services.xserver.enable = true;
+  #services.xserver.displayManager.gdm.enable = true;
+  #services.xserver.desktopManager.gnome3.enable = true;
   #services.xserver.windowManager.xmonad.enable = true;
 
   # Configure keymap in X11
-  services.xserver.layout = "us";
-  services.xserver.xkbOptions = "eurosign:e";
+  #services.xserver.layout = "us";
+  #services.xserver.xkbOptions = "eurosign:e";
 
   # Enable CUPS to print documents.
   # services.printing.enable = true;
@@ -76,6 +102,8 @@ in
   # Enable sound.
   sound.enable = true;
   hardware.pulseaudio.enable = true;
+  hardware.bluetooth.enable = true;
+  systemd.services.upower.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
   # services.xserver.libinput.enable = true;
