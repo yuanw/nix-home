@@ -342,6 +342,7 @@ with lib; {
           ASPELL_CONF = "data-dir ${pkgs.aspell}";
           LANG = "en_US.UTF-8";
           GITSTATUS_LOG_LEVEL = "DEBUG";
+          EDITOR = "emacs";
         };
 
         shellAliases = { alerter = "${pkgs.alerter}/alerter"; };
