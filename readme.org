@@ -128,3 +128,5 @@ https://help.dropbox.com/installs-integrations/desktop/move-dropbox-folder
 https://help.dropbox.com/installs-integrations/desktop/view-preferences
 ** TODO (electron:3127): libnotify-WARNING **: 20:13:33.835: Failed to connect to proxy
 setup notifcation
+** TODO JACK
+https://nixos.wiki/wiki/JACK

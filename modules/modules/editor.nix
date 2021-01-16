@@ -50,9 +50,10 @@ with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    home-manager.users.yuanwang.programs.emacs = {
+    home-manager.users.yuanwang.services.emacs = {
       enable = true;
       package = cfg.pkg;
+      client.enable = true;
     };
 
     home-manager.users.yuanwang.home.file =
