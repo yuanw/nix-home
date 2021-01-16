@@ -11,8 +11,7 @@ let
     xmobar
     nix-tree
   ];
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ./dev/python.nix ];
@@ -25,16 +24,12 @@ with lib; {
   #users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n)))
-        (filter
-          (n:
-            match ".*\\.nix" n != null
-            || pathExists (path + ("/" + n + "/default.nix")))
-          (attrNames (readDir path))) ++ [
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
         (import (builtins.fetchTarball {
           inherit (sources.emacs-overlay) url sha256;
         }))
@@ -102,10 +97,7 @@ with lib; {
       shadowOpacity = "0.75";
     };
 
-    services.dropbox = {
-      enable = false;
-      path = "/home/yuanwang/org/Dropbox";
-    };
+    services.dropbox = { enable = true; };
     programs = {
       direnv = {
         enable = true;
