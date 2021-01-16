@@ -80,6 +80,16 @@ in
       };
 
       displayManager.defaultSession = "none+xmonad";
+      displayManager.lightdm.greeters.mini = {
+        enable = true;
+        user = "your-username";
+        extraConfig = ''
+          [greeter]
+          show-password-label = false
+          [greeter-theme]
+          background-image = ""
+        '';
+      };
       libinput = {
         enable = true;
         disableWhileTyping = true;
