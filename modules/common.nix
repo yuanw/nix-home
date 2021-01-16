@@ -149,7 +149,7 @@ with lib; {
         settings = {
           font = {
             normal = { family = "PragmataPro"; };
-            size = 20;
+            size = 12;
           };
           # https://github.com/dracula/alacritty/blob/master/dracula.yml
           colors = {
