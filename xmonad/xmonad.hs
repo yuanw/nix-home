@@ -69,7 +69,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       -- launch dmenu
       ((modm, xK_p), spawn appLauncher),
       -- launch gmrun
-      ((modm .|. shiftMask, xK_p), spawn "gmrun"),
       -- close focused window
       ((modm .|. shiftMask, xK_c), kill),
       -- Rotate through the available layout algorithms
