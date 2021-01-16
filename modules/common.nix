@@ -11,8 +11,7 @@ let
     xmobar
     nix-tree
   ];
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ./dev/python.nix ];
@@ -25,16 +24,12 @@ with lib; {
   #users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n)))
-        (filter
-          (n:
-            match ".*\\.nix" n != null
-            || pathExists (path + ("/" + n + "/default.nix")))
-          (attrNames (readDir path))) ++ [
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
         (import (builtins.fetchTarball {
           inherit (sources.emacs-overlay) url sha256;
         }))
@@ -78,12 +73,18 @@ with lib; {
 
     xsession = {
       enable = true;
+      initExtra = ''
+        ${pkgs.strectchly}/bin/stretchly &
+        ${pkgs.xorg.xrandr}/bin/xrandr -s 3200x1800
+      '';
       windowManager.xmonad = {
         enable = true;
         enableContribAndExtras = true;
         config = ../xmonad/xmonad.hs;
       };
     };
+
+    services.dunst = { enable = true; };
     services.udiskie = {
       enable = true;
       tray = "always";

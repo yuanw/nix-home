@@ -4,8 +4,7 @@
 
 { config, pkgs, ... }:
 let sources = import ../../nix/sources.nix;
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -67,7 +66,6 @@ in
 
     dbus = {
       enable = true;
-      socketActivated = true;
       packages = [ pkgs.gnome3.dconf ];
     };
     xserver = {

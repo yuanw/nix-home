@@ -61,5 +61,4 @@ with pkgs; [
   stalonetray
   shellcheck
   fontconfig
-  stretchly
 ]
