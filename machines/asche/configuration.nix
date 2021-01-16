@@ -4,8 +4,7 @@
 
 { config, pkgs, ... }:
 let sources = import ../../nix/sources.nix;
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -82,7 +81,7 @@ in
       displayManager.defaultSession = "none+xmonad";
       displayManager.lightdm.greeters.mini = {
         enable = true;
-        user = "your-username";
+        user = "yuanwang";
         extraConfig = ''
           [greeter]
           show-password-label = false
