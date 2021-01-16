@@ -4,8 +4,7 @@
 let
   configDir = ../../conf.d;
   cfg = config.programs.editors.emacs;
-in
-with lib; {
+in with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -50,10 +49,9 @@ with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    home-manager.users.yuanwang.services.emacs = {
+    home-manager.users.yuanwang.programs.emacs = {
       enable = true;
       package = cfg.pkg;
-      client.enable = true;
     };
 
     home-manager.users.yuanwang.home.file =
