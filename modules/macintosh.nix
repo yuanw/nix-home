@@ -300,6 +300,27 @@ with lib; {
       tmux = {
         enable = true;
         terminal = "screen-256color";
+        clock24 = true;
+        escapeTime = 1;
+        shortcut = "a";
+        plugins = with pkgs.tmuxPlugins;
+          [
+            #sensible
+            #yank
+            {
+              plugin = dracula;
+              extraConfig = ''
+                set -g @dracula-show-battery false
+                set -g @dracula-show-powerline false
+                set -g @dracula-refresh-rate 10
+              '';
+            }
+          ];
+
+        extraConfig = ''
+          bind | split-window -h
+          bind - split-window -v
+        '';
       };
 
       zoxide = {
@@ -321,6 +342,7 @@ with lib; {
           ASPELL_CONF = "data-dir ${pkgs.aspell}";
           LANG = "en_US.UTF-8";
           GITSTATUS_LOG_LEVEL = "DEBUG";
+          EDITOR = "emacs";
         };
 
         shellAliases = { alerter = "${pkgs.alerter}/alerter"; };
