@@ -133,6 +133,9 @@ https://nixos.wiki/wiki/JACK
 ** TODO rofi-pass ?
 ** TODO lockscreen
 https://rycee.gitlab.io/home-manager/options.html#opt-services.screen-locker.enable
+
+https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/misc/screensavers
+
 ** TODO setup ~autorandr~
 
 it seems autorandr should be used

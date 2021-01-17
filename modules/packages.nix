@@ -61,4 +61,5 @@ with pkgs; [
   stalonetray
   shellcheck
   fontconfig
+  betterlockscreen
 ]
