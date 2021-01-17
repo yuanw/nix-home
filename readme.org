@@ -132,7 +132,8 @@ setup notifcation
 https://nixos.wiki/wiki/JACK
 ** TODO rofi-pass ?
 ** TODO lockscreen
-** TODO xrandrHeads
+https://rycee.gitlab.io/home-manager/options.html#opt-services.screen-locker.enable
+** TODO setup ~autorandr~
 
 it seems autorandr should be used
 

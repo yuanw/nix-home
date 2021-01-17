@@ -23,6 +23,8 @@ myTerminal = "alacritty"
 
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
+screenLocker = "betterlockscreen -l dim"
+
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
@@ -68,7 +70,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf),
       -- launch dmenu
       ((modm, xK_p), spawn appLauncher),
-      -- launch gmrun
+      -- lock screen
+      ((modm .|. controlMask, xK_l), spawn screenLocker),
       -- close focused window
       ((modm .|. shiftMask, xK_c), kill),
       -- Rotate through the available layout algorithms
