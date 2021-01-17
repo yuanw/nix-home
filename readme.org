@@ -126,7 +126,15 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 https://wiki.archlinux.org/index.php/Xmobar
 https://help.dropbox.com/installs-integrations/desktop/move-dropbox-folder
 https://help.dropbox.com/installs-integrations/desktop/view-preferences
-** TODO (electron:3127): libnotify-WARNING **: 20:13:33.835: Failed to connect to proxy
+** DONE (electron:3127): libnotify-WARNING **: 20:13:33.835: Failed to connect to proxy
 setup notifcation
 ** TODO JACK
 https://nixos.wiki/wiki/JACK
+** TODO rofi-pass ?
+** TODO lockscreen
+** TODO xrandrHeads
+- https://github.com/gvolpe/nix-config/blob/master/system/machine/dell-xps.nix#L26
+- https://linuxconfig.org/how-to-configure-your-monitors-with-xrandr-in-linux
+- https://askubuntu.com/questions/1131558/second-external-monitor-not-waking-up
+** TODO add wifi and battery into xmobar
+** TODO lockscreen

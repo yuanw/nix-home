@@ -149,6 +149,49 @@ in
 
   # Enable the OpenSSH daemon.
   # services.openssh.enable = true;
+  # https://github.com/StevenBlack/hosts#using-nixos
+  networking.extraHosts = builtins.readFile
+    "${sources.hosts}/alternates/fakenews-gambling-porn/hosts";
+
+  # https://nixos.org/manual/nixos/stable/options.html#opt-services.xserver.xrandrHeads
+  services.xserver = {
+    xrandrHeads = [
+      {
+        output = "DP-1";
+        primary = true;
+      }
+      {
+        output = "eDP-1";
+        monitorConfig = ''
+          Option "PreferredMode" "3840x2160"
+          Option "Position" "0 0"
+        '';
+      }
+    ];
+    # https://nixos.org/manual/nixos/stable/options.html#opt-services.xserver.resolutions
+    resolutions = [
+      {
+        x = 2048;
+        y = 1152;
+      }
+      {
+        x = 1920;
+        y = 1080;
+      }
+      {
+        x = 2560;
+        y = 1440;
+      }
+      {
+        x = 3072;
+        y = 1728;
+      }
+      {
+        x = 3840;
+        y = 2160;
+      }
+    ];
+  };
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
