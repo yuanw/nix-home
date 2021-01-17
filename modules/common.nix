@@ -110,6 +110,8 @@ with lib; {
         enableNixDirenvIntegration = true;
       };
 
+      autorandr = { enable = true; };
+
       git = {
         enable = true;
         userName = "Yuan Wang";
