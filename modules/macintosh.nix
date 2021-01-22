@@ -306,8 +306,9 @@ with lib; {
         shortcut = "a";
 
         extraConfig = ''
-          bind | split-window -h
-          bind - split-window -v
+          unbind -
+          bind \| split-window -h
+          bind - split-window
         '';
       };
 
