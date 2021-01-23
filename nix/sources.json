@@ -1,10 +1,10 @@
 {
     "Stretchly": {
-        "sha256": "1i99y35rp2vjw17lr3d0g330ilfc86fp8nxibka4kkhrlhqipqya",
+        "sha256": "0bbk1p4d3vmbsxh9782jmyhfxng0grpzgdf6l9kxspsl0xppjyw3",
         "type": "file",
-        "url": "https://github.com/hovancik/stretchly/releases/download/v1.3.0/Stretchly-1.3.0.dmg",
+        "url": "https://github.com/hovancik/stretchly/releases/download/v1.4.0/Stretchly-1.4.0.dmg",
         "url_template": "https://github.com/hovancik/stretchly/releases/download/v<version>/Stretchly-<version>.dmg",
-        "version": "1.3.0"
+        "version": "1.4.0"
     },
     "emacs-overlay": {
         "branch": "master",

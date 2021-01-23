@@ -6,6 +6,7 @@
     enable = true;
     enableDoomConfig = false;
   };
+  programs.python.enable = true;
   home-manager.users.yuanwang.programs = {
     pet.enable = true;
 
