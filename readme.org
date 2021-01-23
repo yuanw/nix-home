@@ -140,6 +140,8 @@ https://github.com/NixOS/nixpkgs/tree/nixos-unstable/pkgs/misc/screensavers
 
 it seems autorandr should be used
 
+/nix/store/g3ywcsmng00r6az7iizmzavwgr3p049s-xrandr-1.5.1/bin/xrandr --fb 7680x2400 --output eDP-1 --crtc 0 --gamma 1.0:1.0:1.0 --mode 3840x2400 --pos 0x0 --primary --rate 59.99 --reflect normal --rotate normal --output DP-1 --crtc 1 --gamma 1.0:1.0:1.0 --auto --pos 3840x0 --rate 60.00 --reflect normal --rotate normal
+
 - https://github.com/gvolpe/nix-config/blob/master/system/machine/dell-xps.nix#L26
 - https://linuxconfig.org/how-to-configure-your-monitors-with-xrandr-in-linux
 - https://askubuntu.com/questions/1131558/second-external-monitor-not-waking-up

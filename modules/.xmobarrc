@@ -15,7 +15,7 @@ Config { font = "xft:PragmataPro:size=18:bold"
                                        "-o", "Bat",
                                        "-h", "green",
                                        "-l", "red"] 10
-                        , Run Network "wlp3s0" ["-L","0","-H","32","--normal","green","--high","red"] 10
+                        , Run Network "wlp0s20f3" ["-L","0","-H","32","--normal","green","--high","red"] 10
                         ]
         , sepChar = "%"
         , alignSep = "}{"

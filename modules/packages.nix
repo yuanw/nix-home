@@ -39,6 +39,7 @@ with pkgs; [
   #HandBrake
   #wifi-password
   #Stretchly
+  iw
   firefox
   _1password
   #nixops

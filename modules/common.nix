@@ -116,7 +116,7 @@ with lib; {
         enableNixDirenvIntegration = true;
       };
 
-      autorandr = { enable = true; };
+      #  autorandr = { enable = true; };
 
       git = {
         enable = true;
