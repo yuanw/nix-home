@@ -155,3 +155,6 @@ it seems autorandr should be used
 - https://askubuntu.com/questions/1131558/second-external-monitor-not-waking-up
 ** TODO add wifi and battery into xmobar
 ** TODO lockscreen
+
+* TODO patch nix-linter
+https://github.com/Synthetica9/nix-linter/pull/46
