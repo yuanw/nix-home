@@ -2,7 +2,8 @@
 let
   homeDir = builtins.getEnv ("HOME");
   sources = import ../nix/sources.nix;
-in with pkgs.stdenv;
+in
+with pkgs.stdenv;
 with lib; {
 
   imports = [ "${sources.home-manager}/nix-darwin" ./common.nix ];

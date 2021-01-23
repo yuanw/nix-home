@@ -210,6 +210,16 @@ with lib; {
       tmux = {
         enable = true;
         terminal = "screen-256color";
+        clock24 = true;
+        escapeTime = 1;
+        keyMode = "vi";
+        shortcut = "a";
+
+        extraConfig = ''
+          unbind -
+          bind \| split-window -h
+          bind - split-window
+        '';
       };
 
       rofi = {
