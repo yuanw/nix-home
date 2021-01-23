@@ -8,16 +8,15 @@ Config { font = "xft:PragmataPro:size=18:bold"
                         , Run Memory ["-t","Mem: <usedratio>%"] 10
                         , Run Swap [] 10
                         , Run Com "uname" ["-s","-r"] "" 36000
-                        , Run Date "%a %b %_d %Y %H:%M:%S" "date" 10
+                        , Run Date "<fn=1>\xf133</fn>%a %b %_d %Y %H:%M:%S" "date" 10
                         , Run Battery ["-t", "<acstatus>: <left>% - <timeleft>",
 	                               "--",--"-c", "charge_full"
                                        "-O", "AC",
                                        "-o", "Bat",
                                        "-h", "green",
                                        "-l", "red"] 10
-                        , Run Network "wlp0s20f3" ["-L","0","-H","32","--normal","green","--high","red"] 10
                         ]
         , sepChar = "%"
         , alignSep = "}{"
-        , template = " %battery% | %cpu% | %memory% * %swap%  }{ (%wlp3s0% | <fc=#ee9a00>%date%</fc> | %uname%  "
+        , template = " %battery% | %cpu% | %memory% * %swap%  }| %date% | %uname%  "
         }

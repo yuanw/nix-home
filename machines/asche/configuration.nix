@@ -91,7 +91,7 @@ in
       };
       libinput = {
         enable = true;
-        disableWhileTyping = true;
+        touchpad = { disableWhileTyping = true; };
       };
     };
   };

@@ -127,7 +127,13 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 ~killall Dock~
 * NixOS Config
 ** config xrand
+
+
+xrandr --addmode DP-1 3840x2160
+autorandr -l docked
+
 ** Xmobar
+- https://www.youtube.com/watch?v=jCzuMHU3Qtw
 - https://xmobar.org/#configurations-written-in-pure-haskell
 - https://wiki.archlinux.org/index.php/Xmobar
 ** TODO wire a wallpaper with ~feh~
@@ -156,5 +162,5 @@ it seems autorandr should be used
 ** TODO add wifi and battery into xmobar
 ** TODO lockscreen
 
-* TODO patch nix-linter
+* TODO patch nix-linter in shell.nix
 https://github.com/Synthetica9/nix-linter/pull/46
