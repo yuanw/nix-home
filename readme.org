@@ -132,6 +132,11 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 xrandr --addmode DP-1 3840x2160
 autorandr -l docked
 
+- https://askubuntu.com/questions/13254/screen-resolution-xrandr-cannot-find-mode
+- https://github.com/NixOS/nixpkgs/issues/27168
+- https://discourse.nixos.org/t/adding-video-resolution-options/9430
+- https://search.nixos.org/options?query=xserver&from=0&size=30&sort=relevance&channel=20.03
+- https://unix.stackexchange.com/questions/485026/xrandr-fails-randomly-with-configure-crtc-x-failed-on-dock-with-multiple-monit
 ** Xmobar
 - https://www.youtube.com/watch?v=jCzuMHU3Qtw
 - https://xmobar.org/#configurations-written-in-pure-haskell
