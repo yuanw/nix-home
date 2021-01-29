@@ -126,6 +126,11 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 ** How to refresh ~Dock.app~
 ~killall Dock~
 * NixOS Config
+** rofi
+https://github.com/davatorium/rofi/blob/next/doc/rofi.1.markdown
+https://github.com/NixOS/nixpkgs/blob/nixos-20.09/pkgs/tools/security/pass/rofi-pass.nix#L51
+https://github.com/zbaylin/rofi-wifi-menu
+https://github.com/NixOS/nixpkgs/blob/nixos-20.09/pkgs/tools/security/pass/rofi-pass.nix#L51
 ** config xrand
 
 
@@ -141,6 +146,7 @@ autorandr -l docked
 - https://www.youtube.com/watch?v=jCzuMHU3Qtw
 - https://xmobar.org/#configurations-written-in-pure-haskell
 - https://wiki.archlinux.org/index.php/Xmobar
+  https://hub.darcs.net/rgm/config-xmonad
 ** TODO wire a wallpaper with ~feh~
 https://wiki.archlinux.org/index.php/Xmobar
 https://help.dropbox.com/installs-integrations/desktop/move-dropbox-folder
