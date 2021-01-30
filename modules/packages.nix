@@ -63,4 +63,5 @@ with pkgs; [
   shellcheck
   fontconfig
   betterlockscreen
+  killall
 ]

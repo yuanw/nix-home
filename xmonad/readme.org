@@ -1,6 +1,7 @@
 #+TITLE: XMonad Config
 
-
+* How to restart xmonad withour quiting
+\https://discourse.nixos.org/t/xmonad-reloading-without-quitting/10206
 
 * References
 - https://mwhittaker.github.io/blog/gnome_with_xmonad_on_ubuntu_12_04/
