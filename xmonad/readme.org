@@ -1,3 +1,11 @@
 #+TITLE: XMonad Config
 
-https://mwhittaker.github.io/blog/gnome_with_xmonad_on_ubuntu_12_04/
+
+
+* References
+- https://mwhittaker.github.io/blog/gnome_with_xmonad_on_ubuntu_12_04/
+
+* Example
+- https://github.com/Sloopy3333/Dotfiles
+- https://github.com/jumper149/xpm-status-icons
+- https://gitlab.com/dwt1/dotfiles/-/blob/master/.xmonad/xmonad.hs

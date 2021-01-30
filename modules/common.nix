@@ -79,6 +79,9 @@ with lib; {
 
     xsession = {
       enable = true;
+      profileExtra = "
+         xrandr --addmode DP-1 3840x2160
+      ";
       windowManager.xmonad = {
         enable = true;
         enableContribAndExtras = true;
