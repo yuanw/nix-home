@@ -126,16 +126,27 @@ https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 ** How to refresh ~Dock.app~
 ~killall Dock~
 * NixOS Config
+** rofi
+https://github.com/davatorium/rofi/blob/next/doc/rofi.1.markdown
+https://github.com/NixOS/nixpkgs/blob/nixos-20.09/pkgs/tools/security/pass/rofi-pass.nix#L51
+https://github.com/zbaylin/rofi-wifi-menu
+https://github.com/NixOS/nixpkgs/blob/nixos-20.09/pkgs/tools/security/pass/rofi-pass.nix#L51
 ** config xrand
 
 
 xrandr --addmode DP-1 3840x2160
 autorandr -l docked
 
+- https://askubuntu.com/questions/13254/screen-resolution-xrandr-cannot-find-mode
+- https://github.com/NixOS/nixpkgs/issues/27168
+- https://discourse.nixos.org/t/adding-video-resolution-options/9430
+- https://search.nixos.org/options?query=xserver&from=0&size=30&sort=relevance&channel=20.03
+- https://unix.stackexchange.com/questions/485026/xrandr-fails-randomly-with-configure-crtc-x-failed-on-dock-with-multiple-monit
 ** Xmobar
 - https://www.youtube.com/watch?v=jCzuMHU3Qtw
 - https://xmobar.org/#configurations-written-in-pure-haskell
 - https://wiki.archlinux.org/index.php/Xmobar
+  https://hub.darcs.net/rgm/config-xmonad
 ** TODO wire a wallpaper with ~feh~
 https://wiki.archlinux.org/index.php/Xmobar
 https://help.dropbox.com/installs-integrations/desktop/move-dropbox-folder

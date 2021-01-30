@@ -2,8 +2,7 @@
 let
   homeDir = builtins.getEnv ("HOME");
   sources = import ../nix/sources.nix;
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ "${sources.home-manager}/nix-darwin" ./common.nix ];
@@ -20,6 +19,30 @@ with lib; {
   environment.darwinConfig =
     "${homeDir}/.config/nixpkgs/machines/${config.networking.hostName}/configuration.nix";
   nix.trustedUsers = [ "root" "yuanwang" ];
+
+  # Create /etc/bashrc that loads the nix-darwin environment.
+  programs.zsh.enable = true; # default shell on catalina
+  programs.bash.enable = false;
+  time.timeZone = "America/Regina";
+  users.users.yuanwang.shell = pkgs.zsh;
+  users.users.yuanwang.home = homeDir;
+
+  nixpkgs = {
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
+
+    config = {
+      allowUnfree = true;
+      allowBroken = false;
+      allowUnsupportedSystem = false;
+    };
+
+  };
+
   # this is computer level Font, there is also user level font. Nix-darwin cannot manage them yet
   fonts = {
     enableFontDir = true;
@@ -43,8 +66,8 @@ with lib; {
       shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
       shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
 
-                   # focus window
-                   alt - left: yabai -m window --focus west
+      # focus window
+      alt - left: yabai -m window --focus west
                    alt - down : yabai -m window --focus south || yabai -m display --focus prev
                    alt - up : yabai -m window --focus north || yabai -m display --focus next
                    alt - right : yabai -m window --focus east
