@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 let homeDir = builtins.getEnv ("HOME");
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ];
@@ -26,15 +25,12 @@ with lib; {
   users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n))) (filter
-        (n:
-          match ".*\\.nix" n != null
-          || pathExists (path + ("/" + n + "/default.nix")))
-        (attrNames (readDir path)));
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
 
     config = {
       allowUnfree = true;
@@ -232,7 +228,7 @@ with lib; {
           # "url \"git@github.com:\"".insteadOf = "https://github.com/";
         };
 
-        ignores = [ ".direnv" ".DS_Store" ];
+        ignores = [ ".direnv" ".DS_Store" "org.eclipse.buildship.core.prefs" ];
       };
 
       gpg = { enable = true; };
@@ -309,6 +305,9 @@ with lib; {
           unbind -
           bind \| split-window -h
           bind - split-window
+          bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
+          bind C-v run "reattach-to-user-namespace pbpaste | tmux load-buffer - && tmux paste-buffer"
+
         '';
       };
 

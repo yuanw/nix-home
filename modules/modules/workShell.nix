@@ -1,13 +1,15 @@
 { config, lib, ... }:
 
 with lib;
-let
-  homeDir = builtins.getEnv ("HOME");
+let homeDir = builtins.getEnv ("HOME");
 in
 {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {
+    home-manager.users.yuanwang.programs.zsh.shellAliases = {
+      bt = "bigskyTest";
+    };
     home-manager.users.yuanwang.programs.zsh.initExtra = mkAfter ''
       eval "$(pyenv init -)"
       export GOPATH="${homeDir}/go-workspace"

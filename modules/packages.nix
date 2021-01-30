@@ -32,7 +32,7 @@ with pkgs; [
   gitAndTools.pass-git-helper
   gitAndTools.gh
   #gitAndTools.gitstatus
-
+  ranger
 
   nixpkgs-fmt
 
