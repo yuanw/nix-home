@@ -4,8 +4,7 @@
 
 { config, pkgs, ... }:
 let sources = import ../../nix/sources.nix;
-in
-{
+in {
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
@@ -25,9 +24,9 @@ in
     efiSupport = true;
     enableCryptodisk = true;
     device = "nodev";
-    font =
-      "${pkgs.pragmata-pro-font}/share/fonts/PragmataPro/PragmataPro_Mono_R_0828.ttf";
-    fontSize = 48;
+    #font =
+    #  "${pkgs.pragmata-pro-font}/share/fonts/PragmataPro/PragmataPro_Mono_R_0828.ttf";
+    #fontSize = 48;
   };
 
   boot.initrd.luks.devices.home = {
@@ -133,7 +132,13 @@ in
   # $ nix search wget
   environment.systemPackages = with pkgs; [ wget vim gnupg ];
 
-  fonts.fonts = with pkgs; [ pragmata-pro-font ];
+  fonts.fonts = with pkgs; [
+    emacs-all-the-icons-fonts
+    fira-code
+    font-awesome
+    roboto
+    roboto-mono
+  ];
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
