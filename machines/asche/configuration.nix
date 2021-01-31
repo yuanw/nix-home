@@ -78,16 +78,7 @@ in {
       };
 
       displayManager.defaultSession = "none+xmonad";
-      displayManager.lightdm.greeters.mini = {
-        enable = true;
-        user = "yuanwang";
-        extraConfig = ''
-          [greeter]
-          show-password-label = false
-          [greeter-theme]
-          background-image = ""
-        '';
-      };
+      displayManager.lightdm.greeters.gtk = { enable = true; };
       libinput = {
         enable = true;
         touchpad = { disableWhileTyping = true; };
@@ -119,6 +110,7 @@ in {
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.yuanwang = {
     isNormalUser = true;
+    uid = 1000;
     home = "/home/yuanwang";
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
   };

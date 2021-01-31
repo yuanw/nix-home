@@ -11,8 +11,7 @@ let
     xmobar
     nix-tree
   ];
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ./dev/python.nix ];
@@ -25,16 +24,12 @@ with lib; {
   #users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n)))
-        (filter
-          (n:
-            match ".*\\.nix" n != null
-            || pathExists (path + ("/" + n + "/default.nix")))
-          (attrNames (readDir path))) ++ [
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path))) ++ [
         (import (builtins.fetchTarball {
           inherit (sources.emacs-overlay) url sha256;
         }))
@@ -79,9 +74,7 @@ with lib; {
 
     xsession = {
       enable = true;
-      profileExtra = "
-         xrandr --addmode DP-1 3840x2160
-      ";
+      profileExtra = "\n         xrandr --addmode DP-1 3840x2160\n      ";
       windowManager.xmonad = {
         enable = true;
         enableContribAndExtras = true;
@@ -158,7 +151,7 @@ with lib; {
         enable = true;
         settings = {
           font = {
-            normal = { family = "PragmataPro"; };
+            normal = { family = "roboto"; };
             size = 12;
           };
           # https://github.com/dracula/alacritty/blob/master/dracula.yml
