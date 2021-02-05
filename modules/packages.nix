@@ -40,7 +40,7 @@ with pkgs; [
   #HandBrake
   #wifi-password
   Stretchly
-
+  ihp
   #nixops
   #nixfmt
   #nox

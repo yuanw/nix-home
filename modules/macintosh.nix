@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 let homeDir = builtins.getEnv ("HOME");
-in with pkgs.stdenv;
+in
+with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ];
@@ -25,12 +26,15 @@ with lib; {
   users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays = let path = ../overlays;
-    in with builtins;
-    map (n: import (path + ("/" + n))) (filter (n:
-      match ".*\\.nix" n != null
-      || pathExists (path + ("/" + n + "/default.nix")))
-      (attrNames (readDir path)));
+    overlays =
+      let path = ../overlays;
+      in
+      with builtins;
+      map (n: import (path + ("/" + n))) (filter
+        (n:
+          match ".*\\.nix" n != null
+          || pathExists (path + ("/" + n + "/default.nix")))
+        (attrNames (readDir path)));
 
     config = {
       allowUnfree = true;
