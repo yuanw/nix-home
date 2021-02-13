@@ -30,6 +30,18 @@
         "url": "https://github.com/StevenBlack/hosts/archive/a204d5a1e9049dd12378fa5f9c5ab3fc6bf3d63e.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
     },
+    "ihp": {
+        "branch": "master",
+        "description": "λ IHP is a modern batteries-included Web Framework, built on top of Haskell and Nix.",
+        "homepage": "https://ihp.digitallyinduced.com/",
+        "owner": "digitallyinduced",
+        "repo": "ihp",
+        "rev": "483615736724b7d6d488584508e9718113fb432c",
+        "sha256": "0fvfz9l38kkxin70izwsnwryb9rx967lsinh3w8l2hqglifff5gl",
+        "type": "tarball",
+        "url": "https://github.com/digitallyinduced/ihp/archive/483615736724b7d6d488584508e9718113fb432c.tar.gz",
+        "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
     "niv": {
         "branch": "master",
         "description": "Easy dependency management for Nix projects",
