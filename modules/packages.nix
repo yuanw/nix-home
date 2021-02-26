@@ -63,6 +63,4 @@ with pkgs; [
   shellcheck
   fontconfig
 
-  minikube
-  kubectl
 ]
