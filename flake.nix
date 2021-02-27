@@ -29,12 +29,9 @@
 
           system.stateVersion = 4;
           nix.maxJobs = 8;
-          nix.buildCores = 0;
           services.nix-daemon.enable = false;
 
           nixpkgs.overlays = [ nur.overlay emacs.overlay ];
-
-          nix.trustedUsers = [ "root" "yuanwang" ];
           nixpkgs.config.allowUnfree = true;
 
           environment.shells = [ pkgs.zsh ];
@@ -43,7 +40,7 @@
           programs.zsh.enable = true;
 
           users.users.yuanwang.shell = pkgs.zsh;
-          users.users.yuanwang.home = "/Users/cmacrae";
+          users.users.yuanwang.home = "/Users/yuanwang";
 
           system.defaults = {
             dock = {

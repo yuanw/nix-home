@@ -1,0 +1,7 @@
+#+TITLE: Flake
+
+* How to build it
+~nix build .#darwinConfiguration.wf17084.system~
+
+* Goal
+https://grahamc.com/blog/erase-your-darlings
