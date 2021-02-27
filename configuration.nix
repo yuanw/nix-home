@@ -3,7 +3,6 @@
 with pkgs.stdenv;
 with lib; {
 
-  imports = [ inputs.home-manager.darwinModules.home-manager ];
   nix.package = pkgs.nixFlakes;
   nix.extraOptions = ''
     experimental-features = nix-command flakes

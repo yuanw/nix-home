@@ -12,12 +12,20 @@
     emacs.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs }:
-    let fullName = "Yuan Wang";
-    in {
-      darwinConfigurations."yuan-mac" = darwin.lib.darwinSystem {
-        modules = [ ./configuration.nix ];
+  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs }: {
+
+    darwinConfigurations = {
+      "yuan-mac" = darwin.lib.darwinSystem {
+        modules = [
+          ./configuration.nix
+          home-manager.darwinModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+          }
+        ];
         inputs = { inherit darwin nixpkgs emacs nur home-manager; };
       };
     };
+  };
 }
