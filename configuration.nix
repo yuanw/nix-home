@@ -3,10 +3,10 @@
 with pkgs.stdenv;
 with lib; {
 
-  imports = [
-    inputs.home-manager.darwinModules.home-manager
-    ./modules/primary-user.nix
-  ];
+  # imports = [
+  #   inputs.home-manager.darwinModules.home-manager
+  #   ./modules/primary-user.nix
+  # ];
   nix.package = pkgs.nixFlakes;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
@@ -39,20 +39,4 @@ with lib; {
   # Recreate /run/current-system symlink after boot
   services.activate-system.enable = true;
 
-  home-manager.users.yuanwang = {
-    home.stateVersion = "20.09";
-    home.packages = with pkgs; [
-      aspell
-      aspellDicts.en
-      aspellDicts.en-computers
-    ];
-
-    home.sessionVariables = {
-      PAGER = "less -R";
-      EDITOR = "emacsclient";
-    };
-
-    programs.fzf.enable = true;
-    programs.fzf.enableZshIntegration = true;
-  };
 }
