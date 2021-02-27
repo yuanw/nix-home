@@ -125,7 +125,7 @@
       dotDir = ".config/zsh";
       plugins = [{
         name = "powerlevel10k-config";
-        src = lib.cleanSource ../conf.d/p10k-config;
+        src = ../conf.d/p10k-config;
         file = "p10k.zsh";
       }];
 
