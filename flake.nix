@@ -22,6 +22,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.users.yuanwang = import ./home.nix;
           }
         ];
         inputs = { inherit darwin nixpkgs emacs nur home-manager; };
