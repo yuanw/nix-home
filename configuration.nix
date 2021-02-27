@@ -1,9 +1,9 @@
-{ config, lib, pkgs, emacs, home-manager, ... }:
+{ config, lib, pkgs, emacs, ... }:
 
 with pkgs.stdenv;
 with lib; {
 
-  #imports = [ ./modules/primary-user.nix ];
+  imports = [ ./modules/primary-user.nix ];
   nix.package = pkgs.nixFlakes;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
