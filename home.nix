@@ -2,7 +2,7 @@
 
 {
   home.username = "yuanwang";
-  home.homeDirectory = "$HOME";
+  home.homeDirectory = "/Users/yuanwang";
   home.stateVersion = "20.09";
 
   home.packages = [ pkgs.htop pkgs.fortune ];
