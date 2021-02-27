@@ -15,12 +15,12 @@
   outputs = { self, nixpkgs, darwin, home-manager, nur, emacs }:
     let
       fullName = "Yuan Wang";
-      #pkgs = import nixpkgs { system = "x86_64-darwin"; };
+      pkgs = import nixpkgs { system = "x86_64-darwin"; };
     in {
       darwinConfigurations."yuan-mac" = darwin.lib.darwinSystem {
         modules =
           [ home-manager.darwinModules.home-manager ./configuration.nix ];
-        inputs = { inherit darwin nixpkgs home-manager; };
+        inputs = { inherit darwin pkgs nixpkgs nur home-manager; };
       };
     };
 }
