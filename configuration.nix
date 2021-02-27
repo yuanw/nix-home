@@ -1,9 +1,12 @@
-{ config, lib, pkgs, emacs, home-manager, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
 
-  imports = [ ./modules/primary-user.nix ];
+  imports = [
+    inputs.home-manager.darwinModules.home-manager
+    ./modules/primary-user.nix
+  ];
   nix.package = pkgs.nixFlakes;
   nix.extraOptions = ''
     experimental-features = nix-command flakes
@@ -13,7 +16,7 @@ with lib; {
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
 
-  nixpkgs.overlays = [ emacs.overlay ];
+  nixpkgs.overlays = [ inputs.emacs.overlay ];
   nixpkgs.config.allowUnfree = true;
 
   environment.shells = [ pkgs.zsh ];
