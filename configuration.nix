@@ -11,9 +11,21 @@ with lib; {
   system.stateVersion = 4;
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
+  nixpkgs = {
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
 
-  nixpkgs.overlays = [ inputs.emacs.overlay ];
-  nixpkgs.config.allowUnfree = true;
+    config = {
+      allowUnfree = true;
+      allowBroken = false;
+      allowUnsupportedSystem = false;
+    };
+
+  };
 
   system.defaults = {
     dock = {
