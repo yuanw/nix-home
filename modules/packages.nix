@@ -82,5 +82,5 @@ with pkgs; [
   sqlite
 
   # :lang latex & :lang org (latex previews)
-  texlive.combined.scheme-medium
+  #texlive.combined.scheme-medium
 ]
