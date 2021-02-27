@@ -3,6 +3,8 @@
 * How to build it
 ~nix build .#darwinConfiguration.wf17084.system~
 
+* How to rollback
+darwin-rebuild --rollback
 
 * References
 - https://github.com/cmacrae/config
