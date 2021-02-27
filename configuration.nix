@@ -1,4 +1,4 @@
-{ config, lib, pkgs, emacs, ... }:
+{ config, lib, pkgs, emacs, home-manager, ... }:
 
 with pkgs.stdenv;
 with lib; {
