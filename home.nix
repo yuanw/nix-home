@@ -124,6 +124,10 @@
         bind - split-window
       '';
     };
+      zoxide = {
+        enable = true;
+        enableZshIntegration = true;
+      };
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";

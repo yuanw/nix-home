@@ -2,6 +2,7 @@
 
 * How to build it
 ~nix build .#darwinConfiguration.wf17084.system~
+./result/sw/bin/darwin-rebuild switch --flake .
 
 * How to rollback
 darwin-rebuild --rollback
