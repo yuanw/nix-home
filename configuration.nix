@@ -12,7 +12,7 @@ with lib; {
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
   nixpkgs = {
-    overlays = [ inputs.nur.overlay inputs.emacs.overlay (import ./overlays) ];
+    overlays = [ inputs.nur.overlay (import ./overlays) ];
 
     config = {
       allowUnfree = true;
