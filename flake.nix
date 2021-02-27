@@ -18,9 +18,8 @@
       pkgs = import nixpkgs { system = "x86_64-darwin"; };
     in {
       darwinConfigurations."yuan-mac" = darwin.lib.darwinSystem {
-        modules =
-          [ home-manager.darwinModules.home-manager ./configuration.nix ];
-        inputs = { inherit darwin pkgs nixpkgs nur home-manager; };
+        modules = [ ./configuration.nix ];
+        inputs = { inherit darwin pkgs nixpkgs emacs nur home-manager; };
       };
     };
 }

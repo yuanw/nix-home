@@ -1,4 +1,4 @@
-{ config, lib, pkgs, nur, emacs, ... }:
+{ config, lib, pkgs, emacs, home-manager, ... }:
 
 with pkgs.stdenv;
 with lib; {
@@ -13,7 +13,7 @@ with lib; {
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
 
-  nixpkgs.overlays = [ nur.overlay emacs.overlay ];
+  nixpkgs.overlays = [ emacs.overlay ];
   nixpkgs.config.allowUnfree = true;
 
   environment.shells = [ pkgs.zsh ];
