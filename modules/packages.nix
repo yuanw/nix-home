@@ -58,7 +58,6 @@ with pkgs; [
 
   autojump
   vscode
-  haskell-language-server
 
   shellcheck
   fontconfig
