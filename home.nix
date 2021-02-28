@@ -130,7 +130,7 @@
       };
     zsh = rec {
       enable = true;
-      dotDir = ".config/zsh";
+      dotDir = "/Users/yuanwang/.config/zsh";
 
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";

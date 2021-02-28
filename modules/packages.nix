@@ -40,7 +40,7 @@ with pkgs; [
   #HandBrake
   #wifi-password
   Stretchly
-  ihp
+  #ihp
   #nixops
   #nixfmt
   #nox
@@ -62,8 +62,8 @@ with pkgs; [
   shellcheck
   fontconfig
 
-  minikube
-  kubectl
+  #minikube
+  #kubectl
   (ripgrep.override { withPCRE2 = true; })
   gnutls # for TLS connectivity
 
