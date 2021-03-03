@@ -1,7 +1,8 @@
 # Thank you cprussin - https://github.com/cprussin/dotfiles
 { config, lib, ... }:
 let cfg = config.primary-user;
-in {
+in
+{
   options.primary-user.name = lib.mkOption {
     type = lib.types.nullOr lib.types.str;
     default = null;

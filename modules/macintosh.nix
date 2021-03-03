@@ -222,7 +222,7 @@ with lib; {
 
         extraConfig = {
           core = {
-            editor = "emacsclient -a '' -c";
+            editor = "emacs -nw";
             pager =
               "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
           };

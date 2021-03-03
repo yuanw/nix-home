@@ -334,7 +334,8 @@
 
           };
         };
-    in {
+    in
+    {
       darwinConfigurations."wf17084" = darwin.lib.darwinSystem {
         modules = [ home-manager.darwinModules.home-manager ];
         # inputs = { inherit darwin nixpkgs home-manager; };
