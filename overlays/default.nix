@@ -16,7 +16,7 @@ final: prev:
         mkdir -p "$out/Applications/${appname}.app"
         cp -pR * "$out/Applications/${appname}.app"
       '' + postInstall;
-      meta = with stdenv.lib; {
+      meta = with lib; {
         inherit description;
         inherit homepage;
         inherit maintainers;
