@@ -124,13 +124,13 @@
         bind - split-window
       '';
     };
-      zoxide = {
-        enable = true;
-        enableZshIntegration = true;
-      };
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
     zsh = rec {
       enable = true;
-      dotDir = "/Users/yuanwang/.config/zsh";
+      dotDir = ".config/zsh";
 
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
