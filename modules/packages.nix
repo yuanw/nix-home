@@ -81,14 +81,18 @@ with pkgs; [
   # :tools lookup & :lang org +roam
   sqlite
 
-  python37
-  python37Packages.pip
-  python37Packages.ipython
-  python37Packages.black
-  python37Packages.setuptools
-  python37Packages.pylint
-  python37Packages.poetry
-
+  (python37.withPackages (ps:
+    with ps; [
+      pip
+      ipython
+      black
+      isort
+      setuptools
+      pylint
+      #poetry
+      pytest
+      pyflakes
+    ]))
   # :lang latex & :lang org (latex previews)
   #texlive.combined.scheme-medium
 ]
