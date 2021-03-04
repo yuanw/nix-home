@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 let homeDir = builtins.getEnv ("HOME");
-in
-with pkgs.stdenv;
+in with pkgs.stdenv;
 with lib; {
 
   imports = [ ./modules ];
@@ -26,15 +25,12 @@ with lib; {
   users.users.yuanwang.home = homeDir;
 
   nixpkgs = {
-    overlays =
-      let path = ../overlays;
-      in
-      with builtins;
-      map (n: import (path + ("/" + n))) (filter
-        (n:
-          match ".*\\.nix" n != null
-          || pathExists (path + ("/" + n + "/default.nix")))
-        (attrNames (readDir path)));
+    overlays = let path = ../overlays;
+    in with builtins;
+    map (n: import (path + ("/" + n))) (filter (n:
+      match ".*\\.nix" n != null
+      || pathExists (path + ("/" + n + "/default.nix")))
+      (attrNames (readDir path)));
 
     config = {
       allowUnfree = true;
@@ -67,8 +63,8 @@ with lib; {
       shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
       shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
 
-                   # focus window
-                   alt - left: yabai -m window --focus west
+      # focus window
+      alt - left: yabai -m window --focus west
                    alt - down : yabai -m window --focus south || yabai -m display --focus prev
                    alt - up : yabai -m window --focus north || yabai -m display --focus next
                    alt - right : yabai -m window --focus east
