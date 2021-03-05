@@ -12,7 +12,7 @@ with lib; {
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
   nixpkgs = {
-    overlays = [ inputs.nur.overlay (import ./overlays) ];
+    overlays = [ inputs.nur.overlay inputs.emacs.overlay (import ./overlays) ];
 
     config = {
       allowUnfree = true;
@@ -83,8 +83,8 @@ with lib; {
       shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
       # focus window
       alt - left: yabai -m window --focus west
-                   alt - down : yabai -m window --focus south || yabai -m display --focus prev
-                   alt - up : yabai -m window --focus north || yabai -m display --focus next
+      alt - down : yabai -m window --focus south || yabai -m display --focus prev
+      alt - up : yabai -m window --focus north || yabai -m display --focus next
                    alt - right : yabai -m window --focus east
                    # shift window in current workspace, use the arrow keys
                    alt + shift - left  : yabai -m window --warp west

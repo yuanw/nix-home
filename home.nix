@@ -145,7 +145,7 @@
       history = {
         size = 50000;
         save = 500000;
-        path = "${dotDir}/history";
+        path = "$HOME/.config/zsh/history";
         ignoreDups = true;
         share = true;
       };

@@ -17,7 +17,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs }: {
+  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad }: {
 
     darwinConfigurations = {
       "yuan-mac" = darwin.lib.darwinSystem {
