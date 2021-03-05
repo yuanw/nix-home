@@ -28,6 +28,20 @@
         ];
         inputs = { inherit darwin nixpkgs emacs nur home-manager; };
       };
+
+      "wf17084" = darwin.lib.darwinSystem {
+        modules = [
+          ./configuration.nix
+          home-manager.darwinModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = false;
+            home-manager.users.yuanwang = import ./home.nix;
+          }
+        ];
+        inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+      };
+
     };
   };
 }
