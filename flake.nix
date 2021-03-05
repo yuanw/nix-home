@@ -10,6 +10,10 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nur.url = "github:nix-community/NUR";
+    kmonad = {
+      url = "github:david-janssen/kmonad";
+      flake = false;
+    };
     emacs.url = "github:nix-community/emacs-overlay";
   };
 
