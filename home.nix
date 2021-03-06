@@ -131,6 +131,11 @@
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";
+      plugins = [{
+        name = "powerlevel10k-config";
+        src = ../conf.d/p10k-config;
+        file = "p10k.zsh";
+      }];
 
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
@@ -158,6 +163,7 @@
         export PATH=$PATH:$HOME/.local/bin
         . /Users/yuanwang/.nix-profile/etc/profile.d/nix.sh
         export PATH=$PATH:$HOME/.emacs.d/bin
+        export POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 
         function prev() {
             PREV=$(fc -lrn | head -n 1)
