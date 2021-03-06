@@ -81,6 +81,9 @@ with lib; {
       shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app
       shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
       shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
+      ## lock screen
+      shift + ctrl + alt - l: pmset displaysleepnow
+
       # focus window
       alt - left: yabai -m window --focus west
       alt - down : yabai -m window --focus south || yabai -m display --focus prev
