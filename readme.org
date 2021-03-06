@@ -1,4 +1,4 @@
-#+TITLE: My nix-darwin configuration
+#+TITLE: My nix-darwin (Flake) configuration
 
 using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
 
@@ -40,6 +40,13 @@ alt + shift - r : \
  https://gist.github.com/dskindell/374b2a3d8fd9bc4ebc33be4a4486b31e
 https://eclecticlight.co/2019/08/27/kickstarting-and-tearing-down-with-launchctl/
 
+*** add shortcut to lock screen
+
+~pmset displaysleepnow~
+
+require a password immediately after sleep
+
+System Preference -> Secuirty & Privatcy -> General
 ** Terminal Emulator - Alacritty
 
 ** Editor - Doom emacs
@@ -97,30 +104,15 @@ https://lists.gnu.org/archive/html/emacs-orgmode/2013-02/msg00644.html
   https://piratefache.ch/chunkwm-is-dead-reborn-as-yabai/
 - https://github.com/koekeishiya/yabai/blob/7641afd7fdf95101de6675a8e1b9bfafdc3b4c63/examples/skhdrc#L36
 - https://github.com/koekeishiya/yabai/wiki/Commands#space-commands
-** TODO add shortcut to lock screen
 
-~pmset displaysleepnow~
-
-require a password immediately after sleep
-
-System Preference -> Secuirty & Privatcy -> General
 
 ** TODO integrate with github action CI ?
 
-** TODO Update nix_path Darwin Manual
-[2020-09-30 Wed 21:45]
-https://daiderd.com/nix-darwin/manual/index.html#opt-nix.nixPath
-** TODO figure out whether it is possible without install nix-darwin
-https://github.com/jwiegley/nix-config/blob/597b1565c2f244f894a7d43d6402051a0a5352f4/default.nix
-
-#+begin_src bash
-$(nix-build --no-out-link)/sw/bin/darwin-rebuild build
-$(nix-build --no-out-link)/sw/bin/darwin-rebuild switch
-#+end_src
-** TODO install Iosevka font
-https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
-
 * Common commands
-- darwin-rebuild switch -I darwin-config=$HOME/.config/nixpkgs/darwin-configuration.nix
+** How to build
+~nix build .#darwinConfiguartions.yuan-mac.system~
+** How to switch
+~./result/sw/bin/darwin-rebuild switch --flake .~
+
 ** How to refresh ~Dock.app~
 ~killall Dock~

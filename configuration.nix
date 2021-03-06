@@ -71,6 +71,7 @@ with lib; {
     emacs-all-the-icons-fonts
     fira-code
     font-awesome
+    iosevka
     roboto
     roboto-mono
   ];
