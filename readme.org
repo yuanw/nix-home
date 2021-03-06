@@ -19,8 +19,7 @@ https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 * [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
 #+BEGIN_SRC shell
-niv update
-rebuild
+nix flake update --recreate-lock-file
 #+END_SRC
 
 * Content
