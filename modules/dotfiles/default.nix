@@ -1,6 +1,7 @@
-{ lib, ... }:
-
-with lib; {
+{ config, lib, ... }:
+with lib;
+let cfg = config.dotfiles;
+in {
   options = {
     dotfiles = {
       username = mkOption { type = types.str; };
@@ -13,4 +14,7 @@ with lib; {
       };
     };
   };
+
+  config = { };
+
 }

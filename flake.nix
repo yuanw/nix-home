@@ -24,11 +24,11 @@
         modules = [
           ./modules/dotfiles
           {
-            username = "yuanwang";
-            name = "Yuan Wang";
-            email = "me@yuanwang.ca";
-            hostname = "yuan-mac";
-            gpgKey = "BF2ADAA2A98F45E7";
+            dotfiles.username = "yuanwang";
+            dotfiles.name = "Yuan Wang";
+            dotfiles.email = "me@yuanwang.ca";
+            dotifles.hostname = "yuan-mac";
+            dotfiles.gpgKey = "BF2ADAA2A98F45E7";
           }
           ./configuration.nix
           home-manager.darwinModules.home-manager
