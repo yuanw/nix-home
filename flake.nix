@@ -15,14 +15,45 @@
       flake = false;
     };
     emacs.url = "github:nix-community/emacs-overlay";
+    my.url = "path:./my";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad }:
+  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
+    let
+      mailAddr = name: domain: "${name}@${domain}";
+      dotfiles = { config, lib, ... }:
+        with lib;
+        let cfg = config.dotfiles;
+        in {
+          options = {
+            dotfiles = {
+              username = mkOption { type = types.str; };
+              name = mkOption { type = types.str; };
+              email = mkOption { type = types.str; };
+              hostname = mkOption { type = types.str; };
+              gpgKey = mkOption {
+                type = types.str;
+                default = "";
+              };
+            };
+          };
 
-    {
+          config = { };
+
+        };
+
+    in {
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
           modules = [
+            my
+            {
+              my.username = "yuanwang";
+              my.name = "Yuan Wang";
+              my.email = mailAddr "me" "yuanwang.ca";
+              my.hostname = "yuan-mac";
+              my.gpgKey = "BF2ADAA2A98F45E7";
+            }
             ./configuration.nix
             home-manager.darwinModules.home-manager
             {

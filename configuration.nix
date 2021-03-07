@@ -3,9 +3,9 @@
 with pkgs.stdenv;
 with lib; {
 
-  imports = [ ./modules/dotfiles ];
+  #imports = [ ./modules/dotfiles ];
 
-  dotfiles = import ./user.nix;
+  #dotfiles = import ./user.nix;
 
   networking.hostName = config.dotfiles.hostname;
   nix = {
