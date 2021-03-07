@@ -1,7 +1,7 @@
 {
   description = "user information";
-
-  outputs = { self }: {
+  inputs = { };
+  outputs = { self, nixpkgs }: {
 
     my = import ./my.nix;
 

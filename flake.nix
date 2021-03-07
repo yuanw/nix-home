@@ -16,6 +16,7 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     my.url = "path:./my";
+    my.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
