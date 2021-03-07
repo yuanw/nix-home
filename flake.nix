@@ -17,29 +17,22 @@
     emacs.url = "github:nix-community/emacs-overlay";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad }: {
+  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad }:
 
-    darwinConfigurations = {
-      "yuan-mac" = darwin.lib.darwinSystem {
-        modules = [
-          ./modules/dotfiles
-          {
-            dotfiles.username = "yuanwang";
-            dotfiles.name = "Yuan Wang";
-            dotfiles.email = "me@yuanwang.ca";
-            dotifles.hostname = "yuan-mac";
-            dotfiles.gpgKey = "BF2ADAA2A98F45E7";
-          }
-          ./configuration.nix
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = false;
-            home-manager.users.yuanwang = import ./home.nix;
-          }
-        ];
-        inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+    {
+      darwinConfigurations = {
+        "yuan-mac" = darwin.lib.darwinSystem {
+          modules = [
+            ./configuration.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+              home-manager.users.yuanwang = import ./home.nix;
+            }
+          ];
+          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+        };
       };
     };
-  };
 }

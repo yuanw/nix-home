@@ -3,6 +3,10 @@
 with pkgs.stdenv;
 with lib; {
 
+  imports = [ ./modules/dotfiles ];
+
+  dotfiles = import ./user.nix;
+
   networking.hostName = config.dotfiles.hostname;
   nix = {
     package = pkgs.nixFlakes;
