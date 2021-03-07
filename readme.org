@@ -9,11 +9,9 @@ using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.co
 #+begin_src sh
 sh <(curl https://nixos.org/nix/install)
 #+end_src
-
-
 *** Latest OS and the workaround
 https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
-** Install nix-darwin
+*** Install flake
 ** Download PragmataPro zip file to ~private~ directory (optional)
 
 * [[https://github.com/LnL7/nix-darwin#updating][Update]]
@@ -73,15 +71,24 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://rycee.gitlab.io/home-manager/index.html
 
 * Examples
-- https://github.com/jwiegley/nix-config
-- https://github.com/bkase/life
-- https://github.com/tviti/nix-cfg
+** flkaes
 - https://github.com/danieldk/nix-home
 - https://github.com/LnL7/dotfiles
 - https://github.com/cmacrae/config
-- https://github.com/peel/dotfiles
 - https://github.com/hlissner/dotfiles/ (NixOS)
 - https://github.com/Nimor111/nixos-config
+- https://github.com/utdemir/dotfiles/blob/main/system.nix
+- https://github.com/divnix/devos
+- https://github.com/LEXUGE/nixos
+- https://github.com/bqv/nixrc
+- https://git.sr.ht/~dunklecat/nixos-config/tree/master
+
+** non-flakes
+- https://github.com/jwiegley/nix-config
+- https://github.com/bkase/life
+- https://github.com/tviti/nix-cfg
+- https://github.com/peel/dotfiles
+
 * Items of TODO
 ** TODO integrate https://github.com/vjeantet/alerter
 with emacs
