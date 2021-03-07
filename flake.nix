@@ -25,7 +25,7 @@
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
           modules = [
-            my
+            my.my
             {
               my.username = "yuanwang";
               my.name = "Yuan Wang";

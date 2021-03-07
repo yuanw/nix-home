@@ -7,7 +7,7 @@ with lib; {
 
   #dotfiles = import ./user.nix;
 
-  #networking.hostName = config.dotfiles.hostname;
+  networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
