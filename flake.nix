@@ -22,6 +22,14 @@
     darwinConfigurations = {
       "yuan-mac" = darwin.lib.darwinSystem {
         modules = [
+          ./modules/dotfiles
+          {
+            username = "yuanwang";
+            name = "Yuan Wang";
+            email = "me@yuanwang.ca";
+            hostname = "yuan-mac";
+            gpgKey = "BF2ADAA2A98F45E7";
+          }
           ./configuration.nix
           home-manager.darwinModules.home-manager
           {
