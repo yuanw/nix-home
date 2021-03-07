@@ -16,33 +16,11 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     my.url = "path:./my";
-    my.inputs.nixpkgs.follows = "nixpkgs";
+    #my.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
-    let
-      mailAddr = name: domain: "${name}@${domain}";
-      dotfiles = { config, lib, ... }:
-        with lib;
-        let cfg = config.dotfiles;
-        in {
-          options = {
-            dotfiles = {
-              username = mkOption { type = types.str; };
-              name = mkOption { type = types.str; };
-              email = mkOption { type = types.str; };
-              hostname = mkOption { type = types.str; };
-              gpgKey = mkOption {
-                type = types.str;
-                default = "";
-              };
-            };
-          };
-
-          config = { };
-
-        };
-
+    let mailAddr = name: domain: "${name}@${domain}";
     in {
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
