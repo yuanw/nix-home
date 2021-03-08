@@ -43,20 +43,28 @@
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
-      };
 
-      "wf17084" = darwin.lib.darwinSystem {
-        modules = [
-          ./configuration.nix
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = false;
-            home-manager.users.yuanwang = import ./home.nix;
-          }
-        ];
-        inputs = { inherit darwin nixpkgs emacs nur home-manager; };
-      };
+        "wf17084" = darwin.lib.darwinSystem {
+          modules = [
+            my.my
+            {
+              my.username = "yuanwang";
+              my.name = "Yuan Wang";
+              my.email = mailAddr "yuan.wang" "workiva.com";
+              my.hostname = "wf17084";
+              my.gpgKey = "BF2ADAA2A98F45E7";
+            }
+            ./configuration.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = false;
+              home-manager.users.yuanwang = import ./home.nix;
+            }
+          ];
+          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+        };
 
+      };
     };
 }
