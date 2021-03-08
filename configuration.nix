@@ -3,16 +3,36 @@
 with pkgs.stdenv;
 with lib; {
 
-  nix.package = pkgs.nixFlakes;
-  nix.extraOptions = ''
-    experimental-features = nix-command flakes
-  '';
+  #imports = [ ./modules/dotfiles ];
+
+  #dotfiles = import ./user.nix;
+
+  networking.hostName = config.my.hostname;
+  nix = {
+    package = pkgs.nixFlakes;
+    binaryCaches = [
+      "https://utdemir.cachix.org"
+      "https://hs-nix-template.cachix.org"
+      "https://cache.nixos.org"
+      "https://nix-community.cachix.org"
+    ];
+    binaryCachePublicKeys = [
+      "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
+      "hs-nix-template.cachix.org-1:/YbjZCrYAw7d9ayLayk7ZhBdTEkR10ZFmFuOq6ZJo4c="
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+    trustedUsers = [ "root" "yuanwang" ];
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
 
   system.stateVersion = 4;
   nix.maxJobs = 8;
   services.nix-daemon.enable = false;
   nixpkgs = {
-    overlays = [ inputs.nur.overlay (import ./overlays) ];
+    overlays = [ inputs.nur.overlay inputs.emacs.overlay (import ./overlays) ];
 
     config = {
       allowUnfree = true;
@@ -71,6 +91,7 @@ with lib; {
     emacs-all-the-icons-fonts
     fira-code
     font-awesome
+    iosevka
     roboto
     roboto-mono
   ];
@@ -81,10 +102,13 @@ with lib; {
       shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app
       shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
       shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
+      ## lock screen
+      shift + ctrl + alt - l: pmset displaysleepnow
+
       # focus window
       alt - left: yabai -m window --focus west
-                   alt - down : yabai -m window --focus south || yabai -m display --focus prev
-                   alt - up : yabai -m window --focus north || yabai -m display --focus next
+      alt - down : yabai -m window --focus south || yabai -m display --focus prev
+      alt - up : yabai -m window --focus north || yabai -m display --focus next
                    alt - right : yabai -m window --focus east
                    # shift window in current workspace, use the arrow keys
                    alt + shift - left  : yabai -m window --warp west

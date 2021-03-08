@@ -80,7 +80,6 @@ with pkgs; [
   editorconfig-core-c # per-project style config
   # :tools lookup & :lang org +roam
   sqlite
-
   (python37.withPackages (ps:
     with ps; [
       pip

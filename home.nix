@@ -9,6 +9,7 @@
     ".ghci".text = ''
       :set prompt "λ> "
     '';
+
   };
   programs = {
 
@@ -145,13 +146,15 @@
       history = {
         size = 50000;
         save = 500000;
-        path = "${dotDir}/history";
+        path = "$HOME/.config/zsh/history";
         ignoreDups = true;
         share = true;
       };
 
-      initExtraBeforeCompInit =
-        "source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      initExtraBeforeCompInit = ''
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/config/p10k-lean.zsh
+      '';
 
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin

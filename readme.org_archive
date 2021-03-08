@@ -115,3 +115,40 @@ repo https://github.com/StevenBlack/hosts
 :ARCHIVE_CATEGORY: readme
 :ARCHIVE_TODO: KILL
 :END:
+
+* DONE Update nix_path Darwin Manual
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-03-06 Sat 14:51
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+[2020-09-30 Wed 21:45]
+https://daiderd.com/nix-darwin/manual/index.html#opt-nix.nixPath
+
+* DONE figure out whether it is possible without install nix-darwin
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-03-06 Sat 14:51
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+https://github.com/jwiegley/nix-config/blob/597b1565c2f244f894a7d43d6402051a0a5352f4/default.nix
+
+#+begin_src bash
+$(nix-build --no-out-link)/sw/bin/darwin-rebuild build
+$(nix-build --no-out-link)/sw/bin/darwin-rebuild switch
+#+end_src
+
+* DONE install Iosevka font
+:PROPERTIES:
+:ARCHIVE_TIME: 2021-03-06 Sat 14:51
+:ARCHIVE_FILE: ~/.config/nixpkgs/readme.org
+:ARCHIVE_OLPATH: Items of TODO
+:ARCHIVE_CATEGORY: readme
+:ARCHIVE_TODO: DONE
+:END:
+https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
+

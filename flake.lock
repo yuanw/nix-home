@@ -56,6 +56,33 @@
         "type": "github"
       }
     },
+    "kmonad": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1613649907,
+        "narHash": "sha256-97Sb/Rw3A5xjgwhKtSxfBsR6FtHo06TOggSon92InEk=",
+        "owner": "david-janssen",
+        "repo": "kmonad",
+        "rev": "5051af53af3dd471fe9eb1a50e417213b6ea10e3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "david-janssen",
+        "repo": "kmonad",
+        "type": "github"
+      }
+    },
+    "my": {
+      "locked": {
+        "narHash": "sha256-K7x6LJIp6uZNOc9PD+k1V4vKFLBGyfw2VthLhgAFV5s=",
+        "path": "./my",
+        "type": "path"
+      },
+      "original": {
+        "path": "./my",
+        "type": "path"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1614893024,
@@ -91,6 +118,8 @@
         "darwin": "darwin",
         "emacs": "emacs",
         "home-manager": "home-manager",
+        "kmonad": "kmonad",
+        "my": "my",
         "nixpkgs": "nixpkgs",
         "nur": "nur"
       }
