@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, unzip }:
+{ stdenv, fetchurl, unzip, lib }:
 stdenv.mkDerivation rec {
 
   pname = "dart";
@@ -25,7 +25,7 @@ stdenv.mkDerivation rec {
     #done
   '';
 
-  libPath = stdenv.lib.makeLibraryPath [ stdenv.cc.cc ];
+  libPath = lib.makeLibraryPath [ stdenv.cc.cc ];
 
   dontStrip = true;
 
@@ -38,7 +38,7 @@ stdenv.mkDerivation rec {
       with C-style syntax. It offers compilation to JavaScript, interfaces,
       mixins, abstract classes, reified generics, and optional typing.
     '';
-    license = stdenv.lib.licenses.bsd3;
+    license = lib.licenses.bsd3;
     platforms = [ "x86_64-darwin" ];
   };
 }

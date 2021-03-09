@@ -18,7 +18,6 @@ _: super: {
       # case that happens when the archive doesn't have a subdirectory.
       setSourceRoot = "sourceRoot=`pwd`";
 
-
       installPhase = ''
         mkdir -p $out
         cp alerter $out/
@@ -26,14 +25,13 @@ _: super: {
 
       meta = {
         homepage = "https://github.com/vjeantet/alerter";
-        description =
-          "alerter";
+        description = "alerter";
         longDescription = ''
           alerter is a command-line tool to send Mac OS X User Alerts (Notifications),
           which are available in Mac OS X 10.8 and higher. (even catalina) the program ends when the alerter is activated or closed,
           writing a the activated value to output (stdout), or a json object to describe the alert event.
         '';
-        license = stdenv.lib.licenses.bsd3;
+        license = lib.licenses.bsd3;
         platforms = [ "x86_64-darwin" ];
       };
     };

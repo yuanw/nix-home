@@ -51,6 +51,7 @@
               my.email = mailAddr "yuan.wang" "workiva.com";
               my.hostname = "wf17084";
               my.gpgKey = "19AD3F6B1A5BF3BF";
+              my.homeDirectory = "/Users/yuanwang";
             }
             ./configuration.nix
             home-manager.darwinModules.home-manager
