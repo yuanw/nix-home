@@ -65,18 +65,4 @@ with pkgs; [
   #minikube
   #kubectl
 
-  (python37.withPackages (ps:
-    with ps; [
-      pip
-      ipython
-      black
-      isort
-      setuptools
-      pylint
-      #poetry
-      pytest
-      pyflakes
-    ]))
-  # :lang latex & :lang org (latex previews)
-  #texlive.combined.scheme-medium
 ]

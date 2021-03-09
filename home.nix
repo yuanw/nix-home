@@ -1,7 +1,7 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 {
-  home.username = "yuanwang";
+  home.username = config.my.username;
   home.homeDirectory = "/Users/yuanwang";
   home.stateVersion = "20.09";
   home.packages = (import ./modules/packages.nix { inherit pkgs; });
