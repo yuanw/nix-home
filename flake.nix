@@ -16,7 +16,6 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     my.url = "path:./my";
-    #my.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
@@ -51,15 +50,15 @@
               my.name = "Yuan Wang";
               my.email = mailAddr "yuan.wang" "workiva.com";
               my.hostname = "wf17084";
-              my.gpgKey = "BF2ADAA2A98F45E7";
+              my.gpgKey = "19AD3F6B1A5BF3BF";
             }
             ./configuration.nix
             home-manager.darwinModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = false;
-              home-manager.users.yuanwang = import ./home.nix;
-            }
+            ({ lib, pkgs, config, ... }: {
+              editors.emacs.enable = true;
+              dart.enable = true;
+              workShell.enable = true;
+            })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
