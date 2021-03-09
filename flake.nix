@@ -36,6 +36,9 @@
             ./configuration.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
+              home-manager.users.${config.my.username}.programs.git = {
+                extraConfig = { github.user = "yuanw"; };
+              };
               programs = { editors.emacs.enable = true; };
             })
           ];
@@ -56,6 +59,9 @@
             ./configuration.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
+              home-manager.users.${config.my.username}.programs.git = {
+                extraConfig = { github.user = "yuanwang-wf"; };
+              };
               programs = {
                 editors.emacs.enable = true;
                 dart.enable = true;
