@@ -1,11 +1,8 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 { config, lib, pkgs, ... }:
-let
-  configDir = ../../conf.d;
-  cfg = config.programs.editors.emacs;
-in
-with lib; {
+let cfg = config.programs.editors.emacs;
+in with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -25,7 +22,7 @@ with lib; {
 
   config = mkIf cfg.enable {
 
-    home-manager.users.yuanwang.home.packages = with pkgs; [
+    home-manager.users.${config.my.username}.home.packages = with pkgs; [
       git
       (ripgrep.override { withPCRE2 = true; })
       gnutls # for TLS connectivity
@@ -58,7 +55,7 @@ with lib; {
     home-manager.users.yuanwang.home.file =
       mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
 
-    home-manager.users.yuanwang.programs.zsh = {
+    home-manager.users.${config.my.username}.programs.zsh = {
       initExtra = ''
         export PATH=$PATH:$HOME/.emacs.d/bin
       '';
