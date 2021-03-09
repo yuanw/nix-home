@@ -2,7 +2,7 @@
 
 {
   home.username = config.my.username;
-  home.homeDirectory = "/Users/yuanwang";
+  home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
   home.packages = (import ./modules/packages.nix { inherit pkgs; });
   home.file = {
@@ -79,7 +79,7 @@
     # };
     git = {
       enable = true;
-      userName = "Yuan Wang";
+      userName = config.my.username;
 
       aliases = {
         co = "checkout";
@@ -88,10 +88,10 @@
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
-      userEmail = "me@yuanwang.ca";
+      userEmail = config.my.email;
 
       signing = {
-        key = "BF2ADAA2A98F45E7";
+        key = config.my.gpgKey;
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ];

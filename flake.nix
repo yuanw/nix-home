@@ -32,6 +32,7 @@
               my.email = mailAddr "me" "yuanwang.ca";
               my.hostname = "yuan-mac";
               my.gpgKey = "BF2ADAA2A98F45E7";
+              my.homeDirectory = "/Users/yuanwang";
             }
             ./configuration.nix
             home-manager.darwinModules.home-manager

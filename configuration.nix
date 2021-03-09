@@ -83,7 +83,8 @@ with lib; {
   users.users.yuanwang.home = "/Users/yuanwang";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} = import ./home.nix;
+  home-manager.users.${config.my.username} =
+    import ./home.nix { inherit pkgs lib config; };
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
