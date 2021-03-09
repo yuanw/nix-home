@@ -2,11 +2,7 @@
 
 with pkgs.stdenv;
 with lib; {
-
-  #imports = [ ./modules/dotfiles ];
-
-  #dotfiles = import ./user.nix;
-
+  imports = [ ./modules ];
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixFlakes;
@@ -22,7 +18,7 @@ with lib; {
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
-    trustedUsers = [ "root" "yuanwang" ];
+    trustedUsers = [ "root" config.my.username ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -85,10 +81,13 @@ with lib; {
 
   users.users.yuanwang.shell = pkgs.zsh;
   users.users.yuanwang.home = "/Users/yuanwang";
+  home-manager.useGlobalPkgs = true;
+  home-manager.useUserPackages = false;
+  home-manager.users.${config.my.username} =
+    import ./home.nix { inherit pkgs lib config; };
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
-    emacs-all-the-icons-fonts
     fira-code
     font-awesome
     iosevka

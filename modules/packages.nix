@@ -64,34 +64,5 @@ with pkgs; [
 
   #minikube
   #kubectl
-  (ripgrep.override { withPCRE2 = true; })
-  gnutls # for TLS connectivity
 
-  ## Optional dependencies
-  fd # faster projectile indexing
-  imagemagick # for image-dired
-  zstd
-  ## Module dependencies
-  # :checkers spell
-  (aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]))
-  # :checkers grammar
-  languagetool
-  # :tools editorconfig
-  editorconfig-core-c # per-project style config
-  # :tools lookup & :lang org +roam
-  sqlite
-  (python37.withPackages (ps:
-    with ps; [
-      pip
-      ipython
-      black
-      isort
-      setuptools
-      pylint
-      #poetry
-      pytest
-      pyflakes
-    ]))
-  # :lang latex & :lang org (latex previews)
-  #texlive.combined.scheme-medium
 ]

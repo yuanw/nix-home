@@ -74,7 +74,7 @@
     },
     "my": {
       "locked": {
-        "narHash": "sha256-K7x6LJIp6uZNOc9PD+k1V4vKFLBGyfw2VthLhgAFV5s=",
+        "narHash": "sha256-tvXMW/PXQvsbMlct/dTugoC0ZLQu55lu5xLMUtvJY3Y=",
         "path": "./my",
         "type": "path"
       },

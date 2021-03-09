@@ -1,8 +1,8 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, config, ... }:
 
 {
-  home.username = "yuanwang";
-  home.homeDirectory = "/Users/yuanwang";
+  home.username = config.my.username;
+  home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
   home.packages = (import ./modules/packages.nix { inherit pkgs; });
   home.file = {
@@ -73,13 +73,13 @@
       enableZshIntegration = true;
       enableNixDirenvIntegration = true;
     };
-    emacs = {
-      enable = true;
-      package = pkgs.emacsMacport;
-    };
+    # emacs = {
+    #   enable = true;
+    #   package = pkgs.emacsMacport;
+    # };
     git = {
       enable = true;
-      userName = "Yuan Wang";
+      userName = config.my.username;
 
       aliases = {
         co = "checkout";
@@ -88,10 +88,10 @@
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
-      userEmail = "me@yuanwang.ca";
+      userEmail = config.my.email;
 
       signing = {
-        key = "BF2ADAA2A98F45E7";
+        key = config.my.gpgKey;
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ];
@@ -160,7 +160,6 @@
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export PATH=$PATH:$HOME/.local/bin
         . /Users/yuanwang/.nix-profile/etc/profile.d/nix.sh
-        export PATH=$PATH:$HOME/.emacs.d/bin
 
         function prev() {
             PREV=$(fc -lrn | head -n 1)

@@ -90,6 +90,8 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/peel/dotfiles
 
 * Items of TODO
+** TODO try out nix-doom-emacs
+https://github.com/vlaci/nix-doom-emacs
 ** TODO integrate https://github.com/vjeantet/alerter
 with emacs
 

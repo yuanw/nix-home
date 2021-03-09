@@ -10,7 +10,7 @@ with lib; {
         type = types.str;
         default = "";
       };
+      homeDirectory = mkOption { type = types.path; };
     };
   };
-
 }

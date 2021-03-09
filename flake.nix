@@ -32,14 +32,13 @@
               my.email = mailAddr "me" "yuanwang.ca";
               my.hostname = "yuan-mac";
               my.gpgKey = "BF2ADAA2A98F45E7";
+              my.homeDirectory = "/Users/yuanwang";
             }
             ./configuration.nix
             home-manager.darwinModules.home-manager
-            {
-              home-manager.useGlobalPkgs = true;
-              home-manager.useUserPackages = false;
-              home-manager.users.yuanwang = import ./home.nix;
-            }
+            ({ lib, pkgs, config, ... }: {
+              programs = { editors.emacs.enable = true; };
+            })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
