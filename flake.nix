@@ -55,9 +55,11 @@
             ./configuration.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
-              editors.emacs.enable = true;
-              dart.enable = true;
-              workShell.enable = true;
+              programs = {
+                editors.emacs.enable = true;
+                dart.enable = true;
+                workShell.enable = true;
+              };
             })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
