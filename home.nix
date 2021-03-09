@@ -73,10 +73,10 @@
       enableZshIntegration = true;
       enableNixDirenvIntegration = true;
     };
-    emacs = {
-      enable = true;
-      package = pkgs.emacsMacport;
-    };
+    # emacs = {
+    #   enable = true;
+    #   package = pkgs.emacsMacport;
+    # };
     git = {
       enable = true;
       userName = "Yuan Wang";
@@ -160,7 +160,6 @@
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
         export PATH=$PATH:$HOME/.local/bin
         . /Users/yuanwang/.nix-profile/etc/profile.d/nix.sh
-        export PATH=$PATH:$HOME/.emacs.d/bin
 
         function prev() {
             PREV=$(fc -lrn | head -n 1)

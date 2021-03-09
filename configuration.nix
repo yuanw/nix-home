@@ -87,7 +87,6 @@ with lib; {
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
-    emacs-all-the-icons-fonts
     fira-code
     font-awesome
     iosevka
