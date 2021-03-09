@@ -96,7 +96,6 @@
       };
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
-        github.user = "yuanw";
         core = {
           editor = "emacsclient -a '' -c";
           pager =

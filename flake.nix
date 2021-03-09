@@ -16,7 +16,6 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     my.url = "path:./my";
-    #my.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
@@ -37,11 +36,42 @@
             ./configuration.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
+              home-manager.users.${config.my.username}.programs.git = {
+                extraConfig = { github.user = "yuanw"; };
+              };
               programs = { editors.emacs.enable = true; };
             })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
+
+        "wf17084" = darwin.lib.darwinSystem {
+          modules = [
+            my.my
+            {
+              my.username = "yuanwang";
+              my.name = "Yuan Wang";
+              my.email = mailAddr "yuan.wang" "workiva.com";
+              my.hostname = "wf17084";
+              my.gpgKey = "19AD3F6B1A5BF3BF";
+              my.homeDirectory = "/Users/yuanwang";
+            }
+            ./configuration.nix
+            home-manager.darwinModules.home-manager
+            ({ lib, pkgs, config, ... }: {
+              home-manager.users.${config.my.username}.programs.git = {
+                extraConfig = { github.user = "yuanwang-wf"; };
+              };
+              programs = {
+                editors.emacs.enable = true;
+                dart.enable = true;
+                workShell.enable = true;
+              };
+            })
+          ];
+          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+        };
+
       };
     };
 }

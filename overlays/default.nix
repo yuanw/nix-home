@@ -23,6 +23,9 @@ final: prev:
         platforms = platforms.darwin;
       };
     };
+
+  dart = prev.callPackage ./dart.nix { };
+
   Stretchly = final.installApplication rec {
     name = "Stretchly";
     version = "1.4.0";

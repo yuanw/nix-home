@@ -1,8 +1,11 @@
 #+TITLE: Flake
 
 * How to build it
+~nix build .#darwinConfigurations.wf17084.system~
 ~nix build .#darwinConfigurations.yuan-mac.system~
 ./result/sw/bin/darwin-rebuild switch --flake .
+* Goal
+https://grahamc.com/blog/erase-your-darlings
 
 * How to rollback
 darwin-rebuild --rollback
