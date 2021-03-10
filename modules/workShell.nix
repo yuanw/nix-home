@@ -1,7 +1,7 @@
 { config, lib, ... }:
 
 with lib;
-let homeDir = builtins.getEnv ("HOME");
+let homeDir = config.my.homeDirectory;
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 

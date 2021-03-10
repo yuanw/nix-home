@@ -35,6 +35,7 @@ with pkgs; [
   ranger
 
   nixpkgs-fmt
+  nix-tree
 
   #Apps
   #HandBrake
