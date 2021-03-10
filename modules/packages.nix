@@ -6,7 +6,6 @@ with pkgs; [
   coreutils-prefixed
   moreutils
 
-  bat
   ffmpeg
   less
   gifsicle
