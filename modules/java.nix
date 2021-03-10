@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ pkgs.gradle_latest pkgs.jdk11 ];
+      home.packages = [ pkgs.gradle ];
     };
   };
 }

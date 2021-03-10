@@ -6,6 +6,7 @@ with pkgs; [
   coreutils-prefixed
   moreutils
 
+  bat
   ffmpeg
   less
   gifsicle
@@ -35,6 +36,7 @@ with pkgs; [
   ranger
 
   nixpkgs-fmt
+  nix-tree
 
   #Apps
   #HandBrake
