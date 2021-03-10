@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username}.home.packages = [
-      (python37.withPackages (ps:
+      (pkgs.python37.withPackages (ps:
         with ps; [
           pip
           ipython
