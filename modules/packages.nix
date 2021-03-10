@@ -15,7 +15,6 @@ with pkgs; [
   cachix
   nixfmt
   sass
-  #stack
   tree
   broot
   wget
@@ -31,6 +30,7 @@ with pkgs; [
   gitAndTools.delta
   gitAndTools.pass-git-helper
   gitAndTools.gh
+  git-crypt
   #gitAndTools.gitstatus
   ranger
 
@@ -46,7 +46,6 @@ with pkgs; [
   #nixfmt
   #nox
   #niv
-  #google-cloud-sdk
 
   mu
   offlineimap
