@@ -43,7 +43,7 @@ https://eclecticlight.co/2019/08/27/kickstarting-and-tearing-down-with-launchctl
 
 require a password immediately after sleep
 
-System Preference -> Secuirty & Privatcy -> General
+System Preference -> Security & Privacy -> General
 ** Terminal Emulator - Alacritty
 
 ** Editor - Doom emacs
