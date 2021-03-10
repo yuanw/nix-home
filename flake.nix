@@ -39,7 +39,10 @@
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
               };
-              programs = { editors.emacs.enable = true; };
+              programs = {
+                python.enable = true;
+                editors.emacs.enable = true;
+              };
             })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
