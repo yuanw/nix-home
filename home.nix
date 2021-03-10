@@ -68,6 +68,7 @@
         };
       };
     };
+    bat = { enable = true; };
     direnv = {
       enable = true;
       enableZshIntegration = true;

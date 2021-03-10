@@ -65,7 +65,6 @@
               programs = {
                 editors.emacs.enable = true;
                 dart.enable = true;
-                java.enable = true;
                 workShell.enable = true;
               };
             })
