@@ -33,7 +33,7 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ./configuration.nix
+            ./system.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
@@ -56,7 +56,7 @@
               my.gpgKey = "19AD3F6B1A5BF3BF";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ./configuration.nix
+            ./system.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
