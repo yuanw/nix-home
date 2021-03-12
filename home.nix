@@ -12,12 +12,13 @@
     '';
 
   };
-  home.doom-emacs = {
-    enable = true;
-    doomPrivateDir = ./conf.d/doom;
-  };
-  programs = {
 
+  programs = {
+    doom-emacs = {
+      enable = true;
+      doomPrivateDir = ./conf.d/doom;
+      emacsPackage = pkgs.emacsMacport;
+    };
     alacritty = {
       enable = true;
       settings = {
