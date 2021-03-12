@@ -1,7 +1,8 @@
 { inputs, config, lib, pkgs, ... }:
-
 with pkgs.stdenv;
-with lib; {
+with lib;
+let nix-doom-emacs = inputs.nix-doom-emacs;
+in {
   imports = [ ./modules ];
   networking.hostName = config.my.hostname;
   nix = {
@@ -84,7 +85,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit pkgs lib config nix-doom-emacs; };
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [

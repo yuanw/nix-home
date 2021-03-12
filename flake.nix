@@ -15,10 +15,14 @@
       flake = false;
     };
     emacs.url = "github:nix-community/emacs-overlay";
+    nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
+    nix-doom-emacs.inputs.nixpkgs.follows = "nixpkgs";
+    nix-doom-emacs.inputs.emacs-overlay.follows = "emacs";
     my.url = "path:./my";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
+  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my
+    , nix-doom-emacs }:
     let mailAddr = name: domain: "${name}@${domain}";
     in {
       darwinConfigurations = {
@@ -45,7 +49,9 @@
               };
             })
           ];
-          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+          inputs = {
+            inherit darwin nixpkgs emacs nur home-manager nix-doom-emacs;
+          };
         };
 
         "wf17084" = darwin.lib.darwinSystem {

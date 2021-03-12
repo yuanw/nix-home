@@ -1,6 +1,7 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, nix-doom-emacs }:
 
 {
+  imports = [ nix-doom-emacs.hmModule ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
@@ -11,13 +12,17 @@
     '';
 
   };
+  home.doom-emacs = {
+    enable = true;
+    doomPrivateDir = ./conf.d/doom;
+  };
   programs = {
 
     alacritty = {
       enable = true;
       settings = {
         font = {
-          normal = { family = "PragmataPro Mono"; };
+          normal = { family = "PragmataPro"; };
           size = 18;
         };
         # https://github.com/dracula/alacritty/blob/master/dracula.yml
