@@ -25,7 +25,7 @@ final: prev:
     };
 
   dart = prev.callPackage ./dart.nix { };
-  pragmata-pro = prev.callPack ./pragmata-pro-font.nix { };
+  pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
   Stretchly = final.installApplication rec {
     name = "Stretchly";
