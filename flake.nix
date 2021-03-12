@@ -18,7 +18,8 @@
     my.url = "path:./my";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
+  outputs =
+    inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let mailAddr = name: domain: "${name}@${domain}";
     in {
       darwinConfigurations = {

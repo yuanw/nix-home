@@ -64,5 +64,5 @@ with pkgs; [
 
   #minikube
   #kubectl
-
+  hosts
 ]

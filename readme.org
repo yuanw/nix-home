@@ -19,6 +19,10 @@ https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 nix flake update --recreate-lock-file
 #+END_SRC
 
+* private directory with [[https://github.com/AGWA/git-crypt][git-crypt]]
+[[https://fsd.it/shop/fonts/pragmatapro/][PragmataPro]] font content is in the private directory
+~git-crypt unlock~
+
 * Content
 ** Hosts file management
 ** Shell - zsh with p10k
