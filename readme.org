@@ -1,6 +1,7 @@
 #+TITLE: My nix-darwin (Flake) configuration
 
-using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
+using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS.
+"It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
 * Install
 
