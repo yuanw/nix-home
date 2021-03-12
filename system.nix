@@ -93,6 +93,7 @@ with lib; {
     iosevka
     roboto
     roboto-mono
+    pragmata-pro
   ];
   services.skhd = {
     enable = true;
