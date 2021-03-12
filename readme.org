@@ -93,6 +93,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/peel/dotfiles
 
 * Items of TODO
+** TODO finish hosts module path route
 ** TODO try out nix-doom-emacs
 https://github.com/vlaci/nix-doom-emacs
 ** TODO integrate https://github.com/vjeantet/alerter
@@ -127,3 +128,6 @@ https://www.reddit.com/r/unixporn/comments/l7pdlr/yabai_green_green_green/
 
 ** How to refresh ~Dock.app~
 ~killall Dock~
+** How to get git sha
+~nix-prefetch-git~
+~nix-prefetch-url~

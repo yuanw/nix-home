@@ -8,7 +8,24 @@ in {
     # possible values
     # https://github.com/StevenBlack/hosts/tree/master/alternates
     category = mkOption {
-      type = types.str;
+      type = types.enum [
+        "plain"
+        "fakenews-gambling-porn-social"
+        "fakenews-gambling-porn"
+        "fakenews-gambling-social"
+        "fakenews-gambling"
+        "fakenews-porn-social"
+        "fakenews-porn"
+        "fakenews-social"
+        "fakenews"
+        "gambling-porn-social"
+        "gambling-porn"
+        "gambling-social"
+        "gambling"
+        "porn-social"
+        "porn"
+        "social"
+      ];
       default = "fakenews-gambling-porn";
     };
   };
