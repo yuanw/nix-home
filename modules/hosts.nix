@@ -1,11 +1,8 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
-let
-  sources = import ../../nix/sources.nix;
-  cfg = config.programs.stevenBlackHosts;
-in
-{
+let cfg = config.programs.stevenBlackHosts;
+in {
   options.programs.stevenBlackHosts = {
     enable = mkEnableOption "stevenBlackHosts";
     # possible values
@@ -18,7 +15,6 @@ in
 
   config = mkIf cfg.enable {
     environment.etc.hosts.enable = true;
-    environment.etc.hosts.source = sources.hosts
-      + "/alternates/${cfg.category}/hosts";
+    environment.etc.hosts.source = "${pkgs.hosts}/share/hosts/hosts";
   };
 }

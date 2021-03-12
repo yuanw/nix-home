@@ -43,6 +43,7 @@
               programs = {
                 python.enable = true;
                 editors.emacs.enable = true;
+                stevenBlackHosts.enable = true;
               };
             })
           ];

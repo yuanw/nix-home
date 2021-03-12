@@ -1,6 +1,6 @@
 { stdenv, fetchFromGitHub }:
 
-stdenv.mkdDerivation rec {
+stdenv.mkDerivation rec {
   pname = "stevenBlack-hosts";
   version = "3.5.0";
 
