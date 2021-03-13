@@ -27,7 +27,7 @@ final: prev:
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  ihp = prev.callPackage ./ihp.nix { };
+  ihp-new = prev.callPackage ./ihp-new.nix { };
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 

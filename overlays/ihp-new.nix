@@ -2,7 +2,7 @@
 stdenv.mkDerivation rec {
 
   buildInputs = [ git makeWrapper ];
-  pname = "iph";
+  pname = "ihp-new";
   version = "0.8.0";
 
   src = fetchFromGitHub {
