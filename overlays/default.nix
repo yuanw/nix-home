@@ -25,7 +25,10 @@ final: prev:
     };
 
   dart = prev.callPackage ./dart.nix { };
+  hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };
+  ihp = prev.callPackage ./ihp.nix { };
+
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
   Stretchly = final.installApplication rec {
