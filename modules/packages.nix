@@ -62,6 +62,7 @@ with pkgs; [
   shellcheck
   fontconfig
 
+  Docker
   #minikube
   #kubectl
 ]

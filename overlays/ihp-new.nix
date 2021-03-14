@@ -3,12 +3,12 @@ stdenv.mkDerivation rec {
 
   buildInputs = [ git makeWrapper ];
   pname = "ihp-new";
-  version = "0.8.0";
+  version = "0.9.0";
 
   src = fetchFromGitHub {
     owner = "digitallyinduced";
     repo = "ihp";
-    rev = "v0.9.0";
+    rev = "v${version}";
     sha256 = "12bfmgw5ixsy89yd18xihyx310afhk7ydmrgjmql8jsaqkkw3s8m";
   };
 

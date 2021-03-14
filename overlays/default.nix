@@ -24,6 +24,22 @@ final: prev:
       };
     };
 
+  Docker = final.installApplication rec {
+    name = "Docker";
+    version = "3.2.1";
+    sourceRoot = "Docker.app";
+    src = final.fetchurl {
+      url = "https://download.docker.com/mac/stable/Docker.dmg";
+      sha256 = "1jws46c4pfvkmknw56q009bzfmmqrarglxfvcd8y6y4x70dszms3";
+      # date = 2019-10-23T09:49:21-0700;
+    };
+    description = ''
+      Docker CE for Mac is an easy-to-install desktop app for building,
+      debugging, and testing Dockerized apps on a Mac
+    '';
+    homepage =
+      "https://store.docker.com/editions/community/docker-ce-desktop-mac";
+  };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };

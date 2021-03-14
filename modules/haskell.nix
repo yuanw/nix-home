@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ pkgs.hls pkgs.ihp-new ];
+      home.packages = [ pkgs.hls ];
     };
   };
 }
