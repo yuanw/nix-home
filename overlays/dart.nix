@@ -2,14 +2,14 @@
 stdenv.mkDerivation rec {
 
   pname = "dart";
-  version = "2.7.2";
+  version = "2.12.1";
 
   nativeBuildInputs = [ unzip ];
 
   src = fetchurl {
     url =
       "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-x64-release.zip";
-    sha256 = "111zl075qdk2zd4d4mmfkn30jmzsri9nq3nspnmc2l245gdq34jj";
+    sha256 = "0s1m1fm7qrlf1h6gh5kvx0jwmjbhn7ws2gsfmv9vlyq1zr84pzgj";
   };
 
   installPhase = ''
