@@ -26,6 +26,15 @@ final: prev:
 
   dart = prev.callPackage ./dart.nix { };
 
+  zoom-us = final.installApplication rec {
+    name = "zoom-us";
+    version = "5.5.5";
+    sourceRoot = "zoom.us.app";
+    src = prev.fetchurl {
+      url = "https://zoom.us/client/latest/Zoom.pkg";
+      sha256 = "18m737c3vphqx2gxk4x14a9lg5ad8gx0awkxmrw0sfv6q5gqzrv2";
+    };
+  };
   Stretchly = final.installApplication rec {
     name = "Stretchly";
     version = "1.4.0";
