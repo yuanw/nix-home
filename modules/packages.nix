@@ -31,7 +31,9 @@ with pkgs; [
   gitAndTools.pass-git-helper
   gitAndTools.gh
   git-crypt
+
   #gitAndTools.gitstatus
+  hledger
   ranger
 
   nixpkgs-fmt
