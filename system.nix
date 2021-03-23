@@ -22,6 +22,10 @@ with lib; {
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
+    gc = {
+      automatic = true;
+      user = "yuanwang";
+    };
   };
 
   system.stateVersion = 4;
