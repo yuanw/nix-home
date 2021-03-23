@@ -15,7 +15,6 @@ with pkgs; [
   cachix
   nixfmt
   sass
-  #stack
   tree
   broot
   wget
@@ -31,7 +30,10 @@ with pkgs; [
   gitAndTools.delta
   gitAndTools.pass-git-helper
   gitAndTools.gh
+  git-crypt
+
   #gitAndTools.gitstatus
+  hledger
   ranger
 
   nixpkgs-fmt
@@ -46,7 +48,6 @@ with pkgs; [
   #nixfmt
   #nox
   #niv
-  #google-cloud-sdk
 
   mu
   offlineimap
@@ -63,7 +64,7 @@ with pkgs; [
   shellcheck
   fontconfig
 
+  Docker
   #minikube
   #kubectl
-
 ]

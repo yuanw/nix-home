@@ -18,7 +18,8 @@
     my.url = "path:./my";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my }:
+  outputs =
+    inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let mailAddr = name: domain: "${name}@${domain}";
     in {
       darwinConfigurations = {
@@ -33,13 +34,19 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ./configuration.nix
+            ./system.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
               };
-              programs = { editors.emacs.enable = true; };
+              programs = {
+                node.enable = true;
+                python.enable = true;
+                haskell.enable = true;
+                editors.emacs.enable = true;
+                stevenBlackHosts.enable = true;
+              };
             })
           ];
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
@@ -56,7 +63,7 @@
               my.gpgKey = "19AD3F6B1A5BF3BF";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ./configuration.nix
+            ./system.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {

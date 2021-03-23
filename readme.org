@@ -1,6 +1,7 @@
 #+TITLE: My nix-darwin (Flake) configuration
 
-using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
+using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS.
+"It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
 * Install
 
@@ -12,7 +13,6 @@ sh <(curl https://nixos.org/nix/install)
 *** Latest OS and the workaround
 https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 *** Install flake
-** Download PragmataPro zip file to ~private~ directory (optional)
 
 * [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
@@ -20,7 +20,27 @@ https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 nix flake update --recreate-lock-file
 #+END_SRC
 
-* Content
+* Project Structure
+** conf.d
+raw configuration files for different software. (only doom-emacs for now)
+** private directory with [[https://github.com/AGWA/git-crypt][git-crypt]]
+the things cannot put in git public repo
+
+[[https://fsd.it/shop/fonts/pragmatapro/][PragmataPro]] font content is in the private directory
+~git-crypt unlock~
+
+** overlays
+typical nix overlays
+** modules
+my effort to modulize all the stuffs
+** flake.nix
+the entry point to the whole repo
+** system.nix
+it probably should be divide into common stuff and mac specified stuff
+** home.nix
+all the home-manager config, lots of them should be turned into module
+
+* Curreny setup (TODO)
 ** Hosts file management
 ** Shell - zsh with p10k
 ** Window Manager (Yabai + skhd + spacebar)
@@ -50,21 +70,9 @@ System Preference -> Security & Privacy -> General
 https://tecosaur.github.io/emacs-config/config.html
 
 * Caveats
-** ~services.nix~ doesn't seem work with single user mode
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
 
-* How to write custom module
- - https://github.com/hlissner/dotfiles/blob/e006f1a12ee74eed39dbaeda902b56c9e81201f2/modules/default.nix
- - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
- - https://nixos.wiki/wiki/Module
-* Overlays
-- https://nixos.wiki/wiki/Overlays
-- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
-- https://nixos.org/nixpkgs/manual/#chap-overlays
-- https://www.youtube.com/watch?v=W85mF1zWA2o
-- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
-- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
 
 * References and Manual:
 - https://daiderd.com/nix-darwin/manual/index.html#sec-options
@@ -90,6 +98,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/peel/dotfiles
 
 * Items of TODO
+** TODO finish hosts module path route
 ** TODO try out nix-doom-emacs
 https://github.com/vlaci/nix-doom-emacs
 ** TODO integrate https://github.com/vjeantet/alerter
@@ -116,11 +125,25 @@ https://lists.gnu.org/archive/html/emacs-orgmode/2013-02/msg00644.html
 https://www.reddit.com/r/unixporn/comments/l7pdlr/yabai_green_green_green/
 ** TODO integrate with github action CI ?
 
-* Common commands
-** How to build
+* How to
+** build ?
 ~nix build .#darwinConfiguartions.yuan-mac.system~
-** How to switch
+** switch ?
 ~./result/sw/bin/darwin-rebuild switch --flake .~
 
-** How to refresh ~Dock.app~
+** refresh ~Dock.app~
 ~killall Dock~
+** get git sha
+~nix-prefetch-git~
+~nix-prefetch-url~
+** write custom module ?
+ - https://github.com/hlissner/dotfiles/blob/e006f1a12ee74eed39dbaeda902b56c9e81201f2/modules/default.nix
+ - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
+ - https://nixos.wiki/wiki/Module
+** write overlay
+- https://nixos.wiki/wiki/Overlays
+- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
+- https://nixos.org/nixpkgs/manual/#chap-overlays
+- https://www.youtube.com/watch?v=W85mF1zWA2o
+- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
+- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/

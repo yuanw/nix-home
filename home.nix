@@ -17,8 +17,8 @@
       enable = true;
       settings = {
         font = {
-          normal = { family = "Roboto Mono"; };
-          size = 20;
+          normal = { family = "PragmataPro Mono"; };
+          size = 18;
         };
         # https://github.com/dracula/alacritty/blob/master/dracula.yml
         colors = {
