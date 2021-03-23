@@ -79,6 +79,7 @@ with lib; {
   programs.zsh.enable = true;
   time.timeZone = "America/Regina";
 
+  users.nix.configureBuildUsers = true;
   users.users.yuanwang.shell = pkgs.zsh;
   users.users.yuanwang.home = "/Users/yuanwang";
   home-manager.useGlobalPkgs = true;
