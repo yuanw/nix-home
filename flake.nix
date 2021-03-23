@@ -70,7 +70,6 @@
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               programs = {
-                python.enable = true;
                 editors.emacs.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
