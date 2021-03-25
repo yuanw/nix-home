@@ -74,6 +74,7 @@
                 editors.emacs.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
+                yabai.enable = true;
               };
             })
           ];
