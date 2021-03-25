@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.haskell;
+let cfg = config.programs.wm;
 in {
-  options.programs.yabai = { enable = mkEnableOption "yabai"; };
+  options.programs.wm = { enable = mkEnableOption "wm"; };
 
   config = mkIf cfg.enable {
     services.skhd = {
