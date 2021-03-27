@@ -30,7 +30,7 @@ final: prev:
     sourceRoot = "Docker.app";
     src = final.fetchurl {
       url = "https://download.docker.com/mac/stable/Docker.dmg";
-      sha256 = "1jws46c4pfvkmknw56q009bzfmmqrarglxfvcd8y6y4x70dszms3";
+      sha256 = "0sxapv6n1adncdi69haadjdylb60h352ay7yq83xz83fyhwl0kf4";
       # date = 2019-10-23T09:49:21-0700;
     };
     description = ''
@@ -47,6 +47,15 @@ final: prev:
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
+  zoom-us = final.installApplication rec {
+    name = "zoom-us";
+    version = "5.5.5";
+    sourceRoot = "zoom.us.app";
+    src = prev.fetchurl {
+      url = "https://zoom.us/client/latest/Zoom.pkg";
+      sha256 = "18m737c3vphqx2gxk4x14a9lg5ad8gx0awkxmrw0sfv6q5gqzrv2";
+    };
+  };
   Stretchly = final.installApplication rec {
     name = "Stretchly";
     version = "1.4.0";
