@@ -17,7 +17,9 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [ hledge hledge-ui hledger-web ];
-      programs.zsh = mkIf cfg.enableZshIntegration { sessionVariables = { }; };
+      programs.zsh = mkIf cfg.enableZshIntegration {
+        sessionVariables = { LEDGER_FILE = ""; };
+      };
     };
   };
 }
