@@ -18,7 +18,7 @@ with pkgs; [
   tree
   broot
   wget
-  unrar
+  #unrar
   unzip
   graphviz
   plantuml
@@ -42,29 +42,29 @@ with pkgs; [
   #Apps
   #HandBrake
   #wifi-password
-  Stretchly
+  #Stretchly
   #ihp
   #nixops
   #nixfmt
   #nox
   #niv
 
-  mu
-  offlineimap
-  notmuch
-  google-cloud-sdk
+  #mu
+  #offlineimap
+  #notmuch
+  #google-cloud-sdk
 
   # productivity
-  pandoc
+  #pandoc
   #fzf
 
   autojump
   vscode
 
-  shellcheck
+  #shellcheck
   fontconfig
 
-  Docker
+  #Docker
   #minikube
   #kubectl
 ]
