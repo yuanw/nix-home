@@ -24,7 +24,7 @@
     let mailAddr = name: domain: "${name}@${domain}";
     in {
       nixosConfigurations = {
-        "nixos" = inputs.nixpkgs.lib.nixosSystem {
+        "nixos" = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             my.my
@@ -47,7 +47,6 @@
               };
             })
           ];
-          inputs = { inherit nixpkgs emacs nur home-manager; };
         };
       };
       darwinConfigurations = {
