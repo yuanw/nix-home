@@ -1,5 +1,5 @@
 {
-  description = "Yuan Nix-darwin flake";
+  description = "Yuan Nix-darwin/NixOS flake";
 
   inputs = {
     #nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-20.09-darwin";
@@ -43,12 +43,7 @@
                 extraConfig = { github.user = "yuanw"; };
               };
               programs = {
-                node.enable = true;
-                python.enable = true;
-                haskell.enable = true;
-                editors.emacs.enable = true;
                 stevenBlackHosts.enable = true;
-                wm.enable = true;
               };
             })
           ];
