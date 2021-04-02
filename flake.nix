@@ -24,7 +24,7 @@
     let mailAddr = name: domain: "${name}@${domain}";
     in {
       nixosConfigurations = {
-        "nixos" = nixpkgs.lib.nixosSystem {
+        "nixos" = inputs.nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             my.my
