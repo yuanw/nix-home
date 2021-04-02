@@ -23,6 +23,38 @@
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let mailAddr = name: domain: "${name}@${domain}";
     in {
+      nixosConfigurations = {
+        "nixos" = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            my.my
+            {
+              my.username = "yuanwang";
+              my.name = "Yuan Wang";
+              my.email = mailAddr "me" "yuanwang.ca";
+              my.hostname = "nixos";
+              my.gpgKey = "BF2ADAA2A98F45E7";
+              my.homeDirectory = "/home/yuanwang";
+            }
+            ./system.nix
+            home-manager.darwinModules.home-manager
+            ({ lib, pkgs, config, ... }: {
+              home-manager.users.${config.my.username}.programs.git = {
+                extraConfig = { github.user = "yuanw"; };
+              };
+              programs = {
+                node.enable = true;
+                python.enable = true;
+                haskell.enable = true;
+                editors.emacs.enable = true;
+                stevenBlackHosts.enable = true;
+                wm.enable = true;
+              };
+            })
+          ];
+          inputs = { inherit nixpkgs emacs nur home-manager; };
+        };
+      };
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
           modules = [
