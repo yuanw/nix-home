@@ -23,8 +23,7 @@
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let mailAddr = name: domain: "${name}@${domain}";
     in {
-      nixosConfigurations = {
-        "nixos" = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = [
             my.my
