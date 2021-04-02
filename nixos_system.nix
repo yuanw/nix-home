@@ -63,7 +63,6 @@ with lib; {
     '';
     gc = {
       automatic = true;
-      user = "yuanwang";
     };
   };
 
