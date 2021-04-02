@@ -69,7 +69,6 @@ with lib; {
 
   system.stateVersion = "20.09";
   nixpkgs = {
-    overlays = [ inputs.nur.overlay inputs.emacs.overlay (import ./overlays) ];
 
     config = {
       allowUnfree = true;
