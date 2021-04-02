@@ -140,7 +140,6 @@
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
         EDITOR = "emacs";
-        SKHD_PATH = "${pkgs.skhd}/bin";
       };
 
       enableAutosuggestions = true;

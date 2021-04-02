@@ -87,11 +87,9 @@ with lib; {
   # $ nix search wget
   environment.systemPackages = with pkgs; [ wget vim git firefox ];
   environment.shells = [ pkgs.zsh ];
-  programs.bash.enable = false;
   programs.zsh.enable = true;
   time.timeZone = "America/Regina";
 
-  users.nix.configureBuildUsers = true;
   users.users.yuanwang.shell = pkgs.zsh;
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
