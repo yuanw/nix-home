@@ -2,6 +2,7 @@
 
 {
   home.username = config.my.username;
+  xdg.enable = true;
   home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
   home.packages = (import ./modules/packages.nix { inherit pkgs; });
@@ -157,9 +158,6 @@
       '';
 
       initExtra = lib.mkBefore ''
-        export PATH=$PATH:/usr/local/bin:/usr/local/sbin
-        export PATH=$PATH:$HOME/.local/bin
-        . /Users/yuanwang/.nix-profile/etc/profile.d/nix.sh
 
         function prev() {
             PREV=$(fc -lrn | head -n 1)
