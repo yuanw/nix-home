@@ -46,7 +46,6 @@
             })
           ];
         };
-      };
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
           modules = [
