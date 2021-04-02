@@ -43,7 +43,6 @@
                 extraConfig = { github.user = "yuanw"; };
               };
               programs = {
-                stevenBlackHosts.enable = true;
               };
             })
           ];
