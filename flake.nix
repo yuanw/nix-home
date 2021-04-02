@@ -36,7 +36,7 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/home/yuanwang";
             }
-            ./system.nix
+            ./nixos_system.nix
             home-manager.nixosModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
