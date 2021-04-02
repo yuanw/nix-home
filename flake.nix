@@ -37,13 +37,6 @@
             }
             ./nixos_system.nix
             home-manager.nixosModules.home-manager
-            ({ lib, pkgs, config, ... }: {
-              home-manager.users.${config.my.username}.programs.git = {
-                extraConfig = { github.user = "yuanw"; };
-              };
-              programs = {
-              };
-            })
           ];
         };
       darwinConfigurations = {
