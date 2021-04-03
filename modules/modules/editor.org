@@ -1,0 +1,3 @@
+#+TITLE: Editor
+Emacs
+https://github.com/hlissner/doom-emacs/issues/4534

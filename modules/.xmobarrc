@@ -1,0 +1,30 @@
+Config { font = "xft:PragmataPro:size=18:bold"
+        , borderColor = "black"
+        , border = TopB
+        , bgColor = "black"
+        , fgColor = "grey"
+        , allDesktops = True
+        , position = TopW L 100
+        , commands = [ Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
+                        -- Cpu usage in percent
+                        , Run Cpu ["-t", "<fn=1>\xf108</fn>  cpu: (<total>%)","-H","50","--high","red"] 20
+                        -- Ram used number and percent
+                        , Run Memory ["-t", "<fn=1>\xf233</fn>  mem: <used>M (<usedratio>%)"] 20
+                        -- Disk space free
+                        , Run DiskU [("/", "<fn=1>\xf0c7</fn>  hdd: <free> free")] [] 60
+                        , Run Swap [] 10
+                        , Run Wireless "wlp0s20f3" [ ] 20
+                        , Run DynNetwork [] 10
+                        , Run Com "uname" ["-s","-r"] "" 36000
+                        , Run Date "<fn=1>\xf133</fn> %a %b %_d %Y %H:%M:%S" "date" 10
+                        , Run Battery ["-t", "<acstatus>: <left>% - <timeleft>",
+	                               "--",--"-c", "charge_full"
+                                       "-O", "AC",
+                                       "-o", "Bat",
+                                       "-h", "green",
+                                       "-l", "red"] 10
+                        ]
+        , sepChar = "%"
+        , alignSep = "}{"
+        , template = " %battery% | %cpu% | %memory% * %swap% | %disku% | %date% | %uname% | %wlp0s20f3wi% %dynnetwork% "
+        }
