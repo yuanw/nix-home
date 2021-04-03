@@ -22,7 +22,7 @@
   xsession = {
     enable = true;
     windowManager.xmonad = {
-      enable = true;
+      enable = false;
       enableContribAndExtras = true;
       config = ./xmonad/xmonad.hs;
     };

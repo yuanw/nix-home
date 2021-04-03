@@ -41,19 +41,13 @@ with lib; {
   # Enable the GNOME 3 Desktop Environment.
   services.xserver.enable = true;
   services.xserver.windowManager.xmonad = {
-    enable = true;
+    enable = false;
     enableContribAndExtras = true;
   };
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3 = {
     enable = true;
-    flashback = {
-      customSessions = {
-        wmName = "xmonad";
-        wmLabel = "XMonad";
-        wmCommand = "${pkgs.haskellPackages.xmonad}/bin/xmonad";
-      };
-    };
+    flashback.enableMetacity = true;
   };
 
   nix = {
