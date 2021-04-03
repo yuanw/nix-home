@@ -12,6 +12,10 @@
     ".ghci".text = ''
       :set prompt "λ> "
     '';
+    ".config/pass-git-helper/git-pass-mapping.ini".text = ''
+      [github.com*]
+      target=github
+    '';
 
   };
   programs = {
