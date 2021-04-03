@@ -12,6 +12,7 @@
     ".ghci".text = ''
       :set prompt "λ> "
     '';
+    ".xmobarrc".source = ../modules/.xmobarrc;
     ".config/pass-git-helper/git-pass-mapping.ini".text = ''
       [github.com*]
       target=github
@@ -127,6 +128,11 @@
 
     jq = { enable = true; };
     password-store = { enable = true; };
+    rofi = {
+      enable = true;
+      terminal = "${pkgs.alacritty}/bin/alaritty";
+      theme = ../modules/theme.rafi;
+    };
     tmux = {
       enable = true;
       terminal = "screen-256color";
