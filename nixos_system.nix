@@ -41,7 +41,10 @@ with lib; {
   # Enable the GNOME 3 Desktop Environment.
   services.xserver.enable = true;
   services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome3.enable = true;
+  services.xserver.desktopManager.gnome3 = {
+    enable = true;
+    flashback.enableMetacity = true;
+  };
 
   nix = {
     package = pkgs.nixFlakes;
