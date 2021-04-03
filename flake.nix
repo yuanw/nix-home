@@ -37,6 +37,7 @@
             }
             ./nixos_system.nix
             home-manager.nixosModules.home-manager
+{nixpkgs.overlays = [(se: su: {myInputs = inputs;})];}
           ];
         };
       darwinConfigurations = {

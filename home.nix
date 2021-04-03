@@ -94,7 +94,7 @@
 
       signing = {
         key = config.my.gpgKey;
-        signByDefault = true;
+        signByDefault = false;
       };
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
