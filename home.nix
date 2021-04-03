@@ -77,10 +77,7 @@
       enableZshIntegration = true;
       enableNixDirenvIntegration = true;
     };
-    # emacs = {
-    #   enable = true;
-    #   package = pkgs.emacsMacport;
-    # };
+
     git = {
       enable = true;
       userName = config.my.username;
@@ -96,7 +93,7 @@
 
       signing = {
         key = config.my.gpgKey;
-        signByDefault = false;
+        signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
@@ -106,6 +103,8 @@
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
         branch.autosetupmerge = true;
+        credential.helper =
+          "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
       };
     };
 
@@ -114,6 +113,7 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
+    password-store = { enable = true; };
     tmux = {
       enable = true;
       terminal = "screen-256color";

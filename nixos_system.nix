@@ -61,14 +61,11 @@ with lib; {
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
-    gc = {
-      automatic = true;
-    };
+    gc = { automatic = true; };
   };
 
   system.stateVersion = "20.09";
   nixpkgs = {
-
 
     config = {
       allowUnfree = true;
@@ -89,6 +86,7 @@ with lib; {
   environment.systemPackages = with pkgs; [ wget vim git firefox ];
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
+  programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
 
   users.users.yuanwang.shell = pkgs.zsh;
