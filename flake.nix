@@ -37,7 +37,15 @@
             }
             ./nixos_system.nix
             home-manager.nixosModules.home-manager
-{nixpkgs.overlays = [(se: su: {myInputs = inputs;})];}
+{nixpkgs.overlays = [(se: su: {myInputs = inputs;}) emacs.overlay nur.overlay (import ./overlays) ];}
+({config, pkgs, ...}: {
+  programs = {
+     editors.emacs = {
+       enable = true;
+       pkg = pkgs.emacsGcc;
+     };
+  };
+})
           ];
         };
       darwinConfigurations = {

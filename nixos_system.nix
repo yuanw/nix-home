@@ -69,6 +69,7 @@ with lib; {
   system.stateVersion = "20.09";
   nixpkgs = {
 
+
     config = {
       allowUnfree = true;
       allowBroken = false;
