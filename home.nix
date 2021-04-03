@@ -19,14 +19,14 @@
 
   };
 
-  xsession = {
-    enable = true;
-    windowManager.xmonad = {
-      enable = false;
-      enableContribAndExtras = true;
-      config = ./xmonad/xmonad.hs;
-    };
-  };
+  # xsession = {
+  #   enable = true;
+  #   windowManager.xmonad = {
+  #     enable = false;
+  #     enableContribAndExtras = true;
+  #     config = ./xmonad/xmonad.hs;
+  #   };
+  # };
 
   programs = {
     alacritty = {
