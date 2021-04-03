@@ -47,7 +47,13 @@ with lib; {
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3 = {
     enable = true;
-    flashback.enableMetacity = true;
+    flashback = {
+      customSessions = {
+        wmName = "xmonad";
+        wmLabel = "XMonad";
+        wmCommand = "${pkgs.haskellPackages.xmonad}/bin/xmonad";
+      };
+    };
   };
 
   nix = {
