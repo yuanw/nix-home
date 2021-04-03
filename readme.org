@@ -1,25 +1,35 @@
-#+TITLE: My nix-darwin (Flake) configuration
+#+TITLE: My nixos/nix-darwin (Flake) configuration
 
-using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS.
+
+using nixos or [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on NixOs/MacOS.
 "It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
-* Install
+* MacOS
+** Install
 
-*** Install single-user Nix
+**** Install single-user Nix
 
 #+begin_src sh
 sh <(curl https://nixos.org/nix/install)
 #+end_src
-*** Latest OS and the workaround
+**** Latest OS and the workaround
 https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
-*** Install flake
+**** Install flake
 
-* [[https://github.com/LnL7/nix-darwin#updating][Update]]
+** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
 #+BEGIN_SRC shell
 nix flake update --recreate-lock-file
 #+END_SRC
 
+** build on macos?
+~nix build .#darwinConfiguartions.yuan-mac.system~
+*** switch ?
+~./result/sw/bin/darwin-rebuild switch --flake .~
+
+* NixOS
+** Build
+~nixos-rebuild build --flake '.#'~
 * Project Structure
 ** conf.d
 raw configuration files for different software. (only doom-emacs for now)
@@ -126,11 +136,6 @@ https://www.reddit.com/r/unixporn/comments/l7pdlr/yabai_green_green_green/
 ** TODO integrate with github action CI ?
 
 * How to
-** build ?
-~nix build .#darwinConfiguartions.yuan-mac.system~
-** switch ?
-~./result/sw/bin/darwin-rebuild switch --flake .~
-
 ** refresh ~Dock.app~
 ~killall Dock~
 ** get git sha
