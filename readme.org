@@ -151,3 +151,4 @@ https://www.reddit.com/r/unixporn/comments/l7pdlr/yabai_green_green_green/
 - https://www.youtube.com/watch?v=W85mF1zWA2o
 - https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
 - https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
+** flakes ?
