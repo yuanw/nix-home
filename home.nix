@@ -69,55 +69,74 @@
           normal = { family = "Roboto Mono"; };
           size = 18;
         };
+        cursor.style = "Beam";
+        background_opacity = 0.8;
         # https://github.com/dracula/alacritty/blob/master/dracula.yml
         colors = {
-          primary.background = "0x282c34";
-          primary.foreground = "0xabb2bf";
-
-          cursor.text = "0x44475a";
-          cursor.cursor = "0xf8f8f2";
-
-          selection = {
-            text = "0xf8f8f2";
-            background = "0x44475a";
+          # Default colors
+          primary = {
+            background = "0x292d3e";
+            foreground = "0x959dcb";
           };
+          cursor = {
+            text = "0x202331";
+            cursor = "0xc792ea";
+          };
+          # Normal colors
           normal = {
-            black = "0x000000";
-            red = "0xff5555";
-            green = "0x50fa7b";
-            yellow = "0xf1fa8c";
-            blue = "0xbd93f9";
-            magenta = "0xff79c6";
-            cyan = "0x8be9fd";
-            white = "0xbfbfbf";
+            black = "0x292d3e";
+            red = "0xf07178";
+            green = "0xc3e88d";
+            yellow = "0xffcb6b";
+            blue = "0x82aaff";
+            magenta = "0xc792ea";
+            cyan = "0x89ddff";
+            white = "0x959dcb";
           };
-
+          # Bright colors
           bright = {
-            black = "0x4d4d4d";
-            red = "0xff6e67";
-            green = "0x5af78e";
-            yellow = "0xf4f99d";
-            blue = "0xcaa9fa";
-            magenta = "0xff92d0";
-            cyan = "0x9aedfe";
-            white = "0xe6e6e6";
+            black = "0x676e95";
+            red = "0xf07178";
+            green = "0xc3e88d";
+            yellow = "0xffcb6b";
+            blue = "0x82aaff";
+            magenta = "0xc792ea";
+            cyan = "0x89ddff";
+            white = "0xffffff";
           };
-
-          dim = {
-            black = "0x14151b";
-            red = "0xff2222";
-            green = "0x1ef956";
-            yellow = "0xebf85b";
-            blue = "0x4d5b86";
-            magenta = "0xff46b0";
-            cyan = "0x59dffc";
-            white = "0xe6e6d1";
-          };
-
+          indexed_colors = [
+            {
+              index = 16;
+              color = "0xf78c6c";
+            }
+            {
+              index = 17;
+              color = "0xff5370";
+            }
+            {
+              index = 18;
+              color = "0x444267";
+            }
+            {
+              index = 19;
+              color = "0x32374d";
+            }
+            {
+              index = 20;
+              color = "0x8796b0";
+            }
+            {
+              index = 21;
+              color = "0x959dcb";
+            }
+          ];
         };
       };
     };
-    bat = { enable = true; };
+    bat = {
+      enable = true;
+      config.theme = "palenight";
+    };
     direnv = {
       enable = true;
       enableZshIntegration = true;
@@ -163,33 +182,10 @@
     rofi = {
       enable = true;
       terminal = "${pkgs.alacritty}/bin/alaritty";
-      theme = ''
-        let
-          inherit (config.lib.formats.rasi) mkLiteral;
-        in {
-          "*" = {
-            background-color = mkLiteral "#000000";
-            foreground-color = mkLiteral "rgba ( 250, 251, 252, 100 % )";
-            border-color = mkLiteral "#FFFFFF";
-            width = 512;
-          };
-          "#inputbar" = {
-            children = map mkLiteral [ "prompt" "entry" ];
-          };
-          "#textbox-prompt-colon" = {
-            expand = false;
-            str = ":";
-            margin = mkLiteral "0px 0.3em 0em 0em";
-            text-color = mkLiteral "@foreground-color";
-          };
-        }
-
-      '';
     };
     tmux = {
       enable = true;
       terminal = "screen-256color";
-      clock24 = true;
       escapeTime = 1;
       keyMode = "vi";
       shortcut = "a";

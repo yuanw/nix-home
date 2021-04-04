@@ -40,6 +40,11 @@ with lib; {
 
   # Enable the GNOME 3 Desktop Environment.
   services.xserver.enable = true;
+  services.xserver.autorun = true;
+  services.xserver.autoRepeatDelay = 200;
+  services.xserver.autoRepeatInterval = 25;
+  services.dunst.enable = true;
+  services.picom.enable = true;
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
