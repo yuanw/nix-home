@@ -164,10 +164,6 @@
       enable = true;
       terminal = "${pkgs.alacritty}/bin/alaritty";
       theme = ''
-        /**
-         * rofi -dump-theme output (based on arthur theme).
-         * Rofi version: 1.5.4
-         **/
         * {
             yellow:           rgba ( 232, 174, 91, 100 % );
             red:              rgba ( 205, 92, 92, 100 % );
