@@ -51,7 +51,7 @@
     '';
 
   };
-
+  services.dunst.enable = true;
   xsession = {
     enable = true;
     windowManager.xmonad = {
