@@ -1,0 +1,20 @@
+#+TITLE: Title Window Manager
+* MacOS
+** Hotkey
+*** lock screen shortcut
+~pmset displaysleepnow~
+
+require a password immediately after sleep
+System Preference -> Security & Privacy -> General
+
+** Resources
+- https://www.youtube.com/watch?v=AdwhjIg_Xe4
+- https://github.com/stephen-huan/macos-dotfiles
+- https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
+- https://github.com/koekeishiya/skhd
+- https://github.com/koekeishiya/yabai/blob/7641afd7fdf95101de6675a8e1b9bfafdc3b4c63/examples/skhdrc#L36
+- https://github.com/koekeishiya/yabai/wiki/Commands#space-commands
+- https://gist.github.com/dskindell/374b2a3d8fd9bc4ebc33be4a4486b31e
+
+* NixOS
+xmonad + xmobar

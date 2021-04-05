@@ -42,30 +42,9 @@ all the home-manager config, lots of them should be turned into module
 
 * Curreny setup (TODO)
 ** Hosts file management
-** Shell - zsh with p10k
+** Shell - zsh with [[https://starship.rs/config][starship]]
 ** Window Manager (Yabai + skhd + spacebar)
-Hotkey ideas
-- open terminal
-- restart yabai
- #+begin_src shell
-alt + shift - r : \
-    launchctl kickstart -k "gui/${UID}/homebrew.mxcl.yabai"; \
-    skhd --reload
- #+end_src
- org.nixos.yabai-sa
-
- https://gist.github.com/dskindell/374b2a3d8fd9bc4ebc33be4a4486b31e
-https://eclecticlight.co/2019/08/27/kickstarting-and-tearing-down-with-launchctl/
-
-*** add shortcut to lock screen
-
-~pmset displaysleepnow~
-
-require a password immediately after sleep
-
-System Preference -> Security & Privacy -> General
 ** Terminal Emulator - Alacritty
-
 ** Editor - Doom emacs
 https://tecosaur.github.io/emacs-config/config.html
 
@@ -112,17 +91,7 @@ https://github.com/jwiegley/alert
 
 https://lists.gnu.org/archive/html/emacs-orgmode/2013-02/msg00644.html
 ** TODO add module for terminal emulator
-** STRT setup yabai and skhd
-- https://www.youtube.com/watch?v=AdwhjIg_Xe4
-- https://github.com/stephen-huan/macos-dotfiles
-- https://github.com/cmacrae/config/blob/master/conf.d/skhd.conf
-- https://github.com/koekeishiya/skhd
-- https://gist.github.com/knowler/ef937408198d4ee38ce111ae1a3da750
-  https://piratefache.ch/chunkwm-is-dead-reborn-as-yabai/
-- https://github.com/koekeishiya/yabai/blob/7641afd7fdf95101de6675a8e1b9bfafdc3b4c63/examples/skhdrc#L36
-- https://github.com/koekeishiya/yabai/wiki/Commands#space-commands
--
-https://www.reddit.com/r/unixporn/comments/l7pdlr/yabai_green_green_green/
+
 ** TODO integrate with github action CI ?
 
 * How to

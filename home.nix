@@ -115,6 +115,7 @@
     starship = {
       enable = true;
       enableZshIntegration = true;
+      # https://starship.rs/config/#prompt
       settings = {
         aws = { disabled = true; };
         gcloud = { disabled = true; };
@@ -122,6 +123,7 @@
           ahead = "⇡($count)";
           diverged = "⇕⇡($ahead_count)⇣($behind_count)";
           behind = "⇣($count)";
+          modified = "!($count)";
           staged = "[++($count)](green)";
         };
       };
@@ -164,11 +166,6 @@
         ignoreDups = true;
         share = true;
       };
-
-      # initExtraBeforeCompInit = ''
-      #   source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-      #   source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/config/p10k-lean.zsh
-      # '';
 
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
