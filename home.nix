@@ -21,7 +21,7 @@
       enable = true;
       settings = {
         font = {
-          normal = { family = "Roboto Mono"; };
+          normal = { family = "PragmataPro"; };
           size = 18;
         };
         cursor.style = "Beam";
