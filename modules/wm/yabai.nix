@@ -13,28 +13,43 @@ in {
         shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app
         shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
         shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
-        ## lock screen
+        # lock screen
         shift + ctrl + alt - l: pmset displaysleepnow
 
+
         # focus window
-        alt - left: yabai -m window --focus west
-        alt - down : yabai -m window --focus south || yabai -m display --focus prev
-        alt - up : yabai -m window --focus north || yabai -m display --focus next
-        alt - right : yabai -m window --focus east
-        # shift window in current workspace, use the arrow keys
-        alt + shift - left  : yabai -m window --warp west
-        alt + shift - down  : yabai -m window --warp south
-        alt + shift - up    : yabai -m window --warp north
-        alt + shift - right : yabai -m window --warp east
+        alt - h : yabai -m window --focus west
+        alt - j : yabai -m window --focus south
+        alt - k : yabai -m window --focus north
+        alt - l : yabai -m window --focus east
+
+        # swap window
+        shift + alt - h : yabai -m window --swap west
+        shift + alt - j : yabai -m window --swap south
+        shift + alt - k : yabai -m window --swap north
+        shift + alt - l : yabai -m window --swap east
+
+        # move window
+        shift + cmd - h : yabai -m window --warp west
+        shift + cmd - j : yabai -m window --warp south
+        shift + cmd - k : yabai -m window --warp north
+        shift + cmd - l : yabai -m window --warp east
+
         # fast focus desktop
-        cmd + ctrl - tab : yabai -m space --focus recent
-        cmd + ctrl - p : yabai -m space --focus prev
-        cmd + ctrl - n : yabai -m space --focus next
-        cmd + ctrl - 1 : yabai -m space --focus 1
-        cmd + ctrl - 2 : yabai -m space --focus 2
-        cmd + ctrl - 0x21 : yabai -m window --focus stack.prev # this is [
-        cmd + ctrl - 0x1E : yabai -m window --focus stack.next # this is ]
-      '';
+        cmd + alt - x : yabai -m space --focus recent
+        cmd + alt - z : yabai -m space --focus prev
+        cmd + alt - c : yabai -m space --focus next
+        cmd + alt - 1 : yabai -m space --focus 1
+        cmd + alt - 2 : yabai -m space --focus 2
+        cmd + alt - 3 : yabai -m space --focus 3
+        cmd + alt - 4 : yabai -m space --focus 4
+        cmd + alt - 5 : yabai -m space --focus 5
+        cmd + alt - 6 : yabai -m space --focus 6
+        cmd + alt - 7 : yabai -m space --focus 7
+        cmd + alt - 8 : yabai -m space --focus 8
+        cmd + alt - 9 : yabai -m space --focus 9
+        cmd + alt - 0 : yabai -m space --focus 10
+                      '';
     };
     services.spacebar.enable = true;
     services.spacebar.package = pkgs.spacebar;
