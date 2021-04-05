@@ -1,4 +1,4 @@
-{ inputs, config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
@@ -25,7 +25,7 @@ with lib; {
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
+  #networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -40,8 +40,17 @@ with lib; {
 
   # Enable the GNOME 3 Desktop Environment.
   services.xserver.enable = true;
+  services.xserver.autorun = true;
+  services.xserver.autoRepeatDelay = 200;
+  services.xserver.autoRepeatInterval = 25;
+
+  services.picom.enable = true;
+  services.xserver.windowManager.xmonad = {
+    enable = true;
+    enableContribAndExtras = true;
+  };
   services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome3.enable = true;
+  services.xserver.desktopManager.gnome3 = { enable = true; };
 
   nix = {
     package = pkgs.nixFlakes;
@@ -57,19 +66,16 @@ with lib; {
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
+    allowedUsers = [ "root" config.my.username ];
     trustedUsers = [ "root" config.my.username ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
-    gc = {
-      automatic = true;
-      user = "yuanwang";
-    };
+    gc = { automatic = true; };
   };
 
   system.stateVersion = "20.09";
   nixpkgs = {
-    overlays = [ inputs.nur.overlay inputs.emacs.overlay (import ./overlays) ];
 
     config = {
       allowUnfree = true;
@@ -89,18 +95,17 @@ with lib; {
   # $ nix search wget
   environment.systemPackages = with pkgs; [ wget vim git firefox ];
   environment.shells = [ pkgs.zsh ];
-  programs.bash.enable = false;
   programs.zsh.enable = true;
+  programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
 
-  users.nix.configureBuildUsers = true;
   users.users.yuanwang.shell = pkgs.zsh;
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
     import ./home.nix { inherit pkgs lib config; };
 
-  fonts.enableFontDir = true;
+  fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
     fira-code
     font-awesome

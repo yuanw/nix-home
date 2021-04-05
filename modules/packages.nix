@@ -67,4 +67,9 @@ with pkgs; [
   #Docker
   #minikube
   #kubectl
+  #vscode
+  stalonetray
+  fontconfig
+  betterlockscreen
+  killall
 ]
