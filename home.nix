@@ -115,6 +115,10 @@
     starship = {
       enable = true;
       enableZshIntegration = true;
+      settings = {
+        aws = { disabled = true; };
+        gcloud = { disabled = true; };
+      };
     };
     tmux = {
       enable = true;
