@@ -150,55 +150,55 @@
           staged = "[++($count)](green)";
         };
       };
+    };
 
-      tmux = {
-        enable = true;
-        terminal = "screen-256color";
-        escapeTime = 1;
-        keyMode = "vi";
-        shortcut = "a";
+    tmux = {
+      enable = true;
+      terminal = "screen-256color";
+      escapeTime = 1;
+      keyMode = "vi";
+      shortcut = "a";
 
-        extraConfig = ''
-          unbind -
-          bind \| split-window -h
-          bind - split-window
-        '';
+      extraConfig = ''
+        unbind -
+        bind \| split-window -h
+        bind - split-window
+      '';
+    };
+    zoxide = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+    zsh = rec {
+      enable = true;
+      dotDir = ".config/zsh";
+
+      sessionVariables = {
+        PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
+        ASPELL_CONF = "data-dir ${pkgs.aspell}";
+        LANG = "en_US.UTF-8";
+        GITSTATUS_LOG_LEVEL = "DEBUG";
+        EDITOR = "emacs";
       };
-      zoxide = {
-        enable = true;
-        enableZshIntegration = true;
+
+      enableAutosuggestions = true;
+      history = {
+        size = 50000;
+        save = 500000;
+        path = "$HOME/.config/zsh/history";
+        ignoreDups = true;
+        share = true;
       };
-      zsh = rec {
+
+      initExtra = lib.optionals pkgs.stdenvNoCC.isDarwin lib.mkBefore ''
+        export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+        . $HOME/.nix-profile/etc/profile.d/nix.sh
+      '';
+
+      oh-my-zsh = {
         enable = true;
-        dotDir = ".config/zsh";
-
-        sessionVariables = {
-          PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
-          ASPELL_CONF = "data-dir ${pkgs.aspell}";
-          LANG = "en_US.UTF-8";
-          GITSTATUS_LOG_LEVEL = "DEBUG";
-          EDITOR = "emacs";
-        };
-
-        enableAutosuggestions = true;
-        history = {
-          size = 50000;
-          save = 500000;
-          path = "$HOME/.config/zsh/history";
-          ignoreDups = true;
-          share = true;
-        };
-
-        initExtra = lib.optionals pkgs.stdenvNoCC.isDarwin lib.mkBefore ''
-          export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
-        '';
-
-        oh-my-zsh = {
-          enable = true;
-          plugins = [ "git" "history" "autojump" "history-substring-search" ];
-          custom = "$HOME/.config/zsh/custom";
-        };
+        plugins = [ "git" "history" "autojump" "history-substring-search" ];
+        custom = "$HOME/.config/zsh/custom";
       };
     };
   };
