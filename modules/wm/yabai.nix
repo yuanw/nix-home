@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.wm;
+let cfg = config.programs.wm.yabai;
 in {
-  options.programs.wm = { enable = mkEnableOption "wm"; };
+  options.programs.wm.yabai = { enable = mkEnableOption "wm"; };
 
   config = mkIf cfg.enable {
     services.skhd = {
@@ -74,7 +74,7 @@ in {
     services.yabai = {
       enable = true;
       package = pkgs.yabai;
-      enableScriptingAddition = false;
+      enableScriptingAddition = true;
       config = {
         focus_follows_mouse = "autoraise";
         mouse_follows_focus = "off";
