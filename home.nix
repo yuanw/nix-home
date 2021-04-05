@@ -112,6 +112,10 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
+    starship = {
+      enable = true;
+      enableZshIntegration = true;
+    };
     tmux = {
       enable = true;
       terminal = "screen-256color";
@@ -151,10 +155,10 @@
         share = true;
       };
 
-      initExtraBeforeCompInit = ''
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/config/p10k-lean.zsh
-      '';
+      # initExtraBeforeCompInit = ''
+      #   source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
+      #   source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/config/p10k-lean.zsh
+      # '';
 
       initExtra = lib.mkBefore ''
         export PATH=$PATH:/usr/local/bin:/usr/local/sbin
@@ -173,6 +177,5 @@
         custom = "$HOME/.config/zsh/custom";
       };
     };
-
   };
 }
