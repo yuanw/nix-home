@@ -52,7 +52,7 @@ with pkgs; [
   #mu
   #offlineimap
   #notmuch
-  #google-cloud-sdk
+  google-cloud-sdk
 
   # productivity
   #pandoc
@@ -68,8 +68,5 @@ with pkgs; [
   #minikube
   #kubectl
   #vscode
-  stalonetray
-  fontconfig
-  betterlockscreen
-  killall
+
 ]
