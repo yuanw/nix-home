@@ -2,7 +2,6 @@
 
 {
   home.username = config.my.username;
-  xdg.enable = true;
   home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })

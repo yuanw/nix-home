@@ -47,6 +47,7 @@
           }
           ({ config, pkgs, ... }: {
             home-manager.users.${config.my.username} = {
+              xdg.enable = true;
               home.file = {
                 ".xmobarrc".text = ''
                   Config { font = "xft:PragmataPro:size=18:bold"
