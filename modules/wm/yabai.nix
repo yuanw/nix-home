@@ -1,14 +1,30 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.wm.yabai;
+let
+  cfg = config.programs.wm.yabai;
+  moveConfig = builtins.readFile ./skhdrc;
+  laucherConfig = ''
+    # launchers
+    shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app
+    shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
+    shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
+    # reload skhd configuration
+    shift + ctrl + alt - r: "${pkgs.skhd}/bin/skhd -r"
+    # lock screen
+    shift + ctrl + alt - l: pmset displaysleepnow
+  '';
 in {
   options.programs.wm.yabai = { enable = mkEnableOption "wm"; };
 
   config = mkIf cfg.enable {
     services.skhd = {
       enable = true;
-      skhdConfig = builtins.readFile.skhdrc;
+      skhdConfig = ''
+        ${launcherConfig}
+        ${moveConfig}
+      '';
+      #skhdConfig = builtins.readFile ./skhdrc;
       # skhdConfig = ''
       #   # launchers
       #   shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app

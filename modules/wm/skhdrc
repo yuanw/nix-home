@@ -1,10 +1,3 @@
-# launchers
-shift + ctrl + alt - e: open ~/.nix-profile/Applications/Emacs.app
-shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
-shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
-# lock screen
-shift + ctrl + alt - l: pmset displaysleepnow
-
 # https://github.com/koekeishiya/yabai/blob/7641afd7fdf95101de6675a8e1b9bfafdc3b4c63/examples/skhdrc#L4
 # focus window
 alt - h : yabai -m window --focus west
