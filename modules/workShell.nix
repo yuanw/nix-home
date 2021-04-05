@@ -9,6 +9,7 @@ in {
     home-manager.users.${config.my.username}.programs.zsh = {
       shellAliases = { bt = "bigskyTest"; };
       initExtra = mkAfter ''
+        export PATH=$PATH:$HOME/go/bin
         eval "$(pyenv init -)"
         export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 

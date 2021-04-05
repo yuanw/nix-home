@@ -79,7 +79,7 @@
                 haskell.enable = true;
                 editors.emacs.enable = true;
                 stevenBlackHosts.enable = true;
-                wm.enable = true;
+                wm.yabai.enable = true;
               };
             })
           ];
@@ -107,7 +107,7 @@
                 editors.emacs.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
-                wm.enable = true;
+                wm.yabai.enable = true;
               };
             })
           ];

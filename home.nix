@@ -107,11 +107,28 @@
       };
     };
 
+    go = { enable = true; };
     gpg = { enable = true; };
 
     home-manager = { enable = true; };
 
     jq = { enable = true; };
+    starship = {
+      enable = true;
+      enableZshIntegration = true;
+      # https://starship.rs/config/#prompt
+      settings = {
+        aws = { disabled = true; };
+        gcloud = { disabled = true; };
+        git_status = {
+          ahead = "⇡($count)";
+          diverged = "⇕⇡($ahead_count)⇣($behind_count)";
+          behind = "⇣($count)";
+          modified = "!($count)";
+          staged = "[++($count)](green)";
+        };
+      };
+    };
     tmux = {
       enable = true;
       terminal = "screen-256color";
@@ -140,7 +157,6 @@
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
         EDITOR = "emacs";
-        SKHD_PATH = "${pkgs.skhd}/bin";
       };
 
       enableAutosuggestions = true;
@@ -151,11 +167,6 @@
         ignoreDups = true;
         share = true;
       };
-
-      initExtraBeforeCompInit = ''
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
-        source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/config/p10k-lean.zsh
-      '';
 
       initExtra = lib.mkBefore ''
 
@@ -171,6 +182,5 @@
         custom = "$HOME/.config/zsh/custom";
       };
     };
-
   };
 }
