@@ -50,13 +50,13 @@ in {
         # create desktop, move window and follow focus - uses jq for parsing json
         shift + cmd - n : yabai -m space --create && \
                           index="$(yabai -m query --displays --display | jq '.spaces[-1]')" && \
-                          yabai -m window --space "${index}" && \
-                          yabai -m space --focus "${index}"
+                          yabai -m window --space ''${index} && \
+                          yabai -m space --focus ''${index}
 
         # create desktop and follow focus - uses jq for parsing json
         cmd + alt - n : yabai -m space --create;\
                         index="$(yabai -m query --displays --display | jq '.spaces[-1]')" && \
-                        yabai -m space --focus "${index}"
+                        yabai -m space --focus ''${index}
 
         # destroy desktop
         cmd + alt - w : yabai -m space --destroy
