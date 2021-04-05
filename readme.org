@@ -1,8 +1,5 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
-using [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on MacOS
-using nix and home-manager to manage dotfiles on NixOS
-
 using nixos or [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on NixOs/MacOS.
 "It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
@@ -93,6 +90,7 @@ https://tecosaur.github.io/emacs-config/config.html
 
 * Examples
 ** flakes
+- https://github.com/btwiusegentoo/nixconfig
 - https://github.com/danieldk/nix-home
 - https://github.com/LnL7/dotfiles
 - https://github.com/cmacrae/config
@@ -111,6 +109,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/peel/dotfiles
 
 * Items of TODO
+** TODO copy https://github.com/btwiusegentoo/nixconfig to get xmonad + emacs working
 ** TODO finish hosts module path route
 ** TODO try out nix-doom-emacs
 https://github.com/vlaci/nix-doom-emacs
