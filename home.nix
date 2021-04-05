@@ -118,6 +118,12 @@
       settings = {
         aws = { disabled = true; };
         gcloud = { disabled = true; };
+        git_status = {
+          ahead = "⇡($count)";
+          diverged = "⇕⇡($ahead_count)⇣($behind_count)";
+          behind = "⇣($count)";
+          staged = "[++($count)](green)";
+        };
       };
     };
     tmux = {
