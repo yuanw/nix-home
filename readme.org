@@ -1,6 +1,6 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
-using nixos or [[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on NixOs/MacOS.
+using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on NixOs/MacOS.
 "It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
 * MacOS
@@ -50,11 +50,11 @@ it probably should be divide into common stuff and mac specified stuff
 ** home.nix
 all the home-manager config, lots of them should be turned into module
 
-* Curreny setup (TODO)
+* Current setup (TODO)
 ** Hosts file management
 ** Shell - zsh with [[https://starship.rs/config][starship]]
-** Window Manager (Yabai + skhd + spacebar)
-** Terminal Emulator - Alacritty
+** Window Manager (yabai + skhd + spacebar)
+** Terminal Emulator - alacritty
 ** Editor - Doom emacs
 https://tecosaur.github.io/emacs-config/config.html
 
@@ -70,9 +70,10 @@ https://tecosaur.github.io/emacs-config/config.html
 * Examples
 ** flakes
 - https://github.com/btwiusegentoo/nixconfig
+- https://github.com/hardselius/dotfiles
 - https://github.com/danieldk/nix-home
-- https://github.com/LnL7/dotfiles
-- https://github.com/cmacrae/config
+- https://github.com/LnL7/dotfiles (nix-darwin)
+- https://github.com/cmacrae/config (nix-darwin)
 - https://github.com/hlissner/dotfiles/ (NixOS)
 - https://github.com/Nimor111/nixos-config
 - https://github.com/utdemir/dotfiles/blob/main/system.nix
@@ -80,7 +81,7 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/LEXUGE/nixos
 - https://github.com/bqv/nixrc
 - https://git.sr.ht/~dunklecat/nixos-config/tree/master
-
+- https://github.com/malob/nixpkgs (nix-darwin)
 ** non-flakes
 - https://github.com/jwiegley/nix-config
 - https://github.com/bkase/life
@@ -105,26 +106,7 @@ https://lists.gnu.org/archive/html/emacs-orgmode/2013-02/msg00644.html
 ** TODO add module for terminal emulator
 
 ** TODO integrate with github action CI ?
-
-* How to
-** refresh ~Dock.app~
-~killall Dock~
-** get git sha
-~nix-prefetch-git~
-~nix-prefetch-url~
-** write custom module ?
- - https://github.com/hlissner/dotfiles/blob/e006f1a12ee74eed39dbaeda902b56c9e81201f2/modules/default.nix
- - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
- - https://nixos.wiki/wiki/Module
-** write overlay
-- https://nixos.wiki/wiki/Overlays
-- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
-- https://nixos.org/nixpkgs/manual/#chap-overlays
-- https://www.youtube.com/watch?v=W85mF1zWA2o
-- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
-- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
-** flakes ?
-** TODO add shortcut to lock screen
+TODO add shortcut to lock screen
 
 ~pmset displaysleepnow~
 
@@ -147,10 +129,24 @@ $(nix-build --no-out-link)/sw/bin/darwin-rebuild switch
 ** TODO install Iosevka font
 https://github.com/be5invis/Iosevka/releases/tag/v4.0.0-beta.1
 
-* Common commands
-** ~sudo rebuild~
-** How to refresh ~Dock.app~
+* How to
+** refresh ~Dock.app~
 ~killall Dock~
+** get git sha
+~nix-prefetch-git~
+~nix-prefetch-url~
+** write custom module ?
+ - https://github.com/hlissner/dotfiles/blob/e006f1a12ee74eed39dbaeda902b56c9e81201f2/modules/default.nix
+ - https://nixos.org/manual/nixos/stable/index.html#sec-writing-modules
+ - https://nixos.wiki/wiki/Module
+** write overlay
+- https://nixos.wiki/wiki/Overlays
+- https://discourse.nixos.org/t/creating-a-simple-overlay/1737/7
+- https://nixos.org/nixpkgs/manual/#chap-overlays
+- https://www.youtube.com/watch?v=W85mF1zWA2o
+- https://nbp.github.io/slides/NixCon/2017.NixpkgsOverlays/
+- https://www.sam.today/blog/derivations-102-learning-nix-pt-4/
+** flakes ?
 * NixOS Config
 ** rofi
 https://github.com/davatorium/rofi/blob/next/doc/rofi.1.markdown
