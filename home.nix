@@ -5,7 +5,10 @@
   xdg.enable = true;
   home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "20.09";
-  home.packages = (import ./modules/packages.nix { inherit pkgs; });
+  home.packages = (import ./modules/packages.nix { inherit pkgs; })
+    ++ lib.optionals pkgs.stdenvNoCC.isDarwin
+    (import ./modules/macos_packages.nix { inherit pkgs; });
+
   home.file = {
     ".ghci".text = ''
       :set prompt "λ> "
