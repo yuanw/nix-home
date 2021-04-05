@@ -21,11 +21,22 @@
       enable = true;
       settings = {
         font = {
-          normal = { family = "PragmataPro"; };
+          normal = {
+            family = "PragmataPro";
+            style = "Regular";
+          };
+          bold = {
+            family = "PragmataPro";
+            style = "Bold";
+          };
+          italic = {
+            family = "PragmataPro";
+            style = "Italic";
+          };
           size = 18;
         };
         cursor.style = "Beam";
-        background_opacity = 0.8;
+        # background_opacity = 0.8;
         # https://github.com/dracula/alacritty/blob/master/dracula.yml
         colors = {
           # Default colors
