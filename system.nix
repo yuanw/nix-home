@@ -95,7 +95,7 @@ with lib; {
   fonts.fonts = with pkgs; [
     fira-code
     font-awesome
-    iosevka
+    #iosevka
     roboto
     roboto-mono
     pragmata-pro
