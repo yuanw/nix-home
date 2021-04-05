@@ -171,12 +171,9 @@
         share = true;
       };
 
-      initExtra = lib.mkBefore ''
-
-        function prev() {
-            PREV=$(fc -lrn | head -n 1)
-            sh -c "pet new `printf %q "$PREV"`"
-        }
+      initExtra = lib.optionals pkgs.stdenvNoCC.isDarwin lib.mkBefore ''
+        export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+        . $HOME/.nix-profile/etc/profile.d/nix.sh
       '';
 
       oh-my-zsh = {
