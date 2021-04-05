@@ -182,6 +182,7 @@
     rofi = {
       enable = true;
       terminal = "${pkgs.alacritty}/bin/alaritty";
+      theme = ./modules/theme.rafi;
     };
     tmux = {
       enable = true;
