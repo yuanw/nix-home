@@ -103,7 +103,11 @@
                   terminal = "${pkgs.alacritty}/bin/alaritty";
                   theme = ./modules/theme.rafi;
                 };
-                git.extraConfig = { github.user = "yuanw"; };
+                git.extraConfig = {
+                  github.user = "yuanw";
+                  credential.helper =
+                    "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
+                };
               };
             };
             programs = {

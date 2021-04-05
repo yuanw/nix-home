@@ -123,8 +123,6 @@
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
         branch.autosetupmerge = true;
-        credential.helper =
-          "${pkgs.gitAndTools.pass-git-helper}/bin/pass-git-helper";
       };
     };
 
@@ -154,6 +152,7 @@
     tmux = {
       enable = true;
       terminal = "screen-256color";
+      clock24 = true;
       escapeTime = 1;
       keyMode = "vi";
       shortcut = "a";
