@@ -145,13 +145,13 @@
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
               };
+              modules.wm.yabai.enable = true;
               programs = {
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
                 editors.emacs.enable = true;
                 stevenBlackHosts.enable = true;
-                wm.yabai.enable = true;
               };
             })
           ];
