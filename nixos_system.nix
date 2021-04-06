@@ -2,7 +2,7 @@
 
 with pkgs.stdenv;
 with lib; {
-  imports = [ ./hardware-configuration.nix ./modules ];
+  imports = [ ./hardware-configuration.nix ];
   networking.hostName = config.my.hostname;
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;

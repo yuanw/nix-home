@@ -57,6 +57,9 @@
               (import ./overlays)
             ];
           }
+          ({ lib, pkgs, ... }: {
+            imports = import ./modules/modules.nix { inherit pkgs lib; };
+          })
           ({ config, pkgs, ... }: {
             home-manager.users.${config.my.username} = {
               xdg.enable = true;
