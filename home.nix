@@ -109,6 +109,11 @@
       enableNixDirenvIntegration = true;
     };
 
+    fzf = {
+      enable = true;
+      enableZshIntegration = true;
+    };
+
     git = {
       enable = true;
       userName = config.my.username;
