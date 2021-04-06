@@ -133,6 +133,9 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/Users/yuanwang";
             }
+            ({ lib, pkgs, ... }: {
+              imports = import ./modules/modules.ni { inherit pkgs lib; };
+            })
             ./system.nix
             home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {

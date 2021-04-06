@@ -2,7 +2,6 @@
 
 with pkgs.stdenv;
 with lib; {
-  imports = [ ./modules ];
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixFlakes;
