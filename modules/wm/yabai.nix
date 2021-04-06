@@ -21,7 +21,7 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
   '';
 in {
-  options.programs.wm.yabai = { enable = mkEnableOption "wm"; };
+  options.programs.wm.yabai = { enable = mkEnableOption "wm.yabai"; };
 
   config = mkIf cfg.enable {
     services.skhd = {
