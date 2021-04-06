@@ -21,7 +21,19 @@
 
   outputs =
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
-    let mailAddr = name: domain: "${name}@${domain}";
+    let
+      mailAddr = name: domain: "${name}@${domain}";
+      mkDarwinModules = modules:
+        modules ++ [
+          home-manager.darwinModules.home-manager
+          ./system.nix
+          ({ lib, pkgs, ... }: {
+            imports = import ./modules/modules.nix {
+              inherit pkgs lib;
+              isDarwin = true;
+            };
+          })
+        ];
     in {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -123,7 +135,7 @@
       };
       darwinConfigurations = {
         "yuan-mac" = darwin.lib.darwinSystem {
-          modules = [
+          modules = mkDarwinModules [
             my.my
             {
               my.username = "yuanwang";
@@ -133,14 +145,7 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/Users/yuanwang";
             }
-            home-manager.darwinModules.home-manager
-            ./system.nix
-            ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit pkgs lib;
-                isDarwin = true;
-              };
-            })
+
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
@@ -155,6 +160,7 @@
               };
             })
           ];
+
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
 
@@ -175,11 +181,11 @@
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
+              modules.wm.yabai.enable = true;
               programs = {
                 editors.emacs.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
-                wm.yabai.enable = true;
               };
             })
           ];
