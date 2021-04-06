@@ -115,7 +115,7 @@
             programs = {
               editors.emacs = {
                 enable = true;
-                pkg = pkgs.emacsGcc;
+                pkg = pkgs.emacsPgtkGcc;
               };
             };
           })

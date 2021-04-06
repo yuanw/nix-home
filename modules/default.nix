@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, lib, ... }:
 
 {
   imports = [
@@ -9,7 +9,6 @@
     ./hosts.nix
     ./node.nix
     ./python.nix
-    ./wm/yabai.nix
     ./workShell.nix
-  ];
+  ] ++ lib.optionals pkgs.stdenvNoCC.isDarwin [ ./wwm/yabai.nix ];
 }
