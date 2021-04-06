@@ -12,6 +12,7 @@ let
     (loadModule ./hosts.nix { })
     (loadModule ./node.nix { })
     (loadModule ./python.nix { })
+    (loadModule ./wm/yabai.nix { condition = hostPlatform.isDarwin; })
     (loadModule ./workShell.nix { })
   ];
   modules = map (getAttr "file") (filter (getAttr "condition") allModules);
