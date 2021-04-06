@@ -136,7 +136,10 @@
             home-manager.darwinModules.home-manager
             ./system.nix
             ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix { inherit pkgs lib; };
+              imports = import ./modules/modules.nix {
+                inherit pkgs lib;
+                isDarwin = true;
+              };
             })
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {

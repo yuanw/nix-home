@@ -1,4 +1,4 @@
-{ pkgs, lib }:
+{ pkgs, lib, isDarwin ? false }:
 
 with lib;
 let
@@ -12,7 +12,7 @@ let
     (loadModule ./hosts.nix { })
     (loadModule ./node.nix { })
     (loadModule ./python.nix { })
-    (loadModule ./wm/yabai.nix { condition = hostPlatform.isDarwin; })
+    (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { })
   ];
   modules = map (getAttr "file") (filter (getAttr "condition") allModules);

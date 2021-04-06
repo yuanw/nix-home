@@ -7,7 +7,7 @@
 
 with lib;
 let
-  cfg = config.programs.wm.yabai;
+  cfg = config.modules.wm.yabai;
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
@@ -21,7 +21,7 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
   '';
 in {
-  options.programs.wm.yabai = { enable = mkEnableOption "wm.yabai"; };
+  options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
     services.skhd = {
