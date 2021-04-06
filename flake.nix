@@ -165,7 +165,7 @@
         };
 
         "wf17084" = darwin.lib.darwinSystem {
-          modules = [
+          modules = mkDarwinModules [
             my.my
             {
               my.username = "yuanwang";
@@ -175,8 +175,6 @@
               my.gpgKey = "19AD3F6B1A5BF3BF";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ./system.nix
-            home-manager.darwinModules.home-manager
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
