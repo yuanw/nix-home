@@ -10,5 +10,5 @@
     ./node.nix
     ./python.nix
     ./workShell.nix
-  ] ++ lib.optionals pkgs.stdenvNoCC.isDarwin [ ./wwm/yabai.nix ];
+  ] ++ lib.optionals pkgs.stdenvNoCC.isDarwin [ ./wm/yabai.nix ];
 }
