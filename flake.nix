@@ -133,11 +133,11 @@
               my.gpgKey = "BF2ADAA2A98F45E7";
               my.homeDirectory = "/Users/yuanwang";
             }
-            ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.ni { inherit pkgs lib; };
-            })
-            ./system.nix
             home-manager.darwinModules.home-manager
+            ./system.nix
+            ({ lib, pkgs, ... }: {
+              imports = import ./modules/modules.nix { inherit pkgs lib; };
+            })
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
