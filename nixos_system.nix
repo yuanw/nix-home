@@ -39,6 +39,7 @@ with lib; {
   # };
 
   # Enable the GNOME 3 Desktop Environment.
+  services.blueman.enable = true;
   services.xserver.enable = true;
   services.xserver.autorun = true;
   services.xserver.autoRepeatDelay = 200;

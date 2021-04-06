@@ -7,4 +7,6 @@ with pkgs; [
   stalonetray
   betterlockscreen
   killall
+  haskellPackages.xmobar
+  gxmessage
 ]
