@@ -83,8 +83,10 @@ with lib; {
   time.timeZone = "America/Regina";
 
   users.nix.configureBuildUsers = true;
-  users.users.${localConfig.username}.shell = pkgs.zsh;
-  users.users.${localConfig.username}.home = localConfig.homeDirectory;
+  users.users.${localConfig.username} = {
+    shell = pkgs.zsh;
+    home = localConfig.homeDirectory;
+  };
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${localConfig.username} =
