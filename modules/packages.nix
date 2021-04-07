@@ -35,7 +35,7 @@ with pkgs; [
   #gitAndTools.gitstatus
   hledger
   ranger
-
+  du-dust
   nixpkgs-fmt
   nix-tree
 
