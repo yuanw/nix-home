@@ -16,11 +16,10 @@
       flake = false;
     };
     emacs.url = "github:nix-community/emacs-overlay";
-    my.url = "path:./my";
   };
 
   outputs =
-    inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
+    inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
@@ -71,8 +70,8 @@
           homeDirectory = "/home/yuanwang";
         };
         modules = [
-          ({ config, pkgs, ... }: {
-            home-manager.users.${config.my.username} = {
+          ({ config, pkgs, localConfig, ... }: {
+            home-manager.users.${localConfig.username} = {
               xdg.enable = true;
               home.file = {
                 ".xmobarrc".text = ''

@@ -1,9 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, localConfig, ... }:
 
 with pkgs.stdenv;
 with lib; {
   imports = [ ./hardware-configuration.nix ];
-  networking.hostName = config.my.hostname;
+  networking.hostName = localConfig.hostname;
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -67,8 +67,8 @@ with lib; {
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
-    allowedUsers = [ "root" config.my.username ];
-    trustedUsers = [ "root" config.my.username ];
+    allowedUsers = [ "root" localConfig.username ];
+    trustedUsers = [ "root" localConfig.username ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
@@ -85,11 +85,12 @@ with lib; {
     };
 
   };
-  users.users.yuanwang = {
+  users.users.${localConfig.username} = {
     isNormalUser = true;
     uid = 1000;
-    home = "/home/yuanwang";
+    home = localConfig.homeDirectory;
     extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    shell = pkgs.zsh;
   };
 
   # List packages installed in system profile. To search, run:
@@ -100,11 +101,10 @@ with lib; {
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
 
-  users.users.yuanwang.shell = pkgs.zsh;
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit pkgs lib config localConfig; };
 
   fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
