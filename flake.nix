@@ -5,7 +5,7 @@
     #nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-20.09-darwin";
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     # https://github.com/LnL7/nix-darwin/pull/308/files
-    darwin.url = "github:hardselius/nix-darwin/master";
+    darwin.url = "github:LnL7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
     #home-manager.url = "github:nix-community/home-manager/release-20.09";
     home-manager.url = "github:nix-community/home-manager/master";
