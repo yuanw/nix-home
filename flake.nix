@@ -151,8 +151,8 @@
             homeDirectory = "/Users/yuanwang";
           };
           modules = [
-            ({ lib, pkgs, config, ... }: {
-              home-manager.users.${config.my.username}.programs.git = {
+            ({ lib, pkgs, config, localConfig, ... }: {
+              home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
               };
               modules.wm.yabai.enable = true;
@@ -177,8 +177,8 @@
             homeDirectory = "/Users/yuanwang";
           };
           modules = [
-            ({ lib, pkgs, config, ... }: {
-              home-manager.users.${config.my.username}.programs.git = {
+            ({ lib, pkgs, config, localConfig, ... }: {
+              home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               modules.wm.yabai.enable = true;

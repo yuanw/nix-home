@@ -1,12 +1,12 @@
-{ config, lib, ... }:
+{ config, lib, localConfig, ... }:
 
 with lib;
-let homeDir = config.my.homeDirectory;
+let homeDir = localConfig.homeDirectory;
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {
-    home-manager.users.${config.my.username}.programs.zsh = {
+    home-manager.users.${localConfig.username}.programs.zsh = {
       shellAliases = { bt = "bigskyTest"; };
       initExtra = mkAfter ''
         export PATH=$PATH:$HOME/go/bin

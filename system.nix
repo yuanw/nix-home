@@ -2,7 +2,7 @@
 
 with pkgs.stdenv;
 with lib; {
-  networking.hostName = config.my.hostname;
+  networking.hostName = localConfig.hostname;
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
@@ -17,13 +17,13 @@ with lib; {
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
-    trustedUsers = [ "root" config.my.username ];
+    trustedUsers = [ "root" localConfig.username ];
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
     gc = {
       automatic = true;
-      user = "yuanwang";
+      user = "${localConfig.username}";
     };
   };
 
@@ -87,8 +87,8 @@ with lib; {
   users.users.yuanwang.home = "/Users/yuanwang";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+  home-manager.users.${localConfig.username} =
+    import ./home.nix { inherit pkgs lib config localConfig; };
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [

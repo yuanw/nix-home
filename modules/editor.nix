@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, localConfig, ... }:
 let cfg = config.programs.editors.emacs;
 in with lib; {
   options.programs.editors.emacs = {
@@ -22,7 +22,7 @@ in with lib; {
 
   config = mkIf cfg.enable {
 
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${localConfig.username} = {
       home.packages = with pkgs; [
         git
         (ripgrep.override { withPCRE2 = true; })
