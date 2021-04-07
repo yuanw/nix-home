@@ -22,7 +22,9 @@
   outputs =
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let
+      # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
+      # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
@@ -38,32 +40,37 @@
             ./system.nix
           ];
         };
+      mkNixSystem = { localConfig, modules }:
+        nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = modules ++ [
+            ./nixos_system.nix
+            home-manager.nixosModules.home-manager
+            {
+              nixpkgs.overlays = [
+                (se: su: { myInputs = inputs; })
+                emacs.overlay
+                nur.overlay
+                (import ./overlays)
+              ];
+            }
+            ({ lib, pkgs, ... }: {
+              _module.args.localConfig = localConfig;
+              imports = import ./modules/modules.nix { inherit pkgs lib; };
+            })
+          ];
+        };
     in {
-      nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
+      nixosConfigurations.nixos = mkNixSystem {
+        localConfig = {
+          username = "yuanwang";
+          name = "Yuan Wang";
+          email = mailAddr "me" "yuanwang.ca";
+          hostname = "yuan-mac";
+          gpgKey = "BF2ADAA2A98F45E7";
+          homeDirectory = "/home/yuanwang";
+        };
         modules = [
-          my.my
-          {
-            my.username = "yuanwang";
-            my.name = "Yuan Wang";
-            my.email = mailAddr "me" "yuanwang.ca";
-            my.hostname = "nixos";
-            my.gpgKey = "BF2ADAA2A98F45E7";
-            my.homeDirectory = "/home/yuanwang";
-          }
-          ./nixos_system.nix
-          home-manager.nixosModules.home-manager
-          {
-            nixpkgs.overlays = [
-              (se: su: { myInputs = inputs; })
-              emacs.overlay
-              nur.overlay
-              (import ./overlays)
-            ];
-          }
-          ({ lib, pkgs, ... }: {
-            imports = import ./modules/modules.nix { inherit pkgs lib; };
-          })
           ({ config, pkgs, ... }: {
             home-manager.users.${config.my.username} = {
               xdg.enable = true;
