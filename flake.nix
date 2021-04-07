@@ -23,18 +23,19 @@
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let
       mailAddr = name: domain: "${name}@${domain}";
-      mkDarwinSystem = { modules }:
+      mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
           inputs = { inherit darwin nixpkgs emacs nur home-manager; };
           modules = modules ++ [
-            home-manager.darwinModules.home-manager
-            ./system.nix
             ({ lib, ... }: {
+              _module.args.localConfig = localConfig;
               imports = import ./modules/modules.nix {
                 inherit lib;
                 isDarwin = true;
               };
             })
+            home-manager.darwinModules.home-manager
+            ./system.nix
           ];
         };
     in {
@@ -141,17 +142,15 @@
       };
       darwinConfigurations = {
         "yuan-mac" = mkDarwinSystem {
+          localConfig = {
+            username = "yuanwang";
+            name = "Yuan Wang";
+            email = mailAddr "me" "yuanwang.ca";
+            hostname = "yuan-mac";
+            gpgKey = "BF2ADAA2A98F45E7";
+            homeDirectory = "/Users/yuanwang";
+          };
           modules = [
-            my.my
-            {
-              my.username = "yuanwang";
-              my.name = "Yuan Wang";
-              my.email = mailAddr "me" "yuanwang.ca";
-              my.hostname = "yuan-mac";
-              my.gpgKey = "BF2ADAA2A98F45E7";
-              my.homeDirectory = "/Users/yuanwang";
-            }
-
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
@@ -169,16 +168,15 @@
         };
 
         "wf17084" = mkDarwinSystem {
+          localConfig = {
+            username = "yuanwang";
+            name = "Yuan Wang";
+            email = mailAddr "yuan.wang" "workiva.com";
+            hostname = "wf17084";
+            gpgKey = "19AD3F6B1A5BF3BF";
+            homeDirectory = "/Users/yuanwang";
+          };
           modules = [
-            my.my
-            {
-              my.username = "yuanwang";
-              my.name = "Yuan Wang";
-              my.email = mailAddr "yuan.wang" "workiva.com";
-              my.hostname = "wf17084";
-              my.gpgKey = "19AD3F6B1A5BF3BF";
-              my.homeDirectory = "/Users/yuanwang";
-            }
             ({ lib, pkgs, config, ... }: {
               home-manager.users.${config.my.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
