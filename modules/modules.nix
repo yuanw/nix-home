@@ -1,8 +1,9 @@
-{ pkgs, lib, isDarwin ? false }:
+# why not use stdenv isDarwin function
+# https://github.com/nix-community/home-manager/issues/414
+{ lib, isDarwin ? false, isNixOS ? false }:
 
 with lib;
 let
-  hostPlatform = pkgs.stdenv.hostPlatform;
   loadModule = file: { condition ? true }: { inherit file condition; };
   allModules = [
     (loadModule ./dart.nix { })

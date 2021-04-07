@@ -23,17 +23,20 @@
     inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, my, ... }:
     let
       mailAddr = name: domain: "${name}@${domain}";
-      mkDarwinModules = modules:
-        modules ++ [
-          home-manager.darwinModules.home-manager
-          ./system.nix
-          ({ lib, pkgs, ... }: {
-            imports = import ./modules/modules.nix {
-              inherit pkgs lib;
-              isDarwin = true;
-            };
-          })
-        ];
+      mkDarwinSystem = { modules }:
+        darwin.lib.darwinSystem {
+          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+          modules = modules ++ [
+            home-manager.darwinModules.home-manager
+            ./system.nix
+            ({ lib, ... }: {
+              imports = import ./modules/modules.nix {
+                inherit lib;
+                isDarwin = true;
+              };
+            })
+          ];
+        };
     in {
       nixosConfigurations.nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -137,8 +140,8 @@
         ];
       };
       darwinConfigurations = {
-        "yuan-mac" = darwin.lib.darwinSystem {
-          modules = mkDarwinModules [
+        "yuan-mac" = mkDarwinSystem {
+          modules = [
             my.my
             {
               my.username = "yuanwang";
@@ -163,12 +166,10 @@
               };
             })
           ];
-
-          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
 
-        "wf17084" = darwin.lib.darwinSystem {
-          modules = mkDarwinModules [
+        "wf17084" = mkDarwinSystem {
+          modules = [
             my.my
             {
               my.username = "yuanwang";
@@ -190,7 +191,6 @@
               };
             })
           ];
-          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
         };
 
       };
