@@ -1,1 +1,134 @@
-DELL XPS 13 9300
+#+title: Dell XPS 9300 (2020 Developer Edition)
+
+* Before Install NixOS
+I got a developer edition ship with Ubuntb. When I boot up the machine for first time, it asked me whether want to back up the system into ISO on an USB.
+
+** Praticle Install NixOS on VirtualBox
+- https://askubuntu.com/questions/64915/how-do-i-install-ubuntu-on-a-virtualbox-client-from-an-iso-image
+- https://www.youtube.com/watch?v=oPymb2-IXbg
+- https://www.youtube.com/watch?v=82vrj22omyQ
+** Read Dell Manual
+https://www.dell.com/support/manuals/en-ca/xps-13-9300-laptop/xps-13-9300-service-manual/system-setup-options?guid=guid-cc110ea9-65ed-4ff8-bb35-7c2853ffb988
+
+** Check Arch Wiki page for XPS 9300 and update some BIOS setting
+Pressing F2/F12 key to BIOS menu
+
+https://wiki.archlinux.org/index.php/Dell_XPS_13_(9300)
+
+- Make sure SATA Mode from "RAID" to "AHCi" already the default on developer edition
+
+- Disable secure boot to allow Linux to boot
+  (which is not default, although archlinux page state it should be disabled by default )
+
+- POST Behavior
+  Sign of Life
+  - Early Logo Display
+  - Early keyboard backlight
+  https://www.dell.com/community/XPS/XPS-13-9300-Wake-from-sleep/td-p/7523159 (Fun fact, there is "nixos-user" comments and provided answer this thread)
+
+
+* Install
+I chose not to go with dual-boot, just wipe the disk install nixos
+I use graphical install
+https://channels.nixos.org/nixos-20.09/latest-nixos-gnome-x86_64-linux.iso
+
+** TODO add how to burn iso
+Press F12, and boot from usb
+
+The first problem I got is, the build-in wifi cannot find by install. I think it is the same problem with
+https://discourse.nixos.org/t/nixos-minimal-install-doesnt-have-wifi-firmware/7318
+
+Lucky for me, I had a usb wifi adapter which can regonzied with installer.
+
+Without internet access, we cannot finish OS installment.
+
+** How to wipe existing disk
+~wipefs -a /dev/nvme0n1~
+
+
+
+** Partition time
+https://gist.github.com/little-dude/03b68e9e9908d940520fbeb420b49869
+ mostly just followed
+
+- primary disk is `dev/nvme0n1`
+
+  sudo su
+parted /dev/sda -- mklabel gpt
+
+
+Information: you may need to update /etc/fstab can be safely ignored
+
+*** How to find uuid of partition
+
+blkid
+
+ls -l /dev/disk/by-uuid
+
+https://linuxhint.com/uuid_storage_devices_linux/
+
+*** Copy/paste in linux terminal
+is Ctrl + Shift + C/V
+
+I tried to reference home not by uuid. That didn't seem to work. Machine failed to boot, had to press the start button to shut down the machine.
+** Encrypt primary disk
+
+~cryptsetup luksFormat /dev/nvme0n1p2~
+
+Warning about overwrite
+Confirm with YES
+enter passpharse
+
+# open the encrypted partition and map it to /dev/mapper/cryptroot
+$ cryptsetup luksOpen /dev/nvme0n1p2 cryptroot
+
+Map the physical, encrypted volume, then create a new volume group and logical volumes in that group for our nixos root and our swap.
+
+~pvcreate /dev/mapper/cryptroot~
+
+Physical volume "/dev/mapper/cryptroot" successfully created.
+
+~vgcreate vg /dev/mapper/cryptroot~
+tab completion on path works
+
+Volume group "vg" successfully created.
+
+~lvcreate -L 8G -n swap vg~
+Logical volume "swap" created.
+
+~lvcreate -l '100%FREE' -n nixos vg~
+Logical volume "nixo" created.
+
+** Format Disks
+~mkfs.fat -F 32 -n boot /dev/nvme0n1p1~
+
+mkfs.fat warning - lowercase label might not work properly with DOS or Windows
+
+~mkfs.ext4 -L nixos /dev/vg/nixos~
+it might take longer than steps
+
+mkfs.ext4 -L nixos /dev/vg/nixos
+
+** Mount
+mount /dev/disk/by-label/nixos /mnt
+
+lsblk --fs
+
+* First round of nixos configuration
+** Set user password
+~passwd username~
+
+I need to
+~boot.kernelPackages = pkgs.linuxPackages_latest;~
+to find laptop's wifi
+
+* References
+- https://rycwo.xyz/2018/07/29/nixos-series-dual-boot
+- https://nixos.org/manual/nixos/stable/index.html#preface
+- https://wiki.archlinux.org/index.php/Dell_XPS_13_(9300)
+- https://www.dell.com/support/manuals/en-ca/xps-13-9300-laptop/xps-13-9300-service-manual/system-setup-options?guid=guid-cc110ea9-65ed-4ff8-bb35-7c2853ffb988
+- https://gist.github.com/little-dude/03b68e9e9908d940520fbeb420b49869
+- https://discourse.nixos.org/t/libfprint-2-tod1-xps9300-bin/7888
+- https://github.com/hlissner/dotfiles/blob/master/hosts/shiro/hardware-configuration.nix
+- https://github.com/NixOS/nixos-hardware/blob/master/dell/xps/13-9370/default.nix
+- https://github.com/ivanbrennan/installing-NixOS/blob/master/xps13.md
