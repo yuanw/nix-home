@@ -83,8 +83,8 @@ with lib; {
   time.timeZone = "America/Regina";
 
   users.nix.configureBuildUsers = true;
-  users.users.yuanwang.shell = pkgs.zsh;
-  users.users.yuanwang.home = "/Users/yuanwang";
+  users.users.${localConfig.username}.shell = pkgs.zsh;
+  users.users.${localConfig.username}.home = localConfig.homeDirectory;
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${localConfig.username} =

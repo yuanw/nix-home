@@ -59,7 +59,7 @@ in with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    # home-manager.users.yuanwang.home.file =
+    # home-manager.users.${localConfig.username}.home.file =
     #   mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
   };
 }

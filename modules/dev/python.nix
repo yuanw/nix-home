@@ -1,9 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, localConfig, ... }:
 
 with lib;
 let cfg = config.programs.python;
-in
-{
+in {
   options.programs.python = {
     enable = mkEnableOption "python";
     package = mkOption {
@@ -17,7 +16,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.yuanwang.home.packages = [
+    home-manager.users.${localConfig.username}.home.packages = [
       cfg.package
       pkgs.black
       pkgs.python38Packages.pyflakes
