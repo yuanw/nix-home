@@ -55,7 +55,7 @@
             }
             ({ lib, pkgs, ... }: {
               _module.args.localConfig = localConfig;
-              imports = import ./modules/modules.nix { inherit pkgs lib; };
+              imports = import ./modules/modules.nix { inherit lib; };
             })
           ];
         };

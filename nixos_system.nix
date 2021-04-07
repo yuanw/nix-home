@@ -103,7 +103,7 @@ with lib; {
 
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} =
+  home-manager.users.${localConfig.username} =
     import ./home.nix { inherit pkgs lib config localConfig; };
 
   fonts.fontDir.enable = true;
@@ -113,7 +113,7 @@ with lib; {
     iosevka
     roboto
     roboto-mono
-    #pragmata-pro
+    pragmata-pro
   ];
   # Recreate /run/current-system symlink after boot
 }
