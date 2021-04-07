@@ -73,17 +73,6 @@
         "type": "github"
       }
     },
-    "my": {
-      "locked": {
-        "narHash": "sha256-tvXMW/PXQvsbMlct/dTugoC0ZLQu55lu5xLMUtvJY3Y=",
-        "path": "./my",
-        "type": "path"
-      },
-      "original": {
-        "path": "./my",
-        "type": "path"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1616670887,
@@ -121,7 +110,6 @@
         "emacs": "emacs",
         "home-manager": "home-manager",
         "kmonad": "kmonad",
-        "my": "my",
         "nixpkgs": "nixpkgs",
         "nur": "nur"
       }
