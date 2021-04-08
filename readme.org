@@ -61,6 +61,8 @@ https://tecosaur.github.io/emacs-config/config.html
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
+** single-user nix-darwin permission issue
+~sudo chown -R yuanwang:staff /nix/store~
 
 
 * References and Manual:
