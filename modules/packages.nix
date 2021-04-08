@@ -38,6 +38,7 @@ with pkgs; [
   du-dust
   nixpkgs-fmt
   nix-tree
+  nix-du
 
   #Apps
   #HandBrake
@@ -53,7 +54,7 @@ with pkgs; [
   #offlineimap
   #notmuch
   google-cloud-sdk
-
+  qutebrowser
   # productivity
   #pandoc
   #fzf
