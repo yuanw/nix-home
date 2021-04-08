@@ -36,8 +36,37 @@
           size = 18;
         };
         cursor.style = "Beam";
+        key_bindings = [
+          {
+            key = "V";
+            mods = "Control|Shift";
+            action = "Paste";
+          }
+          {
+            key = "C";
+            mods = "Control|Shift";
+            action = "Copy";
+          }
+          {
+            key = "Up";
+            mods = "Control|Shift";
+            action = "ScrollPageUp";
+          }
+          {
+            key = "Down";
+            mods = "Control|Shift";
+            action = "ScrollPageDown";
+          }
+        ];
+        window.padding = {
+          x = 12;
+          y = 0;
+        };
+        window.decorations = "none";
+        window.dynamic_padding = false;
         # background_opacity = 0.8;
-        # https://github.com/dracula/alacritty/blob/master/dracula.yml
+        # base16-material-palenight-256
+        # https://github.com/aarowill/base16-alacritty/blob/master/colors/base16-material-palenight-256.yml
         colors = {
           # Default colors
           primary = {
