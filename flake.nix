@@ -161,7 +161,10 @@
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanw"; };
               };
-              modules.wm.yabai.enable = true;
+              modules = {
+                terminal.enable = true;
+                wm.yabai.enable = true;
+              };
               programs = {
                 node.enable = true;
                 python.enable = true;
@@ -187,7 +190,10 @@
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
-              modules.wm.yabai.enable = true;
+              modules = {
+                terminal.enable = true;
+                wm.yabai.enable = true;
+              };
               programs = {
                 editors.emacs.enable = true;
                 dart.enable = true;

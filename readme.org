@@ -61,6 +61,8 @@ https://tecosaur.github.io/emacs-config/config.html
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
+** single-user nix-darwin permission issue
+~sudo chown -R yuanwang:staff /nix/store~
 
 
 * References and Manual:
@@ -69,8 +71,8 @@ https://tecosaur.github.io/emacs-config/config.html
 
 * Examples
 ** flakes
-- https://github.com/btwiusegentoo/nixconfig
-- https://github.com/hardselius/dotfiles
+- https://github.com/btwiusegentoo/nixconfig (NixOS)
+- https://github.com/hardselius/dotfiles (nix-darwin)
 - https://github.com/danieldk/nix-home
 - https://github.com/LnL7/dotfiles (nix-darwin)
 - https://github.com/cmacrae/config (nix-darwin)
@@ -178,6 +180,3 @@ it seems autorandr should be used
 - https://askubuntu.com/questions/1131558/second-external-monitor-not-waking-up
 ** TODO add wifi and battery into xmobar
 ** TODO lockscreen
-
-* TODO patch nix-linter in shell.nix
-https://github.com/Synthetica9/nix-linter/pull/46
