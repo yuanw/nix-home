@@ -1,5 +1,5 @@
 # why not use stdenv isDarwin function
-# https://github.com/nix-community/home-manager/issues/414
+# https://github.com/nix-community/home-manager/issues/414
 { lib, isDarwin ? false, isNixOS ? false }:
 
 with lib;
@@ -13,6 +13,7 @@ let
     (loadModule ./hosts.nix { })
     (loadModule ./node.nix { })
     (loadModule ./python.nix { })
+    (loadModule ./terminal.nix { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { })
   ];
