@@ -84,7 +84,7 @@ in {
               x = 12;
               y = 0;
             };
-            #window.decorations = "none";
+            window.decorations = "none";
             window.dynamic_padding = false;
             # background_opacity = 0.8;
             # base16-material-palenight-256
