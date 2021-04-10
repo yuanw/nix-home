@@ -16,7 +16,8 @@ let
     shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
-    shift + ctrl + alt - r: ${pkgs.skhd}/bin/skhd -r
+    shift + ctrl + alt - r: ${pkgs.skhd}/bin/skhd -r && \
+                            ${pkgs.alerter}/alerter -message "reload skhd config"
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
   '';
