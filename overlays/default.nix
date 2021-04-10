@@ -40,7 +40,7 @@ final: prev:
     homepage =
       "https://store.docker.com/editions/community/docker-ce-desktop-mac";
   };
-  alerter = prev.callPacke ./alerter.nix { };
+  alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };
