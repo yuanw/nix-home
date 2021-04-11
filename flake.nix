@@ -17,6 +17,8 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     spacebar.url = "github:cmacrae/spacebar";
+    # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
+    spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
