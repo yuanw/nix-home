@@ -63,12 +63,12 @@
           ];
         };
     in {
-      nixosConfigurations.nixos = mkNixSystem {
+      nixosConfigurations.asche = mkNixSystem {
         localConfig = {
           username = "yuanwang";
           name = "Yuan Wang";
           email = mailAddr "me" "yuanwang.ca";
-          hostname = "nixos";
+          hostname = "asche";
           gpgKey = "BF2ADAA2A98F45E7";
           homeDirectory = "/home/yuanwang";
         };
