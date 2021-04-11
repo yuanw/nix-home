@@ -16,17 +16,18 @@
       flake = false;
     };
     emacs.url = "github:nix-community/emacs-overlay";
+    spacebar.url = "github:cmacrae/spacebar";
   };
 
-  outputs =
-    inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad, ... }:
+  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
+    , spacebar, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
-          inputs = { inherit darwin nixpkgs emacs nur home-manager; };
+          inputs = { inherit darwin nixpkgs emacs nur home-manager spacebar; };
           modules = modules ++ [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
