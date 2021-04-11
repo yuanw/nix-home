@@ -13,7 +13,7 @@ let
     (loadModule ./hosts.nix { })
     (loadModule ./node.nix { })
     (loadModule ./python.nix { })
-    (loadModule ./terminal.nix { })
+    (loadModule ./terminal { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { })
   ];

@@ -2,10 +2,13 @@
 * MacOS
 ** Hotkey
 *** lock screen shortcut
+~Meh + L~
 ~pmset displaysleepnow~
 
 require a password immediately after sleep
 System Preference -> Security & Privacy -> General
+** Hide Window
+~Command + H~ default MacOS shortcut
 
 ** Resources
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
