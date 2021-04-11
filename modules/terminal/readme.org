@@ -1,1 +1,8 @@
 #+TITLE: Terminal Setting
+
+Current Choices
+- Alacritty
+- starship
+- tmux
+
+tmux window nagivation and emacs window nagivation should have same/simailr combination
