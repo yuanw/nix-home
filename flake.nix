@@ -68,7 +68,7 @@
           username = "yuanwang";
           name = "Yuan Wang";
           email = mailAddr "me" "yuanwang.ca";
-          hostname = "yuan-mac";
+          hostname = "nixos";
           gpgKey = "BF2ADAA2A98F45E7";
           homeDirectory = "/home/yuanwang";
         };
@@ -140,6 +140,7 @@
                 };
               };
             };
+            modules = { terminal.enable = true; };
             programs = {
               editors.emacs = {
                 enable = true;
