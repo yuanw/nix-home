@@ -44,7 +44,6 @@ final: prev:
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  ihp-new = prev.callPackage ./ihp-new.nix { };
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
@@ -59,12 +58,12 @@ final: prev:
   };
   Stretchly = final.installApplication rec {
     name = "Stretchly";
-    version = "1.5.0";
+    version = "1.6.0";
     sourceRoot = "Stretchly.app";
     src = prev.fetchurl {
       url =
         "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
-      sha256 = "0l8549lhqck8gd0h3kf5y96ifg4n2i9mzr4k82l1fkgi7zp42xwr";
+      sha256 = "1pfsiiwqg94bjwi85ghkli2nhkdgiwsc3yr02mza26zyph4jb8w7";
     };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";

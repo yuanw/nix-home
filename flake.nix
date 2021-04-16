@@ -199,6 +199,7 @@
                 wm.yabai.enable = true;
               };
               programs = {
+                node.enable = true;
                 editors.emacs.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
