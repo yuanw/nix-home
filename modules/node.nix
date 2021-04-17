@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.nodejs ];
+      home.packages = [ pkgs.nodejs pkgs.yarn ];
     };
   };
 }

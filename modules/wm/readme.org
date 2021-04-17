@@ -9,7 +9,7 @@ require a password immediately after sleep
 System Preference -> Security & Privacy -> General
 ** Hide Window
 ~Command + H~ default MacOS shortcut
-
+~Command + Shift + .~ show hidden files
 ** Resources
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
