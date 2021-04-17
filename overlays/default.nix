@@ -26,6 +26,7 @@ final: prev:
 
   emacsMacport = prev.emacsMacport.overrideAttrs (oldAttrs: rec {
     version = "27.2";
+    name = "emacs-mac-27.2-8.2";
     macportVersion = "8.2";
     src = prev.fetchurl {
       url = "mirror://gnu/emacs/emacs-27.2.tar.xz";
