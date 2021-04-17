@@ -24,7 +24,7 @@ final: prev:
       };
     };
 
-  emacsMacport = prev.emacsMacport.overrideAttrs {
+  emacsMacport = prev.emacsMacport.overrideAttrs (oldAttrs: rec {
     version = "27.2";
     macportVersion = "8.2";
     src = prev.fetchurl {
@@ -35,7 +35,7 @@ final: prev:
       url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/emacs-27.2-mac-8.2.tar.gz";
       sha256 = "1bgm2g3ky7rkj1l27wnmyzqsqxzjng7y9bf72ym37wiyhyi2a9za";
     };
-  };
+  });
 
   Docker = final.installApplication rec {
     name = "Docker";
