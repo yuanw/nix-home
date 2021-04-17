@@ -24,6 +24,20 @@ final: prev:
       };
     };
 
+  emacsMacport = prev.emacsMacport.override {
+    version = "27.2";
+    macportVersion = "8.2";
+
+    src = prev.fetchurl {
+      url = "mirror://gnu/emacs/emacs-27.2.tar.xz";
+      sha256 = "1ff182gjw9wqsbx1kj5gl2r5pbqhp4ar54g04j33fgz6g17cr9xl";
+    };
+    macportSrc = prev.fetchurl {
+      url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/emacs-27.2-mac-8.2.tar.gz";
+      sha256 = "1bgm2g3ky7rkj1l27wnmyzqsqxzjng7y9bf72ym37wiyhyi2a9za";
+    };
+  };
+
   Docker = final.installApplication rec {
     name = "Docker";
     version = "3.2.1";
