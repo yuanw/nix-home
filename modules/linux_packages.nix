@@ -9,6 +9,5 @@ with pkgs; [
   killall
   haskellPackages.xmobar
   gxmessage
-  xmessage
   autorandr
 ]
