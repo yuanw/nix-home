@@ -150,7 +150,7 @@
                           enable = true;
                           crtc = 1;
                           mode = "3840x2160";
-                          pos = "3840x0";
+                          position = "3840x0";
                           rate = "60.00";
                         };
                       };
