@@ -30,6 +30,9 @@ nix flake update --recreate-lock-file
 ** install flake
 ** Build
 ~nixos-rebuild build --flake '.#'~ or ~nixos-rebuild build --flake '.#asche'~
+** autorandr
+~autorandr horizontal~
+use ~autorandr -s profile~ to capture monitor output
 * Project Structure
 ** conf.d
 raw configuration files for different software. (only doom-emacs for now)
