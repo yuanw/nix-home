@@ -142,6 +142,7 @@
             };
             modules = { terminal.enable = true; };
             programs = {
+              haskell.enable = true;
               editors.emacs = {
                 enable = true;
                 pkg = pkgs.emacsPgtkGcc;
