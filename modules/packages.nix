@@ -64,7 +64,7 @@ with pkgs; [
 
   #shellcheck
   fontconfig
-
+  zellij
   #Docker
   #minikube
   #kubectl
