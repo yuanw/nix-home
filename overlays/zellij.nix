@@ -10,14 +10,17 @@ stdenv.mkDerivation rec {
     sha256 = "0c738vkw61xq9sp3xs1fj3vypr34lvvdbdzhbpgpyih7wjqgns2s";
   };
 
+  # Work around the "unpacker appears to have produced no directories"
+  # case that happens when the archive doesn't have a subdirectory.
+  setSourceRoot = "sourceRoot=`pwd`";
+
   installPhase = ''
-    mkdir -p $out
-    cp -R * $out/
+    mkdir -p $out/bin
+    cp zellij $out/bin/
+    chmod +x $out/bin/zellij
   '';
 
   libPath = lib.makeLibraryPath [ stdenv.cc.cc ];
-
-  dontStrip = true;
 
   meta = with lib; {
     description =
