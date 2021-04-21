@@ -43,7 +43,7 @@ in {
     services.spacebar.config = {
       debug_output = "on";
       clock_format = "%R";
-      display = "main";
+      display = "all";
       position = "top";
       # bagua eight trigrams - top bar is least significant binary digit
       space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰ ";
