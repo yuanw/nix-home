@@ -1,24 +1,23 @@
-{ lib, stdenv, fetchFromGitHub, rustPlatform, pkg-config, openssl
-, installShellFiles, libiconv, Security }:
+{ lib, stdenv, fetchurl }:
 
-rustPlatform.buildRustPackage rec {
+stdenv.mkDerivation rec {
   pname = "zellij";
   version = "0.5.0-beta";
 
-  src = fetchFromGitHub {
-    owner = "zellij-org";
-    repo = pname;
-    rev = "v${version}";
-    sha256 = "0mhxq0pr87lz36wfn3g9yvgx5k6xwf69yvvjvrm3vf1l6hwm9nf6";
+  src = fetchurl {
+    url =
+      "https://github.com/zellij-org/zellij/releases/download/v0.5.0-beta/zellij-macos-x86_64.tar.gz";
+    sha256 = "0c738vkw61xq9sp3xs1fj3vypr34lvvdbdzhbpgpyih7wjqgns2s";
   };
 
-  nativeBuildInputs = [ installShellFiles ]
-    ++ lib.optionals stdenv.isLinux [ pkg-config ];
+  installPhase = ''
+    mkdir -p $out
+    cp -R * $out/
+  '';
 
-  buildInputs = lib.optionals stdenv.isLinux [ openssl ]
-    ++ lib.optionals stdenv.isDarwin [ libiconv Security ];
+  libPath = lib.makeLibraryPath [ stdenv.cc.cc ];
 
-  cargoHash = "sha256-zreHK+9Nq65ieBQt40FLXQrHVgqjvYp4tSgdfSDA+Ac=";
+  dontStrip = true;
 
   meta = with lib; {
     description =
