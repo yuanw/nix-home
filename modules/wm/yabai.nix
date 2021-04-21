@@ -40,6 +40,7 @@ in {
     };
     services.spacebar.enable = true;
     services.spacebar.package = pkgs.spacebar;
+    # https://github.com/cmacrae/spacebar/blob/master/doc/spacebar.asciidoc
     services.spacebar.config = {
       debug_output = "on";
       clock_format = "%R";
