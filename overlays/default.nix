@@ -82,5 +82,7 @@ final: prev:
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";
   };
-  zellij = prev.callPackage ./zellij.nix { };
+  zellij = prev.callPackage ./zellij.nix {
+    inherit (prev.pkgs.darwin.apple_sdk.frameworks) Security;
+  };
 }
