@@ -33,8 +33,8 @@ in {
           shortcut = "a";
           plugins = with pkgs; [ tmuxPlugins.prefix-highlight ];
           extraConfig = ''
-            bind s split-window -h
-            bind v split-window -v
+            bind s split-window -v
+            bind v split-window -h
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
@@ -49,6 +49,7 @@ in {
             setw -g window-status-activity-style "none"
             setw -g window-status-separator ""
             setw -g window-status-style "none,fg=colour60,bg=colour60"
+            set -g @prefix_highlight_fg 'white'
             set -g status-left "#{prefix_highlight} | #[fg=colour232,bg=colour117] #S #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]"
             set -g status-right "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] %Y-%m-%d  %H:%M #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour232,bg=colour117] #h "
             setw -g window-status-format "#[fg=colour60,bg=colour60] #I #[fg=colour60,bg=colour60] #W "
