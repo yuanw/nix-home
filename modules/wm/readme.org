@@ -10,6 +10,8 @@ System Preference -> Security & Privacy -> General
 ** Hide Window
 ~Command + H~ default MacOS shortcut
 ~Command + Shift + .~ show hidden files
+** Commands screen capture
+~screencapture -i -c /tmp/$(date +%s).png~
 ** Resources
 - https://www.youtube.com/watch?v=AdwhjIg_Xe4
 - https://github.com/stephen-huan/macos-dotfiles
