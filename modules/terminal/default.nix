@@ -30,7 +30,7 @@ in {
           clock24 = true;
           escapeTime = 1;
           keyMode = "vi";
-          shortcut = "a";
+          shortcut = "Space";
           plugins = with pkgs; [ tmuxPlugins.prefix-highlight ];
           extraConfig = ''
             bind s split-window -v
