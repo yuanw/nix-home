@@ -49,7 +49,7 @@ in {
       # bagua eight trigrams - top bar is least significant binary digit
       space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰ ";
       text_font = "Roboto Mono:Regular:12.0";
-      icon_font = "FontAwesome:Regular:12.0";
+      icon_font = "Font Awesome 5 Free:Solid:12.0";
       background_color = "0xff222222";
       foreground_color = "0xffd8dee9";
       space_icon_color = "0xffffab91";
@@ -66,7 +66,7 @@ in {
       space_icon_color_tertiary = "0xfffff9b0";
       clock_icon = "";
       dnd_icon = "";
-      right_shell_icon = "";
+      right_shell_icon = "";
       right_shell = "on";
       right_shell_command = "${pkgs.cpu-stats}/bin/cpuStat";
     };
