@@ -32,23 +32,12 @@ with pkgs; [
   gitAndTools.gh
   git-crypt
 
-  #gitAndTools.gitstatus
   hledger
   ranger
   du-dust
   nixpkgs-fmt
   nix-tree
   nix-du
-
-  #Apps
-  #HandBrake
-  #wifi-password
-  #Stretchly
-  #ihp
-  #nixops
-  #nixfmt
-  #nox
-  #niv
 
   #mu
   #offlineimap
