@@ -49,7 +49,7 @@ in {
       # bagua eight trigrams - top bar is least significant binary digit
       space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰ ";
       text_font = "Roboto Mono:Regular:12.0";
-      icon_font = "PargmataPro:Regular:12.0";
+      icon_font = "FontAwesome:Regular:12.0";
       background_color = "0xff222222";
       foreground_color = "0xffd8dee9";
       space_icon_color = "0xffffab91";
