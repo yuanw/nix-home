@@ -54,10 +54,9 @@ with pkgs; [
   #offlineimap
   #notmuch
   google-cloud-sdk
-  qutebrowser
+  # qutebrowser
   # productivity
-  #pandoc
-  #fzf
+  pandoc
 
   autojump
   vscode
