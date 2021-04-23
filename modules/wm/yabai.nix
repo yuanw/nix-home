@@ -66,10 +66,9 @@ in {
       space_icon_color_tertiary = "0xfffff9b0";
       clock_icon = "";
       dnd_icon = "";
+      right_shell_icon = "";
       right_shell = "on";
-      right_shell_command = ''
-        ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
-      '';
+      right_shell_command = "${pkgs.cpu-stats}/bin/cpuStat";
     };
     services.yabai = {
       enable = true;
