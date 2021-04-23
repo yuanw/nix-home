@@ -66,6 +66,10 @@ in {
       space_icon_color_tertiary = "0xfffff9b0";
       clock_icon = "";
       dnd_icon = "";
+      right_shell = "on";
+      right_shell_command = ''
+        ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
+      '';
     };
     services.yabai = {
       enable = true;
