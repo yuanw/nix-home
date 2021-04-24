@@ -28,6 +28,7 @@ final: prev:
     version = "27.2";
     name = "emacs-mac-27.2-8.2";
     macportVersion = "8.2";
+    patches = [ ./patches/borderless-emacs.patch ];
     src = prev.fetchurl {
       url = "mirror://gnu/emacs/emacs-27.2.tar.xz";
       sha256 = "1ff182gjw9wqsbx1kj5gl2r5pbqhp4ar54g04j33fgz6g17cr9xl";
@@ -61,6 +62,10 @@ final: prev:
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
+  cpu-stats = final.pkgs.writeShellScriptBin "cpuStat" ''
+    ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
+  '';
+
   zoom-us = final.installApplication rec {
     name = "zoom-us";
     version = "5.5.5";
@@ -81,5 +86,8 @@ final: prev:
     };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";
+  };
+  zellij = prev.callPackage ./zellij.nix {
+
   };
 }

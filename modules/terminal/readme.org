@@ -6,3 +6,9 @@ Current Choices
 - tmux
 
 tmux window nagivation and emacs window nagivation should have same/simailr combination
+
+
+
+https://stackoverflow.com/questions/12003726/give-a-hint-when-press-prefix-key-in-tmux
+https://leanpub.com/the-tao-of-tmux/read#zoom-pane
+https://linux.die.net/man/1/tmux

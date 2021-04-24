@@ -32,7 +32,6 @@ with pkgs; [
   gitAndTools.gh
   git-crypt
 
-  #gitAndTools.gitstatus
   hledger
   ranger
   du-dust
@@ -40,31 +39,20 @@ with pkgs; [
   nix-tree
   nix-du
 
-  #Apps
-  #HandBrake
-  #wifi-password
-  #Stretchly
-  #ihp
-  #nixops
-  #nixfmt
-  #nox
-  #niv
-
   #mu
   #offlineimap
   #notmuch
   google-cloud-sdk
-  qutebrowser
+  # qutebrowser
   # productivity
-  #pandoc
-  #fzf
+  pandoc
 
   autojump
   vscode
 
   #shellcheck
   fontconfig
-
+  #zellij
   #Docker
   #minikube
   #kubectl

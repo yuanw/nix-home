@@ -1,6 +1,4 @@
 { pkgs, ... }:
 
-with pkgs; [
-  Docker
-  Stretchly
-]
+with pkgs;
+[ Stretchly ]

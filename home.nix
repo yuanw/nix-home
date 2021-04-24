@@ -81,6 +81,9 @@
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
         EDITOR = "emacs";
+        # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
+        # automatically start tmux
+        ZSH_TMUX_AUTOSTART = "true";
       };
 
       enableAutosuggestions = true;
@@ -102,7 +105,8 @@
 
       oh-my-zsh = {
         enable = true;
-        plugins = [ "git" "history" "autojump" "history-substring-search" ];
+        plugins =
+          [ "git" "history" "autojump" "history-substring-search" "tmux" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
