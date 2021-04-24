@@ -174,6 +174,7 @@
             modules = { terminal.enable = true; };
             programs = {
               haskell.enable = true;
+              python.enable = true;
               editors.emacs = {
                 enable = true;
                 pkg = pkgs.emacsPgtkGcc;
