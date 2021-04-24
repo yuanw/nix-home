@@ -62,6 +62,10 @@ final: prev:
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
+  cpu-stats = final.pkgs.writeShellScriptBin "cpuStat" ''
+    ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
+  '';
+
   zoom-us = final.installApplication rec {
     name = "zoom-us";
     version = "5.5.5";

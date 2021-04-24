@@ -43,7 +43,7 @@ in with lib; {
         sqlite
 
         # :lang latex & :lang org (latex previews)
-        #texlive.combined.scheme-medium
+        texlive.combined.scheme-medium
       ];
       programs.emacs = {
         enable = true;
