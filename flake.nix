@@ -17,6 +17,7 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     spacebar.url = "github:cmacrae/spacebar";
+    nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
     # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
     # spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
