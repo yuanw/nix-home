@@ -25,7 +25,7 @@ with lib; {
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
-  networking.networkmanager = { enable = true; };
+  #networking.networkmanager = { enable = true; };
   #networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
 
   # Configure network proxy if necessary
@@ -51,22 +51,8 @@ with lib; {
     enable = true;
     enableContribAndExtras = true;
   };
-  services.xserver.displayManager.lightdm.enable = true;
-  services.xserver.displayManager.lightdm.greeters.mini.enable = true;
-  services.xserver.displayManager.lightdm.greeters.mini.user =
-    localConfig.username;
+  services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3 = { enable = true; };
-  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.support32Bit = true;
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  services.jack = {
-    jackd.enable = true;
-    alsa.enable = true;
-  };
-  hardware.bluetooth.enable = true;
-  hardware.bluetooth.package = pkgs.bluezFull;
-  hardware.bluetooth.settings = { General = { ControllerMode = "bredr"; }; };
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
