@@ -50,8 +50,9 @@ with lib; {
     enable = true;
     enableContribAndExtras = true;
   };
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome3 = { enable = true; };
+  services.xserver.displayManager.lightdm.enable = true;
+  services.xserver.displayManager.lightdm.greeters.mini.enable = true;
+  #services.xserver.desktopManager.gnome3 = { enable = true; };
 
   nix = {
     package = pkgs.nixFlakes;
