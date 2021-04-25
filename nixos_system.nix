@@ -58,7 +58,13 @@ with lib; {
   services.xserver.desktopManager.gnome3 = { enable = true; };
   hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
   hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.support32Bit = true;
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  services.jack = {
+    jackd.enable = true;
+    alsa.enable = true;
+    loopback = { enable = true; };
+  };
   hardware.bluetooth.enable = true;
   hardware.bluetooth.package = pkgs.bluezFull;
   hardware.bluetooth.settings = { General = { ControllerMode = "bredr"; }; };
@@ -98,7 +104,7 @@ with lib; {
     isNormalUser = true;
     uid = 1000;
     home = localConfig.homeDirectory;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "audio" "jackaudio" "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
 
