@@ -23,7 +23,7 @@ myTerminal = "alacritty"
 
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
-screenLocker = "betterlockscreen -l dim"
+screenLocker = "autorandr -l home"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
