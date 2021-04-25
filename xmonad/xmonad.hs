@@ -74,7 +74,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       -- lock screen
       ((modm .|. controlMask, xK_l), spawn screenLocker),
       -- dock screen
-      ((modm .|. controlMask, xK_l), spawn screenReDocker),
+      ((modm .|. controlMask, xK_r), spawn screenReDocker),
       -- close focused window
       ((modm .|. shiftMask, xK_c), kill),
       -- Rotate through the available layout algorithms
