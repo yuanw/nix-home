@@ -52,7 +52,9 @@ with lib; {
   };
   services.xserver.displayManager.lightdm.enable = true;
   services.xserver.displayManager.lightdm.greeters.mini.enable = true;
-  #services.xserver.desktopManager.gnome3 = { enable = true; };
+  services.xserver.displayManager.lightdm.greeters.mini.user =
+    localConfig.username;
+  services.xserver.desktopManager.gnome3 = { enable = true; };
 
   nix = {
     package = pkgs.nixFlakes;
