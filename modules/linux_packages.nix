@@ -10,5 +10,4 @@ with pkgs; [
   haskellPackages.xmobar
   gxmessage
   autorandr
-  slock
 ]

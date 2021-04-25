@@ -95,7 +95,8 @@ with lib; {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim git firefox ];
+  environment.systemPackages = with pkgs; [ wget vim git firefox slock ];
+  security.wrappers.slock.source = "${pkgs.slock.out}/bin/slock";
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;
