@@ -61,7 +61,7 @@ with lib; {
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
   hardware.bluetooth.enable = true;
   hardware.bluetooth.package = pkgs.bluezFull;
-  hardware.bluetooth.config = { General = { ControllerMode = "bredr"; }; };
+  hardware.bluetooth.settings = { General = { ControllerMode = "bredr"; }; };
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
