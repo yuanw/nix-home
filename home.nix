@@ -16,6 +16,7 @@
     '';
   };
 
+  xdg.enable = true;
   programs = {
     bat = {
       enable = true;
@@ -84,7 +85,7 @@
         # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
         # automatically start tmux
         ZSH_TMUX_AUTOSTART = "true";
-        ZSH_TMUX_CONFIG = "${config.xdg.dataHome}/tmux/tmux.conf";
+        ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
       };
 
       enableAutosuggestions = true;
@@ -106,7 +107,8 @@
 
       oh-my-zsh = {
         enable = true;
-        plugins = [ "git" "history" "autojump" "history-substring-search" ];
+        plugins =
+          [ "git" "history" "autojump" "history-substring-search" "tmux" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
