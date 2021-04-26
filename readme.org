@@ -94,7 +94,13 @@ https://tecosaur.github.io/emacs-config/config.html
 - https://github.com/peel/dotfiles
 
 * Items of TODO
+** TODO look into gnome 3 config to setup all the hardware
+
+https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/x11/desktop-managers/gnome3.nix
+
 ** TODO copy https://github.com/btwiusegentoo/nixconfig to get xmonad + emacs working
+
+
 ** TODO finish hosts module path route
 ** TODO try out nix-doom-emacs
 https://github.com/vlaci/nix-doom-emacs
