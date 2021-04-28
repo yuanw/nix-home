@@ -28,6 +28,7 @@ final: prev:
     version = "27.2";
     name = "emacs-mac-27.2-8.2";
     macportVersion = "8.2";
+    # stolen from https://github.com/cmacrae/config/tree/master/patches
     patches = [ ./patches/borderless-emacs.patch ];
     src = prev.fetchurl {
       url = "mirror://gnu/emacs/emacs-27.2.tar.xz";

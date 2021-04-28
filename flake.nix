@@ -223,7 +223,11 @@
             homeDirectory = "/Users/yuanwang";
           };
           modules = [
-            ({ lib, pkgs, config, localConfig, ... }: {
+            ({ lib, pkgs, config, localConfig, services, ... }: {
+              services.emacs = {
+                enable = true;
+                package = pkgs.emacsMacport;
+              };
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
