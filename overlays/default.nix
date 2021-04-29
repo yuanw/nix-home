@@ -40,7 +40,7 @@ final: prev:
     };
   });
 
-  emacsOsxNativeTile = prev.emacsGit.overrideAttrs (oldAttrs: rec {
+  emacsOsxNativeTile = prev.emacsPgtkGcc.overrideAttrs (oldAttrs: rec {
     patches =
       [ ./patches/no-titlebar.patch ./patches/fix-window-role-yabai.patch ];
   });
