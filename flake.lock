@@ -36,6 +36,22 @@
         "type": "github"
       }
     },
+    "emacs-osx": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1619684682,
+        "narHash": "sha256-CJbQWYZMce1QTIrKcINZ7tOGSjSvGZz+fdluB8AiuM8=",
+        "owner": "sagittaros",
+        "repo": "emacs-osx",
+        "rev": "a25ef67f707788e8652954aa67303136a533c50a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "sagittaros",
+        "repo": "emacs-osx",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -124,6 +140,7 @@
       "inputs": {
         "darwin": "darwin",
         "emacs": "emacs",
+        "emacs-osx": "emacs-osx",
         "home-manager": "home-manager",
         "kmonad": "kmonad",
         "nixpkgs": "nixpkgs",

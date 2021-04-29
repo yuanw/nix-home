@@ -17,19 +17,25 @@
     };
     emacs.url = "github:nix-community/emacs-overlay";
     spacebar.url = "github:cmacrae/spacebar";
+    emacs-osx = {
+      url = "github:sagittaros/emacs-osx";
+      flake = false;
+    };
     # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
     # spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
-    , spacebar, ... }:
+    , spacebar, emacs-osx, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
-          inputs = { inherit darwin nixpkgs emacs nur home-manager spacebar; };
+          inputs = {
+            inherit darwin nixpkgs emacs nur home-manager spacebar emacs-osx;
+          };
           modules = modules ++ [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
