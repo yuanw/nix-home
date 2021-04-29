@@ -179,7 +179,10 @@
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
-                editors.emacs.enable = true;
+                editors.emacs = {
+                  enable = true;
+                  pkg = pkgs.emacsOsxNativeTile;
+                };
                 stevenBlackHosts.enable = true;
               };
             })
@@ -210,7 +213,10 @@
               };
               programs = {
                 node.enable = true;
-                editors.emacs.enable = true;
+                editors.emacs = {
+                  enable = true;
+                  pkg = pkgs.emacsOsxNativeTile;
+                };
                 haskell.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
