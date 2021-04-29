@@ -39,15 +39,15 @@
     "emacs-osx": {
       "flake": false,
       "locked": {
-        "lastModified": 1619684682,
-        "narHash": "sha256-CJbQWYZMce1QTIrKcINZ7tOGSjSvGZz+fdluB8AiuM8=",
-        "owner": "sagittaros",
+        "lastModified": 1619701770,
+        "narHash": "sha256-tyLcVJ2kuRGsz9p29j1vYBT7v7XZo6e6PoqeRiqyu9M=",
+        "owner": "yuanwang-wf",
         "repo": "emacs-osx",
-        "rev": "a25ef67f707788e8652954aa67303136a533c50a",
+        "rev": "878ebb99cc06e015ec2bbaae6e6609adb454e99d",
         "type": "github"
       },
       "original": {
-        "owner": "sagittaros",
+        "owner": "yuanwang-wf",
         "repo": "emacs-osx",
         "type": "github"
       }
