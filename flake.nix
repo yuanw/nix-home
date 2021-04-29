@@ -18,7 +18,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     spacebar.url = "github:cmacrae/spacebar";
     emacs-osx = {
-      url = "github:sagittaros/emacs-osx";
+      url = "github:yuanwang-wf/emacs-osx";
       flake = false;
     };
     # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
