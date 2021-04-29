@@ -39,8 +39,7 @@ with lib; {
       inputs.spacebar.overlay
       (import ./overlays)
       (final: prev: {
-        emacsOsxNativeTile =
-          (final.callPackage inputs.emacs-osx { }).emacsOxsNativeTile;
+        emacsOsxNativeTile = (inputs.emacs-osx).emacsOxsNativeTile;
       })
     ];
 
