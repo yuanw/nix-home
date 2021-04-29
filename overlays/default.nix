@@ -40,6 +40,11 @@ final: prev:
     };
   });
 
+  emacsOsxNativeTile = prev.emacsGit.overrideAttrs (oldAttrs: rec {
+    patches =
+      [ ./patches/no-titlebar.patch ./patches/fix-window-role-yabai.patch ];
+  });
+
   Docker = final.installApplication rec {
     name = "Docker";
     version = "3.2.1";

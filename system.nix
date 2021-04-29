@@ -35,12 +35,12 @@ with lib; {
   nixpkgs = {
     overlays = [
       inputs.nur.overlay
-      ## inputs.emacs.overlay
+      inputs.emacs.overlay
       inputs.spacebar.overlay
       (import ./overlays)
-      (final: prev: {
-        emacsOsxNativeTile = (import inputs.emacs-osx).emacsOsxNativeTile;
-      })
+      # (final: prev: {
+      #   emacsOsxNativeTile = (import inputs.emacs-osx).emacsOsxNativeTile;
+      # })
     ];
 
     config = {
