@@ -171,7 +171,10 @@
                 };
               };
             };
-            modules = { terminal.enable = true; };
+            modules = {
+              terminal.enable = true;
+              browsers.firefox.enable = true;
+            };
             programs = {
               haskell.enable = true;
               python.enable = true;
