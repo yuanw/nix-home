@@ -41,8 +41,8 @@ in {
             "browser.uidensity" = 1;
             "browser.urlbar.placeholderName" = "DuckDuckGo";
             "browser.urlbar.update1" = true;
-            "distribution.searchplugins.defaultLocale" = "en-GB";
-            "general.useragent.locale" = "en-GB";
+            "distribution.searchplugins.defaultLocale" = "en-CA";
+            "general.useragent.locale" = "en-CA";
             "identity.fxaccounts.account.device.name" =
               config.networking.hostName;
             "privacy.trackingprotection.enabled" = true;
