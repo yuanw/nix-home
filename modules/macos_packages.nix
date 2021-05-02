@@ -1,4 +1,6 @@
 { pkgs, ... }:
 
-with pkgs;
-[ Stretchly ]
+with pkgs; [
+  Stretchly
+  vscode
+]

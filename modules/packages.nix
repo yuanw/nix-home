@@ -48,7 +48,6 @@ with pkgs; [
   pandoc
 
   autojump
-  vscode
 
   #shellcheck
   fontconfig
