@@ -1,1 +1,7 @@
-#+TITLE: Readme
+#+TITLE: Browser
+
+* Firefox
+** which package to use
+** Shortcut
+Ctrl +/Ctrl - for zoom in and out
+Alt <- backforward
