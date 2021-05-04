@@ -179,10 +179,7 @@
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
-                editors.emacs = {
-                  enable = true;
-                  pkg = pkgs.emacsOsxNativeTile;
-                };
+                editors.emacs = { enable = true; };
                 stevenBlackHosts.enable = true;
               };
             })
