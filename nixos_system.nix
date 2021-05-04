@@ -25,6 +25,7 @@ with lib; {
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
   networking.useDHCP = false;
+  #networking.networkmanager = { enable = true; };
   #networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
 
   # Configure network proxy if necessary
@@ -52,7 +53,6 @@ with lib; {
   };
   services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome3 = { enable = true; };
-
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
@@ -72,6 +72,7 @@ with lib; {
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
+    autoOptimiseStore = true;
     gc = { automatic = true; };
   };
 
@@ -89,13 +90,14 @@ with lib; {
     isNormalUser = true;
     uid = 1000;
     home = localConfig.homeDirectory;
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "audio" "jackaudio" "wheel" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim git firefox ];
+  environment.systemPackages = with pkgs; [ wget vim git firefox slock ];
+  security.wrappers.slock.source = "${pkgs.slock.out}/bin/slock";
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;

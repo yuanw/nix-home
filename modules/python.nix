@@ -15,6 +15,7 @@ in {
           isort
           setuptools
           pylint
+          matplotlib
           #poetry
           pytest
           pyflakes

@@ -23,7 +23,8 @@ myTerminal = "alacritty"
 
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
-screenLocker = "betterlockscreen -l dim"
+screenLocker = "slock"
+screenReDocker = "autorandr -l home"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -72,6 +73,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm, xK_p), spawn appLauncher),
       -- lock screen
       ((modm .|. controlMask, xK_l), spawn screenLocker),
+      -- dock screen
+      ((modm .|. controlMask, xK_r), spawn screenReDocker),
       -- close focused window
       ((modm .|. shiftMask, xK_c), kill),
       -- Rotate through the available layout algorithms
