@@ -27,7 +27,6 @@ with lib; {
       automatic = true;
       user = "${localConfig.username}";
     };
-    autoOptimiseStore = true;
   };
 
   system.stateVersion = 4;
@@ -91,6 +90,10 @@ with lib; {
   environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
   programs.bash.enable = false;
   programs.zsh.enable = true;
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
   time.timeZone = "America/Regina";
 
   users.nix.configureBuildUsers = true;
