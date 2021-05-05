@@ -81,18 +81,20 @@ final: prev:
       sha256 = "18m737c3vphqx2gxk4x14a9lg5ad8gx0awkxmrw0sfv6q5gqzrv2";
     };
   };
+
   Stretchly = final.installApplication rec {
     name = "Stretchly";
-    version = "1.6.0";
+    version = "1.7.0";
     sourceRoot = "Stretchly.app";
     src = prev.fetchurl {
       url =
         "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
-      sha256 = "1pfsiiwqg94bjwi85ghkli2nhkdgiwsc3yr02mza26zyph4jb8w7";
+      sha256 = "158hc7m4x6y4d0xzslp4ydyg8yq5qr122nrb4s5inkg24qx3l3gw";
     };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";
   };
+
   zellij = prev.callPackage ./zellij.nix {
 
   };
