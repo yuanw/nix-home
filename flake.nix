@@ -23,16 +23,14 @@
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
-    , spacebar, emacs-osx, ... }:
+    , spacebar, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
-          inputs = {
-            inherit darwin nixpkgs emacs nur home-manager spacebar emacs-osx;
-          };
+          inputs = { inherit darwin nixpkgs emacs nur home-manager spacebar; };
           modules = modules ++ [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
