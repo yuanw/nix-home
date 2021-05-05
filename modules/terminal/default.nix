@@ -25,9 +25,11 @@ in {
           };
         };
         tmux = {
+          baseIndex = 1;
           enable = true;
           terminal = "screen-256color";
           clock24 = true;
+          customPaneNavigationAndResize = true;
           escapeTime = 1;
           keyMode = "vi";
           shortcut = "Space";

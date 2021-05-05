@@ -27,6 +27,7 @@ with lib; {
       automatic = true;
       user = "${localConfig.username}";
     };
+    autoOptimiseStore = true;
   };
 
   system.stateVersion = 4;
