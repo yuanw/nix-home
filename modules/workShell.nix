@@ -10,7 +10,7 @@ in {
       shellAliases = { bt = "bigskyTest"; };
       initExtra = mkAfter ''
         export PATH=$PATH:$HOME/go/bin
-        eval "$(pyenv init -)"
+        # eval "$(pyenv init -)"
         export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 
         function bigskyTest {
