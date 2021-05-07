@@ -11,7 +11,7 @@ in {
       initExtra = mkAfter ''
         export PATH=$PATH:$HOME/go/bin
         # eval "$(pyenv init -)"
-        export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
+        # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 
         function bigskyTest {
            python manage.py test $1 --http-integration --traceback -v 2
