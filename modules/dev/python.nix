@@ -3,25 +3,23 @@
 with lib;
 let cfg = config.programs.python;
 in {
-  options.programs.python = {
-    enable = mkEnableOption "python";
-    package = mkOption {
-      type = types.package;
-      default = pkgs.python38;
-      defaultText = literalExample "pkgs.python3";
-      description = ''
-        python package to install.
-      '';
-    };
-  };
+  options.programs.python = { enable = mkEnableOption "python"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username}.home.packages = [
-      cfg.package
-      pkgs.black
-      pkgs.python38Packages.pyflakes
-      pkgs.python38Packages.pytest
-      pkgs.python38Packages.isort
+      (pkgs.python37.withPackages (ps:
+        with ps; [
+          pip
+          ipython
+          black
+          isort
+          setuptools
+          pylint
+          matplotlib
+          #poetry
+          pytest
+          pyflakes
+        ]))
     ];
   };
 }
