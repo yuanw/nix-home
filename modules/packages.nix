@@ -55,6 +55,4 @@ with pkgs; [
   #Docker
   #minikube
   #kubectl
-  #vscode
-
 ]
