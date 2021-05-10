@@ -62,18 +62,7 @@ final: prev:
       "https://store.docker.com/editions/community/docker-ce-desktop-mac";
   };
 
-  Firefox = final.installApplication rec {
-    name = "Firefox";
-    version = "88.0.1";
-
-    src = prev.fetchurl {
-      name = "Firefox-${version}.dmg";
-      url =
-        "https://download-installer.cdn.mozilla.net/pub/firefox/releases/${version}/mac/en-CA/Firefox%20${version}.dmg";
-      sha256 = "TEZ0JloM8GQbqN2iPs5cFCfBcGus5NHi+2zOqgWv1l0=";
-    };
-  };
-
+  Firefox = prev.callPacakge ./firefox.nix { };
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
