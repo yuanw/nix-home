@@ -4,7 +4,13 @@
 with lib;
 let cfg = config.modules.browsers.firefox;
 in {
-  options.modules.browsers.firefox = { enable = mkEnableOption "firefox"; };
+  options.modules.browsers.firefox = {
+    enable = mkEnableOption "firefox";
+    pkg = mkOption {
+      type = types.package;
+      default = pkgs.firefox;
+    };
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
