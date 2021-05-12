@@ -5,3 +5,4 @@
 ** Shortcut
 Ctrl +/Ctrl - for zoom in and out
 Alt <- backforward
+** Tridactyl - Extension

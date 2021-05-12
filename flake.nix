@@ -40,7 +40,7 @@
               };
             })
             home-manager.darwinModules.home-manager
-            ./system.nix
+            ./macintosh.nix
           ];
         };
       mkNixSystem = { localConfig, modules }:
