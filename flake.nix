@@ -235,11 +235,6 @@
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               modules = {
-                browsers.firefox = {
-                  enable = true;
-                  pkg = pkgs.Firefox;
-                };
-
                 dev = { julia.enable = true; };
                 terminal.enable = true;
                 wm.yabai.enable = true;
