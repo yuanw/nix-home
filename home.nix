@@ -134,6 +134,7 @@
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
+        url = { "git@github.com:" = { insteadOf = "https://github.com"; }; };
         branch.autosetupmerge = true;
       };
     };

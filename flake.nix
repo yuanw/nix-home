@@ -229,12 +229,18 @@
             ({ lib, pkgs, config, localConfig, services, ... }: {
               services.emacs = {
                 enable = true;
-                package = pkgs.emacsMacport;
+                package = pkgs.emacsOsxNativeTile;
               };
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               modules = {
+                browsers.firefox = {
+                  enable = true;
+                  pkg = pkgs.Firefox;
+                };
+
+                dev = { julia.enable = true; };
                 terminal.enable = true;
                 wm.yabai.enable = true;
               };

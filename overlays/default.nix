@@ -61,6 +61,8 @@ final: prev:
     homepage =
       "https://store.docker.com/editions/community/docker-ce-desktop-mac";
   };
+
+  Firefox = prev.callPackage ./firefox.nix { };
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };

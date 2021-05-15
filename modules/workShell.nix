@@ -10,12 +10,15 @@ in {
       shellAliases = { bt = "bigskyTest"; };
       initExtra = mkAfter ''
         export PATH=$PATH:$HOME/go/bin
-        eval "$(pyenv init -)"
-        export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
+        # eval "$(pyenv init -)"
+        # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 
         function bigskyTest {
            python manage.py test $1 --http-integration --traceback -v 2
         }
+
+        [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
+
 
         #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
         export SDKMAN_DIR="${homeDir}/.sdkman"

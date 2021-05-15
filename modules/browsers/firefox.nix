@@ -4,12 +4,18 @@
 with lib;
 let cfg = config.modules.browsers.firefox;
 in {
-  options.modules.browsers.firefox = { enable = mkEnableOption "firefox"; };
+  options.modules.browsers.firefox = {
+    enable = mkEnableOption "firefox";
+    pkg = mkOption {
+      type = types.package;
+      default = pkgs.firefox;
+    };
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
       programs.firefox.enable = true;
-      #programs.firefox.package = pkgs.firefox;
+      programs.firefox.package = cfg.pkg;
       programs.firefox.extensions = with pkgs.nur.repos.rycee.firefox-addons; [
         tridactyl
         ublock-origin

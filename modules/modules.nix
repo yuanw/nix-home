@@ -6,14 +6,15 @@ with lib;
 let
   loadModule = file: { condition ? true }: { inherit file condition; };
   allModules = [
-    (loadModule ./browsers/firefox.nix { condition = !isDarwin; })
-    (loadModule ./dart.nix { })
+    (loadModule ./browsers/firefox.nix { })
+    (loadModule ./dev/dart.nix { })
+    (loadModule ./dev/haskell.nix { })
+    (loadModule ./dev/julia.nix { })
+    (loadModule ./dev/node.nix { })
+    (loadModule ./dev/python.nix { })
     (loadModule ./editor.nix { })
-    (loadModule ./haskell.nix { })
-    (loadModule ./hledger.nix { })
     (loadModule ./hosts.nix { })
-    (loadModule ./node.nix { })
-    (loadModule ./python.nix { })
+    (loadModule ./hledger.nix { })
     (loadModule ./terminal { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { })
