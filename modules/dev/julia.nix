@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.julia-stable ];
+      home.packages = [ pkgs.juliaMac ];
     };
   };
 }

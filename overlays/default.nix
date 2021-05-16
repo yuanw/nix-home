@@ -74,6 +74,17 @@ final: prev:
     ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
   '';
 
+  juliaMac = final.installApplication rec {
+    name = "Julia";
+    version = "1.6.1";
+    sourceRoot = "Julia-1.6.app";
+    src = prev.fetchurl {
+      url =
+        "https://julialang-s3.julialang.org/bin/mac/x64/1.6/julia-1.6.1-mac64.dmg";
+      sha256 = "1qgygxlrb6y1h29m8f42fnharvpyncnnv0xf7l8ifnfafsy9ydgd";
+    };
+  };
+
   zoom-us = final.installApplication rec {
     name = "zoom-us";
     version = "5.5.5";
