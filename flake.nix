@@ -209,6 +209,7 @@
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
+                java.enable = true;
                 editors.emacs = { enable = true; };
                 stevenBlackHosts.enable = true;
               };
