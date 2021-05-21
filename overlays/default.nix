@@ -25,19 +25,8 @@ final: prev:
     };
 
   emacsMacport = prev.emacsMacport.overrideAttrs (oldAttrs: rec {
-    version = "27.2";
-    name = "emacs-mac-27.2-8.2";
-    macportVersion = "8.2";
     # stolen from https://github.com/cmacrae/config/tree/master/patches
     patches = [ ./patches/borderless-emacs.patch ];
-    src = prev.fetchurl {
-      url = "mirror://gnu/emacs/emacs-27.2.tar.xz";
-      sha256 = "1ff182gjw9wqsbx1kj5gl2r5pbqhp4ar54g04j33fgz6g17cr9xl";
-    };
-    macportSrc = prev.fetchurl {
-      url = "ftp://ftp.math.s.chiba-u.ac.jp/emacs/emacs-27.2-mac-8.2.tar.gz";
-      sha256 = "1bgm2g3ky7rkj1l27wnmyzqsqxzjng7y9bf72ym37wiyhyi2a9za";
-    };
   });
 
   emacsOsxNativeTile = prev.emacsPgtkGcc.overrideAttrs (oldAttrs: rec {
@@ -62,7 +51,6 @@ final: prev:
       "https://store.docker.com/editions/community/docker-ce-desktop-mac";
   };
 
-  Firefox = prev.callPackage ./firefox.nix { };
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
@@ -95,9 +83,5 @@ final: prev:
     };
     description = "break time reminder app";
     homepage = "https://hovancik.net/stretchly/";
-  };
-
-  zellij = prev.callPackage ./zellij.nix {
-
   };
 }
