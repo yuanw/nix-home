@@ -83,6 +83,8 @@ final: prev:
         "https://julialang-s3.julialang.org/bin/mac/x64/1.6/julia-1.6.1-mac64.dmg";
       sha256 = "1qgygxlrb6y1h29m8f42fnharvpyncnnv0xf7l8ifnfafsy9ydgd";
     };
+    description = "High Performance";
+    homepage = "https://julialang.org/";
   };
 
   zoom-us = final.installApplication rec {
