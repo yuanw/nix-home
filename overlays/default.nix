@@ -73,6 +73,14 @@ final: prev:
     };
     description = "High Performance";
     homepage = "https://julialang.org/";
+    postInstall = ''
+      mkdir -p $out/bin
+      for file in $out/Applications/Julia.app/Contents/Resources/julia/bin/julia
+      do
+        ln -s $file $out/bin/julia
+        chmod +x $file
+      done
+    '';
   };
 
   zoom-us = final.installApplication rec {
