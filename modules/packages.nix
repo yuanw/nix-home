@@ -48,7 +48,7 @@ with pkgs; [
   pandoc
 
   autojump
-
+  gap
   #shellcheck
   fontconfig
   #zellij
