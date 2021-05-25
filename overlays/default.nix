@@ -30,7 +30,7 @@ final: prev:
   });
 
   # gap marked as broken for darwin, it seems build on my mac
-  gap = prev.gap.overrideAttrs (oldAttrs: rec { broken = false; });
+  gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
 
   emacsOsxNativeTile = prev.emacsPgtkGcc.overrideAttrs (oldAttrs: rec {
     patches =
