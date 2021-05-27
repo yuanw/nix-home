@@ -25,11 +25,11 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
-          userChrome = (builtins.readFile (pkgs.substituteAll {
-            name = "homeUserChrome";
-            src = ./userChrome.css;
-            tabLineColour = "#5e81ac";
-          }));
+          # userChrome = (builtins.readFile (pkgs.substituteAll {
+          #   name = "homeUserChrome";
+          #   src = ./userChrome.css;
+          #   tabLineColour = "#5e81ac";
+          # }));
           settings = {
             "app.update.auto" = false;
             "browser.startup.homepage" = "https://lobste.rs";
