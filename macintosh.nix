@@ -117,9 +117,6 @@ with lib; {
   homebrew.extraConfig = ''
     cask "firefox", args: { language: "en-CA" }
   '';
-
-  homebrew.taps = [ "homebrew/core" "homebrew/cask" ];
-
   homebrew.casks = [ "firefox" ];
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
