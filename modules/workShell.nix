@@ -7,7 +7,7 @@ in {
 
   config = mkIf config.programs.workShell.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.kubernetes-helm ];
+      home.packages = [ pkgs.kubernetes-helm pkgs.aws-iam-authenticator ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
         initExtra = mkAfter ''
