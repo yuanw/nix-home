@@ -250,6 +250,7 @@
                   enable = true;
                   pkg = pkgs.emacsOsxNativeTile;
                 };
+                python.enable = true;
                 haskell.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
