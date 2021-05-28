@@ -184,8 +184,7 @@
 
       oh-my-zsh = {
         enable = true;
-        plugins =
-          [ "git" "history" "autojump" "history-substring-search" "tmux" ];
+        plugins = [ "history" "autojump" "history-substring-search" "tmux" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };

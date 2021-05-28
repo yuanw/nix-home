@@ -29,6 +29,9 @@ final: prev:
     patches = [ ./patches/borderless-emacs.patch ];
   });
 
+  # gap marked as broken for darwin, it seems build on my mac
+  gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
+
   emacsOsxNativeTile = prev.emacsPgtkGcc.overrideAttrs (oldAttrs: rec {
     patches =
       [ ./patches/no-titlebar.patch ./patches/fix-window-role-yabai.patch ];
@@ -73,6 +76,14 @@ final: prev:
     };
     description = "High Performance";
     homepage = "https://julialang.org/";
+    postInstall = ''
+      mkdir -p $out/bin
+      for file in $out/Applications/Julia.app/Contents/Resources/julia/bin/julia
+      do
+        ln -s $file $out/bin/julia
+        chmod +x $file
+      done
+    '';
   };
 
   zoom-us = final.installApplication rec {
