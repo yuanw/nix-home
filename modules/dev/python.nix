@@ -16,10 +16,9 @@ in {
           setuptools
           pylint
           matplotlib
-          poetry
           pytest
           pyflakes
-        ]))
+        ]) ++ [ pkgs.poetry ])
     ];
   };
 }
