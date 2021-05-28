@@ -18,7 +18,7 @@ in {
           matplotlib
           pytest
           pyflakes
-        ]) ++ [ pkgs.poetry ])
-    ];
+        ]))
+    ] ++ [ pkgs.poetry ];
   };
 }
