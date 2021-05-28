@@ -16,7 +16,7 @@ in {
           setuptools
           pylint
           matplotlib
-          #poetry
+          poetry
           pytest
           pyflakes
         ]))
