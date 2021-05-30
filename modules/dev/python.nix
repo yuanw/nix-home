@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username}.home.packages = [
-      (pkgs.python37.withPackages (ps:
+      (pkgs.python38.withPackages (ps:
         with ps; [
           pip
           ipython
@@ -16,10 +16,9 @@ in {
           setuptools
           pylint
           matplotlib
-          #poetry
           pytest
           pyflakes
         ]))
-    ];
+    ] ++ [ pkgs.poetry ];
   };
 }

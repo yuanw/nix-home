@@ -236,6 +236,10 @@
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               modules = {
+                browsers.firefox = {
+                  enable = true;
+                  pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+                };
                 dev = { julia.enable = true; };
                 terminal.enable = true;
                 wm.yabai.enable = true;
@@ -246,6 +250,7 @@
                   enable = true;
                   pkg = pkgs.emacsOsxNativeTile;
                 };
+                python.enable = true;
                 haskell.enable = true;
                 dart.enable = true;
                 workShell.enable = true;
