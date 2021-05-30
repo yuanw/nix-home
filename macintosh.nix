@@ -10,14 +10,14 @@ with lib; {
       "https://hs-nix-template.cachix.org"
       "https://cache.nixos.org"
       "https://nix-community.cachix.org"
-      "https://emacs-osx.cachix.org"
+      "https://cachix.org/api/v1/cache/emacs"
     ];
     binaryCachePublicKeys = [
       "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
       "hs-nix-template.cachix.org-1:/YbjZCrYAw7d9ayLayk7ZhBdTEkR10ZFmFuOq6ZJo4c="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "emacs-osx.cachix.org-1:Q2++pOcNsiEjmDLufCzzdquwktG3fFDYzZrd8cEj5Aw="
+      "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
     ];
     trustedUsers = [ "root" localConfig.username ];
     extraOptions = ''
