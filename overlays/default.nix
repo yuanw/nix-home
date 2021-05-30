@@ -37,6 +37,12 @@ final: prev:
       [ ./patches/no-titlebar.patch ./patches/fix-window-role-yabai.patch ];
   });
 
+  emacsCatalina = prev.emacs.overrideAttrs (
+    o: rec {
+      CFLAGS = "";
+    }
+  );
+
   Docker = final.installApplication rec {
     name = "Docker";
     version = "3.2.1";
