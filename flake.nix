@@ -215,7 +215,7 @@
                 java.enable = true;
                 editors.emacs = {
                   enable = true;
-                  package = pkgs.emacs;
+                  pkg = pkgs.emacsCatalina;
                 };
                 stevenBlackHosts.enable = true;
               };
