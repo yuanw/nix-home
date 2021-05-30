@@ -101,6 +101,38 @@
         "type": "github"
       }
     },
+    "emacs-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1622228291,
+        "narHash": "sha256-J0qG4IfrSYJrROmovMdO9qyx/gtZKFlQY6/ooNfKjyA=",
+        "owner": "emacs-mirror",
+        "repo": "emacs",
+        "rev": "2003a407c8bdf79dabe4f782039706d91c4fd9c5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "emacs-mirror",
+        "repo": "emacs",
+        "type": "github"
+      }
+    },
+    "emacs-vterm-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1617983886,
+        "narHash": "sha256-jC/q6RAyZhKM3YRu0aefy7uR0/7m1h0FxtYqWrD74DM=",
+        "owner": "akermu",
+        "repo": "emacs-libvterm",
+        "rev": "2b1392cb2b14ec5bd0b7355197d5f353aa5d3983",
+        "type": "github"
+      },
+      "original": {
+        "owner": "akermu",
+        "repo": "emacs-libvterm",
+        "type": "github"
+      }
+    },
     "evil-markdown": {
       "flake": false,
       "locked": {
@@ -217,6 +249,26 @@
         "type": "github"
       }
     },
+    "mac-emacs": {
+      "inputs": {
+        "emacs-src": "emacs-src",
+        "emacs-vterm-src": "emacs-vterm-src",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1622253986,
+        "narHash": "sha256-NZqHoVJbATfYChecYP9IHJiohfsZp/fqCY3B8O3JfdU=",
+        "owner": "cmacrae",
+        "repo": "emacs",
+        "rev": "d5562c8f2b02b8ed82ebc80f75e96e6d18cc7117",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cmacrae",
+        "repo": "emacs",
+        "type": "github"
+      }
+    },
     "nix-doom-emacs": {
       "inputs": {
         "doom-emacs": "doom-emacs",
@@ -229,7 +281,7 @@
         "explain-pause-mode": "explain-pause-mode",
         "flake-utils": "flake-utils",
         "nix-straight": "nix-straight",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "nose": "nose",
         "ob-racket": "ob-racket",
         "org-mode": "org-mode",
@@ -271,6 +323,22 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1622059058,
+        "narHash": "sha256-t1/ZMtyxClVSfcV4Pt5C1YpkeJ/UwFF3oitLD7Ch/UA=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "84aa23742f6c72501f9cc209f29c438766f5352d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1620928277,
         "narHash": "sha256-O/1xZ3KmjPbR3X8hy0mlHUU0S27UTvLolcjoxnmIRyg=",
         "owner": "NixOS",
@@ -284,7 +352,7 @@
         "type": "indirect"
       }
     },
-    "nixpkgs_2": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1622059058,
         "narHash": "sha256-t1/ZMtyxClVSfcV4Pt5C1YpkeJ/UwFF3oitLD7Ch/UA=",
@@ -300,7 +368,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
         "lastModified": 1616847335,
         "narHash": "sha256-AQrNtJZRl9P78u+otHNXVxcQzu84vuTJLqynupp335g=",
@@ -433,8 +501,9 @@
         "emacs": "emacs",
         "home-manager": "home-manager",
         "kmonad": "kmonad",
+        "mac-emacs": "mac-emacs",
         "nix-doom-emacs": "nix-doom-emacs",
-        "nixpkgs": "nixpkgs_2",
+        "nixpkgs": "nixpkgs_3",
         "nur": "nur",
         "spacebar": "spacebar"
       }
@@ -457,7 +526,7 @@
     },
     "spacebar": {
       "inputs": {
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_4"
       },
       "locked": {
         "lastModified": 1619609923,
