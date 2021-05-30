@@ -35,7 +35,8 @@ with lib; {
   nixpkgs = {
     overlays = [
       inputs.nur.overlay
-      inputs.emacs.overlay
+      #inputs.emacs.overlay
+      inputs.mac-emacs.overlay
       inputs.spacebar.overlay
       (import ./overlays)
       # (final: prev: {
