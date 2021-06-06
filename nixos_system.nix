@@ -76,7 +76,7 @@ with lib; {
     gc = { automatic = true; };
   };
 
-  system.stateVersion = "20.09";
+  system.stateVersion = "21.05";
   nixpkgs = {
 
     config = {
