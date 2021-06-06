@@ -10,10 +10,12 @@
 import qualified Data.Map as M
 import Data.Monoid
 import System.Exit
+import XMonad.Actions.Volume
 import XMonad
 import XMonad.Hooks.EwmhDesktops (ewmh)
 import XMonad.Hooks.ManageDocks
 import qualified XMonad.StackSet as W
+import XMonad.Util.Dzen
 import XMonad.Util.Run (spawnPipe)
 
 -- The preferred terminal program, which is used in a binding below and by
@@ -62,6 +64,8 @@ myNormalBorderColor = "#dddddd"
 
 myFocusedBorderColor = "#ff0000"
 
+
+alert = dzenConfig return . show
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 --
@@ -113,6 +117,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       --
       -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
 
+
+      ((0, xK_F6), lowerVolume 4 >>= alert),
+      ((0, xK_F7), raiseVolume 4 >>= alert).
       -- Quit xmonad
       ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess)),
       -- Restart xmonad
