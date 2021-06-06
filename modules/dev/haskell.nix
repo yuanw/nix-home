@@ -3,7 +3,7 @@
 with lib;
 let
   cfg = config.programs.haskell;
-  haskell-env = pkgs.unstable.haskellPackages.ghcWithHoogle (hp:
+  haskell-env = pkgs.haskellPackages.ghcWithHoogle (hp:
     with hp; [
       xmonad
       xmonad-contrib
