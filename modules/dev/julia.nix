@@ -1,7 +1,7 @@
 { config, lib, pkgs, localConfig, ... }:
 
 with lib;
-let cfg = config.programs.haskell;
+let cfg = config.programs.julia;
 in {
   options.modules.dev.julia = { enable = mkEnableOption "Julia"; };
 
