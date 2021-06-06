@@ -7,7 +7,21 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.hls pkgs.ghc ];
+      home.packages = [
+        pkgs.haskellPackages.ghcWithHoogle
+        (hp:
+          with hp; [
+            xmonad
+            xmonad-contrib
+            xmonad-extras
+            apply-refact
+            haskell-language-server
+            brittany
+            cabal-install
+            hlint
+            xmobar
+          ])
+      ];
     };
   };
 }

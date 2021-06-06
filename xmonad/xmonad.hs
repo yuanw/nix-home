@@ -119,7 +119,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
 
 
       ((0, xK_F6), lowerVolume 4 >>= alert),
-      ((0, xK_F7), raiseVolume 4 >>= alert).
+      ((0, xK_F7), raiseVolume 4 >>= alert),
       -- Quit xmonad
       ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess)),
       -- Restart xmonad
