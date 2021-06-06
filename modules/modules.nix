@@ -9,7 +9,6 @@ let
     (loadModule ./browsers/firefox.nix { })
     (loadModule ./dev/dart.nix { })
     (loadModule ./dev/haskell.nix { })
-    (loadModule ./dev/java.nix { })
 
     (loadModule ./dev/julia.nix { })
     (loadModule ./dev/node.nix { })
