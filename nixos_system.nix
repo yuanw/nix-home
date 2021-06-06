@@ -46,6 +46,11 @@ with lib; {
   services.xserver.autoRepeatDelay = 200;
   services.xserver.autoRepeatInterval = 25;
 
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
+
   services.picom.enable = true;
   services.xserver.windowManager.xmonad = {
     enable = true;
