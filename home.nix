@@ -130,7 +130,7 @@
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
         core = {
-          editor = "emacsclient -a '' -c";
+          editor = "emacsclient";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
