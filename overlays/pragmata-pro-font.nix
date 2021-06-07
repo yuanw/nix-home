@@ -12,7 +12,7 @@ stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/share/fonts/PragmataPro
     unzip $src
-    cp PragmataPro0.828/*.ttf $out/share/fonts/PragmataPro
+    cp PragmataPro0.829/*.ttf $out/share/fonts/PragmataPro
   '';
 
 }
