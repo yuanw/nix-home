@@ -190,7 +190,7 @@
         ];
       };
       darwinConfigurations = {
-        "yuan-mac" = mkDarwinSystem {
+        "yuan-mac.Home" = mkDarwinSystem {
           localConfig = {
             username = "yuanwang";
             name = "Yuan Wang";
