@@ -190,7 +190,7 @@
         ];
       };
       darwinConfigurations = {
-        "yuan-mac.Home" = mkDarwinSystem {
+        yuan-mac = mkDarwinSystem {
           localConfig = {
             username = "yuanwang";
             name = "Yuan Wang";
@@ -212,7 +212,6 @@
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
-                java.enable = true;
                 editors.emacs = {
                   enable = true;
                   pkg = pkgs.emacsCatalina;
@@ -223,7 +222,7 @@
           ];
         };
 
-        "wf17084" = mkDarwinSystem {
+        wf17084 = mkDarwinSystem {
           localConfig = {
             username = "yuanwang";
             name = "Yuan Wang";
