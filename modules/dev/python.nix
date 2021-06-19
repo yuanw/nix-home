@@ -18,6 +18,8 @@ in {
           matplotlib
           pytest
           pyflakes
+          virtualenv
+          virtualenvwrapper
         ]))
     ] ++ [ pkgs.poetry ];
   };
