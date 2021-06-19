@@ -145,6 +145,10 @@
 
     jq = { enable = true; };
 
+    neovim = {
+      enable = true;
+      vimAlias = true;
+    };
     zoxide = {
       enable = true;
       enableZshIntegration = true;
@@ -152,7 +156,6 @@
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";
-
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         ASPELL_CONF = "data-dir ${pkgs.aspell}";
