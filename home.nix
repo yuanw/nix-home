@@ -102,7 +102,10 @@
     direnv = {
       enable = true;
       enableZshIntegration = true;
-      nix-direnv = { enableFlakes = true; };
+      nix-direnv = {
+        enable = true;
+        enableFlakes = true;
+      };
     };
 
     fzf = {
