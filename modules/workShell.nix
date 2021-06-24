@@ -9,7 +9,7 @@ in {
     home-manager.users.${localConfig.username} = {
       home.packages = [
         pkgs.kubernetes-helm
-        pkgs.aws-iam-authenticator
+        # pkgs.aws-iam-authenticator
         pkgs.clang-tools
         pkgs.antlr4
         pkgs.csvkit
