@@ -31,6 +31,7 @@ in {
           clock24 = true;
           customPaneNavigationAndResize = true;
           escapeTime = 1;
+          historyLimit = 5000;
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
