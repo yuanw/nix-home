@@ -51,7 +51,5 @@ with pkgs; [
   gap
   #shellcheck
   fontconfig
-  #Docker
-  #minikube
   #kubectl
 ]
