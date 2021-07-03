@@ -119,8 +119,8 @@ with lib; {
     cask "firefox", args: { language: "en-CA" }
   '';
   homebrew.taps = [ "homebrew/core" "homebrew/cask" ];
-
-  homebrew.casks = [ "firefox" ];
+  homebrew.brews = [ "aws-iam-authenticator" ];
+  homebrew.casks = [ "firefox" "racket" ];
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
     fira-code

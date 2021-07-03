@@ -102,7 +102,10 @@
     direnv = {
       enable = true;
       enableZshIntegration = true;
-      enableNixDirenvIntegration = true;
+      nix-direnv = {
+        enable = true;
+        enableFlakes = true;
+      };
     };
 
     fzf = {
@@ -145,6 +148,10 @@
 
     jq = { enable = true; };
 
+    neovim = {
+      enable = true;
+      vimAlias = true;
+    };
     zoxide = {
       enable = true;
       enableZshIntegration = true;
@@ -152,7 +159,6 @@
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";
-
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         ASPELL_CONF = "data-dir ${pkgs.aspell}";
