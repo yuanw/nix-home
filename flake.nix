@@ -207,6 +207,10 @@
               modules = {
                 terminal.enable = true;
                 wm.yabai.enable = true;
+                brew = {
+                  enable = true;
+                  casks = [ "firefox" "racket" ];
+                };
               };
               programs = {
                 node.enable = true;
