@@ -40,7 +40,7 @@ with lib; {
       inputs.spacebar.overlay
       (import ./overlays)
       (final: prev: {
-        resource-id = (import inputs.resource-id).defaultPackage;
+        resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
       })
     ];
 
