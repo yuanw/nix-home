@@ -39,9 +39,9 @@ with lib; {
       inputs.mac-emacs.overlay
       inputs.spacebar.overlay
       (import ./overlays)
-      # (final: prev: {
-      #   emacsOsxNativeTile = (import inputs.emacs-osx).emacsOsxNativeTile;
-      # })
+      (final: prev: {
+        resource-id = (import inputs.resource-id).defaultPackage;
+      })
     ];
 
     config = {

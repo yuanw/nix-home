@@ -19,12 +19,13 @@
     mac-emacs.url = "github:cmacrae/emacs";
     spacebar.url = "github:cmacrae/spacebar";
     nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
+    resource-id.url = "github:yuanwang-wf/resource-id";
     # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
     # spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
-    , spacebar, mac-emacs, ... }:
+    , spacebar, mac-emacs, resource-id, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
@@ -32,7 +33,8 @@
       mkDarwinSystem = { localConfig, modules }:
         darwin.lib.darwinSystem {
           inputs = {
-            inherit darwin nixpkgs emacs nur home-manager spacebar mac-emacs;
+            inherit darwin nixpkgs emacs nur home-manager spacebar mac-emacs
+              resource-id;
           };
           modules = modules ++ [
             ({ lib, ... }: {
