@@ -13,7 +13,7 @@ in {
         pkgs.clang-tools
         pkgs.antlr4
         pkgs.resource-id
-        pkgs.csvkit
+        # pkgs.csvkit
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
