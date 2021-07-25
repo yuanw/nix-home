@@ -13,6 +13,7 @@ in {
         pkgs.clang-tools
         pkgs.antlr4
         pkgs.resource-id
+        pkgs.ws-access-token
         # pkgs.csvkit
       ];
       programs.zsh = {
