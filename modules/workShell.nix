@@ -14,7 +14,7 @@ in {
         pkgs.antlr4
         pkgs.resource-id
         pkgs.ws-access-token
-        # pkgs.csvkit
+        pkgs.csvkit
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
