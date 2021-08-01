@@ -684,11 +684,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1627230073,
-        "narHash": "sha256-IjW+/PV5pfCk/ADVYATOu/GUvu898KTq/I4MCLAk0rI=",
+        "lastModified": 1627850612,
+        "narHash": "sha256-3wxReiAvhQqr1Oi4z4n+Cn0tlE+oQhhogxkTBb6efzg=",
         "owner": "yuanwang-wf",
         "repo": "ws-access-token",
-        "rev": "427fa889a23030aa0ae398481b89d475fc38e080",
+        "rev": "25948fbb45be49146e1d40dd6d57c8aec0bb6c08",
         "type": "github"
       },
       "original": {
