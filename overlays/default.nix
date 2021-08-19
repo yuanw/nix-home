@@ -32,7 +32,7 @@ final: prev:
   # gap marked as broken for darwin, it seems build on my mac
   gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
 
-  emacsCatalina = prev.emacs.overrideAttrs (o: rec { CFLAGS = ""; });
+  # emacsCatalina = prev.emacs.overrideAttrs (o: rec { CFLAGS = ""; });
 
   Docker = final.installApplication rec {
     name = "Docker";
