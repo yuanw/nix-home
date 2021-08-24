@@ -3,6 +3,7 @@
 using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]] to manage dotfiles on NixOs/MacOS.
 "It ain't much, but it's honest work". I mean I copied pasted most the code, but still.
 
+
 * MacOS
 ** Install
 
@@ -67,10 +68,6 @@ https://tecosaur.github.io/emacs-config/config.html
 ** single-user nix-darwin permission issue
 ~sudo chown -R yuanwang:staff /nix/store~
 
-
-* References and Manual:
-- https://daiderd.com/nix-darwin/manual/index.html#sec-options
-- https://rycee.gitlab.io/home-manager/index.html
 
 * Examples
 ** flakes
@@ -189,3 +186,8 @@ it seems autorandr should be used
 - https://askubuntu.com/questions/1131558/second-external-monitor-not-waking-up
 ** TODO add wifi and battery into xmobar
 ** TODO lockscreen
+
+
+* References and Manual:
+- https://daiderd.com/nix-darwin/manual/index.html#sec-options
+- https://rycee.gitlab.io/home-manager/index.html

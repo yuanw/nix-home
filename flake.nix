@@ -239,7 +239,7 @@
             ({ lib, pkgs, config, localConfig, services, ... }: {
               services.emacs = {
                 enable = true;
-                package = pkgs.emacsCatalina;
+                package = pkgs.emacs;
               };
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
@@ -257,7 +257,7 @@
                 node.enable = true;
                 editors.emacs = {
                   enable = true;
-                  pkg = pkgs.emacsCatalina;
+                  pkg = pkgs.emacs;
                 };
                 python.enable = true;
                 haskell.enable = true;

@@ -1,6 +1,8 @@
 final: prev:
 
-{
+let tatContent = builtins.readFile ./tat;
+
+in {
   installApplication = { name, appname ? name, version, src, description
     , homepage, postInstall ? "", sourceRoot ? ".", ... }:
 
@@ -66,7 +68,7 @@ final: prev:
     ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
   '';
 
-  tat = final.pkgs.writeShellScriptBin "tat" builtins.readFile ./tat;
+  tat = final.pkgs.writeShellScriptBin "tat" tatContent;
 
   juliaMac = final.installApplication rec {
     name = "Julia";
