@@ -320,11 +320,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1629251277,
-        "narHash": "sha256-GDCKgPwxQUohSzzVbaK6AXYRkRqIIgFKfUdw8AqvdKI=",
+        "lastModified": 1622944704,
+        "narHash": "sha256-XLyckTFvVwQxB519jI7qCL0YxO79xBkoN5n74DttwGY=",
         "owner": "cmacrae",
         "repo": "emacs",
-        "rev": "d6b6328074672c224c39a82d656377570d48f16f",
+        "rev": "b5db47cfd46914db26362e4fc2f69b41ad7b4b60",
         "type": "github"
       },
       "original": {

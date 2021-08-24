@@ -32,7 +32,11 @@ final: prev:
   # gap marked as broken for darwin, it seems build on my mac
   gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
 
-  # emacsCatalina = prev.emacs.overrideAttrs (o: rec { CFLAGS = ""; });
+  emacsCatalina = prev.emacs.overrideAttrs (o: rec {
+
+    patches = [ ./patches/fix-window-role-yabai.patch ];
+
+  });
 
   Docker = final.installApplication rec {
     name = "Docker";
@@ -61,6 +65,8 @@ final: prev:
   cpu-stats = final.pkgs.writeShellScriptBin "cpuStat" ''
     ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
   '';
+
+  tat = final.pkgs.writeShellScriptBin "tat" builtins.readFile ./tat;
 
   juliaMac = final.installApplication rec {
     name = "Julia";
