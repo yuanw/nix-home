@@ -120,7 +120,7 @@ with lib; {
     cask "firefox", args: { language: "en-CA" }
   '';
   homebrew.taps = [ "homebrew/core" "homebrew/cask" ];
-  homebrew.brews = [ "aws-iam-authenticator" "reattch-to-user-namespace" ];
+  homebrew.brews = [ "aws-iam-authenticator" "reattach-to-user-namespace" ];
   homebrew.casks = [ "firefox" "racket" ];
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
