@@ -250,10 +250,10 @@
                   brews =
                     [ "aws-iam-authenticator" "reattach-to-user-namespace" ];
                 };
-                browsers.firefox = {
-                  enable = true;
-                  pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
-                };
+                # browsers.firefox = {
+                #   enable = true;
+                #   pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+                # };
                 dev = { julia.enable = true; };
                 terminal.enable = true;
                 wm.yabai.enable = true;
