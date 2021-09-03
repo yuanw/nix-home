@@ -193,7 +193,7 @@
         ];
       };
       darwinConfigurations = {
-        "yuan-mac" = mkDarwinSystem {
+        yuan-mac = mkDarwinSystem {
           localConfig = {
             username = "yuanwang";
             name = "Yuan Wang";
@@ -210,15 +210,18 @@
               modules = {
                 terminal.enable = true;
                 wm.yabai.enable = true;
+                brew = {
+                  enable = true;
+                  casks = [ "firefox" "racket" ];
+                };
               };
               programs = {
                 node.enable = true;
                 python.enable = true;
                 haskell.enable = true;
-                java.enable = true;
                 editors.emacs = {
                   enable = true;
-                  pkg = pkgs.emacsCatalina;
+                  pkg = pkgs.emacsMacport;
                 };
                 stevenBlackHosts.enable = true;
               };
@@ -226,7 +229,7 @@
           ];
         };
 
-        "wf17084" = mkDarwinSystem {
+        wf17084 = mkDarwinSystem {
           localConfig = {
             username = "yuanwang";
             name = "Yuan Wang";
@@ -237,14 +240,16 @@
           };
           modules = [
             ({ lib, pkgs, config, localConfig, services, ... }: {
-              services.emacs = {
-                enable = true;
-                package = pkgs.emacs;
-              };
               home-manager.users.${localConfig.username}.programs.git = {
                 extraConfig = { github.user = "yuanwang-wf"; };
               };
               modules = {
+                brew = {
+                  enable = true;
+                  casks = [ "firefox" "racket" ];
+                  brews =
+                    [ "aws-iam-authenticator" "reattach-to-user-namespace" ];
+                };
                 browsers.firefox = {
                   enable = true;
                   pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";

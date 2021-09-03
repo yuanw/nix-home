@@ -6,10 +6,8 @@ with lib;
 let
   loadModule = file: { condition ? true }: { inherit file condition; };
   allModules = [
-    (loadModule ./browsers/firefox.nix { })
     (loadModule ./dev/dart.nix { })
     (loadModule ./dev/haskell.nix { })
-
     (loadModule ./dev/julia.nix { })
     (loadModule ./dev/node.nix { })
     (loadModule ./dev/python.nix { })
@@ -18,7 +16,8 @@ let
     (loadModule ./hledger.nix { })
     (loadModule ./terminal { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
-    (loadModule ./workShell.nix { })
+    (loadModule ./brew.nix { condition = isDarwin; })
+    (loadModule ./workShell.nix { condition = isDarwin; })
   ];
   modules = map (getAttr "file") (filter (getAttr "condition") allModules);
 in modules

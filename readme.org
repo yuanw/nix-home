@@ -23,7 +23,7 @@ nix flake update --recreate-lock-file
 #+END_SRC
 
 ** build on macos?
-~nix build .#darwinConfiguartions.yuan-mac.system~
+~nix build .#darwinConfigurations.yuan-mac.system~
 *** switch ?
 ~./result/sw/bin/darwin-rebuild switch --flake .~
 
