@@ -51,8 +51,5 @@ with pkgs; [
   gap
   #shellcheck
   fontconfig
-  #zellij
-  #Docker
-  #minikube
   #kubectl
 ]

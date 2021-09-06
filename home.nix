@@ -102,7 +102,10 @@
     direnv = {
       enable = true;
       enableZshIntegration = true;
-      enableNixDirenvIntegration = true;
+      nix-direnv = {
+        enable = true;
+        enableFlakes = true;
+      };
     };
 
     fzf = {
@@ -130,7 +133,7 @@
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
         core = {
-          editor = "emacsclient -a '' -c";
+          editor = "emacsclient";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
@@ -145,6 +148,10 @@
 
     jq = { enable = true; };
 
+    neovim = {
+      enable = true;
+      vimAlias = true;
+    };
     zoxide = {
       enable = true;
       enableZshIntegration = true;
@@ -152,7 +159,6 @@
     zsh = rec {
       enable = true;
       dotDir = ".config/zsh";
-
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         ASPELL_CONF = "data-dir ${pkgs.aspell}";

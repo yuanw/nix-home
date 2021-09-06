@@ -107,20 +107,6 @@ with lib; {
   home-manager.users.${localConfig.username} =
     import ./home.nix { inherit pkgs lib config localConfig; };
 
-  ############
-  # Homebrew #
-  ############
-  homebrew.enable = true;
-  homebrew.autoUpdate = true;
-  homebrew.cleanup = "zap";
-  homebrew.global.brewfile = true;
-  homebrew.global.noLock = true;
-  homebrew.extraConfig = ''
-    cask "firefox", args: { language: "en-CA" }
-  '';
-  homebrew.taps = [ "homebrew/core" "homebrew/cask" ];
-
-  homebrew.casks = [ "firefox" ];
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [
     fira-code
