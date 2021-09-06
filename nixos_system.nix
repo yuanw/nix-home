@@ -81,7 +81,7 @@ with lib; {
     gc = { automatic = true; };
   };
 
-  system.stateVersion = "21.05";
+  system.stateVersion = "21.11";
   nixpkgs = {
 
     config = {
@@ -113,7 +113,7 @@ with lib; {
   home-manager.users.${localConfig.username} =
     import ./home.nix { inherit pkgs lib config localConfig; };
 
-  fonts.fontDir.enable = true;
+  # fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
     fira-code
     font-awesome
