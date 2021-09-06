@@ -6,7 +6,7 @@ with lib;
 let cfg = config.modules.brew;
 in {
   options.modules.brew = {
-    enable = mkEnableOption "Julia";
+    enable = mkEnableOption "brew";
     taps = mkOption {
       type = types.listOf types.str;
       default = [ "homebrew/core" "homebrew/cask" ];

@@ -12,7 +12,10 @@ in {
         # pkgs.aws-iam-authenticator
         pkgs.clang-tools
         pkgs.antlr4
+        pkgs.resource-id
+        pkgs.ws-access-token
         pkgs.csvkit
+        pkgs.tat
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };

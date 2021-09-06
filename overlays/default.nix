@@ -1,6 +1,8 @@
 final: prev:
 
-{
+let tatContent = builtins.readFile ./tat;
+
+in {
   installApplication = { name, appname ? name, version, src, description
     , homepage, postInstall ? "", sourceRoot ? ".", ... }:
 
@@ -32,16 +34,11 @@ final: prev:
   # gap marked as broken for darwin, it seems build on my mac
   gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
 
-  emacsOsxNativeTile = prev.emacsPgtkGcc.overrideAttrs (oldAttrs: rec {
-    patches =
-      [ ./patches/no-titlebar.patch ./patches/fix-window-role-yabai.patch ];
-  });
+  emacsCatalina = prev.emacs.overrideAttrs (o: rec {
 
-  emacsCatalina = prev.emacs.overrideAttrs (
-    o: rec {
-      CFLAGS = "";
-    }
-  );
+    patches = [ ./patches/fix-window-role-yabai.patch ];
+
+  });
 
   Docker = final.installApplication rec {
     name = "Docker";
@@ -71,14 +68,16 @@ final: prev:
     ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
   '';
 
+  tat = final.pkgs.writeShellScriptBin "tat" tatContent;
+
   juliaMac = final.installApplication rec {
     name = "Julia";
-    version = "1.6.1";
+    version = "1.6.2";
     sourceRoot = "Julia-1.6.app";
     src = prev.fetchurl {
       url =
-        "https://julialang-s3.julialang.org/bin/mac/x64/1.6/julia-1.6.1-mac64.dmg";
-      sha256 = "1qgygxlrb6y1h29m8f42fnharvpyncnnv0xf7l8ifnfafsy9ydgd";
+        "https://julialang-s3.julialang.org/bin/mac/x64/1.6/julia-1.6.2-mac64.dmg";
+      sha256 = "1j9pqi7lvh8v1j81bpy7gjaa7kdr4s92qkc27rdp2z6wl48f3dbg";
     };
     description = "High Performance";
     homepage = "https://julialang.org/";

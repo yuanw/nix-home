@@ -6,6 +6,7 @@ with lib;
 let
   loadModule = file: { condition ? true }: { inherit file condition; };
   allModules = [
+    (loadModule ./browsers/firefox.nix { })
     (loadModule ./dev/dart.nix { })
     (loadModule ./dev/haskell.nix { })
     (loadModule ./dev/julia.nix { })

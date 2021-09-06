@@ -39,9 +39,10 @@ with lib; {
       inputs.mac-emacs.overlay
       inputs.spacebar.overlay
       (import ./overlays)
-      # (final: prev: {
-      #   emacsOsxNativeTile = (import inputs.emacs-osx).emacsOsxNativeTile;
-      # })
+      (final: prev: {
+        resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
+        ws-access-token = inputs.ws-access-token.defaultPackage.x86_64-darwin;
+      })
     ];
 
     config = {
