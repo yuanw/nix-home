@@ -56,7 +56,7 @@ with lib; {
     enable = true;
     enableContribAndExtras = true;
   };
-  services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome = { enable = true; };
   nix = {
     package = pkgs.nixFlakes;
@@ -114,13 +114,12 @@ with lib; {
     import ./home.nix { inherit pkgs lib config localConfig; };
 
   # fonts.fontDir.enable = true;
-  fonts.fonts = with pkgs; [
-    fira-code
-    font-awesome
-    iosevka
-    roboto
-    roboto-mono
-    pragmata-pro
-  ];
-  # Recreate /run/current-system symlink after boot
+  # fonts.fonts = with pkgs; [
+  #   fira-code
+  #   font-awesome
+  #   iosevka
+  #   roboto
+  #   roboto-mono
+  #   pragmata-pro
+  # ];
 }
