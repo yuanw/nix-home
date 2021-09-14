@@ -30,22 +30,12 @@ in {
           terminal = "screen-256color";
           clock24 = true;
           customPaneNavigationAndResize = true;
+          reverseSplit = true;
           escapeTime = 1;
           historyLimit = 5000;
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
-            bind s split-window -v
-            bind v split-window -h
-
-            bind-key -r C-k resize-pane -U
-            bind-key -r C-j resize-pane -D
-            bind-key -r C-h resize-pane -L
-            bind-key -r C-l resize-pane -R
-            bind-key -r C-M-k resize-pane -U 5
-            bind-key -r C-M-j resize-pane -D 5
-            bind-key -r C-M-h resize-pane -L 5
-            bind-key -r C-M-l resize-pane -R 5
 
             set -g status-justify "left"
             set -g status "on"
