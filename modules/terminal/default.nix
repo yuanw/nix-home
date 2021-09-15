@@ -30,13 +30,13 @@ in {
           terminal = "screen-256color";
           clock24 = true;
           customPaneNavigationAndResize = true;
-          reverseSplit = true;
           escapeTime = 1;
           historyLimit = 5000;
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
-
+            bind v split-window -h -c '#{pane_current_path}'
+            bind s split-window -v -c '#{pane_current_path}'
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
