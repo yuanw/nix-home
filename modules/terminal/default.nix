@@ -37,6 +37,9 @@ in {
           extraConfig = ''
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
+
+            bind c new-window -c "#{pane_current_path}
+
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
