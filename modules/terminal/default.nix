@@ -34,7 +34,7 @@ in {
           escapeTime = 0;
           historyLimit = 50000;
           keyMode = "vi";
-          shortcut = "q";
+          shortcut = "Space";
           extraConfig = ''
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
