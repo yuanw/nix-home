@@ -25,21 +25,23 @@ in {
           };
         };
         tmux = {
+          aggressiveResize = true;
           baseIndex = 1;
           enable = true;
           terminal = "screen-256color";
           clock24 = true;
           customPaneNavigationAndResize = true;
-          escapeTime = 1;
-          historyLimit = 5000;
+          escapeTime = 0;
+          historyLimit = 50000;
           keyMode = "vi";
-          shortcut = "Space";
+          shortcut = "q";
           extraConfig = ''
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
             bind c new-window -c '#{pane_current_path}'
 
+            set-option -g renumber-windows on
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
