@@ -40,6 +40,8 @@ in {
             bind s split-window -v -c '#{pane_current_path}'
 
             bind c new-window -c '#{pane_current_path}'
+            bind S choose-session -Zw
+            bind C-j new-window -n "session-switcher" "tmux list-sessions | sed -E 's/:.*$//' | grep -v \"^$(tmux display-message -p '#S')\$\" | fzf --reverse | xargs tmux switch-client -t"
 
             set-option -g renumber-windows on
             set -g status-justify "left"
