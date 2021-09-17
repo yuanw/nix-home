@@ -248,7 +248,7 @@
                   enable = true;
                   casks = [ "firefox" "racket" ];
                   brews =
-                    [ "aws-iam-authenticator" "reattach-to-user-namespace" ];
+                    [ "aws-iam-authenticator" ];
                 };
                 browsers.firefox = {
                   enable = true;
