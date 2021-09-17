@@ -41,6 +41,8 @@ in {
 
             bind c new-window -c '#{pane_current_path}'
             bind S choose-session -Zw
+
+            bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "~/.tmux.conf reloaded"
             bind C-j new-window -n "session-switcher" "tmux list-sessions | sed -E 's/:.*$//' | grep -v \"^$(tmux display-message -p '#S')\$\" | fzf --reverse | xargs tmux switch-client -t"
 
             set-option -g renumber-windows on
