@@ -7,6 +7,7 @@ in {
   options.modules.terminal = { enable = mkEnableOption "terminal"; };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
+      home.packages = [ pkgs.tat ];
       programs = {
         starship = {
           enable = true;
@@ -23,6 +24,17 @@ in {
               staged = "[++($count)](green)";
             };
           };
+        };
+        zsh = {
+          shellAliases = {
+            tkill =
+              "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
+          };
+          initExtra = mkAfter ''
+            function zt {
+               z $1 && tat
+            }
+          '';
         };
         tmux = {
           aggressiveResize = true;

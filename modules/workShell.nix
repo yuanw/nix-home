@@ -15,14 +15,9 @@ in {
         pkgs.resource-id
         pkgs.ws-access-token
         pkgs.csvkit
-        pkgs.tat
       ];
       programs.zsh = {
-        shellAliases = {
-          bt = "bigskyTest";
-          tkill =
-            "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzy); do tmux kill-session -t $s; done;";
-        };
+        shellAliases = { bt = "bigskyTest"; };
         initExtra = mkAfter ''
           export PATH=$PATH:$HOME/go/bin
           # eval "$(pyenv init -)"
@@ -33,9 +28,6 @@ in {
           }
 
 
-          function zt {
-             z $1 && tat
-          }
 
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
 
