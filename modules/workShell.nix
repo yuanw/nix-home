@@ -28,6 +28,11 @@ in {
              python manage.py test $1 --http-integration --traceback -v 2
           }
 
+
+          function zt {
+             z $1 && tat
+          }
+
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
 
 
