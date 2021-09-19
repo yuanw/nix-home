@@ -18,7 +18,11 @@ in {
         pkgs.tat
       ];
       programs.zsh = {
-        shellAliases = { bt = "bigskyTest"; };
+        shellAliases = {
+          bt = "bigskyTest";
+          tkill =
+            "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzy); do tmux kill-session -t $s; done;";
+        };
         initExtra = mkAfter ''
           export PATH=$PATH:$HOME/go/bin
           # eval "$(pyenv init -)"
