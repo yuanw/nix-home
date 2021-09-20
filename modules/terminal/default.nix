@@ -26,6 +26,13 @@ in {
           };
         };
         zsh = {
+          sessionVariables = {
+
+            # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
+            # automatically start tmux
+            ZSH_TMUX_AUTOSTART = "true";
+            ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
+          };
           shellAliases = {
             tkill =
               "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
@@ -35,6 +42,7 @@ in {
                z $1 && tat
             }
           '';
+          oh-my-zsh = { plugins = [ "tmux" ]; };
         };
         tmux = {
           aggressiveResize = true;
@@ -57,8 +65,8 @@ in {
             bind S choose-session -Zw
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
-            #bind C-j new-window -n "session-switcher" "tmux list-sessions | sed -E 's/:.*$//' | grep -v \"^$(tmux display-message -p '#S')\$\" | fzf --reverse | xargs tmux switch-client -t"
 
+            bind O display-popup -E "td $HOME/workspace"
             bind J display-popup -E "\
                 tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
                 sed '/^$/d' |\
