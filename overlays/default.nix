@@ -1,6 +1,8 @@
 final: prev:
 
-let tatContent = builtins.readFile ./tat;
+let
+  tatContent = builtins.readFile ./tat;
+  taContent = builtins.readFile.ta;
 
 in {
   installApplication = { name, appname ? name, version, src, description
@@ -69,6 +71,7 @@ in {
   '';
 
   tat = final.pkgs.writeShellScriptBin "tat" tatContent;
+  ta = final.pkgs.writeShellScriptBin "ta" taContent;
 
   juliaMac = final.installApplication rec {
     name = "Julia";
