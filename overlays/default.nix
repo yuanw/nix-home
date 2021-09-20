@@ -71,7 +71,7 @@ in {
   '';
 
   tat = final.pkgs.writeShellScriptBin "tat" tatContent;
-  ta = final.pkgs.writeShellScriptBin "ta" taContent;
+  td = final.pkgs.writeShellScriptBin "td" taContent;
 
   juliaMac = final.installApplication rec {
     name = "Julia";
