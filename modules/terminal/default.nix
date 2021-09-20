@@ -4,7 +4,14 @@ with lib;
 let cfg = config.modules.terminal;
 in {
 
-  options.modules.terminal = { enable = mkEnableOption "terminal"; };
+  options.modules.terminal = {
+    enable = mkEnableOption "terminal";
+    mainWorkspaceDir = mkOption {
+      default = "$HOME/workspace";
+      type = types.str;
+      description = "directory for prefix+O to point to";
+    };
+  };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
       home.packages = [ pkgs.tat pkgs.td ];
@@ -27,7 +34,6 @@ in {
         };
         zsh = {
           sessionVariables = {
-
             # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
             # automatically start tmux
             ZSH_TMUX_AUTOSTART = "true";
@@ -39,7 +45,7 @@ in {
           };
           initExtra = mkAfter ''
             function zt {
-               z $1 && tat
+               z $1 && td --start
             }
           '';
           oh-my-zsh = { plugins = [ "tmux" ]; };
@@ -66,7 +72,7 @@ in {
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
-            bind O display-popup -E "td $HOME/workspace"
+            bind O display-popup -E "td ${cfg.mainWorkspaceDir}"
             bind J display-popup -E "\
                 tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
                 sed '/^$/d' |\

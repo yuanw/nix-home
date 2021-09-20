@@ -247,15 +247,17 @@
                 brew = {
                   enable = true;
                   casks = [ "firefox" "racket" ];
-                  brews =
-                    [ "aws-iam-authenticator" ];
+                  brews = [ "aws-iam-authenticator" ];
                 };
                 browsers.firefox = {
                   enable = true;
                   pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
                 };
                 dev = { julia.enable = true; };
-                terminal.enable = true;
+                terminal = {
+                  enable = true;
+                  mainWorkspaceDir = "$HOME/workiva";
+                };
                 wm.yabai.enable = true;
               };
               programs = {
