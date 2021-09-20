@@ -7,7 +7,7 @@ in {
   options.modules.terminal = { enable = mkEnableOption "terminal"; };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.tat pkgs.ta ];
+      home.packages = [ pkgs.tat pkgs.td ];
       programs = {
         starship = {
           enable = true;

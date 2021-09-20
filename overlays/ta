@@ -52,8 +52,6 @@ if [ "$DIR" == "--start" ]; then
 else
     (TMUX=''
     tmux new-session -Ad -s "$session_name" -c $path_name;
-    tmux split-window -vb -t "$session_name" -c $path_name -p 70;
-    tmux send-keys -t "$session_name" "nvim '+Telescope find_files'" Enter;
     )
 fi
  }
@@ -75,37 +73,3 @@ create_if_needed_and_attach() {
 }
 
 create_if_needed_and_attach || attatch_to_first_session
-# if [ -z "$session_name" ]; then
-#     # operation cancelled by user
-#     exit 1
-# fi
-
-# session_exists() {
-#     # checks if the $session_name exists
-#     tmux has-session -t "=$session_name"
-# }
-
-# create_detached_session() {
-# if [ "$DIR" == "--start" ]; then
-#     (TMUX=''
-#     tmux new-session -Ad -s "$session_name" -c $path_name
-#     )
-# else
-#     (TMUX=''
-#     tmux new-session -Ad -s "$session_name" -c $path_name;
-#     )
-# fi
-#  }
-
-# create_if_needed_and_attach() {
-#     if not_in_tmux; then
-#         tmux new-session -As "$session_name" -c $path_name
-#     else
-#         if ! session_exists; then
-#           create_detached_session
-#         fi
-#         tmux switch-client -t "$session_name"
-#     fi
-# }
-
-# create_if_needed_and_attach
