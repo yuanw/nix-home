@@ -2,7 +2,7 @@ final: prev:
 
 let
   tatContent = builtins.readFile ./tat;
-  taContent = builtins.readFile.ta;
+  taContent = builtins.readFile ./ta;
 
 in {
   installApplication = { name, appname ? name, version, src, description
