@@ -72,6 +72,7 @@ in {
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
+            bind -n M-b switch-client -l
             bind O display-popup -E "td ${cfg.mainWorkspaceDir}"
             bind J display-popup -E "\
                 tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
