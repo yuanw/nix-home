@@ -7,8 +7,11 @@ Current Choices
 
 tmux window nagivation and emacs window nagivation should have the same or simailr combination
 
+* Moonlander keybroad
 
+https://configure.zsa.io/moonlander/layouts/dOezg/latest/0
 
+* References
 https://stackoverflow.com/questions/12003726/give-a-hint-when-press-prefix-key-in-tmux
 https://leanpub.com/the-tao-of-tmux/read#zoom-pane
 https://man7.org/linux/man-pages/man1/tmux.1.html
