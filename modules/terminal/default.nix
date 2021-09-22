@@ -45,7 +45,7 @@ in {
           };
           initExtra = mkAfter ''
             function zt {
-               z $1 && td --start
+               z $1 && tat
             }
           '';
           oh-my-zsh = { plugins = [ "tmux" ]; };
@@ -72,7 +72,7 @@ in {
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
-            bind b switch-client -l
+            bind L switch-client -l
             bind O display-popup -E "td ${cfg.mainWorkspaceDir}"
             bind J display-popup -E "\
                 tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
@@ -80,6 +80,11 @@ in {
                 fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  |\
                 xargs tmux switch-client -t"
             set-option -g renumber-windows on
+
+            # "break session" and "kill session" without exiting tmux
+            bind-key C-b send-keys 'tat && exit' 'C-m'
+            bind-key K run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
+
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
