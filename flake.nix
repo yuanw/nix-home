@@ -37,6 +37,7 @@
             inherit darwin nixpkgs emacs nur home-manager spacebar mac-emacs
               resource-id ws-access-token;
           };
+          system = "x86_64-darwin";
           modules = modules ++ [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
