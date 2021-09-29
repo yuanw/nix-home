@@ -1,7 +1,9 @@
 { config, lib, pkgs, localConfig, ... }:
 
 with lib;
-let cfg = config.modules.terminal;
+let
+  cfg = config.modules.terminal;
+  tmuxMenuSeperator = "''";
 in {
 
   options.modules.terminal = {
@@ -41,7 +43,10 @@ in {
           };
           shellAliases = {
             tkill =
-              "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
+              "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-session --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
+
+            # tkill =
+            #   "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
           };
           initExtra = mkAfter ''
             function zt {
@@ -68,7 +73,7 @@ in {
             bind s split-window -v -c '#{pane_current_path}'
 
             bind c new-window -c '#{pane_current_path}'
-            bind S choose-session -Zw
+            # bind S choose-session -Zw
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
@@ -82,9 +87,13 @@ in {
             set-option -g renumber-windows on
 
             # "break session" and "kill session" without exiting tmux
-            bind-key C-b send-keys 'tat && exit' 'C-m'
-            bind-key K run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
-
+            bind-key C-k run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
+            bind-key M-k display-popup -E "tkill"
+            bind-key S display-menu -T "#[align=centre]#{session_name}" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
+              "Open Workspace" o "display-popup -E \" td ${cfg.mainWorkspaceDir} \""  ${tmuxMenuSeperator} \
+              "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "send-keys 'tkill' 'C-m'" ${tmuxMenuSeperator} \
+              Random r "run-shell 'tat random'" ${tmuxMenuSeperator} \
+              Exit e "send-keys 'tat && exit' 'C-m' "
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
