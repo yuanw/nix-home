@@ -13,6 +13,12 @@ in {
       type = types.str;
       description = "directory for prefix+O to point to";
     };
+
+    secondaryWorkspaceDir = mkOption {
+      default = "$HOME/workspace";
+      type = types.str;
+      description = "secondary directory for prefix+O to point to";
+    };
   };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
@@ -79,20 +85,20 @@ in {
 
             bind L switch-client -l
             bind O display-popup -E "td ${cfg.mainWorkspaceDir}"
-            bind J display-popup -E "\
-                tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
-                sed '/^$/d' |\
-                fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  |\
-                xargs tmux switch-client -t"
+            # bind J display-popup -E "\
+            #     tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
+            #     sed '/^$/d' |\
+            #     fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  |\
+            #     xargs tmux switch-client -t"
             set-option -g renumber-windows on
 
             # "break session" and "kill session" without exiting tmux
             bind-key C-k run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
-            bind-key S display-menu -T "#[align=centre]#{session_name}" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
-              "Open Workspace" o "display-popup -E \" td ${cfg.mainWorkspaceDir} \""  ${tmuxMenuSeperator} \
-              "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "send-keys 'tkill' 'C-m'" ${tmuxMenuSeperator} \
+            bind-key S display-menu -T "#[align=centre]Session Mgt" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
+              "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" "Open Sec Workspace" s "display-popup -E \" td ${cfg.secondaryWorkspaceDir} \""   ${tmuxMenuSeperator} \
+              "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
               Random r "run-shell 'tat random'" ${tmuxMenuSeperator} \
-              Exit e "send-keys 'tat && exit' 'C-m' "
+              Exit e detach"
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
