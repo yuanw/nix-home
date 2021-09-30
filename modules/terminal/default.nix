@@ -84,7 +84,6 @@ in {
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
             bind L switch-client -l
-            bind O display-popup -E "td ${cfg.mainWorkspaceDir}"
             # bind J display-popup -E "\
             #     tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
             #     sed '/^$/d' |\
@@ -92,9 +91,7 @@ in {
             #     xargs tmux switch-client -t"
             set-option -g renumber-windows on
 
-            # "break session" and "kill session" without exiting tmux
-            bind-key C-k run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
-            bind-key S display-menu -T "#[align=centre]Session Mgt" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
+            bind-key S display-menu -T "#[align=centre]Sessions" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
               "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" "Open Sec Workspace" s "display-popup -E \" td ${cfg.secondaryWorkspaceDir} \""   ${tmuxMenuSeperator} \
               "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
               Random r "run-shell 'tat random'" ${tmuxMenuSeperator} \
