@@ -247,7 +247,7 @@
               modules = {
                 brew = {
                   enable = true;
-                  casks = [ "firefox" "racket" ];
+                  casks = [ "firefox" ];
                   brews = [ "aws-iam-authenticator" ];
                 };
                 browsers.firefox = {
