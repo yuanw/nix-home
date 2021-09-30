@@ -16,7 +16,7 @@ in {
   };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.tat pkgs.td ];
+      home.packages = [ pkgs.tat pkgs.td pkgs.tkill ];
       programs = {
         starship = {
           enable = true;
@@ -42,8 +42,8 @@ in {
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
           };
           shellAliases = {
-            tkill =
-              "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-session --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
+            # tkill =
+            #   "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-session --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 
             # tkill =
             #   "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
@@ -88,7 +88,6 @@ in {
 
             # "break session" and "kill session" without exiting tmux
             bind-key C-k run-shell 'tmux switch-client -n \; kill-session -t "$(tmux display-message -p "#S")" || tmux kill-session'
-            bind-key M-k display-popup -E "tkill"
             bind-key S display-menu -T "#[align=centre]#{session_name}" "Jump" j 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
               "Open Workspace" o "display-popup -E \" td ${cfg.mainWorkspaceDir} \""  ${tmuxMenuSeperator} \
               "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "send-keys 'tkill' 'C-m'" ${tmuxMenuSeperator} \
