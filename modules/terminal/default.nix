@@ -4,6 +4,11 @@ with lib;
 let
   cfg = config.modules.terminal;
   tmuxMenuSeperator = "''";
+  tat = pkgs.writeShellScriptBin "tat" builtins.readFile ./tat;
+  td = pkgs.writeShellScriptBin "td" builtins.readFile ./ta;
+
+  tkill = pkgs.writeShellScriptBin "tkill"
+    "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
 
   options.modules.terminal = {
@@ -22,7 +27,7 @@ in {
   };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ pkgs.tat pkgs.td pkgs.tkill ];
+      home.packages = [ tat td tkill ];
       programs = {
         starship = {
           enable = true;

@@ -1,10 +1,6 @@
 final: prev:
 
-let
-  tatContent = builtins.readFile ./tat;
-  taContent = builtins.readFile ./ta;
-  tKillContent = builtins.readFile ./tkill;
-in {
+{
   installApplication = { name, appname ? name, version, src, description
     , homepage, postInstall ? "", sourceRoot ? ".", ... }:
 
@@ -69,10 +65,6 @@ in {
   cpu-stats = final.pkgs.writeShellScriptBin "cpuStat" ''
     ps -A -o %cpu | awk '{s+=$1} END {print s "%"}'
   '';
-
-  tat = final.pkgs.writeShellScriptBin "tat" tatContent;
-  td = final.pkgs.writeShellScriptBin "td" taContent;
-  tkill = final.pkgs.writeShellScriptBin "tkill" tKillContent;
 
   juliaMac = final.installApplication rec {
     name = "Julia";
