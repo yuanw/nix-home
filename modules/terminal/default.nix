@@ -84,11 +84,11 @@ in {
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
 
             bind L switch-client -l
-            # bind J display-popup -E "\
-            #     tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
-            #     sed '/^$/d' |\
-            #     fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  |\
-            #     xargs tmux switch-client -t"
+            bind J display-popup -E "\
+                 tmux list-panes -a -F '#{?session_attached,,#S:#I.#P}' |\
+                 sed '/^$/d' |\
+                 fzf --reverse --header join-pane --preview 'tmux capture-pane -pt {}'  |\
+                 xargs tmux join-pane -v -s"
             set-option -g renumber-windows on
 
             bind-key Tab display-menu -T "#[align=centre]Sessions" "Switch" . 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
