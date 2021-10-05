@@ -48,7 +48,7 @@ with pkgs; [
   pandoc
 
   autojump
-  gap
+  # gap
   #shellcheck
   fontconfig
   #kubectl

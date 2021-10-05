@@ -3,10 +3,10 @@
 stdenv.mkDerivation rec {
   nativeBuildInputs = [ unzip ];
   pname = "pragmata-pro-font";
-  version = "0.829";
+  version = "0.829-2";
   buildInputs = [ unzip ];
 
-  src = ../private/PragmataPro0.829.zip;
+  src = ../private/PragmataPro0.829-2.zip;
   sha256 = "";
   phases = [ "installPhase" ];
   installPhase = ''

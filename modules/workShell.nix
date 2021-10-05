@@ -15,7 +15,6 @@ in {
         pkgs.resource-id
         pkgs.ws-access-token
         pkgs.csvkit
-        pkgs.tat
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
@@ -27,6 +26,8 @@ in {
           function bigskyTest {
              python manage.py test $1 --http-integration --traceback -v 2
           }
+
+
 
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
 

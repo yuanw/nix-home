@@ -1,12 +1,33 @@
 { config, lib, pkgs, localConfig, ... }:
 
 with lib;
-let cfg = config.modules.terminal;
+let
+  cfg = config.modules.terminal;
+  tmuxMenuSeperator = "''";
+  tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
+  td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
+
+  tkill = pkgs.writeShellScriptBin "tkill"
+    "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
 
-  options.modules.terminal = { enable = mkEnableOption "terminal"; };
+  options.modules.terminal = {
+    enable = mkEnableOption "terminal";
+    mainWorkspaceDir = mkOption {
+      default = "$HOME/workspace";
+      type = types.str;
+      description = "directory for prefix+O to point to";
+    };
+
+    secondaryWorkspaceDir = mkOption {
+      default = "$HOME/workspace";
+      type = types.str;
+      description = "secondary directory for prefix+O to point to";
+    };
+  };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
+      home.packages = [ tat td tkill ];
       programs = {
         starship = {
           enable = true;
@@ -24,6 +45,27 @@ in {
             };
           };
         };
+        zsh = {
+          sessionVariables = {
+            # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
+            # automatically start tmux
+            ZSH_TMUX_AUTOSTART = "true";
+            ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
+          };
+          shellAliases = {
+            # tkill =
+            #   "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-session --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
+
+            # tkill =
+            #   "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
+          };
+          initExtra = mkAfter ''
+            function zt {
+               z $1 && tat
+            }
+          '';
+          oh-my-zsh = { plugins = [ "tmux" ]; };
+        };
         tmux = {
           aggressiveResize = true;
           baseIndex = 1;
@@ -36,21 +78,29 @@ in {
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
+
+            set -g mouse on
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
             bind c new-window -c '#{pane_current_path}'
-            bind S choose-session -Zw
+            # bind S choose-session -Zw
 
             bind-key R source-file $XDG_CONFIG_HOME/tmux/tmux.conf \; display-message "$XDG_CONFIG_HOME/tmux/tmux.conf reloaded"
-            #bind C-j new-window -n "session-switcher" "tmux list-sessions | sed -E 's/:.*$//' | grep -v \"^$(tmux display-message -p '#S')\$\" | fzf --reverse | xargs tmux switch-client -t"
 
+            bind L switch-client -l
             bind J display-popup -E "\
-                tmux list-sessions -F '#{?session_attached,,#{session_name}}' |\
-                sed '/^$/d' |\
-                fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  |\
-                xargs tmux switch-client -t"
+                 tmux list-panes -a -F '#{?session_attached,,#S:#I.#P}' |\
+                 sed '/^$/d' |\
+                 fzf --reverse --header join-pane --preview 'tmux capture-pane -pt {}'  |\
+                 xargs tmux join-pane -v -s"
             set-option -g renumber-windows on
+
+            bind-key Tab display-menu -T "#[align=centre]Sessions" "Switch" . 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
+              "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" "Open Sec Workspace" s "display-popup -E \" td ${cfg.secondaryWorkspaceDir} \""   ${tmuxMenuSeperator} \
+              "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
+              Random r "run-shell 'tat random'" ${tmuxMenuSeperator} \
+              Exit e detach"
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"

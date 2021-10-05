@@ -37,6 +37,7 @@
             inherit darwin nixpkgs emacs nur home-manager spacebar mac-emacs
               resource-id ws-access-token;
           };
+          system = "x86_64-darwin";
           modules = modules ++ [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
@@ -246,16 +247,18 @@
               modules = {
                 brew = {
                   enable = true;
-                  casks = [ "firefox" "racket" ];
-                  brews =
-                    [ "aws-iam-authenticator" ];
+                  casks = [ "firefox" ];
+                  brews = [ "aws-iam-authenticator" ];
                 };
                 browsers.firefox = {
                   enable = true;
                   pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
                 };
                 dev = { julia.enable = true; };
-                terminal.enable = true;
+                terminal = {
+                  enable = true;
+                  mainWorkspaceDir = "$HOME/workiva";
+                };
                 wm.yabai.enable = true;
               };
               programs = {
