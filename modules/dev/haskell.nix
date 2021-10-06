@@ -5,15 +5,15 @@ let
   cfg = config.programs.haskell;
   haskell-env = pkgs.haskellPackages.ghcWithHoogle (hp:
     with hp; [
-      xmonad
-      xmonad-contrib
-      xmonad-extras
+      # xmonad
+      # xmonad-contrib
+      # xmonad-extras
       apply-refact
       haskell-language-server
       brittany
       cabal-install
       hlint
-      xmobar
+      # xmobar
     ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
