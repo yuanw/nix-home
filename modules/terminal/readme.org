@@ -5,7 +5,7 @@ Current Choices
 - starship
 - tmux
 
-tmux window nagivation and emacs window nagivation should have the same or simailr combination
+tmux window navigation and emacs window navigation should have the same or similar combination
 
 * Moonlander keybroad
 
