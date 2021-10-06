@@ -6,7 +6,8 @@ let
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
-
+  temacs = pkgs.writeShellScriptBin "temacs" ''
+    (tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacs -nw" "C-m" )'';
   tkill = pkgs.writeShellScriptBin "tkill"
     "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
@@ -27,7 +28,7 @@ in {
   };
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ tat td tkill ];
+      home.packages = [ tat td tkill temacs ];
       programs = {
         starship = {
           enable = true;
@@ -99,8 +100,8 @@ in {
             bind-key Tab display-menu -T "#[align=centre]Sessions" "Switch" . 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
               "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" "Open Sec Workspace" s "display-popup -E \" td ${cfg.secondaryWorkspaceDir} \""   ${tmuxMenuSeperator} \
               "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
-              Random r "run-shell 'tat random'" ${tmuxMenuSeperator} \
-              Exit e detach"
+              Random r "run-shell 'tat random'" Emacs e "run-shell 'temacs'" ${tmuxMenuSeperator} \
+              Exit q detach"
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
