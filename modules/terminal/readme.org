@@ -5,9 +5,19 @@ Current Choices
 - starship
 - tmux
 
-tmux window nagivation and emacs window nagivation should have the same or simailr combination
 
-* Moonlander keybroad
+* Bigger picture
+
+Tiling Window Manager + tmux + Doom Emacs
+
+most of yabai commands start with ~Alt~
+most of tmux commands start with ~Ctr+Space~
+most of Doom Emacs commands start with ~Space~
+
+* Goals
+- tmux window navigation and doom emacs window navigation should have the similar combination
+
+* Moonlander keyboard Layout
 
 https://configure.zsa.io/moonlander/layouts/dOezg/latest/0
 
