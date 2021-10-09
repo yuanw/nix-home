@@ -105,12 +105,21 @@ in {
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style "none"
+            set -g message-command-style "fg=colour146,bg=colour60"
             set -g status-right-style "none"
+            set -g pane-active-border-style "fg=colour117"
             set -g status-style "none,bg=colour60"
+            set -g message-style "fg=colour146,bg=colour60"
+            set -g pane-border-style "fg=colour60"
             set -g status-right-length "100"
             set -g status-left-length "100"
             setw -g window-status-activity-style "none"
-            set -g status-left ' #{?client_prefix,#[reverse]<Prefix>#[noreverse] ,}"#{=21:pane_title}" %H:%M %d-%b-%y'
+            setw -g window-status-separator ""
+            setw -g window-status-style "none,fg=colour60,bg=colour60"
+            set -g status-left "#[fg=colour232,bg=colour117] #{?client_prefix,#[bg=colour2],} #S #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]"
+            set -g status-right "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] %Y-%m-%d  %H:%M #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour232,bg=colour117] #h "
+            setw -g window-status-format "#[fg=colour60,bg=colour60] #I #[fg=colour60,bg=colour60] #W "
+            setw -g window-status-current-format "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] #I #[fg=colour146,bg=colour60] #W #[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]"
           '';
         };
 
