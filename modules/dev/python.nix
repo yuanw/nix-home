@@ -16,6 +16,7 @@ in {
           setuptools
           pylint
           matplotlib
+          nose
           pytest
           pyflakes
         ]))
