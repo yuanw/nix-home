@@ -15,6 +15,8 @@ in {
         pkgs.resource-id
         pkgs.ws-access-token
         pkgs.csvkit
+        pkgs.terraform
+        pkgs.terraform-ls
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
