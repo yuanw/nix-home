@@ -10,4 +10,5 @@ with pkgs; [
   haskellPackages.xmobar
   gxmessage
   autorandr
+  dzen2
 ]

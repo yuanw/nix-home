@@ -46,12 +46,17 @@ with lib; {
   services.xserver.autoRepeatDelay = 200;
   services.xserver.autoRepeatInterval = 25;
 
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
+
   services.picom.enable = true;
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
   };
-  services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome = { enable = true; };
   nix = {
     package = pkgs.nixFlakes;
@@ -76,7 +81,7 @@ with lib; {
     gc = { automatic = true; };
   };
 
-  system.stateVersion = "20.09";
+  system.stateVersion = "21.11";
   nixpkgs = {
 
     config = {
@@ -108,14 +113,13 @@ with lib; {
   home-manager.users.${localConfig.username} =
     import ./home.nix { inherit pkgs lib config localConfig; };
 
-  fonts.fontDir.enable = true;
-  fonts.fonts = with pkgs; [
-    fira-code
-    font-awesome
-    iosevka
-    roboto
-    roboto-mono
-    pragmata-pro
-  ];
-  # Recreate /run/current-system symlink after boot
+  # fonts.fontDir.enable = true;
+  # fonts.fonts = with pkgs; [
+  #   fira-code
+  #   font-awesome
+  #   iosevka
+  #   roboto
+  #   roboto-mono
+  #   pragmata-pro
+  # ];
 }

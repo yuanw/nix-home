@@ -222,7 +222,7 @@
                 haskell.enable = true;
                 editors.emacs = {
                   enable = true;
-                  pkg = pkgs.emacsMacport;
+                  pkg = pkgs.emacs;
                 };
                 stevenBlackHosts.enable = true;
               };
