@@ -8,7 +8,7 @@ in {
     package = mkOption {
       type = types.package;
       default = pkgs.dart;
-      defaultText = literalExample "pkgs.dart";
+      defaultText = literalExpression "pkgs.dart";
       description = ''
         dart package to install.
       '';
