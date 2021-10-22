@@ -7,14 +7,9 @@
     # https://github.com/LnL7/nix-darwin/pull/308/files
     darwin.url = "github:LnL7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
-    #home-manager.url = "github:nix-community/home-manager/release-20.09";
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nur.url = "github:nix-community/NUR";
-    kmonad = {
-      url = "github:david-janssen/kmonad";
-      flake = false;
-    };
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:cmacrae/emacs";
     spacebar.url = "github:cmacrae/spacebar";
@@ -25,8 +20,8 @@
     # spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, kmonad
-    , spacebar, mac-emacs, resource-id, ws-access-token, ... }:
+  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
+    , mac-emacs, resource-id, ws-access-token, ... }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
@@ -275,7 +270,6 @@
             })
           ];
         };
-
       };
     };
 }
