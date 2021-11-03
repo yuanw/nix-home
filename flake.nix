@@ -236,8 +236,12 @@
           };
           modules = [
             ({ lib, pkgs, config, localConfig, services, ... }: {
-              home-manager.users.${localConfig.username}.programs.git = {
-                extraConfig = { github.user = "yuanwang-wf"; };
+              home-manager.users.${localConfig.username}.programs = {
+                go = {
+                  enable = true;
+                  goPath = "go";
+                };
+                git = { extraConfig = { github.user = "yuanwang-wf"; }; };
               };
               modules = {
                 brew = {
