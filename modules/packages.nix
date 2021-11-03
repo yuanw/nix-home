@@ -39,6 +39,7 @@ with pkgs; [
   nix-tree
   nix-du
 
+  eukleides
   #mu
   #offlineimap
   #notmuch
