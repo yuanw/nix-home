@@ -15,6 +15,12 @@ sh <(curl https://nixos.org/nix/install)
 **** Latest OS and the workaround
 https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
 **** Install flake
+**** Install brew (sin)
+there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
+What is benefits of this ?
+we can install/uninstall applications using nix
+don't forget to do
+~brew analytics off~
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 

@@ -208,7 +208,11 @@
                 wm.yabai.enable = true;
                 brew = {
                   enable = true;
-                  casks = [ "firefox" "racket" ];
+                  casks = [
+                    "firefox"
+                    #"zoom"
+                    # bluejeans
+                  ];
                 };
               };
               programs = {
