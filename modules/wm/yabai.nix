@@ -12,7 +12,7 @@ let
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - d: doom run
+    shift + ctrl + alt - d: open ~/.nix-profile/Applications/Emacs.app
     shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
     shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
@@ -110,7 +110,7 @@ in {
 
       extraConfig = ''
         # rules
-        yabai -m rule --add app="emacs"              manage="on"
+        yabai -m rule --add app="*doom* - Doom Emacs"              manage="on"
         yabai -m rule --add app='System Preferences' manage=off
         # Any other arbitrary config here
       '';
