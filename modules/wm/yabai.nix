@@ -13,7 +13,7 @@ let
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - d: doom run
-    shift + ctrl + alt - e: emacslient --eval "(emacs-everywhere)"
+    shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
     shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
