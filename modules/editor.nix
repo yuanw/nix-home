@@ -42,6 +42,7 @@ in with lib; {
         # :tools lookup & :lang org +roam
         sqlite
 
+        wordnet
         # :lang latex & :lang org (latex previews)
         texlive.combined.scheme-medium
       ];

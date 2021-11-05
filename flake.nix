@@ -243,6 +243,10 @@
                 };
                 git = { extraConfig = { github.user = "yuanwang-wf"; }; };
               };
+              services.emacs = {
+                enable = true;
+                package = pkgs.emacs;
+              };
               modules = {
                 brew = {
                   enable = true;
