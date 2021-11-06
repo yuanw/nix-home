@@ -20,8 +20,19 @@
     # spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
-    , mac-emacs, resource-id, ws-access-token, ... }:
+  outputs =
+    inputs@{ self
+    , nixpkgs
+    , darwin
+    , home-manager
+    , nur
+    , emacs
+    , spacebar
+    , mac-emacs
+    , resource-id
+    , ws-access-token
+    , ...
+    }:
     let
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
@@ -65,7 +76,8 @@
             })
           ];
         };
-    in {
+    in
+    {
       nixosConfigurations.asche = mkNixSystem {
         localConfig = {
           username = "yuanwang";
@@ -101,7 +113,7 @@
                                           , Run Com "uname" ["-s","-r"] "" 36000
                                           , Run Date "<fn=1>\xf133</fn> %a %b %_d %Y %H:%M:%S" "date" 10
                                           , Run Battery ["-t", "<acstatus>: <left>% - <timeleft>",
-                  	                               "--",--"-c", "charge_full"
+                                                   "--",--"-c", "charge_full"
                                                          "-O", "AC",
                                                          "-o", "Bat",
                                                          "-h", "green",

@@ -4,8 +4,9 @@ let
 
 
 
-lib.mkMerge [
+  lib.mkMerge [
 
-  (lib.mkIf pkgs.stdenv.isDarwin { imports = [ ./yabai.nix ]; })
+  (lib.mkIf pkgs.stdenv.isDarwin { imports = [ ./yabai.nix ];
+  })
 
-]
+  ]

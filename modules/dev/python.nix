@@ -2,7 +2,8 @@
 
 with lib;
 let cfg = config.programs.python;
-in {
+in
+{
   options.programs.python = { enable = mkEnableOption "python"; };
 
   config = mkIf cfg.enable {

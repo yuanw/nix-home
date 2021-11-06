@@ -2,7 +2,8 @@
 
 with lib;
 let cfg = config.programs.node;
-in {
+in
+{
   options.programs.node = { enable = mkEnableOption "node"; };
 
   config = mkIf cfg.enable {

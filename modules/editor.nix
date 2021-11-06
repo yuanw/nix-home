@@ -2,7 +2,8 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 { config, lib, pkgs, localConfig, ... }:
 let cfg = config.programs.editors.emacs;
-in with lib; {
+in
+with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
       type = types.bool;

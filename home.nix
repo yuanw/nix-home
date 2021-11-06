@@ -22,12 +22,13 @@
       enable = true;
       config.theme = "palenight";
       themes = {
-        palenight = builtins.readFile (pkgs.fetchFromGitHub {
-          owner = "equinusocio";
-          repo = "material-theme";
-          rev = "614b7e8bc7369c32e852297d42253643ebf90d55";
-          sha256 = "1gjfisksvqa2d08na0yln7yxny4i16wrmvlfnwllbqrgwh26v94g";
-        } + "/schemes/Material-Theme-Palenight.tmTheme");
+        palenight = builtins.readFile (pkgs.fetchFromGitHub
+          {
+            owner = "equinusocio";
+            repo = "material-theme";
+            rev = "614b7e8bc7369c32e852297d42253643ebf90d55";
+            sha256 = "1gjfisksvqa2d08na0yln7yxny4i16wrmvlfnwllbqrgwh26v94g";
+          } + "/schemes/Material-Theme-Palenight.tmTheme");
       };
     };
     dircolors = {
@@ -176,13 +177,14 @@
         share = true;
       };
 
-      initExtra = if pkgs.stdenvNoCC.isDarwin then
-        lib.mkBefore ''
-          export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
-        ''
-      else
-        lib.mkBefore "";
+      initExtra =
+        if pkgs.stdenvNoCC.isDarwin then
+          lib.mkBefore ''
+            export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+            . $HOME/.nix-profile/etc/profile.d/nix.sh
+          ''
+        else
+          lib.mkBefore "";
 
       oh-my-zsh = {
         enable = true;

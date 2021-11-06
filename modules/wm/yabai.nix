@@ -25,7 +25,8 @@ let
     shift + ctrl + alt - h: open /etc/skhdrc
 
   '';
-in {
+in
+{
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {

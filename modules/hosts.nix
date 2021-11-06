@@ -2,7 +2,8 @@
 
 with lib;
 let cfg = config.programs.stevenBlackHosts;
-in {
+in
+{
   options.programs.stevenBlackHosts = {
     enable = mkEnableOption "stevenBlackHosts";
     # possible values
