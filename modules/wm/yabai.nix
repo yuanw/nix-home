@@ -12,8 +12,8 @@ let
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - d: open ~/.nix-profile/Applications/Emacs.app
-    shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
+    shift + ctrl + alt - d: emacsclient -c -a emacs
+    shift + ctrl + alt - e: emacsclient -c --eval "(emacs-everywhere)"
     shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
