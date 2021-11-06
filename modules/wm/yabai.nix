@@ -26,6 +26,7 @@ let
 
   '';
 
+  #https://stackoverflow.com/a/64930847
   cpuStat = pkgs.writeShellScriptBin "cpuStat" "top -l  2 | grep -E \"^CPU\" | tail -1 | awk '{ print $3 + $5\"%\" }'";
 in
 {
@@ -40,7 +41,6 @@ in
         # movement configurations
         ${moveConfig}
       '';
-      #skhdConfig = builtins.readFile ./skhdrc;
     };
     services.spacebar.enable = true;
     services.spacebar.package = pkgs.spacebar;

@@ -15,6 +15,11 @@ with lib; {
       default = pkgs.emacsMacport;
     };
 
+    enableService = mkOption {
+      type = types.bool;
+      default = false;
+    };
+
     enableDoomConfig = mkOption {
       type = types.bool;
       default = false;
