@@ -5,17 +5,18 @@ The goal for this repo is to delcaratively manage my MacOS/NixOS Using nixos/[[h
 
 I feel like MacOS side's setup is pretty stable, feel free to take what you like.
 
+* Current MacOS setup
+| Shell    | zsh + starship   |
+|----------+------------------|
+| WM       | yabai + spacebar |
+| Terminal | Alacritty + tmux |
+| Edtior   | Doom Emacs       |
+
+
 * Inspirations
 - https://github.com/cmacrae/config (nix-darwin)
 - https://github.com/hlissner/dotfiles/ (NixOS)
 - https://github.com/jwiegley/nix-config
-
-| Shell    | zsh + starship   |
-|----------+------------------|
-| WM       | yabai + spacebar |
-| Terminal | Alacritty        |
-| Edtior   | Doom Emacs       |
-
 
 * MacOS
 ** Install
