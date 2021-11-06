@@ -26,7 +26,7 @@ let
 
   '';
 
-  cpuStat = pkgs.writeShellScriptBin "cpuStat" "top -l  2 | grep -E "^CPU" | tail -1 | awk '{ print $3 + $5"%" }";
+  cpuStat = pkgs.writeShellScriptBin "cpuStat" "top -l  2 | grep -E \"^CPU\" | tail -1 | awk '{ print $3 + $5\"%\" }'";
 in
 {
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
@@ -74,7 +74,7 @@ in
       right_shell_icon = "";
       right_shell = "on";
       right_shell_icon_color = "0xffd8dee9";
-      right_shell_command = "${cpuStats}/bin/cpuStat";
+      right_shell_command = "${cpuStat}/bin/cpuStat";
     };
     services.yabai = {
       enable = true;
