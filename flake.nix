@@ -14,8 +14,7 @@
     nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
-    # https://github.com/cmacrae/spacebar/blob/master/flake.nix#L4
-    # spacebar.inputs.nixpkgs.follows = "nixpkgs";
+    spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
