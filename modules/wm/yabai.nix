@@ -46,7 +46,7 @@ in
     services.spacebar.package = pkgs.spacebar;
     # https://github.com/cmacrae/spacebar/blob/master/doc/spacebar.asciidoc
     services.spacebar.config = {
-      debug_output = "on";
+      debug_output = "off";
       clock_format = "%R";
       display = "all";
       position = "top";
@@ -82,7 +82,7 @@ in
       enableScriptingAddition = false;
       config = {
         focus_follows_mouse = "autoraise";
-        mouse_follows_focus = "off";
+        mouse_follows_focus = "on";
         window_placement = "second_child";
         window_opacity = "off";
         window_opacity_duration = "0.0";
