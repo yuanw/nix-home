@@ -16,6 +16,7 @@ in
         pkgs.resource-id
         pkgs.ws-access-token
         pkgs.csvkit
+        # pkgs.visidata
         pkgs.terraform
         pkgs.terraform-ls
         pkgs.podman
