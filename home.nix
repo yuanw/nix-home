@@ -157,6 +157,8 @@
     };
     zsh = rec {
       enable = true;
+      # seems have collision with nix.24
+      enableCompletion = false;
       dotDir = ".config/zsh";
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";

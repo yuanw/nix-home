@@ -91,7 +91,10 @@ with lib; {
   environment.shells = [ pkgs.zsh ];
   environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
   programs.bash.enable = false;
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enableCompletion = false;
+    enable = true;
+  };
   programs.gnupg.agent = {
     enable = true;
     enableSSHSupport = true;
