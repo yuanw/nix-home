@@ -1,37 +1,28 @@
 final: prev:
 
 {
-  installApplication =
-    { name
-    , appname ? name
-    , version
-    , src
-    , description
-    , homepage
-    , postInstall ? ""
-    , sourceRoot ? "."
-    , ...
-    }:
+  installApplication = { name, appname ? name, version, src, description
+    , homepage, postInstall ? "", sourceRoot ? ".", ... }:
 
-      with prev;
-      stdenv.mkDerivation {
-        name = "${name}-${version}";
-        version = "${version}";
-        inherit src;
-        buildInputs = [ undmg unzip ];
-        inherit sourceRoot;
-        phases = [ "unpackPhase" "installPhase" ];
-        installPhase = ''
-          mkdir -p "$out/Applications/${appname}.app"
-          cp -pR * "$out/Applications/${appname}.app"
-        '' + postInstall;
-        meta = with lib; {
-          inherit description;
-          inherit homepage;
-          inherit maintainers;
-          platforms = platforms.darwin;
-        };
+    with prev;
+    stdenv.mkDerivation {
+      name = "${name}-${version}";
+      version = "${version}";
+      inherit src;
+      buildInputs = [ undmg unzip ];
+      inherit sourceRoot;
+      phases = [ "unpackPhase" "installPhase" ];
+      installPhase = ''
+        mkdir -p "$out/Applications/${appname}.app"
+        cp -pR * "$out/Applications/${appname}.app"
+      '' + postInstall;
+      meta = with lib; {
+        inherit description;
+        inherit homepage;
+        inherit maintainers;
+        platforms = platforms.darwin;
       };
+    };
 
   emacsMacport = prev.emacsMacport.overrideAttrs (oldAttrs: rec {
     # stolen from https://github.com/cmacrae/config/tree/master/patches
@@ -41,9 +32,8 @@ final: prev:
   # gap marked as broken for darwin, it seems build on my mac
   gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
 
-  emacsCatalina = prev.emacs.overrideAttrs (o: rec {
-    patches = [ ./patches/fix-window-role-yabai.patch ];
-  });
+  emacsCatalina = prev.emacs.overrideAttrs
+    (o: rec { patches = [ ./patches/fix-window-role-yabai.patch ]; });
 
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };

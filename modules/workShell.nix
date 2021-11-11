@@ -2,8 +2,7 @@
 
 with lib;
 let homeDir = localConfig.homeDirectory;
-in
-{
+in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {

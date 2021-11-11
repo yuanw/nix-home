@@ -1,12 +1,10 @@
 { config, lib, pkgs, ... }:
 
-let
+{
 
+  config = lib.mkMerge [
 
+    (lib.mkIf pkgs.stdenv.isDarwin { imports = [ ./yabai.nix ]; })
 
-  lib.mkMerge [
-
-  (lib.mkIf pkgs.stdenv.isDarwin { imports = [ ./yabai.nix ];
-  })
-
-  ]
+  ];
+}

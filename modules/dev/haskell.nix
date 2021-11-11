@@ -15,8 +15,7 @@ let
       hlint
       # xmobar
     ]);
-in
-{
+in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
   config = mkIf cfg.enable {

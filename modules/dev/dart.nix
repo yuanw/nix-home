@@ -2,8 +2,7 @@
 
 with lib;
 let cfg = config.programs.dart;
-in
-{
+in {
   options.programs.dart = {
     enable = mkEnableOption "dart";
     package = mkOption {

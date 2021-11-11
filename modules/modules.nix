@@ -21,5 +21,4 @@ let
     (loadModule ./workShell.nix { condition = isDarwin; })
   ];
   modules = map (getAttr "file") (filter (getAttr "condition") allModules);
-in
-modules
+in modules

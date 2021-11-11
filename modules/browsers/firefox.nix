@@ -3,8 +3,7 @@
 
 with lib;
 let cfg = config.modules.browsers.firefox;
-in
-{
+in {
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
     pkg = mkOption {

@@ -10,8 +10,7 @@ let
     (tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacsclient -c -nw" "C-m" )'';
   tkill = pkgs.writeShellScriptBin "tkill"
     "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
-in
-{
+in {
 
   options.modules.terminal = {
     enable = mkEnableOption "terminal";

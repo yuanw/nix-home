@@ -2,8 +2,7 @@
 
 with lib;
 let cfg = config.programs.hledger;
-in
-{
+in {
   options.programs.hledger = {
     enable = mkEnableOption "hledger";
     enableZshIntegration = mkOption {

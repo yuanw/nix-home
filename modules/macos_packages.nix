@@ -1,5 +1,4 @@
 { pkgs, ... }:
 
-with pkgs; [
-  pinentry_mac
-]
+with pkgs;
+[ pinentry_mac ]

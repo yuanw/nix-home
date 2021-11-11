@@ -27,9 +27,9 @@ let
   '';
 
   #https://stackoverflow.com/a/64930847
-  cpuStat = pkgs.writeShellScriptBin "cpuStat" "top -l  2 | grep -E \"^CPU\" | tail -1 | awk '{ print $3 + $5\"%\" }'";
-in
-{
+  cpuStat = pkgs.writeShellScriptBin "cpuStat"
+    "top -l  2 | grep -E \"^CPU\" | tail -1 | awk '{ print $3 + $5\"%\" }'";
+in {
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {

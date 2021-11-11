@@ -5,6 +5,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     darwin.url = "github:LnL7/nix-darwin/master";
     darwin.inputs.nixpkgs.follows = "nixpkgs";
+    devshell.url = "github:numtide/devshell";
+    flake-utils.url = "github:numtide/flake-utils";
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     nur.url = "github:nix-community/NUR";
@@ -17,20 +19,10 @@
     spacebar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs =
-    inputs@{ self
-    , nixpkgs
-    , darwin
-    , home-manager
-    , nur
-    , emacs
-    , spacebar
-    , mac-emacs
-    , resource-id
-    , ws-access-token
-    , ...
-    }:
+  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
+    , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
+      inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
@@ -70,8 +62,7 @@
             })
           ];
         };
-    in
-    {
+    in {
       nixosConfigurations.asche = mkNixSystem {
         localConfig = {
           username = "yuanwang";
@@ -81,9 +72,7 @@
           gpgKey = "BF2ADAA2A98F45E7";
           homeDirectory = "/home/yuanwang";
         };
-        modules = [
-          ./hosts/asche.nix
-        ];
+        modules = [ ./hosts/asche.nix ];
       };
 
       darwinConfigurations = {
@@ -96,9 +85,7 @@
             gpgKey = "BF2ADAA2A98F45E7";
             homeDirectory = "/Users/yuanwang";
           };
-          modules = [
-            ./hosts/yuan-mac.nix
-          ];
+          modules = [ ./hosts/yuan-mac.nix ];
         };
 
         wf17084 = mkDarwinSystem {
@@ -110,14 +97,20 @@
             gpgKey = "19AD3F6B1A5BF3BF";
             homeDirectory = "/Users/yuanwang";
           };
-          modules = [
-            ./hosts/wf17084.nix
-          ];
+          modules = [ ./hosts/wf17084.nix ];
         };
       };
-
       yuan-mac = self.darwinConfigurations.yuan-mac.system;
-      wf17084  = self.darwinConfigurations.wf17084.system;
+      wf17084 = self.darwinConfigurations.wf17084.system;
 
-    };
+    } // eachDefaultSystem (system:
+      let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [ devshell.overlay ];
+        };
+      in {
+        devShell =
+          pkgs.devshell.mkShell { packages = [ pkgs.treefmt pkgs.nixfmt ]; };
+      });
 }

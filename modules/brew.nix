@@ -4,8 +4,7 @@
 ############
 with lib;
 let cfg = config.modules.brew;
-in
-{
+in {
   options.modules.brew = {
     enable = mkEnableOption "brew";
     taps = mkOption {
