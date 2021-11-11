@@ -13,7 +13,7 @@
   modules = {
     brew = {
       enable = true;
-      casks = [ "firefox" "docker" "google-chrome" "insomnia" ];
+      casks = [ "firefox" "docker" "google-chrome" "insomnia" "stretchly" ];
       brews = [ "aws-iam-authenticator" ];
     };
     browsers.firefox = {
