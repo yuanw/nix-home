@@ -108,6 +108,10 @@
       };
     };
 
+    exa = {
+      enable = true;
+      enableAliases = true;
+    };
     fzf = {
       enable = true;
       enableZshIntegration = true;
