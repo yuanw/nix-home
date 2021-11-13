@@ -31,7 +31,7 @@ with lib; {
 
   system.stateVersion = 4;
   nix.maxJobs = 8;
-  services.nix-daemon.enable = false;
+  services.nix-daemon.enable = true;
   nixpkgs = {
     overlays = [
       inputs.nur.overlay

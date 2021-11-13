@@ -11,10 +11,11 @@ let
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
+  # Once we sort of Emacs GUI Issue, we should use emacsclient
   laucherConfig = ''
-    shift + ctrl + alt - d: emacsclient -c
+    shift + ctrl + alt - d: open ~/.nix-profile/Applications/Emacs.app
     shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
-    shift + ctrl + alt - return : open ~/.nix-profile/Applications/Alacritty.app
+    shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
     shift + ctrl + alt - r: ${pkgs.skhd}/bin/skhd -r && \

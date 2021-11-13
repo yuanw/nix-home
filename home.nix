@@ -182,7 +182,6 @@
       initExtra = if pkgs.stdenvNoCC.isDarwin then
         lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
-          . $HOME/.nix-profile/etc/profile.d/nix.sh
         ''
       else
         lib.mkBefore "";
