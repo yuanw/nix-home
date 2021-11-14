@@ -134,7 +134,7 @@
       ignores = [ ".direnv" ".DS_Store" ];
       extraConfig = {
         core = {
-          editor = "emacsclient";
+          editor = "emacsclient -c -s server";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
@@ -167,7 +167,6 @@
         ASPELL_CONF = "data-dir ${pkgs.aspell}";
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
-        EDITOR = "emacs";
       };
 
       enableAutosuggestions = true;
