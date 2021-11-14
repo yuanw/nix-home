@@ -21,14 +21,15 @@ I feel like MacOS side's setup is pretty stable, feel free to take what you like
 * MacOS
 ** Install
 
-**** Install single-user Nix
+**** Install Nix (with daemon)
 
-#+begin_src sh
-sh <(curl https://nixos.org/nix/install)
-#+end_src
-**** Latest OS and the workaround
-https://www.philipp.haussleiter.de/2020/04/fixing-nix-setup-on-macos-catalina/
-**** Install flake
+I think nix with daemon is recommended over the single user mode.
+
+~sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume~
+**** Turn on flake
+edit ~/etc/nix/nix.conf~
+
+~experimental-features = nix-command flakes~
 **** Install brew (sin)
 there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
 What is benefits of this ?
