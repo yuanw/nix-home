@@ -3,7 +3,7 @@
 Welcome to my nix-home.
 The goal for this repo is to delcaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
 
-I feel like MacOS side's setup is pretty stable, feel free to take what you like.
+I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take what you like.
 
 * Current MacOS setup
 | Shell    | zsh + starship   |
@@ -17,6 +17,8 @@ I feel like MacOS side's setup is pretty stable, feel free to take what you like
 - https://github.com/cmacrae/config (nix-darwin)
 - https://github.com/hlissner/dotfiles/ (NixOS)
 - https://github.com/jwiegley/nix-config
+
+  and so many more
 
 * MacOS
 ** Install
@@ -53,6 +55,7 @@ nix flake update --recreate-lock-file
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
-** single-user nix-darwin permission issue
-~sudo chown -R yuanwang:staff /nix/store~
-
+** nix-darwin permission issue
+~sudo chown -R whoami:staff /nix/store~
+** sometime yabai cannot manage emacsclient window
+just do ~pkill yabai~ to restart yabai, that always fix the issue for me. I bind skhd key for ~pkill yabai~ and reload skhd
