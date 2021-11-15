@@ -103,6 +103,10 @@ with lib; {
   };
   time.timeZone = "America/Regina";
 
+  launchd.user.agents.yabai.serviceConfig.StandardErrorPath = "/tmp/yabai.log";
+  launchd.user.agents.yabai.serviceConfig.StandardOutPath = "/tmp/yabai.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardErrorPath = "/tmp/spacebar.err.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardOutPath = "/tmp/spacebar.out.log";
 
   users.nix.configureBuildUsers = true;
   users.users.${localConfig.username} = {
