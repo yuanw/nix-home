@@ -23,9 +23,11 @@ with lib; {
     extraOptions = ''
       experimental-features = nix-command flakes
     '';
+    trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
-      automatic = true;
-      user = "${localConfig.username}";
+     automatic = true;
+     user = "${localConfig.username}";
+     interval = {Hour = 24*7;};
     };
   };
 
@@ -100,6 +102,11 @@ with lib; {
     enableSSHSupport = true;
   };
   time.timeZone = "America/Regina";
+
+  launchd.user.agents.yabai.serviceConfig.StandardErrorPath = "/tmp/yabai.log";
+  launchd.user.agents.yabai.serviceConfig.StandardOutPath = "/tmp/yabai.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardErrorPath = "/tmp/spacebar.err.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardOutPath = "/tmp/spacebar.out.log";
 
   users.nix.configureBuildUsers = true;
   users.users.${localConfig.username} = {
