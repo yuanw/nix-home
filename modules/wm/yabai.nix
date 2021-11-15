@@ -123,4 +123,8 @@ in {
       '';
     };
   };
+  launchd.user.agents.yabai.serviceConfig.StandardErrorPath = "/tmp/yabai.err.log";
+  launchd.user.agents.yabai.serviceConfig.StandardOutPath = "/tmp/yabai.out.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardErrorPath = "/tmp/spacebar.err.log";
+  launchd.user.agents.spacebar.serviceConfig.StandardOutPath = "/tmp/spacebar.out.log";
 }
