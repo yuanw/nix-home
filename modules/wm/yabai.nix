@@ -29,8 +29,8 @@ let
     shift + ctrl + alt - h: open /etc/skhdrc
 
     # take screenshot
-    shift + ctl + alt - s: screencapture -ic
-    shitt + ctl + alt - i: screencapture -i /tmp/$(date +%s).png
+    shift + ctrl + alt - s: screencapture -ic
+    shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
   '';
 
   #https://stackoverflow.com/a/64930847
