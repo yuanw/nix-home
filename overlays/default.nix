@@ -24,13 +24,15 @@ final: prev:
       };
     };
 
-  nix-direnv = prev.nix-direnv.overrideAttrs {
+  # mainstream use ${nix}, somehow it is not pointing to nix2.4
+  nix-direnv = prev.nix-direnv.overrideAttrs (old: rec {
     postPatch = ''
-    sed -i "1a NIX_BIN_PREFIX=${prev.nixFlakes}/bin/" direnvrc
-    substituteInPlace direnvrc --replace "grep" "${prev.gnugrep}/bin/grep"
-  '';
-  };
- 
+      sed -i "1a NIX_BIN_PREFIX=${final.nixFlakes}/bin/" direnvrc
+      substituteInPlace direnvrc --replace "grep" "${final.gnugrep}/bin/grep"
+    '';
+
+  });
+
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
