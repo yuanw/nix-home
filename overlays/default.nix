@@ -24,17 +24,13 @@ final: prev:
       };
     };
 
-  emacsMacport = prev.emacsMacport.overrideAttrs (oldAttrs: rec {
-    # stolen from https://github.com/cmacrae/config/tree/master/patches
-    patches = [ ./patches/borderless-emacs.patch ];
-  });
-
-  # gap marked as broken for darwin, it seems build on my mac
-  gap = prev.gap.overrideAttrs (oldAttrs: rec { meta.broken = false; });
-
-  emacsCatalina = prev.emacs.overrideAttrs
-    (o: rec { patches = [ ./patches/fix-window-role-yabai.patch ]; });
-
+  nix-direnv = prev.nix-direnv.overrideAttrs {
+    postPatch = ''
+    sed -i "1a NIX_BIN_PREFIX=${prev.nixFlakes}/bin/" direnvrc
+    substituteInPlace direnvrc --replace "grep" "${prev.gnugrep}/bin/grep"
+  '';
+  };
+ 
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hls = prev.callPackage ./easy-hls.nix { };
