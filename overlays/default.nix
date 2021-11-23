@@ -60,17 +60,4 @@ final: prev:
       done
     '';
   };
-
-  Stretchly = final.installApplication rec {
-    name = "Stretchly";
-    version = "1.7.0";
-    sourceRoot = "Stretchly.app";
-    src = prev.fetchurl {
-      url =
-        "https://github.com/hovancik/stretchly/releases/download/v${version}/Stretchly-${version}.dmg";
-      sha256 = "158hc7m4x6y4d0xzslp4ydyg8yq5qr122nrb4s5inkg24qx3l3gw";
-    };
-    description = "break time reminder app";
-    homepage = "https://hovancik.net/stretchly/";
-  };
 }

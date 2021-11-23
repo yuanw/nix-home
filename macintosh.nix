@@ -37,7 +37,6 @@ with lib; {
   nixpkgs = {
     overlays = [
       inputs.nur.overlay
-      #inputs.emacs.overlay
       inputs.mac-emacs.overlay
       inputs.spacebar.overlay
       (import ./overlays)
@@ -52,7 +51,6 @@ with lib; {
       allowBroken = false;
       allowUnsupportedSystem = false;
     };
-
   };
 
   system.defaults = {

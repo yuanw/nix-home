@@ -19,6 +19,9 @@ in {
           nose
           pytest
           pyflakes
+          pylsp-mypy
+          virtualenv
+          virtualenvwrapper
         ]))
     ] ++ [ pkgs.poetry ];
   };
