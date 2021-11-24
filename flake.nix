@@ -110,7 +110,12 @@
           overlays = [ devshell.overlay ];
         };
       in {
-        devShell =
-          pkgs.devshell.mkShell { packages = [ pkgs.treefmt pkgs.nixfmt ]; };
+        devShell = pkgs.devshell.mkShell {
+          name = "nix-home";
+          imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
+          git.hooks.enable = true;
+          git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
+          packages = [ pkgs.treefmt pkgs.nixfmt ];
+        };
       });
 }
