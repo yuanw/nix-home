@@ -138,13 +138,14 @@
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
-        branch.autosetupmerge = true; diff = {
+        branch.autosetupmerge = true;
+        diff = {
           ignoreSubmodules = "dirty";
           renames = "copies";
           mnemonicprefix = true;
         };
 
-    merge = {
+        merge = {
           conflictstyle = "diff3";
           stat = true;
         };
