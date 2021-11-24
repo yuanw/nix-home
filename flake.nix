@@ -1,5 +1,5 @@
 {
-  description = "Yuan Nix-darwin/NixOS flake";
+  description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
@@ -17,10 +17,16 @@
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
     spacebar.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-script = {
+      url = "github:BrianHicks/nix-script";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
-    , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, ... }:
+    , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
+    , ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # copied from https://github.com/cmacrae/config
@@ -107,15 +113,38 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlay ];
+          overlays = [ devshell.overlay nix-script.overlay ];
         };
+
+        # use nix-script-haskell to write executable helper
+        #implemement dep packages, and check maybe
+        mkHsScript = name: text:
+          pkgs.writeTextFile {
+            inherit name;
+            executable = true;
+            destination = "/bin/${name}";
+            text = ''
+              #!/usr/bin/env nix-script-haskell
+              #!haskellPackages turtle
+              ${text}
+            '';
+          };
+
       in {
         devShell = pkgs.devshell.mkShell {
           name = "nix-home";
           imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
-          packages = [ pkgs.treefmt pkgs.nixfmt ];
+          packages = [
+            (mkHsScript "home" (builtins.readFile ./bin/home.hs))
+            pkgs.haskellPackages.hnix
+            pkgs.treefmt
+            pkgs.nixfmt
+            pkgs.nix-script
+            pkgs.nix-script-haskell
+            pkgs.nix-script-bash
+          ];
         };
       });
 }
