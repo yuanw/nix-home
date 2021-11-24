@@ -131,14 +131,24 @@
         key = localConfig.gpgKey;
         signByDefault = true;
       };
-      ignores = [ ".direnv" ".DS_Store" ];
+      ignores = [ ".direnv" ".DS_Store" ".envrc" ];
       extraConfig = {
         core = {
           editor = "emacsclient -c -s server";
           pager =
             "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
-        branch.autosetupmerge = true;
+        branch.autosetupmerge = true; diff = {
+          ignoreSubmodules = "dirty";
+          renames = "copies";
+          mnemonicprefix = true;
+        };
+
+    merge = {
+          conflictstyle = "diff3";
+          stat = true;
+        };
+
       };
     };
 
