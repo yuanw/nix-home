@@ -130,6 +130,9 @@
             '';
           };
 
+        myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
+          (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
+
       in {
         devShell = pkgs.devshell.mkShell {
           name = "nix-home";
@@ -137,6 +140,7 @@
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
+            myHaskellEnv
             (mkHsScript "home" (builtins.readFile ./bin/home.hs))
             pkgs.haskellPackages.hnix
             pkgs.treefmt

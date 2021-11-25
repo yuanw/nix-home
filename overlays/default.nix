@@ -39,6 +39,12 @@ final: prev:
         "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
       sha256 = "1z95njalhvyfs2xx6d91p9b013pc4ad846drhw0k5gipvl03pp92";
     };
+    installPhase = ''
+      mkdir -p $out/bin
+      mkdir -p $out/share/man/man1/
+      cp ./bin/yabai $out/bin/yabai
+      cp ./doc/yabai.1 $out/share/man/man1/yabai.1
+    '';
   });
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
