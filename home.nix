@@ -175,7 +175,6 @@
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
-        ASPELL_CONF = "data-dir ${pkgs.aspell}";
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
       };
