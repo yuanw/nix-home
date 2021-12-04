@@ -59,7 +59,8 @@ in {
       position = "top";
       title = "on";
       # bagua eight trigrams - top bar is least significant binary digit
-      space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰";
+      # space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰";
+      space_icon_strip = "向 死 而 生 逆 水 行 舟";
       #text_font = ''"Roboto Mono:Regular:12.0"'';
       #icon_font = ''"Font Awesome 5 Free:Solid:12.0"'';
       background_color = "0xff222222";
