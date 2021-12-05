@@ -369,7 +369,7 @@
         "type": "github"
       }
     },
-    "haskell-language-server": {
+    "hls": {
       "inputs": {
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils_2",
@@ -702,11 +702,11 @@
     "pre-commit-hooks": {
       "inputs": {
         "flake-utils": [
-          "haskell-language-server",
+          "hls",
           "flake-utils"
         ],
         "nixpkgs": [
-          "haskell-language-server",
+          "hls",
           "nixpkgs"
         ]
       },
@@ -766,7 +766,7 @@
         "devshell": "devshell",
         "emacs": "emacs",
         "flake-utils": "flake-utils",
-        "haskell-language-server": "haskell-language-server",
+        "hls": "hls",
         "home-manager": "home-manager",
         "mac-emacs": "mac-emacs",
         "nix-doom-emacs": "nix-doom-emacs",

@@ -28,7 +28,7 @@
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    haskell-language-server = {
+    hls = {
       url = "github:haskell/haskell-language-server";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -36,7 +36,7 @@
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
-    , haskell-language-server, ... }:
+    , hls, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # copied from https://github.com/cmacrae/config

@@ -10,6 +10,7 @@ let
       # xmonad-extras
       apply-refact
       hlint
+      haskell-language-server
       # xmobar
     ]);
 in {
@@ -19,7 +20,6 @@ in {
     home-manager.users.${localConfig.username} = {
       home.packages = [
         haskell-env
-        pkgs.haskell-language-server
 
       ];
     };
