@@ -16,14 +16,21 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:cmacrae/emacs";
-    spacebar.url = "github:cmacrae/spacebar";
+    spacebar= {
+      url = "github:cmacrae/spacebar";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
-    spacebar.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-script = {
       url = "github:BrianHicks/nix-script";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    haskell-language-server = {
+      url = "github:haskell/haskell-language-server";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

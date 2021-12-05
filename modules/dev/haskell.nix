@@ -9,9 +9,6 @@ let
       # xmonad-contrib
       # xmonad-extras
       apply-refact
-      haskell-language-server
-      brittany
-      cabal-install
       hlint
       # xmobar
     ]);
@@ -20,7 +17,11 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [ haskell-env ];
+      home.packages = [
+        haskell-env
+      pkgs.haskell-language-server
+
+                      ];
     };
   };
 }
