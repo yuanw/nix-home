@@ -16,7 +16,7 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:cmacrae/emacs";
-    spacebar= {
+    spacebar = {
       url = "github:cmacrae/spacebar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -37,6 +37,7 @@
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
+    , haskell-language-server
     , ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
