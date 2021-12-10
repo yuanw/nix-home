@@ -127,6 +127,10 @@
       };
       userEmail = localConfig.email;
 
+      delta = {
+        enable = true;
+      };
+
       signing = {
         key = localConfig.gpgKey;
         signByDefault = true;
@@ -135,9 +139,8 @@
       extraConfig = {
         core = {
           editor = "emacsclient -c -s server";
-          pager =
-            "${pkgs.gitAndTools.delta}/bin/delta --plus-color=\"#012800\" --minus-color=\"#340001\" --theme='ansi-dark'";
         };
+        init.defaultBranch = "main";
         branch.autosetupmerge = true;
         diff = {
           ignoreSubmodules = "dirty";
