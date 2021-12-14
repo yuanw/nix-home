@@ -127,9 +127,7 @@
       };
       userEmail = localConfig.email;
 
-      delta = {
-        enable = true;
-      };
+      delta = { enable = true; };
 
       signing = {
         key = localConfig.gpgKey;
@@ -137,10 +135,9 @@
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
       extraConfig = {
-        core = {
-          editor = "emacsclient -c -s server";
-        };
+        core = { editor = "emacsclient -c -s server"; };
         init.defaultBranch = "main";
+        pull.rebase = true;
         branch.autosetupmerge = true;
         diff = {
           ignoreSubmodules = "dirty";
