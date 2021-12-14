@@ -21,7 +21,7 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "aws-iam-authenticator" ];
+      brews = [ "aws-iam-authenticator" "pyenv" ];
     };
     browsers.firefox = {
       enable = true;
