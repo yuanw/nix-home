@@ -127,7 +127,6 @@
           overlays = [ devshell.overlay nix-script.overlay ];
         };
 
-
         myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
           (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
 
