@@ -15,6 +15,7 @@ let
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
     (loadModule ./hledger.nix { })
+    (loadModule ./settings.nix {})
     (loadModule ./terminal { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./brew.nix { condition = isDarwin; })

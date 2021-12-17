@@ -47,7 +47,7 @@
         darwin.lib.darwinSystem {
           inputs = inputs;
           system = "x86_64-darwin";
-          modules = modules ++ [
+          modules = [
             ({ lib, ... }: {
               _module.args.localConfig = localConfig;
               imports = import ./modules/modules.nix {
@@ -57,7 +57,7 @@
             })
             home-manager.darwinModules.home-manager
             ./macintosh.nix
-          ];
+          ] ++ modules;
         };
       mkNixSystem = { localConfig, modules }:
         nixpkgs.lib.nixosSystem {
@@ -127,19 +127,6 @@
           overlays = [ devshell.overlay nix-script.overlay ];
         };
 
-        # use nix-script-haskell to write executable helper
-        #implemement dep packages, and check maybe
-        mkHsScript = name: text:
-          pkgs.writeTextFile {
-            inherit name;
-            executable = true;
-            destination = "/bin/${name}";
-            text = ''
-              #!/usr/bin/env nix-script-haskell
-              #!haskellPackages turtle
-              ${text}
-            '';
-          };
 
         myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
           (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
@@ -152,7 +139,6 @@
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
             myHaskellEnv
-            (mkHsScript "home" (builtins.readFile ./bin/home.hs))
             pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
