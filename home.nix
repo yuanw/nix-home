@@ -149,7 +149,7 @@
           conflictstyle = "diff3";
           stat = true;
         };
-
+        remote.origin.prune = true;
       };
     };
 
