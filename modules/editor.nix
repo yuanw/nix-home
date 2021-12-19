@@ -1,17 +1,9 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs,  ... }:
+{ config, lib, pkgs, localConfig, ... }:
 let
   cfg = config.programs.editors.emacs;
   emacs-server = "server";
-    localConfig = {
-            username = "yuanwang";
-            name = "Yuan Wang";
-            email = "yuan.wang@workiva.com";
-            hostname = "wf17084";
-            gpgKey = "19AD3F6B1A5BF3BF";
-            homeDirectory = "/Users/yuanwang";
-          };
   emacsclient = "${pkgs.emacs}/bin/emacsclient -s ${emacs-server}";
 in with lib; {
   options.programs.editors.emacs = {

@@ -1,9 +1,7 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, localConfig, ... }:
 
 with lib;
-let
-  cfg = config.programs.dart;
-  localConfig.username = "yuanwang";
+let cfg = config.programs.dart;
 in {
   options.programs.dart = {
     enable = mkEnableOption "dart";

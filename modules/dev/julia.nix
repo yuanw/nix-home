@@ -1,9 +1,7 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, localConfig, ... }:
 
 with lib;
-let
-  cfg = config.modules.dev.julia;
-  localConfig.username = "yuanwang";
+let cfg = config.modules.dev.julia;
 in {
   options.modules.dev.julia = { enable = mkEnableOption "Julia"; };
 

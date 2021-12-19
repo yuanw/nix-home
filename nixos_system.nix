@@ -111,7 +111,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${localConfig.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit pkgs lib config localConfig; };
 
   # fonts.fontDir.enable = true;
   # fonts.fonts = with pkgs; [
