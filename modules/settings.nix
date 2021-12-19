@@ -20,7 +20,6 @@ in {
       hostname = mkOptStr "yuan-mac";
       gpgKey = mkOptStr "BF2ADAA2A98F45E7";
       homeDirectory = mkOptStr "/Users/yuanwang";
-
     };
   };
 }

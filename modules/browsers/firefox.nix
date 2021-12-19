@@ -1,8 +1,17 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.modules.browsers.firefox;
+let
+  cfg = config.modules.browsers.firefox;
+  localConfig = {
+    username = "yuanwang";
+    name = "Yuan Wang";
+    email = "yuan.wang@workiva.com";
+    hostname = "wf17084";
+    gpgKey = "19AD3F6B1A5BF3BF";
+    homeDirectory = "/Users/yuanwang";
+  };
 in {
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";

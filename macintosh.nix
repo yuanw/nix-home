@@ -1,8 +1,8 @@
-{ inputs, config, lib, pkgs, localConfig, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
-  networking.hostName = localConfig.hostname;
+  networking.hostName = "wf17084";
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
@@ -19,7 +19,7 @@ with lib; {
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
     ];
-    trustedUsers = [ "root" localConfig.username ];
+    trustedUsers = [ "root" "yuanwang" ];
     extraOptions = ''
       experimental-features = nix-command flakes
       allow-import-from-derivation = true
@@ -27,7 +27,7 @@ with lib; {
     trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
       automatic = true;
-      user = "${localConfig.username}";
+      user = "yuanwang";
       interval = { Hour = 24 * 7; };
     };
   };
@@ -117,14 +117,13 @@ with lib; {
     "/tmp/skhd.err.log";
 
   users.nix.configureBuildUsers = true;
-  users.users.${localConfig.username} = {
+  users.users.yuanwang = {
     shell = pkgs.zsh;
-    home = localConfig.homeDirectory;
+    home = "/Users/yuanwang";
   };
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${localConfig.username} =
-    import ./home.nix { inherit pkgs lib config localConfig; };
+  home-manager.users.yuanwang = import ./home.nix { inherit pkgs lib config; };
 
   fonts.enableFontDir = true;
   fonts.fonts = with pkgs; [

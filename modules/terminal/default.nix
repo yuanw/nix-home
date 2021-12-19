@@ -1,9 +1,17 @@
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
   cfg = config.modules.terminal;
   tmuxMenuSeperator = "''";
+  localConfig = {
+    username = "yuanwang";
+    name = "Yuan Wang";
+    email = "yuan.wang@workiva.com";
+    hostname = "wf17084";
+    gpgKey = "19AD3F6B1A5BF3BF";
+    homeDirectory = "/Users/yuanwang";
+  };
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
   temacs = pkgs.writeShellScriptBin "temacs" ''

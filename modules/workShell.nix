@@ -1,12 +1,12 @@
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
-let homeDir = localConfig.homeDirectory;
+let homeDir = "/Users/yuanwang";
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.yuanwang = {
       home.packages = [
         pkgs.kubernetes-helm
         # pkgs.aws-iam-authenticator

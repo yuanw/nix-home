@@ -48,13 +48,7 @@
           inputs = inputs;
           system = "x86_64-darwin";
           modules = [
-            ({ lib, ... }: {
-              _module.args.localConfig = localConfig;
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isDarwin = true;
-              };
-            })
+            ./modules/modules.nix
             home-manager.darwinModules.home-manager
             ./macintosh.nix
           ] ++ modules;
@@ -105,16 +99,15 @@
           modules = [ ./hosts/yuan-mac.nix ];
         };
 
-        wf17084 = mkDarwinSystem {
-          localConfig = {
-            username = "yuanwang";
-            name = "Yuan Wang";
-            email = mailAddr "yuan.wang" "workiva.com";
-            hostname = "wf17084";
-            gpgKey = "19AD3F6B1A5BF3BF";
-            homeDirectory = "/Users/yuanwang";
-          };
-          modules = [ ./hosts/wf17084.nix ];
+        wf17084 = darwin.lib.darwinSystem {
+          inputs = inputs;
+          system = "x86_64-darwin";
+          modules = [
+            ./modules/modules.nix
+            home-manager.darwinModules.home-manager
+            ./macintosh.nix
+            ./hosts/wf17084.nix
+          ];
         };
       };
       yuan-mac = self.darwinConfigurations.yuan-mac.system;
