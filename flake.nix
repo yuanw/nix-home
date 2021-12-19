@@ -2,8 +2,11 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
+    # cannot update to latest unstable util
+    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/compilers/llvm/13/libcxx/default.nix#L49
+    # fix is merged https://github.com/NixOS/nixpkgs/pull/147289/files
+    # just wait it ship to unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    # nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-21.11-darwin";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,7 +24,6 @@
       url = "github:cmacrae/spacebar";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-doom-emacs.url = "github:vlaci/nix-doom-emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
 
