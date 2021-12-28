@@ -18,9 +18,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${localConfig.username} = {
-      home.packages = [
-        haskell-env
-      ];
+      home.packages = [ haskell-env ];
     };
   };
 }
