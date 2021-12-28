@@ -17,12 +17,13 @@ in {
           pylint
           matplotlib
           nose
+          poetry
           pytest
           pyflakes
           pylsp-mypy
           virtualenv
           virtualenvwrapper
         ]))
-    ] ++ [ pkgs.poetry ];
+    ];
   };
 }
