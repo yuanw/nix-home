@@ -20,7 +20,6 @@ in {
     home-manager.users.${localConfig.username} = {
       home.packages = [
         haskell-env
-
       ];
     };
   };

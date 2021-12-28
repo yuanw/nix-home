@@ -133,7 +133,7 @@ with lib; {
     #iosevka
     roboto
     roboto-mono
-    pragmata-pro
+    # pragmata-pro
   ];
   # Recreate /run/current-system symlink after boot
   services.activate-system.enable = true;

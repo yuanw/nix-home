@@ -3,7 +3,7 @@
 {
   home.username = localConfig.username;
   home.homeDirectory = localConfig.homeDirectory;
-  home.stateVersion = "21.11";
+  home.stateVersion = "22.05";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin
     (import ./modules/macos_packages.nix { inherit pkgs; })
