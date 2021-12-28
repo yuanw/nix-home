@@ -2,10 +2,6 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    # cannot update to latest unstable util
-    # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/compilers/llvm/13/libcxx/default.nix#L49
-    # fix is merged https://github.com/NixOS/nixpkgs/pull/147289/files
-    # just wait it ship to unstable
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
@@ -31,15 +27,11 @@
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hls = {
-      url = "github:haskell/haskell-language-server";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
-    , hls, ... }:
+    , ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # copied from https://github.com/cmacrae/config
