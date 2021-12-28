@@ -1,10 +1,11 @@
 final: prev:
 # stolen from https://github.com/midchildan/dotfiles/blob/master/overlays/nixpkgs.nix
-# FIXME: workaround for https://github.com/NixOS/nixpkgs/pull/146517
-# prev.lib.optionalAttrs prev.stdenv.isDarwin {
-#   clang-tools =
-#     prev.clang-tools.override { llvmPackages = prev.llvmPackages_12; };
-# } //
+# FIXME: workaround for wait util it ready for nixpkgs-unstable
+# https://nixpk.gs/pr-tracker.html?pr=147289
+prev.lib.optionalAttrs prev.stdenv.isDarwin {
+  clang-tools =
+    prev.clang-tools.override { llvmPackages = prev.llvmPackages_12; };
+} //
 
 {
   installApplication = { name, appname ? name, version, src, description
