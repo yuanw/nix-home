@@ -21,6 +21,7 @@ in {
         ublock-origin
         https-everywhere
         privacy-badger
+        leechblock-ng
       ];
       programs.firefox.profiles = {
         home = {
