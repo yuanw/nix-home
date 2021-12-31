@@ -55,7 +55,6 @@ prev.lib.optionalAttrs prev.stdenv.isDarwin {
   });
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
-  hls = prev.callPackage ./easy-hls.nix { };
   hosts = prev.callPackage ./hosts.nix { };
 
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
