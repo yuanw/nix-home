@@ -2,10 +2,10 @@ final: prev:
 # stolen from https://github.com/midchildan/dotfiles/blob/master/overlays/nixpkgs.nix
 # FIXME: workaround for wait util it ready for nixpkgs-unstable
 # https://nixpk.gs/pr-tracker.html?pr=147289
-prev.lib.optionalAttrs prev.stdenv.isDarwin {
-  clang-tools =
-    prev.clang-tools.override { llvmPackages = prev.llvmPackages_12; };
-} //
+# prev.lib.optionalAttrs prev.stdenv.isDarwin {
+#   clang-tools =
+#     prev.clang-tools.override { llvmPackages = prev.llvmPackages_12; };
+# } //
 
 {
   installApplication = { name, appname ? name, version, src, description
@@ -61,12 +61,12 @@ prev.lib.optionalAttrs prev.stdenv.isDarwin {
 
   juliaMac = final.installApplication rec {
     name = "Julia";
-    version = "1.6.2";
-    sourceRoot = "Julia-1.6.app";
+    version = "1.7.1";
+    sourceRoot = "Julia-1.7.app";
     src = prev.fetchurl {
       url =
-        "https://julialang-s3.julialang.org/bin/mac/x64/1.6/julia-1.6.2-mac64.dmg";
-      sha256 = "1j9pqi7lvh8v1j81bpy7gjaa7kdr4s92qkc27rdp2z6wl48f3dbg";
+        "https://julialang-s3.julialang.org/bin/mac/x64/1.7/julia-1.7.1-mac64.dmg";
+      sha256 = "156lcayi6k51ch6wxvw1q9nciy6y4zv51qmxrybz7knnh8kjz14m";
     };
     description = "High Performance";
     homepage = "https://julialang.org/";
