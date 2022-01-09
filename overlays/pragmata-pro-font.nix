@@ -1,4 +1,5 @@
 # https://github.com/ahmedelgabri/dotfiles/blob/main/nix/pkgs/pragmatapro.nix
+# requireFile https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/trivial-builders.nix
 { lib, stdenv, requireFile, unzip }:
 
 stdenv.mkDerivation rec {
@@ -8,13 +9,16 @@ stdenv.mkDerivation rec {
 
   src = requireFile rec {
     name = "PragmataPro${version}.zip";
-    url = "file://${name}";
+    url = "file:///${name}";
     # nix-hash --flat --base32 --type sha256 /path/to/file
-    sha256 = "0b1zyzh67fgjkx948m7f5gbvrnp7bzz830wlww2b1zg2q4w2qf7w";
-    # sha256 = "187skl3ac8rp4k0jd8dcgdn4kwksdd12044isccxnwq3cajhlay1";
+    sha256 = "187skl3ac8rp4k0jd8dcgdn4kwksdd12044isccxnwq3cajhlay1";
     message = ''
       ${name} font not found in nix store, to add it run:
-      $ nix-store --add-fixed sha256 /path/to/${name}
+
+      using either
+          nix-store --add-fixed sha256 ${name}
+        or
+          nix-prefetch-url --type sha256 file:///path/to/${name}
 
       don't forget to git-crypt unlock
 
