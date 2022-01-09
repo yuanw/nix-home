@@ -20,6 +20,7 @@
         "insomnia"
         "karabiner-elements"
         "stretchly"
+        "hammerspoon"
       ];
       brews = [ "aws-iam-authenticator" "pyenv" ];
     };
