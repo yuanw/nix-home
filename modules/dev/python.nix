@@ -17,7 +17,7 @@ in {
           pylint
           matplotlib
           nose
-          poetry
+          # poetry
           pytest
           pyflakes
           pylsp-mypy
