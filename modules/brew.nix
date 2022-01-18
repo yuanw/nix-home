@@ -19,7 +19,10 @@ in {
       type = types.listOf types.str;
       default = [ "firefox" ];
     };
-
+    masApps = mkOption {
+      type = with types; attrsOf ints.positive;
+      default = {};
+    };
     extraConfig = mkOption {
       type = types.lines;
       default = ''
@@ -37,5 +40,6 @@ in {
     homebrew.taps = cfg.taps;
     homebrew.brews = cfg.brews;
     homebrew.casks = cfg.casks;
+    homebrew.masApps = cfg.masApps;
   };
 }

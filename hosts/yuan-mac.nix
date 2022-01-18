@@ -16,12 +16,12 @@
   };
   programs = {
     node.enable = true;
-    python.enable = true;
+    python.enable = false;
     haskell.enable = true;
     editors.emacs = {
       enable = true;
       pkg = pkgs.emacs;
     };
-    stevenBlackHosts.enable = true;
+    stevenBlackHosts.enable = false;
   };
 }

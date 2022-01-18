@@ -87,14 +87,14 @@
       };
 
       darwinConfigurations = {
-        yuan-mac = mkDarwinSystem {
+        yuanw = mkDarwinSystem {
           localConfig = {
-            username = "yuanwang";
+            username = "yuanw";
             name = "Yuan Wang";
             email = mailAddr "me" "yuanwang.ca";
-            hostname = "yuan-mac";
+            hostname = "yuanw";
             gpgKey = "BF2ADAA2A98F45E7";
-            homeDirectory = "/Users/yuanwang";
+            homeDirectory = "/Users/yuanw";
           };
           modules = [ ./hosts/yuan-mac.nix ];
         };
@@ -111,7 +111,7 @@
           modules = [ ./hosts/wf17084.nix ];
         };
       };
-      yuan-mac = self.darwinConfigurations.yuan-mac.system;
+      yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
 
     } // eachDefaultSystem (system:
