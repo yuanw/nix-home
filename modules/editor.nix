@@ -4,7 +4,7 @@
 let
   cfg = config.programs.editors.emacs;
   emacs-server = "server";
-  emacsclient = "${pkgs.emacs}/bin/emacsclient -s ${emacs-server}";
+  emacsclient = "${pkgs.emacs}/bin/emacsclient";
 in with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
@@ -63,7 +63,6 @@ in with lib; {
 
       programs.zsh = {
         sessionVariables = {
-          EMACS_SERVER_FILE = "${emacs-server}";
           EDITOR = "${emacsclient}";
         };
         initExtra = ''

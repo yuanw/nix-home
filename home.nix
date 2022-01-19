@@ -135,7 +135,7 @@
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
       extraConfig = {
-        core = { editor = "emacsclient -c -s server"; };
+        core = { editor = "emacsclient -c"; };
         init.defaultBranch = "main";
         pull.rebase = true;
         branch.autosetupmerge = true;
@@ -179,6 +179,8 @@
         GITSTATUS_LOG_LEVEL = "DEBUG";
       };
 
+
+
       enableAutosuggestions = true;
       history = {
         size = 50000;
@@ -191,6 +193,10 @@
       initExtra = if pkgs.stdenvNoCC.isDarwin then
         lib.mkBefore ''
           export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+
+          #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+          export SDKMAN_DIR="$HOME/.sdkman"
+          [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
         ''
       else
         lib.mkBefore "";

@@ -2,15 +2,31 @@
   home-manager.users.${localConfig.username}.programs.git = {
     extraConfig = { github.user = "yuanw"; };
   };
+
+  services.emacs = {
+    enable = true;
+    package = pkgs.emacs;
+  };
+
   modules = {
+
+    browsers.firefox = {
+      enable = true;
+      pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+    };
+
     terminal.enable = true;
     wm.yabai.enable = true;
     brew = {
       enable = true;
       casks = [
         "firefox"
-        #"zoom"
-        # bluejeans
+        "docker"
+        "google-chrome"
+        "insomnia"
+        "karabiner-elements"
+        "stretchly"
+        "hammerspoon"
       ];
     };
   };
