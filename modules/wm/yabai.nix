@@ -8,14 +8,14 @@
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsclient = "${pkgs.emacs}/bin/emacsclient -c -s server";
+  emacsclient = "${pkgs.emacs}/bin/emacsclient -c";
 
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   # Once we sort of Emacs GUI Issue, we should use emacsclient
   laucherConfig = ''
-    shift + ctrl + alt - d: ${pkgs.emacs}/bin/emacsclient -c -s server
+    shift + ctrl + alt - d: ${pkgs.emacs}/bin/emacsclient -c
     shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
