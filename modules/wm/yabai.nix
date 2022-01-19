@@ -13,7 +13,6 @@ let
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
-  # Once we sort of Emacs GUI Issue, we should use emacsclient
   laucherConfig = ''
     shift + ctrl + alt - d: ${pkgs.emacs}/bin/emacsclient -c
     shift + ctrl + alt - e: emacsclient --eval "(emacs-everywhere)"
