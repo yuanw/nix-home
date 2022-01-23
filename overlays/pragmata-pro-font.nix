@@ -9,7 +9,8 @@ stdenv.mkDerivation rec {
 
   src = requireFile rec {
     name = "PragmataPro${version}.zip";
-    url = "file:///Users/yuanwang/workspace/nix-home/private/PragmataPro0.829.zip";
+    url =
+      "file:///Users/yuanwang/workspace/nix-home/private/PragmataPro0.829.zip";
     # nix-hash --flat --base32 --type sha256 /path/to/file
     sha256 = "187skl3ac8rp4k0jd8dcgdn4kwksdd12044isccxnwq3cajhlay1";
     message = ''

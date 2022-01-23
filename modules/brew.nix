@@ -1,4 +1,4 @@
-{ config, lib, pkgs,  ... }:
+{ config, lib, pkgs, ... }:
 ############
 # Homebrew #
 ############
@@ -21,7 +21,7 @@ in {
     };
     masApps = mkOption {
       type = with types; attrsOf ints.positive;
-      default = {};
+      default = { };
     };
     extraConfig = mkOption {
       type = types.lines;

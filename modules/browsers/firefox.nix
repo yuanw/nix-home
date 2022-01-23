@@ -1,5 +1,5 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
-{ config, lib, pkgs,  ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let cfg = config.modules.browsers.firefox;

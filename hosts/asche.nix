@@ -1,15 +1,15 @@
-{ config, pkgs,  ... }:
+{ config, pkgs, ... }:
 
 {
 
   my = {
 
-          username = "yuanwang";
-          name = "Yuan Wang";
-          email =  "me@yuanwang.ca";
-          hostname = "asche";
-          gpgKey = "BF2ADAA2A98F45E7";
-          homeDirectory = "/home/yuanwang";
+    username = "yuanwang";
+    name = "Yuan Wang";
+    email = "me@yuanwang.ca";
+    hostname = "asche";
+    gpgKey = "BF2ADAA2A98F45E7";
+    homeDirectory = "/home/yuanwang";
   };
   home-manager.users.${config.my.username} = {
     xdg.enable = true;
@@ -60,7 +60,7 @@
       windowManager.xmonad = {
         enable = true;
         enableContribAndExtras = true;
-        config = ./xmonad/xmonad.hs;
+        config = ../xmonad/xmonad.hs;
       };
     };
     programs = {

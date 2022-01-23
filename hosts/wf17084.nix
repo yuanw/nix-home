@@ -1,13 +1,13 @@
-{ lib, pkgs, config,  services, ... }: {
+{ lib, pkgs, config, services, ... }: {
 
   my = {
 
-            username = "yuanwang";
-            name = "Yuan Wang";
-            email =  "yuan.wang@workiva.com";
-            hostname = "wf17084";
-            gpgKey = "19AD3F6B1A5BF3BF";
-            homeDirectory = "/Users/yuanwang";
+    username = "yuanwang";
+    name = "Yuan Wang";
+    email = "yuan.wang@workiva.com";
+    hostname = "wf17084";
+    gpgKey = "19AD3F6B1A5BF3BF";
+    homeDirectory = "/Users/yuanwang";
   };
   home-manager.users.${config.my.username}.programs = {
     go = {

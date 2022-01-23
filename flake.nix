@@ -37,7 +37,7 @@
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
-      mkDarwinSystem = {  modules }:
+      mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
           inputs = inputs;
           system = "x86_64-darwin";
@@ -52,7 +52,7 @@
             ./macintosh.nix
           ] ++ modules;
         };
-      mkNixSystem = {  modules }:
+      mkNixSystem = { modules }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = modules ++ [
@@ -72,18 +72,13 @@
           ];
         };
     in {
-      nixosConfigurations.asche = mkNixSystem {
-        modules = [ ./hosts/asche.nix ];
-      };
+      nixosConfigurations.asche =
+        mkNixSystem { modules = [ ./hosts/asche.nix ]; };
 
       darwinConfigurations = {
-        yuanw = mkDarwinSystem {
-          modules = [ ./hosts/yuan-mac.nix ];
-        };
+        yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };
 
-        wf17084 = mkDarwinSystem {
-          modules = [ ./hosts/wf17084.nix ];
-        };
+        wf17084 = mkDarwinSystem { modules = [ ./hosts/wf17084.nix ]; };
       };
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;

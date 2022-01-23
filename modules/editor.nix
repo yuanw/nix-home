@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs,  ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.programs.editors.emacs;
   emacs-server = "server";
@@ -62,9 +62,7 @@ in with lib; {
       };
 
       programs.zsh = {
-        sessionVariables = {
-          EDITOR = "${emacsclient}";
-        };
+        sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
           export PATH=$PATH:$HOME/.emacs.d/bin
         '';
