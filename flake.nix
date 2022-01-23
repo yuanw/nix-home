@@ -73,7 +73,9 @@
         };
     in {
       nixosConfigurations.asche =
-        mkNixSystem { modules = [ ./hosts/asche.nix ]; };
+        mkNixSystem { modules = [
+                        ./machines/asche/configuration.nix
+                        ./hosts/asche.nix ]; };
 
       darwinConfigurations = {
         yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };
