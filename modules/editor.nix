@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs,  ... }:
 let
   cfg = config.programs.editors.emacs;
   emacs-server = "server";
@@ -30,7 +30,7 @@ in with lib; {
 
   config = mkIf cfg.enable {
 
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.${config.my.username} = {
       home = {
         packages = with pkgs; [
           git
@@ -73,7 +73,7 @@ in with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    # home-manager.users.${localConfig.username}.home.file =
+    # home-manager.users.${config.my.username}.home.file =
     #   mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
   };
 }

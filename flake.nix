@@ -37,13 +37,12 @@
       # copied from https://github.com/cmacrae/config
       mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
-      mkDarwinSystem = { localConfig, modules }:
+      mkDarwinSystem = {  modules }:
         darwin.lib.darwinSystem {
           inputs = inputs;
           system = "x86_64-darwin";
           modules = [
             ({ lib, ... }: {
-              _module.args.localConfig = localConfig;
               imports = import ./modules/modules.nix {
                 inherit lib;
                 isDarwin = true;
@@ -53,7 +52,7 @@
             ./macintosh.nix
           ] ++ modules;
         };
-      mkNixSystem = { localConfig, modules }:
+      mkNixSystem = {  modules }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           modules = modules ++ [
@@ -68,46 +67,21 @@
               ];
             }
             ({ lib, pkgs, ... }: {
-              _module.args.localConfig = localConfig;
               imports = import ./modules/modules.nix { inherit lib; };
             })
           ];
         };
     in {
       nixosConfigurations.asche = mkNixSystem {
-        localConfig = {
-          username = "yuanwang";
-          name = "Yuan Wang";
-          email = mailAddr "me" "yuanwang.ca";
-          hostname = "asche";
-          gpgKey = "BF2ADAA2A98F45E7";
-          homeDirectory = "/home/yuanwang";
-        };
         modules = [ ./hosts/asche.nix ];
       };
 
       darwinConfigurations = {
         yuanw = mkDarwinSystem {
-          localConfig = {
-            username = "yuanw";
-            name = "Yuan Wang";
-            email = mailAddr "me" "yuanwang.ca";
-            hostname = "yuanw";
-            gpgKey = "BF2ADAA2A98F45E7";
-            homeDirectory = "/Users/yuanw";
-          };
           modules = [ ./hosts/yuan-mac.nix ];
         };
 
         wf17084 = mkDarwinSystem {
-          localConfig = {
-            username = "yuanwang";
-            name = "Yuan Wang";
-            email = mailAddr "yuan.wang" "workiva.com";
-            hostname = "wf17084";
-            gpgKey = "19AD3F6B1A5BF3BF";
-            homeDirectory = "/Users/yuanwang";
-          };
           modules = [ ./hosts/wf17084.nix ];
         };
       };

@@ -1,5 +1,5 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs,  ... }:
 
 with lib;
 let cfg = config.modules.browsers.firefox;
@@ -13,7 +13,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.${config.my.username} = {
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       programs.firefox.extensions = with pkgs.nur.repos.rycee.firefox-addons; [

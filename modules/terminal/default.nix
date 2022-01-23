@@ -1,4 +1,4 @@
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
@@ -27,7 +27,7 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.${cfg.my.username} = {
       home.packages = [ tat td tkill temacs ];
       programs = {
         starship = {

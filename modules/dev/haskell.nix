@@ -1,4 +1,4 @@
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs,  ... }:
 
 with lib;
 let
@@ -17,7 +17,7 @@ in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
   config = mkIf cfg.enable {
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [ haskell-env ];
     };
   };

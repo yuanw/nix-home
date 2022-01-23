@@ -1,8 +1,8 @@
-{ pkgs, lib, config, localConfig, ... }:
+{ pkgs, lib, config,  ... }:
 
 {
-  home.username = localConfig.username;
-  home.homeDirectory = localConfig.homeDirectory;
+  home.username = config.my.username;
+  home.homeDirectory = config.my.homeDirectory;
   home.stateVersion = "22.05";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin
@@ -116,7 +116,7 @@
 
     git = {
       enable = true;
-      userName = localConfig.username;
+      userName = config.my.username;
 
       aliases = {
         co = "checkout";
@@ -125,12 +125,12 @@
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
-      userEmail = localConfig.email;
+      userEmail = config.my.email;
 
       delta = { enable = true; };
 
       signing = {
-        key = localConfig.gpgKey;
+        key = config.my.gpgKey;
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];

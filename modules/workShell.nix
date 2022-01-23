@@ -1,12 +1,12 @@
-{ config, lib, pkgs, localConfig, ... }:
+{ config, lib, pkgs,  ... }:
 
 with lib;
-let homeDir = localConfig.homeDirectory;
+let homeDir = config.my.homeDirectory;
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {
-    home-manager.users.${localConfig.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.kubernetes-helm
         # pkgs.aws-iam-authenticator
@@ -31,11 +31,7 @@ in {
              python manage.py test $1 --http-integration --traceback -v 2
           }
 
-
-
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
-
-
         '';
       };
     };
