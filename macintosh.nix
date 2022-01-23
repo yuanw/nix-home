@@ -23,7 +23,6 @@ with lib; {
     # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''
       experimental-features = nix-command flakes
-      allow-import-from-derivation = true
       keep-outputs          = true
       keep-derivations      = true
     '';
