@@ -1,9 +1,7 @@
 { config, pkgs, ... }:
 
 {
-
   my = {
-
     username = "yuanwang";
     name = "Yuan Wang";
     email = "me@yuanwang.ca";

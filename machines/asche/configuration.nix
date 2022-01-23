@@ -15,9 +15,11 @@ with lib; {
   };
   boot.kernelPackages = pkgs.linuxPackages_latest;
   # luks
-  boot.initrd.luks.devices.cryptboot = {
-    preLVM = true;
-    device = "/dev/disk/by-uuid/23aa6e7d-55ae-4f77-8994-bdbdcc8680a0";
+  boot.initrd.luks.devices = {
+    main = {
+      preLVM = true;
+      device = "/dev/disk/by-uuid/23aa6e7d-55ae-4f77-8994-bdbdcc8680a0";
+    };
   };
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
