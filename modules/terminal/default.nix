@@ -27,7 +27,7 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    home-manager.users.${cfg.my.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [ tat td tkill temacs ];
       programs = {
         starship = {
@@ -127,15 +127,15 @@ in {
           settings = {
             font = {
               normal = {
-                family = "PragmataPro";
+                family = config.my.font;
                 style = "Regular";
               };
               bold = {
-                family = "PragmataPro";
+                family = config.my.font;
                 style = "Bold";
               };
               italic = {
-                family = "PragmataPro";
+                family = config.my.font;
                 style = "Italic";
               };
               size = 18;
