@@ -179,8 +179,6 @@
         GITSTATUS_LOG_LEVEL = "DEBUG";
       };
 
-
-
       enableAutosuggestions = true;
       history = {
         size = 50000;
