@@ -20,9 +20,12 @@ with lib; {
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
     ];
     trustedUsers = [ "root" config.my.username ];
+    # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''
       experimental-features = nix-command flakes
       allow-import-from-derivation = true
+      keep-outputs          = true
+      keep-derivations      = true
     '';
     trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
