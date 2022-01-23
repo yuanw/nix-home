@@ -91,7 +91,7 @@ with lib; {
     };
 
   };
-  users.users.${my.username} = {
+  users.users.${config.my.username} = {
     isNormalUser = true;
     uid = 1000;
     home = config.my.homeDirectory;
