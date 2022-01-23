@@ -4,22 +4,22 @@ with pkgs.stdenv;
 with lib; {
   imports = [ ./hardware-configuration.nix ];
   networking.hostName = config.my.hostname;
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-  boot.loader.grub = {
-    enable = true;
-    version = 2;
-    efiSupport = true;
-    enableCryptodisk = true;
-    device = "nodev";
-  };
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-  # luks
-  boot.initrd.luks.devices.cryptboot = {
-    preLVM = true;
-    device = "/dev/disk/by-uuid/23aa6e7d-55ae-4f77-8994-bdbdcc8680a0";
-  };
+  # # Use the systemd-boot EFI boot loader.
+  # boot.loader.systemd-boot.enable = true;
+  # boot.loader.efi.canTouchEfiVariables = true;
+  # boot.loader.grub = {
+  #   enable = true;
+  #   version = 2;
+  #   efiSupport = true;
+  #   enableCryptodisk = true;
+  #   device = "nodev";
+  # };
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  # # luks
+  # boot.initrd.luks.devices.cryptboot = {
+  #   preLVM = true;
+  #   device = "/dev/disk/by-uuid/23aa6e7d-55ae-4f77-8994-bdbdcc8680a0";
+  # };
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
