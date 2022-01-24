@@ -24,13 +24,13 @@
     brew = {
       enable = true;
       casks = [
-        "firefox"
+        "brave-browser"
         "docker"
-        "google-chrome"
+        "firefox"
+        "hammerspoon"
         "insomnia"
         "karabiner-elements"
         "stretchly"
-        "hammerspoon"
       ];
       brews = [ "aws-iam-authenticator" "pyenv" ];
     };
