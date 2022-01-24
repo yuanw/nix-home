@@ -23,7 +23,6 @@ with lib; {
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
-  networking.useDHCP = false;
   #networking.networkmanager = { enable = true; };
   #networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
 
@@ -75,6 +74,8 @@ with lib; {
     trustedUsers = [ "root" config.my.username ];
     extraOptions = ''
       experimental-features = nix-command flakes
+      keep-outputs = true
+      keep-derivations = true
     '';
     autoOptimiseStore = true;
     gc = { automatic = true; };
