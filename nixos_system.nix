@@ -38,35 +38,33 @@ with lib; {
   # };
 
   # Enable the GNOME 3 Desktop Environment.
-  services.blueman.enable = true;
-  services.xserver.enable = true;
-  services.xserver.autorun = true;
-  services.xserver.autoRepeatDelay = 200;
-  services.xserver.autoRepeatInterval = 25;
+  # services.blueman.enable = true;
+  # services.xserver.enable = true;
+  # services.xserver.autorun = true;
+  # services.xserver.autoRepeatDelay = 200;
+  # services.xserver.autoRepeatInterval = 25;
 
-  sound.enable = true;
-  hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
+  # sound.enable = true;
+  # hardware.pulseaudio.enable = true;
+  # hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  # hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
 
-  services.picom.enable = true;
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
-  };
-  # services.xserver.displayManager.gdm.enable = true;
-  services.xserver.desktopManager.gnome = { enable = true; };
+  # services.picom.enable = true;
+  # services.xserver.windowManager.xmonad = {
+  #   enable = true;
+  #   enableContribAndExtras = true;
+  # };
+  # # services.xserver.displayManager.gdm.enable = true;
+  # services.xserver.desktopManager.gnome = { enable = true; };
   nix = {
     package = pkgs.nixFlakes;
     binaryCaches = [
       "https://utdemir.cachix.org"
-      "https://hs-nix-template.cachix.org"
       "https://cache.nixos.org"
       "https://nix-community.cachix.org"
     ];
     binaryCachePublicKeys = [
       "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
-      "hs-nix-template.cachix.org-1:/YbjZCrYAw7d9ayLayk7ZhBdTEkR10ZFmFuOq6ZJo4c="
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
     ];
@@ -101,7 +99,9 @@ with lib; {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim git firefox ];
+  environment.systemPackages = with pkgs; [ wget vim git
+                                            firefox
+                                          gnomeExtensions.paperwm];
   # security.wrappers.slock.source = "${pkgs.slock.out}/bin/slock";
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;

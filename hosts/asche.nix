@@ -2,12 +2,12 @@
 
 {
   my = {
-    username = "yuanwang";
+    username = "yuanw";
     name = "Yuan Wang";
     email = "me@yuanwang.ca";
     hostname = "asche";
     gpgKey = "BF2ADAA2A98F45E7";
-    homeDirectory = "/home/yuanwang";
+    homeDirectory = "/home/yuanw";
   };
   home-manager.users.${config.my.username} = {
     xdg.enable = true;
@@ -110,11 +110,11 @@
     browsers.firefox.enable = true;
   };
   programs = {
-    haskell.enable = true;
-    python.enable = true;
+    haskell.enable = false;
+    python.enable = false;
     editors.emacs = {
       enable = true;
-      pkg = pkgs.emacsPgtkGcc;
+      pkg = pkgs.emacsGcc;
     };
   };
 }
