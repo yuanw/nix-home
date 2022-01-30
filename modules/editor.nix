@@ -55,6 +55,8 @@ in with lib; {
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
         ];
+
+        file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
       };
       programs.emacs = {
         enable = true;
@@ -71,7 +73,5 @@ in with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    home-manager.users.${config.my.username}.home.file =
-       mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
   };
 }
