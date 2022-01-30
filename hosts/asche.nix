@@ -114,7 +114,7 @@
     python.enable = false;
     editors.emacs = {
       enable = true;
-      pkg = pkgs.emacsGcc;
+      pkg = pkgs.emacsUnstable;
     };
   };
 }

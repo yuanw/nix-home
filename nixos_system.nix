@@ -101,7 +101,7 @@ with lib; {
   # $ nix search wget
   environment.systemPackages = with pkgs; [ wget vim git
                                             firefox
-                                          gnomeExtensions.paperwm];
+                                          ];
   # security.wrappers.slock.source = "${pkgs.slock.out}/bin/slock";
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
@@ -113,13 +113,13 @@ with lib; {
   home-manager.users.${config.my.username} =
     import ./home.nix { inherit pkgs lib config; };
 
-  # fonts.fontDir.enable = true;
-  # fonts.fonts = with pkgs; [
-  #   fira-code
-  #   font-awesome
-  #   iosevka
-  #   roboto
-  #   roboto-mono
+   fonts.fontDir.enable = true;
+   fonts.fonts = with pkgs; [
+     fira-code
+     font-awesome
+     iosevka
+     roboto
+     roboto-mono
   #   pragmata-pro
-  # ];
+   ];
 }
