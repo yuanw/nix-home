@@ -114,6 +114,7 @@
     python.enable = false;
     editors.emacs = {
       enable = true;
+      enableDoomConfig = true;
       pkg = pkgs.emacsPgtkGcc;
     };
   };

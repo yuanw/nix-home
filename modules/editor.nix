@@ -71,7 +71,7 @@ in with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    # home-manager.users.${config.my.username}.home.file =
-    #   mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
+    home-manager.users.${config.my.username}.home.file =
+       mkIf cfg.enableDoomConfig { ".doom.d".source = configDir + "/doom"; };
   };
 }

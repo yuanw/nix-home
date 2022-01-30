@@ -22,7 +22,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-palenight)
 
 (defun +org/opened-buffer-files ()
   "Return the list of files currently opened in Emacs."
@@ -36,13 +36,35 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org-notes/"
-      org-roam-dailies-directory (concat org-directory "dailies/")
+(setq org-roam-v2-ack t
+      org-directory "~/org/"
       org-roam-directory (concat org-directory "roam/")
-      org-default-notes-file (concat org-directory "journal/Dropbox/org/inbox.org")
-      org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
+      ;; org-id-extra-files (find-lisp-find-files org-roam-directory "\.org$")
+       deft-extensions '("org")
+       deft-directory org-directory
+       org-agenda-files (append
+                         (file-expand-wildcards (concat org-directory "*.org"))
+                         (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                         (file-expand-wildcards (concat org-directory "projects/*.org"))
+ )
+       org-default-notes-file (concat org-directory "agenda/inbox.org")
+       +org-capture-notes-file (concat org-directory "agenda/inbox.org")
+       +org-capture-todo-file (concat org-directory "agenda/inbox.org")
+       org-refile-targets '((+org/opened-buffer-files :maxlevel . 9)))
 
 
+
+
+(after! org
+  (setq org-agenda-dim-blocked-tasks nil)
+  (setq org-agenda-inhibit-startup t)
+  (setq org-agenda-use-tag-inheritance nil)
+  (setq org-modules
+   (quote
+    (org-habit org-bibtex ))))
+
+(require 'org-id)
+(require 'org-habit)
 ;;; :tools direnv
 ;;(setq direnv-always-show-summary nil)
 ;; This determines the style of line numbers in effect. If set to `nil', line
