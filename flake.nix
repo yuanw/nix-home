@@ -22,7 +22,7 @@
     };
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
-    sops-nix.url = github:Mic92/sops-nix;
+    sops-nix.url = "github:Mic92/sops-nix";
     nix-script = {
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -57,7 +57,7 @@
           system = "x86_64-linux";
           modules = modules ++ [
             ./nixos_system.nix
-              sops-nix.nixosModules.sops
+            sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
             {
               nixpkgs.overlays = [
@@ -73,10 +73,9 @@
           ];
         };
     in {
-      nixosConfigurations.asche =
-        mkNixSystem { modules = [
-                        ./machines/asche/configuration.nix
-                        ./hosts/asche.nix ]; };
+      nixosConfigurations.asche = mkNixSystem {
+        modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
+      };
 
       darwinConfigurations = {
         yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };

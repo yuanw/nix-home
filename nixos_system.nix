@@ -44,10 +44,10 @@ with lib; {
   services.xserver.autoRepeatDelay = 200;
   services.xserver.autoRepeatInterval = 25;
 
-   sound.enable = true;
-   hardware.pulseaudio.enable = true;
-   hardware.pulseaudio.package = pkgs.pulseaudioFull;
-   hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
+  sound.enable = true;
+  hardware.pulseaudio.enable = true;
+  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
 
   services.picom.enable = true;
   services.xserver.windowManager.xmonad = {
@@ -99,9 +99,7 @@ with lib; {
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  environment.systemPackages = with pkgs; [ wget vim git
-                                            firefox
-                                          ];
+  environment.systemPackages = with pkgs; [ wget vim git firefox ];
   # security.wrappers.slock.source = "${pkgs.slock.out}/bin/slock";
   environment.shells = [ pkgs.zsh ];
   programs.zsh.enable = true;
@@ -113,13 +111,13 @@ with lib; {
   home-manager.users.${config.my.username} =
     import ./home.nix { inherit pkgs lib config; };
 
-   fonts.fontDir.enable = true;
-   fonts.fonts = with pkgs; [
-     fira-code
-     font-awesome
-     iosevka
-     roboto
-     roboto-mono
-  #   pragmata-pro
-   ];
+  fonts.fontDir.enable = true;
+  fonts.fonts = with pkgs; [
+    fira-code
+    font-awesome
+    iosevka
+    roboto
+    roboto-mono
+    #   pragmata-pro
+  ];
 }

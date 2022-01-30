@@ -115,9 +115,9 @@
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;
-      pkg = with pkgs;  ((emacsPackagesNgGen emacsPgtkGcc).emacsWithPackages (epkgs: [
-        epkgs.vterm
-      ]));
+      pkg = with pkgs;
+        ((emacsPackagesNgGen emacsPgtkGcc).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
     };
   };
 }
