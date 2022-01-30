@@ -51,6 +51,8 @@ nix flake update --recreate-lock-file
 ~./result/sw/bin/darwin-rebuild switch --flake .~
 
 
+* Nixos
+~$ sudo nixos-rebuild switch --flake '.#'~
 
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
