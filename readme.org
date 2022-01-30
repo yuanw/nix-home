@@ -12,6 +12,7 @@ I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take 
 | Terminal | Alacritty + tmux |
 | Edtior   | Doom Emacs       |
 
+* Current Nixos setup
 
 * Inspirations
 - https://github.com/cmacrae/config (nix-darwin)
@@ -27,7 +28,7 @@ I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take 
 
 I think nix with daemon is recommended over the single user mode.
 
-~sh <(curl -L https://nixos.org/nix/install) --darwin-use-unencrypted-nix-store-volume~
+~sh <(curl -L https://nixos.org/nix/install)~
 **** Turn on flake
 edit ~/etc/nix/nix.conf~
 

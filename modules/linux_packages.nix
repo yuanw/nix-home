@@ -11,4 +11,5 @@ with pkgs; [
   gxmessage
   autorandr
   dzen2
+  pavucontrol
 ]

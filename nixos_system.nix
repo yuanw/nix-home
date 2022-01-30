@@ -31,29 +31,29 @@ with lib; {
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Select internationalisation properties.
-  # i18n.defaultLocale = "en_US.UTF-8";
+  i18n.defaultLocale = "en_US.UTF-8";
   # console = {
   #   font = "Lat2-Terminus16";
   #   keyMap = "us";
   # };
 
   # Enable the GNOME 3 Desktop Environment.
-  # services.blueman.enable = true;
-  # services.xserver.enable = true;
-  # services.xserver.autorun = true;
-  # services.xserver.autoRepeatDelay = 200;
-  # services.xserver.autoRepeatInterval = 25;
+  services.blueman.enable = true;
+  services.xserver.enable = true;
+  services.xserver.autorun = true;
+  services.xserver.autoRepeatDelay = 200;
+  services.xserver.autoRepeatInterval = 25;
 
-  # sound.enable = true;
-  # hardware.pulseaudio.enable = true;
-  # hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  # hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
+   sound.enable = true;
+   hardware.pulseaudio.enable = true;
+   hardware.pulseaudio.package = pkgs.pulseaudioFull;
+   hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
 
-  # services.picom.enable = true;
-  # services.xserver.windowManager.xmonad = {
-  #   enable = true;
-  #   enableContribAndExtras = true;
-  # };
+  services.picom.enable = true;
+  services.xserver.windowManager.xmonad = {
+    enable = true;
+    enableContribAndExtras = true;
+  };
   # # services.xserver.displayManager.gdm.enable = true;
   # services.xserver.desktopManager.gnome = { enable = true; };
   nix = {

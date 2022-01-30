@@ -22,7 +22,7 @@
     };
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
-
+    sops-nix.url = github:Mic92/sops-nix;
     nix-script = {
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,7 +31,7 @@
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
-    , ... }:
+    , sops-nix, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # copied from https://github.com/cmacrae/config
@@ -57,6 +57,7 @@
           system = "x86_64-linux";
           modules = modules ++ [
             ./nixos_system.nix
+              sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
             {
               nixpkgs.overlays = [
