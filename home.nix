@@ -10,12 +10,6 @@
     ++ lib.optionals pkgs.stdenvNoCC.isLinux
     (import ./modules/linux_packages.nix { inherit pkgs; });
 
-  home.file = {
-    ".ghci".text = ''
-      :set prompt "λ> "
-    '';
-  };
-
   xdg.enable = true;
   programs = {
     bat = {
