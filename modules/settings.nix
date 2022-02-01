@@ -9,6 +9,7 @@ let
       default = value;
     };
 
+  # copied from https://github.com/cmacrae/config
   mailAddr = name: domain: "${name}@${domain}";
 in {
 

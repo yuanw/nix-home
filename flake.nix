@@ -34,8 +34,6 @@
     , sops-nix, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
-      # copied from https://github.com/cmacrae/config
-      mailAddr = name: domain: "${name}@${domain}";
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
