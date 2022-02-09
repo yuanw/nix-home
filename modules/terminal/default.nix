@@ -28,8 +28,11 @@ in {
   };
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ tat td tkill temacs ];
+      home.packages = [ tat td tkill temacs pkgs.jo ];
       programs = {
+        pet = {
+          enable = true;
+        };
         starship = {
           enable = true;
           enableZshIntegration = true;
