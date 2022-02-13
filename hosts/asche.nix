@@ -110,7 +110,7 @@
     browsers.firefox.enable = true;
   };
   programs = {
-    haskell.enable = false;
+    haskell.enable = true;
     python.enable = false;
     editors.emacs = {
       enable = true;

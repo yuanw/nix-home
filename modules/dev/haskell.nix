@@ -1,14 +1,12 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, isDarwin ? true, ... }:
 
 with lib;
 let
   cfg = config.programs.haskell;
-  haskell-env = pkgs.haskellPackages.ghcWithHoogle
-    (hp: with hp; [ apply-refact
-                    hlint
-                    lens
-                    turtle
-                    haskell-language-server ]);
+  haskell-env = pkgs.haskellPackages.ghcWithHoogle (hp:
+    with hp;
+    [ apply-refact hlint lens turtle haskell-language-server
+     xmonad xmonad-contrib ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 

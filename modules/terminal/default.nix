@@ -34,17 +34,17 @@ in {
           enable = true;
           snippets = [
             {
-             description = "Clean up your system profile";
-             command = "sudo nix-collect-garbage --delete-older-than <day=3>d";
-             tag = ["nix"];
+              description = "Clean up your system profile";
+              command = "sudo nix-collect-garbage --delete-older-than <day=3>d";
+              tag = [ "nix" ];
             }
 
             {
-             description = "Clean up your system profile";
-             command = "sudo nix-store --optimise";
-             tag = ["nix"];
+              description = "Clean up your system profile";
+              command = "sudo nix-store --optimise";
+              tag = [ "nix" ];
             }
-            
+
           ];
         };
         starship = {

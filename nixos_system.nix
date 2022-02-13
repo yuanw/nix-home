@@ -59,19 +59,19 @@ with lib; {
   nix = {
     package = pkgs.nixFlakes;
     settings = {
-    substituters = [
-      "https://utdemir.cachix.org"
-      "https://cache.nixos.org"
-      "https://nix-community.cachix.org"
-    ];
-    trusted-public-keys = [
-      "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
-      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-    ];
-    allowed-users = [ "root" config.my.username ];
-    trusted-users = [ "root" config.my.username ];
-    auto-optimise-store = true;
+      substituters = [
+        "https://utdemir.cachix.org"
+        "https://cache.nixos.org"
+        "https://nix-community.cachix.org"
+      ];
+      trusted-public-keys = [
+        "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
+        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      ];
+      allowed-users = [ "root" config.my.username ];
+      trusted-users = [ "root" config.my.username ];
+      auto-optimise-store = true;
     };
     extraOptions = ''
       experimental-features = nix-command flakes
