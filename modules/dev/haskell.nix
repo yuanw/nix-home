@@ -4,9 +4,18 @@ with lib;
 let
   cfg = config.programs.haskell;
   haskell-env = pkgs.haskellPackages.ghcWithHoogle (hp:
-    with hp;
-    [ apply-refact hlint lens turtle haskell-language-server
-     xmonad xmonad-contrib ]);
+    with hp; [
+      apply-refact
+      hlint
+      lens
+      turtle
+      haskell-language-server
+      # TODO add boolean option whether include xmonad
+      xmobar
+      xmonad
+      xmonad-contrib
+      xmonad-extras
+    ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
