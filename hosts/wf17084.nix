@@ -40,7 +40,7 @@
     };
     dev = {
       julia.enable = true;
-      agda.enable = false;
+      agda.enable = true;
     };
     terminal = {
       enable = true;

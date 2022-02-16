@@ -28,7 +28,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     agda = {
-      url = "github:agda/agda";
+      url = "github:agda/agda?rev=4dee747be7aa6cf3947213862e1da9b710b2e40b";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
