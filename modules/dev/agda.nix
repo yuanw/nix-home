@@ -10,9 +10,16 @@ in {
       home.packages = [
         (pkgs.agda.withPackages (p: [ p.standard-library ]))
                       ];
-      # home.file = {
-      #   ".agda/defaults" = "standard-libaray";
-      # };
+      programs = {
+      zsh = {
+          sessionVariables = {
+            AGDA_DIR = "$XDG_CONFIG_HOME/agda";
+          };
+      };
+      };
+      xdg.configFile = {
+        "agda/defaults".text = "standard-library";
+      };
     };
   };
 }
