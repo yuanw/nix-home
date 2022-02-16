@@ -248,16 +248,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1641462883,
-        "narHash": "sha256-ZlQYsgDv461MtHUHBsxHSAbvau9LSAsHGTdu1Jt0Twc=",
-        "owner": "cmacrae",
+        "lastModified": 1643785704,
+        "narHash": "sha256-8hJZziEuMo8oAHHtwqANKnEP1oXqgFBnG3gmXtRu6O4=",
+        "owner": "montchr",
         "repo": "emacs",
-        "rev": "03b4223e56e10a6d88faa151c5804d30b8680cca",
+        "rev": "3ee3593e71d7824d790d3e461c9761440aaf1b82",
         "type": "github"
       },
       "original": {
-        "owner": "cmacrae",
+        "owner": "montchr",
         "repo": "emacs",
+        "rev": "3ee3593e71d7824d790d3e461c9761440aaf1b82",
         "type": "github"
       }
     },

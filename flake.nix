@@ -15,7 +15,7 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    mac-emacs.url = "github:cmacrae/emacs";
+    mac-emacs.url = "github:montchr/emacs?rev=3ee3593e71d7824d790d3e461c9761440aaf1b82";
     spacebar = {
       url = "github:cmacrae/spacebar";
       inputs.nixpkgs.follows = "nixpkgs";
