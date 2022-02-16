@@ -42,24 +42,24 @@ with lib; {
       inputs.nur.overlay
       inputs.mac-emacs.overlay
       inputs.spacebar.overlay
-      (final: prev:
-        let inherit (prev) lib;
-            overlays = [
-              (self: super: {
-                haskellPackages = super.haskellPackages.override {
-                  overrides = hself: hsuper: {
-                    Agda = hsuper.Agda.overrideAttrs (old: {
-                      postInstall = "";
-                    });
-                  };
-                };
-              })
-              inputs.agda.overlay
-            ];
-              composed = lib.composeManyExtensions overlays;
+#       (final: prev:
+#         let inherit (prev) lib;
+#             overlays = [
+#               (self: super: {
+#                 haskellPackages = super.haskellPackages.override {
+#                   overrides = hself: hsuper: {
+#                     Agda = hsuper.Agda.overrideAttrs (old: {
+#                       postInstall = "";
+#                     });
+#                   };
+#                 };
+#               })
+#               inputs.agda.overlay
+#             ];
+#               composed = lib.composeManyExtensions overlays;
 
-in composed final prev
-      )
+# in composed final prev
+#       )
       (import ./overlays)
       (final: prev: {
         resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
