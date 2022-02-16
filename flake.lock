@@ -1,5 +1,28 @@
 {
   "nodes": {
+    "agda": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1644597159,
+        "narHash": "sha256-vMrNp8J3CFh9nybQ4V2Svhf/3x3dPINIiZIN3//hDDY=",
+        "owner": "agda",
+        "repo": "agda",
+        "rev": "cf7ea79a8e6cb8fc62dd5a258f1d6317c5314cdd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "agda",
+        "repo": "agda",
+        "type": "github"
+      }
+    },
     "darwin": {
       "inputs": {
         "nixpkgs": [
@@ -393,6 +416,7 @@
     },
     "root": {
       "inputs": {
+        "agda": "agda",
         "darwin": "darwin",
         "devshell": "devshell",
         "emacs": "emacs",
