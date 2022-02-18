@@ -84,6 +84,19 @@ in {
       right_shell_icon_color = "0xffd8dee9";
       right_shell_command = "${cpuStat}/bin/cpuStat";
     };
+    launchd.user.agents.spacebar.serviceConfig = {
+      StandardErrorPath = "/tmp/spacebar.err.log";
+      StandardOutPath = "/tmp/spacebar.out.log";
+    };
+    launchd.user.agents.skhd.serviceConfig = {
+      StandardOutPath = "/tmp/skhd.out.log";
+      StandardErrorPath = "/tmp/skhd.err.log";
+    };
+    launchd.user.agents.yabai.serviceConfig = {
+      StandardOutPath = "/tmp/yabai.out.log";
+      StandardErrorPath = "/tmp/yabai.err.log";
+    };
+
     services.yabai = {
       enable = true;
       package = pkgs.yabai;
@@ -118,9 +131,7 @@ in {
 
       extraConfig = ''
         # rules
-        sudo yabai --load-sa
-        yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
-        yabai -m rule --add app="emacs"              manage="on"
+        # yabai -m rule --add app="emacs"              manage="on"
         yabai -m rule --add app='System Preferences' manage=off
         # Any other arbitrary config here
       '';
