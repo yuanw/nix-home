@@ -42,6 +42,24 @@ with lib; {
       inputs.nur.overlay
       inputs.mac-emacs.overlay
       inputs.spacebar.overlay
+#       (final: prev:
+#         let inherit (prev) lib;
+#             overlays = [
+#               (self: super: {
+#                 haskellPackages = super.haskellPackages.override {
+#                   overrides = hself: hsuper: {
+#                     Agda = hsuper.Agda.overrideAttrs (old: {
+#                       postInstall = "";
+#                     });
+#                   };
+#                 };
+#               })
+#               inputs.agda.overlay
+#             ];
+#               composed = lib.composeManyExtensions overlays;
+
+# in composed final prev
+#       )
       (import ./overlays)
       (final: prev: {
         resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
@@ -106,17 +124,6 @@ with lib; {
   };
   time.timeZone = "America/Regina";
 
-  launchd.user.agents.yabai.serviceConfig.StandardErrorPath =
-    "/tmp/yabai.err.log";
-  launchd.user.agents.yabai.serviceConfig.StandardOutPath =
-    "/tmp/yabai.out.log";
-  launchd.user.agents.spacebar.serviceConfig.StandardErrorPath =
-    "/tmp/spacebar.err.log";
-  launchd.user.agents.spacebar.serviceConfig.StandardOutPath =
-    "/tmp/spacebar.out.log";
-  launchd.user.agents.skhd.serviceConfig.StandardOutPath = "/tmp/skhd.out.log";
-  launchd.user.agents.skhd.serviceConfig.StandardErrorPath =
-    "/tmp/skhd.err.log";
 
   users.nix.configureBuildUsers = true;
   users.users.${config.my.username} = {

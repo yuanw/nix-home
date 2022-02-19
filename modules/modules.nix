@@ -8,6 +8,7 @@ let
   allModules = [
     (loadModule ./browsers/firefox.nix { })
     (loadModule ./dev/dart.nix { })
+    (loadModule ./dev/agda.nix { })
     (loadModule ./dev/haskell.nix { })
     (loadModule ./dev/julia.nix { })
     (loadModule ./dev/node.nix { })

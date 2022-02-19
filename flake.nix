@@ -15,7 +15,7 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    mac-emacs.url = "github:cmacrae/emacs";
+    mac-emacs.url = "github:montchr/emacs?rev=3ee3593e71d7824d790d3e461c9761440aaf1b82";
     spacebar = {
       url = "github:cmacrae/spacebar";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -27,11 +27,16 @@
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agda = {
+      url = "github:agda/agda?rev=4dee747be7aa6cf3947213862e1da9b710b2e40b";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
-    , sops-nix, ... }:
+    , sops-nix, agda, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
@@ -77,7 +82,6 @@
 
       darwinConfigurations = {
         yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };
-
         wf17084 = mkDarwinSystem { modules = [ ./hosts/wf17084.nix ]; };
       };
       yuanw = self.darwinConfigurations.yuanw.system;
