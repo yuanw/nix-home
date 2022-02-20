@@ -1,0 +1,7 @@
+dependencies:
+  - base == 4.*
+executables:
+  my-xmobar:
+    main: xmobar.hs
+    dependencies:
+    - xmobar

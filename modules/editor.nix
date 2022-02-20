@@ -54,6 +54,8 @@ in with lib; {
           wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
+          # :lang yaml
+          nodePackages.yaml-language-server
         ];
 
         file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
