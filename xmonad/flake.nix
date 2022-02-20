@@ -14,7 +14,7 @@
         overlays = [ self.overlay ];
       });
     in
-    {
+   rec {
    overlay = (final: prev: {
         my-xmobar = final.haskellPackages.callCabal2nix "my-xmobar" ./. {};
       });
@@ -22,14 +22,16 @@
          my-xmobar = nixpkgsFor.${system}.my-xmobar;
       });
       defaultPackage = forAllSystems (system: self.packages.${system}.my-xmobar);
+      apps.my-xmobar = flake-utils.lib.mkApp { drv = packages.my-xmobar; };
       checks = self.packages;
       devShell = forAllSystems (system: let haskellPackages = nixpkgsFor.${system}.haskellPackages;
         in haskellPackages.shellFor {
-          packages = p: [self.packages.${system}.haskell-hello];
+          packages = p: [self.packages.${system}.my-xmobar];
           withHoogle = true;
           buildInputs = with haskellPackages; [
             haskell-language-server
             ghcid
+            hpack
             cabal-install
           ];
         # Change the prompt to show that you are in a devShell
