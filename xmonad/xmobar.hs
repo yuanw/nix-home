@@ -1,6 +1,19 @@
 -- https://github.com/jaor/xmobar/blob/master/examples/xmobar.hs
 
 import Xmobar
+    ( defaultConfig,
+      xmobar,
+      Border(TopB),
+      Config(font, additionalFonts, borderColor, border, bgColor,
+             fgColor, alpha, position, textOffset, iconOffset, lowerOnStart,
+             pickBroadest, persistent, hideOnStart, iconRoot, allDesktops,
+             overrideRedirect, commands, sepChar, alignSep, template),
+      XPosition(Top),
+      Date(Date),
+      Monitors(Swap, Weather, Network, Cpu, Memory),
+      Command(Com),
+      Exec(alias, run),
+      Runnable(Run) )
 
 -- Example user-defined plugin
 
@@ -33,7 +46,6 @@ config = defaultConfig {
   , iconRoot = "."
   , allDesktops = True
   , overrideRedirect = True
-  , textOutputFormat = Ansi
   , commands = [ Run $ Weather "EGPH" ["-t","<station>: <tempC>C",
                                         "-L","18","-H","25",
                                         "--normal","green",
