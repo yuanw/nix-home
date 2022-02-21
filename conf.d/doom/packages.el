@@ -49,3 +49,15 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
+ (package! agda-input
+    :recipe (:host github :repo "agda/agda"
+             :files ("src/data/emacs-mode/agda-input.el")
+             :nonrecursive t)
+    :pin "59c7944b1a2e8015e473eb1932353818614a1e5b")
+
+ (package! agda2-mode
+    :recipe (:host github :repo "agda/agda"
+             :files ("src/data/emacs-mode/*.el"
+                     (:exclude "agda-input.el"))
+             :nonrecursive t)
+    :pin "59c7944b1a2e8015e473eb1932353818614a1e5b")

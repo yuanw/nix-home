@@ -73,6 +73,9 @@
     };
   };
   modules = {
+  dev = {
+  agda.enable = true;
+  };
     terminal.enable = true;
     browsers.firefox.enable = true;
   };
