@@ -4,3 +4,4 @@
 tmp/
 result
 .nix-script-cache/
+.envrc

@@ -10,12 +10,7 @@ let
       lens
       turtle
       haskell-language-server
-      # TODO add boolean option whether include xmonad
-      xmobar
-      xmonad
-      xmonad-contrib
-      xmonad-extras
-    ]);
+       ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 

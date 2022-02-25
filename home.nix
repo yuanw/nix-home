@@ -11,9 +11,7 @@
     (import ./modules/linux_packages.nix { inherit pkgs; });
 
   xdg.enable = true;
-  # TODO move this into a xmonad module
-  services.caffeine.enable = true;
-  services.xscreensaver.enable = true;
+
 
   programs = {
     bat = {
