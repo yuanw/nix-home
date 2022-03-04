@@ -7,10 +7,10 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username}.home.packages = [
-      (pkgs.python39.withPackages (ps:
+      (pkgs.python3.withPackages (ps:
         with ps; [
           pip
-          ipython
+          #ipython
           black
           isort
           setuptools
@@ -20,7 +20,7 @@ in {
           # poetry
           pytest
           pyflakes
-          pylsp-mypy
+          # pylsp-mypy
           virtualenv
           virtualenvwrapper
         ]))

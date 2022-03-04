@@ -64,8 +64,6 @@ with lib; {
       (final: prev: {
         resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
         ws-access-token = inputs.ws-access-token.defaultPackage.x86_64-darwin;
-        # haskell-language-server =
-        #   inputs.hls.packages.haskell-language-server.x86_64-darwin;
       })
     ];
 
