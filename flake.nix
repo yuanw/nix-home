@@ -17,7 +17,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:montchr/emacs?rev=3ee3593e71d7824d790d3e461c9761440aaf1b82";
     spacebar = {
-      url = "github:cmacrae/spacebar";
+      url = "github:cmacrae/spacebar/v1.3.0";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     resource-id.url = "github:yuanwang-wf/resource-id";

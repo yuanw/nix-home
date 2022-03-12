@@ -37,7 +37,7 @@ with pkgs; [
   du-dust
   nixpkgs-fmt
   nix-tree
-  nix-du
+  # nix-du
 
   eukleides
   #mu

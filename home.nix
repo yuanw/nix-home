@@ -156,7 +156,7 @@
     jq = { enable = true; };
 
     neovim = {
-      enable = true;
+      enable = false;
       vimAlias = true;
     };
     zoxide = {

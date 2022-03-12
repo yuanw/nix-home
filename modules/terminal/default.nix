@@ -139,6 +139,7 @@ in {
           '';
         };
 
+        # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {
           enable = true;
           settings = {

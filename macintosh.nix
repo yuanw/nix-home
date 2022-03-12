@@ -41,7 +41,7 @@ with lib; {
     overlays = [
       inputs.nur.overlay
       inputs.mac-emacs.overlay
-      inputs.spacebar.overlay
+      #inputs.spacebar.overlay
 #       (final: prev:
 #         let inherit (prev) lib;
 #             overlays = [
