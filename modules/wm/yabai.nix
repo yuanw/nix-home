@@ -130,7 +130,6 @@ in {
 
       extraConfig = ''
         # rules
-        # yabai -m rule --add app="emacs"              manage="on"
         yabai -m rule --add app='System Preferences' manage=off
         # Any other arbitrary config here
       '';

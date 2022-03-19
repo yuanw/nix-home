@@ -249,17 +249,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1643785704,
-        "narHash": "sha256-8hJZziEuMo8oAHHtwqANKnEP1oXqgFBnG3gmXtRu6O4=",
-        "owner": "montchr",
+        "lastModified": 1647707892,
+        "narHash": "sha256-/cnGHKRA2Rp3EEDRLFwSDcldcknhhJemdKaKlr8Gx24=",
+        "owner": "yuanwang-wf",
         "repo": "emacs",
-        "rev": "3ee3593e71d7824d790d3e461c9761440aaf1b82",
+        "rev": "e63903d33af59803dce62242f0c18936e451f162",
         "type": "github"
       },
       "original": {
-        "owner": "montchr",
+        "owner": "yuanwang-wf",
+        "ref": "trunk",
         "repo": "emacs",
-        "rev": "3ee3593e71d7824d790d3e461c9761440aaf1b82",
         "type": "github"
       }
     },
@@ -430,7 +430,6 @@
         "nur": "nur",
         "resource-id": "resource-id",
         "sops-nix": "sops-nix",
-        "spacebar": "spacebar",
         "ws-access-token": "ws-access-token"
       }
     },
@@ -449,27 +448,6 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
-        "type": "github"
-      }
-    },
-    "spacebar": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1619365544,
-        "narHash": "sha256-f72eQ5KrsBPKlCCENDeTA+Lkqik/ps2xotS2CrEpMpM=",
-        "owner": "cmacrae",
-        "repo": "spacebar",
-        "rev": "96e210e579c1f7a0ce80074e0f22b73e7a7cef00",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cmacrae",
-        "ref": "v1.3.0",
-        "repo": "spacebar",
         "type": "github"
       }
     },

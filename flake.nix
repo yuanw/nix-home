@@ -15,11 +15,7 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    mac-emacs.url = "github:montchr/emacs?rev=3ee3593e71d7824d790d3e461c9761440aaf1b82";
-    spacebar = {
-      url = "github:cmacrae/spacebar/v1.3.0";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    mac-emacs.url = "github:yuanwang-wf/emacs/trunk";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
     sops-nix.url = "github:Mic92/sops-nix";
@@ -34,7 +30,7 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, spacebar
+  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs
     , mac-emacs, resource-id, ws-access-token, devshell, flake-utils, nix-script
     , sops-nix, agda, ... }:
     let
