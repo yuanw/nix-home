@@ -48,7 +48,7 @@ in {
         ${moveConfig}
       '';
     };
-    services.spacebar.enable = true;
+    services.spacebar.enable = false;
     services.spacebar.package = pkgs.spacebar;
     # https://github.com/cmacrae/spacebar/blob/master/doc/spacebar.asciidoc
     services.spacebar.config = {

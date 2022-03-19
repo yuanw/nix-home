@@ -31,9 +31,10 @@
         "insomnia"
         "karabiner-elements"
         "stretchly"
-        "kubectl"
       ];
-      brews = [ "aws-iam-authenticator" "pyenv" ];
+      brews = [ "aws-iam-authenticator" "pyenv"
+        "kubectl"
+              ];
     };
     browsers.firefox = {
       enable = true;
