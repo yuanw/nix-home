@@ -121,12 +121,11 @@ in {
         mouse_action1 = "move";
         mouse_action2 = "resize";
         layout = "bsp";
-        top_padding = 36;
+        top_padding = 10;
         bottom_padding = 10;
         left_padding = 10;
         right_padding = 10;
         window_gap = 10;
-        # external_bar = "main:26:0";
       };
 
       extraConfig = ''

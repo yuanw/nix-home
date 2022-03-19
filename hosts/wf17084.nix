@@ -33,7 +33,6 @@
         "stretchly"
       ];
       brews = [ "aws-iam-authenticator" "pyenv"
-        "kubectl"
               ];
     };
     browsers.firefox = {
