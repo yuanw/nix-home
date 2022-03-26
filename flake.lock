@@ -114,11 +114,11 @@
     "emacs-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1643777815,
-        "narHash": "sha256-UvjHZJG9mKlgPOQWExqCuRcWF2zC7ZJmvntVGi2PIBM=",
+        "lastModified": 1648249479,
+        "narHash": "sha256-+etGMkopurkhN/F9fAh0zjd8eVCkJzUUuJzYIOUh66E=",
         "owner": "emacs-mirror",
         "repo": "emacs",
-        "rev": "d4c2f5b524a262934cbfac5b7a4e9affb2628a00",
+        "rev": "3b6e74f08edaa4bfe028cf91366f3a6798cb6abf",
         "type": "github"
       },
       "original": {
@@ -249,16 +249,15 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1647707892,
-        "narHash": "sha256-/cnGHKRA2Rp3EEDRLFwSDcldcknhhJemdKaKlr8Gx24=",
+        "lastModified": 1648260541,
+        "narHash": "sha256-KFzgXH87dabR35jgOfJAXGN7oRjAxm0gL6BWYmkkA64=",
         "owner": "yuanwang-wf",
         "repo": "emacs",
-        "rev": "e63903d33af59803dce62242f0c18936e451f162",
+        "rev": "e02456e2c6b7f2a5ffb888b2c67450bc39de9858",
         "type": "github"
       },
       "original": {
         "owner": "yuanwang-wf",
-        "ref": "trunk",
         "repo": "emacs",
         "type": "github"
       }
@@ -303,11 +302,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1643472818,
-        "narHash": "sha256-qzVPxKDUubYIxKRSuDl/JgzXWSmGvUVYny9SxFMfPJM=",
+        "lastModified": 1648097358,
+        "narHash": "sha256-GMoTKP/po2Nbkh1tvPvP8Ww6NyFW8FFst1Z3nfzffZc=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "7f65e4abd5ecaad12d2d26e4380d1a7d8edafea7",
+        "rev": "4d60081494259c0785f7e228518fee74e0792c1b",
         "type": "github"
       },
       "original": {

@@ -15,7 +15,7 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    mac-emacs.url = "github:yuanwang-wf/emacs/trunk";
+    mac-emacs.url = "github:yuanwang-wf/emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
     sops-nix.url = "github:Mic92/sops-nix";
