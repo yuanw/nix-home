@@ -122,7 +122,8 @@
       };
       userEmail = config.my.email;
 
-      delta = { enable = true; };
+      difftastic = {enable = true;};
+      delta = { enable = false; };
 
       signing = {
         key = config.my.gpgKey;
