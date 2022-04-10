@@ -44,7 +44,8 @@ final: prev:
   yabai = prev.yabai.overrideAttrs (o: rec {
     version = "4.0.0-pre";
     src = prev.fetchzip {
-      url = "https://github.com/koekeishiya/yabai/files/7915231/yabai-v4.0.0.tar.gz";
+      url =
+        "https://github.com/koekeishiya/yabai/files/7915231/yabai-v4.0.0.tar.gz";
       hash = "sha256-qJE2zG7YIwYMJ9gWsguWIuFMPbvkD4lspRZKFiFkCYo=";
     };
     installPhase = ''

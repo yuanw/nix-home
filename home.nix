@@ -12,7 +12,6 @@
 
   xdg.enable = true;
 
-
   programs = {
     bat = {
       enable = true;

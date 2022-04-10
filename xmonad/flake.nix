@@ -6,27 +6,29 @@
     taffybar.url = "github:taffybar/taffybar";
   };
   outputs = { self, flake-utils, nixpkgs, xmonad, xmonad-contrib, taffybar }:
-      let
+    let
       supportedSystems = [ "x86_64-linux" ];
-      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
-      nixpkgsFor = forAllSystems (system: import nixpkgs {
-        inherit system;
-        overlays = [ self.overlay ];
+      forAllSystems = f:
+        nixpkgs.lib.genAttrs supportedSystems (system: f system);
+      nixpkgsFor = forAllSystems (system:
+        import nixpkgs {
+          inherit system;
+          overlays = [ self.overlay ];
+        });
+    in rec {
+      overlay = (final: prev: {
+        my-xmobar = final.haskellPackages.callCabal2nix "my-xmobar" ./. { };
       });
-    in
-   rec {
-   overlay = (final: prev: {
-        my-xmobar = final.haskellPackages.callCabal2nix "my-xmobar" ./. {};
-      });
-      packages = forAllSystems (system: {
-         my-xmobar = nixpkgsFor.${system}.my-xmobar;
-      });
-      defaultPackage = forAllSystems (system: self.packages.${system}.my-xmobar);
+      packages =
+        forAllSystems (system: { my-xmobar = nixpkgsFor.${system}.my-xmobar; });
+      defaultPackage =
+        forAllSystems (system: self.packages.${system}.my-xmobar);
       apps.my-xmobar = flake-utils.lib.mkApp { drv = packages.my-xmobar; };
       checks = self.packages;
-      devShell = forAllSystems (system: let haskellPackages = nixpkgsFor.${system}.haskellPackages;
+      devShell = forAllSystems (system:
+        let haskellPackages = nixpkgsFor.${system}.haskellPackages;
         in haskellPackages.shellFor {
-          packages = p: [self.packages.${system}.my-xmobar];
+          packages = p: [ self.packages.${system}.my-xmobar ];
           withHoogle = true;
           buildInputs = with haskellPackages; [
             haskell-language-server
@@ -34,8 +36,8 @@
             hpack
             cabal-install
           ];
-        # Change the prompt to show that you are in a devShell
-        shellHook = "export PS1='\\e[1;34mdev > \\e[0m'";
+          # Change the prompt to show that you are in a devShell
+          shellHook = "export PS1='\\e[1;34mdev > \\e[0m'";
         });
     };
 }

@@ -32,16 +32,13 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "aws-iam-authenticator" "pyenv"
-              ];
+      brews = [ "aws-iam-authenticator" "pyenv" ];
     };
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
-    dev = {
-      julia.enable = true;
-    };
+    dev = { julia.enable = true; };
     terminal = {
       enable = true;
       mainWorkspaceDir = "$HOME/workiva";
