@@ -122,7 +122,7 @@
       };
       userEmail = config.my.email;
 
-      difftastic = {enable = true;};
+      difftastic = { enable = true; };
       delta = { enable = false; };
 
       signing = {
