@@ -249,15 +249,15 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1649988196,
-        "narHash": "sha256-DO5BWIrh7Wqct+E66cHAx9ZZpZoQzZoJ298o7XtI22Y=",
-        "owner": "yuanwang-wf",
+        "lastModified": 1650333769,
+        "narHash": "sha256-1LsxRhDZ1syZJILQLngWV52r+BEJnoYHigLbavRVzeQ=",
+        "owner": "cmacrae",
         "repo": "emacs",
-        "rev": "1bb872ca21db7385f5ae8c02f946e3adbcf149b4",
+        "rev": "19dede11218e0166d4162fcd4fb8f49b928c3ea8",
         "type": "github"
       },
       "original": {
-        "owner": "yuanwang-wf",
+        "owner": "cmacrae",
         "repo": "emacs",
         "type": "github"
       }
