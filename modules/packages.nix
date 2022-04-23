@@ -48,7 +48,7 @@ with pkgs; [
   # productivity
   pandoc
 
-  difftastic
+  # difftastic
   autojump
   # gap
   #shellcheck
