@@ -26,6 +26,7 @@
       casks = [
         "brave-browser"
         "docker"
+        # "fig"
         "firefox"
         "hammerspoon"
         "insomnia"
