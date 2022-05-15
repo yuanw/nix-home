@@ -26,7 +26,7 @@ final: prev:
       meta = with lib; {
         inherit description;
         inherit homepage;
-        inherit maintainers;
+        maintainers = [];
         platforms = platforms.darwin;
       };
     };
