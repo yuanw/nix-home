@@ -10,7 +10,7 @@ I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take 
 |----------+------------------|
 | WM       | yabai    |
 | Terminal | Alacritty + tmux |
-| Edtior   | Doom Emacs       |
+| Editor   | Doom Emacs       |
 
 * Current Nixos setup
 
