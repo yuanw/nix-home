@@ -42,12 +42,10 @@ final: prev:
 
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
   yabai = prev.yabai.overrideAttrs (o: rec {
-    version = "4.0.0-pre";
+    version = "4.0.0";
     src = prev.fetchzip {
-      url =
-        "https://github.com/koekeishiya/yabai/files/7915231/yabai-v4.0.0.tar.gz";
-      hash = "sha256-qJE2zG7YIwYMJ9gWsguWIuFMPbvkD4lspRZKFiFkCYo=";
-    };
+      url = "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
+    hash = "sha256-CBoRyxrleCKzgwZQamhwh3zkotxZCHrL3tslfktxluc=";    };
     installPhase = ''
       mkdir -p $out/bin
       mkdir -p $out/share/man/man1/
