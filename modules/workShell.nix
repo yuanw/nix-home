@@ -18,7 +18,7 @@ in {
         # pkgs.visidata
         pkgs.terraform
         pkgs.terraform-ls
-        pkgs.podman
+        # pkgs.podman
       ];
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
