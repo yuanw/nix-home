@@ -19,7 +19,7 @@ in self: super: {
       meta = with stdenv.lib; {
         inherit description;
         inherit homepage;
-         maintainers = [];
+        maintainers = [ ];
         platforms = platforms.darwin;
       };
     };

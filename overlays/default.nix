@@ -26,7 +26,7 @@ final: prev:
       meta = with lib; {
         inherit description;
         inherit homepage;
-        maintainers = [];
+        maintainers = [ ];
         platforms = platforms.darwin;
       };
     };
@@ -44,8 +44,10 @@ final: prev:
   yabai = prev.yabai.overrideAttrs (o: rec {
     version = "4.0.0";
     src = prev.fetchzip {
-      url = "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
-    hash = "sha256-CBoRyxrleCKzgwZQamhwh3zkotxZCHrL3tslfktxluc=";    };
+      url =
+        "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
+      hash = "sha256-CBoRyxrleCKzgwZQamhwh3zkotxZCHrL3tslfktxluc=";
+    };
     installPhase = ''
       mkdir -p $out/bin
       mkdir -p $out/share/man/man1/
