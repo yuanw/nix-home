@@ -26,10 +26,10 @@
       casks = [
         "brave-browser"
         "docker"
-        # "fig"
         "firefox"
         "hammerspoon"
         "insomnia"
+        "racket"
         "karabiner-elements"
         "stretchly"
       ];

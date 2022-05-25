@@ -31,7 +31,6 @@ with pkgs; [
   gitAndTools.pass-git-helper
   gitAndTools.gh
   git-crypt
-  racket
 
   hledger
   ranger
