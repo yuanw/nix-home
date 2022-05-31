@@ -27,6 +27,7 @@
         "brave-browser"
         "docker"
         "firefox"
+        "google-chrome"
         "hammerspoon"
         "insomnia"
         "racket"
