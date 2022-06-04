@@ -12,6 +12,7 @@ in {
           pip
           #ipython
           black
+          pandas
           isort
           setuptools
           pylint
