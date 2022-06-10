@@ -45,6 +45,12 @@ in {
               tag = [ "nix" ];
             }
 
+            {
+              description = "restart emacs user agent service in macos";
+              command = "sudo launchtl kickstart -k gui/$UID/org.nixos.emacs";
+              tag = ["emacs" "macos"];
+            }
+
           ];
         };
         starship = {
