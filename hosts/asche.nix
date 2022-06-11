@@ -84,7 +84,7 @@
       enable = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-        ((emacsPackagesNgGen emacsPgtkGcc).emacsWithPackages
+        ((emacsPackagesFor emacsPgtkNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
   };

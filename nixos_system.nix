@@ -47,7 +47,6 @@ with lib; {
   sound.enable = true;
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  hardware.pulseaudio.extraModules = [ pkgs.pulseaudio-modules-bt ];
 
   services.picom.enable = true;
   services.xserver.windowManager.xmonad = {
