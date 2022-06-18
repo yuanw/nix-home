@@ -28,7 +28,10 @@ in {
   };
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ tat td tkill temacs pkgs.jo ];
+      home = {
+        file."moonlander.pdf".source=../../pictures/moonlander.pdf;
+        packages = [ tat td tkill temacs pkgs.jo ];
+      };
       programs = {
         pet = {
           enable = true;
