@@ -53,7 +53,7 @@ nix flake update --recreate-lock-file
 
 
 * Nixos
-~$ sudo nixos-rebuild switch --flake '.#'~
+~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
 
 #+begin_src
   defcmd :gc do
