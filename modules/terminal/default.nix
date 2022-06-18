@@ -29,7 +29,7 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home = {
-        file."moonlander.pdf".source=../../pictures/moonlander.pdf;
+        file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
         packages = [ tat td tkill temacs pkgs.jo ];
       };
       programs = {
