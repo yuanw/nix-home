@@ -70,7 +70,13 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type nil)
-
+(use-package! super-save
+  :config
+  (add-to-list 'super-save-triggers 'vertico)
+  (add-to-list 'super-save-triggers 'magit)
+  (add-to-list 'super-save-triggers 'find-file)
+  (add-to-list 'super-save-triggers 'winner-undo)
+  (super-save-mode +1))
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
