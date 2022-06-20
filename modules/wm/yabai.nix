@@ -28,7 +28,7 @@ let
     shift + ctrl + alt - h: open /etc/skhdrc
 
     # display moonlander configuration
-    shift + ctrl + alt - m: open $HOME/moonlander.pdf
+    shift + ctrl + alt - m: open ~/$HOME/moonlander.pdf
 
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
