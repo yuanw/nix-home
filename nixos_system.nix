@@ -100,30 +100,26 @@ with lib; {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment = {
-    systemPackages = with pkgs; [ wget vim git firefox
-                                  gnome.gnome-tweaks
-                                ];
+    systemPackages = with pkgs; [ wget vim git firefox gnome.gnome-tweaks ];
 
-
-  shells = [ pkgs.zsh ];
-  gnome.excludePackages = (with pkgs; [
-  gnome-photos
-  gnome-tour
-]) ++ (with pkgs.gnome; [
-  cheese # webcam tool
-  gnome-music
-  # gnome-terminal
-  gedit # text editor
-  epiphany # web browser
-  geary # email reader
-  # evince # document viewer
-  gnome-characters
-  totem # video player
-  tali # poker game
-  iagno # go game
-  hitori # sudoku game
-  atomix # puzzle game
-]);  };
+    shells = [ pkgs.zsh ];
+    gnome.excludePackages = (with pkgs; [ gnome-photos gnome-tour ])
+      ++ (with pkgs.gnome; [
+        cheese # webcam tool
+        gnome-music
+        # gnome-terminal
+        gedit # text editor
+        epiphany # web browser
+        geary # email reader
+        # evince # document viewer
+        gnome-characters
+        totem # video player
+        tali # poker game
+        iagno # go game
+        hitori # sudoku game
+        atomix # puzzle game
+      ]);
+  };
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
