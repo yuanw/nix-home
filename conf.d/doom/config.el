@@ -78,6 +78,15 @@
   (add-to-list 'super-save-triggers 'winner-undo)
   (super-save-mode +1))
 
+(use-package! org-wild-notifier
+  :config
+  (after! org
+  (org-wild-notifier-mode)
+  (setq
+   org-wild-notifier-alert-time '(60 30)
+   alert-default-style 'notifcations))
+ )
+
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
