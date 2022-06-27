@@ -1,4 +1,4 @@
 { pkgs, ... }:
 
 with pkgs;
-[ pinentry_mac ]
+[ pinentry_mac   terminal_notifier]
