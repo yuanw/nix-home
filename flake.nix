@@ -23,16 +23,11 @@
       url = "github:BrianHicks/nix-script";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    agda = {
-      url = "github:agda/agda?rev=4dee747be7aa6cf3947213862e1da9b710b2e40b";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
-    , resource-id, ws-access-token, devshell, flake-utils, nix-script, sops-nix
-    , agda, ... }:
+    , resource-id, ws-access-token, devshell, flake-utils, nix-script, sops-nix,
+      ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
