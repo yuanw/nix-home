@@ -26,8 +26,8 @@
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
-    , resource-id, ws-access-token, devshell, flake-utils, nix-script, sops-nix,
-      ... }:
+    , resource-id, ws-access-token, devshell, flake-utils, nix-script, sops-nix
+    , ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
