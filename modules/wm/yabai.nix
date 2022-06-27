@@ -35,10 +35,7 @@ let
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
   '';
 
-  #https://stackoverflow.com/a/64930847
-  cpuStat = pkgs.writeShellScriptBin "cpuStat"
-    "top -l  2 | grep -E \"^CPU\" | tail -1 | awk '{ print $3 + $5\"%\" }'";
-in {
+ in {
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
@@ -56,46 +53,6 @@ in {
         # movement configurations
         ${moveConfig}
       '';
-    };
-    services.spacebar.enable = false;
-    services.spacebar.package = pkgs.spacebar;
-    # https://github.com/cmacrae/spacebar/blob/master/doc/spacebar.asciidoc
-    services.spacebar.config = {
-      debug_output = "on";
-      clock_format = "%R";
-      display = "all";
-      position = "top";
-      title = "on";
-      # bagua eight trigrams - top bar is least significant binary digit
-      # space_icon_strip = "☷ ☶ ☵ ☴ ☳ ☲ ☱ ☰";
-      space_icon_strip = "向 死 而 生 逆 水 行 舟";
-      #text_font = ''"Roboto Mono:Regular:12.0"'';
-      #icon_font = ''"Font Awesome 5 Free:Solid:12.0"'';
-      background_color = "0xff222222";
-      foreground_color = "0xffd8dee9";
-      space_icon_color = "0xffffab91";
-      dnd_icon_color = "0xffd8dee9";
-      clock_icon_color = "0xffd8dee9";
-      power_icon_color = "0xffd8dee9";
-      battery_icon_color = "0xffd8dee9";
-      power_icon_strip = " ";
-      space_icon = "•";
-      spaces_for_all_displays = "on";
-      display_separator = "on";
-      display_separator_icon = "";
-      space_icon_color_secondary = "0xff78c4d4";
-      space_icon_color_tertiary = "0xfffff9b0";
-      clock_icon = "";
-      dnd_icon = "";
-      # f2db chip
-      right_shell_icon = "";
-      right_shell = "on";
-      right_shell_icon_color = "0xffd8dee9";
-      right_shell_command = "${cpuStat}/bin/cpuStat";
-    };
-    launchd.user.agents.spacebar.serviceConfig = {
-      StandardErrorPath = "/tmp/spacebar.err.log";
-      StandardOutPath = "/tmp/spacebar.out.log";
     };
     launchd.user.agents.skhd.serviceConfig = {
       StandardOutPath = "/tmp/skhd.out.log";
