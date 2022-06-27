@@ -101,12 +101,12 @@
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
             myHaskellEnv
-            pkgs.haskellPackages.hnix
+            # pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
-            pkgs.nix-script
-            pkgs.nix-script-haskell
-            pkgs.nix-script-bash
+            # pkgs.nix-script
+            # pkgs.nix-script-haskell
+            # pkgs.nix-script-bash
           ];
         };
       });
