@@ -24,13 +24,12 @@
     brew = {
       enable = true;
       casks = [
-        "brave-browser"
+        "chromium"
         "docker"
         "firefox"
         "google-chrome"
         "hammerspoon"
         "insomnia"
-        "racket"
         "karabiner-elements"
         "stretchly"
       ];
