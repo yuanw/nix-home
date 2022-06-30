@@ -14,7 +14,10 @@
       enable = true;
       goPath = "go";
     };
-    git = { extraConfig = { github.user = "yuanwang-wf"; }; };
+    git = { extraConfig = {
+      github.user = "yuanwang-wf";
+      url."git@github.com:".insteadOf = "https://github.com";
+    }; };
   };
   services.emacs = {
     enable = true;
