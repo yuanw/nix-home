@@ -9,7 +9,7 @@ in {
     home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.kubernetes-helm
-        # pkgs.aws-iam-authenticator
+        pkgs.aws-iam-authenticator
         pkgs.clang-tools
         pkgs.antlr4
         pkgs.resource-id
@@ -23,7 +23,6 @@ in {
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
         initExtra = mkAfter ''
-          export PATH=$PATH:$HOME/go/bin
           # eval "$(pyenv init -)"
           # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 
@@ -31,6 +30,7 @@ in {
              python manage.py test $1 --http-integration --traceback -v 2
           }
 
+          [[ -s "${homeDir}/.ghcup/env" ]] && source "${homeDir}/.ghcup/env"
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
         '';
       };

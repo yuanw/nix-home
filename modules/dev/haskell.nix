@@ -10,7 +10,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [  pkgs.stack ];
+      home.packages = [   ];
       home.file = {
         ".ghci".text = ''
           :set prompt "λ> "
