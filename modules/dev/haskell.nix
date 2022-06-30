@@ -3,14 +3,14 @@
 with lib;
 let
   cfg = config.programs.haskell;
-  haskell-env = pkgs.haskellPackages.ghcWithHoogle
+  haskell-env = pkgs.haskellPackages
     (hp: with hp; [ apply-refact hlint lens turtle haskell-language-server ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ haskell-env ];
+      home.packages = [  pkgs.stack ];
       home.file = {
         ".ghci".text = ''
           :set prompt "λ> "
