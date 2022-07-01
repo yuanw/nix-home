@@ -14,10 +14,12 @@
       enable = true;
       goPath = "go";
     };
-    git = { extraConfig = {
-      github.user = "yuanwang-wf";
-      url."git@github.com:".insteadOf = "https://github.com";
-    }; };
+    git = {
+      extraConfig = {
+        github.user = "yuanwang-wf";
+        url."git@github.com:".insteadOf = "https://github.com";
+      };
+    };
   };
   services.emacs = {
     enable = true;
@@ -38,7 +40,8 @@
       ];
       brews = [
         # "aws-iam-authenticator"
-                "pyenv" ];
+        "pyenv"
+      ];
     };
     browsers.firefox = {
       enable = true;

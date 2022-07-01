@@ -35,15 +35,15 @@ let
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
   '';
 
- in {
+in {
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
 
     home-manager.users.${config.my.username} = {
-      programs = {zsh = {sessionVariables= {
-        ALERTER_HOME = "${pkgs.alerter}";
-      };};} ;
+      programs = {
+        zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
+      };
     };
     services.skhd = {
       enable = true;

@@ -30,7 +30,15 @@ in {
     home-manager.users.${config.my.username} = {
       home = {
         file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
-        packages = [ tat td tkill temacs pkgs.jo ];
+        packages = [
+          tat
+          td
+          tkill
+          temacs
+          pkgs.jo
+
+          pkgs.haskellPackages.gotta-go-fast
+        ];
       };
       programs = {
         pet = {

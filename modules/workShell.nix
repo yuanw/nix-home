@@ -18,7 +18,6 @@ in {
         # pkgs.visidata
         pkgs.terraform
         pkgs.terraform-ls
-        pkgs.haskellPackages.gotta-go-fast
         # pkgs.podman
       ];
       programs.zsh = {
