@@ -10,7 +10,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [   ];
+      home.packages = [  pkgs.cabal2nix ];
       home.file = {
         ".ghci".text = ''
           :set prompt "λ> "
