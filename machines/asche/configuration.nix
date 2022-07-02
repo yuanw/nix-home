@@ -23,8 +23,6 @@
   networking.hostName = "asche"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-  # Set your time zone.
-  # time.timeZone = "Europe/Amsterdam";
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -47,7 +45,11 @@
   services.xserver.enable = true;
 
   # Enable the GNOME Desktop Environment.
-  services.xserver.displayManager.gdm.enable = true;
+
+  services.xserver.displayManager.gdm = {enable = true;
+
+                                         wayland = false;
+                                        };
   services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11

@@ -3,8 +3,6 @@
 with lib;
 let
   cfg = config.programs.haskell;
-  haskell-env = pkgs.haskellPackages
-    (hp: with hp; [ apply-refact hlint lens turtle haskell-language-server ]);
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
