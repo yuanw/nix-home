@@ -23,7 +23,6 @@
   networking.hostName = "asche"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
-
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
@@ -46,10 +45,11 @@
 
   # Enable the GNOME Desktop Environment.
 
-  services.xserver.displayManager.gdm = {enable = true;
+  services.xserver.displayManager.gdm = {
+    enable = true;
 
-                                         wayland = false;
-                                        };
+    wayland = false;
+  };
   services.xserver.desktopManager.gnome.enable = true;
 
   # Configure keymap in X11

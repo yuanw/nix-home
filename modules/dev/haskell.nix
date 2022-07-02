@@ -1,8 +1,7 @@
 { config, lib, pkgs, isDarwin ? true, ... }:
 
 with lib;
-let
-  cfg = config.programs.haskell;
+let cfg = config.programs.haskell;
 in {
   options.programs.haskell = { enable = mkEnableOption "haskell"; };
 
