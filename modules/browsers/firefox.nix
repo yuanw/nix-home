@@ -26,11 +26,10 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
-           userChrome =
-               ''*{font-size: 36px !important;
-                  }
-''
-           ;
+          userChrome = ''
+            *{font-size: 36px !important;
+                              }
+          '';
           settings = {
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";
