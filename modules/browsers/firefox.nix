@@ -26,11 +26,11 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
-          # userChrome = (builtins.readFile (pkgs.substituteAll {
-          #   name = "homeUserChrome";
-          #   src = ./userChrome.css;
-          #   tabLineColour = "#5e81ac";
-          # }));
+           userChrome =
+               ''*{font-size: 36px !important;
+                  }
+''
+           ;
           settings = {
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";

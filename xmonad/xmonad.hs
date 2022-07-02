@@ -11,7 +11,7 @@ import qualified Data.Map        as M
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal      = "alacritty"
+myTerminal   = "alacritty"
 appLauncher  = "rofi -modi drun,ssh,window -show drun -show-icons"
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
@@ -290,7 +290,7 @@ main = xmonad defaults
 --
 -- No need to modify this.
 --
-defaults = defaultConfig {
+defaults = def {
       -- simple stuff
         terminal           = myTerminal,
         focusFollowsMouse  = myFocusFollowsMouse,
