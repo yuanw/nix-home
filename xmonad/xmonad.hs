@@ -81,7 +81,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
 
     -- close focused window
-    , ((modm .|. shiftMask, xK_c     ), kill)
+    , ((modm , xK_q     ), kill)
 
      -- Rotate through the available layout algorithms
     , ((modm,               xK_space ), sendMessage NextLayout)
@@ -137,8 +137,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Quit xmonad
     , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
 
-    -- Restart xmonad
-    , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+    -- Restart xmonad, comment out for now, this mac close window
+    -- , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
     ]
     ++
 
@@ -228,10 +228,12 @@ myLayout = tiled ||| Mirror tiled ||| Full
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "MPlayer"        --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , resource  =? "desktop_window" --> doIgnore
-    , resource  =? "kdesktop"       --> doIgnore ]
+    [
+    --   className =? "MPlayer"        --> doFloat
+    -- , className =? "Gimp"           --> doFloat
+    -- , resource  =? "desktop_window" --> doIgnore
+    -- , resource  =? "kdesktop"       --> doIgnore
+    ]
 
 ------------------------------------------------------------------------
 -- Event handling

@@ -27,10 +27,12 @@ in {
         home = {
           id = 0;
           userChrome = ''
-            *{font-size: 36px !important;
+            *{font-size: 18px !important;
                               }
           '';
           settings = {
+            # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
+            "layout.css.devPixelsPerPx" = "2.0";
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";
             "app.update.auto" = false;
