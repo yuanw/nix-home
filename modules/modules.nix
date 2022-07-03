@@ -19,6 +19,7 @@ let
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
+    (loadModule ./wm/xmonad.nix { condition = isNixOS; })
     (loadModule ./brew.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { condition = isDarwin; })
   ];

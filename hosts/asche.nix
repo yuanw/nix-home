@@ -75,6 +75,7 @@
   modules = {
     dev = { agda.enable = true; };
     terminal.enable = true;
+    wm.xmonad.enable = true;
     browsers.firefox.enable = true;
   };
   programs = {

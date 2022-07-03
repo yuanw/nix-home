@@ -14,6 +14,8 @@ in {
       home.packages = [ xmonad-env ];
       services.caffeine.enable = true;
       services.xscreensaver.enable = true;
+      services.betterlockscreen.enable = true;
+
     };
   };
 

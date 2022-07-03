@@ -18,16 +18,10 @@
     mac-emacs.url = "github:cmacrae/emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
-    sops-nix.url = "github:Mic92/sops-nix";
-    nix-script = {
-      url = "github:BrianHicks/nix-script";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
-    , resource-id, ws-access-token, devshell, flake-utils, nix-script, sops-nix
-    , ... }:
+    , resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
@@ -51,7 +45,6 @@
           system = "x86_64-linux";
           modules = modules ++ [
             ./nixos_system.nix
-            sops-nix.nixosModules.sops
             home-manager.nixosModules.home-manager
             {
               nixpkgs.overlays = [
@@ -62,7 +55,10 @@
               ];
             }
             ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix { inherit lib; };
+              imports = import ./modules/modules.nix {
+                inherit lib;
+                isNixOS = true;
+              };
             })
           ];
         };
@@ -82,7 +78,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlay nix-script.overlay ];
+          overlays = [ devshell.overlay ];
         };
 
         myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
