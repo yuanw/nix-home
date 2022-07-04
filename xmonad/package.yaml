@@ -5,3 +5,7 @@ executables:
     main: xmobar.hs
     dependencies:
     - xmobar
+  my-xmonad:
+    main: xmonad.hs
+    dependencies:
+    - xmonad
