@@ -196,14 +196,15 @@ in {
                 mods = "Control|Shift";
                 action = "ScrollPageDown";
               }
+              { key = "Space";  mods= "Control";                 action= "ToggleViMode";            }
             ];
             window.padding = {
               x = 12;
               y = 0;
             };
             window.decorations = "none";
-            window.dynamic_padding = false;
-            # background_opacity = 0.8;
+            # window.dynamic_padding = false;
+            background_opacity = 0.8;
             # https://github.com/eendroroy/alacritty-theme/blob/master/themes/palenight.yml
             colors = {
               # Default colors
