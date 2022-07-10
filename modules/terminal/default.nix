@@ -37,7 +37,6 @@ in {
           temacs
           pkgs.jo
 
-          pkgs.haskellPackages.gotta-go-fast
         ];
       };
       programs = {

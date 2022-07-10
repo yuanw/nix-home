@@ -13,6 +13,12 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-script = {
+      url = "github:BrianHicks/nix-script";
+
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-utils.follows = "flake-utils";
+    };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:cmacrae/emacs";
@@ -21,7 +27,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
-    , resource-id, ws-access-token, devshell, flake-utils, ... }:
+    , resource-id, ws-access-token, devshell, flake-utils, nix-script, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
@@ -78,7 +84,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlay ];
+          overlays = [ devshell.overlay nix-script.overlay ];
         };
 
         myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
@@ -95,8 +101,8 @@
             # pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
-            # pkgs.nix-script
-            # pkgs.nix-script-haskell
+            pkgs.nix-script
+            pkgs.nix-script-haskell
             # pkgs.nix-script-bash
           ];
         };

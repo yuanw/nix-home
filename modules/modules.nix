@@ -18,6 +18,7 @@ let
     (loadModule ./hledger.nix { })
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
+    (loadModule ./colemak { })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./wm/xmonad.nix { condition = isNixOS; })
     (loadModule ./brew.nix { condition = isDarwin; })
