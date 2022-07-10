@@ -1,0 +1,8 @@
+#! /usr/bin/env nix-shell
+#! nix-shell <nixpkgs> -i runghc -p "ghc.withPackages (x: [ x.aeson ])"
+
+-- optional
+module Main where
+
+main = do
+  putStrLn "Hello world"
