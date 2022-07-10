@@ -1,8 +1,14 @@
 #! /usr/bin/env nix-shell
-#! nix-shell <nixpkgs> -i runghc -p "ghc.withPackages (x: [ x.aeson ])"
+#! nix-shell <nixpkgs> -i runghc -p "ghc.withPackages (x: [ x.text x.bytestring ])"
 
 -- optional
 module Main where
 
+import qualified Data.Text.IO as TIO
+import qualified Data.Text as T
+import qualified Data.ByteString as B
+import qualified Data.Text.Encoding as E
+
 main = do
-  putStrLn "Hello world"
+ a <- ( T.unlines . map (head . T.words) . T.lines . E.decodeUtf8 ) <$> (B.readFile   "./wordWeights.txt")
+ TIO.writeFile "./level1.txt"   ( T.filter  a )
