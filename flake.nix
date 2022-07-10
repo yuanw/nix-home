@@ -13,12 +13,6 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-script = {
-      url = "github:BrianHicks/nix-script";
-
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     mac-emacs.url = "github:cmacrae/emacs";
@@ -27,7 +21,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
-    , resource-id, ws-access-token, devshell, flake-utils, nix-script, ... }:
+    , resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       # idea borrowed from https://github.com/hardselius/dotfiles
@@ -84,11 +78,11 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlay nix-script.overlay ];
+          overlays = [ devshell.overlay ];
         };
 
-        myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
-          (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
+        # myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
+        #   (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
 
       in {
         devShell = pkgs.devshell.mkShell {
@@ -97,13 +91,10 @@
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
-            myHaskellEnv
+            pkgs.ormolu
             # pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
-            pkgs.nix-script
-            pkgs.nix-script-haskell
-            # pkgs.nix-script-bash
           ];
         };
       });
