@@ -88,6 +88,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch rofi
     , ((modm,               xK_space ),  spawn appLauncher)
+    , ((controlMask .|. shiftMask .|. mod1Mask ,               xK_l ),  spawn screenLocker)
 
 
     -- close focused window
