@@ -39,7 +39,6 @@
         "stretchly"
       ];
       brews = [
-        # "aws-iam-authenticator"
         "pyenv"
       ];
     };
@@ -47,6 +46,7 @@
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
+    colemak.enable = true;
     dev = { julia.enable = true; };
     terminal = {
       enable = true;
