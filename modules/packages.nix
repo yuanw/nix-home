@@ -16,7 +16,7 @@ with pkgs; [
   nixfmt
   sass
   tree
-  broot
+  # broot
   wget
   #unrar
   unzip
