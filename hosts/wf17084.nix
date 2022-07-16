@@ -38,9 +38,7 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [
-        "pyenv"
-      ];
+      brews = [ "pyenv" ];
     };
     browsers.firefox = {
       enable = true;
