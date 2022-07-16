@@ -4,19 +4,21 @@ import qualified Data.Map as M
 import Data.Monoid
 import System.Exit
 import XMonad
-import qualified XMonad.StackSet as W
 -- Utilities
+
+import XMonad.Hooks.DynamicLog
+import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.StatusBar
+import XMonad.Hooks.StatusBar.PP
+import qualified XMonad.StackSet as W
 import XMonad.Util.Dmenu
 import XMonad.Util.EZConfig (additionalKeysP, mkNamedKeymap)
+import XMonad.Util.Loggers
 import XMonad.Util.NamedActions
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (runProcessWithInput, safeSpawn, spawnPipe)
 import XMonad.Util.SpawnOnce
-import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.StatusBar
-import XMonad.Hooks.StatusBar.PP
-import XMonad.Hooks.EwmhDesktops
-import XMonad.Util.Loggers
+
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
@@ -293,43 +295,47 @@ myLogHook = return ()
 myStartupHook = return ()
 
 myXmobarPP :: PP
-myXmobarPP = def
-    { ppSep             = magenta " • "
-    , ppTitleSanitize   = xmobarStrip
-    , ppCurrent         = wrap " " "" . xmobarBorder "Top" "#8be9fd" 2
-    , ppHidden          = white . wrap " " ""
-    , ppHiddenNoWindows = lowWhite . wrap " " ""
-    , ppUrgent          = red . wrap (yellow "!") (yellow "!")
-    , ppOrder           = \[ws, l, _, wins] -> [ws, l, wins]
-    , ppExtras          = [logTitles formatFocused formatUnfocused]
+myXmobarPP =
+  def
+    { ppSep = magenta " • ",
+      ppTitleSanitize = xmobarStrip,
+      ppCurrent = wrap " " "" . xmobarBorder "Top" "#8be9fd" 2,
+      ppHidden = white . wrap " " "",
+      ppHiddenNoWindows = lowWhite . wrap " " "",
+      ppUrgent = red . wrap (yellow "!") (yellow "!"),
+      -- ppOrder = \[ws, l, _, wins] -> [ws, l, wins],
+      ppExtras = [logTitles formatFocused formatUnfocused]
     }
   where
-    formatFocused   = wrap (white    "[") (white    "]") . magenta . ppWindow
-    formatUnfocused = wrap (lowWhite "[") (lowWhite "]") . blue    . ppWindow
+    formatFocused = wrap (white "[") (white "]") . magenta . ppWindow
+    formatUnfocused = wrap (lowWhite "[") (lowWhite "]") . blue . ppWindow
 
-    -- | Windows should have *some* title, which should not not exceed a
+    -- Windows should have *some* title, which should not not exceed a
     -- sane length.
     ppWindow :: String -> String
     ppWindow = xmobarRaw . (\w -> if null w then "untitled" else w) . shorten 30
 
     blue, lowWhite, magenta, red, white, yellow :: String -> String
-    magenta  = xmobarColor "#ff79c6" ""
-    blue     = xmobarColor "#bd93f9" ""
-    white    = xmobarColor "#f8f8f2" ""
-    yellow   = xmobarColor "#f1fa8c" ""
-    red      = xmobarColor "#ff5555" ""
+    magenta = xmobarColor "#ff79c6" ""
+    blue = xmobarColor "#bd93f9" ""
+    white = xmobarColor "#f8f8f2" ""
+    yellow = xmobarColor "#f1fa8c" ""
+    red = xmobarColor "#ff5555" ""
     lowWhite = xmobarColor "#bbbbbb" ""
+
 ------------------------------------------------------------------------
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 main :: IO ()
-main = xmonad
-     . ewmhFullscreen
-     . ewmh
-     . withEasySB (statusBarProp "xmobar" (pure myXmobarPP)) defToggleStrutsKey
-     $ myConfig
+main =
+  xmonad
+    . ewmhFullscreen
+    . ewmh
+    . withEasySB (statusBarProp "xmobar" (pure myXmobarPP)) defToggleStrutsKey
+    $ myConfig
+
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
 -- use the defaults defined in xmonad/XMonad/Config.hs
