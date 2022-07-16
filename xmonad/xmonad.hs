@@ -134,7 +134,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess)),
       -- Restart xmonad, comment out for now, this mac close window
       -- , ((modm              , xK_q     ),)
-      ((controlMask .|. shiftMask .|. mod1Mask, xK_r),  spawn "xmonad --recompile; xmonad --restart")
+      ((controlMask .|. shiftMask .|. mod1Mask, xK_r), spawn "xmonad --recompile; xmonad --restart")
     ]
       ++
       --
