@@ -9,6 +9,7 @@ with lib;
 let
   cfg = config.modules.wm.yabai;
   emacsclient = "${pkgs.emacs}/bin/emacsclient -c";
+  daemonPath = "/Library/LaunchDaemons/org.nixos.yabai-sa.plist";
 
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
@@ -41,6 +42,26 @@ in {
   config = mkIf cfg.enable {
 
     home-manager.users.${config.my.username} = {
+# https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
+      home.packages = [ (
+
+        writeShellScriptBin "yabai-sa-kickstart" ''
+        #
+        # yabai-sa-kickstart
+        #
+        # Kickstart the scripting addition in case it fails to load.
+        #
+        set -x
+        # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
+        [[ $(sudo launchctl list | grep yabai-sa) ]] && {
+          sudo launchctl unload ${daemonPath}
+        }
+        sudo yabai --uninstall-sa
+        sudo yabai --install-sa
+        sudo launchctl load ${daemonPath}
+        set +x
+      ''
+      ) ];
       programs = {
         zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
       };
@@ -68,19 +89,17 @@ in {
       package = pkgs.yabai;
       enableScriptingAddition = true;
       config = {
-        window_border = "on";
+        window_border = "off";
         window_border_width = 2;
         active_window_border_color = "0xff81a1c1";
         normal_window_border_color = "0xff3b4252";
         focus_follows_mouse = "autoraise";
-        mouse_follows_focus = "on";
+        mouse_follows_focus = "off";
+
         mouse_drop_action = "stack";
         window_placement = "second_child";
         window_opacity = "off";
-        window_topmost = "on";
-        window_shadow = "float";
-        active_window_opacity = "1.0";
-        normal_window_opacity = "1.0";
+        window_topmost = "off";
         split_ratio = "0.50";
         auto_balance = "on";
         mouse_modifier = "fn";
