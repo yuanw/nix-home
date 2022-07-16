@@ -20,14 +20,6 @@
     services.blueman-applet.enable = true;
     services.network-manager-applet.enable = true;
     services.dunst.enable = true;
-    xsession = {
-      enable = true;
-      windowManager.xmonad = {
-        enable = true;
-        enableContribAndExtras = true;
-        config = ../xmonad/xmonad.hs;
-      };
-    };
     programs = {
       autorandr = {
         enable = true;
