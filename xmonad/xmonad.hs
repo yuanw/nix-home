@@ -92,7 +92,9 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       -- close focused window
       ((modm, xK_q), kill),
       -- Rotate through the available layout algorithms
-      ((modm, xK_Return), sendMessage NextLayout),
+
+      ((controlMask .|. shiftMask .|. mod1Mask, xK_Return), sendMessage NextLayout),
+      ((modm, xK_Return), spawn myTerminal),
       --  Reset the layouts on the current workspace to default
       ((modm .|. shiftMask, xK_space), setLayout $ XMonad.layoutHook conf),
       -- Resize viewed windows to the correct size
@@ -129,9 +131,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
 
       -- Quit xmonad
-      ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess))
+      ((modm .|. shiftMask, xK_q), io (exitWith ExitSuccess)),
       -- Restart xmonad, comment out for now, this mac close window
-      -- , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+      -- , ((modm              , xK_q     ),)
+      ((controlMask .|. shiftMask .|. mod1Mask, xK_r),  spawn "xmonad --recompile; xmonad --restart")
     ]
       ++
       --
