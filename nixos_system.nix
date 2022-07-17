@@ -43,12 +43,13 @@ with lib; {
   services.xserver.autorun = true;
   services.xserver.autoRepeatDelay = 200;
   services.xserver.autoRepeatInterval = 25;
-
+  services.jack.jackd.enable = true;
   sound.enable = true;
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
 
   services.picom.enable = true;
+  services.upower.enable = true;
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
