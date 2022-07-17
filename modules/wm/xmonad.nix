@@ -29,7 +29,7 @@ in {
 
     home-manager.users.${config.my.username} = {
       home.packages = [ xmonad-env ];
-      services.caffeine.enable = true;
+      # services.caffeine.enable = true;
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
