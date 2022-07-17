@@ -43,7 +43,7 @@ in {
           expand = true;
           width = 10;
           transparent = true;
-          height = 18;
+          height = 36;
           SetDockType = true;
           tint = "0x5f5f5f";
 
