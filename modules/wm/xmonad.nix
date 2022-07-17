@@ -39,13 +39,14 @@ in {
           edge = "top";
           align = "right";
           SetPartialStrut = true;
-
+monitor = "primary";
           expand = true;
           width = 10;
           transparent = true;
           height = 18;
           SetDockType = true;
           tint = "0x5f5f5f";
+
         };
       };
       xresources.properties = {
