@@ -7,12 +7,15 @@ I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take 
 
 * Current MacOS setup
 | Shell    | zsh + starship   |
-|----------+------------------|
-| WM       | yabai    |
+| WM       | yabai            |
 | Terminal | Alacritty + tmux |
 | Editor   | Doom Emacs       |
 
 * Current Nixos setup
+| Shell    | zsh + starship   |
+| WM       | xmonad + xmobar  |
+| Terminal | Alacritty + tmux |
+| Editor   | Doom Emacs       |
 
 * Inspirations
 - https://github.com/cmacrae/config (nix-darwin)
