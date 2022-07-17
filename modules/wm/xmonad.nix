@@ -15,6 +15,17 @@ in {
       services.caffeine.enable = true;
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
+ xresources.properties = {
+    "Xft.dpi" = 180;
+    "Xft.autohint" = 0;
+    "Xft.hintstyle" = "hintfull";
+    "Xft.hinting" = 1;
+    "Xft.antialias" = 1;
+    "Xft.rgba" = "rgb";
+    "Xcursor*theme" = "Vanilla-DMZ-AA";
+    "Xcursor*size" = 24;
+  };
+
       xsession = {
         enable = true;
         windowManager.xmonad = {
@@ -29,7 +40,7 @@ in {
         enable = true;
         extraConfig = ''
           Config { overrideRedirect = False
-                 , font     = "xft:iosevka-9"
+                 , font     = "xft:iosevka-10"
                  , bgColor  = "#5f5f5f"
                  , fgColor  = "#f8f8f2"
                  , position = TopW L 90
