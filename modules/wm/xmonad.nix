@@ -32,6 +32,22 @@ in {
       services.caffeine.enable = true;
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
+      services.pasystray.enable = true;
+      services.trayer = {
+        enable = true;
+        settings = {
+          edge = "top";
+          align = "right";
+          SetPartialStrut = true;
+
+          expand = true;
+          width = 10;
+          transparent = true;
+          height = 18;
+          SetDockType = true;
+          tint = "0x5f5f5f";
+        };
+      };
       xresources.properties = {
         "Xft.dpi" = 180;
         "Xft.autohint" = 0;
