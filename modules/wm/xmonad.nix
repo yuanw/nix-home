@@ -26,6 +26,13 @@ in {
         "Xcursor*size" = 24;
       };
 
+      gtk ={
+        enable = true;
+        theme = {
+          name = "dracula-theme";
+         package = pkgs.dracula-theme;
+        };
+      };
       xsession = {
         enable = true;
         windowManager.xmonad = {
