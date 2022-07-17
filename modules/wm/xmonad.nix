@@ -39,7 +39,7 @@ in {
           edge = "top";
           align = "right";
           SetPartialStrut = true;
-monitor = "primary";
+          monitor = "primary";
           expand = true;
           width = 10;
           transparent = true;
