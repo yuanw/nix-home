@@ -10,6 +10,23 @@ in {
 
   config = mkIf cfg.enable {
 
+    services.xserver.displayManager = {
+      defaultSession = "none+xmonad";
+      lightdm.greeters.mini = {
+        enable = false;
+        user = "${config.my.username}";
+        extraConfig = ''
+          [greeter-theme]
+          background-image = "";
+          background-color = "#0C0F12"
+          text-color = "#ff79c6"
+          password-background-color = "#1E2029"
+          window-color = "#181a23"
+          border-color = "#bd93f9"
+        '';
+      };
+    };
+
     home-manager.users.${config.my.username} = {
       home.packages = [ xmonad-env ];
       services.caffeine.enable = true;
