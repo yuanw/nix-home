@@ -29,10 +29,11 @@
     brew = {
       enable = true;
       casks = [
-        "chromium"
+        "brave-browser"
         "docker"
         "firefox"
         "google-chrome"
+        "qutebrowser"
         "hammerspoon"
         "insomnia"
         "karabiner-elements"
