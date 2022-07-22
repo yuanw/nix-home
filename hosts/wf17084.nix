@@ -46,7 +46,8 @@
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     colemak.enable = true;
-    dev = { julia.enable = true; };
+    dev = { agda.enable = true; };
+
     terminal = {
       enable = true;
       mainWorkspaceDir = "$HOME/workiva";
