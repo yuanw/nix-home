@@ -65,15 +65,15 @@
     };
   };
   modules = {
-    dev = { agda.enable = true; };
+    dev = { agda.enable = true;     haskell.enable = true;
+    python.enable = false;
+};
     terminal.enable = true;
     colemak.enable = true;
     wm.xmonad.enable = true;
     browsers.firefox.enable = true;
   };
   programs = {
-    haskell.enable = true;
-    python.enable = false;
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;

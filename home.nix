@@ -10,7 +10,12 @@
     ++ lib.optionals pkgs.stdenvNoCC.isLinux
     (import ./modules/linux_packages.nix { inherit pkgs; });
 
-  xdg.enable = true;
+  xdg = {
+    enable = true;
+    configFile = {
+".wallpapers/haskell-red-noise.png" = ./pictures/a.source;
+    };
+  };
 
   programs = {
     bat = {

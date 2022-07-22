@@ -1,9 +1,9 @@
 { config, lib, pkgs, isDarwin ? true, ... }:
 
 with lib;
-let cfg = config.programs.haskell;
+let cfg = config.modules.dev.haskell;
 in {
-  options.programs.haskell = { enable = mkEnableOption "haskell"; };
+  options.modules.dev.haskell = { enable = mkEnableOption "haskell"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {

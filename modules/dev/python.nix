@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.python;
+let cfg = config.modules.dev.python;
 in {
-  options.programs.python = { enable = mkEnableOption "python"; };
+  options.modules.dev.python = { enable = mkEnableOption "python"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username}.home.packages = [

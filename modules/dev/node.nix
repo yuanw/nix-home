@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.node;
+let cfg = config.modules.dev.node;
 in {
-  options.programs.node = { enable = mkEnableOption "node"; };
+  options.modules.dev.node = { enable = mkEnableOption "node"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {

@@ -1,9 +1,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.programs.dart;
+let cfg = config.modules.dev.dart;
 in {
-  options.programs.dart = {
+  options.modules.dev.dart = {
     enable = mkEnableOption "dart";
     package = mkOption {
       type = types.package;

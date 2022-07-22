@@ -46,7 +46,11 @@
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     colemak.enable = true;
-    dev = { agda.enable = true; };
+    dev = { agda.enable = true;    python.enable = true;
+    haskell.enable = true;
+    dart.enable = true;
+    node.enable = true;
+};
 
     terminal = {
       enable = true;
@@ -55,14 +59,10 @@
     wm.yabai.enable = true;
   };
   programs = {
-    node.enable = true;
     editors.emacs = {
       enable = true;
       pkg = pkgs.emacs;
     };
-    python.enable = true;
-    haskell.enable = true;
-    dart.enable = true;
-    workShell.enable = true;
+     workShell.enable = true;
   };
 }

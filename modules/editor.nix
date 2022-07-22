@@ -3,8 +3,8 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.programs.editors.emacs;
-  emacs-server = "server";
-  emacsclient = "${pkgs.emacs}/bin/emacsclient";
+  emacsclient = "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'";
+
 in with lib; {
   options.programs.editors.emacs = {
     enable = mkOption {
