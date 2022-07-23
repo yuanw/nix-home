@@ -13,8 +13,11 @@
   xdg = {
     enable = true;
     configFile = {
-      ".wallpapers/haskell-red-noise.png".source =
+      "wallpapers/haskell-red-noise.png".source =
         ./pictures/haskell-red-noise.png;
+        "nix-wallpaper-dracula.png".source =
+        ./pictures/nix-wallpaper-dracula.png
+
     };
   };
 
