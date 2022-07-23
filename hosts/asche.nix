@@ -65,9 +65,11 @@
     };
   };
   modules = {
-    dev = { agda.enable = true;     haskell.enable = true;
-    python.enable = false;
-};
+    dev = {
+      agda.enable = true;
+      haskell.enable = true;
+      python.enable = false;
+    };
     terminal.enable = true;
     colemak.enable = true;
     wm.xmonad.enable = true;
