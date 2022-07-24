@@ -17,7 +17,7 @@
         ./pictures/haskell-red-noise.png;
         "nix-wallpaper-dracula.png".source =
         ./pictures/nix-wallpaper-dracula.png
-
+;
     };
   };
 

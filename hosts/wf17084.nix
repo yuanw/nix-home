@@ -47,7 +47,7 @@
     };
     colemak.enable = true;
     dev = {
-      agda.enable = true;
+      agda.enable = false;
       python.enable = true;
       haskell.enable = true;
       dart.enable = true;
