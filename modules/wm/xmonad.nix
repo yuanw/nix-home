@@ -33,6 +33,7 @@ in {
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
+      services.udiskie.enable = true;
       services.trayer = {
         enable = true;
         settings = {

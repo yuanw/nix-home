@@ -15,9 +15,18 @@
     configFile = {
       "wallpapers/haskell-red-noise.png".source =
         ./pictures/haskell-red-noise.png;
+<<<<<<< HEAD
         "nix-wallpaper-dracula.png".source =
         ./pictures/nix-wallpaper-dracula.png
 ;
+||||||| parent of c3d6303 (format)
+        "nix-wallpaper-dracula.png".source =
+        ./pictures/nix-wallpaper-dracula.png;
+
+=======
+      "nix-wallpaper-dracula.png".source = ./pictures/nix-wallpaper-dracula.png;
+
+>>>>>>> c3d6303 (format)
     };
   };
 

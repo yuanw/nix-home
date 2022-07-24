@@ -51,3 +51,5 @@
 ;(package! builtin-package :recipe (:branch "develop"))
 (package! super-save)
 (package! org-wild-notifier)
+(package! agda2-mode
+     :pin "442c76badc353d1b621243c43293106f60f7d746")
