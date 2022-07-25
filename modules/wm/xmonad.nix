@@ -4,7 +4,9 @@ let
   cfg = config.modules.wm.xmonad;
   xmonad-env = pkgs.haskellPackages.ghcWithHoogle
     (hp: with hp; [ xmobar xmonad xmonad-contrib xmonad-extras ]);
-
+  extra = ''
+  ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.wallpapers/haskell-red-noise.png
+'';
 in {
   options.modules.wm.xmonad = { enable = mkEnableOption "xmonad"; };
 
@@ -70,6 +72,7 @@ in {
       };
       xsession = {
         enable = true;
+  initExtra = extra  ;
         windowManager.xmonad = {
           enable = true;
           enableContribAndExtras = true;
@@ -86,15 +89,8 @@ in {
                  , bgColor  = "#5f5f5f"
                  , fgColor  = "#f8f8f2"
                  , position = TopW L 90
-                 , commands = [ Run Weather "EGPF"
-                                  [ "--template", "<weather> <tempC>°C"
-                                  , "-L", "0"
-                                  , "-H", "25"
-                                  , "--low"   , "lightblue"
-                                  , "--normal", "#f8f8f2"
-                                  , "--high"  , "red"
-                                  ] 36000
-                              , Run Cpu
+                 , commands = [
+                               Run Cpu
                                   [ "-L", "3"
                                   , "-H", "50"
                                   , "--high"  , "red"
@@ -108,12 +104,13 @@ in {
                                   ]
                               , Run Memory ["--template", "Mem: <usedratio>%"] 10
                               , Run Swap [] 10
+                              , Run DiskU [("/", "<fn=1>\xf0c7</fn>  hdd: <free> free")] [] 60
                               , Run Date "%a %Y-%m-%d <fc=#8be9fd>%H:%M</fc>" "date" 10
                               , Run XMonadLog
                               ]
                  , sepChar  = "%"
                  , alignSep = "}{"
-                 , template = "%XMonadLog% }{ %alsa:default:Master% | %cpu% | %memory% * %swap% | %EGPF% | %date% "
+                 , template = "%XMonadLog% }{ %alsa:default:Master% | %cpu% | %memory% * %swap% *  %disku% | %*date% "
                  }
         '';
       };
