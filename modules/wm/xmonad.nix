@@ -5,8 +5,8 @@ let
   xmonad-env = pkgs.haskellPackages.ghcWithHoogle
     (hp: with hp; [ xmobar xmonad xmonad-contrib xmonad-extras ]);
   extra = ''
-  ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.wallpapers/haskell-red-noise.png
-'';
+    ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.wallpapers/haskell-red-noise.png
+  '';
 in {
   options.modules.wm.xmonad = { enable = mkEnableOption "xmonad"; };
 
@@ -72,7 +72,7 @@ in {
       };
       xsession = {
         enable = true;
-  initExtra = extra  ;
+        initExtra = extra;
         windowManager.xmonad = {
           enable = true;
           enableContribAndExtras = true;
