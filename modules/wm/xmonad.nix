@@ -5,7 +5,7 @@ let
   xmonad-env = pkgs.haskellPackages.ghcWithHoogle
     (hp: with hp; [ xmobar xmonad xmonad-contrib xmonad-extras ]);
   extra = ''
-    ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.wallpapers/haskell-red-noise.png
+    ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.config/wallpapers/haskell-red-noise.png
   '';
 in {
   options.modules.wm.xmonad = { enable = mkEnableOption "xmonad"; };
@@ -110,7 +110,7 @@ in {
                               ]
                  , sepChar  = "%"
                  , alignSep = "}{"
-                 , template = "%XMonadLog% }{ %alsa:default:Master% | %cpu% | %memory% * %swap% *  %disku% | %*date% "
+                 , template = "%XMonadLog% }{ %alsa:default:Master% | %cpu% | %memory% * %swap% *  %disku% | %date% "
                  }
         '';
       };
