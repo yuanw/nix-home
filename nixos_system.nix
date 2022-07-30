@@ -23,7 +23,6 @@ with lib; {
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
-  networking.networkmanager = { enable = true; };
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -36,8 +35,6 @@ with lib; {
   #   keyMap = "us";
   # };
 
-  # Enable the GNOME 3 Desktop Environment.
-  services.blueman.enable = true;
   services.xserver.enable = true;
   services.xserver.autorun = true;
   services.xserver.autoRepeatDelay = 200;
@@ -46,15 +43,6 @@ with lib; {
   sound.enable = true;
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  services.dbus = {
-    enable = true;
-    packages = [ pkgs.dconf ];
-  };
-  services.upower.enable = true;
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
-  };
   # # services.xserver.displayManager.gdm.enable = true;
   # services.xserver.desktopManager.gnome = { enable = true; };
   nix = {

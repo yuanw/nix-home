@@ -10,17 +10,13 @@
     homeDirectory = "/home/yuanw";
   };
   home-manager.users.${config.my.username} = {
-    xdg.enable = true;
     home.file = {
       ".config/pass-git-helper/git-pass-mapping.ini".text = ''
         [github.com*]
         target=github
       '';
     };
-    services.blueman-applet.enable = true;
-    services.network-manager-applet.enable = true;
-    services.dunst.enable = true;
-    programs = {
+      programs = {
       password-store = { enable = true; };
       rofi = {
         enable = true;
