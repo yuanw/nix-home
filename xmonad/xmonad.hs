@@ -334,7 +334,7 @@ main =
   xmonad
     . ewmhFullscreen
     . ewmh
-    . withEasySB (statusBarProp "xmobar -x 1" (pure myXmobarPP)) defToggleStrutsKey
+    . withEasySB (statusBarProp "xmobar" (pure myXmobarPP)) defToggleStrutsKey
     $ myConfig
 
 -- A structure containing your configuration settings, overriding
