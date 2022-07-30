@@ -49,7 +49,6 @@
           eDP-1 = {
             enable = true;
             crtc = 0;
-            primary = true;
             position = "0x0";
             mode = "3840x2400";
             rate = "59.99";
@@ -57,6 +56,7 @@
           DP-3 = {
             enable = true;
             crtc = 1;
+            primary = true;
             mode = "3840x2160";
             position = "3840x0";
             rate = "60.00";

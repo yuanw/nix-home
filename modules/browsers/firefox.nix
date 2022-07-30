@@ -26,10 +26,10 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
-          userChrome = ''
-            *{font-size: 18px !important;
-                              }
-          '';
+          # userChrome = ''
+          #   *{font-size: 18px !important;
+          #                     }
+          # '';
           settings = {
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
             "layout.css.devPixelsPerPx" = "2.0";
