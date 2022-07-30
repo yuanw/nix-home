@@ -12,18 +12,18 @@ in {
 
   config = mkIf cfg.enable {
 
-  networking.networkmanager = { enable = true; };
-  services.dbus = {
-    enable = true;
-    packages = [ pkgs.dconf ];
-  };
-  services.upower.enable = true;
-  services.xserver.windowManager.xmonad = {
-    enable = true;
-    enableContribAndExtras = true;
-  };
+    networking.networkmanager = { enable = true; };
+    services.dbus = {
+      enable = true;
+      packages = [ pkgs.dconf ];
+    };
+    services.upower.enable = true;
+    services.xserver.windowManager.xmonad = {
+      enable = true;
+      enableContribAndExtras = true;
+    };
 
-  services.blueman.enable = true;
+    services.blueman.enable = true;
     services.xserver.displayManager = {
       defaultSession = "none+xmonad";
       lightdm.greeters.mini = {
@@ -44,9 +44,9 @@ in {
     home-manager.users.${config.my.username} = {
       home.packages = [ xmonad-env ];
       # services.caffeine.enable = true;
-         services.blueman-applet.enable = true;
-    services.network-manager-applet.enable = true;
-    services.dunst.enable = true;
+      services.blueman-applet.enable = true;
+      services.network-manager-applet.enable = true;
+      services.dunst.enable = true;
 
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;

@@ -16,7 +16,7 @@
         target=github
       '';
     };
-      programs = {
+    programs = {
       password-store = { enable = true; };
       rofi = {
         enable = true;
