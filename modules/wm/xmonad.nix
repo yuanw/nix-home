@@ -36,6 +36,8 @@ in {
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
       services.udiskie.enable = true;
+      services.picom.enable = true;
+      services.gnome-keyring.enable = true;
       services.trayer = {
         enable = true;
         settings = {

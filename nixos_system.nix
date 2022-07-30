@@ -23,8 +23,7 @@ with lib; {
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
-  #networking.networkmanager = { enable = true; };
-  #networking.interfaces.wlp0s20f0u4u4.useDHCP = true;
+  networking.networkmanager = { enable = true; };
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -47,8 +46,10 @@ with lib; {
   sound.enable = true;
   hardware.pulseaudio.enable = true;
   hardware.pulseaudio.package = pkgs.pulseaudioFull;
-
-  services.picom.enable = true;
+  services.dbus = {
+    enable = true;
+    packages = [ pkgs.dconf ];
+  };
   services.upower.enable = true;
   services.xserver.windowManager.xmonad = {
     enable = true;
@@ -101,25 +102,25 @@ with lib; {
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment = {
-    systemPackages = with pkgs; [ wget vim git firefox gnome.gnome-tweaks ];
+    systemPackages = with pkgs; [ wget vim git firefox ];
 
     shells = [ pkgs.zsh ];
-    gnome.excludePackages = (with pkgs; [ gnome-photos gnome-tour ])
-      ++ (with pkgs.gnome; [
-        cheese # webcam tool
-        gnome-music
-        # gnome-terminal
-        gedit # text editor
-        epiphany # web browser
-        geary # email reader
-        # evince # document viewer
-        gnome-characters
-        totem # video player
-        tali # poker game
-        iagno # go game
-        hitori # sudoku game
-        atomix # puzzle game
-      ]);
+    # gnome.excludePackages = (with pkgs; [ gnome-photos gnome-tour ])
+    #   ++ (with pkgs.gnome; [
+    #     cheese # webcam tool
+    #     gnome-music
+    #     # gnome-terminal
+    #     gedit # text editor
+    #     epiphany # web browser
+    #     geary # email reader
+    #     # evince # document viewer
+    #     gnome-characters
+    #     totem # video player
+    #     tali # poker game
+    #     iagno # go game
+    #     hitori # sudoku game
+    #     atomix # puzzle game
+    #   ]);
   };
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;

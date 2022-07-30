@@ -26,7 +26,7 @@ myTerminal = "alacritty"
 
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
-screenLocker = "betterlockscreen  ~/.config/wallpapers/haskell-red-noise.png -l dim"
+screenLocker = "betterlockscreen -l dim"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
