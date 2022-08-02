@@ -24,8 +24,8 @@ in {
     };
 
     services.xserver.libinput = {
-    enable = true;
-  touchpad.disableWhileTyping = true;
+      enable = true;
+      touchpad.disableWhileTyping = true;
     };
     services.blueman.enable = true;
     services.xserver.displayManager = {
