@@ -33,7 +33,7 @@
 
   services.autorandr = {
     enable = true;
-    defaultTarget = "home";
+    defaultTarget = "horizontal";
     profiles = {
       home = {
         fingerprint = {
