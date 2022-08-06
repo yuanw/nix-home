@@ -55,4 +55,7 @@
      :pin "442c76badc353d1b621243c43293106f60f7d746")
 (package! embark-vc)
 (package! evil-replace-with-register)
+;; workaround for
 ;;https://github.com/emacs-tree-sitter/tree-sitter-langs/pull/110
+(package! evil-textobj-tree-sitter
+  :recipe (:host github :repo "yuanw/evil-textobj-tree-sitter" :branch "java-comment-fix"))
