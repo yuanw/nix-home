@@ -2,7 +2,7 @@
 #
 # this module aims to encapsulate all configurations
 # to have a functional tiling window manager environment on MacOS
-# yabai/skhd/spacebar
+# yabai/skhd
 { config, lib, pkgs, ... }:
 
 with lib;
