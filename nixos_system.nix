@@ -39,10 +39,11 @@ with lib; {
   services.xserver.autorun = true;
   services.xserver.autoRepeatDelay = 200;
   services.xserver.autoRepeatInterval = 25;
-  services.jack.jackd.enable = true;
+  # enable jackd seems mess up headphone jack
+  # services.jack.jackd.enable = true;
   sound.enable = true;
   hardware.pulseaudio.enable = true;
-  hardware.pulseaudio.package = pkgs.pulseaudioFull;
+  # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   # # services.xserver.displayManager.gdm.enable = true;
   # services.xserver.desktopManager.gnome = { enable = true; };
   nix = {
