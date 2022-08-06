@@ -3,7 +3,8 @@
 {
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
-  home.stateVersion = "22.05";
+  # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
+  home.stateVersion = "22.11";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin
     (import ./modules/macos_packages.nix { inherit pkgs; })

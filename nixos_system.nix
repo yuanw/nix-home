@@ -3,22 +3,6 @@
 with pkgs.stdenv;
 with lib; {
   networking.hostName = config.my.hostname;
-  # # Use the systemd-boot EFI boot loader.
-  # boot.loader.systemd-boot.enable = true;
-  # boot.loader.efi.canTouchEfiVariables = true;
-  # boot.loader.grub = {
-  #   enable = true;
-  #   version = 2;
-  #   efiSupport = true;
-  #   enableCryptodisk = true;
-  #   device = "nodev";
-  # };
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  # # luks
-  # boot.initrd.luks.devices.cryptboot = {
-  #   preLVM = true;
-  #   device = "/dev/disk/by-uuid/23aa6e7d-55ae-4f77-8994-bdbdcc8680a0";
-  # };
 
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
@@ -44,8 +28,6 @@ with lib; {
   sound.enable = true;
   hardware.pulseaudio.enable = true;
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
-  # # services.xserver.displayManager.gdm.enable = true;
-  # services.xserver.desktopManager.gnome = { enable = true; };
   nix = {
     package = pkgs.nixFlakes;
     settings = {
@@ -71,7 +53,7 @@ with lib; {
     gc = { automatic = true; };
   };
 
-  system.stateVersion = "21.11";
+  system.stateVersion = "22.05";
   nixpkgs = {
     config = {
       allowUnfree = true;
@@ -92,24 +74,7 @@ with lib; {
   # $ nix search wget
   environment = {
     systemPackages = with pkgs; [ wget vim git firefox ];
-
     shells = [ pkgs.zsh ];
-    # gnome.excludePackages = (with pkgs; [ gnome-photos gnome-tour ])
-    #   ++ (with pkgs.gnome; [
-    #     cheese # webcam tool
-    #     gnome-music
-    #     # gnome-terminal
-    #     gedit # text editor
-    #     epiphany # web browser
-    #     geary # email reader
-    #     # evince # document viewer
-    #     gnome-characters
-    #     totem # video player
-    #     tali # poker game
-    #     iagno # go game
-    #     hitori # sudoku game
-    #     atomix # puzzle game
-    #   ]);
   };
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;
