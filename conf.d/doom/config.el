@@ -39,6 +39,7 @@
 (setq org-roam-v2-ack t
       org-directory "~/org/"
       org-roam-directory (concat org-directory "roam/")
+ magit-list-refs-sortby "-committerdate"
       ;; org-id-extra-files (find-lisp-find-files org-roam-directory "\.org$")
        deft-extensions '("org")
        deft-directory org-directory
@@ -69,7 +70,8 @@
 ;;(setq direnv-always-show-summary nil)
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type nil)
+(setq display-line-numbers-type 'relative)
+
 (use-package! super-save
   :config
   (add-to-list 'super-save-triggers 'vertico)
@@ -86,6 +88,15 @@
    org-wild-notifier-alert-time '(60 30)
    alert-default-style 'notifcations))
  )
+(use-package! embark-vc
+  :after embark)
+(use-package! evil-replace-with-register
+  :config
+(map!
+        :n  "gR"  #'evil-replace-with-register
+        :v  "gR"  #'evil-replace-with-register)
+ (evil-replace-with-register-install))
+
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
