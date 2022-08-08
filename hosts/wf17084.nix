@@ -39,7 +39,7 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "pyenv" ];
+      brews = [ "pyenv"  "pngpaste"];
     };
     browsers.firefox = {
       enable = true;
