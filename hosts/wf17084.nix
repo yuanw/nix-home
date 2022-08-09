@@ -59,6 +59,7 @@
       mainWorkspaceDir = "$HOME/workiva";
     };
     wm.yabai.enable = true;
+    wm.amethyst.enable = true;
   };
   programs = {
     editors.emacs = {
