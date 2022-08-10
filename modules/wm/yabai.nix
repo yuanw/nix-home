@@ -15,8 +15,8 @@ let
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - d: doom run
-    shift + ctrl + alt - e: doom everywhere"
+    shift + ctrl + alt - d: ~/.emacs.d/bin/doom run
+    shift + ctrl + alt - e: ~/.emacs.d/bin/doom +everywhere"
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
