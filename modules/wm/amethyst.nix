@@ -10,7 +10,7 @@ in
   config = mkIf cfg.enable {
  assertions = [
       {
-        assertion = config.modules.brew.enable;
+        assertion = config.homebrew.enable;
         message = "";
       }
       {
@@ -19,11 +19,11 @@ in
 
       }
     ];
- # brew = {
- #   casks = [
- #     "amethyst"
- #   ];
- # };
+ homebrew = {
+   casks = [
+     "amethyst"
+   ];
+ };
 
   };
 }
