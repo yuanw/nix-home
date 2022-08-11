@@ -21,10 +21,6 @@
       };
     };
   };
-  services.emacs = {
-    enable = false;
-    package = pkgs.emacs;
-  };
   modules = {
     brew = {
       enable = true;
@@ -39,12 +35,18 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "pyenv"  "pngpaste"];
+      brews = [ "pyenv" "pngpaste" ];
     };
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
+    editors.emacs = {
+      enable = true;
+      enableService = true;
+      pkg = pkgs.emacs;
+    };
+
     colemak.enable = true;
     dev = {
       agda.enable = false;
@@ -60,11 +62,5 @@
     };
     wm.yabai.enable = true;
   };
-  programs = {
-    editors.emacs = {
-      enable = true;
-      pkg = pkgs.emacs;
-    };
-    workShell.enable = true;
-  };
+  programs = { workShell.enable = true; };
 }

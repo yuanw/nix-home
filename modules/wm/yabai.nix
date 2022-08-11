@@ -8,15 +8,23 @@
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsclient = "${pkgs.emacs}/bin/emacsclient -c";
+  emacsclient = if config.modules.editors.emacs.enableService then
+    "${pkgs.emacs}/bin/emacsclient -c"
+  else
+    "~/.emacs.d/bin/doom run";
+  emacsEveryWhere = if config.modules.editors.emacs.enableService then
+    ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"''
+  else
+    "~/.emacs.d/bin/doom +everywhere";
+
   daemonPath = "/Library/LaunchDaemons/org.nixos.yabai-sa.plist";
 
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - d: ~/.emacs.d/bin/doom run
-    shift + ctrl + alt - e: ~/.emacs.d/bin/doom +everywhere"
+    shift + ctrl + alt - d: ${emacsclient}
+    shift + ctrl + alt - e: ${emacsEveryWhere}
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration

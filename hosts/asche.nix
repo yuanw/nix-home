@@ -68,12 +68,6 @@
       haskell.enable = true;
       python.enable = false;
     };
-    terminal.enable = true;
-    colemak.enable = true;
-    wm.xmonad.enable = true;
-    browsers.firefox.enable = true;
-  };
-  programs = {
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;
@@ -81,5 +75,9 @@
         ((emacsPackagesFor emacsPgtkNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
+    terminal.enable = true;
+    colemak.enable = true;
+    wm.xmonad.enable = true;
+    browsers.firefox.enable = true;
   };
 }

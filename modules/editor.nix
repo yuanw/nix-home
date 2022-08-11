@@ -2,11 +2,11 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 { config, lib, pkgs, ... }:
 let
-  cfg = config.programs.editors.emacs;
+  cfg = config.modules.editors.emacs;
   emacsclient = "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'";
 
 in with lib; {
-  options.programs.editors.emacs = {
+  options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
       default = false;
@@ -29,6 +29,10 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
+    services.emacs = {
+      enable = cfg.enableService;
+      package = cfg.pkg;
+    };
 
     home-manager.users.${config.my.username} = {
       home = {
