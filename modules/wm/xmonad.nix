@@ -17,6 +17,7 @@ in {
       enable = true;
       packages = [ pkgs.dconf ];
     };
+    programs.dconf.enable = true;
     services.upower.enable = true;
     services.xserver.windowManager.xmonad = {
       enable = true;
