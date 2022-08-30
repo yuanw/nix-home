@@ -42,7 +42,7 @@
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
-      enable = true;
+      # enable = true;
       enableService = true;
       pkg = pkgs.emacs;
     };
@@ -53,7 +53,7 @@
       python.enable = true;
       haskell.enable = true;
       dart.enable = true;
-      node.enable = true;
+      # node.enable = true;
     };
 
     terminal = {
