@@ -5,6 +5,8 @@ with lib; {
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixFlakes;
+
+  configureBuildUsers = true;
     settings = {
     substituters= [
       "https://utdemir.cachix.org"
@@ -23,6 +25,7 @@ with lib; {
       "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
     ];
 
+  max-jobs = 8;
     trusted-users = [ "root" config.my.username ];
     };
     # Avoid unwanted garbage collection when using nix-direnv
@@ -31,7 +34,7 @@ with lib; {
       keep-outputs          = true
       keep-derivations      = true
     '';
-    trustedBinaryCaches = config.nix.binaryCaches;
+    # trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
       automatic = true;
       user = "${config.my.username}";
@@ -40,7 +43,6 @@ with lib; {
   };
 
   system.stateVersion = 4;
-  nix.maxJobs = 8;
   services.nix-daemon.enable = true;
   nixpkgs = {
     overlays = [
@@ -126,7 +128,6 @@ with lib; {
   };
   time.timeZone = "America/Regina";
 
-  users.nix.configureBuildUsers = true;
   users.users.${config.my.username} = {
     shell = pkgs.zsh;
     home = config.my.homeDirectory;
