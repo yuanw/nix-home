@@ -42,7 +42,7 @@
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
-      # enable = true;
+      enable = true;
       enableService = true;
       pkg = pkgs.emacs;
     };
