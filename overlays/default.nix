@@ -32,13 +32,13 @@ final: prev:
     };
 
   # mainstream use ${nix}, somehow it is not pointing to nix2.4
-  nix-direnv = prev.nix-direnv.overrideAttrs (old: rec {
-    postPatch = ''
-      sed -i "1a NIX_BIN_PREFIX=${final.nixFlakes}/bin/" direnvrc
-      substituteInPlace direnvrc --replace "grep" "${final.gnugrep}/bin/grep"
-    '';
+  # nix-direnv = prev.nix-direnv.overrideAttrs (old: rec {
+  #   postPatch = ''
+  #     sed -i "1a NIX_BIN_PREFIX=${final.nixFlakes}/bin/" direnvrc
+  #     substituteInPlace direnvrc --replace "grep" "${final.gnugrep}/bin/grep"
+  #   '';
 
-  });
+  # });
 
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
   yabai = prev.yabai.overrideAttrs (o: rec {
