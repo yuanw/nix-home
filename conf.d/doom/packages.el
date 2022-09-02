@@ -49,13 +49,16 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
+(package! interaction-log)
+(package! evil-motion-trainer
+  :recipe (:host github :repo "martinbaillie/evil-motion-trainer"))
 (package! super-save)
 (package! org-wild-notifier)
 (package! agda2-mode
      :pin "442c76badc353d1b621243c43293106f60f7d746")
 (package! embark-vc)
 (package! evil-replace-with-register)
-;; workaround for
-;;https://github.com/emacs-tree-sitter/tree-sitter-langs/pull/110
-(package! evil-textobj-tree-sitter
-  :recipe (:host github :repo "yuanw/evil-textobj-tree-sitter" :branch "java-comment-fix"))
+(package! tree-sitter-langs
+  :pin "5c6900a66a6b3a5d4ae6bde5199b5288c09af43b"
+  )
+(package! keycast)

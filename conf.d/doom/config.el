@@ -55,6 +55,32 @@
 
 
 
+(map!
+
+ ;; (:after evil-org
+
+ ;;       :map evil-org-mode-map
+ ;;       :n "gk" (cmd! (if (org-on-heading-p)
+ ;;                         (org-backward-element)
+ ;;                       (evil-previous-visual-line)))
+ ;;       :n "gj" (cmd! (if (org-on-heading-p)
+ ;;                         (org-forward-element)
+ ;;                       (evil-next-visual-line))))
+
+
+      :leader
+      ;; (:prefix "n"
+      ;;  "b" #'org-roam-buffer-toggle
+      ;;  "d" #'org-roam-dailies-goto-today
+      ;;  "D" #'org-roam-dailies-goto-date
+      ;;  "i" #'org-roam-node-insert
+      ;;  "r" #'org-roam-node-find
+      ;;  "R" #'org-roam-capture)
+
+      (:prefix "t"
+       "k" #'keycast-mode
+       )
+)
 
 (after! org
   (setq org-agenda-dim-blocked-tasks nil)
@@ -71,6 +97,7 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
+(after! company (setq company-idle-delay 0.2))
 
 (use-package! super-save
   :config
@@ -96,7 +123,7 @@
         :n  "gR"  #'evil-replace-with-register
         :v  "gR"  #'evil-replace-with-register)
  (evil-replace-with-register-install))
-
+(use-package! interaction-log)
 
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
