@@ -66,7 +66,7 @@
     dev = {
       agda.enable = true;
       haskell.enable = true;
-      python.enable = false;
+      python.enable = true;
     };
     editors.emacs = {
       enable = true;
