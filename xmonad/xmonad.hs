@@ -95,6 +95,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       -- launch rofi
       ((modm, xK_space), spawn appLauncher),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_l), spawn screenLocker),
+      ((controlMask .|. shiftMask .|. mod1Mask, xK_r), spawn "autorandr-load-home"),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_d), spawn myEditor),
       -- close focused window
       ((modm, xK_q), kill),

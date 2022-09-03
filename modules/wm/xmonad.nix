@@ -47,7 +47,22 @@ in {
     };
 
     home-manager.users.${config.my.username} = {
-      home.packages = [ xmonad-env ];
+      home.packages = [
+        xmonad-env
+
+        (
+
+          pkgs.writeShellScriptBin "autorandr-load-home" ''
+            #
+            # load autorandr home profile
+            #
+            xrandr --auto
+            autorandr horizontal
+            autorandr home
+          '')
+
+      ];
+
       # services.caffeine.enable = true;
       services.blueman-applet.enable = true;
       services.network-manager-applet.enable = true;
