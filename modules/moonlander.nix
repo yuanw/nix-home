@@ -8,8 +8,15 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [ pkgs.wally-cli ];
+      # Usage of wally-cli: [flags] <firmware file>
+      # wally-cli .build/moonlander_yuanw.bin
+      # Press the reset button of your keyboard.2022/09/11 12:07:42 handle_events: error: libusb: interrupted [code -10]
+      # 73660 / 73660 [=======================================================================================================================================] 100.00% 17s
+      # Your keyboard was successfully flashed and rebooted. Enjoy the new firmware!
+
     };
     # https://github.com/zsa/wally/wiki/Linux-install#2-create-a-udev-rule-file
+    # https://discourse.nixos.org/t/creating-a-custom-udev-rule/14569
     services.udev.extraRules = ''
            # Rules for Oryx web flashing and live training
       KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", MODE="0664", GROUP="plugdev"
@@ -37,7 +44,5 @@ in {
           SYMLINK+="stm32_dfu"
     '';
 
-    # The UNIX file mode bits
-    # mode = "0440";
   };
 }
