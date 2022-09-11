@@ -75,6 +75,7 @@
         ((emacsPackagesFor emacsPgtkNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
+    moonlander.enable = true;
     terminal.enable = true;
     colemak.enable = true;
     wm.xmonad.enable = true;

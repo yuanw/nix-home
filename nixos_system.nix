@@ -66,7 +66,8 @@ with lib; {
     isNormalUser = true;
     uid = 1000;
     home = config.my.homeDirectory;
-    extraGroups = [ "audio" "jackaudio" "wheel" "docker"  ]; # Enable ‘sudo’ for the user.
+    extraGroups =
+      [ "audio" "jackaudio" "wheel" "docker" ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
 

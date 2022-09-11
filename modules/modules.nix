@@ -21,6 +21,7 @@ let
     (loadModule ./colemak { })
     # (loadModule ./wm/amethyst.nix { condition = isDarwin; })
     (loadModule ./wm/xmonad.nix { condition = isNixOS; })
+    (loadModule ./moonlander.nix { condition = isNixOS; })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./brew.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { condition = isDarwin; })
