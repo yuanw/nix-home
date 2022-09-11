@@ -66,7 +66,7 @@ with lib; {
     isNormalUser = true;
     uid = 1000;
     home = config.my.homeDirectory;
-    extraGroups = [ "audio" "jackaudio" "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [ "audio" "jackaudio" "wheel" "docker"  ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
 
@@ -79,7 +79,7 @@ with lib; {
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
-
+  virtualisation.docker.enable = true;
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
