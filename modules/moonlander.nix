@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ pkgs.wally-cli ];
+      home.packages = [ pkgs.wally-cli pkgs.libusb1  ];
       # Usage of wally-cli: [flags] <firmware file>
       # wally-cli .build/moonlander_yuanw.bin
       # Press the reset button of your keyboard.2022/09/11 12:07:42 handle_events: error: libusb: interrupted [code -10]
