@@ -112,7 +112,7 @@ with lib; {
   };
   system.keyboard = {
     enableKeyMapping = true;
-    remapCapsLockToControl = true;
+    # remapCapsLockToControl = true;
   };
 
   environment.shells = [ pkgs.zsh ];

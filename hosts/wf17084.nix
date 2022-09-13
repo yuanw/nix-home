@@ -24,8 +24,11 @@
   modules = {
     brew = {
       enable = true;
+      taps = ["homebrew/core" "homebrew/cask" "qmk/qmk" "osx-cross/avr" ];
+
       casks = [
         "brave-browser"
+        "gcc-arm-embedded"
         "docker"
         "firefox"
         "google-chrome"
@@ -35,7 +38,7 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "pyenv" "pngpaste" ];
+      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" ];
     };
     browsers.firefox = {
       enable = true;
