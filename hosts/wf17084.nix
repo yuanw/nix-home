@@ -24,11 +24,10 @@
   modules = {
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" "qmk/qmk" "osx-cross/avr" ];
+      taps = [ "homebrew/core" "homebrew/cask" "qmk/qmk" "osx-cross/avr" "osx-cross/arm"  ];
 
       casks = [
         "brave-browser"
-        "gcc-arm-embedded"
         "docker"
         "firefox"
         "google-chrome"
