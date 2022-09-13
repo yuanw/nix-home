@@ -24,7 +24,7 @@
   modules = {
     brew = {
       enable = true;
-      taps = ["homebrew/core" "homebrew/cask" "qmk/qmk" "osx-cross/avr" ];
+      taps = [ "homebrew/core" "homebrew/cask" "qmk/qmk" "osx-cross/avr" ];
 
       casks = [
         "brave-browser"
