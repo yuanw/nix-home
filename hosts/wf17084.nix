@@ -21,37 +21,18 @@
       };
     };
   };
+
   modules = {
     brew = {
       enable = true;
-      taps = [
-        "homebrew/core"
-        "homebrew/cask"
-        "qmk/qmk"
-        "osx-cross/avr"
-        "osx-cross/arm"
-      ];
-
-      casks = [
-        "brave-browser"
-        "docker"
-        "firefox"
-        "google-chrome"
-        "qutebrowser"
-        "hammerspoon"
-        "insomnia"
-        "karabiner-elements"
-        "stretchly"
-      ];
-      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" ];
-    };
+       };
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
       enable = true;
-      enableService = true;
+      # enableService = true;
       pkg = pkgs.emacs;
     };
 
