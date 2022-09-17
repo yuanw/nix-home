@@ -33,10 +33,10 @@ in {
 
   config = mkIf cfg.enable {
     homebrew.enable = true;
-    homebrew.onActivation.autoUpdate = true;
-    homebrew.onActivation.cleanup = "zap";
+    homebrew.autoUpdate = true;
+    homebrew.cleanup = "zap";
     homebrew.global.brewfile = true;
-    homebrew.global.lockfiles = true;
+    homebrew.global.noLock = true;
     homebrew.taps = cfg.taps;
     homebrew.brews = cfg.brews;
     homebrew.casks = cfg.casks;

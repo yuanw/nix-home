@@ -51,7 +51,7 @@
     };
     editors.emacs = {
       enable = true;
-      # enableService = true;
+      enableService = true;
       pkg = pkgs.emacs;
     };
 
