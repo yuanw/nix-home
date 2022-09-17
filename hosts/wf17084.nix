@@ -52,7 +52,7 @@
     editors.emacs = {
       enable = true;
       # enableService = true;
-      pkg = pkgs.emacs;
+      pkg = pkgs.emacsMacport;
     };
 
     colemak.enable = true;
