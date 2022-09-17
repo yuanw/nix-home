@@ -31,15 +31,6 @@ final: prev:
       };
     };
 
-  # mainstream use ${nix}, somehow it is not pointing to nix2.4
-  # nix-direnv = prev.nix-direnv.overrideAttrs (old: rec {
-  #   postPatch = ''
-  #     sed -i "1a NIX_BIN_PREFIX=${final.nixFlakes}/bin/" direnvrc
-  #     substituteInPlace direnvrc --replace "grep" "${final.gnugrep}/bin/grep"
-  #   '';
-
-  # });
-
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
   yabai = prev.yabai.overrideAttrs (o: rec {
     version = "4.0.1";
@@ -58,7 +49,7 @@ final: prev:
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-
+  emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
 
   juliaMac = final.installApplication rec {

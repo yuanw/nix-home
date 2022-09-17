@@ -15,12 +15,12 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    mac-emacs.url = "github:cmacrae/emacs";
+    # mac-emacs.url = "github:cmacrae/emacs";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs, mac-emacs
+  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs
     , resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;

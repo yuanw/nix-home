@@ -43,7 +43,7 @@
         "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" ];
+      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" ];
     };
     browsers.firefox = {
       enable = true;
@@ -51,8 +51,11 @@
     };
     editors.emacs = {
       enable = true;
-      enableService = true;
-      pkg = pkgs.emacs;
+      # enableService = true;
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
+
     };
 
     colemak.enable = true;

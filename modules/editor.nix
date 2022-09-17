@@ -40,7 +40,7 @@ in with lib; {
           git
           (ripgrep.override { withPCRE2 = true; })
           gnutls # for TLS connectivity
-
+          cmake
           ## Optional dependencies
           fd # faster projectile indexing
           imagemagick # for image-dired

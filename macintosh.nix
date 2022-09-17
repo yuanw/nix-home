@@ -47,7 +47,7 @@ with lib; {
   nixpkgs = {
     overlays = [
       inputs.nur.overlay
-      inputs.mac-emacs.overlay
+      # inputs.mac-emacs.overlay
       #       (final: prev:
       #         let inherit (prev) lib;
       #             overlays = [
