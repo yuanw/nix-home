@@ -45,6 +45,8 @@ in with lib; {
           fd # faster projectile indexing
           imagemagick # for image-dired
           zstd
+          html-tidy
+          shfmt
           ## Module dependencies
           # :checkers spell
           (aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]))
@@ -58,6 +60,17 @@ in with lib; {
           wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
+          #: js
+          nodePackages.eslint
+          #: markdown
+          nodePackages.unified-language-server
+          #: sh
+          nodePackages.bash-language-server
+          #: toml
+          taplo-lsp
+          #: web-mode
+          nodePackages.js-beautify
+          nodePackages.stylelint
           # :lang yaml
           nodePackages.yaml-language-server
         ];

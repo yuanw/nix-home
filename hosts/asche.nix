@@ -72,7 +72,8 @@
       enable = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-        ((emacsPackagesFor emacsPgtkNativeComp).emacsWithPackages
+      # 28.2 + native-comp
+        ((emacsPackagesFor emacsNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
     moonlander.enable = true;

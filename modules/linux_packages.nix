@@ -11,4 +11,6 @@ with pkgs; [
   dzen2
   pavucontrol
   scrot
+  xdotool
+  xorg.xwininfo
 ]
