@@ -4,7 +4,7 @@ with pkgs.stdenv;
 with lib; {
   networking.hostName = config.my.hostname;
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixUnstable;
 
     configureBuildUsers = true;
     settings = {

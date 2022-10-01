@@ -29,7 +29,7 @@ with lib; {
   hardware.pulseaudio.enable = true;
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   nix = {
-    package = pkgs.nixFlakes;
+    package = pkgs.nixUnstable;
     settings = {
       substituters = [
         "https://utdemir.cachix.org"
