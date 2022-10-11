@@ -60,15 +60,15 @@ in {
               command = "sudo launchctl kickstart -k gui/$UID/org.nixos.emacs";
               tag = [ "emacs" "macos" ];
             }
-          {
+            {
               description = "check all services";
               command = "checkin my services";
-              tag = [ "slack"  ];
+              tag = [ "slack" ];
             }
-      {
+            {
               description = "check all services";
-              command = "checkin content-management-service" ;
-              tag = [ "slack"  ];
+              command = "checkin content-management-service";
+              tag = [ "slack" ];
             }
 
           ];
