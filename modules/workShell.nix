@@ -26,10 +26,11 @@ in {
           # eval "$(pyenv init -)"
           # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
 
-          function bigskyTest {
-             python manage.py test $1 --http-integration --traceback -v 2
-          }
+          # function bigskyTest {
+          #    python manage.py test $1 --http-integration --traceback -v 2
+          # }
 
+          export PATH=$PATH:$HOME/go/bin
           [[ -s "${homeDir}/.ghcup/env" ]] && source "${homeDir}/.ghcup/env"
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
         '';
