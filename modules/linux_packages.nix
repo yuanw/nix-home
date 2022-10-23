@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
 with pkgs; [
+  cmake
   _1password-gui
   pinentry
   stalonetray
