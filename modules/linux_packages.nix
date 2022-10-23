@@ -1,8 +1,8 @@
 { pkgs, ... }:
 
 with pkgs; [
-  cmake
-  _1password-gui
+gnumake
+_1password-gui
   pinentry
   stalonetray
   killall
