@@ -2,7 +2,6 @@
 
 with pkgs; [
   _1password-gui
-  stretchly
   pinentry
   stalonetray
   killall
@@ -13,4 +12,5 @@ with pkgs; [
   scrot
   xdotool
   xorg.xwininfo
+  teams
 ]
