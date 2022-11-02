@@ -37,7 +37,7 @@ final: prev:
     src = prev.fetchzip {
       url =
         "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
-      hash = "sha256-0czxhf95mnpycbp7aqz9ajgnb0zmazdh9lhj14gn4kpnwj64kwmd";
+      hash = "sha256-iCx/e3IwJ6YzgEy7wGkNQU/d7gaZd4b/RLwRvRpwVwQ=";
     };
     installPhase = ''
       mkdir -p $out/bin
