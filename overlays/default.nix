@@ -32,7 +32,7 @@ final: prev:
     };
 
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
-  yabai  = prev.callPackage ./yabai.nix { };
+  yabai = prev.callPackage ./yabai.nix { };
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };

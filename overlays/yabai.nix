@@ -1,13 +1,12 @@
-{  stdenv,
-  fetchzip,
-  lib, ... }:
+{ stdenv, fetchzip, lib, ... }:
 
 stdenv.mkDerivation rec {
   pname = "yabai";
   version = "5.0.1";
 
   src = fetchzip {
-    url = "https://github.com/koekeishiya/yabai/releases/download/v${version}/${pname}-v${version}.tar.gz";
+    url =
+      "https://github.com/koekeishiya/yabai/releases/download/v${version}/${pname}-v${version}.tar.gz";
     hash = "sha256-iCx/e3IwJ6YzgEy7wGkNQU/d7gaZd4b/RLwRvRpwVwQ=";
   };
 
