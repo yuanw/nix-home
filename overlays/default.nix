@@ -32,20 +32,7 @@ final: prev:
     };
 
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
-  yabai = prev.yabai.overrideAttrs (o: rec {
-    version = "5.0.1";
-    src = prev.fetchzip {
-      url =
-        "https://github.com/koekeishiya/yabai/releases/download/v${version}/yabai-v${version}.tar.gz";
-      hash = "sha256-iCx/e3IwJ6YzgEy7wGkNQU/d7gaZd4b/RLwRvRpwVwQ=";
-    };
-    installPhase = ''
-      mkdir -p $out/bin
-      mkdir -p $out/share/man/man1/
-      cp ./bin/yabai $out/bin/yabai
-      cp ./doc/yabai.1 $out/share/man/man1/yabai.1
-    '';
-  });
+  yabai  = prev.callPackage ./yabai.nix { };
   alerter = prev.callPackage ./alerter.nix { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
