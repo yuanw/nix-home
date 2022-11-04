@@ -52,24 +52,24 @@ in {
     home-manager.users.${config.my.username} = {
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
-        # (
+        (
 
-        #   pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
-        #     #
-        #     # yabai-sa-kickstart
-        #     #
-        #     # Kickstart the scripting addition in case it fails to load.
-        #     #
-        #     set -x
-        #     # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
-        #     [[ $(sudo launchctl list | grep yabai-sa) ]] && {
-        #       sudo launchctl unload ${daemonPath}
+          pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
+            #
+            # yabai-sa-kickstart
+            #
+            # Kickstart the scripting addition in case it fails to load.
+            #
+            set -x
+            # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
+            [[ $(sudo launchctl list | grep yabai-sa) ]] && {
+              sudo launchctl unload ${daemonPath}
         #     }
-        #     sudo yabai --uninstall-sa
-        #     sudo yabai --install-sa
-        #     sudo launchctl load ${daemonPath}
+            sudo yabai --uninstall-sa
+            sudo yabai --install-sa
+            sudo launchctl load ${daemonPath}
         #     set +x
-        #   '')
+          '')
       ];
       programs = {
         zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
