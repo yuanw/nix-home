@@ -55,20 +55,20 @@ in {
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
-            #
-            # yabai-sa-kickstart
-            #
-            # Kickstart the scripting addition in case it fails to load.
-            #
-            set -x
-            # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
-            [[ $(sudo launchctl list | grep yabai-sa) ]] && {
-              sudo launchctl unload ${daemonPath}
-        #     }
-            sudo yabai --uninstall-sa
-            sudo yabai --install-sa
-            sudo launchctl load ${daemonPath}
-        #     set +x
+                #
+                # yabai-sa-kickstart
+                #
+                # Kickstart the scripting addition in case it fails to load.
+                #
+                set -x
+                # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
+                [[ $(sudo launchctl list | grep yabai-sa) ]] && {
+                  sudo launchctl unload ${daemonPath}
+            #     }
+                sudo yabai --uninstall-sa
+                sudo yabai --install-sa
+                sudo launchctl load ${daemonPath}
+            #     set +x
           '')
       ];
       programs = {
