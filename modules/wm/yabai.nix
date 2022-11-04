@@ -64,12 +64,13 @@ in {
                 # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
                 [[ $(sudo launchctl list | grep yabai-sa) ]] && {
                   sudo launchctl unload ${daemonPath}
-            #     }
+                 }
                 sudo yabai --uninstall-sa
                 sudo yabai --install-sa
                 sudo launchctl load ${daemonPath}
-            #     set +x
-          '')
+                set +x
+          ''
+        )
       ];
       programs = {
         zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
