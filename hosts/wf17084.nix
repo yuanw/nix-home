@@ -37,7 +37,6 @@
         "docker"
         "firefox"
         "google-chrome"
-        "qutebrowser"
         "hammerspoon"
         "insomnia"
         "karabiner-elements"
