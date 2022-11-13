@@ -123,7 +123,7 @@ in {
         enable = true;
         extraConfig = ''
           Config { overrideRedirect = False
-                 , font     = "xft:iosevka-10"
+                 , font     = "xft:iosevka-12"
                  , bgColor  = "#5f5f5f"
                  , fgColor  = "#f8f8f2"
                  , position = TopSize L 90 36
