@@ -126,7 +126,7 @@ in {
                  , font     = "xft:iosevka-10"
                  , bgColor  = "#5f5f5f"
                  , fgColor  = "#f8f8f2"
-                 , position = TopW L 90
+                 , position = TopSize L 90 36
                  , commands = [
                                Run Cpu
                                   [ "-L", "3"
