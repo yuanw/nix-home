@@ -70,6 +70,7 @@ with lib; {
       #       )
       (import ./overlays)
       (final: prev: {
+        devenv = inputs.devenv.defaultPackage.x86_64-darwin;
         resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
         ws-access-token = inputs.ws-access-token.defaultPackage.x86_64-darwin;
       })
@@ -118,8 +119,7 @@ with lib; {
   };
 
   environment.shells = [ pkgs.zsh ];
-  environment.systemPackages =
-    [ pkgs.zsh pkgs.gcc inputs.devenv.packages.devenv ];
+  environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
   programs.bash.enable = false;
   programs.zsh = {
     enableCompletion = false;
