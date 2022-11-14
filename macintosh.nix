@@ -15,6 +15,7 @@ with lib; {
         "https://nix-community.cachix.org"
         "https://cachix.org/api/v1/cache/yuanwang-wf"
         "https://cachix.org/api/v1/cache/emacs"
+        "https://cachix.org/api/v1/cache/devenv"
       ];
       trusted-public-keys = [
         "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
@@ -23,6 +24,7 @@ with lib; {
         "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
         "yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80="
         "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
+        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
       ];
 
       max-jobs = 8;
@@ -116,7 +118,8 @@ with lib; {
   };
 
   environment.shells = [ pkgs.zsh ];
-  environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
+  environment.systemPackages =
+    [ pkgs.zsh pkgs.gcc inputs.devenv.packages.devenv ];
   programs.bash.enable = false;
   programs.zsh = {
     enableCompletion = false;

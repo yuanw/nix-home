@@ -7,6 +7,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    devenv.url = "github:cachix/devenv/v0.2";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
@@ -20,7 +21,7 @@
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, nixpkgs, darwin, home-manager, nur, emacs
+  outputs = inputs@{ self, devenv, nixpkgs, darwin, home-manager, nur, emacs
     , resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
