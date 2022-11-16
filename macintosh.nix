@@ -70,9 +70,9 @@ with lib; {
       #       )
       (import ./overlays)
       (final: prev: {
-        devenv = inputs.devenv.defaultPackage.x86_64-darwin;
-        resource-id = inputs.resource-id.defaultPackage.x86_64-darwin;
-        ws-access-token = inputs.ws-access-token.defaultPackage.x86_64-darwin;
+        devenv = inputs.devenv.defaultPackage.${prev.system};
+        resource-id = inputs.resource-id.defaultPackage.${prev.system};
+        ws-access-token = inputs.ws-access-token.defaultPackage.${prev.system};
       })
     ];
 
