@@ -6,83 +6,13 @@ with lib; {
   nix = {
     package = pkgs.nixUnstable;
 
-    configureBuildUsers = true;
-    settings = {
-      substituters = [
-        "https://utdemir.cachix.org"
-        "https://hs-nix-template.cachix.org"
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-        "https://cachix.org/api/v1/cache/yuanwang-wf"
-        "https://cachix.org/api/v1/cache/emacs"
-        "https://cachix.org/api/v1/cache/devenv"
-      ];
-      trusted-public-keys = [
-        "utdemir.cachix.org-1:mDgucWXufo3UuSymLuQumqOq1bNeclnnIEkD4fFMhsw="
-        "hs-nix-template.cachix.org-1:/YbjZCrYAw7d9ayLayk7ZhBdTEkR10ZFmFuOq6ZJo4c="
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80="
-        "emacs.cachix.org-1:b1SMJNLY/mZF6GxQE+eDBeps7WnkT0Po55TAyzwOxTY="
-        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-      ];
-
-      max-jobs = 8;
-      trusted-users = [ "root" config.my.username ];
-    };
-    # Avoid unwanted garbage collection when using nix-direnv
-    extraOptions = ''
-      experimental-features = nix-command flakes
-      keep-outputs          = true
-      keep-derivations      = true
-    '';
+    trusted-users = [ "root" config.my.username ];
     # trustedBinaryCaches = config.nix.binaryCaches;
-    gc = {
-      automatic = true;
-      user = "${config.my.username}";
-      interval = { Hour = 24 * 7; };
-    };
+    gc = { user = "${config.my.username}"; };
   };
 
   system.stateVersion = 4;
   services.nix-daemon.enable = true;
-  nixpkgs = {
-    overlays = [
-      inputs.nur.overlay
-      # inputs.mac-emacs.overlay
-      #       (final: prev:
-      #         let inherit (prev) lib;
-      #             overlays = [
-      #               (self: super: {
-      #                 haskellPackages = super.haskellPackages.override {
-      #                   overrides = hself: hsuper: {
-      #                     Agda = hsuper.Agda.overrideAttrs (old: {
-      #                       postInstall = "";
-      #                     });
-      #                   };
-      #                 };
-      #               })
-      #               inputs.agda.overlay
-      #             ];
-      #               composed = lib.composeManyExtensions overlays;
-
-      # in composed final prev
-      #       )
-      (import ./overlays)
-      (final: prev: {
-        devenv = inputs.devenv.defaultPackage.${prev.system};
-        resource-id = inputs.resource-id.defaultPackage.${prev.system};
-        ws-access-token = inputs.ws-access-token.defaultPackage.${prev.system};
-      })
-    ];
-
-    config = {
-      allowUnfree = true;
-      allowBroken = false;
-      allowUnsupportedSystem = false;
-    };
-  };
-
   system.defaults = {
     dock = {
       autohide = true;
