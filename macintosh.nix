@@ -6,7 +6,7 @@ with lib; {
   nix = {
     package = pkgs.nixUnstable;
 
-    trusted-users = [ "root" config.my.username ];
+    # trusted-users = [ "root" config.my.username ];
     # trustedBinaryCaches = config.nix.binaryCaches;
     gc = { user = "${config.my.username}"; };
   };
