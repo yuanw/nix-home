@@ -110,7 +110,6 @@
             home-manager.nixosModules.home-manager
             {
               nix = {
-                configureBuildUsers = true;
                 settings = {
                   substituters = [
                     "https://utdemir.cachix.org"
@@ -143,7 +142,7 @@
                 # trustedBinaryCaches = config.nix.binaryCaches;
                 gc = {
                   automatic = true;
-                  interval = { Hour = 24 * 7; };
+                  # interval = { Hour = 24 * 7; };
                 };
               };
 
