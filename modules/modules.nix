@@ -16,6 +16,7 @@ let
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
     (loadModule ./hledger.nix { })
+    (loadModule ./qmk.nix { })
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
     (loadModule ./colemak { })
