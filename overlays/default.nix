@@ -44,7 +44,7 @@ final: prev:
       owner = "qmk";
       repo = "qmk_firmware";
       rev = version;
-      sha256 = "4U1/9DgoKZ1Al76lZ2P8x4LIvtqaJPLq81cCSCy+9iE=";
+      sha256 = "YEKqqCLJQvFD3OaJvgD+OEDxXgPcjnaNpNtSPaDUS+M=";
     };
   });
   juliaMac = final.installApplication rec {
