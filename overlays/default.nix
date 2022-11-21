@@ -38,7 +38,15 @@ final: prev:
   hosts = prev.callPackage ./hosts.nix { };
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
-
+  qmk-udev-rules = prev.qmk-udev-rules.overrideAttrs (oldAttrs: rec {
+    version = "0.18.17";
+    src = prev.fetchFromGitHub {
+      owner = "qmk";
+      repo = "qmk_firmware";
+      rev = version;
+      sha256 = "4U1/9DgoKZ1Al76lZ2P8x4LIvtqaJPLq81cCSCy+9iE=";
+    };
+  });
   juliaMac = final.installApplication rec {
     name = "Julia";
     version = "1.7.1";
