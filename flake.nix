@@ -42,9 +42,7 @@
           inputs = inputs;
           system = "x86_64-darwin";
           modules = [
-            {
-              nixpkgs.overlays = overlays;
-            }
+            { nixpkgs.overlays = overlays; }
 
             ({ lib, ... }: {
               imports = import ./modules/modules.nix {
