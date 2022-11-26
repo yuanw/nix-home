@@ -2,7 +2,7 @@
 
 {
   nix = {
-    configureBuildUsers = true;
+    # configureBuildUsers = true;
     settings = {
       substituters = [
         "https://utdemir.cachix.org"
@@ -33,7 +33,7 @@
     # trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
       automatic = true;
-      interval = { Hour = 24 * 7; };
+      # interval = { Hour = 24 * 7; };
     };
   };
   nixpkgs = {
