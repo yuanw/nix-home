@@ -37,9 +37,9 @@
         "docker"
         "firefox"
         "google-chrome"
-        "hammerspoon"
+        # "hammerspoon"
         "insomnia"
-        "karabiner-elements"
+        # "karabiner-elements"
         "stretchly"
       ];
       brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" ];
