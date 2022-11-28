@@ -24,7 +24,7 @@ let
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - d: ${emacsclient}
-    shift + ctrl + alt - e: ${emacsEveryWhere}https://meet.google.com/jec-riyc-ptu
+    shift + ctrl + alt - e: ${emacsEveryWhere}
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
