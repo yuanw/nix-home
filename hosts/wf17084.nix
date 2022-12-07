@@ -42,7 +42,7 @@
         # "karabiner-elements"
         "stretchly"
       ];
-      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" ];
+      brews = [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" "ttygif" ];
     };
     browsers.firefox = {
       enable = true;
