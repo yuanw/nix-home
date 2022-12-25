@@ -49,11 +49,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1667210711,
-        "narHash": "sha256-IoErjXZAkzYWHEpQqwu/DeRNJGFdR7X2OGbkhMqMrpw=",
+        "lastModified": 1671489820,
+        "narHash": "sha256-qoei5HDJ8psd1YUPD7DhbHdhLIT9L2nadscp4Qk37uk=",
         "owner": "numtide",
         "repo": "devshell",
-        "rev": "96a9dd12b8a447840cc246e17a47b81a4268bba7",
+        "rev": "5aa3a8039c68b4bf869327446590f4cdf90bb634",
         "type": "github"
       },
       "original": {
@@ -100,11 +100,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1671268121,
-        "narHash": "sha256-LIOLFw5m2mYDjMo7eBB/cxYjhEqBnvQ8dpZvTjR6+Lo=",
+        "lastModified": 1671876553,
+        "narHash": "sha256-bx0syKpE5p8Pzz4/yoLX7d3K74Ou85PQsYt9ALx0S2w=",
         "owner": "nix-community",
         "repo": "emacs-overlay",
-        "rev": "249d14bdd55995eea2e0c9cfed8a230525faebde",
+        "rev": "1cb4409944f776fbf9ca79bbd25cd8f4c3b70069",
         "type": "github"
       },
       "original": {
@@ -229,11 +229,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1671209729,
-        "narHash": "sha256-zxn1eA/rMi2DOx43V7q87bGaDzvL7CMVY/Ti7lJ92DQ=",
+        "lastModified": 1671831633,
+        "narHash": "sha256-tANQOkJnlqK4M83KvvXFMFrIbR0xkloqXY5ruqzR3kE=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "7d55a72d4c1df694e87a41a7e6c9a7b6e9a40ca3",
+        "rev": "d7eee202e597bc7789498a8664082cf0ffedaa8f",
         "type": "github"
       },
       "original": {
@@ -360,11 +360,25 @@
     },
     "nixpkgs_5": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1671249438,
         "narHash": "sha256-5e+CcnbZA3/i2BRXbnzRS52Ly67MUNdZR+Zpbb2C65k=",
+||||||| parent of 328cbff (update lock)
+        "lastModified": 1670058159,
+        "narHash": "sha256-ERiP2JWanLuGV1PDyHTbcigFCfIi9oco5LFdMJHjREE=",
+=======
+        "lastModified": 1671848398,
+        "narHash": "sha256-cJIIPd1kvCI6ne/S0facbiBNH7sZUzk405GfdSJPwZE=",
+>>>>>>> 328cbff (update lock)
         "owner": "NixOS",
         "repo": "nixpkgs",
+<<<<<<< HEAD
         "rev": "067bfc6c90a301572cec7da48f09c447a9a8eae0",
+||||||| parent of 328cbff (update lock)
+        "rev": "49b8ad618e64d9fe9ab686817bfebe047860dcae",
+=======
+        "rev": "bb0359be0a1a08c8d74412fe8c69aa2ffb3f477e",
+>>>>>>> 328cbff (update lock)
         "type": "github"
       },
       "original": {
@@ -374,11 +388,25 @@
     },
     "nixpkgs_6": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1671200928,
         "narHash": "sha256-mZfzDyzojwj6I0wyooIjGIn81WtGVnx6+avU5Wv+VKU=",
+||||||| parent of 328cbff (update lock)
+        "lastModified": 1669969257,
+        "narHash": "sha256-mOS13sK3v+kfgP+1Mh56ohiG8uVhLHAo7m/q9kqAehc=",
+=======
+        "lastModified": 1671722432,
+        "narHash": "sha256-ojcZUekIQeOZkHHzR81st7qxX99dB1Eaaq6PU5MNeKc=",
+>>>>>>> 328cbff (update lock)
         "owner": "nixos",
         "repo": "nixpkgs",
+<<<<<<< HEAD
         "rev": "757b82211463dd5ba1475b6851d3731dfe14d377",
+||||||| parent of 328cbff (update lock)
+        "rev": "b72b8b94cf0c012b0252a9100a636cad69696666",
+=======
+        "rev": "652e92b8064949a11bc193b90b74cb727f2a1405",
+>>>>>>> 328cbff (update lock)
         "type": "github"
       },
       "original": {
@@ -422,11 +450,25 @@
     },
     "nur": {
       "locked": {
+<<<<<<< HEAD
         "lastModified": 1671251299,
         "narHash": "sha256-QFslNMb6xQdgEoHmbZ+YjyXysCPsiU2dOPpjWp68dYg=",
+||||||| parent of 328cbff (update lock)
+        "lastModified": 1669805596,
+        "narHash": "sha256-g1CPQZ+1jGhY4bsjppk+gH5jfzzqmPlqGHg0zSYS3Hw=",
+=======
+        "lastModified": 1671882360,
+        "narHash": "sha256-vTa5luC2FnDN5Z/zVv0lHynzaA8MC+/BJOmXFrmzHVs=",
+>>>>>>> 328cbff (update lock)
         "owner": "nix-community",
         "repo": "NUR",
+<<<<<<< HEAD
         "rev": "ca8e5a3c87bd533b1c0b0b4195b1191ad23c1c66",
+||||||| parent of 328cbff (update lock)
+        "rev": "c81b1e527f3a220abfa9bf8096153d52784c5007",
+=======
+        "rev": "3e531640bcdaaed1293fde20958c76a66acfb797",
+>>>>>>> 328cbff (update lock)
         "type": "github"
       },
       "original": {

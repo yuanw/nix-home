@@ -43,7 +43,7 @@
         "stretchly"
       ];
       brews =
-        [ "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" "ttygif" ];
+        [ "aws-iam-authenticator" "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" "ttygif" ];
     };
     browsers.firefox = {
       enable = true;
