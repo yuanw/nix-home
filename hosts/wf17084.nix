@@ -42,8 +42,16 @@
         # "karabiner-elements"
         "stretchly"
       ];
-      brews =
-        [ "aws-iam-authenticator" "pyenv" "pngpaste" "avr-gcc" "qmk/qmk/qmk" "jdtls" "redis" "ttygif" ];
+      brews = [
+        "aws-iam-authenticator"
+        "pyenv"
+        "pngpaste"
+        "avr-gcc"
+        "qmk/qmk/qmk"
+        "jdtls"
+        "redis"
+        "ttygif"
+      ];
     };
     browsers.firefox = {
       enable = true;
