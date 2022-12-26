@@ -5,7 +5,7 @@ import Data.Monoid
 import System.Exit
 import XMonad
 -- Utilities
-
+import XMonad.Actions.Volume
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.StatusBar
@@ -99,6 +99,11 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((controlMask .|. shiftMask .|. mod1Mask, xK_d), spawn myEditor),
       -- close focused window
       ((modm, xK_q), kill),
+       -- XF86AudioRaiseVolume
+    ((0 , 0x1008ff13 ), spawn "pactl set-sink-volume 0 +1.5%"),
+ ((0 , 0x1008ff11 ), spawn "pactl set-sink-volume 0 -- -1.5%"),
+ -- XF86AudioMute
+ ((0 , 0x1008ff12), spawn "pactl set-sink-mute 0 toggle"),
       -- Rotate through the available layout algorithms
 
       ((controlMask .|. shiftMask .|. mod1Mask, xK_Return), sendMessage NextLayout),
