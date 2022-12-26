@@ -5,7 +5,6 @@ import Data.Monoid
 import System.Exit
 import XMonad
 -- Utilities
-import XMonad.Actions.Volume
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.StatusBar
