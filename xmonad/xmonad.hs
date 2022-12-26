@@ -100,7 +100,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm, xK_q), kill),
       -- XF86AudioRaiseVolume
       ((0, 0x1008ff13), spawn "pactl set-sink-volume 0 +1.5%"),
-      ((0, 0x1008ff11), spawn "pactl set-sink-volume 0 -- -1.5%"),
+      ((0, 0x1008ff11), spawn "pactl set-sink-volume 0 -1.5%"),
       -- XF86AudioMute
       ((0, 0x1008ff12), spawn "pactl set-sink-mute 0 toggle"),
       -- Rotate through the available layout algorithms
