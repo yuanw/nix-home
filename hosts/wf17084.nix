@@ -43,7 +43,7 @@
         "stretchly"
       ];
       brews = [
-        "aws-iam-authenticator"
+        # "aws-iam-authenticator"
         "pyenv"
         "pngpaste"
         "avr-gcc"
