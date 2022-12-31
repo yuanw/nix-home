@@ -25,7 +25,7 @@ in {
         profileExtra = mkAfter ''
 
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
-'';
+        '';
         initExtra = mkAfter ''
           # eval "$(pyenv init -)"
           # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
