@@ -24,7 +24,7 @@ with pkgs; [
   plantuml
   xclip
   pass
-
+  zlib
   shellcheck
   gitAndTools.pre-commit
   gitAndTools.delta
