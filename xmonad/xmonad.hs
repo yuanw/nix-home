@@ -86,7 +86,7 @@ myFocusedBorderColor = "#ff0000"
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
---myKeys :: XConfig l0 -> [((KeyMask, KeySym), NamedAction)]
+-- myKeys :: XConfig l0 -> [((KeyMask, KeySym), NamedAction)]
 myKeys conf@(XConfig {XMonad.modMask = modm}) =
   M.fromList $
     -- launch a terminal
@@ -177,7 +177,8 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) =
     -- mod-button1, Set the window to floating mode and move by dragging
     [ ( (modm, button1),
         ( \w ->
-            focus w >> mouseMoveWindow w
+            focus w
+              >> mouseMoveWindow w
               >> windows W.shiftMaster
         )
       ),
@@ -186,7 +187,8 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) =
       -- mod-button3, Set the window to floating mode and resize by dragging
       ( (modm, button3),
         ( \w ->
-            focus w >> mouseResizeWindow w
+            focus w
+              >> mouseResizeWindow w
               >> windows W.shiftMaster
         )
       )
