@@ -98,6 +98,13 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
 (after! company (setq company-idle-delay 0.2))
+(setq org-agenda-custom-commands
+      '(("c" "Desk Work";; (1) (2) (3) (4)
+         ((org-agenda-files '("~/org/agenda/workiva" )) ;; (5)
+          (org-agenda-sorting-strategy '(priority-up effort-down))) ;; (5) cont.
+         ("~/computer.html")) ;; (6)
+        ;; ...other commands here
+        ))
 
 (use-package! super-save
   :config
