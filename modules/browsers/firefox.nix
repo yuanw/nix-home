@@ -19,7 +19,7 @@ in {
       programs.firefox.extensions = with pkgs.nur.repos.rycee.firefox-addons; [
         tridactyl
         ublock-origin
-        https-everywhere
+         # https-everywhere
         privacy-badger
         leechblock-ng
       ];
