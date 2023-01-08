@@ -98,13 +98,47 @@
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'nil)
 (after! company (setq company-idle-delay 0.2))
+;; (setq org-agenda-custom-commands
+;;       '(("w" "Work";; (1) (2) (3) (4)
+;;             (todo "TODO"
+;;                 ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
+;;                  (org-agenda-files '("~/org/agenda/inbox.org"))
+;;                  (org-agenda-text-search-extra-files nil))))
+;;          ;; ("~/computer.html")) ;; (6)
+;;         ;; ...other commands here
+;;         ))
+
 (setq org-agenda-custom-commands
-      '(("c" "Desk Work";; (1) (2) (3) (4)
-         ((org-agenda-files '("~/org/agenda/workiva" )) ;; (5)
-          (org-agenda-sorting-strategy '(priority-up effort-down))) ;; (5) cont.
-         ("~/computer.html")) ;; (6)
-        ;; ...other commands here
-        ))
+      `(("d" "Dashboard"
+         ;; ((agenda "" ((org-deadline-warning-days 7)))
+          ((tags-todo "+PRIORITY=\"A\""
+                     ((org-agenda-overriding-header "High Priority")))
+          (tags-todo "+followup" ((org-agenda-overriding-header "Needs Follow Up")))
+          (todo "NEXT"
+                ((org-agenda-overriding-header "Next Actions")
+                 (org-agenda-max-todos nil)))
+          (todo "TODO"
+                ((org-agenda-overriding-header "Unprocessed Inbox Tasks")
+                 (org-agenda-files '("~/org/agenda/inbox.org"))
+                 (org-agenda-text-search-extra-files nil)))
+                    (todo "TODO"
+                ((org-agenda-overriding-header "Work")
+                 (org-agenda-files '("~/org/agenda/workiva.org"))
+                 (org-agenda-text-search-extra-files nil)))
+
+          )
+         )
+
+        ("n" "Next Tasks"
+         ((agenda "" ((org-deadline-warning-days 7)))
+          (todo "NEXT"
+                ((org-agenda-overriding-header "Next Tasks")))))
+
+        ;; Low-effort next actions
+        ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
+         ((org-agenda-overriding-header "Low Effort Tasks")
+          (org-agenda-max-todos 20)
+          (org-agenda-files org-agenda-files)))))
 
 (use-package! super-save
   :config
