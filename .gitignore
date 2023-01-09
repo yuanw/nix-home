@@ -5,3 +5,5 @@ tmp/
 result
 .nix-script-cache/
 .envrc
+
+nohup.out

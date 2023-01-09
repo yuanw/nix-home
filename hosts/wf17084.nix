@@ -66,7 +66,7 @@
 
     };
 
-    colemak.enable = true;
+    # colemak.enable = true;
     dev = {
       agda.enable = false;
       python.enable = true;
