@@ -20,11 +20,13 @@ import XMonad.Util.SpawnOnce
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
---
+myTerminal :: String
 myTerminal = "alacritty"
 
+appLauncher :: String
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
+screenLocker :: String
 screenLocker = "betterlockscreen -l dim"
 
 -- Whether focus follows the mouse pointer.
