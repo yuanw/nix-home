@@ -25,6 +25,7 @@ with pkgs; [
   xclip
   pass
   zlib
+  pigz
   shellcheck
   gitAndTools.pre-commit
   gitAndTools.delta
