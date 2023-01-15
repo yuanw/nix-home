@@ -9,6 +9,8 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
+import XMonad.Prompt
+import XMonad.Prompt.OrgMode (orgPrompt)
 import qualified XMonad.StackSet as W
 import XMonad.Util.Dmenu
 import XMonad.Util.EZConfig (additionalKeysP, mkNamedKeymap)
@@ -17,8 +19,6 @@ import XMonad.Util.NamedActions
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (runProcessWithInput, safeSpawn, spawnPipe)
 import XMonad.Util.SpawnOnce
-import XMonad.Prompt
-import XMonad.Prompt.OrgMode (orgPrompt)
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
