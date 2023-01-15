@@ -47,9 +47,6 @@ final: prev:
       sha256 = "YEKqqCLJQvFD3OaJvgD+OEDxXgPcjnaNpNtSPaDUS+M=";
     };
   });
-    haskellPackages.gotta-go-fast  = prev.haskellPackages.gotta-go-fast.overrideAttrs (oldAttrs: rec {
-      broken = false;
-   });
 
   juliaMac = final.installApplication rec {
     name = "Julia";
