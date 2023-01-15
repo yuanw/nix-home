@@ -17,6 +17,8 @@ import XMonad.Util.NamedActions
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run (runProcessWithInput, safeSpawn, spawnPipe)
 import XMonad.Util.SpawnOnce
+import XMonad.Prompt
+import XMonad.Prompt.OrgMode (orgPrompt)
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -138,6 +140,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm, xK_comma), sendMessage (IncMasterN 1)),
       -- Deincrement the number of windows in the master area
       ((modm, xK_period), sendMessage (IncMasterN (-1))),
+      ((modm, xK_x), orgPrompt def "TODO" "/home/me/org/todos.org"),
       -- Toggle the status bar gap
       -- Use this binding with avoidStruts from Hooks.ManageDocks.
       -- See also the statusBar function from Hooks.DynamicLog.
