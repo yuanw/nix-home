@@ -81,24 +81,31 @@ myModMask = mod4Mask
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
 myWorkspaces = ["web", "code", "random"]
+
 -- | Base colours to be used.
-colorBg       :: String = "#282A36"
-colorBlue     :: String = "#bd93f9"
-colorCyan     :: String = "#8be9fd"
-colorFg       :: String = "#f8f8f2"
+colorBg :: String = "#282A36"
+
+colorBlue :: String = "#bd93f9"
+
+colorCyan :: String = "#8be9fd"
+
+colorFg :: String = "#f8f8f2"
+
 colorLowWhite :: String = "#bbbbbb"
-colorMagenta  :: String = "#ff79c6"
-colorRed      :: String = "#ff5555"
-colorYellow   :: String = "#f1fa8c"
+
+colorMagenta :: String = "#ff79c6"
+
+colorRed :: String = "#ff5555"
+
+colorYellow :: String = "#f1fa8c"
 
 blue, lowWhite, magenta, red, white, yellow :: String -> String
-magenta  = xmobarColor colorMagenta  ""
-blue     = xmobarColor colorBlue     ""
-white    = xmobarColor colorFg       ""
-yellow   = xmobarColor colorYellow   ""
-red      = xmobarColor colorRed      ""
+magenta = xmobarColor colorMagenta ""
+blue = xmobarColor colorBlue ""
+white = xmobarColor colorFg ""
+yellow = xmobarColor colorYellow ""
+red = xmobarColor colorRed ""
 lowWhite = xmobarColor colorLowWhite ""
-
 
 -- Border colors for unfocused and focused windows, respectively.
 --
