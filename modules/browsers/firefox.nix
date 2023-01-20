@@ -1,4 +1,6 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
+# should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
+# https://github.com/mozilla/policy-templates
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -26,10 +28,34 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
+          search = {
+              default = "Google";
+              order = ["Google" "DuckDuckGo"];
+              engines =
+                  {"Nix Packages" = {
+                      urls = [{
+                        template = "https://search.nixos.org/packages";
+                        params = [
+                          { name = "type"; value = "packages"; }
+                          { name = "query"; value = "{searchTerms}"; }
+                        ];
+                      }];
+                      icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                      definedAliases = [ "@np" ];
+                    };
+                    "NixOS Wiki" = {
+                      urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
+                      iconUpdateURL = "https://nixos.wiki/favicon.png";
+                      updateInterval = 24 * 60 * 60 * 1000; # every day
+                      definedAliases = [ "@nw" ];
+                    };
+                  };
+          };
           # userChrome = ''
           #   *{font-size: 18px !important;
           #                     }
           # '';
+          # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
             "layout.css.devPixelsPerPx" = "2.0";
