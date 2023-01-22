@@ -44,6 +44,7 @@
       ];
       brews = [
         # "aws-iam-authenticator"
+        "helm"
         "pyenv"
         "pngpaste"
         "avr-gcc"
