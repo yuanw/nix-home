@@ -25,6 +25,7 @@ let
   laucherConfig = ''
     shift + ctrl + alt - d: ${emacsclient}
     shift + ctrl + alt - e: ${emacsEveryWhere}
+    shift + ctrl + alt - x: org-capture -k n
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
