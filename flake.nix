@@ -21,8 +21,8 @@
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, nixpkgs-stable, devenv, nixpkgs, darwin, home-manager, nur, emacs
-    , resource-id, ws-access-token, devshell, flake-utils, ... }:
+  outputs = inputs@{ self, nixpkgs-stable, devenv, nixpkgs, darwin, home-manager
+    , nur, emacs, resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -30,11 +30,11 @@
         nur.overlay
         (final: prev: {
           stable = nixpkgs-stable.legacyPackages.${prev.system};
-        # use this variant if unfree packages are needed:
-        # unstable = import nixpkgs-unstable {
-        #   inherit system;
-        #   config.allowUnfree = true;
-        # };
+          # use this variant if unfree packages are needed:
+          # unstable = import nixpkgs-unstable {
+          #   inherit system;
+          #   config.allowUnfree = true;
+          # };
 
         })
         (final: prev: {
