@@ -2,7 +2,8 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -20,13 +21,22 @@
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, devenv, nixpkgs, darwin, home-manager, nur, emacs
+  outputs = inputs@{ self, nixpkgs-stable, devenv, nixpkgs, darwin, home-manager, nur, emacs
     , resource-id, ws-access-token, devshell, flake-utils, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
         emacs.overlay
         nur.overlay
+        (final: prev: {
+          stable = nixpkgs-stable.legacyPackages.${prev.system};
+        # use this variant if unfree packages are needed:
+        # unstable = import nixpkgs-unstable {
+        #   inherit system;
+        #   config.allowUnfree = true;
+        # };
+
+        })
         (final: prev: {
           devenv = inputs.devenv.defaultPackage.${prev.system};
           resource-id = inputs.resource-id.defaultPackage.${prev.system};

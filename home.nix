@@ -119,6 +119,7 @@
 
     git = {
       enable = true;
+      package = pkgs.stable.git;
       userName = config.my.username;
 
       aliases = {
