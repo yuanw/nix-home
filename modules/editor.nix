@@ -37,7 +37,7 @@ in with lib; {
     home-manager.users.${config.my.username} = {
       home = {
         packages = with pkgs; [
-          git
+          # git
           (ripgrep.override { withPCRE2 = true; })
           gnutls # for TLS connectivity
           cmake
