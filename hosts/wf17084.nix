@@ -44,7 +44,7 @@
       ];
       brews = [
         # "aws-iam-authenticator"
-        "helm"
+        # "helm"
         "pyenv"
         "pngpaste"
         "avr-gcc"
@@ -67,7 +67,7 @@
 
     };
 
-    # colemak.enable = true;
+    colemak.enable = true;
     dev = {
       agda.enable = false;
       python.enable = true;
