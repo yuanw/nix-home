@@ -8,6 +8,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    hosts.url = "github:StevenBlack/hosts";
     devenv.url = "github:cachix/devenv/v0.2";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
@@ -22,7 +23,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs-stable, devenv, nixpkgs, darwin, home-manager
-    , nur, emacs, resource-id, ws-access-token, devshell, flake-utils, ... }:
+    , nur, emacs, resource-id, ws-access-token, devshell, flake-utils, hosts, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -69,6 +70,14 @@
           system = "x86_64-linux";
           modules = modules ++ [
             ./nixos_system.nix
+            hosts.nixosModule {
+ networking.stevenBlackHosts = {
+    blockFakenews = true;
+    blockGambling = true;
+    blockPorn = true;
+    blockSocial = false;
+  };
+            }
             home-manager.nixosModules.home-manager
             {
 
