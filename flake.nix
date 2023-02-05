@@ -104,7 +104,7 @@
         wf17084 = mkDarwinSystem { modules = [ ./hosts/wf17084.nix ]; };
       };
 
-      asche  = self.nixosConfigurations.asche.system;
+      asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
 
