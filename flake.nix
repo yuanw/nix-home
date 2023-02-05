@@ -122,7 +122,7 @@
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
-            pkgs.ormolu
+            # pkgs.ormolu
             # pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
