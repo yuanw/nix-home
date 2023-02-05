@@ -38,18 +38,12 @@ final: prev:
   hosts = prev.callPackage ./hosts.nix { };
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
-  # TODO: change this once upstream to on
-  # git = prev.git.overrideAttrs (oldAttrs: rec {
-  #   version = "2.39.1";
-  # src = prev.fetchurl {
-  #   url = "https://www.kernel.org/pub/software/scm/git/git-${version}.tar.xz";
-  #   sha256 = "sha256-QKOKCEezDDcbNYc7OvzxI4hd1B6j7Lv1EO+pfzzlwWE=";
-  # };  });
-  # 1.12.0 test fails on my machine
-  #  starship = prev.starship.overrideAttrs (oldAttrs: {
-  #    doCheck = false;
-  #    doInstallCheck = false;
-  # });
+  haskellPackages = prev.haskellPackages.override {
+    overrides = haskellPackagesNew: haskellPackagesOld: rec {
+      gotta-go-fast = haskellPackagesNew.callPackage ./gotta-go-fast.nix { };
+
+    };
+  };
   qmk-udev-rules = prev.qmk-udev-rules.overrideAttrs (oldAttrs: rec {
     version = "0.18.17";
     src = prev.fetchFromGitHub {
