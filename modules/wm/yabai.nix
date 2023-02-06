@@ -37,8 +37,7 @@ let
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
 
-    # display moonlander configuration
-    shift + ctrl + alt - m: open ~/moonlander.pdf
+     shift + ctrl + alt - m: sRepo
 
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
@@ -53,6 +52,15 @@ in {
     home-manager.users.${config.my.username} = {
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
+        (
+             pkgs.writeShellScriptBin "sRepo"
+    ''
+REPO=$(gum choose "content-management-service" "bigsky")
+
+open -a firefox -g  "https://github.com/Workiva/$REPO/"
+    ''
+
+        )
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
