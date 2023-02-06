@@ -37,7 +37,7 @@ let
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
 
-     shift + ctrl + alt - m: sRepo
+    shift + ctrl + alt - m: alacritty -e sRepo
 
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
