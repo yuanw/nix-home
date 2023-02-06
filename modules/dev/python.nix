@@ -21,7 +21,7 @@ in {
           # poetry
           pytest
           pyflakes
-          pylsp-mypy
+          # pylsp-mypy
           virtualenv
           virtualenvwrapper
         ]))
