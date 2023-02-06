@@ -56,4 +56,6 @@ with pkgs; [
   #shellcheck
   fontconfig
   #kubectl
+  #
+  gum
 ]
