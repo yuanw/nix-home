@@ -49,7 +49,7 @@
         "pngpaste"
         "avr-gcc"
         "qmk/qmk/qmk"
-        # "jdtls"
+        "jdtls"
         "redis"
         "ttygif"
       ];
