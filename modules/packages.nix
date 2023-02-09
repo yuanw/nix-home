@@ -57,5 +57,6 @@ with pkgs; [
   fontconfig
   #kubectl
   #
+  csvkit
   gum
 ]
