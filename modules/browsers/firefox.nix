@@ -21,14 +21,13 @@ in {
       programs.firefox.profiles = {
         home = {
           id = 0;
-          extensions =
-               with pkgs.nur.repos.rycee.firefox-addons; [
-        tridactyl
-        ublock-origin
-        # https-everywhere
-        privacy-badger
-        leechblock-ng
-      ];
+          extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+            tridactyl
+            ublock-origin
+            # https-everywhere
+            privacy-badger
+            leechblock-ng
+          ];
 
           search = {
             default = "Google";
