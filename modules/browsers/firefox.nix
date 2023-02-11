@@ -18,16 +18,18 @@ in {
     home-manager.users.${config.my.username} = {
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
-      programs.firefox.extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+      programs.firefox.profiles = {
+        home = {
+          id = 0;
+          extensions =
+               with pkgs.nur.repos.rycee.firefox-addons; [
         tridactyl
         ublock-origin
         # https-everywhere
         privacy-badger
         leechblock-ng
       ];
-      programs.firefox.profiles = {
-        home = {
-          id = 0;
+
           search = {
             default = "Google";
             order = [ "Google" "DuckDuckGo" ];
