@@ -10,7 +10,6 @@
         "https://yuanw-nix-home-macos.cachix.org"
         "https://cachix.org/api/v1/cache/yuanwang-wf"
         "https://cachix.org/api/v1/cache/devenv"
-        "https://cachix.org/api/v1/cache/"
       ];
       trusted-substituters = [
         "https://cache.nixos.org"
