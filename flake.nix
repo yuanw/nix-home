@@ -2,7 +2,8 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   nixConfig = {
-    extra-trusted-public-keys = "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ=";
+    extra-trusted-public-keys =
+      "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ=";
     extra-substituters = "https://yuanw-nix-home-macos.cachix.org";
   };
   inputs = {
