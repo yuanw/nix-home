@@ -59,4 +59,5 @@ with pkgs; [
   #
   csvkit
   gum
+  example
 ]
