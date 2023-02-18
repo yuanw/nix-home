@@ -82,9 +82,7 @@
               };
             }
             home-manager.nixosModules.home-manager
-            {
-              nixpkgs.overlays = overlays;
-            }
+            { nixpkgs.overlays = overlays; }
             ({ lib, pkgs, ... }: {
               imports = import ./modules/modules.nix {
                 inherit lib;
