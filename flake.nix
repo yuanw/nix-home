@@ -83,7 +83,6 @@
             }
             home-manager.nixosModules.home-manager
             {
-
               nixpkgs.overlays = overlays;
             }
             ({ lib, pkgs, ... }: {
