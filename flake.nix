@@ -18,8 +18,8 @@
     };
     nur.url = "github:nix-community/NUR";
     hs-land = {
-       url = "path:/hs-land";
-       inputs.nixpkgs.follows = "nixpkgs";
+      url = "path:/hs-land";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     emacs.url = "github:nix-community/emacs-overlay";
     resource-id.url = "github:yuanwang-wf/resource-id";

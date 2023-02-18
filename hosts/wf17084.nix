@@ -61,7 +61,7 @@
     editors.emacs = {
       enable = true;
       # enableService = true;
-     pkg = with pkgs;
+      pkg = with pkgs;
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
