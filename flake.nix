@@ -1,7 +1,7 @@
 {
   description = "Yuan Nix-darwin/NixOS Home";
 
-   inputs = {
+  inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.11";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     darwin = {
@@ -82,9 +82,7 @@
               };
             }
             home-manager.nixosModules.home-manager
-            {
-              nixpkgs.overlays = overlays;
-            }
+            { nixpkgs.overlays = overlays; }
             ({ lib, pkgs, ... }: {
               imports = import ./modules/modules.nix {
                 inherit lib;

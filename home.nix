@@ -17,7 +17,8 @@
       "wallpapers/haskell-red-noise.png".source =
         ./pictures/haskell-red-noise.png;
       "wallpapers/doom.svg".source = ./pictures/doomEmacs.svg;
-      "wallpapers/nix-wallpaper-dracula.png".source = ./pictures/nix-wallpaper-dracula.png;
+      "wallpapers/nix-wallpaper-dracula.png".source =
+        ./pictures/nix-wallpaper-dracula.png;
     };
   };
 
