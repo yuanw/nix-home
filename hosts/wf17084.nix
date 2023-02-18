@@ -61,18 +61,9 @@
     editors.emacs = {
       enable = true;
       # enableService = true;
-      pkg = let
-        system = "x86_64-darwin";
-        emacsPgtkWithXwidgets =
-          inputs.emacs.packages.${system}.emacsPgtk.override {
-            withXwidgets = true;
-          };
-        myEmacs = emacsPgtkWithXwidgets.overrideAttrs (oa: {
-          buildInputs = oa.buildInputs ++ lib.optionals pkgs.stdenv.isDarwin
-            [ pkgs.darwin.apple_sdk.frameworks.WebKit ];
-        });
-      in (pkgs.emacsPackagesFor myEmacs).emacsWithPackages
-      (epkgs: [ epkgs.vterm ]);
+     pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
     };
 
     # colemak.enable = true;

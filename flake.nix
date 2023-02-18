@@ -17,6 +17,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nur.url = "github:nix-community/NUR";
+    hs-land = {
+       url = "path:/hs-land";
+       inputs.nixpkgs.follows = "nixpkgs";
+    };
     emacs.url = "github:nix-community/emacs-overlay";
     resource-id.url = "github:yuanwang-wf/resource-id";
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
@@ -40,6 +44,7 @@
 
         })
         (final: prev: {
+          example = inputs.hs-land.defaultPackage.${prev.system};
           devenv = inputs.devenv.defaultPackage.${prev.system};
           resource-id = inputs.resource-id.defaultPackage.${prev.system};
           ws-access-token =
