@@ -1,4 +1,4 @@
-{ lib, pkgs, config, services, ... }: {
+{ lib, pkgs, config, inputs, services, ... }: {
 
   my = {
 
@@ -61,10 +61,19 @@
     editors.emacs = {
       enable = true;
       # enableService = true;
-      pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
-
+      pkg =
+             let
+        emacsPgtkWithXwidgets = inputs.emacs-overlay.packages.${system}.emacsPgtk.override {
+          withXwidgets = true;
+        };
+        myEmacs = emacsPgtkWithXwidgets.overrideAttrs (oa: {
+          buildInputs = oa.buildInputs ++ lib.optionals pkgs.stdenv.isDarwin
+            [ pkgs.darwin.apple_sdk.frameworks.WebKit ];
+        });
+      in
+      (pkgs.emacsPackagesFor myEmacs).emacsWithPackages (epkgs: [
+        epkgs.vterm
+      ]);
     };
 
     # colemak.enable = true;
