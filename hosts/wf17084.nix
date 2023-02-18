@@ -62,8 +62,9 @@
       enable = true;
       # enableService = true;
       pkg = let
+        system = "x86_64-darwin";
         emacsPgtkWithXwidgets =
-          inputs.emacs-overlay.packages.${system}.emacsPgtk.override {
+          inputs.emacs.packages.${system}.emacsPgtk.override {
             withXwidgets = true;
           };
         myEmacs = emacsPgtkWithXwidgets.overrideAttrs (oa: {
