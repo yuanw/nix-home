@@ -86,7 +86,7 @@ in {
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
             "browser.startup.homepage" =
-              "files:://${homeDir}/startpage/index.html";
+              "file://${homeDir}/startpage/index.html";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
