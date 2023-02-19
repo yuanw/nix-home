@@ -14,7 +14,7 @@
   xdg = {
     enable = true;
     configFile = {
-      "startpage".source = ../startpage;
+      "startpage".source = lib.file.mkOutOfStoreSymlink  ../startpage;
       "wallpapers/haskell-red-noise.png".source =
         ./pictures/haskell-red-noise.png;
       "wallpapers/doom.svg".source = ./pictures/doomEmacs.svg;
