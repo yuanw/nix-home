@@ -10,7 +10,7 @@
       imports = [ inputs.haskell-flake.flakeModule ];
       perSystem = { self', pkgs, ... }: {
         haskellProjects.default = {
-          # packages.example.root = ./.;  # This value is detected based on .cabal files
+          packages.example.root = ./.;  # This value is detected based on .cabal files
           # overrides = self: super: { };
           # devShell = {
           #  enable = true;  # Enabled by default
