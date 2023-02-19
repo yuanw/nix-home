@@ -4,8 +4,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.modules.browsers.firefox;
-    homeDir = config.my.homeDirectory;
+let
+  cfg = config.modules.browsers.firefox;
+  homeDir = config.my.homeDirectory;
 in {
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
@@ -84,7 +85,8 @@ in {
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
-            "browser.startup.homepage" = "files::///${homeDir}/startpage/index.html";
+            "browser.startup.homepage" =
+              "files::///${homeDir}/startpage/index.html";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
