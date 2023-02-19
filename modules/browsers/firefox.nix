@@ -20,7 +20,7 @@ in {
     home-manager.users.${config.my.username} = {
       home = {
 
-        file."startpage".source = ../../startpage;
+        file."startpage".source = ../startpage;
       };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;

@@ -6,3 +6,4 @@
 Ctrl +/Ctrl - for zoom in and out
 Alt <- backforward
 ** Tridactyl - Extension
+https://github.com/Axarva/dotfiles-2.0/tree/f86ba7d19a9192b288bb98e06b84ff0657249d98/startpage
