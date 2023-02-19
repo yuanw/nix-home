@@ -1,7 +1,7 @@
 {
   description = "Yuan Nix-darwin/NixOS Home";
 
-   inputs = {
+  inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.11";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     darwin = {
