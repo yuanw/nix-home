@@ -9,7 +9,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hosts.url = "github:StevenBlack/hosts";
-    # devenv.url = "github:cachix/devenv";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
@@ -18,8 +17,6 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    # resource-id.url = "github:yuanwang-wf/resource-id";
-    # ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
@@ -38,13 +35,6 @@
           # };
 
         })
-        (final: prev:
-          {
-            # devenv = inputs.devenv.defaultPackage.${prev.system};
-            # resource-id = inputs.resource-id.defaultPackage.${prev.system};
-            # ws-access-token =
-            #   inputs.ws-access-token.defaultPackage.${prev.system};
-          })
         (import ./overlays)
       ];
 
@@ -111,10 +101,6 @@
           inherit system;
           overlays = [ devshell.overlay ];
         };
-
-        # myHaskellEnv = (pkgs.haskellPackages.ghcWithHoogle
-        #   (p: with p; [ cabal-install ormolu hlint hpack brittany turtle ]));
-
       in {
         devShell = pkgs.devshell.mkShell {
           name = "nix-home";
@@ -122,8 +108,6 @@
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
           packages = [
-            # pkgs.ormolu
-            # pkgs.haskellPackages.hnix
             pkgs.treefmt
             pkgs.nixfmt
           ];
