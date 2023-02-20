@@ -19,8 +19,8 @@
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
         haskellProjects.main = {
-          packages.resource-id.root =
-            ./resource-id; # This value is detected based on .cabal files
+          packages.resource-id.root = ./resource-id; # This value is detected based on .cabal files
+          packages.ws-access-token.root = ./ws-access-token; # This value is detected based on .cabal files
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
@@ -50,6 +50,7 @@
         };
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.default = self'.packages.main-resource-id;
+        packages.ws-access-token = self'.packages.main-ws-access-token;
       };
     };
 }
