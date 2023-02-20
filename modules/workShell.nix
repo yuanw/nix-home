@@ -11,7 +11,7 @@ in {
         pkgs.kubernetes-helm
         pkgs.aws-iam-authenticator
         pkgs.clang-tools
-        pkgs.antlr4
+        # pkgs.antlr4
 
         pkgs.haskellPackages.resource-id
         pkgs.ws-access-token
