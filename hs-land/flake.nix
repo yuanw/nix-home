@@ -23,6 +23,9 @@
             ./resource-id; # This value is detected based on .cabal files
           packages.ws-access-token.root =
             ./ws-access-token; # This value is detected based on .cabal files
+         packages.hi-chew.root =
+            ./hi-chew;
+
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
@@ -51,8 +54,9 @@
           };
         };
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.default = self'.packages.main-resource-id;
+        packages.resource-id = self'.packages.main-resource-id;
         packages.ws-access-token = self'.packages.main-ws-access-token;
+        packages.hi-chew = self'.packages.main-hi-chew;
       };
     };
 }
