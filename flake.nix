@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     hosts.url = "github:StevenBlack/hosts";
-    devenv.url = "github:cachix/devenv";
+    # devenv.url = "github:cachix/devenv";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
@@ -22,7 +22,7 @@
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, nixpkgs-stable, devenv, nixpkgs, darwin, home-manager
+  outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager
     , nur, emacs, resource-id, ws-access-token, devshell, flake-utils, hosts
     , ... }:
     let
@@ -41,7 +41,7 @@
         })
         (final: prev: {
           # example = inputs.hs-land.apps.${prev.system};
-          devenv = inputs.devenv.defaultPackage.${prev.system};
+          # devenv = inputs.devenv.defaultPackage.${prev.system};
           resource-id = inputs.resource-id.defaultPackage.${prev.system};
           ws-access-token =
             inputs.ws-access-token.defaultPackage.${prev.system};
