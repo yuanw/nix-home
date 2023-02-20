@@ -12,7 +12,8 @@ in {
         pkgs.aws-iam-authenticator
         pkgs.clang-tools
         pkgs.antlr4
-        pkgs.resource-id
+
+        pkgs.haskellPackages.resource-id
         pkgs.ws-access-token
         pkgs.csvkit
         # pkgs.visidata
