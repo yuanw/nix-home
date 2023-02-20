@@ -22,9 +22,8 @@
     ws-access-token.url = "github:yuanwang-wf/ws-access-token";
   };
 
-  outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager
-    , nur, emacs, resource-id, ws-access-token, devshell, flake-utils, hosts
-    , ... }:
+  outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
+    , emacs, resource-id, ws-access-token, devshell, flake-utils, hosts, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
