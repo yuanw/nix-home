@@ -54,7 +54,7 @@ import Web.JWT
         sub,
         unregisteredClaims
       ),
-    Signer (RSAPrivateKey),
+    EncodeSigner (EncodeRSAPrivateKey),
     StringOrURI,
     claims,
     decode,
@@ -85,12 +85,12 @@ instance FromJSON AccessToken where
     val <- obj .: "access_token"
     return (AccessToken val)
 
-getSigner :: Record -> IO Signer
+getSigner :: Record -> IO EncodeSigner
 getSigner config = do
   content <- (BS.readFile . T.unpack . keyPath) config
   maybe
     (fail "fail to read secret key")
-    (return . RSAPrivateKey)
+    (return . EncodeRSAPrivateKey)
     (readRsaSecret content)
 
 constructClaimsSet :: Record -> POSIXTime -> JWTClaimsSet
