@@ -40,8 +40,9 @@ final: prev:
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
   haskellPackages = prev.haskellPackages.override {
     overrides = haskellPackagesNew: haskellPackagesOld: rec {
-     ws-access-token  =
-        haskellPackagesNew.callPackage ../hs-land/ws-access-token/release.nix { };
+      ws-access-token =
+        haskellPackagesNew.callPackage ../hs-land/ws-access-token/release.nix
+        { };
 
       resource-id =
         haskellPackagesNew.callPackage ../hs-land/resource-id/release.nix { };

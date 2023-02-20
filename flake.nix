@@ -38,12 +38,13 @@
           # };
 
         })
-        (final: prev: {
-          # devenv = inputs.devenv.defaultPackage.${prev.system};
-          # resource-id = inputs.resource-id.defaultPackage.${prev.system};
-          # ws-access-token =
-          #   inputs.ws-access-token.defaultPackage.${prev.system};
-        })
+        (final: prev:
+          {
+            # devenv = inputs.devenv.defaultPackage.${prev.system};
+            # resource-id = inputs.resource-id.defaultPackage.${prev.system};
+            # ws-access-token =
+            #   inputs.ws-access-token.defaultPackage.${prev.system};
+          })
         (import ./overlays)
       ];
 
