@@ -59,5 +59,5 @@ with pkgs; [
   #
   csvkit
   gum
-  # haskellPackages.example
+  haskellPackages.example
 ]
