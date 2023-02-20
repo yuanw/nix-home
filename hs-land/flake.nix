@@ -18,12 +18,12 @@
         inputs.mission-control.flakeModule
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
-        haskellProjects.resource-id = {
+        haskellProjects.main = {
           packages.resource-id.root =
             ./resource-id; # This value is detected based on .cabal files
           # overrides = self: super: { };
           devShell = {
-            enable = true; # Enabled by default
+            # enable = true; # Enabled by default
             tools = hp:
               {
                 treefmt = config.treefmt.build.wrapper;
@@ -49,7 +49,7 @@
           };
         };
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.resource-id = self'.packages.resource-id;
+        packages.defaul = self'.packages.main-resource-id;
       };
     };
 }
