@@ -18,7 +18,11 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ colemak pkgs.haskellPackages.gotta-go-fast ];
+      home.packages = [
+        # colemak
+        # pkgs.haskellPackages.gotta-go-fast
+        ttyper
+      ];
 
       xdg.configFile = {
         "colemak/level1.txt".source = ./level1.txt;
