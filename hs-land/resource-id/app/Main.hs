@@ -1,15 +1,15 @@
 module Main where
 
-import qualified Data.ByteString.Char8 as C
-import           Lib
-import qualified Options.Applicative   as OA
-import           System.Environment
-import           System.Exit
+import Data.ByteString.Char8 qualified as C
+import Lib
+import Options.Applicative qualified as OA
+import System.Environment
+import System.Exit
 
 data Config = Config
-  { rid    :: String
-  , decode :: Bool
-  }
+    { rid :: String
+    , decode :: Bool
+    }
 
 config :: OA.Parser Config
 config = error ""

@@ -1,5 +1,18 @@
-{ mkDerivation, aeson, base, bytestring, containers, cryptonite, dhall, hedgehog
-, jwt, lib, req, text, time, vector }:
+{ mkDerivation
+, aeson
+, base
+, bytestring
+, containers
+, cryptonite
+, dhall
+, hedgehog
+, jwt
+, lib
+, req
+, text
+, time
+, vector
+}:
 mkDerivation {
   pname = "ws-access-token";
   version = "0.0.1.0";

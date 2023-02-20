@@ -1,70 +1,67 @@
-cabal-version: 1.12
+cabal-version:      1.12
+name:               resource-id
+version:            0.1.0.0
+description:
+  Please see the README on GitHub at <https://github.com/yuanwang-wf/resource-id#readme>
 
-name:           resource-id
-version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/yuanwang-wf/resource-id#readme>
-homepage:       https://github.com/yuanwang-wf/resource-id#readme
-bug-reports:    https://github.com/yuanwang-wf/resource-id/issues
-author:         Yuan Wang
-maintainer:     yuan.wang@workiva.com
-copyright:      2019 Yuan Wang
-license:        BSD3
-license-file:   LICENSE
-build-type:     Simple
+homepage:           https://github.com/yuanwang-wf/resource-id#readme
+bug-reports:        https://github.com/yuanwang-wf/resource-id/issues
+author:             Yuan Wang
+maintainer:         yuan.wang@workiva.com
+copyright:          2019 Yuan Wang
+license:            BSD3
+license-file:       LICENSE
+build-type:         Simple
 extra-source-files:
-    README.md
-    ChangeLog.md
+  ChangeLog.md
+  README.md
 
 source-repository head
-  type: git
+  type:     git
   location: https://github.com/yuanwang-wf/resource-id
 
 library
-  exposed-modules:
-      Lib
-  other-modules:
-      Paths_resource_id
-  hs-source-dirs:
-      src
+  exposed-modules:  Lib
+  other-modules:    Paths_resource_id
+  hs-source-dirs:   src
   build-depends:
-      base >=4.7 && <5
+      base                  >=4.7 && <5
     , base64-bytestring
     , bytestring
+    , optparse-applicative
     , pretty-terminal
     , text
-    , optparse-applicative
+
   default-language: Haskell2010
 
 executable rid
-  main-is: Main.hs
-  other-modules:
-      Paths_resource_id
-  hs-source-dirs:
-      app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  main-is:          Main.hs
+  other-modules:    Paths_resource_id
+  hs-source-dirs:   app
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      base                  >=4.7 && <5
     , base64-bytestring
     , bytestring
+    , optparse-applicative
     , pretty-terminal
     , resource-id
     , text
-    , optparse-applicative
+
   default-language: Haskell2010
 
 test-suite resource-id-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  other-modules:
-      Paths_resource_id
-  hs-source-dirs:
-      test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  type:             exitcode-stdio-1.0
+  main-is:          Spec.hs
+  other-modules:    Paths_resource_id
+  hs-source-dirs:   test
+  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      base               >=4.7 && <5
     , base64-bytestring
     , bytestring
     , pretty-terminal
     , resource-id
     , text
+
   default-language: Haskell2010
