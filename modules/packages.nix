@@ -56,7 +56,7 @@ with pkgs; [
   #shellcheck
   fontconfig
   #kubectl
-  vhs
+  # vhs
   csvkit
   gum
   # haskellPackages.example
