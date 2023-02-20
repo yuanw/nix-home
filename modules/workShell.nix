@@ -14,7 +14,7 @@ in {
         # pkgs.antlr4
 
         pkgs.haskellPackages.resource-id
-        pkgs.ws-access-token
+        pkgs.haskellPackages.ws-access-token
         pkgs.csvkit
         # pkgs.visidata
         pkgs.terraform
