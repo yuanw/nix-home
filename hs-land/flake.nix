@@ -56,7 +56,7 @@
         packages.resource-id = self'.packages.main-resource-id;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
- # Dev shell scripts.
+        # Dev shell scripts.
         mission-control.scripts = {
           docs = {
             description = "Start Hoogle server for project dependencies";
@@ -86,7 +86,6 @@
             category = "Primary";
           };
         };
-
 
         # Default shell.
         devShells.default =
