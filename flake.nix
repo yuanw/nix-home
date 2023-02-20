@@ -39,9 +39,8 @@
 
         })
         (final: prev: {
-          # example = inputs.hs-land.apps.${prev.system};
           # devenv = inputs.devenv.defaultPackage.${prev.system};
-          resource-id = inputs.resource-id.defaultPackage.${prev.system};
+          # resource-id = inputs.resource-id.defaultPackage.${prev.system};
           ws-access-token =
             inputs.ws-access-token.defaultPackage.${prev.system};
         })
