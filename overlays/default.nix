@@ -40,8 +40,7 @@ final: prev:
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
   haskellPackages = prev.haskellPackages.override {
     overrides = haskellPackagesNew: haskellPackagesOld: rec {
-      gotta-go-fast = haskellPackagesNew.callPackage ./gotta-go-fast.nix { };
-
+      example = haskellPackagesNew.callPackage ../hs-land { };
     };
   };
   qmk-udev-rules = prev.qmk-udev-rules.overrideAttrs (oldAttrs: rec {
