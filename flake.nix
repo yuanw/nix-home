@@ -107,10 +107,7 @@
           imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
           git.hooks.enable = true;
           git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
-          packages = [
-            pkgs.treefmt
-            pkgs.nixfmt
-          ];
+          packages = [ pkgs.treefmt pkgs.nixfmt ];
         };
       });
 }
