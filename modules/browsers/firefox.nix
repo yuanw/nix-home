@@ -19,7 +19,6 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home = {
-
         file."startpage".source = ./startpage;
       };
       programs.firefox.enable = true;

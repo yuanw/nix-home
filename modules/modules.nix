@@ -15,6 +15,7 @@ let
     (loadModule ./dev/python.nix { })
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
+    (loadModule ./helix.nix { })
     (loadModule ./hledger.nix { })
     (loadModule ./common.nix { })
     (loadModule ./settings.nix { })
