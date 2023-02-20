@@ -21,7 +21,7 @@ in {
       home.packages = [
         # colemak
         # pkgs.haskellPackages.gotta-go-fast
-        ttyper
+        pkgs.ttyper
       ];
 
       xdg.configFile = {
