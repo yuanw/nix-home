@@ -1,4 +1,4 @@
-{ lib, pkgs, config, inputs, services, ... }: {
+{ lib, pkgs, config, services, ... }: {
 
   my = {
 
