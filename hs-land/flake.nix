@@ -23,8 +23,7 @@
             ./resource-id; # This value is detected based on .cabal files
           packages.ws-access-token.root =
             ./ws-access-token; # This value is detected based on .cabal files
-         packages.hi-chew.root =
-            ./hi-chew;
+          packages.hi-chew.root = ./hi-chew;
 
           # overrides = self: super: { };
           devShell = {
@@ -57,6 +56,41 @@
         packages.resource-id = self'.packages.main-resource-id;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
+ # Dev shell scripts.
+        mission-control.scripts = {
+          docs = {
+            description = "Start Hoogle server for project dependencies";
+            exec = ''
+              echo http://127.0.0.1:8888
+              hoogle serve -p 8888 --local
+            '';
+            category = "Dev Tools";
+          };
+          repl = {
+            description = "Start the cabal repl";
+            exec = ''
+              cabal repl "$@"
+            '';
+            category = "Dev Tools";
+          };
+          fmt = {
+            description = "Format the source tree";
+            exec = "${lib.getExe config.treefmt.build.wrapper}";
+            category = "Dev Tools ";
+          };
+          run = {
+            description = "Run the project with ghcid auto-recompile";
+            exec = ''
+              ghcid -c "cabal repl exe:haskell-template" --warnings -T :main
+            '';
+            category = "Primary";
+          };
+        };
+
+
+        # Default shell.
+        devShells.default =
+          config.mission-control.installToDevShell self'.devShells.main;
       };
     };
 }
