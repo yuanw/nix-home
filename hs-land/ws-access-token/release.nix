@@ -1,6 +1,5 @@
-{ mkDerivation, aeson, base, bytestring, containers, cryptonite
-, dhall, hedgehog, jwt, lib, req, text, time, vector
-}:
+{ mkDerivation, aeson, base, bytestring, containers, cryptonite, dhall, hedgehog
+, jwt, lib, req, text, time, vector }:
 mkDerivation {
   pname = "ws-access-token";
   version = "0.0.1.0";
@@ -8,7 +7,16 @@ mkDerivation {
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson base bytestring containers cryptonite dhall jwt req text time
+    aeson
+    base
+    bytestring
+    containers
+    cryptonite
+    dhall
+    jwt
+    req
+    text
+    time
     vector
   ];
   executableHaskellDepends = [ base ];
