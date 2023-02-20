@@ -1,12 +1,5 @@
-{ mkDerivation
-, base
-, base64-bytestring
-, bytestring
-, lib
-, optparse-applicative
-, pretty-terminal
-, text
-}:
+{ mkDerivation, base, base64-bytestring, bytestring, lib, optparse-applicative
+, pretty-terminal, text }:
 mkDerivation {
   pname = "resource-id";
   version = "0.1.0.0";
