@@ -42,7 +42,8 @@ final: prev:
     overrides = haskellPackagesNew: haskellPackagesOld: rec {
       # example = haskellPackagesNew.callPackage ../hs-land { };
 
-      resource-id  = haskellPackagesNew.callPackage ../hs-land/resource-id/release.nix { };
+      resource-id =
+        haskellPackagesNew.callPackage ../hs-land/resource-id/release.nix { };
 
     };
   };
