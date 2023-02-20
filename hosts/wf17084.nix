@@ -64,7 +64,6 @@
       pkg = with pkgs;
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
-
     };
 
     # colemak.enable = true;
