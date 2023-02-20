@@ -49,7 +49,7 @@
           };
         };
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.defaul = self'.packages.main-resource-id;
+        packages.default = self'.packages.main-resource-id;
       };
     };
 }
