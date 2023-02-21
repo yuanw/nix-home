@@ -35,6 +35,7 @@
           # };
 
         })
+        (import ./hs-land/overlay.nix)
         (import ./overlays)
       ];
 
