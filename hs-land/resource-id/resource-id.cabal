@@ -24,6 +24,8 @@ library
   exposed-modules:  Lib
   other-modules:    Paths_resource_id
   hs-source-dirs:   src
+  default-extensions:
+      ImportQualifiedPost
   build-depends:
       base                  >=4.7 && <5
     , base64-bytestring
@@ -39,6 +41,9 @@ executable rid
   other-modules:    Paths_resource_id
   hs-source-dirs:   app
   ghc-options:      -threaded -rtsopts -with-rtsopts=-N
+  default-extensions:
+      ImportQualifiedPost
+
   build-depends:
       base                  >=4.7 && <5
     , base64-bytestring
