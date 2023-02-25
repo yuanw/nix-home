@@ -14,7 +14,7 @@ let
     esac
   '';
 in {
-  options.modules.colemak = { enable = mkEnableOption "typing"; };
+  options.modules.typing = { enable = mkEnableOption "typing"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
