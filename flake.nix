@@ -109,13 +109,11 @@
           overlays = [ devshell.overlay ];
         };
       in {
-         packages.firmware = pkgs.stdenv.mkDerivation rec {
+        packages.firmware = pkgs.stdenv.mkDerivation rec {
           name = "firmware.hex";
           src = qmk_firmware;
 
-          buildInputs = with pkgs; [
-            qmk
-          ];
+          buildInputs = with pkgs; [ qmk ];
 
           # postUnpack = ''
           #   ln -s ${./.} $sourceRoot/keyboards/keebio/nyquist/keymaps/alternate
