@@ -28,6 +28,8 @@ in {
       enable = true;
       touchpad.disableWhileTyping = true;
     };
+
+      services.udisk2.enable = true;
     services.blueman.enable = true;
     services.xserver.displayManager = {
       defaultSession = "none+xmonad";
@@ -71,7 +73,6 @@ in {
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
-      services.udisk2.enable = true;
       services.udiskie = {
         enable = true;
         tray = "always";
