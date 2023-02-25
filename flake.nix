@@ -19,7 +19,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     qmk_firmware = {
       url =
-        "git+https://github.com/Bastardkb/bastardkb-qmk/tree/bkb-master/?submodules=1&shallow=1";
+        "github:Bastardkb/bastardkb-qmk/bkb-master";
       flake = false;
     };
   };
