@@ -252,6 +252,25 @@
         "type": "github"
       }
     },
+    "qmk_firmware": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1676791265,
+        "narHash": "sha256-GsdereiGwm+jQ8O2Q+xJF2yYzx9eWECIqPauIyKjG4A=",
+        "ref": "refs/heads/main",
+        "rev": "403439b6b531197ce7c8276b5d6d328a05b60921",
+        "shallow": true,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/Bastardkb/bastardkb-qmk"
+      },
+      "original": {
+        "shallow": true,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/Bastardkb/bastardkb-qmk"
+      }
+    },
     "root": {
       "inputs": {
         "darwin": "darwin",
@@ -262,7 +281,8 @@
         "hosts": "hosts",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable",
-        "nur": "nur"
+        "nur": "nur",
+        "qmk_firmware": "qmk_firmware"
       }
     },
     "utils": {
