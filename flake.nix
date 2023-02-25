@@ -119,7 +119,7 @@
           # '';
 
           buildPhase = ''
-            qmk compile -c -kb bastardkb/charybdis/3x5/v2/splinky_3  -km vial
+            qmk compile -c -kb bastardkb/charybdis/3x5/v2/splinky_3  -km via
           '';
 
           installPhase = ''
