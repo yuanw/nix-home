@@ -18,7 +18,8 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     qmk_firmware = {
-      url = "github:github.com/Bastardkb/bastardkb-qmk/bkb-master";
+      url =
+        "git+https://github.com/Bastardkb/bastardkb-qmk/tree/bkb-master?submodules=1&shallow=1";
       flake = false;
     };
   };
