@@ -29,7 +29,6 @@ in {
       touchpad.disableWhileTyping = true;
     };
 
-
     services.udisks2.enable = true;
     services.blueman.enable = true;
     services.xserver.displayManager = {

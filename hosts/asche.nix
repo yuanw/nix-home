@@ -79,7 +79,7 @@
     qmk.enable = true;
     # moonlander.enable = true;
     terminal.enable = true;
-    # colemak.enable = true;
+    colemak.enable = true;
     wm.xmonad.enable = true;
     browsers.firefox.enable = true;
   };
