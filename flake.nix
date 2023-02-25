@@ -17,7 +17,11 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    qmk_firmware = { url = "git+https://github.com/Bastardkb/bastardkb-qmk?submodules=1&shallow=1"; flake = false; };
+    qmk_firmware = {
+      url =
+        "git+https://github.com/Bastardkb/bastardkb-qmk?submodules=1&shallow=1";
+      flake = false;
+    };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
