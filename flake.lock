@@ -255,20 +255,18 @@
     "qmk_firmware": {
       "flake": false,
       "locked": {
-        "lastModified": 1676791265,
-        "narHash": "sha256-GsdereiGwm+jQ8O2Q+xJF2yYzx9eWECIqPauIyKjG4A=",
-        "ref": "refs/heads/main",
-        "rev": "403439b6b531197ce7c8276b5d6d328a05b60921",
-        "shallow": true,
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/Bastardkb/bastardkb-qmk"
+        "lastModified": 1676783339,
+        "narHash": "sha256-cst5icNP+UQUeWD2ypzdPPH5kzVo/CAILKwKlGbb0HE=",
+        "owner": "Bastardkb",
+        "repo": "bastardkb-qmk",
+        "rev": "31183757508f13873502c4be09c4e8af770278d6",
+        "type": "github"
       },
       "original": {
-        "shallow": true,
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/Bastardkb/bastardkb-qmk"
+        "owner": "Bastardkb",
+        "ref": "bkb-master",
+        "repo": "bastardkb-qmk",
+        "type": "github"
       }
     },
     "root": {

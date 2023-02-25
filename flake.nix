@@ -18,8 +18,7 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     qmk_firmware = {
-      url =
-        "github:Bastardkb/bastardkb-qmk/bkb-master";
+      url = "github:Bastardkb/bastardkb-qmk/bkb-master";
       flake = false;
     };
   };
@@ -113,7 +112,7 @@
           name = "firmware.hex";
           src = qmk_firmware;
 
-          buildInputs = with pkgs; [ qmk ];
+          buildInputs = with pkgs; [ qmk git ];
 
           # postUnpack = ''
           #   ln -s ${./.} $sourceRoot/keyboards/keebio/nyquist/keymaps/alternate
