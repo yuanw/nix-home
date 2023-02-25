@@ -27,9 +27,7 @@ in {
 
         zsh = {
 
-          sessionVariables = {
-            TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper";
-        };
+          sessionVariables = { TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper"; };
         };
       };
 
