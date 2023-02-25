@@ -2,7 +2,7 @@
 
 with lib;
 let
-  cfg = config.modules.colemak;
+  cfg = config.modules.typing;
   colemak = pkgs.writeShellScriptBin "colemak" ''
     case "$1" in
       "l1" | "level1" | "1" ) gotta-go-fast -h 10 -prw 60 $XDG_CONFIG_HOME/colemak/level1.txt;;
@@ -14,7 +14,7 @@ let
     esac
   '';
 in {
-  options.modules.colemak = { enable = mkEnableOption "colemak"; };
+  options.modules.colemak = { enable = mkEnableOption "typing"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
@@ -23,6 +23,15 @@ in {
         # pkgs.haskellPackages.gotta-go-fast
         pkgs.ttyper
       ];
+      programs = {
+
+        zsh = {
+
+          sessionVariables = {
+            TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper";
+        };
+        };
+      };
 
       xdg.configFile = {
         "colemak/level1.txt".source = ./level1.txt;

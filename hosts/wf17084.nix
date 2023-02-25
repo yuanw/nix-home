@@ -65,7 +65,7 @@
           (epkgs: [ epkgs.vterm ]));
     };
 
-    colemak.enable = true;
+    typing.enable = true;
     dev = {
       agda.enable = false;
       python.enable = true;
