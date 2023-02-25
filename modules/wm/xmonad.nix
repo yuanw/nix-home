@@ -29,7 +29,8 @@ in {
       touchpad.disableWhileTyping = true;
     };
 
-      services.udisk2.enable = true;
+
+    services.udisks2.enable = true;
     services.blueman.enable = true;
     services.xserver.displayManager = {
       defaultSession = "none+xmonad";
