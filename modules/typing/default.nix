@@ -6,7 +6,7 @@ let
   adept = pkgs.writeShellScriptBin "adept" ''
     case "$1" in
       "l1" | "level1" | "1" ) ttyper --language-file level1;;
-      "l2" | "level2" | "2" ) ttyper --language-file level2;;;
+      "l2" | "level2" | "2" ) ttyper --language-file level2;;
       "l3" | "level3" | "3" ) gotta-go-fast -h 10 -prw 60 $XDG_CONFIG_HOME/colemak/level2.txt;;
       "l4" | "level4" | "4" ) gotta-go-fast -h 10 -prw 60 $XDG_CONFIG_HOME/colemak/level4.txt;;
       "l5" | "level5" | "5" ) gotta-go-fast -h 10 -prw 60 $XDG_CONFIG_HOME/colemak/level5.txt;;
