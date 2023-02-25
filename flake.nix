@@ -19,13 +19,13 @@
     emacs.url = "github:nix-community/emacs-overlay";
     qmk_firmware = {
       url =
-        "git+https://github.com/Bastardkb/bastardkb-qmk?submodules=1&shallow=1";
+        "git+https://github.com/Bastardkb/bastardkb-qmk/bkb-master?submodules=1&shallow=1";
       flake = false;
     };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, ... }:
+    , emacs, devshell, flake-utils, hosts, qmk_firmware, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -109,6 +109,27 @@
           overlays = [ devshell.overlay ];
         };
       in {
+         packages.firmware = pkgs.stdenv.mkDerivation rec {
+          name = "firmware.hex";
+          src = qmk_firmware;
+
+          buildInputs = with pkgs; [
+            qmk
+          ];
+
+          # postUnpack = ''
+          #   ln -s ${./.} $sourceRoot/keyboards/keebio/nyquist/keymaps/alternate
+          # '';
+
+          buildPhase = ''
+            qmk compile -c -kb bastardkb/charybdis/3x5/v2/splinky_3  -km vial
+          '';
+
+          installPhase = ''
+            cp bastardkb_charybdis_3x5_v2_splinky_v3_*.bin $out
+            cp bastardkb_charybdis_3x5_v2_splinky_v3_*.uf2 $out
+          '';
+        };
         devShell = pkgs.devshell.mkShell {
           name = "nix-home";
           imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
