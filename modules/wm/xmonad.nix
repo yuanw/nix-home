@@ -71,6 +71,7 @@ in {
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
+      services.udisk2.enable = true;
       services.udiskie = {
         enable = true;
         tray = "always";
