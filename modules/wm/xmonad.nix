@@ -71,7 +71,10 @@ in {
       services.xscreensaver.enable = true;
       services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
-      services.udiskie.enable = true;
+      services.udiskie = {
+        enable = true;
+        tray = "always";
+      };
       services.picom.enable = true;
       services.gnome-keyring.enable = true;
       services.trayer = {
