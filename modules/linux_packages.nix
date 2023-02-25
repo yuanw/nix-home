@@ -13,5 +13,5 @@ with pkgs; [
   scrot
   xdotool
   xorg.xwininfo
-  teams
+  udiskie
 ]
