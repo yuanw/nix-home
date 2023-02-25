@@ -14,9 +14,12 @@
   xdg = {
     enable = true;
     configFile = {
+      # "startpage".source = ./startpage;
       "wallpapers/haskell-red-noise.png".source =
         ./pictures/haskell-red-noise.png;
-      "nix-wallpaper-dracula.png".source = ./pictures/nix-wallpaper-dracula.png;
+      "wallpapers/doom.svg".source = ./pictures/doomEmacs.svg;
+      "wallpapers/nix-wallpaper-dracula.png".source =
+        ./pictures/nix-wallpaper-dracula.png;
     };
   };
 
@@ -164,10 +167,10 @@
 
     jq = { enable = true; };
 
-    neovim = {
-      enable = true;
-      vimAlias = true;
-    };
+    # neovim = {
+    #   enable = true;
+    #   vimAlias = true;
+    # };
     zoxide = {
       enable = true;
       enableZshIntegration = true;

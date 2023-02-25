@@ -51,7 +51,6 @@
         "qmk/qmk/qmk"
         "jdtls"
         "redis"
-        "ttygif"
       ];
     };
     browsers.firefox = {
@@ -64,10 +63,9 @@
       pkg = with pkgs;
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
-
     };
 
-    # colemak.enable = true;
+    colemak.enable = true;
     dev = {
       agda.enable = false;
       python.enable = true;

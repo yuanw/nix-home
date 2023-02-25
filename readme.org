@@ -18,11 +18,9 @@ I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take 
 | Editor   | Doom Emacs       |
 
 * Inspirations
-- https://github.com/cmacrae/config (nix-darwin)
-- https://github.com/hlissner/dotfiles/ (NixOS)
-- https://github.com/jwiegley/nix-config
 
-  and so many more
+https://github.com/stars/yuanw/lists/nix-home/
+
 
 * MacOS
 ** Install

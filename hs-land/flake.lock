@@ -1,0 +1,147 @@
+{
+  "nodes": {
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
+      },
+      "locked": {
+        "lastModified": 1675933616,
+        "narHash": "sha256-/rczJkJHtx16IFxMmAWu5nNYcSXNg1YYXTHoGjLrLUA=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "47478a4a003e745402acf63be7f9a092d51b83d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-root": {
+      "locked": {
+        "lastModified": 1671378805,
+        "narHash": "sha256-yqGxyzMN2GuppwG3dTWD1oiKxi+jGYP7D1qUSc5vKhI=",
+        "owner": "srid",
+        "repo": "flake-root",
+        "rev": "dc7ba6166e478804a9da6881aa48c45d300075cf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "flake-root",
+        "type": "github"
+      }
+    },
+    "haskell-flake": {
+      "locked": {
+        "lastModified": 1676149835,
+        "narHash": "sha256-rE/MIjs65pBtYzpyltvoZx4V8GcGkuh04GjlLi4VvTE=",
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "rev": "34641d4508c2ad00d1a5ef5fb592f49bfa9e2770",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "type": "github"
+      }
+    },
+    "mission-control": {
+      "locked": {
+        "lastModified": 1675195908,
+        "narHash": "sha256-nQv35C7svZFluwy2uoZFxwPqiT16XoKAoMlIQYmvg3A=",
+        "owner": "Platonic-Systems",
+        "repo": "mission-control",
+        "rev": "feb06872ac4dc977f70f6388c87d36fc3c3c3693",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Platonic-Systems",
+        "repo": "mission-control",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1676549890,
+        "narHash": "sha256-sq/WcOEAl7gWrrfGkWdnyYazRyTf+enEim/o6LOQzI8=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "8c66bd1b68f4708c90dcc97c6f7052a5a7b33257",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1675183161,
+        "narHash": "sha256-Zq8sNgAxDckpn7tJo7V1afRSk2eoVbu3OjI1QklGLNg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e1e1b192c1a5aab2960bf0a0bd53a2e8124fa18e",
+        "type": "github"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1675545634,
+        "narHash": "sha256-TbQeQcM5TA/wIho6xtzG+inUfiGzUXi8ewwttiQWYJE=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "0591d6b57bfeb55dfeec99a671843337bc2c3323",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-parts": "flake-parts",
+        "flake-root": "flake-root",
+        "haskell-flake": "haskell-flake",
+        "mission-control": "mission-control",
+        "nixpkgs": "nixpkgs",
+        "treefmt-nix": "treefmt-nix"
+      }
+    },
+    "treefmt-nix": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1676131462,
+        "narHash": "sha256-EaWq2jUIGbXW6Tp66mbwZXEXRZ3y4W+4NTWiBFYNBxw=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "819dd7f076832838bba238eceef9a3dbfc63f5d0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

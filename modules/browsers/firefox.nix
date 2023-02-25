@@ -4,7 +4,9 @@
 { config, lib, pkgs, ... }:
 
 with lib;
-let cfg = config.modules.browsers.firefox;
+let
+  cfg = config.modules.browsers.firefox;
+  homeDir = config.my.homeDirectory;
 in {
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
@@ -16,18 +18,20 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
+      home = { file."startpage".source = ./startpage; };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
-      programs.firefox.extensions = with pkgs.nur.repos.rycee.firefox-addons; [
-        tridactyl
-        ublock-origin
-        # https-everywhere
-        privacy-badger
-        leechblock-ng
-      ];
       programs.firefox.profiles = {
         home = {
           id = 0;
+          extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+            tridactyl
+            ublock-origin
+            # https-everywhere
+            privacy-badger
+            leechblock-ng
+          ];
+
           search = {
             default = "Google";
             order = [ "Google" "DuckDuckGo" ];
@@ -78,7 +82,8 @@ in {
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
-            "browser.startup.homepage" = "https://lobste.rs";
+            "browser.startup.homepage" =
+              "file://${homeDir}/startpage/index.html";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;

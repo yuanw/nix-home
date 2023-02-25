@@ -40,7 +40,7 @@ with pkgs; [
   nix-tree
   # nix-du
 
-  devenv
+  # devenv
   eukleides
   #mu
   #offlineimap
@@ -56,7 +56,8 @@ with pkgs; [
   #shellcheck
   fontconfig
   #kubectl
-  #
+  # vhs
   csvkit
   gum
+  # haskellPackages.example
 ]

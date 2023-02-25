@@ -11,9 +11,10 @@ in {
         pkgs.kubernetes-helm
         pkgs.aws-iam-authenticator
         pkgs.clang-tools
-        pkgs.antlr4
-        pkgs.resource-id
-        pkgs.ws-access-token
+        # pkgs.antlr4
+
+        pkgs.haskellPackages.resource-id
+        pkgs.haskellPackages.ws-access-token
         pkgs.csvkit
         # pkgs.visidata
         pkgs.terraform

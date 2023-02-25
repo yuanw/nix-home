@@ -38,12 +38,17 @@ final: prev:
   hosts = prev.callPackage ./hosts.nix { };
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
-  haskellPackages = prev.haskellPackages.override {
-    overrides = haskellPackagesNew: haskellPackagesOld: rec {
-      gotta-go-fast = haskellPackagesNew.callPackage ./gotta-go-fast.nix { };
+  # haskellPackages = prev.haskellPackages.override {
+  #   overrides = haskellPackagesNew: haskellPackagesOld: rec {
+  #     ws-access-token =
+  #       haskellPackagesNew.callPackage ../hs-land/ws-access-token/release.nix
+  #       { };
 
-    };
-  };
+  #     resource-id =
+  #       haskellPackagesNew.callPackage ../hs-land/resource-id/release.nix { };
+
+  #   };
+  # };
   qmk-udev-rules = prev.qmk-udev-rules.overrideAttrs (oldAttrs: rec {
     version = "0.18.17";
     src = prev.fetchFromGitHub {
