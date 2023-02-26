@@ -26,13 +26,13 @@ instance FromDhall Project
 
 work :: Vector Project -> Shell (Either Line Line)
 work projects = do
-  repo <- (inshell (V.foldr (\a b -> b <> (name a))  "gum choose" projects )  empty)
+  repo <- (inshell (V.foldr (\a b -> b <> " " <> (name a))  "gum choose " projects )  empty)
   inshellWithErr (format ("open -a firefox -g https://github.com/Workiva/"%s%"/") (lineToText repo)) empty
 
 main :: IO ()
 main = do
   projects <- loadProject
-  view work
+  view (work projects)
 
 
 getConfigDir :: IO String
