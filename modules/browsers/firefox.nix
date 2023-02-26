@@ -82,8 +82,7 @@ in {
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
-            "browser.startup.homepage" =
-              "https://yuanwang.dev/";
+            "browser.startup.homepage" = "https://yuanwang.dev/";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
