@@ -110,7 +110,13 @@
       in {
         packages.firmware = pkgs.stdenv.mkDerivation rec {
           name = "firmware.hex";
-          src = qmk_firmware;
+          src = pkgs.fetchFromGitHub {
+                owner = "yuanw";
+      repo = "bastardkb-qmk";
+      ref = "yuanw-master";
+      sha256 = "YEKqqCLJQvFD3OaJvgD+OEDxXgPcjnaNpNtSPaDUS+M=";
+     submodules = true;
+          };
 
           buildInputs = with pkgs; [ qmk git ];
 
