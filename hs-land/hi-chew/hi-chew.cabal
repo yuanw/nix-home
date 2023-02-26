@@ -23,6 +23,9 @@ extra-source-files: CHANGELOG.md
 
 executable hi-chew
   main-is:          Main.hs
+  default-extensions:
+      ImportQualifiedPost
+
 
   -- Modules included in this executable, other than Main.
   -- other-modules:
