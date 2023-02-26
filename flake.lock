@@ -255,16 +255,16 @@
     "qmk_firmware": {
       "flake": false,
       "locked": {
-        "lastModified": 1676783339,
-        "narHash": "sha256-cst5icNP+UQUeWD2ypzdPPH5kzVo/CAILKwKlGbb0HE=",
-        "owner": "Bastardkb",
+        "lastModified": 1677334010,
+        "narHash": "sha256-GI/yhUV4NY7eaHLpUoratQuXEgLg5dcG65DmxjB6CUk=",
+        "owner": "yuanw",
         "repo": "bastardkb-qmk",
-        "rev": "31183757508f13873502c4be09c4e8af770278d6",
+        "rev": "83e1bdfe89355b9d35a4f10ec4aabd784883c140",
         "type": "github"
       },
       "original": {
-        "owner": "Bastardkb",
-        "ref": "bkb-master",
+        "owner": "yuanw",
+        "ref": "yuanw-master",
         "repo": "bastardkb-qmk",
         "type": "github"
       }

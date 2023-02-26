@@ -83,7 +83,7 @@ in {
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
             "browser.startup.homepage" =
-              "https://kaleidoscopic-cajeta-3feb8f.netlify.app/";
+              "https://yuanwang.dev/";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
