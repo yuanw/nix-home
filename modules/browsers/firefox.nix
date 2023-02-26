@@ -83,7 +83,7 @@ in {
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
             "browser.startup.homepage" =
-              "file://${homeDir}/startpage/index.html";
+              "https://kaleidoscopic-cajeta-3feb8f.netlify.app/";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
