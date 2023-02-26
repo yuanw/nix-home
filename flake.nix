@@ -114,7 +114,7 @@
             owner = "yuanw";
             repo = "bastardkb-qmk";
             rev = "83e1bdfe89355b9d35a4f10ec4aabd784883c140";
-            sha256 = pkgs.lib.fakeSha256 ;
+            sha256 = "mh4qC4aEmUNmvHphwU17sUjL8pQ/mGT61DRbben0SDs=";
             fetchSubmodules = true;
           };
 
@@ -125,7 +125,7 @@
           # '';
 
           buildPhase = ''
-            qmk compile -c -kb bastardkb/charybdis/3x5/v2/splinky_3  -km via
+            qmk compile -c -kb bastardkb/charybdis/3x5/v2/splinky_3  -km yuanw
           '';
 
           installPhase = ''
