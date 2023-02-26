@@ -17,14 +17,10 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    qmk_firmware = {
-      url = "github:yuanw/bastardkb-qmk/yuanw-master";
-      flake = false;
-    };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, qmk_firmware, ... }:
+    , emacs, devshell, flake-utils, hosts, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
