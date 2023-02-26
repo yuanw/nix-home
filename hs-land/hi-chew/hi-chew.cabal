@@ -31,6 +31,7 @@ executable hi-chew
   -- other-extensions:
   build-depends:
     , base    ^>=4.16.3.0
+    , dhall
     , turtle
 
   hs-source-dirs:   app
