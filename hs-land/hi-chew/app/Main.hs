@@ -24,9 +24,9 @@ data Project = Project
 
 instance FromDhall Project
 
-work :: Shell (Either Line Line)
-work = do
-  repo <- (inshell "gum choose content-management-service bigsky" empty)
+work :: Vector Project -> Shell (Either Line Line)
+work projects = do
+  repo <- (inshell (V.foldr (\a b -> b <> (name a))  "gum choose" projects )  empty)
   inshellWithErr (format ("open -a firefox -g https://github.com/Workiva/"%s%"/") (lineToText repo)) empty
 
 main :: IO ()
