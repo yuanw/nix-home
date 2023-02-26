@@ -114,7 +114,7 @@
             owner = "yuanw";
             repo = "bastardkb-qmk";
             rev = "83e1bdfe89355b9d35a4f10ec4aabd784883c140";
-            sha256 = "0000D";
+            sha256 = pkgs.lib.fakeSha256 ;
             fetchSubmodules = true;
           };
 
