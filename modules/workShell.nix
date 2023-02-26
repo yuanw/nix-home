@@ -36,7 +36,6 @@ in {
           # }
 
           export PATH=$PATH:$HOME/go/bin
-          [[ -s "${homeDir}/.ghcup/env" ]] && source "${homeDir}/.ghcup/env"
         '';
       };
     };
