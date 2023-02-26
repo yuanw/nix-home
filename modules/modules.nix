@@ -20,7 +20,7 @@ let
     (loadModule ./common.nix { })
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
-    (loadModule ./colemak { })
+    (loadModule ./typing { })
     # (loadModule ./wm/amethyst.nix { condition = isDarwin; })
     #
     (loadModule ./qmk.nix { condition = isNixOS; })

@@ -27,8 +27,8 @@ level5 = "wfpbjluyarstgmneiocdvk"
 main :: IO ()
 main = do
   a <- map (head . T.words) . T.lines . E.decodeUtf8 <$> B.readFile "./wordWeights.txt"
-  TIO.writeFile "./level1.txt" (T.unwords . filter (T.all (`T.elem` level1)) $ a)
-  TIO.writeFile "./level2.txt" (T.unwords . filter (T.all (`T.elem` level2)) $ a)
-  TIO.writeFile "./level3.txt" (T.unwords . filter (T.all (`T.elem` level3)) $ a)
-  TIO.writeFile "./level4.txt" (T.unwords . filter (T.all (`T.elem` level4)) $ a)
-  TIO.writeFile "./level5.txt" (T.unwords . filter (T.all (`T.elem` level5)) $ a)
+  TIO.writeFile "./level1.txt" (T.intercalate "\n" . filter (T.all (`T.elem` level1)) $ a)
+  TIO.writeFile "./level2.txt" (T.intercalate "\n"  . filter (T.all (`T.elem` level2)) $ a)
+  TIO.writeFile "./level3.txt" (T.intercalate "\n"  . filter (T.all (`T.elem` level3)) $ a)
+  TIO.writeFile "./level4.txt" (T.intercalate "\n" . filter (T.all (`T.elem` level4)) $ a)
+  TIO.writeFile "./level5.txt" (T.intercalate "\n"  . filter (T.all (`T.elem` level5)) $ a)
