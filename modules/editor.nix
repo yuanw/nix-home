@@ -86,6 +86,7 @@ in with lib; {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
           export PATH=$PATH:$HOME/.emacs.d/bin
+          export PATH=$PATH:$HOME/.config/emacs/bin
         '';
       };
     };
