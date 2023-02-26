@@ -45,5 +45,5 @@ getConfigDir = liftA2 (++) base (pure "hi-chew")
 
 loadProject :: IO (Vector Project)
 loadProject = do
-    file <- fmap (++  "config.dhall") getConfigDir
+    file <- fmap (++  "/config.dhall") getConfigDir
     input auto (T.pack file)
