@@ -4,6 +4,7 @@ module Main where
 
 import Data.Text qualified as T
 import Data.Vector qualified as V
+import qualified Data.Map as Map
 import Dhall (
     FromDhall,
     Generic,
@@ -12,9 +13,10 @@ import Dhall (
     auto,
     input,
  )
-
+import Data.Maybe (fromJust)
 import System.Environment (getArgs, lookupEnv)
 import Turtle hiding (input)
+
 data Project = Project
     { name :: Text
     , repoUrl :: Text
@@ -24,15 +26,18 @@ data Project = Project
 
 instance FromDhall Project
 
-work :: Vector Project -> Shell (Either Line Line)
-work projects = do
-  repo <- (inshell (V.foldr (\a b -> b <> " " <> (name a))  "gum choose " projects )  empty)
-  inshellWithErr (format ("open -a firefox -g https://github.com/Workiva/"%s%"/") (lineToText repo)) empty
+toMap :: Vector Project -> Map.Map Text Project
+toMap = Map.fromList .  map (\p -> (name p, p))  . V.toList
+
+work :: Map.Map Text Project -> Shell (Either Line Line)
+work projectMap = do
+  repo <- (inshell ( foldr (\a b -> b <> " " <>  a)  "gum choose " (Map.keys projectMap ) ) empty)
+  inshellWithErr (format ("open -a firefox -g "%s%"/")  ( repoUrl . fromJust . flip Map.lookup projectMap . lineToText $ repo)) empty
 
 main :: IO ()
 main = do
-  projects <- loadProject
-  view (work projects)
+  projectMap <- fmap toMap loadProject
+  view (work projectMap)
 
 
 getConfigDir :: IO String
