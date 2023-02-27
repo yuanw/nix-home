@@ -45,8 +45,8 @@ openLog :: Project -> Shell (Either Line Line)
 openLog project = do
   projectEnv <- inshell "gum choose dev prod" empty
   case lineToText projectEnv of
-    "dev" -> openLink (devLog project)
-    "prod" -> openLink (prodLog project)
+    "dev" -> inshellWithErr ( format  ("open -a firefox -g "%s) (devLog project)  ) empty
+    "prod" -> inshellWithErr ( format ("open -a firefox -g "%s) (prodLog project)  ) empty
 
 
 work :: Map.Map Text Project -> Shell (Either Line Line)
