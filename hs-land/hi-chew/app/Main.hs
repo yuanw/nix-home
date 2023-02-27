@@ -32,7 +32,7 @@ toMap = Map.fromList .  map (\p -> (name p, p))  . V.toList
 work :: Map.Map Text Project -> Shell (Either Line Line)
 work projectMap = do
   repo <- (inshell ( foldr (\a b -> b <> " " <>  a)  "gum choose " (Map.keys projectMap ) ) empty)
-  inshellWithErr (format ("open -a firefox -g "%s%"/")  ( repoUrl . fromJust . flip Map.lookup projectMap . lineToText $ repo)) empty
+  inshellWithErr (format ("open -a firefox -g "%s)  ( repoUrl . fromJust . flip Map.lookup projectMap . lineToText $ repo)) empty
 
 main :: IO ()
 main = do
