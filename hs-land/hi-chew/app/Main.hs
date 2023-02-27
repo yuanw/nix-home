@@ -13,7 +13,7 @@ import Dhall (
     auto,
     input,
  )
-import Data.Maybe (fromJust)
+import Data.Maybe (fromJust, isJust)
 import System.Environment (getArgs, lookupEnv)
 import Turtle hiding (input)
 
@@ -29,9 +29,13 @@ instance FromDhall Project
 toMap :: Vector Project -> Map.Map Text Project
 toMap = Map.fromList .  map (\p -> (name p, p))  . V.toList
 
+actions :: Project -> Text
+actions project = "gum choose repo" <> if (isJust . checkoutCommand) project then " checkout" else ""
+
 work :: Map.Map Text Project -> Shell (Either Line Line)
 work projectMap = do
   repo <- (inshell ( foldr (\a b -> b <> " " <>  a)  "gum choose " (Map.keys projectMap ) ) empty)
+  action <- inshell (actions . fromJust . flip Map.lookup projectMap . lineToText $ repo) empty
   inshellWithErr (format ("open -a firefox -g "%s)  ( repoUrl . fromJust . flip Map.lookup projectMap . lineToText $ repo)) empty
 
 main :: IO ()
