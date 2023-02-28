@@ -12,7 +12,7 @@ let
       text = ''
         #!/usr/bin/env doomscript
         ${text}
-        '';
+      '';
       checkPhase = ''
         ${lib.stdenv.shellDryRun} "$target"
       '';

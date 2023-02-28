@@ -1,6 +1,5 @@
 # https://github.com/maaslalani/_/blob/main/modules/helix.nix
-{ config, lib, pkgs, ... }:
-{
+{ config, lib, pkgs, ... }: {
 
   home-manager.users.${config.my.username} = {
 
@@ -32,7 +31,7 @@
         };
       };
       languages = [
-             {
+        {
           name = "nix";
           auto-format = true;
           formatter = { command = "alejandra"; };
