@@ -4,6 +4,19 @@
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'";
+  # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
+  writeDoomScript = name: text:
+    pkgs.writeTextFile {
+      inherit name;
+      executable = true;
+      text = ''
+        #!/usr/bin/env doomscript
+        ${text}
+        '';
+      checkPhase = ''
+        ${lib.stdenv.shellDryRun} "$target"
+      '';
+    };
 
 in with lib; {
   options.modules.editors.emacs = {
