@@ -101,7 +101,7 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlay ];
+          overlays = [ devshell.overlays ];
         };
       in {
         packages.firmware = pkgs.stdenv.mkDerivation rec {
