@@ -23,8 +23,8 @@
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ="
       ];
-
-      auto-optimise-store = true;
+      # https://github.com/NixOS/nix/issues/7273
+      # auto-optimise-store = true;
       max-jobs = 8;
     };
     # Avoid unwanted garbage collection when using nix-direnv

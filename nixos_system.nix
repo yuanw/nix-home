@@ -29,6 +29,7 @@ with lib; {
   hardware.pulseaudio.enable = true;
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   nix = {
+    auto-optimise-store = true;
     package = pkgs.nixUnstable;
     settings = {
       allowed-users = [ "root" config.my.username ];
