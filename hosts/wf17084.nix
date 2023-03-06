@@ -41,6 +41,7 @@
         "insomnia"
         # "karabiner-elements"
         "stretchly"
+        "sloth"
       ];
       brews = [
         # "aws-iam-authenticator"
