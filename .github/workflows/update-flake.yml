@@ -22,7 +22,7 @@ jobs:
         # Only needed for private caches
         #authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Update flake.lock
-      uses: DeterminateSystems/update-flake-lock@v16
+      uses: DeterminateSystems/update-flake-lock@v17
       with:
         pr-title: "Update flake.lock" # Title of PR to be created
         pr-labels: |                  # Labels to be set on the PR
