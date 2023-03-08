@@ -93,7 +93,7 @@ in {
           sessionVariables = {
             # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
             # automatically start tmux
-            ZSH_TMUX_AUTOSTART = "true";
+            # ZSH_TMUX_AUTOSTART = "true";
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
           };
           shellAliases = {
@@ -163,6 +163,9 @@ in {
               Random r "run-shell 'tat random'" Emacs e "run-shell 'temacs'" ${tmuxMenuSeperator} \
               Exit q detach"
           '';
+        };
+        programs.zellij = {
+          enable = true;
         };
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
