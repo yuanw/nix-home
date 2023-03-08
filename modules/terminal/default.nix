@@ -164,7 +164,7 @@ in {
               Exit q detach"
           '';
         };
-        programs.zellij = {
+        zellij = {
           enable = true;
         };
 
