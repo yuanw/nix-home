@@ -101,7 +101,6 @@
       let
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ devshell.overlays ];
         };
       in {
         packages.firmware = pkgs.stdenv.mkDerivation rec {
@@ -129,12 +128,12 @@
             cp bastardkb_charybdis_3x5_v2_splinky_v3_*.uf2 $out
           '';
         };
-        devShell = pkgs.devshell.mkShell {
-          name = "nix-home";
-          imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
-          git.hooks.enable = true;
-          git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
-          packages = [ pkgs.treefmt pkgs.nixfmt ];
-        };
+        # devShell = pkgs.devshell.mkShell {
+        #   name = "nix-home";
+        #   imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
+        #   git.hooks.enable = true;
+        #   git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
+        #   packages = [ pkgs.treefmt pkgs.nixfmt ];
+        # };
       });
 }
