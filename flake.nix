@@ -123,6 +123,7 @@
 
           buildPhase = ''
             make bastardkb/charybdis/3x5/v2/splinky_3:via SKIP_GIT=1
+            qmk -v c2json  -kb bastardkb/charybdis/3x5/v2/splinky_3 -km yuanw ./keyboards/bastardkb/charybdis/3x5/keymaps/via/keymap.c > k.json
           '';
 
           installPhase = ''
