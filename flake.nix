@@ -126,7 +126,7 @@
           '';
 
           installPhase = ''
-            cp bastardkb_charybdis_3x5_v2_splinky_v3_via.uf2 $out
+            cp .build/bastardkb_charybdis_3x5_v2_splinky_v3_via.uf2 $out
           '';
         };
         # devShell = pkgs.devshell.mkShell {
