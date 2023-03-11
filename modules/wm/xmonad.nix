@@ -122,6 +122,7 @@ in {
       };
       programs.eww = {
         enable = true;
+        configDir = ./eww;
       };
       programs.xmobar = {
         enable = true;
