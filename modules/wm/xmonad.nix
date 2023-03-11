@@ -51,9 +51,7 @@ in {
     home-manager.users.${config.my.username} = {
       home.packages = [
         xmonad-env
-
         (
-
           pkgs.writeShellScriptBin "autorandr-load-home" ''
             #
             # load autorandr home profile
@@ -75,7 +73,7 @@ in {
       services.pasystray.enable = true;
       services.udiskie = {
         enable = true;
-        tray = "always";
+        tray = "auto";
       };
       services.picom.enable = true;
       services.gnome-keyring.enable = true;
