@@ -51,15 +51,14 @@ in {
     home-manager.users.${config.my.username} = {
       home.packages = [
         xmonad-env
-        (
-          pkgs.writeShellScriptBin "autorandr-load-home" ''
-            #
-            # load autorandr home profile
-            #
-            xrandr --auto
-            autorandr horizontal
-            autorandr home
-          '')
+        (pkgs.writeShellScriptBin "autorandr-load-home" ''
+          #
+          # load autorandr home profile
+          #
+          xrandr --auto
+          autorandr horizontal
+          autorandr home
+        '')
 
       ];
 
