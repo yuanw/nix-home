@@ -98,10 +98,7 @@
       wf17084 = self.darwinConfigurations.wf17084.system;
 
     } // eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+      let pkgs = import nixpkgs { inherit system; };
       in {
         packages.firmware = pkgs.stdenv.mkDerivation rec {
           name = "firmware.hex";
