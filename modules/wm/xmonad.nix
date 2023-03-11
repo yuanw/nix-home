@@ -120,7 +120,9 @@ in {
 
         };
       };
-
+      programs.eww = {
+        enable = true;
+      };
       programs.xmobar = {
         enable = true;
         extraConfig = ''
