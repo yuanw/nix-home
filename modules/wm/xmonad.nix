@@ -74,7 +74,12 @@ in {
         enable = true;
         tray = "auto";
       };
-      services.picom.enable = true;
+      services.picom = {
+        enable = true;
+        settings =  {
+          detect-client-opacity = true;
+        };
+      };
       services.gnome-keyring.enable = true;
       services.trayer = {
         enable = true;
