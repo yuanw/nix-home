@@ -38,8 +38,8 @@
         })
          (final: prev:
           {
-            reiryoku-firmware = inputs.reiryoku.packages.firmware.${prev.system};
-            reiryoku-flash = inputs.reiryoku.packages.flash.${prev.system};
+            reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
+            reiryoku-flash = inputs.reiryoku.apps.${prev.system}.flash;
                    })
         (import ./hs-land/overlay.nix)
         (import ./overlays)
