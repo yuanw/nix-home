@@ -47,6 +47,21 @@ in {
         '';
       };
     };
+    systemd.user.services.flashfocus = {
+      Unit = {
+        Description = "flashfocus";
+        After = [ "graphical-session-pre.target" ];
+        PartOf = [ "graphical-session.target" ];
+      };
+
+      Install = { WantedBy = [ "graphical-session.target" ]; };
+
+      Service = {
+        ExecStart = concatStringsSep " " ([ "${pkgs.flashfocus}/flashfocus" ]);
+        Restart = "always";
+        RestartSec = 3;
+      };
+    };
 
     home-manager.users.${config.my.username} = {
       home.packages = [
@@ -59,7 +74,6 @@ in {
           autorandr horizontal
           autorandr home
         '')
-
       ];
 
       # services.caffeine.enable = true;
@@ -76,9 +90,7 @@ in {
       };
       services.picom = {
         enable = true;
-        settings =  {
-          detect-client-opacity = true;
-        };
+        settings = { detect-client-opacity = true; };
       };
       services.gnome-keyring.enable = true;
       services.trayer = {
