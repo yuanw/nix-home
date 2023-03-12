@@ -1,0 +1,2 @@
+#+title: Readme
+https://dharmx.is-a.dev/eww-powermenu/
