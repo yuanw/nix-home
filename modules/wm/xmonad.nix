@@ -48,18 +48,13 @@ in {
       };
     };
     systemd.user.services.flashfocus = {
-      Unit = {
-        Description = "flashfocus";
-        After = [ "graphical-session-pre.target" ];
-        PartOf = [ "graphical-session.target" ];
-      };
+        description = "flashfocus";
+        after = [ "graphical-session-pre.target" ];
 
-      Install = { WantedBy = [ "graphical-session.target" ]; };
+      wantedBy = [ "graphical-session.target" ];
 
-      Service = {
-        ExecStart = concatStringsSep " " ([ "${pkgs.flashfocus}/flashfocus" ]);
-        Restart = "always";
-        RestartSec = 3;
+      serviceConfig = {
+        ExecStart = ''${pkgs.flashfocus}/flashfocus'';
       };
     };
 
@@ -74,6 +69,7 @@ in {
           autorandr horizontal
           autorandr home
         '')
+        pkgs.flashfocus
       ];
 
       # services.caffeine.enable = true;
