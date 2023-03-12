@@ -47,13 +47,18 @@ in {
         '';
       };
     };
+    # https://nixos.wiki/wiki/Extend_NixOS
+    # https://www.freedesktop.org/software/systemd/man/systemd.service.html
     systemd.user.services.flashfocus = {
+
         description = "flashfocus";
         after = [ "graphical-session-pre.target" ];
 
       wantedBy = [ "graphical-session.target" ];
 
       serviceConfig = {
+         Type = "forking";
+        User = "yuanw";
         ExecStart = ''${pkgs.flashfocus}/flashfocus'';
       };
     };
