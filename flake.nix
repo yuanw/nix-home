@@ -17,10 +17,11 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
+    reiryoku.url = "github:yuanw/reiryoku";
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, ... }:
+    , emacs, devshell, flake-utils, hosts, reiryoku, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -35,6 +36,11 @@
           # };
 
         })
+         (final: prev:
+          {
+            reiryoku-firmware = inputs.reiryoku.firmware.${prev.system};
+            reiryoku-flash = inputs.reiryoku.flash.${prev.system};
+                   })
         (import ./hs-land/overlay.nix)
         (import ./overlays)
       ];
@@ -100,31 +106,6 @@
     } // eachDefaultSystem (system:
       let pkgs = import nixpkgs { inherit system; };
       in {
-        packages.firmware = pkgs.stdenv.mkDerivation rec {
-          name = "firmware.hex";
-          src = pkgs.fetchFromGitHub {
-            owner = "yuanw";
-            repo = "bastardkb-qmk";
-            rev = "83e1bdfe89355b9d35a4f10ec4aabd784883c140";
-            sha256 = "mh4qC4aEmUNmvHphwU17sUjL8pQ/mGT61DRbben0SDs=";
-            fetchSubmodules = true;
-          };
-
-          buildInputs = with pkgs; [ qmk git ];
-
-          # postUnpack = ''
-          #   ln -s ${./.} $sourceRoot/keyboards/keebio/nyquist/keymaps/alternate
-          # '';
-
-          buildPhase = ''
-            make bastardkb/charybdis/3x5/v2/splinky_3:via SKIP_GIT=1
-            qmk -v c2json  -kb bastardkb/charybdis/3x5/v2/splinky_3 -km yuanw ./keyboards/bastardkb/charybdis/3x5/keymaps/via/keymap.c > k.json
-          '';
-
-          installPhase = ''
-            cp bastardkb_charybdis_3x5_v2_splinky_3_via.uf2 $out
-          '';
-        };
         # devShell = pkgs.devshell.mkShell {
         #   name = "nix-home";
         #   imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];

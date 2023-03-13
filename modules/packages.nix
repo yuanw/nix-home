@@ -59,5 +59,7 @@ with pkgs; [
   # vhs
   csvkit
   gum
-  # haskellPackages.example
+
+  reiryoku-firmware
+  reiryoku-flash
 ]
