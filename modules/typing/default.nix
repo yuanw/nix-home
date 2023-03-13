@@ -29,7 +29,7 @@ in {
         };
       };
       xdg.configFile = {
-        "keymap.svg" = pkgs.reiryoku-firmware/share/reiryoku.svg;
+        # "keymap.svg" = pkgs.reiryoku-firmware/share/reiryoku.svg;
         "ttyper/level1".source = ./level1.txt;
         "ttyper/level2".source = ./level2.txt;
         "ttyper/level3".source = ./level3.txt;
