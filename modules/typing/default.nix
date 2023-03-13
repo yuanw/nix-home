@@ -28,8 +28,8 @@ in {
           sessionVariables = { TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper"; };
         };
       };
-
       xdg.configFile = {
+        "keymap.svg" = pkgs.reiyoku-firmware/reiryoku.svg;
         "ttyper/level1".source = ./level1.txt;
         "ttyper/level2".source = ./level2.txt;
         "ttyper/level3".source = ./level3.txt;

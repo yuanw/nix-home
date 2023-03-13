@@ -60,6 +60,6 @@ with pkgs; [
   csvkit
   gum
 
-  reiryoku-firmware
+  # reiryoku-firmware
   reiryoku-flash
 ]
