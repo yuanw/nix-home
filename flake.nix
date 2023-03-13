@@ -17,8 +17,6 @@
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-        # must be git not github for submodules
-    qmk_firmware = { url = "git+https://github.com/qmk/qmk_firmware?submodules=1&shallow=1"; flake = false; };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
@@ -100,10 +98,7 @@
       wf17084 = self.darwinConfigurations.wf17084.system;
 
     } // eachDefaultSystem (system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-        };
+      let pkgs = import nixpkgs { inherit system; };
       in {
         packages.firmware = pkgs.stdenv.mkDerivation rec {
           name = "firmware.hex";

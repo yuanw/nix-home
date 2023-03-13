@@ -47,22 +47,34 @@ in {
         '';
       };
     };
+    # https://nixos.wiki/wiki/Extend_NixOS
+    # https://www.freedesktop.org/software/systemd/man/systemd.service.html
+    systemd.user.services.flashfocus = {
+
+        description = "flashfocus";
+        after = [ "graphical-session-pre.target" ];
+
+      wantedBy = [ "graphical-session.target" ];
+
+      serviceConfig = {
+         Type = "forking";
+        User = "yuanw";
+        ExecStart = ''${pkgs.flashfocus}/flashfocus'';
+      };
+    };
 
     home-manager.users.${config.my.username} = {
       home.packages = [
         xmonad-env
-
-        (
-
-          pkgs.writeShellScriptBin "autorandr-load-home" ''
-            #
-            # load autorandr home profile
-            #
-            xrandr --auto
-            autorandr horizontal
-            autorandr home
-          '')
-
+        (pkgs.writeShellScriptBin "autorandr-load-home" ''
+          #
+          # load autorandr home profile
+          #
+          xrandr --auto
+          autorandr horizontal
+          autorandr home
+        '')
+        pkgs.flashfocus
       ];
 
       # services.caffeine.enable = true;
@@ -75,9 +87,12 @@ in {
       services.pasystray.enable = true;
       services.udiskie = {
         enable = true;
-        tray = "always";
+        tray = "auto";
       };
-      services.picom.enable = true;
+      services.picom = {
+        enable = true;
+        settings = { detect-client-opacity = true; };
+      };
       services.gnome-keyring.enable = true;
       services.trayer = {
         enable = true;
@@ -123,7 +138,10 @@ in {
 
         };
       };
-
+      programs.eww = {
+        enable = true;
+        configDir = ./eww;
+      };
       programs.xmobar = {
         enable = true;
         extraConfig = ''
