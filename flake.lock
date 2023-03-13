@@ -365,11 +365,11 @@
         "qmk_firmware": "qmk_firmware"
       },
       "locked": {
-        "lastModified": 1678561101,
-        "narHash": "sha256-uKv2GyphoMWqpuB7TlF1pFb64z1fobjF5WkOIB5u5ro=",
+        "lastModified": 1678666095,
+        "narHash": "sha256-Kya9K8T4eFO0bIA3juwcbDpb86bWBopLLf4f2SqKhYQ=",
         "owner": "yuanw",
         "repo": "reiryoku",
-        "rev": "026aceab10fdefd3e77ee34d818907bcda7f55fb",
+        "rev": "dfbfbeb3e6fa264a392504940ccd7230563ea4a6",
         "type": "github"
       },
       "original": {
