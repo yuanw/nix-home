@@ -27,9 +27,7 @@
       taps = [
         "homebrew/core"
         "homebrew/cask"
-        "qmk/qmk"
-        "osx-cross/avr"
-        "osx-cross/arm"
+        "d12frosted/emacs-plus"
       ];
 
       casks = [
@@ -46,6 +44,11 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
+               {
+        name = "emacs-plus@29";
+        args = ["with-native-comp"];
+        link = true;
+      }
         "pyenv"
         "pngpaste"
         "avr-gcc"
@@ -61,9 +64,10 @@
     editors.emacs = {
       enable = true;
       # enableService = true;
-      pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      pkg = pkgs.runCommand "emacs-0.0.0" { } "mkdir $out";
+      # pkg = with pkgs;
+      #   ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+      #     (epkgs: [ epkgs.vterm ]));
     };
 
     typing.enable = true;
