@@ -19,7 +19,6 @@
   };
 
   modules = {
-
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
