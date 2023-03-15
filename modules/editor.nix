@@ -30,11 +30,10 @@ in with lib; {
       default = pkgs.emacsMacport;
     };
 
-    # brewPackage = mkOption {
-    #   type = types.bool;
-    #   default = false;
-    # };
-
+    usePackage = mkOption {
+      type = types.bool;
+      default = true;
+    };
 
 
     enableService = mkOption {
@@ -49,10 +48,10 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    # services.emacs = {
-    #   enable = cfg.enableService;
-    #   package = cfg.pkg;
-    # };
+    services.emacs = mkIf cfg.usePackage {
+      enable = cfg.enableService;
+      package = cfg.pkg;
+    };
 
     home-manager.users.${config.my.username} = {
       home = {
@@ -97,10 +96,10 @@ in with lib; {
 
         file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
       };
-      # programs.emacs = {
-      #   enable = true;
-      #   package = cfg.pkg;
-      # };
+      programs.emacs = mkIf cfg.usePackage {
+        enable = true;
+        package = cfg.pkg;
+      };
 
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };

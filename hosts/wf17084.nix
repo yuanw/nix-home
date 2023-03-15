@@ -59,8 +59,8 @@
     };
     editors.emacs = {
       enable = true;
+      usePackage = false;
       # enableService = true;
-      pkg = pkgs.runCommand "emacs-0.0.0" { } "mkdir $out";
       # pkg = with pkgs;
       #   ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
       #     (epkgs: [ epkgs.vterm ]));
