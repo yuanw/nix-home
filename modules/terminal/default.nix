@@ -44,6 +44,11 @@ in {
           enable = true;
           snippets = [
             {
+              description = "update a flake source";
+              command = " nix flake lock --update-input <input=nixpkgs>";
+              tag = ["nix"];
+            }
+            {
               description = "Clean up your system profile";
               command = "sudo nix-collect-garbage --delete-older-than <day=3>d";
               tag = [ "nix" ];
