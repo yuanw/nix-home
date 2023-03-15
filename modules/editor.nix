@@ -3,7 +3,7 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.modules.editors.emacs;
-  emacsclient = "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'";
+  emacsclient = "emacsclient -c -a 'emacs'";
   # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
   writeDoomScript = name: text:
     pkgs.writeTextFile {
@@ -30,6 +30,13 @@ in with lib; {
       default = pkgs.emacsMacport;
     };
 
+    # brewPackage = mkOption {
+    #   type = types.bool;
+    #   default = false;
+    # };
+
+
+
     enableService = mkOption {
       type = types.bool;
       default = false;
@@ -42,10 +49,10 @@ in with lib; {
   };
 
   config = mkIf cfg.enable {
-    services.emacs = {
-      enable = cfg.enableService;
-      package = cfg.pkg;
-    };
+    # services.emacs = {
+    #   enable = cfg.enableService;
+    #   package = cfg.pkg;
+    # };
 
     home-manager.users.${config.my.username} = {
       home = {
@@ -90,10 +97,10 @@ in with lib; {
 
         file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
       };
-      programs.emacs = {
-        enable = true;
-        package = cfg.pkg;
-      };
+      # programs.emacs = {
+      #   enable = true;
+      #   package = cfg.pkg;
+      # };
 
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };

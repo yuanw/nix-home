@@ -44,11 +44,7 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-               {
-        name = "emacs-plus@29";
-        args = ["with-native-comp"];
-        link = true;
-      }
+       "emacs-plus@29"
         "pyenv"
         "pngpaste"
         "avr-gcc"
@@ -62,7 +58,7 @@
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
-      enable = true;
+      enable = false;
       # enableService = true;
       pkg = pkgs.runCommand "emacs-0.0.0" { } "mkdir $out";
       # pkg = with pkgs;
