@@ -24,11 +24,7 @@
   modules = {
     brew = {
       enable = true;
-      taps = [
-        "homebrew/core"
-        "homebrew/cask"
-        "d12frosted/emacs-plus"
-      ];
+      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
 
       casks = [
         "brave-browser"
@@ -44,11 +40,11 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-       "emacs-plus@29"
+        "emacs-plus@29"
         "pyenv"
         "pngpaste"
-        "avr-gcc"
-        "qmk/qmk/qmk"
+        # "avr-gcc"
+        # "qmk/qmk/qmk"
         "jdtls"
         "redis"
       ];
