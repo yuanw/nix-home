@@ -7,7 +7,7 @@ with lib; {
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
     gc = { user = "${config.my.username}"; };
-  };
+   };
 
   system.stateVersion = 4;
   services.nix-daemon.enable = true;
