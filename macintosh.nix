@@ -5,7 +5,7 @@ with lib; {
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
-    extra-trusted-users = [ config.my.username ];
+    # extra-trusted-users = [ config.my.username ];
     trusted-users = [ "root" config.my.username ];
     gc = { user = "${config.my.username}"; };
   };
