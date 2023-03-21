@@ -5,9 +5,8 @@ with lib; {
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
-
-    # trusted-users = [ "root" config.my.username ];
-    # trustedBinaryCaches = config.nix.binaryCaches;
+    extra-trusted-users = [ config.my.username ];
+    trusted-users = [ "root" config.my.username ];
     gc = { user = "${config.my.username}"; };
   };
 

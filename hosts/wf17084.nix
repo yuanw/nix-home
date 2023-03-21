@@ -1,7 +1,6 @@
 { lib, pkgs, config, services, ... }: {
 
   my = {
-
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
