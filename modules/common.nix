@@ -4,6 +4,7 @@
   nix = {
     # configureBuildUsers = true;
     settings = {
+      trusted-users = [ "root" config.my.username ];
       substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
