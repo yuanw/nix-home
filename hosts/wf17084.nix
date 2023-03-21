@@ -24,13 +24,7 @@
   modules = {
     brew = {
       enable = true;
-      taps = [
-        "homebrew/core"
-        "homebrew/cask"
-        "qmk/qmk"
-        "osx-cross/avr"
-        "osx-cross/arm"
-      ];
+      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
 
       casks = [
         "brave-browser"
@@ -46,10 +40,11 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
+        "emacs-plus@29"
         "pyenv"
         "pngpaste"
-        "avr-gcc"
-        "qmk/qmk/qmk"
+        # "avr-gcc"
+        # "qmk/qmk/qmk"
         "jdtls"
         "redis"
       ];
@@ -60,10 +55,11 @@
     };
     editors.emacs = {
       enable = true;
+      usePackage = false;
       # enableService = true;
-      pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      # pkg = with pkgs;
+      #   ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+      #     (epkgs: [ epkgs.vterm ]));
     };
 
     typing.enable = true;

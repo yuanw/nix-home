@@ -11,11 +11,11 @@ let
   emacsclient = if config.modules.editors.emacs.enableService then
     "${pkgs.emacs}/bin/emacsclient -c"
   else
-    "~/.emacs.d/bin/doom run";
+    "doom run";
   emacsEveryWhere = if config.modules.editors.emacs.enableService then
     ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"''
   else
-    "~/.emacs.d/bin/doom +everywhere";
+    "doom +everywhere";
 
   daemonPath = "/Library/LaunchDaemons/org.nixos.yabai-sa.plist";
 
