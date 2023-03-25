@@ -46,7 +46,7 @@ in {
             {
               description = "update a flake source";
               command = " nix flake lock --update-input <input=nixpkgs>";
-              tag = ["nix"];
+              tag = [ "nix" ];
             }
             {
               description = "Clean up your system profile";
@@ -121,6 +121,11 @@ in {
           enable = true;
           terminal = "screen-256color";
           clock24 = true;
+          plugins = with pkgs;
+            [
+              # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
+              tmuxPlugins.fzf-tmux-url
+            ];
           customPaneNavigationAndResize = true;
           escapeTime = 0;
           historyLimit = 50000;
