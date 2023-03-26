@@ -60,6 +60,9 @@ with pkgs; [
   csvkit
   gum
 
+  SDL2
+  glew
+  pkg-config
   reiryoku-firmware
   # reiryoku-flash
 ]
