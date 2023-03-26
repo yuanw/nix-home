@@ -10,7 +10,7 @@
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = nixpkgs.lib.systems.flakeExposed;
+      systems = ["x86_64-darwin"];
       imports = [
         inputs.haskell-flake.flakeModule
         inputs.treefmt-nix.flakeModule
