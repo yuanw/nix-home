@@ -24,7 +24,7 @@
           packages.ws-access-token.root =
             ./ws-access-token; # This value is detected based on .cabal files
           packages.hi-chew.root = ./hi-chew;
-          packages.mono-stretchly.root = ./mono-stretchly;
+          # packages.mono-stretchly.root = ./mono-stretchly;
 
           # overrides = self: super: { };
           devShell = {
