@@ -10,7 +10,7 @@
   };
   outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = ["x86_64-darwin"];
+      systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
         inputs.haskell-flake.flakeModule
         inputs.treefmt-nix.flakeModule
@@ -24,7 +24,7 @@
           packages.ws-access-token.root =
             ./ws-access-token; # This value is detected based on .cabal files
           packages.hi-chew.root = ./hi-chew;
-          # packages.mono-stretchly.root = ./mono-stretchly;
+          packages.mono-stretchly.root = ./mono-stretchly;
 
           # overrides = self: super: { };
           devShell = {
@@ -55,7 +55,7 @@
         };
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.resource-id = self'.packages.main-resource-id;
-        # packages.mono-stretchly = self'.packages.mono-stretchly;
+        packages.mono-stretchly = self'.packages.mono-stretchly;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
         # Dev shell scripts.
