@@ -53,9 +53,9 @@ main = do
   where
     config = [
       appWindowTitle "Hello world",
-      appWindowIcon "./assets/images/icon.png",
+      -- appWindowIcon "./assets/images/icon.png",
       appTheme darkTheme,
-      appFontDef "Regular" "./assets/fonts/Roboto-Regular.ttf",
+      -- appFontDef "Regular" "./assets/fonts/Roboto-Regular.ttf",
       appInitEvent AppInit
       ]
     model = AppModel 0
