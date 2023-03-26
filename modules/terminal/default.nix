@@ -123,6 +123,7 @@ in {
           clock24 = true;
           plugins = with pkgs;
             [
+              # bind is u
               # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
               tmuxPlugins.fzf-tmux-url
             ];
