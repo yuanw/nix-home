@@ -10,6 +10,7 @@ mkDerivation {
   executableHaskellDepends = [
     base data-default lens monomer text text-show
   ];
+  enableSeparateDataOutput = true;
   license = lib.licenses.mit;
   mainProgram = "mono-stretchly";
 }
