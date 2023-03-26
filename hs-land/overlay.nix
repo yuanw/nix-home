@@ -8,7 +8,7 @@ final: prev:
 
       resource-id =
         haskellPackagesNew.callPackage ./resource-id/release.nix { };
-   mono-stretchly =
+      mono-stretchly =
         haskellPackagesNew.callPackage ./mono-stretchly/project.nix { };
 
       hi-chew = haskellPackagesNew.callPackage ./hi-chew/release.nix { };
