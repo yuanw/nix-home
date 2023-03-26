@@ -53,6 +53,7 @@ main = do
   where
     config = [
       appWindowTitle "Hello world",
+      --how to bundle a png
       appWindowIcon "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/assets/images/icon.png",
       appTheme darkTheme,
       appFontDef "Regular" "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/assets/fonts/Roboto-Regular.ttf",

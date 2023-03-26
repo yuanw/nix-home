@@ -63,7 +63,7 @@ with pkgs; [
   SDL2
   glew
   pkg-config
-
+  mono-stretchly
   reiryoku-firmware
   # reiryoku-flash
 ]
