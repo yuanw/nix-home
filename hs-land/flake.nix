@@ -55,7 +55,7 @@
         };
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.resource-id = self'.packages.main-resource-id;
-        packages.mono-stretchly = self'.packages.mono-stretchly;
+        packages.mono-stretchly = self'.packages.main-mono-stretchly;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
         # Dev shell scripts.
