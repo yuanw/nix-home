@@ -62,6 +62,7 @@ with pkgs; [
 
   SDL2
   glew
+  pkg-config
 
   reiryoku-firmware
   # reiryoku-flash
