@@ -55,7 +55,7 @@
         };
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.resource-id = self'.packages.main-resource-id;
-        packages.monomer-starter = self'.packages.monomer-starter;
+        # packages.monomer-starter = self'.packages.monomer-starter;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
         # Dev shell scripts.
