@@ -8,7 +8,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url =
       "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-x64-release.zip";
-    sha256 = "sha256-zyu6r8akId/AHpBKH95wJXXu1LD9CKShWYKfppnSRx4=";
+    sha256 = "15a9gzkvmlnw9g1dnkxssh0c6skwf7z40i176ck7hzagd5r71fjj";
   };
 
   installPhase = ''
