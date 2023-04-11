@@ -10,7 +10,7 @@ in {
       home.packages = [
         pkgs.kubernetes-helm
         pkgs.aws-iam-authenticator
-        pkgs.clang-tools
+        # pkgs.clang-tools
         # pkgs.antlr4
 
         pkgs.haskellPackages.resource-id
