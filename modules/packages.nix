@@ -2,7 +2,7 @@
 
 with pkgs; [
   #cacert
-  #clang
+  clang
   coreutils-prefixed
   moreutils
 
