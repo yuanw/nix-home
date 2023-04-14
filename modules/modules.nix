@@ -18,6 +18,7 @@ let
     (loadModule ./helix.nix { })
     (loadModule ./hledger.nix { })
     (loadModule ./common.nix { })
+    (loadModule ./agenix.nix { })
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
     (loadModule ./typing { })

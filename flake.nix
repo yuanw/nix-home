@@ -18,15 +18,21 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     reiryoku.url = "github:yuanw/reiryoku";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.darwin.follows = "darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, reiryoku, ... }:
+    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
         emacs.overlay
         nur.overlay
+        agenix.overlays.default
         (final: prev: {
           stable = nixpkgs-stable.legacyPackages.${prev.system};
           # use this variant if unfree packages are needed:
@@ -50,13 +56,14 @@
           system = "x86_64-darwin";
           modules = [
             { nixpkgs.overlays = overlays; }
-
             ({ lib, ... }: {
               imports = import ./modules/modules.nix {
                 inherit lib;
                 isDarwin = true;
               };
             })
+
+            agenix.darwinModules.age
             home-manager.darwinModules.home-manager
             ./macintosh.nix
           ] ++ modules;
@@ -77,6 +84,8 @@
                 blockSocial = false;
               };
             }
+
+            agenix.nixosModules.age
             home-manager.nixosModules.home-manager
             { nixpkgs.overlays = overlays; }
             ({ lib, pkgs, ... }: {
