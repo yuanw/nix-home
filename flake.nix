@@ -60,12 +60,14 @@
           system = "x86_64-darwin";
           modules = [
             { nixpkgs.overlays = overlays; }
-            ({ lib, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isDarwin = true;
-              };
-            })
+            # ({ lib, ... }: {
+              # imports = import
+                ./modules/modules.nix
+            # {
+                # inherit lib;
+                # isDarwin = true;
+              # };
+            # })
 
             agenix.darwinModules.age
             home-manager.darwinModules.home-manager
@@ -95,12 +97,12 @@
             agenix.nixosModules.age
             home-manager.nixosModules.home-manager
             { nixpkgs.overlays = overlays; }
-            ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isNixOS = true;
-              };
-            })
+            # ({ lib, pkgs, ... }: {
+              ./modules/modules.nix
+                # inherit lib;
+                # isNixOS = true;
+              # };
+            # })
           ];
         };
     in {
