@@ -52,8 +52,7 @@
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
-          inputs =  {
-            inherit inputs;
+          inputs = inputs // {
             isNixOS = false;
             isDarwin = true;
           };
@@ -61,14 +60,12 @@
           system = "x86_64-darwin";
           modules = [
             { nixpkgs.overlays = overlays; }
-            # ({ lib, ... }: {
-              # imports = import
-                ./modules/modules.nix
-            # {
-                # inherit lib;
-                # isDarwin = true;
-              # };
-            # })
+            ({ lib, ... }: {
+              imports = import ./modules/modules.nix {
+                inherit lib;
+                isDarwin = true;
+              };
+            })
 
             agenix.darwinModules.age
             home-manager.darwinModules.home-manager
@@ -78,8 +75,7 @@
       mkNixSystem = { modules }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs =   {
-            inherit inputs;
+          specialArgs = inputs // {
             isNixOS = true;
             isDarwin = false;
           };
@@ -99,12 +95,12 @@
             agenix.nixosModules.age
             home-manager.nixosModules.home-manager
             { nixpkgs.overlays = overlays; }
-            # ({ lib, pkgs, ... }: {
-              ./modules/modules.nix
-                # inherit lib;
-                # isNixOS = true;
-              # };
-            # })
+            ({ lib, pkgs, ... }: {
+              imports = import ./modules/modules.nix {
+                inherit lib;
+                isNixOS = true;
+              };
+            })
           ];
         };
     in {
