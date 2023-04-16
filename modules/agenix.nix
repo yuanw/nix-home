@@ -37,7 +37,7 @@ with builtins; {
     })
 
     {
-           age = {
+      age = {
         secrets.secret1 = {
           file = ../secrets/secret1.age;
           mode = "770";

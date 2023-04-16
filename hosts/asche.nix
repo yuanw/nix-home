@@ -30,7 +30,7 @@
       };
     };
   };
-
+  services.openssh.enable = true;
   services.autorandr = {
     enable = true;
     defaultTarget = "home";
@@ -80,7 +80,6 @@
           (epkgs: [ epkgs.vterm ]));
     };
     qmk.enable = true;
-    # moonlander.enable = true;
     terminal.enable = true;
     typing.enable = true;
     wm.xmonad.enable = true;
