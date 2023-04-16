@@ -6,14 +6,12 @@ in with lib;
 with builtins; {
 
   options.modules.secrets.agenix = {
-    enable = mkEnableOption "agenix";
-    isDarwin = mkOption {
-      type = types.bool;
-    };
-    isNixOS = mkOption {
-      type = types.bool;
-    };
+    options = {
+      enable = mkEnableOption "agenix";
+      isDarwin = mkOption { type = types.bool; };
+      isNixOS = mkOption { type = types.bool; };
 
+    };
   };
 
   config = mkIf cfg.enable (mkMerge [
