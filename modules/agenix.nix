@@ -23,13 +23,13 @@ with builtins; {
       assertions = [{
         assertion = let os = [ cfg.isDarwin cfg.isNixOS ]; in count id os <= 1;
         message =
-          "Only one of 'programs.git.delta.enable' or 'programs.git.difftastic.enable' or 'programs.git.diff-so-fancy.enable' can be set to true at the same time.";
+          "Only one of 'programs.git.difftastic.enable' or 'programs.git.diff-so-fancy.enable' can be set to true at the same time.";
       }];
 
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
-    (mkIf cfg.isDarwin {
+    (mkIf (cfg.isDarwin) {
       launchd.daemons.activate-agenix.serviceConfig = {
         StandardOutPath = "/tmp/agenix.out.log";
         StandardErrorPath = "/tmp/agenix.err.log";

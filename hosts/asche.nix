@@ -63,6 +63,9 @@
     };
   };
   modules = {
+    secrets.agenix = {
+      enable = true;
+    };
     dev = {
       agda.enable = true;
       haskell.enable = true;
