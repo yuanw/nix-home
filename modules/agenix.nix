@@ -9,11 +9,9 @@ with builtins; {
     enable = mkEnableOption "agenix";
     isDarwin = mkOption {
       type = types.bool;
-      default = pkgs.stdenv.hostPlatform.isDarwin;
     };
     isNixOS = mkOption {
       type = types.bool;
-      default = !pkgs.stdenv.hostPlatform.isDarwin;
     };
 
   };
@@ -29,12 +27,12 @@ with builtins; {
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
-    (mkIf cfg.isDarwin {
-      launchd.daemons.activate-agenix.serviceConfig = {
-        StandardOutPath = "/tmp/agenix.out.log";
-        StandardErrorPath = "/tmp/agenix.err.log";
-      };
-    })
+    # (mkIf cfg.isDarwin {
+    #   launchd.daemons.activate-agenix.serviceConfig = {
+    #     StandardOutPath = "/tmp/agenix.out.log";
+    #     StandardErrorPath = "/tmp/agenix.err.log";
+    #   };
+    # })
 
     {
       age = {

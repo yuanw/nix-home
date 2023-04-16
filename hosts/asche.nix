@@ -65,6 +65,7 @@
   modules = {
     secrets.agenix = {
       enable = false;
+      isDarwin = false;
     };
     dev = {
       agda.enable = true;
