@@ -7,6 +7,15 @@ with builtins; {
 
   options.modules.secrets.agenix = {
     enable = mkEnableOption "agenix";
+    # isDarwin = mkOption {
+    #   type = types.bool;
+    #   default = pkgs.stdenv.hostPlatform.isDarwin;
+    # };
+    # isNixOS = mkOption {
+    #   type = types.bool;
+    #   default = !pkgs.stdenv.hostPlatform.isDarwin;
+    # };
+
   };
 
   config = mkIf cfg.enable (mkMerge [
