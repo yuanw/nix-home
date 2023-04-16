@@ -7,24 +7,24 @@ with builtins; {
 
   options.modules.secrets.agenix = {
     enable = mkEnableOption "agenix";
-    isDarwin = mkOption {
-      type = types.bool;
-      default = pkgs.stdenv.hostPlatform.isDarwin;
-    };
-    isNixOS = mkOption {
-      type = types.bool;
-      default = !pkgs.stdenv.hostPlatform.isDarwin;
-    };
+    # isDarwin = mkOption {
+    #   type = types.bool;
+    #   default = pkgs.stdenv.hostPlatform.isDarwin;
+    # };
+    # isNixOS = mkOption {
+    #   type = types.bool;
+    #   default = !pkgs.stdenv.hostPlatform.isDarwin;
+    # };
 
   };
 
   config = mkIf cfg.enable (mkMerge [
     {
-      assertions = [{
-        assertion = let os = [ cfg.isDarwin cfg.isNixOS ]; in count id os <= 1;
-        message =
-          "Only one of 'programs.git.difftastic.enable' or 'programs.git.diff-so-fancy.enable' can be set to true at the same time.";
-      }];
+      # assertions = [{
+      #   assertion = let os = [ cfg.isDarwin cfg.isNixOS ]; in count id os <= 1;
+      #   message =
+      #     "Only one of 'programs.git.difftastic.enable' or 'programs.git.diff-so-fancy.enable' can be set to true at the same time.";
+      # }];
 
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
@@ -37,12 +37,7 @@ with builtins; {
     })
 
     {
-      # imports = (mkMerge [
-      #   (mkIf cfg.isNixOs  agenix.nixosModules.age )
-      #   (mkIf cfg.isDarwin  agenix.darwinModules.age )
-      # ]);
-
-      age = {
+           age = {
         secrets.secret1 = {
           file = ../secrets/secret1.age;
           mode = "770";
