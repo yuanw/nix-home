@@ -53,8 +53,8 @@
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
           inputs = inputs // {
-            isNixOS = false;
-            isDarwin = true;
+            # isNixOS = false;
+            # isDarwin = true;
           };
 
           system = "x86_64-darwin";
