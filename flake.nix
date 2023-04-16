@@ -52,7 +52,11 @@
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
-          inputs = inputs;
+          inputs = inputs // {
+            isNixOS = false;
+            isDarwin = true;
+          };
+
           system = "x86_64-darwin";
           modules = [
             { nixpkgs.overlays = overlays; }
@@ -71,7 +75,10 @@
       mkNixSystem = { modules }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = inputs;
+          specialArgs = inputs // {
+            isNixOS = true;
+            isDarwin = false;
+          };
           modules = modules ++ [
             ./nixos_system.nix
             hosts.nixosModule
