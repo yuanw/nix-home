@@ -52,7 +52,8 @@
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
-          inputs = inputs // {
+          inputs =  {
+            inherit inputs;
             isNixOS = false;
             isDarwin = true;
           };
@@ -77,7 +78,8 @@
       mkNixSystem = { modules }:
         nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
-          specialArgs = inputs // {
+          specialArgs =   {
+            inherit inputs;
             isNixOS = true;
             isDarwin = false;
           };
