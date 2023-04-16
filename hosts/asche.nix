@@ -64,7 +64,7 @@
   };
   modules = {
     secrets.agenix = {
-      enable = true;
+      enable = false;
     };
     dev = {
       agda.enable = true;
