@@ -1,4 +1,4 @@
-{ config, lib, options, pkgs, isNixOS, isDarwin, ... }:
+{ config, lib, options, pkgs, ... }:
 let
 
   cfg = config.modules.secrets.agenix;
@@ -29,7 +29,7 @@ with builtins; {
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
-    (mkIf isDarwin {
+    (mkIf cfg.isDarwin {
       launchd.daemons.activate-agenix.serviceConfig = {
         StandardOutPath = "/tmp/agenix.out.log";
         StandardErrorPath = "/tmp/agenix.err.log";
