@@ -28,7 +28,7 @@ in {
     };
   };
   config = mkIf cfg.enable {
-    imports = [ nix-colors.homeManagerModule ];
+    import = [ nix-colors.homeManagerModule ];
 
     colorScheme = nix-colors.colorSchemes.dracula;
 
@@ -180,7 +180,7 @@ in {
               Exit q detach"
           '';
         };
-        zellij = { enable = true; };
+        zellij = { enable = false; };
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {
