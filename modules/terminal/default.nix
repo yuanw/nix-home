@@ -13,6 +13,7 @@ let
     "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
 
+    imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
     mainWorkspaceDir = mkOption {
@@ -27,8 +28,8 @@ in {
       description = "secondary directory for prefix+O to point to";
     };
   };
+
   config = mkIf cfg.enable {
-    import = [ nix-colors.homeManagerModule ];
 
     colorScheme = nix-colors.colorSchemes.dracula;
 
