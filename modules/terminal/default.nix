@@ -13,7 +13,7 @@ let
     "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
 
-    imports = [ nix-colors.homeManagerModule ];
+  imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
     mainWorkspaceDir = mkOption {

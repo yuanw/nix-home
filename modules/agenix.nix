@@ -1,4 +1,4 @@
-{ config, lib, options, pkgs, ... }:
+{ config, lib, options, pkgs, isDarwin, ... }:
 let
 
   cfg = config.modules.secrets.agenix;
@@ -32,12 +32,12 @@ with builtins; {
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
-    # (mkIf cfg.isDarwin {
-    #   launchd.daemons.activate-agenix.serviceConfig = {
-    #     StandardOutPath = "/tmp/agenix.out.log";
-    #     StandardErrorPath = "/tmp/agenix.err.log";
-    #   };
-    # })
+    (mkIf isDarwin {
+      launchd.daemons.activate-agenix.serviceConfig = {
+        StandardOutPath = "/tmp/agenix.out.log";
+        StandardErrorPath = "/tmp/agenix.err.log";
+      };
+    })
 
     {
       age = {
