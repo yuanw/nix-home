@@ -50,70 +50,108 @@
         (import ./overlays)
       ];
 
+      # https://github.com/shaunsingh/nix-darwin-dotfiles/blob/main/flake.nix
+      mkSystemConfig = { system, modules
+        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system, isNixOS ? !isDarwin
+        , ... }:
+        (if isDarwin then
+          darwin.lib.darwinSystem
+        else
+          nixpkgs.lib.nixosSystem) {
+            inherit system;
+            specialArgs = {
+              inherit nix-colors;
+              isNixOS = false;
+              isDarwin = true;
+            };
+            modules = modules ++ [
+
+              { nixpkgs.overlays = overlays; }
+              ./modules
+            ] ++ (if isDarwin then ([
+              agenix.darwinModules.age
+              home-manager.darwinModules.home-manager
+              ./macintosh.nix
+            ]) else ([
+              ./nixos_system.nix
+              hosts.nixosModule
+              {
+                networking.stevenBlackHosts = {
+                  enable = true;
+                  blockFakenews = true;
+                  blockGambling = true;
+                  blockPorn = true;
+                  blockSocial = false;
+                };
+              }
+              agenix.nixosModules.age
+              home-manager.nixosModules.home-manager
+
+            ]));
+
+          };
+
       # idea borrowed from https://github.com/hardselius/dotfiles
-      mkDarwinSystem = { modules }:
-        darwin.lib.darwinSystem {
-          specialArgs =  {
-            inherit nix-colors;
-            isNixOS = false;
-            isDarwin = true;
-          };
+      # mkDarwinSystem = { modules }:
+      #   darwin.lib.darwinSystem {
+      #     specialArgs = {
+      #       inherit nix-colors;
+      #       isNixOS = false;
+      #       isDarwin = true;
+      #     };
 
-          system = "x86_64-darwin";
-          modules = [
-            { nixpkgs.overlays = overlays; }
-            ({ lib, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isDarwin = true;
-              };
-            })
+      #     system = "x86_64-darwin";
+      #     modules = [
+      #       { nixpkgs.overlays = overlays; }
+      #       ./modules
+      #       agenix.darwinModules.age
+      #       home-manager.darwinModules.home-manager
+      #       nix-colors.homeManagerModule
+      #       ./macintosh.nix
+      #     ] ++ modules;
+      #   };
+      # mkNixSystem = { modules }:
+      #   nixpkgs.lib.nixosSystem {
+      #     system = "x86_64-linux";
+      #     specialArgs = inputs // {
+      #       isNixOS = true;
+      #       isDarwin = false;
+      #     };
+      #     modules = modules ++ [
+      #       ./nixos_system.nix
+      #       hosts.nixosModule
+      #       {
+      #         networking.stevenBlackHosts = {
+      #           enable = true;
+      #           blockFakenews = true;
+      #           blockGambling = true;
+      #           blockPorn = true;
+      #           blockSocial = false;
+      #         };
+      #       }
 
-            agenix.darwinModules.age
-            home-manager.darwinModules.home-manager
-             nix-colors.homeManagerModule
-            ./macintosh.nix
-          ] ++ modules;
-        };
-      mkNixSystem = { modules }:
-        nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = inputs // {
-            isNixOS = true;
-            isDarwin = false;
-          };
-          modules = modules ++ [
-            ./nixos_system.nix
-            hosts.nixosModule
-            {
-              networking.stevenBlackHosts = {
-                enable = true;
-                blockFakenews = true;
-                blockGambling = true;
-                blockPorn = true;
-                blockSocial = false;
-              };
-            }
+      #       agenix.nixosModules.age
+      #       home-manager.nixosModules.home-manager
+      #       { nixpkgs.overlays = overlays; }
 
-            agenix.nixosModules.age
-            home-manager.nixosModules.home-manager
-            { nixpkgs.overlays = overlays; }
-            ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isNixOS = true;
-              };
-            })
-          ];
-        };
+      #       ./modules
+      #     ];
+      #   };
     in {
-      nixosConfigurations.asche = mkNixSystem {
+      nixosConfigurations.asche = mkSystemConfig {
+        system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
       };
 
       darwinConfigurations = {
-        yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };
-        wf17084 = mkDarwinSystem { modules = [ ./hosts/wf17084.nix ]; };
+        yuanw = mkSystemConfig {
+          system = "x86_64-darwin";
+          modules = [ ./hosts/yuan-mac.nix ];
+        };
+        wf17084 = mkSystemConfig {
+          system = "x86_64-darwin";
+          modules = [ ./hosts/wf17084.nix ];
+        };
       };
 
       asche = self.nixosConfigurations.asche.system;
