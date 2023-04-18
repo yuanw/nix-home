@@ -49,11 +49,6 @@
         (import ./hs-land/overlay.nix)
         (import ./overlays)
       ];
-      loadModules = { lib, isDarwin, isNixOS, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib isDarwin isNixOS;
-              };
-            };
 
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
@@ -67,7 +62,7 @@
           system = "x86_64-darwin";
           modules = [
             { nixpkgs.overlays = overlays; }
-            loadModules
+            ./modules
             agenix.darwinModules.age
             home-manager.darwinModules.home-manager
              nix-colors.homeManagerModule
@@ -97,7 +92,8 @@
             agenix.nixosModules.age
             home-manager.nixosModules.home-manager
             { nixpkgs.overlays = overlays; }
-            loadModules
+
+            ./modules
             # ({ lib, pkgs, ... }: {
             #   imports = import ./modules/modules.nix {
             #     inherit lib;
