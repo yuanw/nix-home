@@ -53,7 +53,8 @@
       # idea borrowed from https://github.com/hardselius/dotfiles
       mkDarwinSystem = { modules }:
         darwin.lib.darwinSystem {
-          inputs = inputs // {
+          inputs =  {
+            inherit nix-colors;
             isNixOS = false;
             isDarwin = true;
           };
