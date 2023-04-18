@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, nix-colors, ... }:
 
 with lib;
 let
   cfg = config.modules.terminal;
+  colorScheme = nix-colors.colorSchemes.dracula;
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
@@ -188,7 +189,7 @@ in {
               };
               bold = {
                 family = config.my.font;
-                style = "Bold";
+               style = "Bold";
               };
               italic = {
                 family = config.my.font;
@@ -211,7 +212,7 @@ in {
               # Default colors
               primary = {
                 background = "0x292d3e";
-                foreground = "0xd0d0d0";
+                foreground = "#${config.colorScheme.colors.base00}";
               };
               cursor = {
                 text = "0x202331";

@@ -8,6 +8,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
@@ -26,7 +27,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, ... }:
+    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -69,6 +70,7 @@
 
             agenix.darwinModules.age
             home-manager.darwinModules.home-manager
+             nix-colors.homeManagerModule
             ./macintosh.nix
           ] ++ modules;
         };
