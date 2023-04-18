@@ -70,7 +70,7 @@
 
             agenix.darwinModules.age
             home-manager.darwinModules.home-manager
-             nix-colors.homeManagerModule
+             # nix-colors.homeManagerModule
             ./macintosh.nix
           ] ++ modules;
         };

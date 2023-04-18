@@ -28,6 +28,10 @@ in {
     };
   };
   config = mkIf cfg.enable {
+    imports = [ nix-colors.homeManagerModule ];
+
+    colorScheme = nix-colors.colorSchemes.dracula;
+
     home-manager.users.${config.my.username} = {
       home = {
         file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
@@ -189,7 +193,7 @@ in {
               };
               bold = {
                 family = config.my.font;
-               style = "Bold";
+                style = "Bold";
               };
               italic = {
                 family = config.my.font;
@@ -212,7 +216,7 @@ in {
               # Default colors
               primary = {
                 background = "0x292d3e";
-                foreground = "#${config.colorScheme.colors.base00}";
+                foreground = "#${colorScheme.colors.base00}";
               };
               cursor = {
                 text = "0x202331";
