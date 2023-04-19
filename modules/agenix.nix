@@ -32,12 +32,15 @@ with builtins; {
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
-    (mkIf isDarwin {
+    (if (builtins.hasAttr "launchd" options) then {
       launchd.daemons.activate-agenix.serviceConfig = {
         StandardOutPath = "/tmp/agenix.out.log";
         StandardErrorPath = "/tmp/agenix.err.log";
       };
-    })
+    } else
+      {
+        # systemd
+      })
 
     {
       age = {
