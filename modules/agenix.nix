@@ -1,4 +1,4 @@
-{ config, lib, options, pkgs, isDarwin, ... }:
+{ config, lib, options, pkgs, ... }:
 let
 
   cfg = config.modules.secrets.agenix;
@@ -10,25 +10,10 @@ with builtins; {
     modules.secrets.agenix = {
       enable = mkEnableOption "agenix";
 
-      isDarwin = mkOption {
-        type = types.bool;
-        default = !pkgs.stdenv.isLinux;
-      };
-      isNixOS = mkOption {
-        type = types.bool;
-        default = pkgs.stdenv.isLinux;
-      };
     };
   };
   config = mkIf cfg.enable (mkMerge [
     {
-      assertions = [{
-        assertion = let enabled = [ cfg.isDarwin cfg.isNixOS ];
-        in count id enabled <= 1;
-        message =
-          "Only one of 'modules.secrets.agenix.isDarwin' or 'modules.secrets.agenix.isNixOS' can be set to true at the same time.";
-      }];
-
       environment.systemPackages = with pkgs; [ agenix rage ];
     }
 
