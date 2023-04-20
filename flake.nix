@@ -8,7 +8,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    inputs.devenv.url = "github:cachix/devenv/latest";
+    devenv.url = "github:cachix/devenv/latest";
     nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
     devshell.url = "github:numtide/devshell";
