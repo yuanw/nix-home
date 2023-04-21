@@ -217,7 +217,7 @@ in {
               # Default colors
               primary = {
                 background = "0x292d3e";
-                foreground = "#${colorScheme.colors.base00}";
+                foreground = "0xd0d0d0";
               };
               cursor = {
                 text = "0x202331";
