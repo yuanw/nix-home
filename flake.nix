@@ -62,9 +62,7 @@
           nixpkgs.lib.nixosSystem) {
             inherit system;
             specialArgs = {
-              inherit nix-colors;
-              inherit isNixOS ;
-              inherit isDarwin ;
+              inherit nix-colors isNixOS isDarwin ;
             };
             modules = modules ++ [
 
