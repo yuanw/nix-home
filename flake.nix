@@ -63,8 +63,8 @@
             inherit system;
             specialArgs = {
               inherit nix-colors;
-              isNixOS = false;
-              isDarwin = true;
+              inherit isNixOS ;
+              inherit isDarwin ;
             };
             modules = modules ++ [
 
