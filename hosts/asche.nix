@@ -30,7 +30,7 @@
       };
     };
   };
-
+  services.openssh.enable = true;
   services.autorandr = {
     enable = true;
     defaultTarget = "home";
@@ -63,6 +63,9 @@
     };
   };
   modules = {
+    secrets.agenix = {
+      enable = false;
+    };
     dev = {
       agda.enable = true;
       haskell.enable = true;
@@ -77,7 +80,6 @@
           (epkgs: [ epkgs.vterm ]));
     };
     qmk.enable = true;
-    # moonlander.enable = true;
     terminal.enable = true;
     typing.enable = true;
     wm.xmonad.enable = true;

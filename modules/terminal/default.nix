@@ -1,8 +1,9 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, nix-colors, ... }:
 
 with lib;
 let
   cfg = config.modules.terminal;
+  colorScheme = nix-colors.colorSchemes.dracula;
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
@@ -12,6 +13,7 @@ let
     "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in {
 
+  imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
     mainWorkspaceDir = mkOption {
@@ -26,7 +28,11 @@ in {
       description = "secondary directory for prefix+O to point to";
     };
   };
+
   config = mkIf cfg.enable {
+
+    colorScheme = nix-colors.colorSchemes.dracula;
+
     home-manager.users.${config.my.username} = {
       home = {
         file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
@@ -175,7 +181,7 @@ in {
               Exit q detach"
           '';
         };
-        zellij = { enable = true; };
+        zellij = { enable = false; };
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {

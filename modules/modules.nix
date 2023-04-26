@@ -1,6 +1,6 @@
 # why not use stdenv isDarwin function
 # https://github.com/nix-community/home-manager/issues/414
-{ lib, isDarwin ? false, isNixOS ? false }:
+{ lib, isDarwin , isNixOS, ...  }:
 
 with lib;
 let
@@ -18,6 +18,7 @@ let
     (loadModule ./helix.nix { })
     (loadModule ./hledger.nix { })
     (loadModule ./common.nix { })
+    (loadModule ./agenix.nix { })
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
     (loadModule ./typing { })

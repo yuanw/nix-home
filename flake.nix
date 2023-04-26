@@ -8,6 +8,8 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    devenv.url = "github:cachix/devenv/latest";
+    nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
     devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
@@ -18,15 +20,21 @@
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     reiryoku.url = "github:yuanw/reiryoku";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.darwin.follows = "darwin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, reiryoku, ... }:
+    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
         emacs.overlay
         nur.overlay
+        agenix.overlays.default
         (final: prev: {
           stable = nixpkgs-stable.legacyPackages.${prev.system};
           # use this variant if unfree packages are needed:
@@ -36,67 +44,114 @@
           # };
 
         })
-         (final: prev:
-          {
-            reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
-            # reiryoku-flash = inputs.reiryoku.packages.${prev.system}.flash;
-                   })
+        (final: prev: {
+          reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
+          devenv = inputs.devenv.packages.${prev.system}.devenv;
+        })
         (import ./hs-land/overlay.nix)
         (import ./overlays)
       ];
 
-      # idea borrowed from https://github.com/hardselius/dotfiles
-      mkDarwinSystem = { modules }:
-        darwin.lib.darwinSystem {
-          inputs = inputs;
-          system = "x86_64-darwin";
-          modules = [
-            { nixpkgs.overlays = overlays; }
+      # https://github.com/shaunsingh/nix-darwin-dotfiles/blob/main/flake.nix
+      mkSystemConfig = { system, modules
+        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system, isNixOS ? !isDarwin
+        , ... }:
+        (if isDarwin then
+          darwin.lib.darwinSystem
+        else
+          nixpkgs.lib.nixosSystem) {
+            inherit system;
+            specialArgs = {
+              inherit nix-colors isNixOS isDarwin ;
+            };
+            modules = modules ++ [
 
-            ({ lib, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isDarwin = true;
-              };
-            })
-            home-manager.darwinModules.home-manager
-            ./macintosh.nix
-          ] ++ modules;
-        };
-      mkNixSystem = { modules }:
-        nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          specialArgs = inputs;
-          modules = modules ++ [
-            ./nixos_system.nix
-            hosts.nixosModule
-            {
-              networking.stevenBlackHosts = {
-                enable = true;
-                blockFakenews = true;
-                blockGambling = true;
-                blockPorn = true;
-                blockSocial = false;
-              };
-            }
-            home-manager.nixosModules.home-manager
-            { nixpkgs.overlays = overlays; }
-            ({ lib, pkgs, ... }: {
-              imports = import ./modules/modules.nix {
-                inherit lib;
-                isNixOS = true;
-              };
-            })
-          ];
-        };
+              { nixpkgs.overlays = overlays; }
+              ./modules
+            ] ++ (if isDarwin then ([
+              agenix.darwinModules.age
+              home-manager.darwinModules.home-manager
+              ./macintosh.nix
+            ]) else ([
+              ./nixos_system.nix
+              hosts.nixosModule
+              {
+                networking.stevenBlackHosts = {
+                  enable = true;
+                  blockFakenews = true;
+                  blockGambling = true;
+                  blockPorn = true;
+                  blockSocial = false;
+                };
+              }
+              agenix.nixosModules.age
+              home-manager.nixosModules.home-manager
+
+            ]));
+
+          };
+
+      # idea borrowed from https://github.com/hardselius/dotfiles
+      # mkDarwinSystem = { modules }:
+      #   darwin.lib.darwinSystem {
+      #     specialArgs = {
+      #       inherit nix-colors;
+      #       isNixOS = false;
+      #       isDarwin = true;
+      #     };
+
+      #     system = "x86_64-darwin";
+      #     modules = [
+      #       { nixpkgs.overlays = overlays; }
+      #       ./modules
+      #       agenix.darwinModules.age
+      #       home-manager.darwinModules.home-manager
+      #       nix-colors.homeManagerModule
+      #       ./macintosh.nix
+      #     ] ++ modules;
+      #   };
+      # mkNixSystem = { modules }:
+      #   nixpkgs.lib.nixosSystem {
+      #     system = "x86_64-linux";
+      #     specialArgs = inputs // {
+      #       isNixOS = true;
+      #       isDarwin = false;
+      #     };
+      #     modules = modules ++ [
+      #       ./nixos_system.nix
+      #       hosts.nixosModule
+      #       {
+      #         networking.stevenBlackHosts = {
+      #           enable = true;
+      #           blockFakenews = true;
+      #           blockGambling = true;
+      #           blockPorn = true;
+      #           blockSocial = false;
+      #         };
+      #       }
+
+      #       agenix.nixosModules.age
+      #       home-manager.nixosModules.home-manager
+      #       { nixpkgs.overlays = overlays; }
+
+      #       ./modules
+      #     ];
+      #   };
     in {
-      nixosConfigurations.asche = mkNixSystem {
+      nixosConfigurations.asche = mkSystemConfig {
+        system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
       };
 
       darwinConfigurations = {
-        yuanw = mkDarwinSystem { modules = [ ./hosts/yuan-mac.nix ]; };
-        wf17084 = mkDarwinSystem { modules = [ ./hosts/wf17084.nix ]; };
+        yuanw = mkSystemConfig {
+          system = "x86_64-darwin";
+          modules = [ ./hosts/yuan-mac.nix ];
+        };
+        wf17084 = mkSystemConfig {
+          system = "x86_64-darwin";
+          modules = [ ./hosts/wf17084.nix ];
+        };
       };
 
       asche = self.nixosConfigurations.asche.system;

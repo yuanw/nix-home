@@ -24,18 +24,7 @@
   };
 
   programs = {
-    bat = {
-      enable = true;
-      # config.theme = "palenight";
-      # themes = {
-      #   palenight = builtins.readFile (pkgs.fetchFromGitHub {
-      #     owner = "equinusocio";
-      #     repo = "material-theme";
-      #     rev = "614b7e8bc7369c32e852297d42253643ebf90d55";
-      #     sha256 = "1gjfisksvqa2d08na0yln7yxny4i16wrmvlfnwllbqrgwh26v94g";
-      #   } + "/schemes/Material-Theme-Palenight.tmTheme");
-      # };
-    };
+    bat = { enable = true; };
     dircolors = {
       enable = true;
       enableZshIntegration = true;

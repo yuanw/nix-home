@@ -40,7 +40,7 @@ with pkgs; [
   nix-tree
   # nix-du
 
-  # devenv
+  devenv
   eukleides
   #mu
   #offlineimap
@@ -59,6 +59,7 @@ with pkgs; [
   # vhs
   csvkit
   gum
+
 
   SDL2
   glew

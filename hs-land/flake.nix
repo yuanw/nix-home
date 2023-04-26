@@ -90,8 +90,9 @@
         };
 
         # Default shell.
-        devShells.default =
-          config.mission-control.installToDevShell self'.devShells.main;
+            devShells.default = pkgs.mkShell {
+          inputsFrom = [ config.mission-control.devShell self'.devShells.main ];
+        };
       };
     };
 }
