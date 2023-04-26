@@ -126,10 +126,10 @@
       # difftastic = { enable = true; };
       delta = { enable = true; };
 
-      # signing = {
-      #   key = config.my.gpgKey;
-      #   signByDefault = true;
-      # };
+      signing = {
+        key = config.my.gpgKey;
+        signByDefault = true;
+      };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
       extraConfig = {
         core = { editor = "emacsclient -c"; };
