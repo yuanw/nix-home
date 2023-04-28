@@ -4,7 +4,6 @@
   };
 
   my = {
-
     username = "yuanw";
     name = "Yuan Wang";
     email = "me@yuanwang.ca";
@@ -13,40 +12,31 @@
     homeDirectory = "/Users/yuanw";
   };
 
-  services.emacs = {
-    enable = true;
-    package = pkgs.emacs;
-  };
-
   modules = {
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+    };
+    editors.emacs = {
+      enable = true;
+      usePackage = false;
+      enableDoomConfig = true;
     };
 
     terminal.enable = true;
     wm.yabai.enable = true;
     brew = {
       enable = true;
+      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
+      brews = [ "emacs-plus@29" ];
       casks = [
-        "firefox"
-        "docker"
-        "google-chrome"
-        "insomnia"
-        "karabiner-elements"
-        "stretchly"
-        "hammerspoon"
-      ];
+        "brave-browser"
+        "firefox"  "stretchly" ];
     };
   };
-  programs = {
-    node.enable = true;
-    python.enable = false;
-    haskell.enable = true;
-    editors.emacs = {
-      enable = true;
-      pkg = pkgs.emacs;
-    };
-    stevenBlackHosts.enable = false;
-  };
+  # programs = {
+  #   node.enable = true;
+  #   python.enable = false;
+  #   haskell.enable = false;
+  # };
 }
