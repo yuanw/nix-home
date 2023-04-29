@@ -26,7 +26,9 @@
     };
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
+      taps = [ "homebrew/core" "homebrew/cask"
+               # "d12frosted/emacs-plus"
+             ];
 
       casks = [
         "brave-browser"
@@ -43,7 +45,7 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-        "emacs-plus@29"
+        # "emacs-plus@29"
         "pyenv"
         "pngpaste"
         # "avr-gcc"
@@ -58,11 +60,11 @@
     };
     editors.emacs = {
       enable = true;
-      usePackage = false;
+      # usePackage = false;
       # enableService = true;
-      # pkg = with pkgs;
-      #   ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-      #     (epkgs: [ epkgs.vterm ]));
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
     };
 
     typing.enable = true;

@@ -16,7 +16,7 @@ in emacsUnstable.overrideAttrs (o: {
   configureFlags = o.configureFlags ++ [ "--with-cairo" "--with-harfbuzz" ];
 
   patches = [
-    "${emacsPlus}/patches/emacs-28/no-titlebar.patch"
+    # "${emacsPlus}/patches/emacs-28/no-titlebar.patch"
     "${emacsPlus}/patches/emacs-28/fix-window-role.patch"
   ];
 

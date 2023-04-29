@@ -19,7 +19,10 @@
     };
     editors.emacs = {
       enable = true;
-      usePackage = false;
+      # usePackage = false;
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
       enableDoomConfig = true;
     };
 
@@ -27,8 +30,10 @@
     wm.yabai.enable = true;
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
-      brews = [ "emacs-plus@29" ];
+      taps = [ "homebrew/core" "homebrew/cask"
+               # "d12frosted/emacs-plus"
+             ];
+      # brews = [ "emacs-plus@29" ];
       casks = [
         "brave-browser"
         "firefox"  "stretchly" ];
