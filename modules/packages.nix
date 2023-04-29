@@ -59,7 +59,7 @@ with pkgs; [
   # vhs
   csvkit
   gum
-
+  adguardhome
 
   SDL2
   glew
