@@ -40,7 +40,7 @@
         # "karabiner-elements"
         "stretchly"
         "sloth"
-        "mysqlworkbench"
+        # "mysqlworkbench"
       ];
       brews = [
         # "aws-iam-authenticator"
