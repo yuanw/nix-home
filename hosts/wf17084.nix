@@ -26,21 +26,16 @@
     };
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask"
-               # "d12frosted/emacs-plus"
-             ];
+      taps = [ "homebrew/core" "homebrew/cask"];
 
       casks = [
         "brave-browser"
         "docker"
         "firefox"
         "google-chrome"
-        # "hammerspoon"
         "insomnia"
-        # "karabiner-elements"
         "stretchly"
         "sloth"
-        # "mysqlworkbench"
       ];
       brews = [
         # "aws-iam-authenticator"
