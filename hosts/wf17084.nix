@@ -40,11 +40,8 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-        # "emacs-plus@29"
         "pyenv"
         "pngpaste"
-        # "avr-gcc"
-        # "qmk/qmk/qmk"
         "jdtls"
         "redis"
       ];
@@ -55,7 +52,6 @@
     };
     editors.emacs = {
       enable = true;
-      # usePackage = false;
       # enableService = true;
       pkg = with pkgs;
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
