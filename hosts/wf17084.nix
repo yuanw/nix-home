@@ -21,6 +21,7 @@
     };
   };
   modules = {
+    common.enable = true;
     secrets.agenix = {
       enable = true;
     };
