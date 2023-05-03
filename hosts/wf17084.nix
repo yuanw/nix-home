@@ -21,7 +21,10 @@
     };
   };
   modules = {
-    common.enable = true;
+    common = {
+      enable = true;
+supportLocalVirtualBuilder = true;
+    };
     secrets.agenix = {
       enable = true;
     };

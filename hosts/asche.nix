@@ -63,9 +63,9 @@
     };
   };
   modules = {
-    secrets.agenix = {
-      enable = false;
-    };
+    common = { enable = true; };
+
+    secrets.agenix = { enable = false; };
     dev = {
       agda.enable = true;
       haskell.enable = true;
