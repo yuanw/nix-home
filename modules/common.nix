@@ -1,6 +1,16 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, isDarwin, ... }:
+with lib;
+let cfg = config.modules.common;
+in {
+  options = {
+    modules.common = {
+      supportLocalVirtualBuilder = mkOption {
+        type = types.bool;
+        default = false;
+      };
+    };
+  };
 
-{
   nix = {
     # configureBuildUsers = true;
     settings = {
@@ -35,11 +45,13 @@
       keep-derivations      = true
       fallback              = true
       extra-trusted-users   = ${config.my.username}
-      # builders = ssh-ng://builder@localhost x86_64-linux /etc/nix/builder_ed25519 4 - - - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=
-      # # Not strictly necessary, but this will reduce your disk utilization
-      # builders-use-substitutes = true
+      # Not strictly necessary, but this will reduce your disk utilization
+      # builders-use-substitutes = true''
+      + (if cfg.supportLocalVirtualBuilder then ''
+        builders = ssh-ng://builder@localhost x86_64-linux /etc/nix/builder_ed25519 4 - - - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=
 
-    '';
+      '' else
+        "");
     # trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
       automatic = true;
