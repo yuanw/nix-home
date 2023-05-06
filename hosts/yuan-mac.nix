@@ -13,6 +13,8 @@
   };
 
   modules = {
+    common = { enable = true; };
+
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
@@ -30,13 +32,13 @@
     wm.yabai.enable = true;
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask"
-               # "d12frosted/emacs-plus"
-             ];
+      taps = [
+        "homebrew/core"
+        "homebrew/cask"
+        # "d12frosted/emacs-plus"
+      ];
       # brews = [ "emacs-plus@29" ];
-      casks = [
-        "brave-browser"
-        "firefox"  "stretchly" ];
+      casks = [ "brave-browser" "firefox" "stretchly" ];
     };
   };
   # programs = {
