@@ -60,6 +60,7 @@ with pkgs; [
   csvkit
   gum
 
+  dig
 
   SDL2
   glew
