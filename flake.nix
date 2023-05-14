@@ -11,7 +11,6 @@
     devenv.url = "github:cachix/devenv/latest";
     nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
-    devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -28,7 +27,7 @@
   };
 
   outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
+    , emacs, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -61,32 +60,28 @@
         else
           nixpkgs.lib.nixosSystem) {
             inherit system;
-            specialArgs = {
-              inherit nix-colors isNixOS isDarwin ;
-            };
-            modules = modules ++ [
-              { nixpkgs.overlays = overlays; }
-              ./modules
-            ] ++ (if isDarwin then ([
-              agenix.darwinModules.age
-              home-manager.darwinModules.home-manager
-              ./macintosh.nix
-            ]) else ([
-              ./nixos_system.nix
-              hosts.nixosModule
-              {
-                networking.stevenBlackHosts = {
-                  enable = true;
-                  blockFakenews = true;
-                  blockGambling = true;
-                  blockPorn = true;
-                  blockSocial = false;
-                };
-              }
-              agenix.nixosModules.age
-              home-manager.nixosModules.home-manager
+            specialArgs = { inherit nix-colors isNixOS isDarwin; };
+            modules = modules ++ [ { nixpkgs.overlays = overlays; } ./modules ]
+              ++ (if isDarwin then ([
+                agenix.darwinModules.age
+                home-manager.darwinModules.home-manager
+                ./macintosh.nix
+              ]) else ([
+                ./nixos_system.nix
+                hosts.nixosModule
+                {
+                  networking.stevenBlackHosts = {
+                    enable = true;
+                    blockFakenews = true;
+                    blockGambling = true;
+                    blockPorn = true;
+                    blockSocial = false;
+                  };
+                }
+                agenix.nixosModules.age
+                home-manager.nixosModules.home-manager
 
-            ]));
+              ]));
 
           };
 
@@ -137,7 +132,7 @@
       #     ];
       #   };
     in {
-        nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [ ./modules/adguard.nix ];
       };
@@ -165,12 +160,7 @@
     } // eachDefaultSystem (system:
       let pkgs = import nixpkgs { inherit system; };
       in {
-        devShell = pkgs.devshell.mkShell {
-          name = "nix-home";
-          imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
-          git.hooks.enable = true;
-          git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
-          packages = [ pkgs.treefmt pkgs.nixfmt ];
-        };
+        devShells.default =
+          pkgs.mkShell { buildInputs = [ pkgs.nixpkgs-fmt ]; };
       });
 }
