@@ -124,8 +124,8 @@ resource "null_resource" "wait" {
 
 module "nixos" {
   source      = "github.com/Gabriella439/terraform-nixos-ng//nixos?ref=d8563d06cc65bc699ffbf1ab8d692b1343ecd927"
-  host        = "root@${aws_instance.todo.public_ip}"
-  flake       = ".#default"
+  host        = "root@${aws_instance.adguard.public_ip}"
+  flake       = ".#adguard"
   arguments   = ["--build-host", "root@${aws_instance.adguard.public_ip}"]
   ssh_options = "-o StrictHostKeyChecking=accept-new -i ${local_sensitive_file.ssh_key_file.filename}"
   depends_on  = [null_resource.wait]
