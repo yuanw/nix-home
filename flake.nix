@@ -161,6 +161,6 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShells.default =
-          pkgs.mkShell { buildInputs = [ pkgs.nixpkgs-fmt ]; };
+          pkgs.mkShell { buildInputs = with pkgs; [ nixpkgs-fmt treefmt ]; };
       });
 }
