@@ -123,7 +123,7 @@ resource "null_resource" "wait" {
 }
 
 module "nixos" {
-  source      = "github.com/Gabriella439/terraform-nixos-ng//nixos?ref=d8563d06cc65bc699ffbf1ab8d692b1343ecd927"
+  source      = "github.com/Gabriella439/terraform-nixos-ng//nixos"
   host        = "root@${aws_instance.adguard.public_ip}"
   flake       = ".#adguard"
   # arguments   = ["--build-host", "root@${aws_instance.adguard.public_ip}"]
