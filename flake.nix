@@ -180,7 +180,7 @@
     } // eachDefaultSystem (system:
     let pkgs = import nixpkgs { inherit system; };
     in {
-      devShells.default =
+      devShells.adguard =
         pkgs.mkShell { buildInputs = with pkgs; [ nixfmt treefmt ]; };
     });
 }
