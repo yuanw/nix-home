@@ -74,13 +74,13 @@ resource "tls_private_key" "adguard" {
 # use
 resource "local_sensitive_file" "ssh_key_file" {
   filename = "${path.module}/id_ed25519"
-  content  = tls_private_key.nixos-in-production.private_key_openssh
+  content  = tls_private_key.adguard.private_key_openssh
 }
 
 # Mirror the SSH public key to EC2 so that we can later install the public key
 # as an authorized key for our server
 resource "aws_key_pair" "adguard" {
-  public_key = tls_private_key.nixos-in-production.public_key_openssh
+  public_key = tls_private_key.adguard.public_key_openssh
 }
 
 module "ami" {
@@ -102,7 +102,7 @@ resource "aws_instance" "adguard" {
   security_groups = [aws_security_group.adguard.name]
 
   # Install our SSH public key as an authorized key
-  key_name = aws_key_pair.nixos-in-production.key_name
+  key_name = aws_key_pair.adguard.key_name
 
   # Request a bit more space because we will be building on the machine
   root_block_device {
