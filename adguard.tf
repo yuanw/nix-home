@@ -85,7 +85,7 @@ resource "aws_key_pair" "adguard" {
 
 module "ami" {
   source  = "github.com/Gabriella439/terraform-nixos-ng//ami?ref=d8563d06cc65bc699ffbf1ab8d692b1343ecd927"
-  release = "22.11"
+  # release = "22.11"
   region  = var.region
   system  = "x86_64-linux"
 }
