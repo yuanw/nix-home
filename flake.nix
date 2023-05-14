@@ -65,7 +65,6 @@
               inherit nix-colors isNixOS isDarwin ;
             };
             modules = modules ++ [
-
               { nixpkgs.overlays = overlays; }
               ./modules
             ] ++ (if isDarwin then ([
@@ -138,6 +137,11 @@
       #     ];
       #   };
     in {
+        nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [ ./modules/adguard.nix ];
+      };
+
       nixosConfigurations.asche = mkSystemConfig {
         system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
