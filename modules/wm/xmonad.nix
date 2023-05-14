@@ -7,7 +7,8 @@ let
   extra = ''
     ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.config/wallpapers/haskell-red-noise.png
   '';
-in {
+in
+{
   options.modules.wm.xmonad = { enable = mkEnableOption "xmonad"; };
 
   config = mkIf cfg.enable {
@@ -51,13 +52,13 @@ in {
     # https://www.freedesktop.org/software/systemd/man/systemd.service.html
     systemd.user.services.flashfocus = {
 
-        description = "flashfocus";
-        after = [ "graphical-session-pre.target" ];
+      description = "flashfocus";
+      after = [ "graphical-session-pre.target" ];
 
       wantedBy = [ "graphical-session.target" ];
 
       serviceConfig = {
-         Type = "forking";
+        Type = "forking";
         User = "yuanw";
         ExecStart = ''${pkgs.flashfocus}/flashfocus'';
       };

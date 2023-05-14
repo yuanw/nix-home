@@ -8,14 +8,16 @@
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsclient = if config.modules.editors.emacs.enableService then
-    "${pkgs.emacs}/bin/emacsclient -c"
-  else
-    "doom run";
-  emacsEveryWhere = if config.modules.editors.emacs.enableService then
-    ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"''
-  else
-    "doom +everywhere";
+  emacsclient =
+    if config.modules.editors.emacs.enableService then
+      "${pkgs.emacs}/bin/emacsclient -c"
+    else
+      "doom run";
+  emacsEveryWhere =
+    if config.modules.editors.emacs.enableService then
+      ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"''
+    else
+      "doom +everywhere";
 
   daemonPath = "/Library/LaunchDaemons/org.nixos.yabai-sa.plist";
 
@@ -44,7 +46,8 @@ let
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
   '';
 
-in {
+in
+{
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
@@ -70,7 +73,8 @@ in {
             sudo yabai --load-sa
             sudo launchctl load ${daemonPath}
             set +x
-          '')
+          ''
+        )
       ];
       programs = {
         zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };

@@ -18,7 +18,8 @@ let
       '';
     };
 
-in with lib; {
+in
+with lib; {
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;

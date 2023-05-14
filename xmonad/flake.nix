@@ -15,7 +15,8 @@
           inherit system;
           overlays = [ self.overlay ];
         });
-    in rec {
+    in
+    rec {
       overlay = (final: prev: {
         my-xmobar = final.haskellPackages.callCabal2nix "my-xmobar" ./. { };
       });

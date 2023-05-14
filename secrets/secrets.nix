@@ -7,4 +7,5 @@ let
   ashe =
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLStUG7iJOYDhS3GLuI0LkvSiY9fqsw2bM5p9JfoUqf";
   systems = [ system1 ashe ];
-in { "secret1.age".publicKeys = users ++ systems; }
+in
+{ "secret1.age".publicKeys = users ++ systems; }

@@ -1,6 +1,6 @@
 # why not use stdenv isDarwin function
 # https://github.com/nix-community/home-manager/issues/414
-{ lib, isDarwin , isNixOS, ...  }:
+{ lib, isDarwin, isNixOS, ... }:
 
 with lib;
 let
@@ -32,4 +32,5 @@ let
     (loadModule ./workShell.nix { condition = isDarwin; })
   ];
   modules = map (getAttr "file") (filter (getAttr "condition") allModules);
-in modules
+in
+modules

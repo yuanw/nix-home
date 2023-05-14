@@ -7,7 +7,8 @@ with lib;
 let
   cfg = config.modules.browsers.firefox;
   homeDir = config.my.homeDirectory;
-in {
+in
+{
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
     pkg = mkOption {
