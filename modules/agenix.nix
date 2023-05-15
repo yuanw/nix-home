@@ -36,6 +36,10 @@ with builtins; {
           owner = "yuanwang";
           group = "admin";
         };
+        secrets.adguard = {
+          file = ../secrets/adguard.age;
+        };
+
         identityPaths = options.age.identityPaths.default
           ++ (filter pathExists [
           "${config.my.homeDirectory}/.ssh/id_ed25519"
