@@ -75,7 +75,7 @@
       enable = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-      # 28.2 + native-comp
+        # 28.2 + native-comp
         ((emacsPackagesFor emacsNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };

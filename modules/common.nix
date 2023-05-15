@@ -48,9 +48,9 @@ in {
         fallback              = true
         extra-trusted-users   = ${config.my.username}
       '' + (if cfg.supportLocalVirtualBuilder then ''
-            # Not strictly necessary, but this will reduce your disk utilization
-          builders-use-substitutes = true
-          builders = ssh-ng://builder@localhost x86_64-linux /etc/nix/builder_ed25519 4 - - - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=
+          # Not strictly necessary, but this will reduce your disk utilization
+        builders-use-substitutes = true
+        builders = ssh-ng://builder@localhost x86_64-linux /etc/nix/builder_ed25519 4 - - - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=
 
       '' else
         "");
