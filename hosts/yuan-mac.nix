@@ -4,7 +4,6 @@
   };
 
   my = {
-
     username = "yuanw";
     name = "Yuan Wang";
     email = "me@yuanwang.ca";
@@ -13,40 +12,38 @@
     homeDirectory = "/Users/yuanw";
   };
 
-  services.emacs = {
-    enable = true;
-    package = pkgs.emacs;
-  };
-
   modules = {
+    common = { enable = true; };
+
     browsers.firefox = {
       enable = true;
       pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+    };
+    editors.emacs = {
+      enable = true;
+      # usePackage = false;
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
+      enableDoomConfig = true;
     };
 
     terminal.enable = true;
     wm.yabai.enable = true;
     brew = {
       enable = true;
-      casks = [
-        "firefox"
-        "docker"
-        "google-chrome"
-        "insomnia"
-        "karabiner-elements"
-        "stretchly"
-        "hammerspoon"
+      taps = [
+        "homebrew/core"
+        "homebrew/cask"
+        # "d12frosted/emacs-plus"
       ];
+      # brews = [ "emacs-plus@29" ];
+      casks = [ "brave-browser" "firefox" "stretchly" ];
     };
   };
-  programs = {
-    node.enable = true;
-    python.enable = false;
-    haskell.enable = true;
-    editors.emacs = {
-      enable = true;
-      pkg = pkgs.emacs;
-    };
-    stevenBlackHosts.enable = false;
-  };
+  # programs = {
+  #   node.enable = true;
+  #   python.enable = false;
+  #   haskell.enable = false;
+  # };
 }

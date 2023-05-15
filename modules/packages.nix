@@ -61,6 +61,7 @@ with pkgs; [
   gum
 
   dig
+  just
 
   SDL2
   glew

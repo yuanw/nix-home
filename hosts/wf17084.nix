@@ -21,33 +21,29 @@
     };
   };
   modules = {
-    secrets.agenix = {
+    common = {
       enable = true;
+      supportLocalVirtualBuilder = true;
     };
+    secrets.agenix = { enable = true; };
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" "d12frosted/emacs-plus" ];
+      taps = [ "homebrew/core" "homebrew/cask" ];
 
       casks = [
         "brave-browser"
         "docker"
         "firefox"
         "google-chrome"
-        # "hammerspoon"
         "insomnia"
-        # "karabiner-elements"
         "stretchly"
         "sloth"
-        "mysqlworkbench"
       ];
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-        "emacs-plus@29"
         "pyenv"
         "pngpaste"
-        # "avr-gcc"
-        # "qmk/qmk/qmk"
         "jdtls"
         "redis"
       ];
@@ -58,11 +54,10 @@
     };
     editors.emacs = {
       enable = true;
-      usePackage = false;
       # enableService = true;
-      # pkg = with pkgs;
-      #   ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-      #     (epkgs: [ epkgs.vterm ]));
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
     };
 
     typing.enable = true;
