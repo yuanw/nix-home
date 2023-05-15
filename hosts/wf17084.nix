@@ -46,6 +46,7 @@
         "pngpaste"
         "jdtls"
         "redis"
+        "frugal"
       ];
     };
     browsers.firefox = {
