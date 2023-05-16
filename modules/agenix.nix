@@ -2,9 +2,42 @@
 let
 
   cfg = config.modules.secrets.agenix;
+  settings = {
+    block_auth_min = 10;
+    debug_pprof = true;
+    dns = {
+      bind_hosts = [ "0.0.0.0" ];
+      # query logging
+      querylog_enabled = true;
+      querylog_file_enabled = true;
+      querylog_interval = "24h";
+      querylog_size_memory = 1000; # entries
+      anonymize_client_ip = false; # for now
 
-in
-with lib;
+      # adguard
+      protection_enabled = true;
+      blocking_mode = "default"; # NXDOMAIN
+      filtering_enabled = true;
+
+      # upstream DNS
+      upstream_dns = [
+        "8.8.8.8" # google
+        "8.8.8.4" # google
+      ];
+      # if upstream has any hostnames
+      bootstrap_dns = [ "192.168.1.1" ]; # ask the gateway
+      # caching
+      cache_size = 536870912; # 512 MB
+      cache_ttl_min = 1800; # 30 min
+      cache_optimistic = true; # return stale and then refresh
+
+    };
+  };
+  configFile = pkgs.writeTextFile {
+    name = "AdGuardHome.yaml";
+    text = builtins.toJSON settings;
+  };
+in with lib;
 with builtins; {
 
   options = {
@@ -14,9 +47,7 @@ with builtins; {
     };
   };
   config = mkIf cfg.enable (mkMerge [
-    {
-      environment.systemPackages = with pkgs; [ agenix rage ];
-    }
+    { environment.systemPackages = with pkgs; [ agenix rage ]; }
 
     (if (builtins.hasAttr "launchd" options) then {
       launchd.daemons.activate-agenix.serviceConfig = {
@@ -36,19 +67,23 @@ with builtins; {
           owner = "yuanwang";
           group = "admin";
         };
-        secrets.adguard = {
-          file = ../secrets/adguard.age;
-        };
+        secrets.adguard = { file = ../secrets/adguard.age; };
 
         identityPaths = options.age.identityPaths.default
           ++ (filter pathExists [
-          "${config.my.homeDirectory}/.ssh/id_ed25519"
-          "${config.my.homeDirectory}/.ssh/id_rsa"
-        ]);
+            "${config.my.homeDirectory}/.ssh/id_ed25519"
+            "${config.my.homeDirectory}/.ssh/id_rsa"
+          ]);
 
       };
-      home-manager.users.${config.my.username} = {
+      system.activationScripts.adguard-passwords = ''
+        conf_nss="$(mktemp)"
+        cp "${configFile}" $conf_nss
+        printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
+        mv $conf_nss /var/lib/AdGuardHome/AdGuardHome.yaml
+      '';
 
+      home-manager.users.${config.my.username} = {
         programs = {
           zsh = {
             sessionVariables = {
