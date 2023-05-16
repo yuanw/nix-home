@@ -67,7 +67,13 @@ with builtins; {
           owner = "yuanwang";
           group = "admin";
         };
-        secrets.adguard = { file = ../secrets/adguard.age; };
+        secrets.adguard = {
+          file = ../secrets/adguard.age;
+          mode = "770";
+          owner = "yuanwang";
+          group = "admin";
+
+        };
 
         identityPaths = options.age.identityPaths.default
           ++ (filter pathExists [
@@ -81,7 +87,7 @@ with builtins; {
         conf_nss="$(mktemp)"
         cp "${configFile}" $conf_nss
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
-        mv -fT "$conf_nss" /var/lib/AdGuardHome/AdGuardHome.yaml
+        cp --force "$conf_nss" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
 
       home-manager.users.${config.my.username} = {
