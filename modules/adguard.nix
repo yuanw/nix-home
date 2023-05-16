@@ -14,6 +14,18 @@
     }];
   };
 
+    system.activationScripts.adguard-passwords = ''
+        if    [ -e "$STATE_DIRECTORY/AdGuardHome.yaml" ] \
+           && [ "${toString cfg.mutableSettings}" = "1" ]; then
+          # Writing directly to AdGuardHome.yaml results in empty file
+          ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "${configFile}" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
+          mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
+        else
+          cp --force "${configFile}" "$STATE_DIRECTORY/AdGuardHome.yaml"
+          chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
+        fi
+        '';
+
   services.adguardhome = {
     enable = true;
     openFirewall = true;
