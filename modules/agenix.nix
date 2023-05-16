@@ -69,10 +69,9 @@ with builtins; {
         };
         secrets.adguard = {
           file = ../secrets/adguard.age;
-          mode = "770";
-          owner = "yuanwang";
-          group = "admin";
-
+          # mode = "770";
+          # owner = "yuanwang";
+          # group = "admin";
         };
 
         identityPaths = options.age.identityPaths.default
