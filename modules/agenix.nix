@@ -82,7 +82,11 @@ with builtins; {
 
       };
       system.activationScripts.postActivation.text = ''
+
         echo >&2 "setting up adguard..."
+        if    [ ! -d "/var/lib/AdGuardHome" ];  then
+           mkdir /var/lib/AdGuardHome
+        fi
         conf_nss="$(mktemp)"
         cp "${configFile}" $conf_nss
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
