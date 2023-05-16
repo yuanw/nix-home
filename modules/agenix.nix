@@ -82,7 +82,7 @@ with builtins; {
           ]);
 
       };
-      system.activationScripts.postUserActivation.text = ''
+      system.activationScripts.postActivation.text = ''
         echo >&2 "setting up adguard..."
         conf_nss="$(mktemp)"
         cp "${configFile}" $conf_nss
