@@ -80,7 +80,7 @@ with builtins; {
         conf_nss="$(mktemp)"
         cp "${configFile}" $conf_nss
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
-        mv $conf_nss /var/lib/AdGuardHome/AdGuardHome.yaml
+        mv -fT "$conf_nss" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
 
       home-manager.users.${config.my.username} = {
