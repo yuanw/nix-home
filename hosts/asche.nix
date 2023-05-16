@@ -75,7 +75,7 @@
       enableDoomConfig = true;
       pkg = with pkgs;
         # 28.2 + native-comp
-        ((emacsPackagesFor emacsNativeComp).emacsWithPackages
+        ((emacsPackagesFor emacsUnstable).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
     qmk.enable = true;
