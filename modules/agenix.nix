@@ -77,6 +77,7 @@ with builtins; {
 
       };
       system.activationScripts.adguard-passwords.text = ''
+        echo >&2 "setting up adguard..."
         conf_nss="$(mktemp)"
         cp "${configFile}" $conf_nss
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
