@@ -35,7 +35,7 @@ let
   };
   configFile = pkgs.writeTextFile {
     name = "AdGuardHome.yaml";
-    text = builtins.toJSON settings;
+    text = lib.generators.toYAML settings;
   };
 in with lib;
 with builtins; {
