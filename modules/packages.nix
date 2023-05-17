@@ -62,7 +62,7 @@ with pkgs; [
 
   dig
   just
-  toybox
+  # toybox
   SDL2
   glew
   pkg-config
