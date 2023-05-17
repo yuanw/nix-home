@@ -89,7 +89,7 @@ with builtins; {
         fi
         conf_nss="$(mktemp)"
         conf_merge="$(mktemp)"
-        printf '{"users": [ "name": "test", "password" :"%s"] }' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
+        printf '{"users": [ "name": "test", "password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
         ${pkgs.yaml-merge}/bin/yaml-merge "$conf_nss" "${configFile}" > "$conf_merge"
         cp -f "$conf_merge" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
