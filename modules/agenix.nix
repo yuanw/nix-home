@@ -35,7 +35,7 @@ let
   };
   configFile = pkgs.writeTextFile {
     name = "AdGuardHome.yaml";
-    text = lib.generators.toYAML settings;
+    text = builtins.toJSON settings;
   };
 in with lib;
 with builtins; {
@@ -88,9 +88,10 @@ with builtins; {
            mkdir /var/lib/AdGuardHome
         fi
         conf_nss="$(mktemp)"
-        cp "${configFile}" $conf_nss
+        conf_megre="$(mktemp)"
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
-        cp -f "$conf_nss" /var/lib/AdGuardHome/AdGuardHome.yaml
+        ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "${configFile}" > $conf_merge
+        cp -f "$conf_megre" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
 
       home-manager.users.${config.my.username} = {
