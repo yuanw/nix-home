@@ -92,7 +92,7 @@ with builtins; {
         conf_merge="$(mktemp)"
         printf '{"users": [ "name": "%s",' "${user}" >> $user_conf
         printf 'password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path})" >> $user_conf
-        ${pkgs.yaml-merge}/bin/yaml-merge "$conf_nss" "${configFile}" > "$conf_merge"
+        ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
         cp -f "$conf_merge" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
 
