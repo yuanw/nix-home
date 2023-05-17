@@ -90,7 +90,7 @@ with builtins; {
         conf_nss="$(mktemp)"
         conf_megre="$(mktemp)"
         printf 'users: \n name:test\n passwort:%s\n' "$(cat ${config.age.secrets.adguard.path})" >> $conf_nss
-        ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "${configFile}" > $conf_merge
+        ${pkgs.yaml-merge}/bin/yaml-merge $conf_nss "${configFile}" > $conf_merge
         cp -f "$conf_megre" /var/lib/AdGuardHome/AdGuardHome.yaml
       '';
 
