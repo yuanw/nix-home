@@ -36,7 +36,7 @@ in
       })
     ];
 
-  options.services.adguardhome = with types; {
+  options.services.adguardhome-with-user = with types; {
     enable = mkEnableOption (lib.mdDoc "AdGuard Home network-wide ad blocker");
     user = mkOption {
       type = types.str;
@@ -141,7 +141,7 @@ in
       }
     ];
 
-    systemd.services.adguardhome = {
+    systemd.services.adguardhome-with-user = {
       description = "AdGuard Home: Network-level blocker";
       after = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];

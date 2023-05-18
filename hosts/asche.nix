@@ -33,7 +33,7 @@
   services.adguardhome-with-user = {
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
     enable = true;
-    openFirewall = true;
+    # openFirewall = true;
     mutableSettings = true;
     user = "test";
     passwordFile = config.age.secrets.adguard.path;
