@@ -22,7 +22,7 @@ in
 {
 
   imports =
-    let cfgPath = [ "services" "adguardhome" ];
+    let cfgPath = [ "services" "adguardhome-with-user" ];
     in [
       (mkRenamedOptionModuleWith {
         sinceRelease = 2211;
