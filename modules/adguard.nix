@@ -1,4 +1,4 @@
-{ modulesPath, pkgs, ... }:
+{ modulesPath, pkgs, config, ... }:
 
 {
 
@@ -15,14 +15,13 @@
   };
 
 
-  services.adguardhome = {
+  services.adguardhome-with-user = {
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
-    preStart = ''
-    printf 'users:\n  name:test'
-    '';
     enable = true;
     openFirewall = true;
     mutableSettings = true;
+    user = "test";
+    passwordFile = config.age.secrets.adguard.path;
     # corresponds to /var/lib/AdGuardHome/AdGuardHome.yaml
     settings = {
       block_auth_min = 10;
