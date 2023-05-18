@@ -18,21 +18,23 @@ let
     checkPhase = "${pkgs.adguardhome}/bin/adguardhome -c $out --check-config";
   };
 
-in {
+in
+{
 
-  imports = let cfgPath = [ "services" "adguardhome" ];
-  in [
-    (mkRenamedOptionModuleWith {
-      sinceRelease = 2211;
-      from = cfgPath ++ [ "host" ];
-      to = cfgPath ++ [ "settings" "bind_host" ];
-    })
-    (mkRenamedOptionModuleWith {
-      sinceRelease = 2211;
-      from = cfgPath ++ [ "port" ];
-      to = cfgPath ++ [ "settings" "bind_port" ];
-    })
-  ];
+  imports =
+    let cfgPath = [ "services" "adguardhome" ];
+    in [
+      (mkRenamedOptionModuleWith {
+        sinceRelease = 2211;
+        from = cfgPath ++ [ "host" ];
+        to = cfgPath ++ [ "settings" "bind_host" ];
+      })
+      (mkRenamedOptionModuleWith {
+        sinceRelease = 2211;
+        from = cfgPath ++ [ "port" ];
+        to = cfgPath ++ [ "settings" "bind_port" ];
+      })
+    ];
 
   options.services.adguardhome = with types; {
     enable = mkEnableOption (lib.mdDoc "AdGuard Home network-wide ad blocker");

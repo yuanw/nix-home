@@ -38,7 +38,8 @@ let
     name = "AdGuardHome.yaml";
     text = builtins.toJSON settings;
   };
-in with lib;
+in
+with lib;
 with builtins; {
 
   options = {
@@ -77,9 +78,9 @@ with builtins; {
 
         identityPaths = options.age.identityPaths.default
           ++ (filter pathExists [
-            "${config.my.homeDirectory}/.ssh/id_ed25519"
-            "${config.my.homeDirectory}/.ssh/id_rsa"
-          ]);
+          "${config.my.homeDirectory}/.ssh/id_ed25519"
+          "${config.my.homeDirectory}/.ssh/id_rsa"
+        ]);
 
       };
       system.activationScripts.postActivation.text = ''

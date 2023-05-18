@@ -30,7 +30,7 @@
       };
     };
   };
-    services.adguardhome-with-user = {
+  services.adguardhome-with-user = {
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
     enable = true;
     openFirewall = true;
