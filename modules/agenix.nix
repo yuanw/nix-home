@@ -63,11 +63,11 @@ with builtins; {
 
     {
       age = {
-        secrets.secret1 = {
-          file = ../secrets/secret1.age;
-          mode = "770";
-          owner = "yuanwang";
-          group = "admin";
+         secrets.secret1 = {
+           file = ../secrets/secret1.age;
+        #   mode = "770";
+        #   owner = "yuanwang";
+        #   group = "admin";
         };
         secrets.adguard = {
           file = ../secrets/adguard.age;
