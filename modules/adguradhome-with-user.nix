@@ -158,7 +158,7 @@ in
           conf_merge="$(mktemp)"
           printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
           printf 'password" :"%s"]}' "$(cat ${cfg.passwordFile})" >> $user_conf
-          printf '{"users": [ "name": "test", "password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path} | ${pkgs.toybox}/bin/mkpasswd -m bcrypt )" >> $conf_nss
+          printf '{"users": [ "name": "test", "password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path} | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt )" >> $conf_nss
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "${configFile}" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
         else
