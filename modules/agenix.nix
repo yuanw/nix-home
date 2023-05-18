@@ -83,29 +83,29 @@ with builtins; {
         ]);
 
       };
-      system.activationScripts.postActivation.text = ''
+      # system.activationScripts.postActivation.text = ''
 
-        echo >&2 "setting up adguard..."
-        if    [ ! -d "/var/lib/AdGuardHome" ];  then
-           mkdir /var/lib/AdGuardHome
-        fi
-        user_conf="$(mktemp)"
-        conf_merge="$(mktemp)"
-        printf '{"users": [ "name": "%s",' "${user}" >> $user_conf
-        printf 'password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path})" >> $user_conf
-        ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
-        cp -f "$conf_merge" /var/lib/AdGuardHome/AdGuardHome.yaml
-      '';
+      #   echo >&2 "setting up adguard..."
+      #   if    [ ! -d "/var/lib/AdGuardHome" ];  then
+      #      mkdir /var/lib/AdGuardHome
+      #   fi
+      #   user_conf="$(mktemp)"
+      #   conf_merge="$(mktemp)"
+      #   printf '{"users": [ "name": "%s",' "${user}" >> $user_conf
+      #   printf 'password" :"%s"]}' "$(cat ${config.age.secrets.adguard.path})" >> $user_conf
+      #   ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
+      #   cp -f "$conf_merge" /var/lib/AdGuardHome/AdGuardHome.yaml
+      # '';
 
-      home-manager.users.${config.my.username} = {
-        programs = {
-          zsh = {
-            sessionVariables = {
-              SECRET_PATH = "${config.age.secrets.secret1.path}";
-            };
-          };
-        };
-      };
+      # home-manager.users.${config.my.username} = {
+      #   programs = {
+      #     zsh = {
+      #       sessionVariables = {
+      #         SECRET_PATH = "${config.age.secrets.secret1.path}";
+      #       };
+      #     };
+      #   };
+      # };
     }
 
   ]);
