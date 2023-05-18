@@ -26,6 +26,7 @@ let
     #
     (loadModule ./qmk.nix { condition = isNixOS; })
     (loadModule ./wm/xmonad.nix { condition = isNixOS; })
+    (loadModule ./adguradhome-with-user.nix { condition = isNixOS; })
     (loadModule ./moonlander.nix { condition = isNixOS; })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
     (loadModule ./brew.nix { condition = isDarwin; })
