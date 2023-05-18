@@ -151,9 +151,11 @@ in
       };
 
       preStart = optionalString (cfg.settings != null) ''
+        echo >&2 "setting up adguard..."
         if    [ -e "$STATE_DIRECTORY/AdGuardHome.yaml" ] \
            && [ "${toString cfg.mutableSettings}" = "1" ]; then
           # Writing directly to AdGuardHome.yaml results in empty file
+          echo >&2 "if"
           user_conf="$(mktemp)"
           conf_merge="$(mktemp)"
           printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
@@ -162,6 +164,7 @@ in
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "${configFile}" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
         else
+          echo >&2 "else"
           cp --force "${configFile}" "$STATE_DIRECTORY/AdGuardHome.yaml"
           chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
         fi
