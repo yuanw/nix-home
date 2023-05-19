@@ -167,6 +167,7 @@ in
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
         else
           echo "else"
+          whoami
           printf '{"users": [ "name": "%s","password": %s]}'  "${cfg.user}" "$(cat ${cfg.passwordFile} | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
