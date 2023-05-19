@@ -58,7 +58,7 @@ in {
             }
             {
               description = "Clean up your system profile";
-              command = "sudo nix-collect-garbage --delete-older-than <day=3>d";
+              command = "sudo nix-collect-garbage --delete-older-than <day=7>d";
               tag = [ "nix" ];
             }
 
