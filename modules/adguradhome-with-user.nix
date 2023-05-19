@@ -172,7 +172,8 @@ in
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           echo "yo"
-          cp --force "$confg_merge" "$STATE_DIRECTORY/AdGuardHome.yaml"
+          cp --force "$conf_merge"  "$STATE_DIRECTORY/temp.yaml"
+          cp --force "$conf_merge" "$STATE_DIRECTORY/AdGuardHome.yaml"
           chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
         fi
       '';
