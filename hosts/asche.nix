@@ -34,7 +34,7 @@
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
     enable = true;
     # openFirewall = true;
-    mutableSettings = true;
+    # mutableSettings = true;
     user = "test";
     passwordFile = config.age.secrets.adguard.path;
     # corresponds to /var/lib/AdGuardHome/AdGuardHome.yaml
