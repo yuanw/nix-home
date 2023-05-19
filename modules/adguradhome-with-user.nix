@@ -160,6 +160,7 @@ in
           # Writing directly to AdGuardHome.yaml results in empty file
           echo "if"
           printf '{"users": [ "name": "%s","password": %s]}'  "${cfg.user}", "$(cat ${cfg.passwordFile} | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
+          cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "$conf_merge" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
