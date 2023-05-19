@@ -177,7 +177,7 @@ in
       '';
 
       serviceConfig = {
-        DynamicUser = true;
+        DynamicUser = false;
         ExecStart = "${pkgs.adguardhome}/bin/adguardhome ${args}";
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
         Restart = "always";

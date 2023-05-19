@@ -72,7 +72,7 @@ with builtins; {
         secrets.adguard = {
           file = ../secrets/adguard.age;
           # mode = "770";
-          owner = "adguardhome-with-user";
+          # owner = "adguardhome-with-user";
           # group = "admin";
         };
 
