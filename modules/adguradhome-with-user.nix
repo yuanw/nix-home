@@ -159,7 +159,7 @@ in
            && [ "${toString cfg.mutableSettings}" = "1" ]; then
           # Writing directly to AdGuardHome.yaml results in empty file
           echo "if"
-                 printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
+          printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
           printf '"password": %s]}' "$(cat ${cfg.passwordFile}  | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "$conf_merge" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
