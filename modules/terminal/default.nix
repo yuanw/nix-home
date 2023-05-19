@@ -42,7 +42,9 @@ in {
           tkill
           temacs
           pkgs.jo
-
+          (pkgs.writeShellScriptBin "jsonify" ''
+            cat $1 | jq | sponge $1
+          '')
         ];
       };
       programs = {
