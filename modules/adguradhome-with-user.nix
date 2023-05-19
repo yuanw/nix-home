@@ -160,13 +160,13 @@ in
           # Writing directly to AdGuardHome.yaml results in empty file
           echo "if"
                  printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
-          printf 'password" :%s]}' "$(cat ${cfg.passwordFile}  | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
+          printf '"password": %s]}' "$(cat ${cfg.passwordFile}  | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "$conf_merge" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
         else
           printf '{"users": [ "name": "%s",' "${cfg.user}" >> $user_conf
-          printf 'password" :%s]}' "$(cat ${cfg.passwordFile}  | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
+          printf '"password" :%s]}' "$(cat ${cfg.passwordFile}  | ${pkgs.mkpasswd}/bin/mkpasswd -m bcrypt)" >> $user_conf
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           cp --force "$config_merge" "$STATE_DIRECTORY/AdGuardHome.yaml"
           chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
