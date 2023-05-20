@@ -131,6 +131,11 @@ module "nixos" {
   depends_on  = [null_resource.wait]
 }
 
+output "public_ip" {
+  value = aws_instance.adguard.public_ip
+}
+
+
 output "public_dns" {
   value = aws_instance.adguard.public_dns
 }
