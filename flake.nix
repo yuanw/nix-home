@@ -84,62 +84,11 @@
               ]));
 
           };
-
-      # idea borrowed from https://github.com/hardselius/dotfiles
-      # mkDarwinSystem = { modules }:
-      #   darwin.lib.darwinSystem {
-      #     specialArgs = {
-      #       inherit nix-colors;
-      #       isNixOS = false;
-      #       isDarwin = true;
-      #     };
-
-      #     system = "x86_64-darwin";
-      #     modules = [
-      #       { nixpkgs.overlays = overlays; }
-      #       ./modules
-      #       agenix.darwinModules.age
-      #       home-manager.darwinModules.home-manager
-      #       nix-colors.homeManagerModule
-      #       ./macintosh.nix
-      #     ] ++ modules;
-      #   };
-      # mkNixSystem = { modules }:
-      #   nixpkgs.lib.nixosSystem {
-      #     system = "x86_64-linux";
-      #     specialArgs = inputs // {
-      #       isNixOS = true;
-      #       isDarwin = false;
-      #     };
-      #     modules = modules ++ [
-      #       ./nixos_system.nix
-      #       hosts.nixosModule
-      #       {
-      #         networking.stevenBlackHosts = {
-      #           enable = true;
-      #           blockFakenews = true;
-      #           blockGambling = true;
-      #           blockPorn = true;
-      #           blockSocial = false;
-      #         };
-      #       }
-
-      #       agenix.nixosModules.age
-      #       home-manager.nixosModules.home-manager
-      #       { nixpkgs.overlays = overlays; }
-
-      #       ./modules
-      #     ];
-      #   };
     in {
       nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          {
-            nixpkgs.overlays = [
-              agenix.overlays.default
-            ];
-          }
+          { nixpkgs.overlays = [ agenix.overlays.default ]; }
           agenix.nixosModules.age
           ./modules/adguradhome-with-user.nix
           ./modules/adguard.nix
