@@ -26,21 +26,8 @@
     };
   };
 
-  outputs =
-    inputs@{ self
-    , nixpkgs-stable
-    , nixpkgs
-    , darwin
-    , home-manager
-    , nur
-    , emacs
-    , flake-utils
-    , hosts
-    , reiryoku
-    , agenix
-    , nix-colors
-    , ...
-    }:
+  outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
+    , emacs, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -65,44 +52,38 @@
       ];
 
       # https://github.com/shaunsingh/nix-darwin-dotfiles/blob/main/flake.nix
-      mkSystemConfig =
-        { system
-        , modules
-        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system
-        , isNixOS ? !isDarwin
-        , ...
-        }:
+      mkSystemConfig = { system, modules
+        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system, isNixOS ? !isDarwin
+        , ... }:
         (if isDarwin then
           darwin.lib.darwinSystem
         else
           nixpkgs.lib.nixosSystem) {
-          inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin; };
-          modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
-            ++ (if isDarwin then
-            ([
-              agenix.darwinModules.age
-              home-manager.darwinModules.home-manager
-              ./macintosh.nix
-            ]) else
-            ([
-              ./nixos_system.nix
-              hosts.nixosModule
-              {
-                networking.stevenBlackHosts = {
-                  enable = true;
-                  blockFakenews = true;
-                  blockGambling = true;
-                  blockPorn = true;
-                  blockSocial = false;
-                };
-              }
-              agenix.nixosModules.age
-              home-manager.nixosModules.home-manager
+            inherit system;
+            specialArgs = { inherit nix-colors isNixOS isDarwin; };
+            modules = modules ++ [ { nixpkgs.overlays = overlays; } ./modules ]
+              ++ (if isDarwin then ([
+                agenix.darwinModules.age
+                home-manager.darwinModules.home-manager
+                ./macintosh.nix
+              ]) else ([
+                ./nixos_system.nix
+                hosts.nixosModule
+                {
+                  networking.stevenBlackHosts = {
+                    enable = true;
+                    blockFakenews = true;
+                    blockGambling = true;
+                    blockPorn = true;
+                    blockSocial = false;
+                  };
+                }
+                agenix.nixosModules.age
+                home-manager.nixosModules.home-manager
 
-            ]));
+              ]));
 
-        };
+          };
 
       # idea borrowed from https://github.com/hardselius/dotfiles
       # mkDarwinSystem = { modules }:
@@ -150,15 +131,20 @@
       #       ./modules
       #     ];
       #   };
-    in
-    {
+    in {
       nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-             agenix.nixosModules.age
+          {
+            nixpkgs.overlays = [
+              agenix.overlays.default
+            ];
+          }
+          agenix.nixosModules.age
           ./modules/adguradhome-with-user.nix
-             ./modules/adguard.nix
-             ./modules/agenix.nix  ];
+          ./modules/adguard.nix
+          ./modules/agenix.nix
+        ];
       };
 
       nixosConfigurations.asche = mkSystemConfig {
@@ -183,9 +169,10 @@
       adguard = self.nixosConfigurations.adguard.system;
 
     } // eachDefaultSystem (system:
-    let pkgs = import nixpkgs { inherit system; };
-    in {
-      devShells.adguard =
-        pkgs.mkShell { buildInputs = with pkgs; [ awscli terraform nixfmt treefmt ]; };
-    });
+      let pkgs = import nixpkgs { inherit system; };
+      in {
+        devShells.adguard = pkgs.mkShell {
+          buildInputs = with pkgs; [ awscli terraform nixfmt treefmt ];
+        };
+      });
 }
