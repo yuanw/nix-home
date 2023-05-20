@@ -121,7 +121,9 @@
       let pkgs = import nixpkgs { inherit system; };
       in {
         devShells.adguard = pkgs.mkShell {
-          buildInputs = with pkgs; [ awscli terraform nixfmt treefmt ];
+          buildInputs = with pkgs; [ awscli
+                                     mkpasswd
+                                     terraform nixfmt treefmt ];
         };
       });
 }
