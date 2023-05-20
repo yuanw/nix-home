@@ -156,7 +156,9 @@
         system = "x86_64-linux";
         modules = [
              agenix.nixosModules.age
-          ./modules/adguardhome-with-user.nix ./modules/adguard.nix ./modules/agenix.nix  ];
+          ./modules/adguradhome-with-user.nix
+             ./modules/adguard.nix
+             ./modules/agenix.nix  ];
       };
 
       nixosConfigurations.asche = mkSystemConfig {
