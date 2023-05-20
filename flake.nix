@@ -178,6 +178,7 @@
       asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
+      adguard = self.nixosConfigurations.adguard.system;
 
     } // eachDefaultSystem (system:
     let pkgs = import nixpkgs { inherit system; };
