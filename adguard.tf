@@ -84,7 +84,7 @@ resource "aws_key_pair" "adguard" {
 }
 
 module "ami" {
-  source  = "github.com/Gabriella439/terraform-nixos-ng//ami"
+  source  = "github.com/yuanw/terraform-nixos-ng//ami"
   release = "22.11"
   region  = var.region
   system  = "x86_64-linux"
@@ -123,7 +123,7 @@ resource "null_resource" "wait" {
 }
 
 module "nixos" {
-  source      = "github.com/Gabriella439/terraform-nixos-ng//nixos"
+  source      = "github.com/yuanw/terraform-nixos-ng//nixos"
   host        = "root@${aws_instance.adguard.public_ip}"
   flake       = ".#adguard"
   arguments   = ["--build-host", "root@${aws_instance.adguard.public_ip}"]
