@@ -171,6 +171,7 @@ in
           whoami
           echo "before"
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})
+          which awk
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  |  awk -F:  '{ printf "{\"users\": [{  \"name\": \"%s\", \"password\": \"%s\" }]}" , $1 , $2 }'
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | awk -F:  '{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> $user_conf
           echo "after"
