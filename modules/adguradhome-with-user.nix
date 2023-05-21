@@ -171,7 +171,9 @@ in
           whoami
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b "$psfile"  "${cfg.user}" "$(cat ${cfg.passwordFile})"
           cp --force "$psfile"  "$STATE_DIRECTORY/psfile"
-          printf '{"users": [ {   "name": "%s","password": "%s" }]}'  "${cfg.user}" "$(cat $psfile | awk -F:  '{ print $2 }')">> $user_conf
+          printf '{"users": [ {   "name": "%s","password":  "'  "${cfg.user}"
+          cat "$STATE_DIRECTORY/psfile" | awk -F:  '{ print $2 }' >> $user_conf
+          printf '"}]}' >> $user_conf
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           echo "yo"
