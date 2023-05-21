@@ -159,7 +159,7 @@ in
            && [ "${toString cfg.mutableSettings}" = "1" ]; then
           # Writing directly to AdGuardHome.yaml results in empty file
           echo "if"
-          printf '{"users": [ { "name": "%s","password": "%s"} ]}'  "${cfg.user}" "$(cat ${cfg.passwordFile} | ${pkgs.apacheHttpd}/bin/htpasswd -B -n -b test | awk -F:  '{ print $2 }')" >> $user_conf
+          printf '{"users": [ { "name": "%s","password": "%s"} ]}'  "${cfg.user}" "$(cat ${cfg.passwordFile} | xargs ${pkgs.apacheHttpd}/bin/htpasswd -B -n -b test | awk -F:  '{ print $2 }')" >> $user_conf
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           cp --force "$conf_merge"  "$STATE_DIRECTORY/temp.yaml"
@@ -168,7 +168,7 @@ in
         else
           echo "else"
           whoami
-          printf '{"users": [ {   "name": "%s","password": "%s" }]}'  "${cfg.user}" "$(cat ${cfg.passwordFile} | ${pkgs.apacheHttpd}/bin/htpasswd -B -n -b test | awk -F:  '{ print $2 }')">> $user_conf
+          printf '{"users": [ {   "name": "%s","password": "%s" }]}'  "${cfg.user}" "$(cat ${cfg.passwordFile} | xargs ${pkgs.apacheHttpd}/bin/htpasswd -B -n -b test | awk -F:  '{ print $2 }')">> $user_conf
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           echo "yo"
