@@ -170,9 +170,9 @@ in
           cat ${cfg.passwordFile}
           echo "before"
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})
-          # ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  '{ print "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }'
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  '{ print "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' | ${pkgs.jq}/bin/jq
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  '{ print "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> "$user_conf"
+          # ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }'
+          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf"{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' | ${pkgs.jq}/bin/jq
+          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> "$user_conf"
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           echo "after"
           cat "$user_conf"
