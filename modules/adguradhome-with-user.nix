@@ -170,11 +170,9 @@ in
           echo "else"
           whoami
           echo "before"
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  '{ printf "{\"users\": [{  \"name\": \"%s\", \"password\": \"%s\" }]}" , $1 , $2 }'
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  '{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> $user_conf
-          echo "after"
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
+          echo "after"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           echo "yo"
           cp --force "$conf_merge"  "$STATE_DIRECTORY/temp.yaml"
