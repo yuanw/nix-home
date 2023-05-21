@@ -169,6 +169,8 @@ in
         else
           echo "else"
           whoami
+
+          echo "before"
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | awk -F:  '{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> $user_conf
           echo "after"
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
