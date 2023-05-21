@@ -32,7 +32,7 @@
   };
   services.adguardhome-with-user = {
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
-    enable = true;
+    # enable = true;
     # openFirewall = true;
     mutableSettings = false;
     user = "test";
@@ -69,7 +69,16 @@
       };
     };
   };
-
+  services.unbound = {
+    # enable = true;
+     settings = {
+       server = {
+         hide-identity = "yes";
+         hide-version = "yes";
+         port = 5335;
+       };
+     };
+  };
   services.openssh.enable = true;
   services.autorandr = {
     enable = true;

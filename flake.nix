@@ -123,8 +123,9 @@
         devShells.adguard = pkgs.mkShell {
           buildInputs = with pkgs; [
             awscli
-            mkpasswd
-            apacheHttpd
+            # mkpasswd
+            # apacheHttpd
+            lego
             terraform
             nixfmt
             treefmt

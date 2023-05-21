@@ -153,32 +153,22 @@ in
       preStart = optionalString (cfg.settings != null) ''
         echo "setting up adguard..."
         user_conf="$(mktemp)"
-        psfile="$(mktemp)"
         conf_merge="$(mktemp)"
 
         if    [ -e "$STATE_DIRECTORY/AdGuardHome.yaml" ] \
            && [ "${toString cfg.mutableSettings}" = "1" ]; then
           # Writing directly to AdGuardHome.yaml results in empty file
-          echo "if"
+          echo "found existing AdGuardHome.yaml"
+          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> "$user_conf"
+          cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
           cp --force "$conf_merge"  "$STATE_DIRECTORY/temp.yaml"
           ${pkgs.yaml-merge}/bin/yaml-merge "$STATE_DIRECTORY/AdGuardHome.yaml" "$conf_merge" > "$STATE_DIRECTORY/AdGuardHome.yaml.tmp"
           mv "$STATE_DIRECTORY/AdGuardHome.yaml.tmp" "$STATE_DIRECTORY/AdGuardHome.yaml"
         else
-          echo "else"
-          cat "$user_conf"
-          cat ${cfg.passwordFile}
-          echo "before"
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})
-          # ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }'
-          ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf"{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' | ${pkgs.jq}/bin/jq
           ${pkgs.apacheHttpd}/bin/htpasswd -B -b -n ${cfg.user} $(cat ${cfg.passwordFile})  | ${pkgs.gawk}/bin/awk -F:  'NR==1{ printf "{\"users\": [{\"name\": \"%s\", \"password\": \"%s\" }]}",  $1, $2 }' >> "$user_conf"
           cp --force "$user_conf"  "$STATE_DIRECTORY/user.json"
-          echo "after"
-          cat "$user_conf"
           ${pkgs.yaml-merge}/bin/yaml-merge "$user_conf" "${configFile}" > "$conf_merge"
-          echo "yo"
-          cp --force "$conf_merge"  "$STATE_DIRECTORY/temp.yaml"
           cp --force "$conf_merge" "$STATE_DIRECTORY/AdGuardHome.yaml"
           chmod 600 "$STATE_DIRECTORY/AdGuardHome.yaml"
         fi
