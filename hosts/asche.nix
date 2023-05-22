@@ -71,13 +71,13 @@
   };
   services.unbound = {
     # enable = true;
-     settings = {
-       server = {
-         hide-identity = "yes";
-         hide-version = "yes";
-         port = 5335;
-       };
-     };
+    settings = {
+      server = {
+        hide-identity = "yes";
+        hide-version = "yes";
+        port = 5335;
+      };
+    };
   };
   services.openssh.enable = true;
   services.autorandr = {
