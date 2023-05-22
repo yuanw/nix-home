@@ -20,14 +20,6 @@ provider "aws" {
 }
 
 resource "aws_security_group" "adguard" {
-  # The "nixos" Terraform module requires SSH access to the machine to deploy
-  # our desired NixOS configuration.
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   # We will be building our NixOS configuration on the target machine, so we
   # permit all outbound connections so that the build can download any missing
@@ -39,11 +31,36 @@ resource "aws_security_group" "adguard" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # The "nixos" Terraform module requires SSH access to the machine to deploy
+  # our desired NixOS configuration.
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Allow port 80 so that we can view our TODO list web page
   ingress {
     from_port   = 3000
     to_port     = 3000
     protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow port 433 for https
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+ # Allow port 853 for https
+  ingress {
+    from_port   = 853
+    to_port     = 853
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
