@@ -13,7 +13,8 @@ let
       *) ttyper;;
     esac
   '';
-in {
+in
+{
   options.modules.typing = { enable = mkEnableOption "typing"; };
 
   config = mkIf cfg.enable {

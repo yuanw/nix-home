@@ -59,8 +59,10 @@ with pkgs; [
   # vhs
   csvkit
   gum
-  just
 
+  dig
+  just
+  # toybox
   SDL2
   glew
   pkg-config

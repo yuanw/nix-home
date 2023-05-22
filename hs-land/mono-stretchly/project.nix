@@ -1,4 +1,10 @@
-{ mkDerivation, base, data-default, lens, lib, monomer, text
+{ mkDerivation
+, base
+, data-default
+, lens
+, lib
+, monomer
+, text
 , text-show
 }:
 mkDerivation {
@@ -8,7 +14,12 @@ mkDerivation {
   isLibrary = false;
   isExecutable = true;
   executableHaskellDepends = [
-    base data-default lens monomer text text-show
+    base
+    data-default
+    lens
+    monomer
+    text
+    text-show
   ];
   enableSeparateDataOutput = true;
   license = lib.licenses.mit;

@@ -11,7 +11,6 @@
     devenv.url = "github:cachix/devenv/latest";
     nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
-    devshell.url = "github:numtide/devshell";
     flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
       url = "github:nix-community/home-manager/master";
@@ -27,8 +26,21 @@
     };
   };
 
-  outputs = inputs@{ self, nixpkgs-stable, nixpkgs, darwin, home-manager, nur
-    , emacs, devshell, flake-utils, hosts, reiryoku, agenix, nix-colors, ... }:
+  outputs =
+    inputs@{ self
+    , nixpkgs-stable
+    , nixpkgs
+    , darwin
+    , home-manager
+    , nur
+    , emacs
+    , flake-utils
+    , hosts
+    , reiryoku
+    , agenix
+    , nix-colors
+    , ...
+    }:
     let
       inherit (flake-utils.lib) eachDefaultSystem eachSystem;
       overlays = [
@@ -53,26 +65,27 @@
       ];
 
       # https://github.com/shaunsingh/nix-darwin-dotfiles/blob/main/flake.nix
-      mkSystemConfig = { system, modules
-        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system, isNixOS ? !isDarwin
-        , ... }:
+      mkSystemConfig =
+        { system
+        , modules
+        , isDarwin ? nixpkgs.lib.hasSuffix "-darwin" system
+        , isNixOS ? !isDarwin
+        , ...
+        }:
         (if isDarwin then
           darwin.lib.darwinSystem
         else
           nixpkgs.lib.nixosSystem) {
-            inherit system;
-            specialArgs = {
-              inherit nix-colors isNixOS isDarwin ;
-            };
-            modules = modules ++ [
-
-              { nixpkgs.overlays = overlays; }
-              ./modules
-            ] ++ (if isDarwin then ([
+          inherit system;
+          specialArgs = { inherit nix-colors isNixOS isDarwin; };
+          modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
+            ++ (if isDarwin then
+            ([
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
-            ]) else ([
+            ]) else
+            ([
               ./nixos_system.nix
               hosts.nixosModule
               {
@@ -89,55 +102,20 @@
 
             ]));
 
-          };
+        };
+    in
+    {
+      nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          { nixpkgs.overlays = [ agenix.overlays.default ]; }
+          agenix.nixosModules.age
+          ./modules/adguradhome-with-user.nix
+          ./modules/adguard.nix
+          ./modules/agenix.nix
+        ];
+      };
 
-      # idea borrowed from https://github.com/hardselius/dotfiles
-      # mkDarwinSystem = { modules }:
-      #   darwin.lib.darwinSystem {
-      #     specialArgs = {
-      #       inherit nix-colors;
-      #       isNixOS = false;
-      #       isDarwin = true;
-      #     };
-
-      #     system = "x86_64-darwin";
-      #     modules = [
-      #       { nixpkgs.overlays = overlays; }
-      #       ./modules
-      #       agenix.darwinModules.age
-      #       home-manager.darwinModules.home-manager
-      #       nix-colors.homeManagerModule
-      #       ./macintosh.nix
-      #     ] ++ modules;
-      #   };
-      # mkNixSystem = { modules }:
-      #   nixpkgs.lib.nixosSystem {
-      #     system = "x86_64-linux";
-      #     specialArgs = inputs // {
-      #       isNixOS = true;
-      #       isDarwin = false;
-      #     };
-      #     modules = modules ++ [
-      #       ./nixos_system.nix
-      #       hosts.nixosModule
-      #       {
-      #         networking.stevenBlackHosts = {
-      #           enable = true;
-      #           blockFakenews = true;
-      #           blockGambling = true;
-      #           blockPorn = true;
-      #           blockSocial = false;
-      #         };
-      #       }
-
-      #       agenix.nixosModules.age
-      #       home-manager.nixosModules.home-manager
-      #       { nixpkgs.overlays = overlays; }
-
-      #       ./modules
-      #     ];
-      #   };
-    in {
       nixosConfigurations.asche = mkSystemConfig {
         system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
@@ -157,16 +135,21 @@
       asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
+      adguard = self.nixosConfigurations.adguard.system;
 
     } // eachDefaultSystem (system:
-      let pkgs = import nixpkgs { inherit system; };
-      in {
-        # devShell = pkgs.devshell.mkShell {
-        #   name = "nix-home";
-        #   imports = [ (pkgs.devshell.extraModulesDir + "/git/hooks.nix") ];
-        #   git.hooks.enable = true;
-        #   git.hooks.pre-commit.text = "${pkgs.treefmt}/bin/treefmt";
-        #   packages = [ pkgs.treefmt pkgs.nixfmt ];
-        # };
-      });
+    let pkgs = import nixpkgs { inherit system; };
+    in {
+      devShells.adguard = pkgs.mkShell {
+        buildInputs = with pkgs; [
+          awscli
+          # mkpasswd
+          # apacheHttpd
+          lego
+          terraform
+          nixfmt
+          treefmt
+        ];
+      };
+    });
 }
