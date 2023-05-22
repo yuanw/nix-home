@@ -5,7 +5,7 @@
   imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
 
   documentation.enable = false;
-  environment.systemPackages = [ pkgs.bind ];
+  environment.systemPackages = [ pkgs.bind pkgs.lego ];
   networking.firewall = {
     allowedTCPPorts = [ 53 ];
     allowedUDPPortRanges = [{
