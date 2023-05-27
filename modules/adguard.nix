@@ -10,14 +10,17 @@
     # 53 for dns
     # 443 for https
     # 853 for DNS-over-TLS, DNS-over-QUIC port
-    allowedTCPPorts = [ 53 443 853  ];
-    allowedUDPPortRanges = [{
-      from = 53;
-      to = 53;
-    } {
-      from = 853;
-      to = 853;
-    }];
+    allowedTCPPorts = [ 53 443 853 ];
+    allowedUDPPortRanges = [
+      {
+        from = 53;
+        to = 53;
+      }
+      {
+        from = 853;
+        to = 853;
+      }
+    ];
   };
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
@@ -28,6 +31,14 @@
         hide-version = "yes";
         port = 5335;
       };
+    };
+  };
+
+  age = {
+    secrets.adguard = {
+      file = ../secrets/adguard.age;
+      mode = "770";
+      owner = "adguardhome";
     };
   };
 

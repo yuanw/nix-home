@@ -69,20 +69,20 @@ with builtins; {
         # #   owner = "yuanwang";
         # #   group = "admin";
         # };
-        secrets.adguard = {
-          file = ../secrets/adguard.age;
-          # mode = "770";
-          # owner = "adguardhome-with-user";
-          # group = "admin";
-        };
-        # does not work well with ec-2 instance
-        # identityPaths = options.age.identityPaths.default
-        #   ++ (filter pathExists [
-        #   "${config.my.homeDirectory}/.ssh/id_ed25519"
-        #   "${config.my.homeDirectory}/.ssh/id_rsa"
-        # ]);
-
+        # secrets.adguard = {
+        #   file = ../secrets/adguard.age;
+        # mode = "770";
+        # owner = "adguardhome-with-user";
+        # group = "admin";
       };
+      # does not work well with ec-2 instance
+      # identityPaths = options.age.identityPaths.default
+      #   ++ (filter pathExists [
+      #   "${config.my.homeDirectory}/.ssh/id_ed25519"
+      #   "${config.my.homeDirectory}/.ssh/id_rsa"
+      # ]);
+
+    };
     }
 
   ]);
