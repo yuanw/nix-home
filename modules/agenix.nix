@@ -38,8 +38,7 @@ let
   #   name = "AdGuardHome.yaml";
   #   text = builtins.toJSON settings;
   # };
-in
-with lib;
+in with lib;
 with builtins; {
 
   options = {
@@ -82,8 +81,6 @@ with builtins; {
       #   "${config.my.homeDirectory}/.ssh/id_rsa"
       # ]);
 
-    };
     }
-
   ]);
 }
