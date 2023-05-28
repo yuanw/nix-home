@@ -5,13 +5,22 @@
   imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
 
   documentation.enable = false;
-  environment.systemPackages = [ pkgs.bind ];
+  environment.systemPackages = [ pkgs.bind pkgs.lego ];
   networking.firewall = {
-    allowedTCPPorts = [ 53 ];
-    allowedUDPPortRanges = [{
-      from = 53;
-      to = 53;
-    }];
+    # 53 for dns
+    # 443 for https
+    # 853 for DNS-over-TLS, DNS-over-QUIC port
+    allowedTCPPorts = [ 53 443 853 ];
+    allowedUDPPortRanges = [
+      {
+        from = 53;
+        to = 53;
+      }
+      {
+        from = 853;
+        to = 853;
+      }
+    ];
   };
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
@@ -22,6 +31,29 @@
         hide-version = "yes";
         port = 5335;
       };
+    };
+  };
+
+  age = {
+    secrets = {
+      adguard = {
+        file = ../secrets/adguard.age;
+        mode = "770";
+        owner = "adguardhome";
+      };
+      adguard-encryption-private-key = {
+        file = ../secrets/adguard-encryption-key.age;
+        mode = "770";
+        path = "/opt/adguradhome/my.key";
+        owner = "adguardhome";
+      };
+   adguard-encryption-certificate = {
+        file = ../secrets/adguard-encryption-certificate.age;
+        mode = "770";
+        path = "/opt/adguradhome/my.crt";
+        owner = "adguardhome";
+      };
+
     };
   };
 

@@ -140,7 +140,7 @@
     } // eachDefaultSystem (system:
     let pkgs = import nixpkgs { inherit system; };
     in {
-      devShells.adguard = pkgs.mkShell {
+      devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
           awscli
           # mkpasswd

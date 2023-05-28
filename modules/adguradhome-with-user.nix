@@ -175,7 +175,7 @@ in
       '';
 
       serviceConfig = {
-        DynamicUser = false;
+        User = "adguardhome";
         ExecStart = "${pkgs.adguardhome}/bin/adguardhome ${args}";
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
         Restart = "always";
@@ -184,6 +184,13 @@ in
         StateDirectory = "AdGuardHome";
       };
     };
+
+    users.users.adguardhome = {
+      description = "adguard home user";
+      group = "adguard";
+      isSystemUser = true;
+    };
+    users.groups.adguard = { };
 
     networking.firewall.allowedTCPPorts =
       mkIf cfg.openFirewall [ cfg.settings.bind_port ];
