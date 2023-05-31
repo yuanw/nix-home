@@ -18,8 +18,8 @@ let
       '';
     };
 
-in
-with lib; {
+  inherit (config.lib.file) mkOutOfStoreSymlink;
+in with lib; {
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -35,7 +35,6 @@ with lib; {
       type = types.bool;
       default = true;
     };
-
 
     enableService = mkOption {
       type = types.bool;
@@ -95,7 +94,14 @@ with lib; {
           nodePackages.yaml-language-server
         ];
 
-        file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
+        file = mkIf cfg.enableDoomConfig {
+          ".doom.d/init.el".source =
+            mkOutOfStoreSymlink ../conf.d/doom-work/init.el;
+          ".doom.d/packages.el".source =
+            mkOutOfStoreSymlink ../conf.d/doom-work/packages.el;
+          ".doom.d/config.el".source =
+            mkOutOfStoreSymlink ../conf.d/doom-work/config.el;
+        };
       };
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
