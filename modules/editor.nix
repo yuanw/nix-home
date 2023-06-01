@@ -18,7 +18,6 @@ let
       '';
     };
 
-  inherit (config.lib.file) mkOutOfStoreSymlink;
 in with lib; {
   options.modules.editors.emacs = {
     enable = mkOption {
@@ -53,7 +52,7 @@ in with lib; {
       package = cfg.pkg;
     };
 
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${config.my.username} =  {config, pkgs, ... }:  {
       home = {
         packages = with pkgs; [
           # git
@@ -96,11 +95,11 @@ in with lib; {
 
         file = mkIf cfg.enableDoomConfig {
           ".doom.d/init.el".source =
-            mkOutOfStoreSymlink ../conf.d/doom-work/init.el;
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/init.el;
           ".doom.d/packages.el".source =
-            mkOutOfStoreSymlink ../conf.d/doom-work/packages.el;
+              config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/packages.el;
           ".doom.d/config.el".source =
-            mkOutOfStoreSymlink ../conf.d/doom-work/config.el;
+              config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/config.el;
         };
       };
       programs.emacs = mkIf cfg.usePackage {
