@@ -51,8 +51,11 @@ in with lib; {
       enable = cfg.enableService;
       package = cfg.pkg;
     };
-
-    home-manager.users.${config.my.username} =  {config, pkgs, ... }:  {
+    # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
+    # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
+    # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
+    # the context of home-manager
+    home-manager.users.${config.my.username} = { config, pkgs, ... }: {
       home = {
         packages = with pkgs; [
           # git
@@ -97,9 +100,9 @@ in with lib; {
           ".doom.d/init.el".source =
             config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/init.el;
           ".doom.d/packages.el".source =
-              config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/packages.el;
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/packages.el;
           ".doom.d/config.el".source =
-              config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/config.el;
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom-work/config.el;
         };
       };
       programs.emacs = mkIf cfg.usePackage {
