@@ -30,20 +30,23 @@
           };
         };
       };
-      languages = [
+      languages =
+
         {
-          name = "nix";
-          auto-format = true;
-          formatter = { command = "alejandra"; };
-          language-server = { command = "nil"; };
-        }
-        {
-          name = "html";
-          auto-format = false;
-        }
-      ];
-      # themes = {
-      # };
+          language = [
+            {
+              name = "nix";
+              auto-format = true;
+              formatter = { command = "alejandra"; };
+              language-server = { command = "nil"; };
+            }
+            {
+              name = "html";
+              auto-format = false;
+            }
+          ];
+
+        };
     };
   };
 }
