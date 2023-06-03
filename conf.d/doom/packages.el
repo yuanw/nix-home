@@ -1,29 +1,16 @@
 ;; -*- no-byte-compile: t; -*-
 ;;; $DOOMDIR/packages.el
 
-;; To install a package with Doom you must declare them here, run 'doom sync' on
-;; the command line, then restart Emacs for the changes to take effect.
-;; Alternatively, use M-x doom/reload.
-;;
-;; WARNING: Disabling core packages listed in ~/.emacs.d/core/packages.el may
-;; have nasty side-effects and is not recommended.
-
-
-;; All of Doom's packages are pinned to a specific commit, and updated from
-;; release to release. To un-pin all packages and live on the edge, do:
-;(unpin! t)
-
-;; ...but to unpin a single package:
-;(unpin! pinned-package)
-;; Use it to unpin multiple packages
-;(unpin! pinned-package another-pinned-package)
+;; To install a package with Doom you must declare them here and run 'doom sync'
+;; on the command line, then restart Emacs for the changes to take effect -- or
+;; use 'M-x doom/reload'.
 
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
 
-;; To install a package directly from a particular repo, you'll need to specify
-;; a `:recipe'. You'll find documentation on what `:recipe' accepts here:
+;; To install a package directly from a remote git repo, you must specify a
+;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
 ;; https://github.com/raxod502/straight.el#the-recipe-format
 ;(package! another-package
 ;  :recipe (:host github :repo "username/repo"))
@@ -35,8 +22,8 @@
 ;  :recipe (:host github :repo "username/repo"
 ;           :files ("some-file.el" "src/lisp/*.el")))
 
-;; If you'd like to disable a package included with Doom, for whatever reason,
-;; you can do so here with the `:disable' property:
+;; If you'd like to disable a package included with Doom, you can do so here
+;; with the `:disable' property:
 ;(package! builtin-package :disable t)
 
 ;; You can override the recipe of a built in package without having to specify
@@ -49,16 +36,30 @@
 ;; This is required for some packages whose default branch isn't 'master' (which
 ;; our package manager can't deal with; see raxod502/straight.el#279)
 ;(package! builtin-package :recipe (:branch "develop"))
+
+;; Use `:pin' to specify a particular commit to install.
+;(package! builtin-package :pin "1a2b3c4d5e")
+
+
+;; Doom's packages are pinned to a specific commit and updated from release to
+;; release. The `unpin!' macro allows you to unpin single packages...
+;(unpin! pinned-package)
+;; ...or multiple packages
+;(unpin! pinned-package another-pinned-package)
+;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
+;(unpin! t)
 (package! interaction-log)
 (package! evil-motion-trainer
   :recipe (:host github :repo "martinbaillie/evil-motion-trainer"))
 (package! super-save)
 (package! org-wild-notifier)
-(package! agda2-mode
-     :pin "442c76badc353d1b621243c43293106f60f7d746")
+(package! thrift-mode)
 (package! embark-vc)
 (package! evil-replace-with-register)
-(package! tree-sitter-langs
-  :pin "5c6900a66a6b3a5d4ae6bde5199b5288c09af43b"
-  )
 (package! keycast)
+(package! eglot-java)
+(package! atomic-chrome)
+;https://github.com/emacs-tree-sitter/tree-sitter-langs/pull/110
+;; (package! tree-sitter-langs
+;;   :pin "388dcbbc237b2b1360e5b148e67b158eecede805"
+;;   )

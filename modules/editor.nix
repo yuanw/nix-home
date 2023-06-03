@@ -18,8 +18,7 @@ let
       '';
     };
 
-in
-with lib; {
+in with lib; {
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -35,7 +34,6 @@ with lib; {
       type = types.bool;
       default = true;
     };
-
 
     enableService = mkOption {
       type = types.bool;
@@ -53,8 +51,11 @@ with lib; {
       enable = cfg.enableService;
       package = cfg.pkg;
     };
-
-    home-manager.users.${config.my.username} = {
+    # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
+    # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
+    # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
+    # the context of home-manager
+    home-manager.users.${config.my.username} = { config, pkgs, ... }: {
       home = {
         packages = with pkgs; [
           # git
@@ -95,7 +96,16 @@ with lib; {
           nodePackages.yaml-language-server
         ];
 
-        file = mkIf cfg.enableDoomConfig { ".doom.d".source = ../conf.d/doom; };
+        file = mkIf cfg.enableDoomConfig {
+          ".doom.d/init.el".source =
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/init.el;
+          ".doom.d/packages.el".source =
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/packages.el;
+          ".doom.d/config.el".source =
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/config.el;
+          ".doom.d/snippets/java-mode/lombok-log".source =
+            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/snippets/java-mode/lombok-log;
+        };
       };
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
