@@ -1,6 +1,6 @@
 #https://github.com/montchr/dotfield/blob/3827a2f745a8c433767f27f667bab212369d1360/darwin/packages/emacs-plus.nix
 { lib
-, emacsUnstable
+, emacs-unstable
 , fetchFromGitHub
 , ##: options
   withTitleBar ? true
@@ -18,7 +18,7 @@ let
   };
   patchesDir = emacsPlus + "/patches/emacs-28";
 in
-emacsUnstable.overrideAttrs (o: {
+emacs-unstable.overrideAttrs (o: {
   pname = "emacsPlusNativeComp";
 
 
