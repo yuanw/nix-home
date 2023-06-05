@@ -20,9 +20,6 @@ let
 
 in
 with lib; {
-    imports = [
-    nixvim.homeManagerModules.nixvim
-  ];
 
   options.modules.editors.emacs = {
     enable = mkOption {
@@ -61,6 +58,9 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { config, pkgs, ... }: {
+    imports = [
+    nixvim.homeManagerModules.nixvim
+  ];
 
       home = {
         packages = with pkgs; [
