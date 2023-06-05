@@ -155,12 +155,13 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
+programs.nixvim = {
+    enable = true;
 
-    # neovim = {
-    #   enable = true;
-    #   vimAlias = true;
-    # };
-    zoxide = {
+    colorschemes.gruvbox.enable = true;
+    plugins.lightline.enable = true;
+  };
+     zoxide = {
       enable = true;
       enableZshIntegration = true;
     };

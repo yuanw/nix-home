@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.11";
     nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixvim.url = github:pta2002/nixvim;
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -39,6 +40,7 @@
     , reiryoku
     , agenix
     , nix-colors
+    , nixvim
     , ...
     }:
     let
@@ -84,6 +86,8 @@
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
+nixvim.homeManagerModules.nixvim
+    nixvim.nixDarwinModules.nixvim
             ]) else
             ([
               ./nixos_system.nix
@@ -99,7 +103,8 @@
               }
               agenix.nixosModules.age
               home-manager.nixosModules.home-manager
-
+              nixvim.nixosModules.nixvim
+              nixvim.homeManagerModules.nixvim
             ]));
 
         };
