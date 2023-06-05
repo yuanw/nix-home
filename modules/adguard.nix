@@ -47,7 +47,7 @@
         path = "/opt/adguradhome/my.key";
         owner = "adguardhome";
       };
-   adguard-encryption-certificate = {
+      adguard-encryption-certificate = {
         file = ../secrets/adguard-encryption-certificate.age;
         mode = "770";
         path = "/opt/adguradhome/my.crt";

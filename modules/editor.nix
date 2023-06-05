@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, nixvim, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -18,7 +18,12 @@ let
       '';
     };
 
-in with lib; {
+in
+with lib; {
+    imports = [
+    nixvim.homeManagerModules.nixvim
+  ];
+
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -56,6 +61,7 @@ in with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { config, pkgs, ... }: {
+
       home = {
         packages = with pkgs; [
           # git
@@ -107,6 +113,13 @@ in with lib; {
             config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/snippets/java-mode/lombok-log;
         };
       };
+           programs.nixvim = {
+      enable = true;
+
+      colorschemes.gruvbox.enable = true;
+      plugins.lightline.enable = true;
+    };
+
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
         package = cfg.pkg;

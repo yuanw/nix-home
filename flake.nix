@@ -86,7 +86,7 @@
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
-    nixvim.nixDarwinModules.nixvim
+              nixvim.nixDarwinModules.nixvim
             ]) else
             ([
               ./nixos_system.nix
