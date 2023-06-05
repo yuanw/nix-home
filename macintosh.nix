@@ -1,4 +1,4 @@
-{ inputs, config, lib, pkgs, ... }:
+{ nixvim, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {

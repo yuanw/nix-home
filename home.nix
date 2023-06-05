@@ -155,11 +155,6 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
-
-    # neovim = {
-    #   enable = true;
-    #   vimAlias = true;
-    # };
     zoxide = {
       enable = true;
       enableZshIntegration = true;
