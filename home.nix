@@ -1,4 +1,4 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, nixvim, ... }:
 
 {
   home.username = config.my.username;
@@ -155,13 +155,7 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
-programs.nixvim = {
-    enable = true;
-
-    colorschemes.gruvbox.enable = true;
-    plugins.lightline.enable = true;
-  };
-     zoxide = {
+      zoxide = {
       enable = true;
       enableZshIntegration = true;
     };

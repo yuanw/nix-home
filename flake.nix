@@ -79,14 +79,13 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin nixvim; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
-nixvim.homeManagerModules.nixvim
     nixvim.nixDarwinModules.nixvim
             ]) else
             ([
@@ -104,7 +103,6 @@ nixvim.homeManagerModules.nixvim
               agenix.nixosModules.age
               home-manager.nixosModules.home-manager
               nixvim.nixosModules.nixvim
-              nixvim.homeManagerModules.nixvim
             ]));
 
         };
