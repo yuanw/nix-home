@@ -155,7 +155,7 @@
     home-manager = { enable = true; };
 
     jq = { enable = true; };
-      zoxide = {
+    zoxide = {
       enable = true;
       enableZshIntegration = true;
     };

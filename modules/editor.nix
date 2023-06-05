@@ -58,9 +58,9 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { config, pkgs, ... }: {
-    imports = [
-    nixvim.homeManagerModules.nixvim
-  ];
+      imports = [
+        nixvim.homeManagerModules.nixvim
+      ];
 
       home = {
         packages = with pkgs; [
@@ -113,12 +113,17 @@ with lib; {
             config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/snippets/java-mode/lombok-log;
         };
       };
-           programs.nixvim = {
-      enable = true;
-
-      colorschemes.gruvbox.enable = true;
-      plugins.lightline.enable = true;
-    };
+      programs.nixvim = {
+        enable = true;
+        globals.mapleader = " ";
+        maps = {
+          normal."<leader>pv" = {
+            action = "vim.cmd.Ex";
+          };
+        };
+        colorschemes.gruvbox.enable = true;
+        plugins.lightline.enable = true;
+      };
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
