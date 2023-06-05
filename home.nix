@@ -1,4 +1,4 @@
-{ pkgs, lib, config, nixvim, ... }:
+{ pkgs, lib, config, ... }:
 
 {
   home.username = config.my.username;
