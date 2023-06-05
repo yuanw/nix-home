@@ -115,9 +115,10 @@ with lib; {
       };
       programs.nixvim = {
         enable = true;
-        globals.mapleader = " ";
+        leader = " ";
         maps = {
           normal."<leader>pv" = {
+            silent = true;
             action = "vim.cmd.Ex";
           };
         };
