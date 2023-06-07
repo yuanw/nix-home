@@ -126,8 +126,8 @@ with lib; {
             action = "vim.cmd.Ex";
           };
         };
-        colorschemes.gruvbox.enable = true;
-        plugins.lightline.enable = true;
+        # colorschemes.gruvbox.enable = true;
+        # plugins.lightline.enable = true;
       };
 
       programs.emacs = mkIf cfg.usePackage {
