@@ -3,7 +3,10 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-root.url = "github:srid/flake-root";
     mission-control.url = "github:Platonic-Systems/mission-control";
 
@@ -91,7 +94,9 @@
 
         # Default shell.
         devShells.default = pkgs.mkShell {
-          inputsFrom = [ config.mission-control.devShell self'.devShells.main ];
+          inputsFrom = [ config.mission-control.devShell
+                         config.flake-root.devShell
+                         self'.devShells.main ];
         };
       };
     };
