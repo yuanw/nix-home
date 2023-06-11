@@ -2,7 +2,7 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.O5";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nixvim.url = github:pta2002/nixvim;
     darwin = {
@@ -51,6 +51,7 @@
         agenix.overlays.default
         (final: prev: {
           stable = nixpkgs-stable.legacyPackages.${prev.system};
+          mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
           # use this variant if unfree packages are needed:
           # unstable = import nixpkgs-unstable {
           #   inherit system;
