@@ -64,7 +64,7 @@ in {
       config = {
         allowUnfree = true;
         allowBroken = false;
-        allowUnsupportedSystem = false;
+        allowUnsupportedSystem = true;
       };
     };
   };
