@@ -28,7 +28,9 @@
           #   ./ws-access-token; # This value is detected based on .cabal files
           # packages.hi-chew.root = ./hi-chew;
           # packages.mono-stretchly.root = ./mono-stretchly;
+          settings = {
 
+          };
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
