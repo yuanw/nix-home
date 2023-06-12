@@ -61,6 +61,8 @@
         packages.mono-stretchly = self'.packages.main-mono-stretchly;
         packages.ws-access-token = self'.packages.main-ws-access-token;
         packages.hi-chew = self'.packages.main-hi-chew;
+        packages.default = self'.packages.main-ws-access-token;
+        apps.default = self'.apps.main-ws-access-token;
         # Dev shell scripts.
         mission-control.scripts = {
           docs = {
