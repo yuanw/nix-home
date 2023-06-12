@@ -30,14 +30,14 @@
           # packages.mono-stretchly.root = ./mono-stretchly;
 
           # overrides = self: super: { };
-          # devShell = {
-          #   # enable = true; # Enabled by default
-          #   tools = hp:
-          #     {
-          #       treefmt = config.treefmt.build.wrapper;
-          #     } // config.treefmt.build.programs;
-          #   hlsCheck.enable = true;
-          # };
+          devShell = {
+            # enable = true; # Enabled by default
+            tools = hp:
+              {
+                treefmt = config.treefmt.build.wrapper;
+              } // config.treefmt.build.programs;
+            hlsCheck.enable = false;
+          };
         };
         # Auto formatters. This also adds a flake check to ensure that the
         # source tree was auto formatted.
@@ -95,10 +95,10 @@
         };
 
         # Default shell.
-        devShells.default = pkgs.mkShell {
-          inputsFrom = [ config.mission-control.devShell
-                         self'.devShells.default ];
-        };
+        # devShells.default = pkgs.mkShell {
+        #   inputsFrom = [ config.mission-control.devShell
+        #                  self'.devShells.default ];
+        # };
       };
     };
 }
