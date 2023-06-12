@@ -21,13 +21,13 @@
         inputs.mission-control.flakeModule
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
-        haskellProjects.main = {
-          packages.resource-id.root =
-            ./resource-id; # This value is detected based on .cabal files
-          packages.ws-access-token.root =
-            ./ws-access-token; # This value is detected based on .cabal files
-          packages.hi-chew.root = ./hi-chew;
-          packages.mono-stretchly.root = ./mono-stretchly;
+        haskellProjects.default = {
+          # packages.resource-id.root =
+          #   ./resource-id; # This value is detected based on .cabal files
+          # packages.ws-access-token.root =
+          #   ./ws-access-token; # This value is detected based on .cabal files
+          # packages.hi-chew.root = ./hi-chew;
+          # packages.mono-stretchly.root = ./mono-stretchly;
 
           # overrides = self: super: { };
           devShell = {
@@ -57,12 +57,12 @@
           };
         };
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.resource-id = self'.packages.main-resource-id;
-        packages.mono-stretchly = self'.packages.main-mono-stretchly;
-        packages.ws-access-token = self'.packages.main-ws-access-token;
-        packages.hi-chew = self'.packages.main-hi-chew;
-        packages.default = self'.packages.main-ws-access-token;
-        apps.default = self'.apps.main-ws-access-token;
+        packages.resource-id = self'.packages.resource-id;
+        packages.mono-stretchly = self'.packages.mono-stretchly;
+        packages.ws-access-token = self'.packages.ws-access-token;
+        packages.hi-chew = self'.packages.hi-chew;
+        packages.default = self'.packages.mono-stretchly;
+        apps.default = self'.apps.mono-stretchly;
         # Dev shell scripts.
         mission-control.scripts = {
           docs = {
