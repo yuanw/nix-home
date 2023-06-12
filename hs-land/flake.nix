@@ -97,7 +97,6 @@
         # Default shell.
         devShells.default = pkgs.mkShell {
           inputsFrom = [ config.mission-control.devShell
-                         config.flake-root.devShell
                          self'.devShells.default ];
         };
       };
