@@ -30,7 +30,9 @@
         # ... things you need to patch ...
       })
     ];
-    config = { };
+    config = {
+      allowUnsupportedSystem = true;
+    };
   };
         haskellProjects.default = {
           # packages.resource-id.root =
