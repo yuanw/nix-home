@@ -39,6 +39,7 @@ executable mono-stretchly
       , monomer
       , text
       , text-show
+      , time
 
     -- Directories containing source files.
     hs-source-dirs:   app

@@ -15,7 +15,7 @@ import qualified Data.Text as T
 import qualified Monomer.Lens as L
 
 newtype AppModel = AppModel {
-_currentTime :: TimeOfDay
+  _currentTime :: TimeOfDay
 } deriving (Eq, Show)
 
 data AppEvent
