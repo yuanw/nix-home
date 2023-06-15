@@ -37,7 +37,7 @@ buildUI wenv model = widgetTree where
 
   widgetTree = vstack [
       animFadeIn timeLabel `nodeKey` "fadeTimeLabel"
-  ]
+      ]
 
 -- handleEvent
 --   :: WidgetEnv AppModel AppEvent
