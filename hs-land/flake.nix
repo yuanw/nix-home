@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
     treefmt-nix = {
@@ -11,7 +12,7 @@
     mission-control.url = "github:Platonic-Systems/mission-control";
 
   };
-  outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
@@ -21,6 +22,16 @@
         inputs.mission-control.flakeModule
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
+         _module.args.pkgs = import inputs.nixpkgs {
+    inherit system;
+    overlays = [
+      (final: prev: {
+        mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+        # ... things you need to patch ...
+      })
+    ];
+    config = { };
+  };
         haskellProjects.default = {
           # packages.resource-id.root =
           #   ./resource-id; # This value is detected based on .cabal files
