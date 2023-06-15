@@ -7,8 +7,8 @@ data-files:
   data/assets/fonts/*.ttf
 
 -- The package author(s).
-author:             yuanwang
-maintainer:         yuan.wang@workiva.com
+author:             yuanw
+maintainer:         me@yuanwang.ca
 
 
 extra-source-files: CHANGELOG.md

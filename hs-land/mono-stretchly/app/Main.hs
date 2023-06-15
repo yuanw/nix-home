@@ -77,7 +77,7 @@ getLocalTimeOfDay = do
 main :: IO ()
 main = do
   time <- getLocalTimeOfDay
-  startApp model handleEvent buildUI config
+  startApp (model time) handleEvent buildUI config
   where
     config = [
       appWindowTitle "Hello world",
