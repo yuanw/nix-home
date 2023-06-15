@@ -32,12 +32,13 @@ buildUI
 buildUI wenv model = widgetTree where
   timeString = T.pack . show $ model ^. currentTime
 
+
   timeLabel = label (T.takeWhile (/= '.') timeString)
     `styleBasic` [textFont "Bold", textSize 80, textCenter, textMiddle, flexHeight 100]
 
   widgetTree = vstack [
       animFadeIn timeLabel `nodeKey` "fadeTimeLabel"
-      ]
+    ]
 
 -- handleEvent
 --   :: WidgetEnv AppModel AppEvent
@@ -80,7 +81,7 @@ main = do
   startApp (model time) handleEvent buildUI config
   where
     config = [
-      appWindowTitle "Hello world",
+      appWindowTitle "Producers",
       --how to bundle a png
       appWindowIcon "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/data/assets/images/icon.png",
       appTheme darkTheme,
@@ -89,4 +90,4 @@ main = do
       ]
     model time = AppModel {
       _currentTime = time
-                          }
+    }
