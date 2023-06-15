@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
     treefmt-nix = {
@@ -11,7 +12,7 @@
     mission-control.url = "github:Platonic-Systems/mission-control";
 
   };
-  outputs = inputs@{ self, nixpkgs, flake-parts, ... }:
+  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
@@ -21,14 +22,28 @@
         inputs.mission-control.flakeModule
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
-        haskellProjects.main = {
-          packages.resource-id.root =
-            ./resource-id; # This value is detected based on .cabal files
-          packages.ws-access-token.root =
-            ./ws-access-token; # This value is detected based on .cabal files
-          packages.hi-chew.root = ./hi-chew;
-          packages.mono-stretchly.root = ./mono-stretchly;
+         _module.args.pkgs = import inputs.nixpkgs {
+    inherit system;
+    overlays = [
+      (final: prev: {
+        mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+        # ... things you need to patch ...
+      })
+    ];
+    config = {
+      allowUnsupportedSystem = true;
+    };
+  };
+        haskellProjects.default = {
+          # packages.resource-id.root =
+          #   ./resource-id; # This value is detected based on .cabal files
+          # packages.ws-access-token.root =
+          #   ./ws-access-token; # This value is detected based on .cabal files
+          # packages.hi-chew.root = ./hi-chew;
+          # packages.mono-stretchly.root = ./mono-stretchly;
+          settings = {
 
+          };
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
@@ -36,7 +51,7 @@
               {
                 treefmt = config.treefmt.build.wrapper;
               } // config.treefmt.build.programs;
-            hlsCheck.enable = true;
+            hlsCheck.enable = false;
           };
         };
         # Auto formatters. This also adds a flake check to ensure that the
@@ -57,10 +72,12 @@
           };
         };
         # haskell-flake doesn't set the default package, but you can do it here.
-        packages.resource-id = self'.packages.main-resource-id;
-        packages.mono-stretchly = self'.packages.main-mono-stretchly;
-        packages.ws-access-token = self'.packages.main-ws-access-token;
-        packages.hi-chew = self'.packages.main-hi-chew;
+        packages.resource-id = self'.packages.resource-id;
+        packages.mono-stretchly = self'.packages.mono-stretchly;
+        packages.ws-access-token = self'.packages.ws-access-token;
+        packages.hi-chew = self'.packages.hi-chew;
+        packages.default = self'.packages.mono-stretchly;
+        apps.default = self'.apps.mono-stretchly;
         # Dev shell scripts.
         mission-control.scripts = {
           docs = {
@@ -93,11 +110,10 @@
         };
 
         # Default shell.
-        devShells.default = pkgs.mkShell {
-          inputsFrom = [ config.mission-control.devShell
-                         config.flake-root.devShell
-                         self'.devShells.main ];
-        };
+        # devShells.default = pkgs.mkShell {
+        #   inputsFrom = [ config.mission-control.devShell
+        #                  self'.devShells.default ];
+        # };
       };
     };
 }
