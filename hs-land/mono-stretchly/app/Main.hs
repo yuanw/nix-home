@@ -15,40 +15,36 @@ import qualified Data.Text as T
 import qualified Monomer.Lens as L
 
 newtype AppModel = AppModel {
-  _currentTime :: TimeOfDay
+  _currentTime :: LocalTime
 } deriving (Eq, Show)
 
 data AppEvent
   = AppInit
-  | AppSetTime TimeOfDay
+  | AppSetTime LocalTime
+  | AppDone
   deriving (Eq, Show)
 
 makeLenses 'AppModel
 
+-- https://mokehehe.hatenadiary.org/entry/20081204/time
+miniBreak :: NominalDiffTime
+miniBreak = secondsToNominalDiffTime 30
+
+-- doneTime ::
+-- https://hackage.haskell.org/package/time-1.12.2/docs/Data-Time-LocalTime.html#v:addLocalTime
 buildUI
   :: WidgetEnv AppModel AppEvent
   -> AppModel
   -> WidgetNode AppModel AppEvent
 buildUI wenv model = widgetTree where
-  timeString = T.pack . show $ model ^. currentTime
-
-
+  timeString = T.pack . show . localTimeOfDay $ model ^. currentTime
   timeLabel = label (T.takeWhile (/= '.') timeString)
-    `styleBasic` [textFont "Bold", textSize 80, textCenter, textMiddle, flexHeight 100]
+    `styleBasic` [textFont "Regular", textSize 80, textCenter, textMiddle, flexHeight 100]
 
   widgetTree = vstack [
       animFadeIn timeLabel `nodeKey` "fadeTimeLabel"
     ]
-
--- handleEvent
---   :: WidgetEnv AppModel AppEvent
---   -> WidgetNode AppModel AppEvent
---   -> AppModel
---   -> AppEvent
---   -> [AppEventResponse AppModel AppEvent]
--- handleEvent wenv node model evt = case evt of
---   AppInit -> []
---   AppIncrease -> [Model (model & clickCount +~ 1)]
+-- https://github.com/fjvallarino/monomer/blob/main/docs/tutorials/06-composite.md
 handleEvent
   :: WidgetEnv AppModel AppEvent
   -> WidgetNode AppModel AppEvent
@@ -57,7 +53,10 @@ handleEvent
   -> [AppEventResponse AppModel AppEvent]
 handleEvent wenv node model evt = case evt of
   AppInit -> [Producer timeOfDayProducer]
-  AppSetTime time -> fadeInMsg time ++ [Model $ model & currentTime .~ time]
+  AppSetTime time -> fadeInMsg ( localTimeOfDay time) ++ [Model $ model & currentTime .~ time]
+  AppDone -> [Request (ExitApplication True )]
+
+
   where
     fadeInMsg time
       | truncate (todSec time) `mod` 10 /= 0 = []
@@ -70,10 +69,10 @@ timeOfDayProducer sendMsg = do
   threadDelay $ 1000 * 1000
   timeOfDayProducer sendMsg
 
-getLocalTimeOfDay :: IO TimeOfDay
+getLocalTimeOfDay :: IO LocalTime
 getLocalTimeOfDay = do
   time <- getZonedTime
-  return . localTimeOfDay . zonedTimeToLocalTime $ time
+  return . zonedTimeToLocalTime $ time
 
 main :: IO ()
 main = do
