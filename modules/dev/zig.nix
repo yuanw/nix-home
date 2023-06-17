@@ -7,6 +7,8 @@ in {
 
   config = mkIf cfg.enable {
 
-    home.packages = [ pkgs.zig pkgs.zls ];
+    home-manager.users.${config.my.username} = {
+      home.packages = [ pkgs.zig pkgs.zls ];
+    };
   };
 }
