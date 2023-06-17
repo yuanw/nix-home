@@ -83,6 +83,8 @@ with lib; {
           editorconfig-core-c # per-project style config
           # :tools lookup & :lang org +roam
           sqlite
+          tree-sitter
+          tree-sitter-grammars.tree-sitter-c
 
           wordnet
           # :lang latex & :lang org (latex previews)
