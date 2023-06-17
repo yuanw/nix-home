@@ -83,9 +83,7 @@ with lib; {
           editorconfig-core-c # per-project style config
           # :tools lookup & :lang org +roam
           sqlite
-          tree-sitter
-          tree-sitter-grammars.tree-sitter-c
-
+          tree-sitter.withPlugins (p: [ p.tree-sitter-c p.tree-sitter-java  ])
           wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
