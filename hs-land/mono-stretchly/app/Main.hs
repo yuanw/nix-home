@@ -15,20 +15,20 @@ import qualified Data.Text as T
 import qualified Monomer.Lens as L
 
 newtype AppModel = AppModel {
-  _currentTime :: LocalTime
+  _countDownSec :: Int
 } deriving (Eq, Show)
 
 data AppEvent
   = AppInit
-  | AppSetTime LocalTime
+  | CountDown
   | AppDone
   deriving (Eq, Show)
 
 makeLenses 'AppModel
 
 -- https://mokehehe.hatenadiary.org/entry/20081204/time
-miniBreak :: NominalDiffTime
-miniBreak = secondsToNominalDiffTime 30
+-- miniBreak :: NominalDiffTime
+-- miniBreak = secondsToNominalDiffTime 30
 
 -- doneTime ::
 -- https://hackage.haskell.org/package/time-1.12.2/docs/Data-Time-LocalTime.html#v:addLocalTime
@@ -37,12 +37,17 @@ buildUI
   -> AppModel
   -> WidgetNode AppModel AppEvent
 buildUI wenv model = widgetTree where
-  timeString = T.pack . show . localTimeOfDay $ model ^. currentTime
-  timeLabel = label (T.takeWhile (/= '.') timeString)
-    `styleBasic` [textFont "Regular", textSize 80, textCenter, textMiddle, flexHeight 100]
+  -- timeString = (T.pack . show . $ model ^. countDownSec) + " seconds remaining"
+  -- timeLabel = label (T.takeWhile (/= '.') timeString)
+  --   `styleBasic` [textFont "Regular", textSize 80, textCenter, textMiddle, flexHeight 100]
 
   widgetTree = vstack [
-      animFadeIn timeLabel `nodeKey` "fadeTimeLabel"
+      -- animFadeIn timeLabel `nodeKey` "fadeTimeLabel",
+      label "Doing one time at a time",
+      spacer_ [width 5],
+      label $ showt (model ^. countDownSec) <> "seconds remaing",
+      spacer_ [width 5],
+      button "Skip this break" AppDone
     ]
 -- https://github.com/fjvallarino/monomer/blob/main/docs/tutorials/06-composite.md
 handleEvent
@@ -52,41 +57,39 @@ handleEvent
   -> AppEvent
   -> [AppEventResponse AppModel AppEvent]
 handleEvent wenv node model evt = case evt of
-  AppInit -> [Producer timeOfDayProducer]
-  AppSetTime time -> fadeInMsg ( localTimeOfDay time) ++ [Model $ model & currentTime .~ time]
+  AppInit -> [Producer countDownProducer]
+  CountDown  ->  [if (model ^. countDownSec) > 0 then Model ( model & countDownSec -~ 1 ) else Request (ExitApplication True)]
   AppDone -> [Request (ExitApplication True )]
 
 
-  where
-    fadeInMsg time
-      | truncate (todSec time) `mod` 10 /= 0 = []
-      | otherwise = [Message "fadeTimeLabel" AnimationStart]
+  -- where
+  --   fadeInMsg time
+  --     | truncate (todSec time) `mod` 10 /= 0 = []
+  --     | otherwise = [Message "fadeTimeLabel" AnimationStart]
 
-timeOfDayProducer :: (AppEvent -> IO ()) -> IO ()
-timeOfDayProducer sendMsg = do
-  time <- getLocalTimeOfDay
-  sendMsg (AppSetTime time)
+countDownProducer :: (AppEvent -> IO ()) -> IO ()
+countDownProducer sendMsg = do
+  sendMsg CountDown
   threadDelay $ 1000 * 1000
-  timeOfDayProducer sendMsg
+  countDownProducer sendMsg
 
-getLocalTimeOfDay :: IO LocalTime
-getLocalTimeOfDay = do
-  time <- getZonedTime
-  return . zonedTimeToLocalTime $ time
+-- getLocalTimeOfDay :: IO LocalTime
+-- getLocalTimeOfDay = do
+--   time <- getZonedTime
+--   return . zonedTimeToLocalTime $ time
 
 main :: IO ()
 main = do
-  time <- getLocalTimeOfDay
-  startApp (model time) handleEvent buildUI config
+  startApp model handleEvent buildUI config
   where
     config = [
-      appWindowTitle "Producers",
+      appWindowTitle "Stretch",
       --how to bundle a png
       appWindowIcon "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/data/assets/images/icon.png",
       appTheme darkTheme,
       appFontDef "Regular" "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/data/assets/fonts/Roboto-Regular.ttf",
       appInitEvent AppInit
       ]
-    model time = AppModel {
-      _currentTime = time
+    model = AppModel {
+      _countDownSec = 20
     }
