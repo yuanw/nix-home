@@ -1,4 +1,4 @@
-{ config, lib, pkgs, isDarwin ? true, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let cfg = config.modules.dev.haskell;

@@ -62,13 +62,15 @@
     };
 
     typing.enable = true;
-    dev = {
-      agda.enable = false;
-      python.enable = true;
-      haskell.enable = true;
-      dart.enable = true;
-      # node.enable = true;
-    };
+    dev =
+      {
+        agda.enable = false;
+        dart.enable = true;
+        haskell.enable = true;
+        python.enable = true;
+        zig.enable = true;
+        # node.enable = true;
+      };
 
     terminal = {
       enable = true;

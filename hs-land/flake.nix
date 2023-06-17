@@ -22,18 +22,18 @@
         inputs.mission-control.flakeModule
       ];
       perSystem = { self', system, lib, config, pkgs, ... }: {
-         _module.args.pkgs = import inputs.nixpkgs {
-    inherit system;
-    overlays = [
-      (final: prev: {
-        mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
-        # ... things you need to patch ...
-      })
-    ];
-    config = {
-      allowUnsupportedSystem = true;
-    };
-  };
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [
+            (final: prev: {
+              mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+              # ... things you need to patch ...
+            })
+          ];
+          config = {
+            allowUnsupportedSystem = true;
+          };
+        };
         haskellProjects.default = {
           # packages.resource-id.root =
           #   ./resource-id; # This value is detected based on .cabal files
@@ -41,9 +41,7 @@
           #   ./ws-access-token; # This value is detected based on .cabal files
           # packages.hi-chew.root = ./hi-chew;
           # packages.mono-stretchly.root = ./mono-stretchly;
-          settings = {
-
-          };
+          settings = { };
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
