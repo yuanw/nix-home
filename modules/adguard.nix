@@ -22,7 +22,7 @@
       # }
     ];
   };
-  sevices.fail2ban.enable = true;
+  services.fail2ban.enable = true;
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
     enable = true;
