@@ -10,18 +10,19 @@
     # 53 for dns
     # 443 for https
     # 853 for DNS-over-TLS, DNS-over-QUIC port
-    allowedTCPPorts = [ 53 443 853 ];
+    allowedTCPPorts = [ 53 443  ];
     allowedUDPPortRanges = [
       {
         from = 53;
         to = 53;
       }
-      {
-        from = 853;
-        to = 853;
-      }
+      # {
+      #   from = 853;
+      #   to = 853;
+      # }
     ];
   };
+  sevices.fail2ban.enable = true;
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
     enable = true;
@@ -69,12 +70,12 @@
     settings = {
       block_auth_min = 10;
       # debug_pprof = true;
-      filters = [{
-        enabled = true;
-        id = 1;
-        url =
-          "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
-      }];
+      # filters = [{
+      #   enabled = true;
+      #   id = 1;
+      #   url =
+      #     "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+      # }];
       dns = {
         bind_hosts = [ "0.0.0.0" ];
 
