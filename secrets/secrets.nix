@@ -15,4 +15,5 @@ in
   "adguard.age".publicKeys = users ++ systems;
   "adguard-encryption-key.age".publicKeys = users ++ systems;
   "adguard-encryption-certificate.age".publicKeys = users ++ systems;
+  "wireguard-server-private.age".publicKeys = users ++ systems;
 }
