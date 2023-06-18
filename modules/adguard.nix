@@ -5,7 +5,11 @@
   imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
 
   documentation.enable = false;
-  environment.systemPackages = [ pkgs.bind pkgs.lego ];
+  environment.systemPackages = [
+                                 pkgs.bind
+                                 # pkgs.lego
+                                pkgs.wireguard-tools
+                               ];
   networking.firewall = {
     # 53 for dns
     # 443 for https
