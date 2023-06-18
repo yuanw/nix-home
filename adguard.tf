@@ -56,13 +56,13 @@ resource "aws_security_group" "adguard" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
- # Allow port 853 for dns over quic
-  # ingress {
-  #   from_port   = 853
-  #   to_port     = 853
-  #   protocol    = "tcp"
-  #   cidr_blocks = ["0.0.0.0/0"]
-  # }
+ # Allow port 51820 for wireguard
+ ingress {
+    from_port   = 51820
+    to_port     = 51820
+    protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+   }
 
   # Allow port 53 so that we can do dns
   ingress {

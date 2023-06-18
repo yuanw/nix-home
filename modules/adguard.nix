@@ -32,6 +32,13 @@
       # }
     ];
   };
+ # enable NAT
+  networking.nat.enable = true;
+  networking.nat.externalInterface = "eth0";
+  networking.nat.internalInterfaces = [ "wg0" ];
+  networking.firewall = {
+    allowedUDPPorts = [ 51820 ];
+  };
   services.fail2ban.enable = true;
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
