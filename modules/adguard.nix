@@ -6,15 +6,21 @@
 
   documentation.enable = false;
   environment.systemPackages = [
-                                 pkgs.bind
-                                 # pkgs.lego
-                                pkgs.wireguard-tools
-                               ];
+    pkgs.bind
+    # pkgs.lego
+    pkgs.wireguard-tools
+  ];
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+
   networking.firewall = {
     # 53 for dns
     # 443 for https
     # 853 for DNS-over-TLS, DNS-over-QUIC port
-    allowedTCPPorts = [ 53 443  ];
+    allowedTCPPorts = [ 53 443 ];
     allowedUDPPortRanges = [
       {
         from = 53;
