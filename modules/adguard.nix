@@ -79,12 +79,12 @@
 
       peers = [
         # List of allowed peers.
-        # { # Feel free to give a meaning full name
-        #   # Public key of the peer (not a file path).
-        #   publicKey = "{client public key}";
-        #   # List of IPs assigned to this peer within the tunnel subnet. Used to configure routing.
-        #   allowedIPs = [ "10.100.0.2/32" ];
-        # }
+        { # iphone
+          # Public key of the peer (not a file path).
+          publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
+          # List of IPs assigned to this peer within the tunnel subnet. Used to configure routing.
+          allowedIPs = [ "10.100.0.2/32" ];
+        }
         # { # John Doe
         #   publicKey = "{john doe's public key}";
         #   allowedIPs = [ "10.100.0.3/32" ];
