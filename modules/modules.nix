@@ -7,12 +7,13 @@ let
   loadModule = file: { condition ? true }: { inherit file condition; };
   allModules = [
     (loadModule ./browsers/firefox.nix { })
-    (loadModule ./dev/dart.nix { })
     (loadModule ./dev/agda.nix { })
+    (loadModule ./dev/dart.nix { })
     (loadModule ./dev/haskell.nix { })
     (loadModule ./dev/julia.nix { })
     (loadModule ./dev/node.nix { })
     (loadModule ./dev/python.nix { })
+    (loadModule ./dev/zig.nix { })
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
     (loadModule ./helix.nix { })

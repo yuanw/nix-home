@@ -5,6 +5,7 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nixvim.url = "github:pta2002/nixvim";
+    zig.url = "github:mitchellh/zig-overlay";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";

@@ -1,5 +1,12 @@
-{ mkDerivation, base, data-default, lens, lib, monomer, text
-, text-show, time
+{ mkDerivation
+, base
+, data-default
+, lens
+, lib
+, monomer
+, text
+, text-show
+, time
 }:
 mkDerivation {
   pname = "mono-stretchly";
@@ -9,7 +16,13 @@ mkDerivation {
   isExecutable = true;
   enableSeparateDataOutput = true;
   executableHaskellDepends = [
-    base data-default lens monomer text text-show time
+    base
+    data-default
+    lens
+    monomer
+    text
+    text-show
+    time
   ];
   license = "unknown";
   mainProgram = "mono-stretchly";
