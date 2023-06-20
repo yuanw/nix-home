@@ -98,23 +98,23 @@
 
   age = {
     secrets = {
-      adguard = {
-        file = ../secrets/adguard.age;
-        mode = "770";
-        owner = "adguardhome";
-      };
-      adguard-encryption-private-key = {
-        file = ../secrets/adguard-encryption-key.age;
-        mode = "770";
-        path = "/opt/adguradhome/my.key";
-        owner = "adguardhome";
-      };
-      adguard-encryption-certificate = {
-        file = ../secrets/adguard-encryption-certificate.age;
-        mode = "770";
-        path = "/opt/adguradhome/my.crt";
-        owner = "adguardhome";
-      };
+      # adguard = {
+      #   file = ../secrets/adguard.age;
+      #   mode = "770";
+      #   owner = "adguardhome";
+      # };
+      # adguard-encryption-private-key = {
+      #   file = ../secrets/adguard-encryption-key.age;
+      #   mode = "770";
+      #   path = "/opt/adguradhome/my.key";
+      #   owner = "adguardhome";
+      # };
+      # adguard-encryption-certificate = {
+      #   file = ../secrets/adguard-encryption-certificate.age;
+      #   mode = "770";
+      #   path = "/opt/adguradhome/my.crt";
+      #   owner = "adguardhome";
+      # };
       wireguard-server-private-key = {
         file = ../secrets/wireguard-server-private.age;
       };
