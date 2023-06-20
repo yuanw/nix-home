@@ -14,10 +14,37 @@ variable "region" {
   default = "us-east-2"
 }
 
+variable "private_key_file" {
+  type = string
+  nullable = false
+}
+
+# Mirror the SSH public key to EC2 so that we can later install the public key
+# as an authorized key for our server
+resource "aws_key_pair" "adguard" {
+  #public_key = tls_private_key.adguard.public_key_openssh
+  public_key = file("${var.private_key_file}.pub")
+}
+
+
 provider "aws" {
   profile = "adguard-home"
   region  = var.region
 }
+
+# Generate an SSH key pair as strings stored in Terraform state
+# resource "tls_private_key" "adguard" {
+#  algorithm = "ED25519"
+#}
+
+# Synchronize the SSH private key to a local file that the "nixos" module can
+# use
+# resource "local_sensitive_file" "ssh_key_file" {
+#  filename = "${path.module}/id_ed25519"
+#  content  = tls_private_key.adguard.private_key_openssh
+#}
+
+
 
 resource "aws_security_group" "adguard" {
 
@@ -82,23 +109,6 @@ resource "aws_security_group" "adguard" {
 
 }
 
-# Generate an SSH key pair as strings stored in Terraform state
-resource "tls_private_key" "adguard" {
-  algorithm = "ED25519"
-}
-
-# Synchronize the SSH private key to a local file that the "nixos" module can
-# use
-resource "local_sensitive_file" "ssh_key_file" {
-  filename = "${path.module}/id_ed25519"
-  content  = tls_private_key.adguard.private_key_openssh
-}
-
-# Mirror the SSH public key to EC2 so that we can later install the public key
-# as an authorized key for our server
-resource "aws_key_pair" "adguard" {
-  public_key = tls_private_key.adguard.public_key_openssh
-}
 
 module "ami" {
   source  = "github.com/yuanw/terraform-nixos-ng//ami"
@@ -132,7 +142,8 @@ resource "null_resource" "wait" {
   provisioner "remote-exec" {
     connection {
       host        = aws_instance.adguard.public_dns
-      private_key = tls_private_key.adguard.private_key_openssh
+      #private_key = tls_private_key.adguard.private_key_openssh
+      private_key = file(var.private_key_file)
     }
 
     inline = [":"] # Do nothing; we're just testing SSH connectivity
@@ -144,7 +155,8 @@ module "nixos" {
   host        = "root@${aws_instance.adguard.public_ip}"
   flake       = ".#adguard"
   arguments   = ["--build-host", "root@${aws_instance.adguard.public_ip}"]
-  ssh_options = "-o StrictHostKeyChecking=accept-new -i ${local_sensitive_file.ssh_key_file.filename}"
+  # ssh_options = "-o StrictHostKeyChecking=accept-new -i ${local_sensitive_file.ssh_key_file.filename}"
+  ssh_options = "-o StrictHostKeyChecking=accept-new -i ${private_key_file}"
   depends_on  = [null_resource.wait]
 }
 
