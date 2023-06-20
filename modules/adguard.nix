@@ -53,8 +53,9 @@
 
   boot.kernel.sysctl."net.ipv4.ip_forward" = "1";
   boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = "1";
-  # https://github.com/NixOS/nixpkgs/issues/63869
-  networking.wireguard.dynamicEndpointRefreshSeconds = 5;
+
+  networking.dhcpcd.enable = false;
+  networking.useDHCP = false;
   networking.wireguard.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
     wg0 = {
@@ -89,6 +90,8 @@
           publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
           # List of IPs assigned to this peer within the tunnel subnet. Used to configure routing.
           allowedIPs = [ "10.100.0.2/32" ];
+          # https://github.com/NixOS/nixpkgs/issues/63869
+          # dynamicEndpointRefreshSeconds = 5;
         }
         # { # John Doe
         #   publicKey = "{john doe's public key}";
