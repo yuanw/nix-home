@@ -156,7 +156,7 @@ module "nixos" {
   flake       = ".#adguard"
   arguments   = ["--build-host", "root@${aws_instance.adguard.public_ip}"]
   # ssh_options = "-o StrictHostKeyChecking=accept-new -i ${local_sensitive_file.ssh_key_file.filename}"
-  ssh_options = "-o StrictHostKeyChecking=accept-new"
+  ssh_options = "-o StrictHostKeyChecking=accept-new -i ${private_key_file}"
   depends_on  = [null_resource.wait]
 }
 
