@@ -1,20 +1,11 @@
 { modulesPath, pkgs, config, ... }:
 
 {
-
-  imports = [ "${modulesPath}/virtualisation/amazon-image.nix" ];
-
-  documentation.enable = false;
   environment.systemPackages = [
     pkgs.dig
     # pkgs.lego
     pkgs.wireguard-tools
   ];
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 10d";
-  };
 
   networking.firewall = {
     # 53 for dns
@@ -38,7 +29,6 @@
   networking.nat.enable = true;
   networking.nat.externalInterface = "eth0";
   networking.nat.internalInterfaces = [ "wg0" ];
-  services.fail2ban.enable = true;
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
     enable = true;
