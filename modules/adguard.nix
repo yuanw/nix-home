@@ -26,9 +26,9 @@
     # ];
   };
   # enable NAT
-  networking.nat.enable = true;
-  networking.nat.externalInterface = "eth0";
-  networking.nat.internalInterfaces = [ "wg0" ];
+  # networking.nat.enable = true;
+  # networking.nat.externalInterface = "eth0";
+  # networking.nat.internalInterfaces = [ "wg0" ];
   # https://nlnetlabs.nl/documentation/unbound/unbound.conf/
   services.unbound = {
     enable = true;
@@ -41,8 +41,8 @@
     };
   };
 
-  boot.kernel.sysctl."net.ipv4.ip_forward" = "1";
-  boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = "1";
+  # boot.kernel.sysctl."net.ipv4.ip_forward" = "1";
+  # boot.kernel.sysctl."net.ipv6.conf.all.forwarding" = "1";
   # networking.dhcpcd = {
   #   wait = "ipv4";
   #   extraConfig = "noipv4ll";
