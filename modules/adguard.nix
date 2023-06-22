@@ -55,8 +55,7 @@
       # The port that WireGuard listens to - recommended that this be changed from default
       listenPort = 51820;
       # Path to the server's private key
-      privateKeyFile = "/root/wireguard-keys/privatekey";
-
+      privateKeyFile = config.age.secrets.wireguard-server-private-key.path;
       # This allows the wireguard server to route your traffic to the internet and hence be like a VPN
       postUp = ''
         ${pkgs.iptables}/bin/iptables -A FORWARD -i wg0 -j ACCEPT
