@@ -65,7 +65,7 @@
 
       # Undo the above
       preDown = ''
-        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.0/24 -o ens5 -j MASQUERADE
+        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.100.0.0/24 -o ens5 -j MASQUERADE
       '';
 
       peers = [
