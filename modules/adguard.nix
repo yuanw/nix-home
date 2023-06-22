@@ -32,7 +32,7 @@
     # enableIPv6 = true;
     # https://www.baeldung.com/linux/network-interface-configure
     externalInterface = "ens5";
-    internalInterfaces = [ "wg0" ];
+    internalInterfaces = [ "wg1" ];
     # internalIPs = [ "10.42.0.0/16" ];
     # internalIPv6s = [ "fd42::/16" ];
   };
@@ -49,7 +49,7 @@
   };
   networking.wg-quick.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
-    wg0 = {
+    wg1 = {
       # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
       # address = [ "10.0.0.1/24" "fdc9:281f:04d7:9ee9::1/64" ];
       address = [ "10.100.0.1/24"
