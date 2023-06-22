@@ -14,10 +14,32 @@ variable "region" {
   default = "us-east-2"
 }
 
+
+# Mirror the SSH public key to EC2 so that we can later install the public key
+# as an authorized key for our server
+resource "aws_key_pair" "adguard" {
+  public_key = tls_private_key.adguard.public_key_openssh
+}
+
+
 provider "aws" {
   profile = "adguard-home"
   region  = var.region
 }
+
+# Generate an SSH key pair as strings stored in Terraform state
+resource "tls_private_key" "adguard" {
+  algorithm = "ED25519"
+}
+
+# Synchronize the SSH private key to a local file that the "nixos" module can
+# use
+resource "local_sensitive_file" "ssh_key_file" {
+  filename = "${path.module}/id_ed25519"
+  content  = tls_private_key.adguard.private_key_openssh
+}
+
+
 
 resource "aws_security_group" "adguard" {
 
@@ -56,13 +78,13 @@ resource "aws_security_group" "adguard" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
- # Allow port 853 for https
-  ingress {
-    from_port   = 853
-    to_port     = 853
-    protocol    = "tcp"
+ # Allow port 51820 for wireguard
+ ingress {
+    from_port   = 51820
+    to_port     = 51820
+    protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
+   }
 
   # Allow port 53 so that we can do dns
   ingress {
@@ -82,23 +104,6 @@ resource "aws_security_group" "adguard" {
 
 }
 
-# Generate an SSH key pair as strings stored in Terraform state
-resource "tls_private_key" "adguard" {
-  algorithm = "ED25519"
-}
-
-# Synchronize the SSH private key to a local file that the "nixos" module can
-# use
-resource "local_sensitive_file" "ssh_key_file" {
-  filename = "${path.module}/id_ed25519"
-  content  = tls_private_key.adguard.private_key_openssh
-}
-
-# Mirror the SSH public key to EC2 so that we can later install the public key
-# as an authorized key for our server
-resource "aws_key_pair" "adguard" {
-  public_key = tls_private_key.adguard.public_key_openssh
-}
 
 module "ami" {
   source  = "github.com/yuanw/terraform-nixos-ng//ami"

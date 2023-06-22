@@ -110,11 +110,22 @@
         };
     in
     {
+      nixosConfigurations.aws = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          { nixpkgs.overlays = [ agenix.overlays.default ]; }
+          agenix.nixosModules.age
+          ./modules/aws.nix
+          ./modules/agenix.nix
+        ];
+      };
+
       nixosConfigurations.adguard = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           { nixpkgs.overlays = [ agenix.overlays.default ]; }
           agenix.nixosModules.age
+          ./modules/aws.nix
           ./modules/adguradhome-with-user.nix
           ./modules/adguard.nix
           ./modules/agenix.nix
@@ -141,6 +152,7 @@
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
       adguard = self.nixosConfigurations.adguard.system;
+      aws = self.nixosConfigurations.aws.system;
 
     } // eachDefaultSystem (system:
     let pkgs = import nixpkgs { inherit system; };
