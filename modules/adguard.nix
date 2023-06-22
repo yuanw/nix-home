@@ -29,7 +29,7 @@
   # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/nat.nix#L35
   networking.nat = {
     enable = true;
-    # enableIPv6 = true;
+    enableIPv6 = true;
     # https://www.baeldung.com/linux/network-interface-configure
     externalInterface = "ens5";
     internalInterfaces = [ "wg0" ];
