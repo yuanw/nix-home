@@ -52,7 +52,7 @@
     wg0 = {
       # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
       # address = [ "10.0.0.1/24" "fdc9:281f:04d7:9ee9::1/64" ];
-      address = [ "10.0.0.1/24"
+      address = [ "10.100.0.1/24"
                 ];
       # The port that WireGuard listens to - recommended that this be changed from default
       listenPort = 51820;
@@ -65,13 +65,13 @@
 
       # Undo the above
       preDown = ''
-        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.1/24 -o ens5 -j MASQUERADE
+        ${pkgs.iptables}/bin/iptables -t nat -D POSTROUTING -s 10.0.0.0/24 -o ens5 -j MASQUERADE
       '';
 
       peers = [
         { # peer0
           publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
-          allowedIPs = [ "10.0.0.2/32" ];
+          allowedIPs = [ "10.100.0.2/32" ];
         }
         # More peers can be added here.
       ];
