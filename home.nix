@@ -22,7 +22,7 @@
         ./pictures/nix-wallpaper-dracula.png;
     };
   };
-
+  manual.manpages.enable = false;
   programs = {
     bat = { enable = true; };
     dircolors = {
