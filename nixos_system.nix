@@ -31,6 +31,11 @@ with lib; {
   nix = {
     # auto-optimise-store = true;
     package = pkgs.nixUnstable;
+    gc = {
+     automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 10d";
+    };
     settings = {
       allowed-users = [ "root" config.my.username ];
       trusted-users = [ "root" config.my.username ];
