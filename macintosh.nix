@@ -6,12 +6,13 @@ with lib; {
   nix = {
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
-    gc = { user = "${config.my.username}";
-    automatic = true;
-    interval = {Hour=168;};
+    gc = {
+      user = "${config.my.username}";
+      automatic = true;
+      interval = { Hour = 168; };
 
-    options = "--delete-older-than 7d";
-         };
+      options = "--delete-older-than 7d";
+    };
   };
 
   system.stateVersion = 4;

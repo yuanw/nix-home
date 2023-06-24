@@ -47,7 +47,7 @@
       };
     };
   };
-    networking.wg-quick.interfaces = {
+  networking.wg-quick.interfaces = {
     # "wg0" is the network interface name. You can name the interface arbitrarily.
     wg0 = {
       # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
@@ -73,8 +73,9 @@
       '';
 
       peers = [
-        { # peer0
-           publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
+        {
+          # peer0
+          publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
           # presharedKeyFile = "/root/wireguard-keys/preshared_from_peer0_key";
           allowedIPs = [ "10.0.0.2/32" "fdc9:281f:04d7:9ee9::2/128" ];
         }
