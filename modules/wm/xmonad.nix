@@ -50,19 +50,19 @@ in
     };
     # https://nixos.wiki/wiki/Extend_NixOS
     # https://www.freedesktop.org/software/systemd/man/systemd.service.html
-    systemd.user.services.flashfocus = {
+    #systemd.user.services.flashfocus = {
 
-      description = "flashfocus";
-      after = [ "graphical-session-pre.target" ];
+    #  description = "flashfocus";
+   #   after = [ "graphical-session-pre.target" ];
 
-      wantedBy = [ "graphical-session.target" ];
+   #   wantedBy = [ "graphical-session.target" ];
 
-      serviceConfig = {
-        Type = "forking";
-        User = "yuanw";
-        ExecStart = ''${pkgs.flashfocus}/flashfocus'';
-      };
-    };
+   #   serviceConfig = {
+   #     Type = "forking";
+   #     User = "yuanw";
+   #     ExecStart = ''${pkgs.flashfocus}/flashfocus'';
+   #   };
+  #  };
 
     home-manager.users.${config.my.username} = {
       home.packages = [
@@ -75,7 +75,7 @@ in
           autorandr horizontal
           autorandr home
         '')
-        pkgs.flashfocus
+      #  pkgs.flashfocus
       ];
 
       # services.caffeine.enable = true;
