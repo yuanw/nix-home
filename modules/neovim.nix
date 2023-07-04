@@ -42,7 +42,7 @@ let
     "make"
     "toml"
   ];
-  pyPkgs = pkgs.python3Packages;
+  # pyPkgs = pkgs.python3Packages;
   # nvim-open = pkgs.stdenv.mkDerivation {
   #   name = "nvim-open";
   #   unpackPhase = ":";
