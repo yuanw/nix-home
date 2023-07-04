@@ -41,6 +41,7 @@ with pkgs; [
   # nix-du
   lazygit
   gron
+  keychain
 
   devenv
   eukleides
