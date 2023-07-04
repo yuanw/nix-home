@@ -55,6 +55,8 @@ let
   };
 in
 {
+
+    home-manager.users.${config.my.username} = {
   home.packages = with pkgs; [
     neovim
     nvim-open
@@ -107,4 +109,6 @@ in
       ln -s ${pkgs.tree-sitter.builtGrammars."tree-sitter-${name}"}/parser $out/parser/${name}.so
     '') langs}
   '';
+
+  };
 }
