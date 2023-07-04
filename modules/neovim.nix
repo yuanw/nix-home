@@ -85,7 +85,7 @@ in
     shellcheck
     shfmt
     # isort
-    black
+    # black
     ruff
     nixpkgs-fmt
     terraform-ls
