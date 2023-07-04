@@ -20,7 +20,7 @@
     };
     astro-nvim = {
       url = "github:AstroNvim/AstroNvim";
-     flake = false;
+      flake = false;
     };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
