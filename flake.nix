@@ -43,7 +43,6 @@
     , reiryoku
     , agenix
     , nix-colors
-    , nixvim
     , astro-nvim
     , ...
     }:
@@ -84,14 +83,13 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin nixvim astro-nvim; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
-              nixvim.nixDarwinModules.nixvim
             ]) else
             ([
               ./nixos_system.nix
@@ -107,7 +105,6 @@
               }
               agenix.nixosModules.age
               home-manager.nixosModules.home-manager
-              nixvim.nixosModules.nixvim
             ]));
 
         };
