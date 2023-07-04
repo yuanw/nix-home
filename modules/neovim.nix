@@ -43,23 +43,23 @@ let
     "toml"
   ];
   pyPkgs = pkgs.python3Packages;
-  nvim-open = pkgs.stdenv.mkDerivation {
-    name = "nvim-open";
-    unpackPhase = ":";
-    nativeBuildInputs = [ pyPkgs.wrapPython ];
-    pythonPath = [ (pyPkgs.toPythonModule pkgs.neovim-remote) ];
-    preFixup = "wrapPythonPrograms";
-    installPhase = ''
-      install -D -m755 ${./nvim-open.py} $out/bin/nvim-open
-    '';
-  };
+  # nvim-open = pkgs.stdenv.mkDerivation {
+  #   name = "nvim-open";
+  #   unpackPhase = ":";
+  #   nativeBuildInputs = [ pyPkgs.wrapPython ];
+  #   pythonPath = [ (pyPkgs.toPythonModule pkgs.neovim-remote) ];
+  #   preFixup = "wrapPythonPrograms";
+  #   installPhase = ''
+  #     install -D -m755 ${./nvim-open.py} $out/bin/nvim-open
+  #   '';
+  # };
 in
 {
 
     home-manager.users.${config.my.username} = {
   home.packages = with pkgs; [
     neovim
-    nvim-open
+    # nvim-open
 
     nodejs # copilot
     vale
