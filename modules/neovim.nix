@@ -69,8 +69,8 @@ in
 
     # based on ./suggested-pkgs.json
     delve
-    gopls
-    golangci-lint
+    # gopls
+    # golangci-lint
     nodePackages.bash-language-server
     taplo-lsp
     marksman
@@ -81,10 +81,10 @@ in
     # gofumpt
     iferr
     impl
-    gotools
+    # gotools
     shellcheck
     shfmt
-    isort
+    # isort
     black
     ruff
     nixpkgs-fmt
