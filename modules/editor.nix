@@ -58,9 +58,9 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { config, pkgs, ... }: {
-      # imports = [
-      #   nixvim.homeManagerModules.nixvim
-      # ];
+      imports = [
+        nixvim.homeManagerModules.nixvim
+      ];
 
       home = {
         packages = with pkgs; [
@@ -107,22 +107,22 @@ with lib; {
           ".doom.d".source = ../conf.d/doom;
         };
       };
-      # programs.nixvim = {
-      #   enable = true;
-      #   globals = {
-      #     mapleader = " ";
-      #     maplocalleader = " ";
-      #   };
+      programs.nixvim = {
+        enable = false;
+        # globals = {
+        #   mapleader = " ";
+        #   maplocalleader = " ";
+        # };
 
-      #   maps = {
-      #     normal."<leader>pv" = {
-      #       silent = true;
-      #       action = "vim.cmd.Ex";
-      #     };
-      #   };
-      #   # colorschemes.gruvbox.enable = true;
-      #   # plugins.lightline.enable = true;
-      # };
+        # maps = {
+        #   normal."<leader>pv" = {
+        #     silent = true;
+        #     action = "vim.cmd.Ex";
+        #   };
+        # };
+        # colorschemes.gruvbox.enable = true;
+        # plugins.lightline.enable = true;
+      };
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
