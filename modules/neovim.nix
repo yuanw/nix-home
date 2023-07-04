@@ -103,7 +103,6 @@ in
     rm $out/lua
     mkdir -p $out/lua
     ln -s ${astro-nvim}/lua/* $out/lua
-    # ln -s ${./user} $out/lua/user
 
     ${lib.concatMapStringsSep "\n" (name: ''
       ln -s ${pkgs.tree-sitter.builtGrammars."tree-sitter-${name}"}/parser $out/parser/${name}.so
