@@ -1,7 +1,7 @@
 { config
 , pkgs
 , lib
-, inputs
+, astro-nvim
 , ...
 }:
 let
@@ -99,10 +99,10 @@ in
   xdg.configFile."nvim".source = pkgs.runCommand "nvim" { } ''
     mkdir -p $out/parser
 
-    ln -s ${inputs.astro-nvim}/* $out/
+    ln -s ${astro-nvim}/* $out/
     rm $out/lua
     mkdir -p $out/lua
-    ln -s ${inputs.astro-nvim}/lua/* $out/lua
+    ln -s ${astro-nvim}/lua/* $out/lua
     # ln -s ${./user} $out/lua/user
 
     ${lib.concatMapStringsSep "\n" (name: ''

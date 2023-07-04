@@ -46,6 +46,7 @@
     , agenix
     , nix-colors
     , nixvim
+    , astro-nvim
     , ...
     }:
     let
@@ -85,7 +86,7 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin nixvim; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin nixvim astro-nvim; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
