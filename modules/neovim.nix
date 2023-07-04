@@ -54,10 +54,11 @@ let
   #     install -D -m755 ${./nvim-open.py} $out/bin/nvim-open
   #   '';
   # };
+
+  cfg = config.modules.editors.neovim;
 in
 {
-
-  options.modules.editor.neovim = { enable = mkEnableOption "neovim"; };
+  options.modules.editors.neovim = { enable = mkEnableOption "neovim"; };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
