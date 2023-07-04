@@ -1,7 +1,8 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
-The goal for this repo is to declaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
+
+The goal for this repo is to declaratively configure MacOS and Linux system using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
 
 feel free to take what you like.
 
@@ -11,7 +12,7 @@ feel free to take what you like.
 | Terminal | Alacritty + tmux |
 | Editor   | Doom Emacs + astronvim + helix |
 
-* Current Nixos setup
+* Current NixOs setup
 | Shell    | zsh + starship   |
 | WM       | xmonad + xmobar  |
 | Terminal | Alacritty + tmux |
@@ -25,13 +26,12 @@ https://github.com/stars/yuanw/lists/nix-home/
 ** Install
 
 **** Install Nix (with daemon)
-
-I think nix with daemon is recommended over the single user mode.
-
+with official script
 ~sh <(curl -L https://nixos.org/nix/install)~
 or using
 https://github.com/DeterminateSystems/nix-installer
 
+~curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install~
 **** Turn on flake
 edit ~/etc/nix/nix.conf~
 ~experimental-features = nix-command flakes~
@@ -51,6 +51,25 @@ What is benefits of this ?
 we can install/uninstall applications using nix
 don't forget to do
 ~brew analytics off~
+
+**** import gpg keys (airdrop)
+~gpg --list-secret-keys~ or ~gpg --list-secret-keys user@example.com~
+
+#+begin_src shell
+pub   4096R/ABC12345 2020-01-01 [expires: 2025-12-31]
+uid                  Your Name <user@example.com>
+sub   4096R/DEF67890 2020-01-01 [expires: 2025-12-31]
+#+end_src
+
+ID of your key (second column e.g "ABC12345")
+
+~gpg --export-secret-keys YOUR_ID_HERE > private.key~
+
+font
+font book
+** Import
+
+~gpg --import private.key~
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
