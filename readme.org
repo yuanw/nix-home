@@ -30,12 +30,24 @@ https://github.com/stars/yuanw/lists/nix-home/
 I think nix with daemon is recommended over the single user mode.
 
 ~sh <(curl -L https://nixos.org/nix/install)~
+or using
+https://github.com/DeterminateSystems/nix-installer
+
 **** Turn on flake
 edit ~/etc/nix/nix.conf~
-
 ~experimental-features = nix-command flakes~
-**** Install brew (sin)
+
+**** Install nix-darwin
+
+https://github.com/LnL7/nix-darwin#install
+#+begin_src shell
+nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
+./result/bin/darwin-installer
+#+end_src
+
+**** Install brew
 there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
+~/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)~
 What is benefits of this ?
 we can install/uninstall applications using nix
 don't forget to do
