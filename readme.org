@@ -1,22 +1,21 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
-The goal for this repo is to delcaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
+The goal for this repo is to declaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
 
-I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take what you like.
+feel free to take what you like.
 
 * Current MacOS setup
 | Shell    | zsh + starship   |
 | WM       | yabai            |
 | Terminal | Alacritty + tmux |
-| Editor   | Doom Emacs       |
+| Editor   | Doom Emacs + astronvim + helix |
 
 * Current Nixos setup
 | Shell    | zsh + starship   |
 | WM       | xmonad + xmobar  |
 | Terminal | Alacritty + tmux |
-| Editor   | Doom Emacs       |
-
+| Editor   | Doom Emacs + astronvim + helix |
 * Inspirations
 
 https://github.com/stars/yuanw/lists/nix-home/
@@ -68,35 +67,6 @@ nix flake update --recreate-lock-file
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
 
-#+begin_src
-  defcmd :gc do
-    desc "Garbage collect & optimize nix store"
-    opts "-a", "--all",    "GC both the user and system profiles"
-    opts "-s", "--system", "Only GC the system profile"
-    lambda do |_args|
-      if @@opts[:all] or @@opts[:system]
-        puts "Cleaning up your system profile..."
-        sh %w{nix-collect-garbage -d}, sudo: true
-        sh %w{nix-store --optimise}, sudo: true
-        # Clear out left-over secrets. The switch-to-configuration call below will
-        # regenerate them.
-        if File.exists?("/run/secrets/*")
-          sh %w{rm -rf /run/secrets/*}, sudo: true
-        end
-        # nix-collect-garbage is a Nix tool, not a NixOS tool. It won't delete old
-        # boot entries until you do a nixos-rebuild (which means we'll always have
-        # 2 boot entries at any time). Instead, we properly delete them by
-        # reloading the current environment.
-        sh %w{nix-env --delete-generations old --profile /nix/var/nix/profiles/system}, sudo: true
-        sh %w{/nix/var/nix/profiles/system/bin/switch-to-configuration switch}, sudo: true
-      end
-      if @@opts[:all] or not @@opts[:system]
-        puts "Cleaning up your user profile..."
-        sh %w{nix-collect-garbage -d}
-      end
-    end
-  end
-#+end_src
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
