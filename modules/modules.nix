@@ -17,7 +17,7 @@ let
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
     (loadModule ./helix.nix { })
-    (loadModule ./neovim.nix { })
+    (loadModule ./neovim { })
     (loadModule ./hledger.nix { })
     (loadModule ./common.nix { })
     (loadModule ./agenix.nix { })
