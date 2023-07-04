@@ -147,6 +147,10 @@
           system = "x86_64-darwin";
           modules = [ ./hosts/yuan-mac.nix ];
         };
+        wk01174 = mkSystemConfig {
+          system = "aarch64-darwin";
+          modules = [ ./hosts/wk01174.nix ];
+        };
         wf17084 = mkSystemConfig {
           system = "x86_64-darwin";
           modules = [ ./hosts/wf17084.nix ];
@@ -156,6 +160,7 @@
       asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
+      wk01174 = self.darwinConfigurations.wk01174.system;
       adguard = self.nixosConfigurations.adguard.system;
       aws = self.nixosConfigurations.aws.system;
 
