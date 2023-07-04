@@ -104,32 +104,25 @@ with lib; {
         ];
 
         file = mkIf cfg.enableDoomConfig {
-          ".doom.d/init.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/init.el;
-          ".doom.d/packages.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/packages.el;
-          ".doom.d/config.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/config.el;
-          ".doom.d/snippets/java-mode/lombok-log".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/snippets/java-mode/lombok-log;
+          ".doom.d".source = ../conf.d/doom;
         };
       };
-      programs.nixvim = {
-        enable = true;
-        globals = {
-          mapleader = " ";
-          maplocalleader = " ";
-        };
+      # programs.nixvim = {
+      #   enable = true;
+      #   globals = {
+      #     mapleader = " ";
+      #     maplocalleader = " ";
+      #   };
 
-        maps = {
-          normal."<leader>pv" = {
-            silent = true;
-            action = "vim.cmd.Ex";
-          };
-        };
-        # colorschemes.gruvbox.enable = true;
-        # plugins.lightline.enable = true;
-      };
+      #   maps = {
+      #     normal."<leader>pv" = {
+      #       silent = true;
+      #       action = "vim.cmd.Ex";
+      #     };
+      #   };
+      #   # colorschemes.gruvbox.enable = true;
+      #   # plugins.lightline.enable = true;
+      # };
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;

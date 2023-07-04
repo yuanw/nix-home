@@ -18,6 +18,10 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    astro-nvim = {
+      url = "github:AstroNvim/AstroNvim";
+     flake = false;
+    };
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     reiryoku.url = "github:yuanw/reiryoku";
