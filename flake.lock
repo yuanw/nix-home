@@ -24,6 +24,22 @@
         "type": "github"
       }
     },
+    "astro-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1688480466,
+        "narHash": "sha256-YO+zucakOMc+DuKENyc0Ior62AWZC4Q4KNv+ijzCA/Q=",
+        "owner": "AstroNvim",
+        "repo": "AstroNvim",
+        "rev": "87a05226b003c05369ca70ff7e7baf4910d0f8b1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AstroNvim",
+        "repo": "AstroNvim",
+        "type": "github"
+      }
+    },
     "base16-schemes": {
       "flake": false,
       "locked": {
@@ -891,6 +907,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "astro-nvim": "astro-nvim",
         "darwin": "darwin",
         "devenv": "devenv",
         "emacs": "emacs",
