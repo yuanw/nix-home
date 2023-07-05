@@ -108,7 +108,7 @@ with lib; {
         enable = true;
         package = cfg.pkg;
       };
-
+      # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix#L58
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
@@ -117,8 +117,18 @@ with lib; {
         '';
       };
     };
+    env.PATH = [ "$XDG_CONFIG_HOME/emacs/bin" ];
+
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+
+    system.userActivationScripts = {
+      installDoomEmacs = ''
+        if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
+           git clone --depth=1 --single-branch "${cfg.doom.repoUrl}" "$XDG_CONFIG_HOME/emacs"
+        fi
+      '';
+    };
 
   };
 }
