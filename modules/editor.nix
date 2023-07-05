@@ -109,15 +109,14 @@ with lib; {
         package = cfg.pkg;
       };
       # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix#L58
+      #
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
-          export PATH=$PATH:$HOME/.emacs.d/bin
-          export PATH=$PATH:$HOME/.config/emacs/bin
+          export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
         '';
       };
     };
-    env.PATH = [ "$XDG_CONFIG_HOME/emacs/bin" ];
 
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
