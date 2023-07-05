@@ -13,6 +13,12 @@
     #   enable = true;
     #   goPath = "go";
     # };
+    zsh = {
+      initExtra = lib.mkAfter ''
+          export PATH=/opt/homebrew/bin:$PATH
+          export PATH=/opt/homebrew/sbin:$PATH
+'';
+    };
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
@@ -45,7 +51,7 @@
         # "helm"
         "go"
         "pyenv"
-        "pngpaste"
+        # "pngpaste"
         "jdtls"
         "redis"
         "frugal"
