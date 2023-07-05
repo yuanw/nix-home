@@ -74,7 +74,7 @@
 
     terminal = {
       enable = true;
-      mainWorkspaceDir = "$HOME/workspace";
+      mainWorkspaceDir = "$HOME/workspaces";
     };
     wm.yabai.enable = true;
   };

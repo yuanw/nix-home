@@ -161,7 +161,7 @@
       asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
-      wk01174 = self.darwinConfigurations.wk01174.system;
+      WK01174 = self.darwinConfigurations.wk01174.system;
       adguard = self.nixosConfigurations.adguard.system;
       aws = self.nixosConfigurations.aws.system;
 

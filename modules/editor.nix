@@ -108,8 +108,6 @@ with lib; {
         enable = true;
         package = cfg.pkg;
       };
-      # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix#L58
-      #
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
