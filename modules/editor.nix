@@ -98,17 +98,18 @@ with lib; {
           # :lang yaml
           nodePackages.yaml-language-server
         ];
- xdg.configFile."emacs-bk".source = pkgs.runCommand "emacs-bk" { } ''
+
+        file = mkIf cfg.enableDoomConfig {
+          ".doom.d".source = ../conf.d/doom;
+        };
+      };
+       xdg.configFile."emacs-bk".source = pkgs.runCommand "emacs-bk" { } ''
         mkdir -p $out
 
         ln -s ${doom-emacs}/* $out/
       '';
 
 
-        file = mkIf cfg.enableDoomConfig {
-          ".doom.d".source = ../conf.d/doom;
-        };
-      };
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
