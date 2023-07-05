@@ -9,10 +9,10 @@
     homeDirectory = "/Users/yuanwang";
   };
   home-manager.users.${config.my.username}.programs = {
-    go = {
-      enable = true;
-      goPath = "go";
-    };
+    # go = {
+    #   enable = true;
+    #   goPath = "go";
+    # };
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
@@ -43,6 +43,7 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
+        "go"
         "pyenv"
         "pngpaste"
         "jdtls"
