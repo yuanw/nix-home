@@ -27,7 +27,7 @@
 
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    reiryoku.url = "github:yuanw/reiryoku";
+    # reiryoku.url = "github:yuanw/reiryoku";
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "darwin";
