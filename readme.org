@@ -70,6 +70,18 @@ font book
 ** Import
 
 ~gpg --import private.key~
+** ssh file
+
+.ssh/config
+#+begin_src
+Host *
+  IgnoreUnknown UseKeychain
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+
+#+end_src
+
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
