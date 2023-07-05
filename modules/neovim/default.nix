@@ -1,3 +1,5 @@
+# most of this is stealed from Mic92 module
+# https://github.com/Mic92/dotfiles/blob/main/home-manager/modules/neovim/default.nix
 { config
 , pkgs
 , lib

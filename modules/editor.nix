@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, doom-emacs, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -98,6 +98,12 @@ with lib; {
           # :lang yaml
           nodePackages.yaml-language-server
         ];
+ xdg.configFile."emacs-bk".source = pkgs.runCommand "setup-doom-emacs" { } ''
+        mkdir -p $out
+
+        ln -s ${doom-emacs}/* $out/
+      '';
+
 
         file = mkIf cfg.enableDoomConfig {
           ".doom.d".source = ../conf.d/doom;

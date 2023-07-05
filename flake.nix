@@ -20,6 +20,11 @@
       url = "github:AstroNvim/AstroNvim";
       flake = false;
     };
+    doom-emacs = {
+      url = "github:doomemacs/doomemacs";
+      flake = false;
+    };
+
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     reiryoku.url = "github:yuanw/reiryoku";
@@ -44,6 +49,7 @@
     , agenix
     , nix-colors
     , astro-nvim
+    , doom-emacs
     , ...
     }:
     let
@@ -83,7 +89,7 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim doom-emacs; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
