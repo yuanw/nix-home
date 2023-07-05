@@ -45,7 +45,7 @@
     , emacs
     , flake-utils
     , hosts
-    , reiryoku
+    # , reiryoku
     , agenix
     , nix-colors
     , astro-nvim
