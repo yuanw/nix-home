@@ -220,36 +220,6 @@
         "type": "github"
       }
     },
-    "flake-utils_5": {
-      "locked": {
-        "lastModified": 1676283394,
-        "narHash": "sha256-XX2f9c3iySLCw54rJ/CZs+ZK6IQy7GXNY4nSOyu2QG4=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "3db36a8b464d0c4532ba1c7dda728f4576d6d073",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_6": {
-      "locked": {
-        "lastModified": 1676283394,
-        "narHash": "sha256-XX2f9c3iySLCw54rJ/CZs+ZK6IQy7GXNY4nSOyu2QG4=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "3db36a8b464d0c4532ba1c7dda728f4576d6d073",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "gitignore": {
       "inputs": {
         "nixpkgs": [
@@ -330,22 +300,6 @@
       "original": {
         "owner": "StevenBlack",
         "repo": "hosts",
-        "type": "github"
-      }
-    },
-    "keymap_drawer": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1678175580,
-        "narHash": "sha256-G9ippnxaKNSFk76vvP36h3pb6xZ+KRoc0JWrPW8b73w=",
-        "owner": "caksoylar",
-        "repo": "keymap-drawer",
-        "rev": "681a80cb9e3ec38b19e9e3cedb791e75d35c5fb4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "caksoylar",
-        "repo": "keymap-drawer",
         "type": "github"
       }
     },
@@ -548,22 +502,6 @@
         "type": "indirect"
       }
     },
-    "nixpkgs_5": {
-      "locked": {
-        "lastModified": 1678418513,
-        "narHash": "sha256-HLLR2Fmkn3TgD0F+u5gMcTKx5YzAU1rbS4cLfm6ugiU=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "5496585eb876f2ce97654bc8f96838c6f8642563",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nur": {
       "locked": {
         "lastModified": 1688082333,
@@ -576,28 +514,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "NUR",
-        "type": "github"
-      }
-    },
-    "poetry2nix": {
-      "inputs": {
-        "flake-utils": "flake-utils_6",
-        "nixpkgs": [
-          "reiryoku",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1678135815,
-        "narHash": "sha256-U9rGLDafi7CcrNuYD1LkM3LSN2rZ5zgF0GeInrAihAE=",
-        "owner": "nix-community",
-        "repo": "poetry2nix",
-        "rev": "4c424edc8a546952e640f2a3017354b05bf15f0b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "poetry2nix",
         "type": "github"
       }
     },
@@ -629,48 +545,6 @@
         "type": "github"
       }
     },
-    "qmk_firmware": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1680833272,
-        "narHash": "sha256-3YU7MnBAFTn1H4t5RUz7o1RlmJ24YOh/JipOIBCUnnM=",
-        "ref": "bkb-master",
-        "rev": "951f0e6d4dfe2848425375e05c880560b09d50e2",
-        "shallow": true,
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/Bastardkb/bastardkb-qmk"
-      },
-      "original": {
-        "ref": "bkb-master",
-        "shallow": true,
-        "submodules": true,
-        "type": "git",
-        "url": "https://github.com/Bastardkb/bastardkb-qmk"
-      }
-    },
-    "reiryoku": {
-      "inputs": {
-        "flake-utils": "flake-utils_5",
-        "keymap_drawer": "keymap_drawer",
-        "nixpkgs": "nixpkgs_5",
-        "poetry2nix": "poetry2nix",
-        "qmk_firmware": "qmk_firmware"
-      },
-      "locked": {
-        "lastModified": 1687030779,
-        "narHash": "sha256-Z0MK7K0pMwwVPV6rp3VX7yVy18jzZPxKg+EqQJhEzT4=",
-        "owner": "yuanw",
-        "repo": "reiryoku",
-        "rev": "bf3f2f147730ccaea753b4b69ae0d1ec27f74c7a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "yuanw",
-        "repo": "reiryoku",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
         "agenix": "agenix",
@@ -685,8 +559,7 @@
         "nix-colors": "nix-colors",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable_3",
-        "nur": "nur",
-        "reiryoku": "reiryoku"
+        "nur": "nur"
       }
     },
     "systems": {
