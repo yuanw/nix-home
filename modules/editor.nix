@@ -103,7 +103,8 @@ with lib; {
           ".doom.d".source = ../conf.d/doom;
         };
       };
-       xdg.configFile."emacs-bk".source = pkgs.runCommand "emacs-bk" { } ''
+
+       xdg.configFile."emacs".source = pkgs.runCommand "emacs-bk" { } ''
         mkdir -p $out
 
         ln -s ${doom-emacs}/* $out/
