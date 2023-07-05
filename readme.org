@@ -44,6 +44,7 @@ nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
 ./result/bin/darwin-installer
 #+end_src
 
+**** install xcode
 **** Install brew
 there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
 ~/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)~
@@ -51,6 +52,7 @@ What is benefits of this ?
 we can install/uninstall applications using nix
 don't forget to do
 ~brew analytics off~
+
 
 **** import gpg keys (airdrop)
 ~gpg --list-secret-keys~ or ~gpg --list-secret-keys user@example.com~

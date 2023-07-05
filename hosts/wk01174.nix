@@ -69,7 +69,7 @@
         dart.enable = true;
         haskell.enable = true;
         python.enable = true;
-        zig.enable = true;
+        # zig.enable = true;
         # node.enable = true;
       };
 
