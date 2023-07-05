@@ -99,6 +99,22 @@
         "type": "github"
       }
     },
+    "doom-emacs": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1685489944,
+        "narHash": "sha256-qAI2FbELXIYDMsgMjn19MhYS9WaOxzpcWrATgQW+RP8=",
+        "owner": "doomemacs",
+        "repo": "doomemacs",
+        "rev": "07fca786154551f90f36535bfb21f8ca4abd5027",
+        "type": "github"
+      },
+      "original": {
+        "owner": "doomemacs",
+        "repo": "doomemacs",
+        "type": "github"
+      }
+    },
     "emacs": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -661,6 +677,7 @@
         "astro-nvim": "astro-nvim",
         "darwin": "darwin",
         "devenv": "devenv",
+        "doom-emacs": "doom-emacs",
         "emacs": "emacs",
         "flake-utils": "flake-utils_3",
         "home-manager": "home-manager_2",

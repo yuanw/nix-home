@@ -98,7 +98,7 @@ with lib; {
           # :lang yaml
           nodePackages.yaml-language-server
         ];
- xdg.configFile."emacs-bk".source = pkgs.runCommand "setup-doom-emacs" { } ''
+ xdg.configFile."emacs-bk".source = pkgs.runCommand "emacs-bk" { } ''
         mkdir -p $out
 
         ln -s ${doom-emacs}/* $out/
