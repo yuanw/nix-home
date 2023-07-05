@@ -38,6 +38,7 @@
         "insomnia"
         "stretchly"
         "sloth"
+        "slack"
       ];
       brews = [
         # "aws-iam-authenticator"
