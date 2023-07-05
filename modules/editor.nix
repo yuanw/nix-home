@@ -104,14 +104,6 @@ with lib; {
         };
       };
 
-       xdg.configFile."emacs".source = pkgs.runCommand "emacs-bk" { } ''
-        mkdir -p $out
-
-        ln -s ${doom-emacs}/* $out/
-      '';
-
-
-
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
         package = cfg.pkg;
