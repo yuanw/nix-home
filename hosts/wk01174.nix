@@ -57,7 +57,7 @@
         # "go"
         # "pyenv"
         # "pngpaste"
-        "koekeishiya/formulae/yabai"
+        # "koekeishiya/formulae/yabai"
         "jdtls"
         "redis"
         "frugal"
