@@ -8,7 +8,7 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
-  environment.sessionVariables = {
+  environment.variables = {
     PATH = [
       "/opt/homebrew/bin"
       "/opt/homebrew/sbin"
