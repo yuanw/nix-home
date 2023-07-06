@@ -33,7 +33,7 @@ let
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
-                            ${pkgs.alerter}/alerter -message "restart yabai and reload skhd"
+                            osascript -e 'display notification "restart yabai and reload skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
