@@ -16,8 +16,12 @@ stdenv.mkDerivation rec {
   # case that happens when the archive doesn't have a subdirectory.
   # setSourceRoot = "sourceRoot=`pwd`";
 
+   buildPhase = ''
+     unzip $src
+  '';
+
+
   installPhase = ''
-    ls
     mkdir -p $out
     cp alerter $out/
   '';
