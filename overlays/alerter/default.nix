@@ -23,7 +23,7 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out
-    cp ${./alerter} $out/alerter
+    cp ${./alerter} $out/alerter-bin
   '';
 
   meta = {
