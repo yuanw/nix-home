@@ -8,17 +8,23 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
+  environment.sessionVariables = {
+    PATH = [
+      "/opt/homebrew/bin"
+      "/opt/homebrew/sbin"
+    ];
+  };
   home-manager.users.${config.my.username}.programs = {
     go = {
       enable = true;
       goPath = "go";
     };
-    zsh = {
-      initExtra = lib.mkAfter ''
-          export PATH=/opt/homebrew/bin:$PATH
-          export PATH=/opt/homebrew/sbin:$PATH
-      '';
-    };
+    # zsh = {
+    #   initExtra = lib.mkAfter ''
+    #       export PATH=/opt/homebrew/bin:$PATH
+    #       export PATH=/opt/homebrew/sbin:$PATH
+    #   '';
+    # };
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
