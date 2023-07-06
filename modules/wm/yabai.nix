@@ -55,10 +55,8 @@ in
     home-manager.users.${config.my.username} = {
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
-
         pkgs.haskellPackages.hi-chew
         (
-
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
             #
             # yabai-sa-kickstart
@@ -76,9 +74,6 @@ in
           ''
         )
       ];
-      programs = {
-        # zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
-      };
     };
     services.skhd = {
       enable = true;
