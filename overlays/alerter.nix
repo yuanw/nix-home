@@ -32,4 +32,6 @@ stdenv.mkDerivation rec {
     license = lib.licenses.mit;
     platforms = [ "x86_64-darwin" "aarch64-darwin" ];
   };
+
+  dontUnpack = true;
 }
