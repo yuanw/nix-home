@@ -99,7 +99,7 @@ in
     };
 
     services.yabai = {
-      enable = true;
+      enable = false;
       package = pkgs.yabai;
       enableScriptingAddition = true;
       config = {
