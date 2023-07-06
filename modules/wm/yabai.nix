@@ -33,7 +33,7 @@ let
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
-                            osascript -e 'display notification "restart yabai and reload skhd"'
+                            ${pkgs.alerter}/alerter -message "restart yabai and reload skhd"
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
@@ -55,8 +55,10 @@ in
     home-manager.users.${config.my.username} = {
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
+
         pkgs.haskellPackages.hi-chew
         (
+
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
             #
             # yabai-sa-kickstart
@@ -74,6 +76,9 @@ in
           ''
         )
       ];
+      programs = {
+        zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
+      };
     };
     services.skhd = {
       enable = true;
