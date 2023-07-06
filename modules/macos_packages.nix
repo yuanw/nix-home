@@ -1,6 +1,6 @@
 { pkgs, ... }:
 
 with pkgs; [
-  alerter
+  # alerter
   pinentry_mac
 ]

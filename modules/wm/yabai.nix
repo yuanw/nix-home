@@ -77,7 +77,7 @@ in
         )
       ];
       programs = {
-        zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
+        # zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
       };
     };
     services.skhd = {
