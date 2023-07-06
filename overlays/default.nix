@@ -42,20 +42,11 @@ final: prev:
 
   # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
   yabai = prev.callPackage ./yabai.nix { };
-  alerter = prev.callPackage ./alerter.nix { };
+  alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
-  # qmk-udev-rules = prev.qmk-udev-rules.overrideAttrs (oldAttrs: rec {
-  #   version = "0.18.17";
-  #   src = prev.fetchFromGitHub {
-  #     owner = "qmk";
-  #     repo = "qmk_firmware";
-  #     rev = version;
-  #     sha256 = "YEKqqCLJQvFD3OaJvgD+OEDxXgPcjnaNpNtSPaDUS+M=";
-  #   };
-  # });
 
   juliaMac = final.installApplication rec {
     name = "Julia";
