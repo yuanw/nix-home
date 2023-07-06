@@ -49,8 +49,8 @@
       brews = [
         # "aws-iam-authenticator"
         # "helm"
-        "go"
-        "pyenv"
+        # "go"
+        # "pyenv"
         # "pngpaste"
         "jdtls"
         "redis"
