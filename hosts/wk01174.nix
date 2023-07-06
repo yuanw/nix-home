@@ -9,15 +9,15 @@
     homeDirectory = "/Users/yuanwang";
   };
   home-manager.users.${config.my.username}.programs = {
-    # go = {
-    #   enable = true;
-    #   goPath = "go";
-    # };
+    go = {
+      enable = true;
+      goPath = "go";
+    };
     zsh = {
       initExtra = lib.mkAfter ''
           export PATH=/opt/homebrew/bin:$PATH
           export PATH=/opt/homebrew/sbin:$PATH
-'';
+      '';
     };
     git = {
       extraConfig = {
