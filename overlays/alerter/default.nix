@@ -5,25 +5,25 @@ stdenv.mkDerivation rec {
   # big sur version
   version = "1.0.1";
 
-  nativeBuildInputs = [ unzip ];
+  # nativeBuildInputs = [ unzip ];
 
-  src = fetchurl {
-    url = "https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip";
-      # "https://github.com/vjeantet/alerter/releases/download/${version}/alerter_v${version}_darwin_amd64.zip";
-    sha256 = "sha256-gWHzn1CBcpKrGRD1pi3M/kOEuQShXvBnavBlgg3KLVo=";
-  };
-  # Work around the "unpacker appears to have produced no directories"
-  # case that happens when the archive doesn't have a subdirectory.
-  # setSourceRoot = "sourceRoot=`pwd`";
+  # src = fetchurl {
+  #   url = "https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip";
+  #     # "https://github.com/vjeantet/alerter/releases/download/${version}/alerter_v${version}_darwin_amd64.zip";
+  #   sha256 = "sha256-gWHzn1CBcpKrGRD1pi3M/kOEuQShXvBnavBlgg3KLVo=";
+  # };
+  # # Work around the "unpacker appears to have produced no directories"
+  # # case that happens when the archive doesn't have a subdirectory.
+  # # setSourceRoot = "sourceRoot=`pwd`";
 
-   buildPhase = ''
-     unzip $src
-  '';
+  #  buildPhase = ''
+  #    unzip $src
+  # '';
 
 
   installPhase = ''
     mkdir -p $out
-    cp alerter $out/
+    cp ${./alerter} $out/
   '';
 
   meta = {
