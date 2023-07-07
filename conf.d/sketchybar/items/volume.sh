@@ -5,10 +5,10 @@ volume_slider=(
   updates=on
   label.drawing=off
   icon.drawing=off
-  slider.highlight_color=$BLUE
+  slider.highlight_color="$BLUE"
   slider.background.height=5
   slider.background.corner_radius=3
-  slider.background.color=$BACKGROUND_2
+  slider.background.color="$BACKGROUND_2"
   slider.knob=􀀁
   slider.knob.drawing=off
 )
@@ -16,10 +16,10 @@ volume_slider=(
 volume_icon=(
   click_script="$PLUGIN_DIR/volume_click.sh"
   padding_left=10
-  icon=$VOLUME_100
+  icon="$VOLUME_100"
   icon.width=0
   icon.align=left
-  icon.color=$GREY
+  icon.color="$GREY"
   icon.font="$FONT:Regular:14.0"
   label.width=25
   label.align=left
@@ -27,8 +27,8 @@ volume_icon=(
 )
 
 status_bracket=(
-  background.color=$BACKGROUND_1
-  background.border_color=$BACKGROUND_2
+  background.color="$BACKGROUND_1"
+  background.border_color="$BACKGROUND_2"
 )
 
 sketchybar --add slider volume right            \
