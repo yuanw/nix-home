@@ -33,7 +33,7 @@ let
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
-                            ${pkgs.alerter}/alerter -message "restart yabai and reload skhd"
+                            osascript -e 'display notification  "restart yabai and reload skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
@@ -76,9 +76,9 @@ in
           ''
         )
       ];
-      programs = {
-        zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
-      };
+      # programs = {
+      #   zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
+      # };
     };
     services.skhd = {
       enable = true;
@@ -98,6 +98,9 @@ in
       StandardErrorPath = "/tmp/yabai.err.log";
     };
 
+    services.sketchybar.enable = true;
+
+    xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
     services.yabai = {
       enable = true;
       package = pkgs.yabai;
@@ -120,7 +123,7 @@ in
         mouse_action1 = "move";
         mouse_action2 = "resize";
         layout = "bsp";
-        top_padding = 10;
+        top_padding = 20;
         bottom_padding = 10;
         left_padding = 10;
         right_padding = 10;
