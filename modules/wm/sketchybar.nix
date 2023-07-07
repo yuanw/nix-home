@@ -41,6 +41,9 @@ in {
 
     launchd.user.agents.sketchybar = {
       serviceConfig = {
+           StandardOutPath = "/tmp/sketchybar.out.log";
+         StandardErrorPath = "/tmp/sketchybar.err.log";
+
         ProgramArguments =
           ["${cfg.package}/bin/sketchybar"]
           ++ optionals (cfg.config != "") ["--config" configFile];

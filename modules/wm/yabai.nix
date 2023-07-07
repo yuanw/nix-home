@@ -121,7 +121,7 @@ in
         mouse_action1 = "move";
         mouse_action2 = "resize";
         layout = "bsp";
-        top_padding = 20;
+        top_padding = 25;
         bottom_padding = 10;
         left_padding = 10;
         right_padding = 10;
