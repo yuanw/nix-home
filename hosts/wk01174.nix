@@ -39,12 +39,13 @@
     secrets.agenix = { enable = true; };
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" ];
+      taps = [ "homebrew/core" "homebrew/cask"  "homebrew/cask-fonts" ];
 
       casks = [
         "brave-browser"
         "docker"
         "firefox"
+        "font-hack-nerd-font"
         "google-chrome"
         "insomnia"
         "slack"
