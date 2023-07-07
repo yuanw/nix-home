@@ -76,9 +76,8 @@ in
           ''
         )
       ];
-      # programs = {
-      #   zsh = { sessionVariables = { ALERTER_HOME = "${pkgs.alerter}"; }; };
-      # };
+
+    xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
     };
     services.skhd = {
       enable = true;
@@ -100,7 +99,6 @@ in
 
     services.sketchybar.enable = true;
 
-    xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
     services.yabai = {
       enable = true;
       package = pkgs.yabai;
