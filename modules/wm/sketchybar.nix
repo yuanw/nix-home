@@ -45,8 +45,8 @@ in {
          StandardErrorPath = "/tmp/sketchybar.err.log";
 
         ProgramArguments =
-          ["${cfg.package}/bin/sketchybar"]
-          ++ optionals (cfg.config != "") ["--config" configFile];
+          ["${cfg.package}/bin/sketchybar"];
+          # ++ optionals (cfg.config != "") ["--config" configFile];
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
