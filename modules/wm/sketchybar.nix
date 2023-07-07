@@ -39,21 +39,21 @@ in {
   config = mkIf cfg.enable {
     environment.systemPackages = [cfg.package];
 
-    # launchd.user.agents.sketchybar = {
-    #   serviceConfig = {
-    #        StandardOutPath = "/tmp/sketchybar.out.log";
-    #      StandardErrorPath = "/tmp/sketchybar.err.log";
+    launchd.user.agents.sketchybar = {
+      serviceConfig = {
+           StandardOutPath = "/tmp/sketchybar.out.log";
+         StandardErrorPath = "/tmp/sketchybar.err.log";
 
-    #     ProgramArguments =
-    #       ["${cfg.package}/bin/sketchybar"];
-    #       # ++ optionals (cfg.config != "") ["--config" configFile];
-    #     KeepAlive = true;
-    #     RunAtLoad = true;
-    #     EnvironmentVariables = {
-    #       PATH = "${cfg.package}/bin:${config.environment.systemPath}";
-    #     };
-    #   };
-    # };
+        ProgramArguments =
+          ["${cfg.package}/bin/sketchybar"];
+          # ++ optionals (cfg.config != "") ["--config" configFile];
+        KeepAlive = true;
+        RunAtLoad = true;
+        EnvironmentVariables = {
+          PATH = "${cfg.package}/bin:${config.environment.systemPath}";
+        };
+      };
+    };
 
     system.defaults.NSGlobalDomain._HIHideMenuBar = cfg.hideMenuBar;
   };
