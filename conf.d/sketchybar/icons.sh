@@ -2,7 +2,7 @@
 
 # General Icons
 LOADING=􀖇
-APPLE=􀣺
+APPLE=
 PREFERENCES=􀺽
 ACTIVITY=􀒓
 LOCK=􀒳
@@ -39,7 +39,7 @@ BATTERY_0=􀛪
 BATTERY_CHARGING=􀢋
 
 # Volume Icons
-VOLUME_100=􀊩
+VOLUME_100=🔊
 VOLUME_66=􀊧
 VOLUME_33=􀊥
 VOLUME_10=􀊡
