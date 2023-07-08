@@ -1,22 +1,22 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
-The goal for this repo is to delcaratively manage my MacOS/NixOS Using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
 
-I feel like my macOS side's setup (Big Sur) is pretty stable, feel free to take what you like.
+The goal for this repo is to declaratively configure MacOS and Linux system using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
+
+feel free to take what you like.
 
 * Current MacOS setup
-| Shell    | zsh + starship   |
-| WM       | yabai            |
-| Terminal | Alacritty + tmux |
-| Editor   | Doom Emacs       |
+| Shell    | zsh + starship                 |
+| WM       | yabai + skhd + sketchybar      |
+| Terminal | Alacritty + tmux               |
+| Editor   | Doom Emacs + astronvim + helix |
 
-* Current Nixos setup
-| Shell    | zsh + starship   |
-| WM       | xmonad + xmobar  |
-| Terminal | Alacritty + tmux |
-| Editor   | Doom Emacs       |
-
+* Current NixOs setup
+| Shell    | zsh + starship                 |
+| WM       | xmonad + xmobar                |
+| Terminal | Alacritty + tmux               |
+| Editor   | Doom Emacs + astronvim + helix |
 * Inspirations
 
 https://github.com/stars/yuanw/lists/nix-home/
@@ -26,20 +26,64 @@ https://github.com/stars/yuanw/lists/nix-home/
 ** Install
 
 **** Install Nix (with daemon)
-
-I think nix with daemon is recommended over the single user mode.
-
+with official script
 ~sh <(curl -L https://nixos.org/nix/install)~
+or using
+https://github.com/DeterminateSystems/nix-installer
+
+~curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install~
 **** Turn on flake
 edit ~/etc/nix/nix.conf~
-
 ~experimental-features = nix-command flakes~
-**** Install brew (sin)
+
+**** Install nix-darwin
+
+https://github.com/LnL7/nix-darwin#install
+#+begin_src shell
+nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
+./result/bin/darwin-installer
+#+end_src
+
+**** install xcode
+**** Install brew
 there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
+~/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)~
 What is benefits of this ?
 we can install/uninstall applications using nix
 don't forget to do
 ~brew analytics off~
+
+
+**** import gpg keys (airdrop)
+~gpg --list-secret-keys~ or ~gpg --list-secret-keys user@example.com~
+
+#+begin_src shell
+pub   4096R/ABC12345 2020-01-01 [expires: 2025-12-31]
+uid                  Your Name <user@example.com>
+sub   4096R/DEF67890 2020-01-01 [expires: 2025-12-31]
+#+end_src
+
+ID of your key (second column e.g "ABC12345")
+
+~gpg --export-secret-keys YOUR_ID_HERE > private.key~
+
+font
+font book
+** Import
+
+~gpg --import private.key~
+** ssh file
+
+.ssh/config
+#+begin_src
+Host *
+  IgnoreUnknown UseKeychain
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+
+#+end_src
+
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
@@ -56,35 +100,6 @@ nix flake update --recreate-lock-file
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
 
-#+begin_src
-  defcmd :gc do
-    desc "Garbage collect & optimize nix store"
-    opts "-a", "--all",    "GC both the user and system profiles"
-    opts "-s", "--system", "Only GC the system profile"
-    lambda do |_args|
-      if @@opts[:all] or @@opts[:system]
-        puts "Cleaning up your system profile..."
-        sh %w{nix-collect-garbage -d}, sudo: true
-        sh %w{nix-store --optimise}, sudo: true
-        # Clear out left-over secrets. The switch-to-configuration call below will
-        # regenerate them.
-        if File.exists?("/run/secrets/*")
-          sh %w{rm -rf /run/secrets/*}, sudo: true
-        end
-        # nix-collect-garbage is a Nix tool, not a NixOS tool. It won't delete old
-        # boot entries until you do a nixos-rebuild (which means we'll always have
-        # 2 boot entries at any time). Instead, we properly delete them by
-        # reloading the current environment.
-        sh %w{nix-env --delete-generations old --profile /nix/var/nix/profiles/system}, sudo: true
-        sh %w{/nix/var/nix/profiles/system/bin/switch-to-configuration switch}, sudo: true
-      end
-      if @@opts[:all] or not @@opts[:system]
-        puts "Cleaning up your user profile..."
-        sh %w{nix-collect-garbage -d}
-      end
-    end
-  end
-#+end_src
 * Caveats
 ** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index

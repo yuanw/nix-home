@@ -39,6 +39,9 @@ with pkgs; [
   nixpkgs-fmt
   nix-tree
   # nix-du
+  lazygit
+  gron
+  keychain
 
   devenv
   eukleides

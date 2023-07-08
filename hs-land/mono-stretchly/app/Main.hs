@@ -85,9 +85,9 @@ main = do
     config = [
       appWindowTitle "Stretch",
       --how to bundle a png
-      appWindowIcon "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/data/assets/images/icon.png",
+      appWindowIcon "/Users/yuanwang/workspaces/nix-home/hs-land/mono-stretchly/data/assets/images/icon.png",
       appTheme darkTheme,
-      appFontDef "Regular" "/Users/yuanwang/workspace/nix-home/hs-land/mono-stretchly/data/assets/fonts/Roboto-Regular.ttf",
+      appFontDef "Regular" "/Users/yuanwang/workspaces/nix-home/hs-land/mono-stretchly/data/assets/fonts/Roboto-Regular.ttf",
       appInitEvent AppInit
       ]
     model = AppModel {

@@ -16,7 +16,7 @@
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
-        url."git@github.com:".insteadOf = "https://github.com";
+        # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
   };
@@ -36,7 +36,6 @@
         "firefox"
         "google-chrome"
         "insomnia"
-        "stretchly"
         "sloth"
       ];
       brews = [
@@ -60,7 +59,7 @@
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
-
+    editors.neovim.enable = true;
     typing.enable = true;
     dev =
       {

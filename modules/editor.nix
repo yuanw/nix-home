@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, nixvim, ... }:
+{ config, lib, pkgs, doom-emacs, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -58,10 +58,6 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { config, pkgs, ... }: {
-      imports = [
-        nixvim.homeManagerModules.nixvim
-      ];
-
       home = {
         packages = with pkgs; [
           # git
@@ -104,48 +100,31 @@ with lib; {
         ];
 
         file = mkIf cfg.enableDoomConfig {
-          ".doom.d/init.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/init.el;
-          ".doom.d/packages.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/packages.el;
-          ".doom.d/config.el".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/config.el;
-          ".doom.d/snippets/java-mode/lombok-log".source =
-            config.lib.file.mkOutOfStoreSymlink ../conf.d/doom/snippets/java-mode/lombok-log;
+          ".doom.d".source = ../conf.d/doom;
         };
-      };
-      programs.nixvim = {
-        enable = true;
-        globals = {
-          mapleader = " ";
-          maplocalleader = " ";
-        };
-
-        maps = {
-          normal."<leader>pv" = {
-            silent = true;
-            action = "vim.cmd.Ex";
-          };
-        };
-        # colorschemes.gruvbox.enable = true;
-        # plugins.lightline.enable = true;
       };
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
         package = cfg.pkg;
       };
-
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
-          export PATH=$PATH:$HOME/.emacs.d/bin
-          export PATH=$PATH:$HOME/.config/emacs/bin
+          export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
         '';
       };
     };
 
+
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+
+    system.activationScripts.postUserActivation.text
+      = ''
+        if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
+           git clone --depth=1 --single-branch "https://github.com/doomemacs/doomemacs" "$XDG_CONFIG_HOME/emacs"
+        fi
+      '';
 
   };
 }

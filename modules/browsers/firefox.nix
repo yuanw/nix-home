@@ -125,7 +125,8 @@ in
             # https://wiki.mozilla.org/Privacy/Reviews/New_Tab
             # https://support.mozilla.org/en-US/kb/new-tab-page-show-hide-and-customize-top-sites#w_how-do-i-turn-the-new-tab-page-off
             "browser.newtabpage.enabled" = false;
-            "browser.newtab.url" = "about:blank";
+            # "browser.newtab.url" = "about:blank";
+            "browser.newtab.url" = "yuanwang.dev";
             # Disable Activity Stream
             # https://wiki.mozilla.org/Firefox/Activity_Stream
             # Disable new tab tile ads & preload
@@ -134,7 +135,7 @@ in
             # https://wiki.mozilla.org/Tiles/Technical_Documentation#Ping
             # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-source
             # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-ping
-            "browser.newtabpage.directory.source" = "data:text/plain,{}";
+            # "browser.newtabpage.directory.source" = "data:text/plain,{}";
             # Reduce search engine noise in the urlbar's completion window. The
             # shortcuts and suggestions will still work, but Firefox won't clutter
             # its UI with reminders that they exist.

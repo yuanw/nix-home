@@ -45,7 +45,6 @@ with builtins; {
   options = {
     modules.secrets.agenix = {
       enable = mkEnableOption "agenix";
-
     };
   };
   config = mkIf cfg.enable (mkMerge [

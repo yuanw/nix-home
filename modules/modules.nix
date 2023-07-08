@@ -17,6 +17,7 @@ let
     (loadModule ./editor.nix { })
     (loadModule ./hosts.nix { })
     (loadModule ./helix.nix { })
+    (loadModule ./neovim { })
     (loadModule ./hledger.nix { })
     (loadModule ./common.nix { })
     (loadModule ./agenix.nix { })
@@ -30,6 +31,7 @@ let
     (loadModule ./adguradhome-with-user.nix { condition = isNixOS; })
     (loadModule ./moonlander.nix { condition = isNixOS; })
     (loadModule ./wm/yabai.nix { condition = isDarwin; })
+    (loadModule ./wm/sketchybar.nix { condition = isDarwin; })
     (loadModule ./brew.nix { condition = isDarwin; })
     (loadModule ./workShell.nix { condition = isDarwin; })
   ];

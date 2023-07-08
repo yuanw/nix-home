@@ -4,8 +4,6 @@
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    nixvim.url = "github:pta2002/nixvim";
-    zig.url = "github:mitchellh/zig-overlay";
     darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -18,9 +16,18 @@
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    astro-nvim = {
+      url = "github:AstroNvim/AstroNvim";
+      flake = false;
+    };
+    doom-emacs = {
+      url = "github:doomemacs/doomemacs";
+      flake = false;
+    };
+
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    reiryoku.url = "github:yuanw/reiryoku";
+    # reiryoku.url = "github:yuanw/reiryoku";
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "darwin";
@@ -38,10 +45,11 @@
     , emacs
     , flake-utils
     , hosts
-    , reiryoku
+    # , reiryoku
     , agenix
     , nix-colors
-    , nixvim
+    , astro-nvim
+    , doom-emacs
     , ...
     }:
     let
@@ -81,14 +89,13 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin nixvim; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim doom-emacs; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
               agenix.darwinModules.age
               home-manager.darwinModules.home-manager
               ./macintosh.nix
-              nixvim.nixDarwinModules.nixvim
             ]) else
             ([
               ./nixos_system.nix
@@ -104,7 +111,6 @@
               }
               agenix.nixosModules.age
               home-manager.nixosModules.home-manager
-              nixvim.nixosModules.nixvim
             ]));
 
         };
@@ -142,6 +148,10 @@
           system = "x86_64-darwin";
           modules = [ ./hosts/yuan-mac.nix ];
         };
+        WK01174 = mkSystemConfig {
+          system = "aarch64-darwin";
+          modules = [ ./hosts/wk01174.nix ];
+        };
         wf17084 = mkSystemConfig {
           system = "x86_64-darwin";
           modules = [ ./hosts/wf17084.nix ];
@@ -151,6 +161,7 @@
       asche = self.nixosConfigurations.asche.system;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
+      wk01174 = self.darwinConfigurations.WK01174.system;
       adguard = self.nixosConfigurations.adguard.system;
       aws = self.nixosConfigurations.aws.system;
 
