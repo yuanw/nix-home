@@ -50,7 +50,7 @@
         "insomnia"
         "slack"
         "sloth"
-        "stretchly"
+        # "stretchly"
         "viscosity"
       ];
       brews = [
