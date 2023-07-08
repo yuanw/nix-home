@@ -14,4 +14,4 @@ jobs:
       with:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - run: nix build .#wk01174
+    - run: nix build .#wf17084
