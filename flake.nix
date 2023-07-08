@@ -158,7 +158,7 @@
         };
       };
 
-      asche = self.nixosConfigurations.asche.system.build.toplevel;
+      asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       yuanw = self.darwinConfigurations.yuanw.system;
       wf17084 = self.darwinConfigurations.wf17084.system;
       wk01174 = self.darwinConfigurations.WK01174.system;
