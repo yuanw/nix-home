@@ -36,7 +36,6 @@
         "firefox"
         "google-chrome"
         "insomnia"
-        "stretchly"
         "sloth"
       ];
       brews = [

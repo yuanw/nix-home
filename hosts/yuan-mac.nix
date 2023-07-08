@@ -38,7 +38,7 @@
         # "d12frosted/emacs-plus"
       ];
       # brews = [ "emacs-plus@29" ];
-      casks = [ "brave-browser" "firefox" "stretchly" ];
+      casks = [ "brave-browser" "firefox" ];
     };
   };
   # programs = {
