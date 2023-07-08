@@ -47,6 +47,7 @@ final: prev:
   hosts = prev.callPackage ./hosts.nix { };
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   pragmata-pro = prev.callPackage ./pragmata-pro-font.nix { };
+  sketchybar-app-font = prev.callPackage ./pragmata-pro-font.nix { };
 
   juliaMac = final.installApplication rec {
     name = "Julia";

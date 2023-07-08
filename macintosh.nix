@@ -81,6 +81,7 @@ with lib; {
     #iosevka
     roboto
     roboto-mono
+    sketchybar-app-font
     # pragmata-pro
   ];
   # Recreate /run/current-system symlink after boot
