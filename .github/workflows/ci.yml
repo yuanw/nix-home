@@ -14,6 +14,7 @@ jobs:
       with:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    #https://github.com/github/roadmap/issues/528
     - run: nix build .#wf17084
   nixos:
     runs-on: ubuntu-latest
