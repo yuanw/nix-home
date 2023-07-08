@@ -38,6 +38,7 @@ with pkgs; [
   du-dust
   nixpkgs-fmt
   nix-tree
+  nix-diff
   # nix-du
   lazygit
   gron
