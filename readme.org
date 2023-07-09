@@ -2,6 +2,8 @@
 
 Welcome to my nix-home.
 
+[[./screenshots/macos.png]]
+
 The goal for this repo is to declaratively configure MacOS and Linux system using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
 
 feel free to take what you like.
@@ -101,7 +103,6 @@ nix flake update --recreate-lock-file
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
 
 * Caveats
-** ~fontconfig~ doesn't work for MacOS ?
 ** Exclude Nix directory from Spotlight index
 ** nix-darwin permission issue
 ~sudo chown -R whoami:staff /nix/store~
