@@ -7,6 +7,7 @@
 with lib; let
   cfg = config.services.sketchybar;
   configFile = "${pkgs.writeScript "sketchybarrc" cfg.config}";
+  homeDir = config.my.homeDirectory;
 in
 {
   options.services.sketchybar.enable = mkEnableOption ''
@@ -49,8 +50,9 @@ in
         # ++ optionals (cfg.config != "") ["--config" configFile];
         KeepAlive = true;
         RunAtLoad = true;
+        # only to pass gh and jq
         EnvironmentVariables = {
-          PATH = "${cfg.package}/bin:${config.environment.systemPath}:${pkgs.jq}/bin";
+          PATH = "${cfg.package}/bin:${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
       };
     };
