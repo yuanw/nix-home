@@ -119,12 +119,11 @@ with lib; {
 
     fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
-    system.activationScripts.postUserActivation.text
-      = ''
-        if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
-           git clone --depth=1 --single-branch "https://github.com/doomemacs/doomemacs" "$XDG_CONFIG_HOME/emacs"
-        fi
-      '';
+    system.activationScripts.postUserActivation.text = ''
+      if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
+         git clone --depth=1 --single-branch "https://github.com/doomemacs/doomemacs" "$XDG_CONFIG_HOME/emacs"
+      fi
+    '';
 
   };
 }

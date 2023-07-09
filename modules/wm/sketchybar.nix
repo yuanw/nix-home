@@ -1,14 +1,15 @@
 # https://github.com/natsukium/dotfiles/blob/929ed6a27218f6312fe4bbd862bdaa60639cb544/nix/modules/services/sketchybar.nix
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib; let
   cfg = config.services.sketchybar;
   configFile = "${pkgs.writeScript "sketchybarrc" cfg.config}";
-in {
+  homeDir = config.my.homeDirectory;
+in
+{
   options.services.sketchybar.enable = mkEnableOption ''
     Whether to enable the sketchybar.
   '';
@@ -37,20 +38,21 @@ in {
   };
 
   config = mkIf cfg.enable {
-    environment.systemPackages = [cfg.package];
+    environment.systemPackages = [ cfg.package ];
 
     launchd.user.agents.sketchybar = {
       serviceConfig = {
-           StandardOutPath = "/tmp/sketchybar.out.log";
-         StandardErrorPath = "/tmp/sketchybar.err.log";
+        StandardOutPath = "/tmp/sketchybar.out.log";
+        StandardErrorPath = "/tmp/sketchybar.err.log";
 
         ProgramArguments =
-          ["${cfg.package}/bin/sketchybar"];
-          # ++ optionals (cfg.config != "") ["--config" configFile];
+          [ "${cfg.package}/bin/sketchybar" ];
+        # ++ optionals (cfg.config != "") ["--config" configFile];
         KeepAlive = true;
         RunAtLoad = true;
+        # only to pass gh and jq
         EnvironmentVariables = {
-          PATH = "${cfg.package}/bin:${config.environment.systemPath}:${pkgs.jq}/bin";
+          PATH = "${cfg.package}/bin:${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
       };
     };

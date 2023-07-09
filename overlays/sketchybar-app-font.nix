@@ -7,11 +7,11 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "https://github.com/kvndrsslr/sketchybar-app-font/releases/download/v${version}/sketchybar-app-font.ttf";
     hash = "sha256-3QEKNT026lhstJtHPsFA8f7/XXO7Bmjrth92dd9D2xw=";
-   };
+  };
 
   buildCommand = ''
-      install -m444 -Dt $out/share/fonts/truetype ${src}
-    '';
+    install -m444 -Dt $out/share/fonts/truetype ${src}
+  '';
 
   meta = with lib; {
     description = ''

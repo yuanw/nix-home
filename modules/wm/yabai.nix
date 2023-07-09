@@ -52,7 +52,31 @@ in
 
   config = mkIf cfg.enable {
 
+    homebrew = {
+      taps = [ "homebrew/cask-fonts" ];
+      casks = [
+        "font-hack-nerd-font"
+        "sf-symbols"
+      ];
+    };
+    fonts.fonts = with pkgs; [
+      sketchybar-app-font
+    ];
+
     home-manager.users.${config.my.username} = {
+      programs.gh = {
+        enable = true;
+        settings = {
+          git_protocol = "ssh";
+
+          prompt = "enabled";
+
+          aliases = {
+            co = "pr checkout";
+            pv = "pr view";
+          };
+        };
+      };
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
 
@@ -77,7 +101,7 @@ in
         )
       ];
 
-    xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
+      xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
     };
     services.skhd = {
       enable = true;
