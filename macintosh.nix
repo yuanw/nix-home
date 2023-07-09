@@ -81,7 +81,7 @@ with lib; {
     #iosevka
     roboto
     roboto-mono
-    # pragmata-pro
+    sketchybar-app-font
   ];
   # Recreate /run/current-system symlink after boot
   services.activate-system.enable = true;
