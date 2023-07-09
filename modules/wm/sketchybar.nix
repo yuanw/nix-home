@@ -50,7 +50,7 @@ in {
         KeepAlive = true;
         RunAtLoad = true;
         EnvironmentVariables = {
-          PATH = "${cfg.package}/bin:${config.environment.systemPath}";
+          PATH = "${cfg.package}/bin:${config.environment.systemPath}:${pkgs.jq}/bin";
         };
       };
     };

@@ -12,7 +12,8 @@ PADDINGS=3 # All paddings use this value (icon, label, background)
 # Setting up and starting the helper process
 HELPER=git.felix.helper
 killall helper
-(cd $CONFIG_DIR/helper && make)
+
+# (cd $CONFIG_DIR/helper && make)
 $CONFIG_DIR/helper/helper $HELPER > /dev/null 2>&1 &
 
 # Unload the macOS on screen indicator overlay for volume change
