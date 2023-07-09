@@ -50,6 +50,7 @@
         "insomnia"
         "slack"
         "sloth"
+        "sf-symbols"
         # "stretchly"
         "viscosity"
       ];
