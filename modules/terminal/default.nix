@@ -20,14 +20,14 @@ in
     mainWorkspaceDir = mkOption {
       default = "$HOME/workspace";
       type = types.str;
-      description = "directory for prefix+O to point to";
+      description = "directory for prefix+m to point to";
     };
 
-    secondaryWorkspaceDir = mkOption {
-      default = "$HOME/workspace";
-      type = types.str;
-      description = "secondary directory for prefix+O to point to";
-    };
+    # secondaryWorkspaceDir = mkOption {
+    #   default = "$HOME/workspace";
+    #   type = types.str;
+    #   description = "secondary directory for prefix+O to point to";
+    # };
   };
 
   config = mkIf cfg.enable {
@@ -178,7 +178,7 @@ in
 
             # keep this at the bottom
             bind-key Tab display-menu -T "#[align=centre]Sessions" "Switch" . 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
-              "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" "Open Sec Workspace" s "display-popup -E \" td ${cfg.secondaryWorkspaceDir} \""   ${tmuxMenuSeperator} \
+              "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" ${tmuxMenuSeperator} \
               "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
               Random r "run-shell 'tat random'" Emacs e "run-shell 'temacs'" ${tmuxMenuSeperator} \
               Exit q detach"
