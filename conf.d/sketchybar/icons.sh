@@ -9,6 +9,8 @@ LOCK=􀒳
 BELL=􀋚
 BELL_DOT=􀝗
 
+MAIL=
+MAIL_OPEN=
 # Git Icons
 GIT_ISSUE=􀍷
 GIT_DISCUSSION=􀒤
