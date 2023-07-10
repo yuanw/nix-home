@@ -156,6 +156,7 @@ in
         # rules
         yabi -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
         yabai -m rule --add app='System Preferences' manage=off
+        yabai -m rule --add app='mono-stretchly' manage=off
         # Any other arbitrary config here
         yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
         yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
