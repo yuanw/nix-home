@@ -347,9 +347,6 @@ case $@ in
 "Linear")
   icon_result=":linear:"
   ;;
-"League of Legends")
-  icon_result=":league_of_legends:"
-  ;;
 "Zeplin")
   icon_result=":zeplin:"
   ;;
@@ -361,6 +358,9 @@ case $@ in
   ;;
 "Alacritty" | "Hyper" | "iTerm2" | "kitty" | "Terminal" | "WezTerm")
   icon_result=":terminal:"
+  ;;
+"emacs")
+  icon_result=":emacs:"
   ;;
 "Tor Browser")
   icon_result=":tor_browser:"
