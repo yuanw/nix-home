@@ -14,23 +14,8 @@ case $@ in
 "FaceTime")
   icon_result=":face_time:"
   ;;
-"Affinity Publisher")
-  icon_result=":affinity_publisher:"
-  ;;
 "Messages" | "Nachrichten")
   icon_result=":messages:"
-  ;;
-"Tweetbot" | "Twitter")
-  icon_result=":twitter:"
-  ;;
-"ClickUp")
-  icon_result=":click_up:"
-  ;;
-"KeePassXC")
-  icon_result=":kee_pass_x_c:"
-  ;;
-"Microsoft Edge")
-  icon_result=":microsoft_edge:"
   ;;
 "VLC")
   icon_result=":vlc:"
@@ -47,21 +32,6 @@ case $@ in
 "Caprine")
   icon_result=":caprine:"
   ;;
-"Zulip")
-  icon_result=":zulip:"
-  ;;
-"Spark")
-  icon_result=":spark:"
-  ;;
-"Microsoft To Do" | "Things")
-  icon_result=":things:"
-  ;;
-"DEVONthink 3")
-  icon_result=":devonthink3:"
-  ;;
-"GitHub Desktop")
-  icon_result=":git_hub:"
-  ;;
 "App Store")
   icon_result=":app_store:"
   ;;
@@ -70,9 +40,6 @@ case $@ in
   ;;
 "zoom.us")
   icon_result=":zoom:"
-  ;;
-"MoneyMoney")
-  icon_result=":bank:"
   ;;
 "Color Picker")
   icon_result=":color_picker:"
@@ -140,18 +107,6 @@ case $@ in
 "Default")
   icon_result=":default:"
   ;;
-"Element")
-  icon_result=":element:"
-  ;;
-"Bear")
-  icon_result=":bear:"
-  ;;
-"TeamSpeak 3")
-  icon_result=":team_speak:"
-  ;;
-"Airmail")
-  icon_result=":airmail:"
-  ;;
 "Firefox Developer Edition" | "Firefox Nightly")
   icon_result=":firefox_developer_edition:"
   ;;
@@ -205,9 +160,6 @@ case $@ in
   ;;
 "Dropbox")
   icon_result=":dropbox:"
-  ;;
-"微信")
-  icon_result=":wechat:"
   ;;
 "Typora")
   icon_result=":text:"
@@ -269,9 +221,6 @@ case $@ in
 "mpv")
   icon_result=":mpv:"
   ;;
-"网易云音乐")
-  icon_result=":netease_music:"
-  ;;
 "Transmit")
   icon_result=":transmit:"
   ;;
@@ -284,26 +233,11 @@ case $@ in
 "Affinity Designer")
   icon_result=":affinity_designer:"
   ;;
-"IntelliJ IDEA")
-  icon_result=":idea:"
-  ;;
 "Drafts")
   icon_result=":drafts:"
   ;;
 "Audacity")
   icon_result=":audacity:"
-  ;;
-"Affinity Photo")
-  icon_result=":affinity_photo:"
-  ;;
-"Atom")
-  icon_result=":atom:"
-  ;;
-"Obsidian")
-  icon_result=":obsidian:"
-  ;;
-"CleanMyMac X")
-  icon_result=":desktop:"
   ;;
 "Zotero")
   icon_result=":zotero:"
@@ -313,9 +247,6 @@ case $@ in
   ;;
 "LibreWolf")
   icon_result=":libre_wolf:"
-  ;;
-"Grammarly Editor")
-  icon_result=":grammarly:"
   ;;
 "OmniFocus")
   icon_result=":omni_focus:"
