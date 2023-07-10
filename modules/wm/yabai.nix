@@ -154,11 +154,12 @@ in
 
       extraConfig = ''
         # rules
+        yabi -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
+        yabai -m rule --add app='System Preferences' manage=off
+        # Any other arbitrary config here
         yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
         yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
         yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
-        yabai -m rule --add app='System Preferences' manage=off
-        # Any other arbitrary config here
       '';
     };
   };
