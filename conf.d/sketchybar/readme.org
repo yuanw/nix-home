@@ -1,0 +1,5 @@
+#+title: sketchbar config
+
+* gh
+to get notifications working, one needs to configure the subcriptios to notify on github
+https://github.com/settings/notifications
