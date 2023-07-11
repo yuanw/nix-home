@@ -151,7 +151,8 @@ in
         # right_padding = 10;
         window_gap = 10;
       };
-
+      # https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc#signal
+      # https://felixkratz.github.io/SketchyBar/config/events#triggering-custom-events
       extraConfig = ''
         # rules
         yabi -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
@@ -159,6 +160,8 @@ in
         yabai -m rule --add app='mono-stretchly' manage=off
         # Any other arbitrary config here
         yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
+        yabai -m signal --add event=window_resized action="sketchybar --trigger window_focus"
+        yabai -m signal --add event=window_moved action="sketchybar --trigger window_on_spaces"
         yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
         yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
       '';
