@@ -1,7 +1,6 @@
 #!/bin/bash
 
 yabai=(
-  # update_freq=10
   icon.width=0
   label.width=0
   script="$PLUGIN_DIR/yabai.sh"

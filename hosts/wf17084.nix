@@ -36,6 +36,7 @@
         "firefox"
         "google-chrome"
         "insomnia"
+        "mysql-shell"
         "sloth"
       ];
       brews = [

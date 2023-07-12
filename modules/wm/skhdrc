@@ -1,9 +1,9 @@
 # https://github.com/koekeishiya/yabai/blob/7641afd7fdf95101de6675a8e1b9bfafdc3b4c63/examples/skhdrc#L4
 # focus window
-alt - h : yabai -m window --focus west
-alt - j : yabai -m window --focus south
-alt - k : yabai -m window --focus north
-alt - l : yabai -m window --focus east
+# alt - h : yabai -m window --focus west
+# alt - j : yabai -m window --focus south
+# alt - k : yabai -m window --focus north
+# alt - l : yabai -m window --focus east
 
 # swap window
 shift + alt - h : yabai -m window --swap west
@@ -123,7 +123,7 @@ alt - x : yabai -m space --mirror x-axis
 alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
 
 # toggle window parent zoom
-alt - d : yabai -m window --toggle zoom-parent
+# alt - d : yabai -m window --toggle zoom-parent
 
 # toggle window fullscreen zoom
 alt - z : yabai -m window --toggle zoom-fullscreen
@@ -149,6 +149,6 @@ alt - t : yabai -m window --toggle float;\
 #           yabai -m window --grid 5:5:4:0:1:1
 
 # # change layout of desktop
-ctrl + alt - a : yabai -m space --layout bsp
-ctrl + alt - d : yabai -m space --layout stack
-alt - j: yabai -m window --focus stack.next
+# ctrl + alt - a : yabai -m space --layout bsp
+# ctrl + alt - s : yabai -m space --layout stack
+alt - h : yabai -m window --focus stack.next
