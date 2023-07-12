@@ -56,6 +56,7 @@ in
       taps = [ "homebrew/cask-fonts" ];
       casks = [
         "font-hack-nerd-font"
+        "mysql-shell"
         "sf-symbols"
       ];
       brews = [
