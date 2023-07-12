@@ -58,6 +58,9 @@ in
         "font-hack-nerd-font"
         "sf-symbols"
       ];
+      brews = [
+        "ical-buddy"
+      ];
     };
     fonts.fonts = with pkgs; [
       sketchybar-app-font

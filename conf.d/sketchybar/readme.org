@@ -3,3 +3,6 @@
 * gh
 to get notifications working, one needs to configure the subcriptios to notify on github
 https://github.com/settings/notifications
+
+* ical
+will ask for permission
