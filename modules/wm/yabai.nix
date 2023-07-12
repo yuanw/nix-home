@@ -117,7 +117,7 @@ in
                LAST_STACK_INDEX=$(yabai -m query --windows --window stack.last | jq '.["stack-index"]')
                echo "$STACK_INDEX"
                echo "$LAST_STACK_INDEX"
-               if [["$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
+               if [[ "$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
                  echo "match"
                  yabai -m window --focus stack.first
                  echo "not match"
