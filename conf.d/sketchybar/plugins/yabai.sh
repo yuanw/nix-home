@@ -25,6 +25,8 @@ window_state() {
     ICON+=$YABAI_STACK
     LABEL="$(printf "[%s/%s]" "$STACK_INDEX" "$LAST_STACK_INDEX")"
     COLOR=$RED
+  elif [[ $LAYOUT = "bsp" ]]; then
+    ICON+=$YABAI_BSP
   fi
 
   args=(--animate sin 10 --bar border_color=$COLOR

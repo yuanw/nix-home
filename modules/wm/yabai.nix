@@ -115,8 +115,12 @@ in
             STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
             if [[ $STACK_INDEX -gt 0 ]]; then
                LAST_STACK_INDEX=$(yabai -m query --windows --window stack.last | jq '.["stack-index"]')
+               echo "$STACK_INDEX"
+               echo "$LAST_STACK_INDEX"
                if [["$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
+                 echo "match"
                  yabai -m window --focus stack.first
+                 echo "not match"
                else
                  yabai -m window --focus stack.next
                fi
