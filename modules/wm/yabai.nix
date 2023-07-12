@@ -103,6 +103,29 @@ in
             set +x
           ''
         )
+            (
+
+          pkgs.writeShellScriptBin "yabai-next-window" ''
+            #
+            # yabai-sa-kickstart
+            #
+            # Kickstart the scripting addition in case it fails to load.
+            #
+            WINDOW=$(yabai -m query --windows --window)
+            STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
+            if [[ $STACK_INDEX -gt 0 ]]; then
+               LAST_STACK_INDEX=$(yabai -m query --windows --window stack.last | jq '.["stack-index"]')
+               if [["$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
+                 yabai -m window --focus stack.first
+               else
+                 yabai -m window --focus stack.next
+               fi
+            else
+               yabai -m window --focus west
+            fi
+          ''
+        )
+
       ];
 
       xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;

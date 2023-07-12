@@ -1,4 +1,5 @@
 #!/bin/bash
+LAYOUT=$(yabai -m query --spaces --space | jq -r .type)
 
 window_state() {
   source "$CONFIG_DIR/colors.sh"
@@ -64,7 +65,17 @@ windows_on_spaces () {
 }
 
 mouse_clicked() {
-  yabai -m space --layout stack
+  case "$LAYOUT" in
+    bsp)
+    yabai -m space --layout stack
+    ;;
+    stack)
+    yabai -m space --layout bsp
+    ;;
+    float)
+    yabai -m space --layout bsp
+    ;;
+  esac
   window_state
 }
 
