@@ -17,6 +17,7 @@ shift + cmd - j : yabai -m window --warp south
 shift + cmd - k : yabai -m window --warp north
 shift + cmd - l : yabai -m window --warp east
 
+
 # balance size of windows
 shift + alt - 0 : yabai -m space --balance
 
@@ -104,10 +105,10 @@ shift + cmd - w : yabai -m window --resize top:0:20
 shift + cmd - d : yabai -m window --resize right:-20:0
 
 # set insertion point in focused container
-ctrl + alt - h : yabai -m window --insert west
-ctrl + alt - j : yabai -m window --insert south
-ctrl + alt - k : yabai -m window --insert north
-ctrl + alt - l : yabai -m window --insert east
+# ctrl + alt - h : yabai -m window --insert west
+# ctrl + alt - j : yabai -m window --insert south
+# ctrl + alt - k : yabai -m window --insert north
+# ctrl + alt - l : yabai -m window --insert east
 
 # rotate tree
 alt - r : yabai -m space --rotate 90
@@ -148,5 +149,6 @@ alt - t : yabai -m window --toggle float;\
 #           yabai -m window --grid 5:5:4:0:1:1
 
 # # change layout of desktop
-# ctrl + alt - a : yabai -m space --layout bsp
-# ctrl + alt - d : yabai -m space --layout float
+ctrl + alt - a : yabai -m space --layout bsp
+ctrl + alt - d : yabai -m space --layout stack
+alt - j: yabai -m window --focus stack.next
