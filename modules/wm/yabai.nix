@@ -103,13 +103,12 @@ in
             set +x
           ''
         )
-            (
-
+        (
           pkgs.writeShellScriptBin "yabai-next-window" ''
             #
-            # yabai-sa-kickstart
+            # yabai-next-window
             #
-            # Kickstart the scripting addition in case it fails to load.
+            # move to next window
             #
             WINDOW=$(yabai -m query --windows --window)
             STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
