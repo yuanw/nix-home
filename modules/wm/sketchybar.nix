@@ -6,7 +6,6 @@
 }:
 with lib; let
   cfg = config.services.sketchybar;
-  configFile = "${pkgs.writeScript "sketchybarrc" cfg.config}";
   homeDir = config.my.homeDirectory;
 in
 {
