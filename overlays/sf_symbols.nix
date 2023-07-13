@@ -5,12 +5,13 @@ stdenv.mkDerivation rec {
   version = "5";
 
   src = fetchurl {
-   url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-#${version}.dmg";
-    hash = "";
+   url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-${version}.dmg";
+    hash = "sha256-WXnmgGaoIn0IFSw457wvLtAKLnTBl5L/Rq5zMCPijnU=";
   };
        unpackPhase = ''
                 undmg $src
-                7z x 'sf-pro'
+                ls
+                7z x 'SF Symbols.pkg'
                 7z x 'Payload~'
               '';
     buildInputs = [pkgs.p7zip pkgs.undmg];

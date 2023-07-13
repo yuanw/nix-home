@@ -53,11 +53,11 @@ in
   config = mkIf cfg.enable {
 
     homebrew = {
-      taps = [ "homebrew/cask-fonts" ];
+      # taps = [ "homebrew/cask-fonts" ];
       casks = [
-        "font-hack-nerd-font"
+        # "font-hack-nerd-font"
         "mysql-shell"
-        "sf-symbols"
+        # "sf-symbols"
       ];
       brews = [
         "ical-buddy"
@@ -65,6 +65,8 @@ in
     };
     fonts.fonts = with pkgs; [
       sketchybar-app-font
+      font-hack-nerd-font
+      sf-symbols
     ];
 
     home-manager.users.${config.my.username} = {

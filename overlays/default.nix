@@ -48,6 +48,7 @@ final: prev:
   emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
+  font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
 
   juliaMac = final.installApplication rec {
     name = "Julia";
