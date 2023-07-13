@@ -29,7 +29,7 @@
        ;; +icons
        ;; +minibuffer
        ;; +orderless)
-       ( vertico  )           ; the search engine of the future
+       ( vertico +childframe +icons  )           ; the search engine of the future
 
 
        :ui
