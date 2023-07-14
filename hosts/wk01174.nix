@@ -48,6 +48,7 @@
         "insomnia"
         "slack"
         "sloth"
+        "mysql-shell"
         # "stretchly"
         "viscosity"
       ];

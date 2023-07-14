@@ -52,17 +52,16 @@ in
 
   config = mkIf cfg.enable {
 
-    homebrew = {
-      # taps = [ "homebrew/cask-fonts" ];
-      casks = [
-        # "font-hack-nerd-font"
-        "mysql-shell"
-        # "sf-symbols"
-      ];
-      brews = [
-        "ical-buddy"
-      ];
-    };
+    # homebrew = {
+    #   # taps = [ "homebrew/cask-fonts" ];
+    #   casks = [
+    #     # "font-hack-nerd-font"
+    #     # "sf-symbols"
+    #   ];
+    #   brews = [
+    #     # "ical-buddy"
+    #   ];
+    # };
     fonts.fonts = with pkgs; [
       sketchybar-app-font
       font-hack-nerd-font
@@ -85,7 +84,7 @@ in
       };
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
-
+        pkgs.ical-buddy
         pkgs.haskellPackages.hi-chew
         (
 
