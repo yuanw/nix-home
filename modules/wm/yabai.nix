@@ -39,8 +39,6 @@ let
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
 
-    shift + ctrl + alt - m: alacritty -e hi-chew
-
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
@@ -51,18 +49,7 @@ in
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
-
-    # homebrew = {
-    #   # taps = [ "homebrew/cask-fonts" ];
-    #   casks = [
-    #     # "font-hack-nerd-font"
-    #     # "sf-symbols"
-    #   ];
-    #   brews = [
-    #     # "ical-buddy"
-    #   ];
-    # };
-    fonts.fonts = with pkgs; [
+      fonts.fonts = with pkgs; [
       sketchybar-app-font
       font-hack-nerd-font
       sf-symbols
@@ -85,7 +72,6 @@ in
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
         pkgs.ical-buddy
-        pkgs.haskellPackages.hi-chew
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
