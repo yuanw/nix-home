@@ -20,9 +20,9 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     description = ''
-      sketchybar-app-font
+      eveloper targeted fonts with a high number of glyphs
     '';
-    homepage = "https://github.com/kvndrsslr/sketchybar-app-font";
+    homepage = "https://github.com/ryanoasis/nerd-fonts";
     platforms = platforms.darwin;
   };
 }

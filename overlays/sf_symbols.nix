@@ -5,23 +5,23 @@ stdenv.mkDerivation rec {
   version = "5";
 
   src = fetchurl {
-   url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-${version}.dmg";
+    url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-${version}.dmg";
     hash = "sha256-WXnmgGaoIn0IFSw457wvLtAKLnTBl5L/Rq5zMCPijnU=";
   };
-       unpackPhase = ''
-                undmg $src
-                ls
-                7z x 'SF Symbols.pkg'
-                7z x 'Payload~'
-              '';
-    buildInputs = [pkgs.p7zip pkgs.undmg];
+  unpackPhase = ''
+    undmg $src
+    ls
+    7z x 'SF Symbols.pkg'
+    7z x 'Payload~'
+  '';
+  buildInputs = [ pkgs.p7zip pkgs.undmg ];
   installPhase = ''
-                mkdir -p $out/share/fonts
-                mkdir -p $out/share/fonts/opentype
-                mkdir -p $out/share/fonts/truetype
-                find -name \*.otf -exec mv {} $out/share/fonts/opentype/ \;
-                find -name \*.ttf -exec mv {} $out/share/fonts/truetype/ \;
-              '';
+    mkdir -p $out/share/fonts
+    mkdir -p $out/share/fonts/opentype
+    mkdir -p $out/share/fonts/truetype
+    find -name \*.otf -exec mv {} $out/share/fonts/opentype/ \;
+    find -name \*.ttf -exec mv {} $out/share/fonts/truetype/ \;
+  '';
   meta = with lib; {
     description = ''
       SF-symbols
