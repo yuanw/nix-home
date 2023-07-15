@@ -20,14 +20,8 @@
       url = "github:AstroNvim/AstroNvim";
       flake = false;
     };
-    doom-emacs = {
-      url = "github:doomemacs/doomemacs";
-      flake = false;
-    };
-
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
-    # reiryoku.url = "github:yuanw/reiryoku";
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "darwin";
@@ -45,11 +39,9 @@
     , emacs
     , flake-utils
     , hosts
-      # , reiryoku
     , agenix
     , nix-colors
     , astro-nvim
-    , doom-emacs
     , ...
     }:
     let
@@ -171,8 +163,6 @@
       devShells.default = pkgs.mkShell {
         buildInputs = with pkgs; [
           awscli
-          # mkpasswd
-          # apacheHttpd
           lego
           terraform
           nixfmt
