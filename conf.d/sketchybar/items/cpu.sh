@@ -28,7 +28,7 @@ cpu_sys=(
   icon.drawing=off
   background.height=30
   background.drawing=on
-  background.color=$TRANSPARENT
+  background.color="$TRANSPARENT"
 )
 
 cpu_user=(

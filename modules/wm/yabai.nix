@@ -49,7 +49,7 @@ in
   options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
 
   config = mkIf cfg.enable {
-      fonts.fonts = with pkgs; [
+    fonts.fonts = with pkgs; [
       sketchybar-app-font
       font-hack-nerd-font
       sf-symbols
@@ -72,6 +72,7 @@ in
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
         pkgs.ical-buddy
+        pkgs.sketchybar-cpu-helper
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''

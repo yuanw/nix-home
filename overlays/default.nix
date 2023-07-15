@@ -50,6 +50,7 @@ final: prev:
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
+  sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
 
   juliaMac = final.installApplication rec {
     name = "Julia";
