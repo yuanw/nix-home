@@ -81,7 +81,7 @@
         else
           nixpkgs.lib.nixosSystem) {
           inherit system;
-          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim doom-emacs; };
+          specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim ; };
           modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
             ++ (if isDarwin then
             ([
