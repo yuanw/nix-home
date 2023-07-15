@@ -153,7 +153,7 @@
     gpg = { enable = true; };
 
     home-manager = { enable = true; };
-
+    nnn = {enable = true;};
     jq = { enable = true; };
     zoxide = {
       enable = true;
