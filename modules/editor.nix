@@ -48,7 +48,7 @@ with lib; {
     };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (mkMerge [{
     services.emacs = mkIf cfg.usePackage {
       enable = cfg.enableService;
       package = cfg.pkg;
@@ -125,5 +125,14 @@ with lib; {
       fi
     '';
 
-  };
+  }
+    (if (builtins.hasAttr "launchd" options) then {
+      launchd.user.agents.emacs.serviceConfig = {
+        StandardOutPath = "/tmp/emacs.log";
+        StandardErrorPath = "/tmp/emacs.log";
+      };
+    } else
+      {
+        # systemd
+      })]);
 }

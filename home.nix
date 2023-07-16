@@ -153,7 +153,7 @@
     gpg = { enable = true; };
 
     home-manager = { enable = true; };
-    nnn = {enable = true; package = pkgs.nnn.override ({ withNerdIcons = true; });};
+    nnn = { enable = true; package = pkgs.nnn.override ({ withNerdIcons = true; }); };
     jq = { enable = true; };
     zoxide = {
       enable = true;

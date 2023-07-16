@@ -52,8 +52,8 @@ with builtins; {
 
     (if (builtins.hasAttr "launchd" options) then {
       launchd.daemons.activate-agenix.serviceConfig = {
-        StandardOutPath = "/tmp/agenix.out.log";
-        StandardErrorPath = "/tmp/agenix.err.log";
+        StandardOutPath = "/tmp/agenix.log";
+        StandardErrorPath = "/tmp/agenix.log";
       };
     } else
       {

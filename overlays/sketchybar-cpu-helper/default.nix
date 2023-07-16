@@ -1,6 +1,6 @@
-{ lib,  pkgs }:
+{ lib, pkgs }:
 let
-stdenv = pkgs.clangStdenv;
+  stdenv = pkgs.clangStdenv;
 in
 stdenv.mkDerivation rec {
   pname = "cpu-helper";
