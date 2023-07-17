@@ -10,7 +10,7 @@ let
   cfg = config.modules.wm.yabai;
   emacsclient =
     if config.modules.editors.emacs.enableService then
-      "${pkgs.emacs}/bin/emacsclient -c"
+      "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'"
     else
       "doom run";
   emacsEveryWhere =
@@ -108,7 +108,7 @@ in
                  yabai -m window --focus stack.next
                fi
             else
-               yabai -m window --focus west
+               yabai - window --focus west
             fi
           ''
         )
@@ -127,12 +127,12 @@ in
       '';
     };
     launchd.user.agents.skhd.serviceConfig = {
-      StandardOutPath = "/tmp/skhd.out.log";
-      StandardErrorPath = "/tmp/skhd.err.log";
+      StandardOutPath = "/tmp/skhd.log";
+      StandardErrorPath = "/tmp/skhd.log";
     };
     launchd.user.agents.yabai.serviceConfig = {
-      StandardOutPath = "/tmp/yabai.out.log";
-      StandardErrorPath = "/tmp/yabai.err.log";
+      StandardOutPath = "/tmp/yabai.log";
+      StandardErrorPath = "/tmp/yabai.log";
     };
 
     services.sketchybar.enable = true;
