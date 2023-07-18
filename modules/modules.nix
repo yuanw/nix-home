@@ -24,6 +24,7 @@ let
     (loadModule ./settings.nix { })
     (loadModule ./terminal { })
     (loadModule ./typing { })
+    (loadModule ./health.nix { })
     # (loadModule ./wm/amethyst.nix { condition = isDarwin; })
     #
     (loadModule ./qmk.nix { condition = isNixOS; })

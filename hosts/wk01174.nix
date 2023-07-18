@@ -70,6 +70,7 @@
         ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
+    health.enable = true;
     editors.neovim.enable = true;
     typing.enable = true;
     dev =
