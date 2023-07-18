@@ -15,7 +15,7 @@ in {
 
         pkgs.haskellPackages.resource-id
         pkgs.haskellPackages.ws-access-token
-        pkgs.haskellPackages.mono-stretchly
+        # pkgs.haskellPackages.mono-stretchly
         pkgs.csvkit
         # pkgs.visidata
         pkgs.terraform
