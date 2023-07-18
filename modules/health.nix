@@ -17,8 +17,7 @@ in
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "echo"
-            "hello"
+            "mono-stretchly"
           ];
         # RunAtLoad = false;
         EnvironmentVariables = {
