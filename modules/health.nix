@@ -17,14 +17,14 @@ in
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "${pkgs.haskellPackages.mono-stretchly}/bin/mono-strecthly"
+            "echo hello"
           ];
         RunAtLoad = false;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
 
-        StartCalendarInterval = [{ Minute = 15; }];
+        StartCalendarInterval = [{ Minute = 5; }];
       };
       # serviceConfig.UserName = cfg.user;
     };
