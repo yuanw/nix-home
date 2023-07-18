@@ -19,7 +19,7 @@ in
           [
             "echo hello"
           ];
-        RunAtLoad = false;
+        # RunAtLoad = false;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
