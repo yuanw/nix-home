@@ -10,7 +10,7 @@ in
 
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
-      path = [ config.environment.systemPath ];
+      # path = [ config.environment.systemPath ];
 
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
@@ -20,6 +20,10 @@ in
             "${pkgs.haskellPackages.mono-stretchly}/bin/mono-strecthly"
           ];
         RunAtLoad = false;
+        EnvironmentVariables = {
+          PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
+        };
+
         StartCalendarInterval = [{ Minute = 15; }];
       };
       # serviceConfig.UserName = cfg.user;
