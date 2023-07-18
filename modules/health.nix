@@ -17,14 +17,15 @@ in
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "echo hello"
+            "echo"
+            "hello"
           ];
         # RunAtLoad = false;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
 
-        StartCalendarInterval = [{ Minute = 5; }];
+        StartInterval =  300;
       };
       # serviceConfig.UserName = cfg.user;
     };
