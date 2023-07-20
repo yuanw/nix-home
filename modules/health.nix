@@ -24,7 +24,7 @@ in
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
 
-        StartInterval =  10;
+        StartInterval =  300;
       };
       serviceConfig.UserName = config.my.username;
     };
