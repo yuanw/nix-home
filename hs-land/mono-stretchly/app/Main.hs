@@ -43,9 +43,9 @@ buildUI wenv model = widgetTree where
 
   widgetTree = vstack [
       -- animFadeIn timeLabel `nodeKey` "fadeTimeLabel",
-      label "Doing one time at a time",
+      label "Doing one time at a time" `styleBasic` [textCenter] ,
       spacer_ [width 5],
-      label $ showt (model ^. countDownSec) <> "seconds remaing",
+      label $ showt (model ^. countDownSec) <> " seconds remaing"    `styleBasic` [textCenter],
       spacer_ [width 5],
       button "Skip this break" AppDone
     ]
