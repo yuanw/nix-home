@@ -17,16 +17,16 @@ in
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "mono-stretchly"
+            "${pkgs.haskellPackages.mono-stretchly}/bin/mono-stretchly"
           ];
         # RunAtLoad = false;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
 
-        StartInterval =  300;
+        StartInterval =  10;
       };
-      # serviceConfig.UserName = cfg.user;
+      serviceConfig.UserName = config.my.username;
     };
     home-manager.users.${config.my.username} = {
       home.packages = [
