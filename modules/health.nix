@@ -23,8 +23,8 @@ in
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
-
-        StartInterval =  300;
+        # in secs
+        StartInterval =  900;
       };
       serviceConfig.UserName = config.my.username;
     };
