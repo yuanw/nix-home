@@ -96,8 +96,6 @@
 
  )
 
-(after! company
-  (setq company-idle-delay 0.2))
 
 ;;; :ui modeline
 ;; An evil mode indicator is redundant with cursor shape
@@ -155,21 +153,22 @@
 (after! browse-at-remote
   (setq browse-at-remote-add-line-number-if-no-region-selected t))
 
-(add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
-(after! org
-  (setq org-eukleides-path (getenv "EUKLEIDES_PATH")
-        org-agenda-dim-blocked-tasks nil
-        org-agenda-inhibit-startup t
-        org-agenda-use-tag-inheritance nil)
-  (add-to-list 'org-modules 'org-habit)
-  )
-(use-package! super-save
-  :config
-  (add-to-list 'super-save-triggers 'vertico)
-  (add-to-list 'super-save-triggers 'magit)
-  (add-to-list 'super-save-triggers 'find-file)
-  (add-to-list 'super-save-triggers 'winner-undo)
-  (super-save-mode +1))
+;; (add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
+;; (after! org
+;;   (setq org-eukleides-path (getenv "EUKLEIDES_PATH")
+;;         org-agenda-dim-blocked-tasks nil
+;;         org-agenda-inhibit-startup t
+;;         org-agenda-use-tag-inheritance nil)
+;;   (add-to-list 'org-modules 'org-habit)
+;;   )
+;; (use-package! super-save
+;;   :config
+;;   (add-to-list 'super-save-triggers 'vertico)
+;;   (add-to-list 'super-save-triggers 'magit)
+;;   (add-to-list 'super-save-triggers 'find-file)
+;;   (add-to-list 'super-save-triggers 'winner-undo)
+;;   (super-save-mode +1)
+;;  )
 
 (use-package! embark-vc
   :after embark)
