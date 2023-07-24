@@ -90,16 +90,16 @@
  ;; (:prefix "i"
  ;;  "o" #'org-insert-todo-heading
  ;;  )
- (:prefix "t"
-          "k" #'keycast-mode
-          )
+ ;; (:prefix "t"
+ ;;          "k" #'keycast-mode
+ ;;          )
 
  )
 
 
 ;;; :ui modeline
 ;; An evil mode indicator is redundant with cursor shape
-(advice-add #'doom-modeline-segment--modals :override #'ignore)
+;; (advice-add #'doom-modeline-segment--modals :override #'ignore)
 
 (setq org-agenda-custom-commands
       `(("d" "Dashboard"
@@ -131,14 +131,14 @@
  ;; lsp-ui-sideline-enable nil   ; not anymore useful than flycheck
  ;; lsp-ui-doc-enable nil        ; slow and redundant with K
  ;; lsp-enable-symbol-highlighting nil
- lsp-file-watch-threshold 5000
+ ;; lsp-file-watch-threshold 5000
  ;; If an LSP server isn't present when I start a prog-mode buffer, you
  ;; don't need to tell me. I know. On some systems I don't care to have a
  ;; whole development environment for some ecosystems.
  ;;+lsp-prompt-to-install-server 'quiet
  )
 
-(use-package! interaction-log)
+;; (use-package! interaction-log)
 (use-package! thrift-mode
   :config
   (add-to-list 'auto-mode-alist '("\\.frugal\\'" . thrift-mode ) ))
@@ -170,12 +170,12 @@
 ;;   (super-save-mode +1)
 ;;  )
 
-(use-package! embark-vc
-  :after embark)
-(use-package! evil-replace-with-register
-  :config
-  (setq evil-replace-with-register-key (kbd "gr"))
-  (evil-replace-with-register-install))
+;; (use-package! embark-vc
+;;   :after embark)
+;; (use-package! evil-replace-with-register
+;;   :config
+;;   (setq evil-replace-with-register-key (kbd "gr"))
+;;   (evil-replace-with-register-install))
 ;; (use-package! elgot-java
 ;;   :after elgot
 ;;   :config
@@ -190,25 +190,25 @@
 ;;                                      (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh)))
 ;;    ))
 
-(use-package! keycast
-  :commands keycast-mode
-  :config
-  (define-minor-mode keycast-mode
-    "Show current command and its key binding in the mode line."
-    :global t
-    (if keycast-mode
-        (progn
-          (add-hook 'pre-command-hook 'keycast--update t)
-          (add-to-list 'global-mode-string '("" keycast-mode-line " ")))
-      (remove-hook 'pre-command-hook 'keycast--update)
-      (setq global-mode-string (remove '("" keycast-mode-line " ") global-mode-string))))
-  (custom-set-faces!
-    '(keycast-command :inherit doom-modeline-debug
-      :height 0.9)
-    '(keycast-key :inherit custom-modified
-      :height 1.1
-      :weight bold))
-  )
+;; (use-package! keycast
+;;   :commands keycast-mode
+;;   :config
+;;   (define-minor-mode keycast-mode
+;;     "Show current command and its key binding in the mode line."
+;;     :global t
+;;     (if keycast-mode
+;;         (progn
+;;           (add-hook 'pre-command-hook 'keycast--update t)
+;;           (add-to-list 'global-mode-string '("" keycast-mode-line " ")))
+;;       (remove-hook 'pre-command-hook 'keycast--update)
+;;       (setq global-mode-string (remove '("" keycast-mode-line " ") global-mode-string))))
+;;   (custom-set-faces!
+;;     '(keycast-command :inherit doom-modeline-debug
+;;       :height 0.9)
+;;     '(keycast-key :inherit custom-modified
+;;       :height 1.1
+;;       :weight bold))
+;;   )
 ;; (use-package! vlf-setup
 ;;   :defer-incrementally  vlf-base vlf-write vlf-search vlf-occur vlf-follow vlf-ediff vlf)
 (setq
