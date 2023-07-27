@@ -112,6 +112,7 @@ with lib; {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
           export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
+          export PATH=$PATH:$HOME/.doom.d/bin
         '';
       };
     };
