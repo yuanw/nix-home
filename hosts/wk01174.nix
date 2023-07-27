@@ -26,7 +26,7 @@
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
-        url."git@github.com:".insteadOf = "https://github.com";
+        # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
   };
