@@ -1,0 +1,7 @@
+#!/usr/bin/env doomscript
+
+(defcli! export-org-agenda (&args)
+  ;(require 'doom-start)          ; load your user config
+  (org-batch-agenda "a" org-agenda-span (quote day) ))   ;
+
+(run! "export-org-agenda" (cdr (member "--" argv)))
