@@ -71,8 +71,8 @@ in
       };
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
-        pkgs.ical-buddy
-        pkgs.sketchybar-cpu-helper
+        # pkgs.ical-buddy
+        # pkgs.sketchybar-cpu-helper
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
@@ -135,7 +135,22 @@ in
       StandardErrorPath = "/tmp/yabai.log";
     };
 
-    services.sketchybar.enable = true;
+    services.sketchybar = {
+      extraPackages = [
+        pkgs.jq
+        pkgs.gh
+        pkgs.ical-buddy
+        pkgs.sketchybar-cpu-helper
+
+      ];
+      enable = true;
+    };
+    launchd.user.agents.sketchybar = {
+      serviceConfig = {
+        StandardOutPath = "/tmp/sketchybar.log";
+        StandardErrorPath = "/tmp/sketchybar.log";
+      };
+    };
 
     services.yabai = {
       enable = true;
