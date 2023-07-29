@@ -141,7 +141,6 @@ in
         pkgs.gh
         pkgs.ical-buddy
         pkgs.sketchybar-cpu-helper
-
       ];
       enable = true;
     };
