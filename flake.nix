@@ -45,12 +45,12 @@
   "x86_64-linux"
 ];
       imports = [
-        ./devshell.nix
-        ./docs
-        ./homeConfigurations
-        ./nixosConfigurations
-        ./nixosModules
-        ./packages
+        # ./devshell.nix
+        # ./docs
+        # ./homeConfigurations
+        ./osConfigurations
+        # ./nixosModules
+        # ./packages
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];
