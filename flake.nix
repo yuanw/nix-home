@@ -8,7 +8,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    devenv.url = "github:cachix/devenv/latest";
+    devenv.url = "github:cachix/devenv";
     flake-parts = {
     url = "github:hercules-ci/flake-parts";
     inputs.nixpkgs-lib.follows = "nixpkgs";
@@ -51,6 +51,7 @@
         ./osConfigurations
         # ./nixosModules
         # ./packages
+           inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];
