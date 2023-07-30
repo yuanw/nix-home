@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ lib, pkgs, ... }:
 # https://github.com/NixOS/nixpkgs/blob/e11142026e2cef35ea52c9205703823df225c947/pkgs/development/tools/language-servers/jdt-language-server/default.nix#L96
 #https://github.com/Homebrew/homebrew-core/blob/51e9cd9bd5a35a32f41574df95d43df853df57b5/Formula/jdtls.rb
 pkgs.stdenv.mkDerivation {

@@ -1,4 +1,4 @@
-{ modulesPath, pkgs, config, ... }:
+{ pkgs, config, ... }:
 
 {
   environment.systemPackages = [

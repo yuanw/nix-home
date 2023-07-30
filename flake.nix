@@ -10,8 +10,8 @@
     };
     devenv.url = "github:cachix/devenv";
     flake-parts = {
-    url = "github:hercules-ci/flake-parts";
-    inputs.nixpkgs-lib.follows = "nixpkgs";
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
@@ -31,27 +31,27 @@
       inputs.darwin.follows = "darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
   };
 
 
- outputs = inputs @ { flake-parts, systems, ... }:
+  outputs = inputs @ { flake-parts, systems, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
-  "aarch64-darwin"
-  "aarch64-linux"
-  "x86_64-darwin"
-  "x86_64-linux"
-];
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
       imports = [
-         ./devshell.nix
+        ./devshell.nix
         # ./docs
         # ./homeConfigurations
         ./osConfigurations
         # ./nixosModules
         # ./packages
-           inputs.devenv.flakeModule
+        inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];

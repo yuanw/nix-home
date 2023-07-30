@@ -1,4 +1,4 @@
-{ lib, pkgs, config, services, ... }: {
+{ pkgs, config, ... }: {
 
   my = {
     username = "yuanwang";

@@ -1,5 +1,4 @@
-let sources = import ../nix/sources.nix;
-in self: super: {
+_self: super: {
 
   installApplication =
     { name

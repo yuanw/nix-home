@@ -1,4 +1,4 @@
-{ lib, pkgs, config, ... }: {
+{ pkgs, config, ... }: {
   home-manager.users.${config.my.username}.programs.git = {
     extraConfig = { github.user = "yuanw"; };
   };

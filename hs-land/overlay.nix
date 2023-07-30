@@ -1,8 +1,8 @@
-final: prev:
+_final: prev:
 
 {
   haskellPackages = prev.haskellPackages.override {
-    overrides = haskellPackagesNew: haskellPackagesOld: rec {
+    overrides = haskellPackagesNew: _haskellPackagesOld: rec {
       ws-access-token =
         haskellPackagesNew.callPackage ./ws-access-token/release.nix { };
 

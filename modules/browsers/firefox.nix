@@ -6,7 +6,6 @@
 with lib;
 let
   cfg = config.modules.browsers.firefox;
-  homeDir = config.my.homeDirectory;
 in
 {
   options.modules.browsers.firefox = {

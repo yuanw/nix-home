@@ -1,4 +1,4 @@
-{ config, lib, pkgs, isDarwin, ... }:
+{ config, lib, ... }:
 with lib;
 let cfg = config.modules.common;
 in {
