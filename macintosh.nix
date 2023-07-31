@@ -2,12 +2,12 @@
 
 with pkgs.stdenv;
 with lib; {
-  networking.hostName = config.my.hostname;
+  networking.hostName = flake.config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      user = "${config.my.username}";
+      user = "${flake.config.my.username}";
       automatic = true;
       interval = { Hour = 168; };
 
