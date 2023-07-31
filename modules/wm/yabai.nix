@@ -3,7 +3,7 @@
 # this module aims to encapsulate all configurations
 # to have a functional tiling window manager environment on MacOS
 # yabai/skhd
-{ config, lib, pkgs, ... }:
+{ flake, config, lib, pkgs, ... }:
 
 with lib;
 let
@@ -55,7 +55,7 @@ in
       sf-symbols
     ];
 
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       programs.gh = {
         enable = true;
         settings = {
