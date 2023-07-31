@@ -1,4 +1,4 @@
-{ pkgs, inputs, lib, ... }:
+{ pkgs, flake, lib, ... }:
 {
     nix = {
       # configureBuildUsers = true;
@@ -47,12 +47,12 @@
         allowUnsupportedSystem = true;
       };
         overlays = [
-    inputs.emacs.overlay
-    inputs.nur.overlay
-    inputs.agenix.overlays.default
+   flake. inputs.emacs.overlay
+    # inputs.nur.overlay
+    # inputs.agenix.overlays.default
     (_final: prev: {
-      stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
-      mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+      # stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
+      # mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
       # use this variant if unfree packages are needed:
       # unstable = import nixpkgs-unstable {
       #   inherit system;
@@ -61,7 +61,7 @@
 
     })
     (_final: prev: {
-      reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
+      # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
       # devenv = inputs.devenv.packages.${prev.system}.devenv;
     })
     (import ../hs-land/overlay.nix)
