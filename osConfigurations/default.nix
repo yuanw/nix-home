@@ -94,7 +94,13 @@ in
       };
       WK01174 =  inputs.darwin.lib.darwinSystem {
         system = "aarch64-darwin";
-        modules = [ ../hosts/wk01174.nix ];
+        modules = [
+          inputs.agenix.darwinModules.age
+          inputs.home-manager.darwinModules.home-manager
+          ../macintosh.nix
+          ../hosts/wk01174.nix
+           ../modules
+        ];
       };
       wf17084 = mkSystemConfig {
         system = "x86_64-darwin";
