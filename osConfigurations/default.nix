@@ -13,7 +13,7 @@
       linux = { ... }: { };
       # nix-darwin specific configuration
       darwin.imports = [
-        # ../macintosh.nix
+        ../macintosh.nix
       ];
     };
     nixosConfigurations = {
