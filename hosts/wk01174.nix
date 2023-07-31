@@ -1,6 +1,6 @@
-{ pkgs, config, ... }: {
+{ pkgs, flake, ... }: {
 
-  config.my = {
+  flake.config.my = {
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
@@ -9,11 +9,11 @@
     homeDirectory = "/Users/yuanwang";
   };
   # TODO we need to add this back
-  # environment.systemPath = [
-  #   "/opt/homebrew/bin"
-  #   "/opt/homebrew/sbin"
-  # ];
-  home-manager.users.${config.my.username}.programs = {
+  environment.systemPath = [
+    "/opt/homebrew/bin"
+    "/opt/homebrew/sbin"
+  ];
+  home-manager.users.${flake.config.my.username}.programs = {
     go = {
       enable = true;
       goPath = "go";
