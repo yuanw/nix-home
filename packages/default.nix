@@ -1,5 +1,4 @@
 { self, inputs, ... }: {
-  perSystem = { system, pkgs, ... }: {
      nixpkgs = {
     config = {
       allowBroken = true;
@@ -33,7 +32,9 @@
 
       ];
   };
-    packages = {
+
+  perSystem = { system, pkgs, ... }: {
+      packages = {
       # re-export our packages
       inherit (pkgs)
        emacsPlusNativeComp        ;
