@@ -92,16 +92,19 @@ in
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 =  inputs.darwin.lib.darwinSystem {
-        system = "aarch64-darwin";
-        modules = [
-          inputs.agenix.darwinModules.age
-          inputs.home-manager.darwinModules.home-manager
-          ../macintosh.nix
-          ../hosts/wk01174.nix
-           # ../modules
-        ];
+      WK01174 =   self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+        imports = [  ];
       };
+      # WK01174 =   inputs.darwin.lib.darwinSystem {
+      #   system = "aarch64-darwin";
+      #   modules = [
+      #     inputs.agenix.darwinModules.age
+      #     inputs.home-manager.darwinModules.home-manager
+      #     ../macintosh.nix
+      #     ../hosts/wk01174.nix
+      #      # ../modules
+      #   ];
+      # };
       wf17084 = mkSystemConfig {
         system = "x86_64-darwin";
         modules = [ ../hosts/wf17084.nix ];
