@@ -48,13 +48,13 @@
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 = self.nixos-flake.lib.mkMacosSystem  "aarch64-darwin" {
-          imports = [
-             inputs.self.nixosModules.common
-             # self.nixosModules.darwin
-            # ../hosts/wk01174.nix
-          ];
-        };
+      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+        imports = [
+          inputs.self.nixosModules.common
+          # self.nixosModules.darwin
+          # ../hosts/wk01174.nix
+        ];
+      };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
       #   system = "aarch64-darwin";
       #   modules = [

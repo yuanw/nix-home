@@ -1,4 +1,4 @@
-{   pkgs, ... }: {
+{ pkgs, ... }: {
 
   # self.config.my = {
   #   username = "yuanwang";
@@ -73,7 +73,7 @@
         dart.enable = true;
         haskell.enable = true;
         python.enable = true;
-            };
+      };
 
     terminal = {
       enable = true;
