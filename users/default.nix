@@ -1,13 +1,40 @@
 { lib, ... }:
 let
-  userSubmodule = lib.types.submodule {
+  mySubmodule = lib.types.submodule {
     options = {
-      name = lib.mkOption {
+      username = lib.mkOption {
         type = lib.types.str;
       };
       email = lib.mkOption {
         type = lib.types.str;
       };
+       gpgKey = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+          GPP key
+        '';
+      };
+   homeDirectory = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+        '';
+      };
+   font = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+        '';
+      };
+   hostname = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+        '';
+      };
+     name = lib.mkOption {
+        type = lib.types.str;
+        description = ''
+        '';
+      };
+
       sshKeys = lib.mkOption {
         type = lib.types.listOf lib.types.str;
         description = ''
@@ -16,29 +43,14 @@ let
       };
     };
   };
-  peopleSubmodule = lib.types.submodule {
-    options = {
-      users = lib.mkOption {
-        type = lib.types.attrsOf userSubmodule;
-      };
-      myself = lib.mkOption {
-        type = lib.types.str;
-        description = ''
-          The name of the user that represents myself.
-
-          Admin user in all contexts.
-        '';
-      };
-    };
-  };
 in
 {
   options = {
-    people = lib.mkOption {
-      type = peopleSubmodule;
+    my = lib.mkOption {
+      type = mySubmodule;
     };
   };
   config = {
-    people = import ./config.nix;
+    # people = import ./config.nix;
   };
 }
