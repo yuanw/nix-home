@@ -27,10 +27,10 @@ let
     })
     (_final: prev: {
       reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
-      devenv = inputs.devenv.packages.${prev.system}.devenv;
+      # devenv = inputs.devenv.packages.${prev.system}.devenv;
     })
     (import ./hs-land/overlay.nix)
-    (import ./overlays)
+    (import ./packages)
   ];
 in
 {
