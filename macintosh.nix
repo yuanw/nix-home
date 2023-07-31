@@ -72,7 +72,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${flake.config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit flake pkgs lib config; };
 
   fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [

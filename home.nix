@@ -1,8 +1,8 @@
-{ pkgs, lib, config, ... }:
+{ flake, pkgs, lib, config, ... }:
 
 {
-  home.username = config.my.username;
-  home.homeDirectory = config.my.homeDirectory;
+  home.username = flake.config.my.username;
+  home.homeDirectory = flake.config.my.homeDirectory;
   # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
   home.stateVersion = "22.11";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })
