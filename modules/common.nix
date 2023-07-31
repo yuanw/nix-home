@@ -1,22 +1,9 @@
-{ config, lib, ... }:
-with lib;
-let cfg = config.modules.common;
-in {
-  options = {
-    modules.common = {
-      enable = mkEnableOption "common";
-      supportLocalVirtualBuilder = mkOption {
-        type = types.bool;
-        default = false;
-      };
-    };
-  };
-
-  config = mkIf cfg.enable {
+{ flake, lib, ... }:
+{
     nix = {
       # configureBuildUsers = true;
       settings = {
-        trusted-users = [ "root" config.my.username ];
+        trusted-users = [ "root" flake.config.my.username ];
         substituters = [
           "https://cache.nixos.org"
           "https://nix-community.cachix.org"
@@ -46,14 +33,8 @@ in {
         keep-outputs          = true
         keep-derivations      = true
         fallback              = true
-        extra-trusted-users   = ${config.my.username}
-      '' + (if cfg.supportLocalVirtualBuilder then ''
-          # Not strictly necessary, but this will reduce your disk utilization
-        builders-use-substitutes = true
-        builders = ssh-ng://builder@localhost x86_64-linux /etc/nix/builder_ed25519 4 - - - c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUpCV2N4Yi9CbGFxdDFhdU90RStGOFFVV3JVb3RpQzVxQkorVXVFV2RWQ2Igcm9vdEBuaXhvcwo=
-
-      '' else
-        "");
+        extra-trusted-users   = ${flake.config.my.username}
+       '';
       # trustedBinaryCaches = config.nix.binaryCaches;
       gc = {
         automatic = true;
@@ -66,6 +47,27 @@ in {
         allowBroken = false;
         allowUnsupportedSystem = true;
       };
+        overlays = [
+   flake. inputs.emacs.overlay
+    flake.inputs.nur.overlay
+    flake.inputs.agenix.overlays.default
+    (_final: prev: {
+      stable = flake.inputs.nixpkgs-stable.legacyPackages.${prev.system};
+      mesa = flake.inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+      # use this variant if unfree packages are needed:
+      # unstable = import nixpkgs-unstable {
+      #   inherit system;
+      #   config.allowUnfree = true;
+      # };
+
+    })
+    (_final: prev: {
+      reiryoku-firmware = flake. inputs.reiryoku.packages.${prev.system}.firmware;
+      # devenv = inputs.devenv.packages.${prev.system}.devenv;
+    })
+    (import ../hs-land/overlay.nix)
+    (import ../packages)
+  ];
+
     };
-  };
 }

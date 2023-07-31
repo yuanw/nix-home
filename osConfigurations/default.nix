@@ -4,12 +4,10 @@
     # All nixos/nix-darwin configurations are kept here.
     nixosModules = {
       # Common nixos/nix-darwin configuration shared between Linux and macOS.
-      common = { pkgs, ... }: {
-        environment.systemPackages = with pkgs; [
-          hello
-        ];
-      };
-      # NixOS specific configuration
+      common.imports = [
+        ../modules/common.nix
+      ];
+          # NixOS specific configuration
       linux = { ... }: { };
       # nix-darwin specific configuration
       darwin.imports = [
