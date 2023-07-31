@@ -8,10 +8,11 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
-  environment.systemPath = [
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
-  ];
+  # TODO we need to add this back
+  # environment.systemPath = [
+  #   "/opt/homebrew/bin"
+  #   "/opt/homebrew/sbin"
+  # ];
   home-manager.users.${config.my.username}.programs = {
     go = {
       enable = true;
