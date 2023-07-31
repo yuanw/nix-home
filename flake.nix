@@ -52,7 +52,7 @@
         ./users
         # ./homeConfigurations
         ./osConfigurations
-        # ./nixosModules
+        ./modules
         # inputs.devenv.flakeModule
         ./systemModule.nix
         # inputs.devshell.flakeModule
