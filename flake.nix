@@ -51,7 +51,6 @@
       ];
       imports = [
         ./devshell.nix
-
          ./packages
         # ./docs
         # ./homeConfigurations
