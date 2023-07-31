@@ -40,19 +40,18 @@ in
       nixos-flake.lib = rec {
         inherit specialArgsFor;
         mkSystemConfig =
-          { system
-          , modules
-          , isDarwin ? inputs.nixpkgs.lib.hasSuffix "-darwin" system
-          , isNixOS ? !isDarwin
-          , ...
-          }:
+          system: mod:
+        let
+         isDarwin = inputs.nixpkgs.lib.hasSuffix "-darwin" system;
+           isNixOS= !isDarwin;
+        in
           (if isDarwin then
             inputs.darwin.lib.darwinSystem
           else
             inputs.nixpkgs.lib.nixosSystem) {
             inherit system;
             specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
-            modules = modules ++ [{ nixpkgs.overlays = overlays; } ./modules]
+            modules =  [{ nixpkgs.overlays = overlays; } ./modules mod]
               ++ (if isDarwin then
               ([
                 inputs.agenix.darwinModules.age
