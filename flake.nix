@@ -8,7 +8,7 @@
     # systems.url = "github:nix-systems/default";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    nix-darwin = {
+    darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -32,7 +32,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.darwin.follows = "nix-darwin";
+      inputs.darwin.follows = "darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
