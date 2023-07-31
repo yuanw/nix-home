@@ -24,7 +24,7 @@ let
         description = ''
         '';
       };
-      hstname = lib.mkOption {
+      hostname = lib.mkOption {
         type = lib.types.str;
         description = ''
         '';
