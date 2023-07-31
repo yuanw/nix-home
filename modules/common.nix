@@ -1,4 +1,4 @@
-{ pkgs, flake, lib, ... }:
+{ pkgs, inputs, lib, ... }:
 {
     nix = {
       # configureBuildUsers = true;
@@ -47,7 +47,7 @@
         allowUnsupportedSystem = true;
       };
         overlays = [
-   flake. inputs.emacs.overlay
+    inputs.emacs.overlay
     # inputs.nur.overlay
     # inputs.agenix.overlays.default
     (_final: prev: {
