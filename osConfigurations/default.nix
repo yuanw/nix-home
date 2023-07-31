@@ -1,21 +1,21 @@
 { self, inputs, system, ... }:
 let
 
-  overlays = [
-    inputs.emacs.overlay
-    inputs.nur.overlay
-    inputs.agenix.overlays.default
-    (_final: prev: {
-      stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
-      mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
-    })
-    (_final: prev: {
-      reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
-      devenv = inputs.devenv.packages.${prev.system}.devenv;
-    })
-    (import ../hs-land/overlay.nix)
-    (import ../overlays)
-  ];
+  # overlays = [
+  #   inputs.emacs.overlay
+  #   inputs.nur.overlay
+  #   inputs.agenix.overlays.default
+  #   (_final: prev: {
+  #     stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
+  #     mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+  #   })
+  #   (_final: prev: {
+  #     reiryoku-firmware = inputs.reiryoku.packages.${prev.system}.firmware;
+  #     devenv = inputs.devenv.packages.${prev.system}.devenv;
+  #   })
+  #   (import ../hs-land/overlay.nix)
+  #   (import ../overlays)
+  # ];
 
   mkSystemConfig =
     { system
@@ -30,7 +30,8 @@ let
       inputs.nixpkgs.lib.nixosSystem) {
       inherit system;
       specialArgs = { inherit inputs isNixOS isDarwin; };
-      modules = modules ++ [{ nixpkgs.overlays = overlays; } ../modules]
+      modules = modules ++ [
+        ../modules]
         ++ (if isDarwin then
         ([
           inputs.agenix.darwinModules.age
