@@ -8,7 +8,7 @@
     systems.url = "github:nix-systems/default";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    darwin = {
+    nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
