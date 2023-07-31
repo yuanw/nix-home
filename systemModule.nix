@@ -37,45 +37,29 @@ in
 
   config = {
     flake = {
-      nixos-flake.lib = rec {
-        inherit specialArgsFor;
-        mkSystemConfig =
-          system: mod:
+      nixos-flake.lib =  {
+        mkLinuxSystem = system: mod:
         let
-         isDarwin = inputs.nixpkgs.lib.hasSuffix "-darwin" system;
-           isNixOS= !isDarwin;
+          isNixOS = true;
+          isDarwin = false;
         in
-          (if isDarwin then
-            inputs.darwin.lib.darwinSystem
-          else
-            inputs.nixpkgs.lib.nixosSystem) {
-            inherit system;
+           inputs.nixpkgs.lib.nixosSystem {
+          inherit system;
             specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
-            modules =  [{ nixpkgs.overlays = overlays; } ./modules mod]
-              ++ (if isDarwin then
-              ([
-                inputs.agenix.darwinModules.age
-                inputs.home-manager.darwinModules.home-manager
-                ./macintosh.nix
-              ]) else
-              ([
-                ./nixos_system.nix
-                inputs.hosts.nixosModule
-                {
-                  networking.stevenBlackHosts = {
-                    enable = true;
-                    blockFakenews = true;
-                    blockGambling = true;
-                    blockPorn = true;
-                    blockSocial = false;
-                  };
-                }
-                inputs.agenix.nixosModules.age
-                inputs.home-manager.nixosModules.home-manager
-              ]));
+          modules = [ mod ];
+        };
 
-          };
+        mkMacosSystem = system: mod:
+        let
+             isNixOS = true;
+          isDarwin = false;
 
+        in
+          inputs.nix-darwin.lib.darwinSystem {
+          inherit system;
+            specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
+          modules = [ mod ];
+        };
       };
     };
   };
