@@ -1,4 +1,4 @@
-{ flake, lib, ... }:
+{ pkgs, flake, lib, ... }:
 {
     nix = {
       # configureBuildUsers = true;
