@@ -31,7 +31,8 @@ let
       inherit system;
       specialArgs = { inherit inputs isNixOS isDarwin; };
       modules = modules ++ [
-        ../modules]
+        ../modules
+      ]
         ++ (if isDarwin then
         ([
           inputs.agenix.darwinModules.age
