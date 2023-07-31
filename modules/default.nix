@@ -3,7 +3,7 @@
   flake.nixosModules = {
     common =
       ./common.nix;
-    darwins.imports = [
+    darwin.imports = [
       ./brew.nix
       ./wm/yabai.nix
     ];
