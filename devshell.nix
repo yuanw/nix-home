@@ -1,8 +1,8 @@
 {
   perSystem = { config, ... }: {
 
-     devshells.default.packages = [
+    devshells.default.packages = [
       config.treefmt.build.wrapper
     ];
   };
-   }
+}

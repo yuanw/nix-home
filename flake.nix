@@ -2,10 +2,10 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-     devshell.inputs.nixpkgs.follows = "nixpkgs";
+    devshell.inputs.nixpkgs.follows = "nixpkgs";
     devshell.inputs.systems.follows = "systems";
     devshell.url = "github:numtide/devshell";
-      systems.url = "github:nix-systems/default";
+    systems.url = "github:nix-systems/default";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     darwin = {
