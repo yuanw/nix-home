@@ -67,7 +67,7 @@
       enableService = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+        ((emacsPackagesFor pkgs.emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
     health.enable = true;
