@@ -37,7 +37,7 @@
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    nixos-flake.url = "github:srid/nixos-flake";
+    # nixos-flake.url = "github:srid/nixos-flake";
   };
 
 

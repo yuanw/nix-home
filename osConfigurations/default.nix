@@ -31,8 +31,7 @@ let
       inherit system;
       specialArgs = { inherit inputs isNixOS isDarwin; };
       modules = modules ++ [
-        ../modules
-      ]
+        ../modules]
         ++ (if isDarwin then
         ([
           inputs.agenix.darwinModules.age
@@ -93,14 +92,14 @@ in
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+      WK01174 =  inputs.darwin.lib.darwinSystem {
         system = "aarch64-darwin";
-        imports =  [ ../hosts/wk01174.nix ];
+        modules = [ ../hosts/wk01174.nix ];
       };
-      # wf17084 = mkSystemConfig {
-      #   system = "x86_64-darwin";
-      #   modules = [ ../hosts/wf17084.nix ];
-      # };
+      wf17084 = mkSystemConfig {
+        system = "x86_64-darwin";
+        modules = [ ../hosts/wf17084.nix ];
+      };
     };
 
   };
