@@ -1,7 +1,11 @@
 {
-  perSystem = { config, ... }: {
-    devshells.default.packages = [
-      config.treefmt.build.wrapper
-    ];
+  perSystem = { config, pkgs, ... }: {
+     devShells.default = pkgs.mkShell {
+
+            # See https://haskell.flake.page/devshell#composing-devshells
+            inputsFrom = [
+              config.treefmt.build.devShell
+            ];
+          };
   };
 }
