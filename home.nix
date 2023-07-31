@@ -127,7 +127,7 @@
       delta = { enable = true; };
 
       signing = {
-        key = config.my.gpgKey;
+        key = flake.config.my.gpgKey;
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
