@@ -5,6 +5,7 @@
       inherit (pkgs)
        emacsPlusNativeComp        ;
     };
+
     # make pkgs available to all `perSystem` functions
     _module.args.pkgs = import inputs.nixpkgs {
       inherit system;
@@ -39,7 +40,7 @@
     sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
 
   };
-}  # https://github.com/montchr/dotfield/blob/main/pkgs/darwin/yabai.nix
+}
 
 # juliaMac = final.installApplication rec {
 #   name = "Julia";

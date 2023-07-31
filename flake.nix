@@ -51,11 +51,12 @@
       ];
       imports = [
         ./devshell.nix
+
+         ./packages
         # ./docs
         # ./homeConfigurations
         ./osConfigurations
         # ./nixosModules
-         ./packages
         # inputs.devenv.flakeModule
         # inputs.nixos-flake.flakeModule
         # inputs.devshell.flakeModule
