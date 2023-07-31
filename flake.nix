@@ -2,16 +2,8 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    # devshell.inputs.nixpkgs.follows = "nixpkgs";
-    # devshell.inputs.systems.follows = "systems";
-    # devshell.url = "github:numtide/devshell";
-    # systems.url = "github:nix-systems/default";
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    darwin = {
-      url = "github:LnL7/nix-darwin/master";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -37,7 +29,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.darwin.follows = "darwin";
+      inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
