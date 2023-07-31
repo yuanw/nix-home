@@ -6,6 +6,7 @@
     darwin.imports = [
       ./brew.nix
       ./wm/yabai.nix
+      ../macintosh.nix
     ];
 
     # desktop = ./desktop.nix;
