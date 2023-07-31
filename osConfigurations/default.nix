@@ -58,6 +58,21 @@ let
 in
 {
   flake = {
+      # All nixos/nix-darwin configurations are kept here.
+          nixosModules = {
+            # Common nixos/nix-darwin configuration shared between Linux and macOS.
+            common = { pkgs, ... }: {
+              environment.systemPackages = with pkgs; [
+                hello
+              ];
+            };
+            # NixOS specific configuration
+            linux = { pkgs, ... }: {
+            };
+            # nix-darwin specific configuration
+            darwin = { pkgs, ... }: {
+            };
+          };
     nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
