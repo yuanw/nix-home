@@ -50,6 +50,8 @@
       };
       WK01174 = self.nixos-flake.lib.mkMacosSystem  "aarch64-darwin" {
           imports = [
+             self.nixosModules.common
+             self.nixosModules.darwin
             ../hosts/wk01174.nix
           ];
         };
