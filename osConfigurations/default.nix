@@ -1,22 +1,21 @@
 { self, inputs, system, ... }:
 {
   flake = {
-      # All nixos/nix-darwin configurations are kept here.
-          nixosModules = {
-            # Common nixos/nix-darwin configuration shared between Linux and macOS.
-            common = { pkgs, ... }: {
-              environment.systemPackages = with pkgs; [
-                hello
-              ];
-            };
-            # NixOS specific configuration
-            linux = { pkgs, ... }: {
-            };
-            # nix-darwin specific configuration
-            darwin.imports = [
-              ../macintosh.nix
-            ];
-          };
+    # All nixos/nix-darwin configurations are kept here.
+    nixosModules = {
+      # Common nixos/nix-darwin configuration shared between Linux and macOS.
+      common = { pkgs, ... }: {
+        environment.systemPackages = with pkgs; [
+          hello
+        ];
+      };
+      # NixOS specific configuration
+      linux = { ... }: { };
+      # nix-darwin specific configuration
+      darwin.imports = [
+        ../macintosh.nix
+      ];
+    };
     nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -41,19 +40,19 @@
         ];
       };
 
-      asche = inputs.nixpkgs.lib.nixosSystem  {
+      asche = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
       };
     };
     darwinConfigurations = {
-      yuanw = self.nixos-flake.lib.mkMacosSystem  {
+      yuanw = self.nixos-flake.lib.mkMacosSystem {
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 =   self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         imports = [
-            self.nixosModules.darwin
+          self.nixosModules.darwin
         ];
       };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
@@ -66,7 +65,7 @@
       #      # ../modules
       #   ];
       # };
-      wf17084 = self.nixos-flake.lib.mkMacosSystem  {
+      wf17084 = self.nixos-flake.lib.mkMacosSystem {
         system = "x86_64-darwin";
         modules = [ ../hosts/wf17084.nix ];
       };

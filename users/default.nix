@@ -8,28 +8,28 @@ let
       email = lib.mkOption {
         type = lib.types.str;
       };
-       gpgKey = lib.mkOption {
+      gpgKey = lib.mkOption {
         type = lib.types.str;
         description = ''
           GPP key
         '';
       };
-   homeDirectory = lib.mkOption {
+      homeDirectory = lib.mkOption {
         type = lib.types.str;
         description = ''
         '';
       };
-   font = lib.mkOption {
+      font = lib.mkOption {
         type = lib.types.str;
         description = ''
         '';
       };
-   hostname = lib.mkOption {
+      hstname = lib.mkOption {
         type = lib.types.str;
         description = ''
         '';
       };
-     name = lib.mkOption {
+      name = lib.mkOption {
         type = lib.types.str;
         description = ''
         '';

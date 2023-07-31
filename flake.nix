@@ -34,7 +34,7 @@
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-     nixos-flake.url = "github:srid/nixos-flake";
+    nixos-flake.url = "github:srid/nixos-flake";
   };
 
 
@@ -48,7 +48,7 @@
       ];
       imports = [
         ./devshell.nix
-         ./packages
+        ./packages
         # ./docs
         # ./homeConfigurations
         ./osConfigurations
