@@ -55,7 +55,7 @@
         # ./homeConfigurations
         ./osConfigurations
         # ./nixosModules
-        # ./packages
+         ./packages
         # inputs.devenv.flakeModule
         # inputs.nixos-flake.flakeModule
         # inputs.devshell.flakeModule
