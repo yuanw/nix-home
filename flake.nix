@@ -32,7 +32,7 @@
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.darwin.follows = "darwin";
+      inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
