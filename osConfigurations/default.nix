@@ -56,35 +56,37 @@ let
     };
 in
 {
-  flake.nixosConfigurations = {
-    aws = inputs.nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
-        inputs.agenix.nixosModules.age
-        ../modules/aws.nix
-        ../modules/agenix.nix
-      ];
-    };
+  flake = {
+    nixosConfigurations = {
+      aws = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
+          inputs.agenix.nixosModules.age
+          ../modules/aws.nix
+          ../modules/agenix.nix
+        ];
+      };
 
-    adguard = inputs.nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [
-        { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
+      adguard = inputs.nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
 
-        inputs.agenix.nixosModules.age
-        ../modules/aws.nix
-        ../modules/adguradhome-with-user.nix
-        ../modules/adguard.nix
-        ../modules/agenix.nix
-      ];
-    };
+          inputs.agenix.nixosModules.age
+          ../modules/aws.nix
+          ../modules/adguradhome-with-user.nix
+          ../modules/adguard.nix
+          ../modules/agenix.nix
+        ];
+      };
 
-    asche = mkSystemConfig {
-      system = "x86_64-linux";
-      modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
+      asche = mkSystemConfig {
+        system = "x86_64-linux";
+        modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
+      };
     };
-    flake.darwinConfigurations = {
+    darwinConfigurations = {
       yuanw = mkSystemConfig {
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
