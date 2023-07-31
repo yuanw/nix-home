@@ -93,14 +93,14 @@ in
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 = mkSystemConfig {
+      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         system = "aarch64-darwin";
-        modules = [ ../hosts/wk01174.nix ];
+        imports =  [ ../hosts/wk01174.nix ];
       };
-      wf17084 = mkSystemConfig {
-        system = "x86_64-darwin";
-        modules = [ ../hosts/wf17084.nix ];
-      };
+      # wf17084 = mkSystemConfig {
+      #   system = "x86_64-darwin";
+      #   modules = [ ../hosts/wf17084.nix ];
+      # };
     };
 
   };

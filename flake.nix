@@ -37,6 +37,7 @@
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    nixos-flake.url = "github:srid/nixos-flake";
   };
 
 
@@ -56,6 +57,7 @@
         # ./nixosModules
         # ./packages
         # inputs.devenv.flakeModule
+        inputs.nixos-flake.flakeModule
         inputs.devshell.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
