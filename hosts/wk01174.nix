@@ -1,6 +1,6 @@
-{ pkgs, flake, ... }: {
+{ pkgs, config, ... }: {
 
-  flake.config.my = {
+  config.my = {
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
@@ -13,7 +13,7 @@
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${flake.config.my.username}.programs = {
+  home-manager.users.${config.my.username}.programs = {
     go = {
       enable = true;
       goPath = "go";
