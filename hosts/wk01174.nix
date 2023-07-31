@@ -1,6 +1,6 @@
 { pkgs, config, ... }: {
 
-  my = {
+  config.my = {
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
