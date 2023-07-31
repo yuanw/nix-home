@@ -44,7 +44,7 @@ with pkgs; [
   gron
   keychain
 
-  devenv
+  # devenv
   eukleides
   #mu
   #offlineimap
