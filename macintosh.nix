@@ -65,9 +65,9 @@ with lib; {
   };
   time.timeZone = "America/Regina";
 
-  users.users.${config.my.username} = {
+  users.users.${flake.config.my.username} = {
     shell = pkgs.zsh;
-    home = config.my.homeDirectory;
+    home = flake.config.my.homeDirectory;
   };
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
