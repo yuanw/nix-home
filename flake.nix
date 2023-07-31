@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    darwin = {
+    nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -29,12 +29,12 @@
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.darwin.follows = "darwin";
+      inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    # nixos-flake.url = "github:srid/nixos-flake";
+    nixos-flake.url = "github:srid/nixos-flake";
   };
 
 
@@ -54,8 +54,8 @@
         ./osConfigurations
         ./modules
         # inputs.devenv.flakeModule
-        ./systemModule.nix
-        # inputs.devshell.flakeModule
+        # ./systemModule.nix
+        inputs.nixos-flake.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];
