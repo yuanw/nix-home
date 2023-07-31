@@ -18,12 +18,6 @@
       enable = true;
       goPath = "go";
     };
-    # zsh = {
-    #   initExtra = lib.mkAfter ''
-    #       export PATH=/opt/homebrew/bin:$PATH
-    #       export PATH=/opt/homebrew/sbin:$PATH
-    #   '';
-    # };
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
@@ -50,7 +44,6 @@
         "slack"
         "sloth"
         "mysql-shell"
-        # "stretchly"
         "viscosity"
       ];
       brews = [
@@ -80,9 +73,7 @@
         dart.enable = true;
         haskell.enable = true;
         python.enable = true;
-        # zig.enable = true;
-        # node.enable = true;
-      };
+            };
 
     terminal = {
       enable = true;
