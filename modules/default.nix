@@ -1,9 +1,9 @@
 { ... }:
 {
   flake.nixosModules = {
-    common.imports = [
-      ./common.nix
-  ];
+    common =
+      ./common.nix;
+
     # desktop = ./desktop.nix;
     # gnome = ./gnome.nix;
     # gotosocial = ./gotosocial.nix;
