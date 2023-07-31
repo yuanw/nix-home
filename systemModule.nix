@@ -42,7 +42,7 @@ in
         let
           isNixOS = true;
           isDarwin = false;
-        in
+       in
            inputs.nixpkgs.lib.nixosSystem {
           inherit system;
             specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
