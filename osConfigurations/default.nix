@@ -52,7 +52,7 @@
         imports = [
           inputs.self.nixosModules.common
           # self.nixosModules.darwin
-          # ../hosts/wk01174.nix
+          ../hosts/wk01174.nix
         ];
       };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
