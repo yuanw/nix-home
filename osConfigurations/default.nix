@@ -13,7 +13,7 @@
       linux = { ... }: { };
       # nix-darwin specific configuration
       darwin.imports = [
-        ../macintosh.nix
+        # ../macintosh.nix
       ];
     };
     nixosConfigurations = {
@@ -50,9 +50,10 @@
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
-      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
-        imports = [
-          self.nixosModules.darwin
+      WK01174 = self.nixos-flake.lib.mkSystemConfig  "aarch64-darwin" {
+        modules = [
+         ../hosts/wk01174.nix
+          # self.nixosModules.darwin
         ];
       };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
