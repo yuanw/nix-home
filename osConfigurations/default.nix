@@ -13,8 +13,9 @@
             linux = { pkgs, ... }: {
             };
             # nix-darwin specific configuration
-            darwin = { pkgs, ... }: {
-            };
+            darwin.imports = [
+              ../macintosh.nix
+            ];
           };
     nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
@@ -40,18 +41,20 @@
         ];
       };
 
-      asche = mkSystemConfig {
+      asche = inputs.nixpkgs.lib.nixosSystem  {
         system = "x86_64-linux";
         modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
       };
     };
     darwinConfigurations = {
-      yuanw = mkSystemConfig {
+      yuanw = self.nixos-flake.lib.mkMacosSystem  {
         system = "x86_64-darwin";
         modules = [ ../hosts/yuan-mac.nix ];
       };
       WK01174 =   self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
-        imports = [  ];
+        imports = [
+            self.nixosModules.darwin
+        ];
       };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
       #   system = "aarch64-darwin";
@@ -63,7 +66,7 @@
       #      # ../modules
       #   ];
       # };
-      wf17084 = mkSystemConfig {
+      wf17084 = self.nixos-flake.lib.mkMacosSystem  {
         system = "x86_64-darwin";
         modules = [ ../hosts/wf17084.nix ];
       };
