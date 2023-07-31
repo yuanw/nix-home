@@ -55,7 +55,7 @@ in
           isDarwin = false;
 
         in
-          inputs.nix-darwin.lib.darwinSystem {
+          inputs.darwin.lib.darwinSystem {
           inherit system;
             specialArgs = { inherit nix-colors isNixOS isDarwin astro-nvim; };
           modules = [ mod ];
