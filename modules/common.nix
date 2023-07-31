@@ -51,8 +51,8 @@
       # inputs.nur.overlay
       # inputs.agenix.overlays.default
       (_final: _prev: {
-        # stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
-        # mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+        stable = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system};
+        mesa = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
         # use this variant if unfree packages are needed:
         # unstable = import nixpkgs-unstable {
         #   inherit system;
@@ -65,7 +65,7 @@
         # devenv = inputs.devenv.packages.${prev.system}.devenv;
       })
       (import ../hs-land/overlay.nix)
-      # (import ../packages)
+      (import ../packages)
     ];
 
   };
