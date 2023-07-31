@@ -55,7 +55,6 @@
             ../hosts/wk01174.nix
           ];
         };
-      };
       # WK01174 =   inputs.darwin.lib.darwinSystem {
       #   system = "aarch64-darwin";
       #   modules = [
