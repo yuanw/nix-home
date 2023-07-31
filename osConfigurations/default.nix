@@ -99,7 +99,7 @@ in
           inputs.home-manager.darwinModules.home-manager
           ../macintosh.nix
           ../hosts/wk01174.nix
-           ../modules
+           # ../modules
         ];
       };
       wf17084 = mkSystemConfig {
