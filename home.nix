@@ -121,7 +121,7 @@
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
-      userEmail = config.my.email;
+      userEmail = flake.config.my.email;
 
       # difftastic = { enable = true; };
       delta = { enable = true; };
