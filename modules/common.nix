@@ -1,9 +1,9 @@
-{ pkgs, flake, lib, ... }:
+{ pkgs, inputs, lib, ... }:
 {
     nix = {
       # configureBuildUsers = true;
       settings = {
-        trusted-users = [ "root" flake.config.my.username ];
+        # trusted-users = [ "root" flake.config.my.username ];
         substituters = [
           "https://cache.nixos.org"
           "https://nix-community.cachix.org"
@@ -33,7 +33,6 @@
         keep-outputs          = true
         keep-derivations      = true
         fallback              = true
-        extra-trusted-users   = ${flake.config.my.username}
        '';
       # trustedBinaryCaches = config.nix.binaryCaches;
       gc = {
@@ -48,12 +47,12 @@
         allowUnsupportedSystem = true;
       };
         overlays = [
-   flake. inputs.emacs.overlay
-    flake.inputs.nur.overlay
-    flake.inputs.agenix.overlays.default
+    inputs.emacs.overlay
+    inputs.nur.overlay
+    inputs.agenix.overlays.default
     (_final: prev: {
-      stable = flake.inputs.nixpkgs-stable.legacyPackages.${prev.system};
-      mesa = flake.inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+      stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
+      mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
       # use this variant if unfree packages are needed:
       # unstable = import nixpkgs-unstable {
       #   inherit system;
@@ -62,7 +61,7 @@
 
     })
     (_final: prev: {
-      reiryoku-firmware = flake. inputs.reiryoku.packages.${prev.system}.firmware;
+      reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
       # devenv = inputs.devenv.packages.${prev.system}.devenv;
     })
     (import ../hs-land/overlay.nix)
