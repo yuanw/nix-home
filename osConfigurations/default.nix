@@ -52,7 +52,6 @@
       };
       WK01174 = self.nixos-flake.lib.mkSystemConfig "aarch64-darwin" {
           imports = [
-             ../macintosh.nix
             ../hosts/wk01174.nix
           ];
         };

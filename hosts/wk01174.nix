@@ -1,30 +1,30 @@
-{  self, pkgs, ... }: {
+{   pkgs, ... }: {
 
-  self.config.my = {
-    username = "yuanwang";
-    name = "Yuan Wang";
-    email = "yuan.wang@workiva.com";
-    hostname = "WK01174";
-    gpgKey = "19AD3F6B1A5BF3BF";
-    homeDirectory = "/Users/yuanwang";
-  };
+  # self.config.my = {
+  #   username = "yuanwang";
+  #   name = "Yuan Wang";
+  #   email = "yuan.wang@workiva.com";
+  #   hostname = "WK01174";
+  #   gpgKey = "19AD3F6B1A5BF3BF";
+  #   homeDirectory = "/Users/yuanwang";
+  # };
   # TODO we need to add this back
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${self.config.my.username}.programs = {
-    go = {
-      enable = true;
-      goPath = "go";
-    };
-    git = {
-      extraConfig = {
-        github.user = "yuanwang-wf";
-        # url."git@github.com:".insteadOf = "https://github.com";
-      };
-    };
-  };
+  # home-manager.users.${self.config.my.username}.programs = {
+  #   go = {
+  #     enable = true;
+  #     goPath = "go";
+  #   };
+  #   git = {
+  #     extraConfig = {
+  #       github.user = "yuanwang-wf";
+  #       # url."git@github.com:".insteadOf = "https://github.com";
+  #     };
+  #   };
+  # };
   modules = {
     common = {
       enable = true;
