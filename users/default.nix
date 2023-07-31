@@ -51,6 +51,6 @@ in
     };
   };
   config = {
-    # people = import ./config.nix;
+    my = import ./config.nix;
   };
 }
