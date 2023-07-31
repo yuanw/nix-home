@@ -1,5 +1,38 @@
 { self, inputs, ... }: {
   perSystem = { system, pkgs, ... }: {
+     nixpkgs = {
+    config = {
+      allowBroken = true;
+      allowUnsupportedSystem = true;
+      allowUnfree = true;
+    };
+    overlays = [
+        inputs.emacs.overlay
+        inputs.nur.overlay
+        inputs.agenix.overlays.default
+
+        (import ../hs-land/overlay.nix)
+        (
+          _final: prev: {
+    # alpacasay = prev.callPackage ./alpacasay { };
+    # myvim = prev.callPackage ./myvim { };
+    stable = inputs.nixpkgs-stable.legacyPackages.${prev.system};
+    mesa = inputs.nixpkgs-stable.legacyPackages.${prev.system}.mesa;
+    yabai = prev.callPackage ./yabai.nix { };
+    alerter = prev.callPackage ./alerter { };
+    dart = prev.callPackage ./dart.nix { };
+    hosts = prev.callPackage ./hosts.nix { };
+    emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
+    sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
+    sf-symbols = prev.callPackage ./sf_symbols.nix { };
+    font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
+    ical-buddy = prev.callPackage ./ical-buddy.nix { };
+    sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
+
+          })
+
+      ];
+  };
     packages = {
       # re-export our packages
       inherit (pkgs)
