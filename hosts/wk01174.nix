@@ -1,6 +1,6 @@
-{ pkgs, config, ... }: {
+{  self, pkgs, ... }: {
 
-  config.my = {
+  self.config.my = {
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
@@ -13,7 +13,7 @@
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${config.my.username}.programs = {
+  home-manager.users.${self.config.my.username}.programs = {
     go = {
       enable = true;
       goPath = "go";

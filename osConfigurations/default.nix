@@ -2,20 +2,20 @@
 {
   flake = {
     # All nixos/nix-darwin configurations are kept here.
-    # nixosModules = {
-    #   # Common nixos/nix-darwin configuration shared between Linux and macOS.
-    #   common = { pkgs, ... }: {
-    #     environment.systemPackages = with pkgs; [
-    #       hello
-    #     ];
-    #   };
-    #   # NixOS specific configuration
-    #   linux = { ... }: { };
-    #   # nix-darwin specific configuration
-    #   darwin.imports = [
-    #     # ../macintosh.nix
-    #   ];
-    # };
+    nixosModules = {
+      # Common nixos/nix-darwin configuration shared between Linux and macOS.
+      common = { pkgs, ... }: {
+        environment.systemPackages = with pkgs; [
+          hello
+        ];
+      };
+      # NixOS specific configuration
+      linux = { ... }: { };
+      # nix-darwin specific configuration
+      darwin.imports = [
+        # ../macintosh.nix
+      ];
+    };
     nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
@@ -52,6 +52,7 @@
       };
       WK01174 = self.nixos-flake.lib.mkSystemConfig "aarch64-darwin" {
           imports = [
+             ../macintosh.nix
             ../hosts/wk01174.nix
           ];
         };
@@ -65,10 +66,10 @@
       #      # ../modules
       #   ];
       # };
-      wf17084 = self.nixos-flake.lib.mkMacosSystem {
-        system = "x86_64-darwin";
-        modules = [ ../hosts/wf17084.nix ];
-      };
+      # wf17084 = self.nixos-flake.lib.mkMacosSystem {
+      #   system = "x86_64-darwin";
+      #   modules = [ ../hosts/wf17084.nix ];
+      # };
     };
 
   };
