@@ -55,7 +55,7 @@
           ../hosts/wk01174.nix
         ];
       };
-      wf17084 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+      wf17084 = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
         imports = [
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
