@@ -17,6 +17,7 @@
       ./helix.nix
       ./neovim
       ./health.nix
+      ./settings.nix
       ./terminal
       ./typing
       ./workShell.nix
