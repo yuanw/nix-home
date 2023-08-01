@@ -1,4 +1,4 @@
-{ config, ... }:
+{ flake, config, ... }:
 {
   nix = {
     # configureBuildUsers = true;
