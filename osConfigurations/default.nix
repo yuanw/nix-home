@@ -50,7 +50,17 @@
       };
       WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         imports = [
+          ({config}: {
+              config.my = {
+    username = "yuanwang";
+    name = "Yuan Wang";
+    email = "yuan.wang@workiva.com";
+    hostname = "WK01174";
+    gpgKey = "19AD3F6B1A5BF3BF";
+    homeDirectory = "/Users/yuanwang";
+  };
 
+          })
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
           ../hosts/wk01174.nix
