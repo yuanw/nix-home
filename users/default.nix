@@ -55,8 +55,7 @@ let
   };
 in
 {
-  options = {
-     my = {
+  options.my = {
       username = mkOptStr "yuanwang";
       name = mkOptStr "Yuan Wang";
       email = mkOptStr (mailAddr "me" "yuanwang.ca");
@@ -64,9 +63,5 @@ in
       gpgKey = mkOptStr "BF2ADAA2A98F45E7";
       homeDirectory = mkOptStr "/Users/yuanwang";
       font = mkOptStr "PragmataPro";
-    };
   };
-  config = {
-    # my = import ./config.nix;
-  };
-}
+ }
