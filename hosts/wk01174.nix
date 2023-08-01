@@ -1,4 +1,4 @@
-{ pkgs, flake, ... }: {
+{ pkgs, flake, config, ... }: {
 
   environment.systemPath = [
     "/opt/homebrew/bin"
