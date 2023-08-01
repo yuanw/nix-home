@@ -6,7 +6,7 @@ in {
   options.modules.dev.python = { enable = mkEnableOption "python"; };
 
   config = mkIf cfg.enable {
-    home-manager.users.${flake.config.my.username}.home.packages = [
+    home-manager.users.${config.my.username}.home.packages = [
       (pkgs.python3.withPackages (ps:
         with ps; [
           pip

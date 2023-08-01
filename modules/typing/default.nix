@@ -18,7 +18,7 @@ in
   options.modules.typing = { enable = mkEnableOption "typing"; };
 
   config = mkIf cfg.enable {
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [
         # pkgs.haskellPackages.gotta-go-fast
         adept

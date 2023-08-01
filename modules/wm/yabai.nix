@@ -55,7 +55,7 @@ in
       sf-symbols
     ];
 
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       programs.gh = {
         enable = true;
         settings = {

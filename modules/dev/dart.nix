@@ -25,7 +25,7 @@ in {
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [ cfg.package ];
       programs.zsh = mkIf cfg.enableZshIntegration {
         sessionVariables = { DART_SDK = "${cfg.package}"; };

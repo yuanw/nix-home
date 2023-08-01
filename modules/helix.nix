@@ -1,7 +1,7 @@
 # https://github.com/maaslalani/_/blob/main/modules/helix.nix
 { config, flake, ... }: {
 
-  home-manager.users.${flake.config.my.username} = {
+  home-manager.users.${config.my.username} = {
 
     programs.helix = {
       enable = true;

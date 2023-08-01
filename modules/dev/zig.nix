@@ -7,7 +7,7 @@ in {
 
   config = mkIf cfg.enable {
 
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [ pkgs.zig pkgs.zls ];
     };
   };

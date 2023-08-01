@@ -6,12 +6,12 @@ with lib; {
     flake.inputs.agenix.darwinModules.age
     flake.inputs.home-manager.darwinModules.home-manager
   ];
-  networking.hostName = flake.config.my.hostname;
+  networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      user = "${flake.config.my.username}";
+      user = "${config.my.username}";
       automatic = true;
       interval = { Hour = 168; };
 
@@ -71,7 +71,7 @@ with lib; {
 
   users.users.${config.my.username} = {
     shell = pkgs.zsh;
-    home = flake.config.my.homeDirectory;
+    home = config.my.homeDirectory;
   };
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;

@@ -4,7 +4,7 @@
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${flake.config.my.username}.programs = {
+  home-manager.users.${config.my.username}.programs = {
     go = {
       enable = true;
       goPath = "go";

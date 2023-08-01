@@ -1,8 +1,8 @@
 { flake, pkgs, lib, config, ... }:
 
 {
-  home.username = flake.config.my.username;
-  home.homeDirectory = flake.config.my.homeDirectory;
+  home.username = config.my.username;
+  home.homeDirectory = config.my.homeDirectory;
   # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
   home.stateVersion = "22.11";
   home.packages = (import ./modules/packages.nix { inherit pkgs; })
@@ -112,7 +112,7 @@
     git = {
       enable = true;
       # package = pkgs.stable.git;
-      userName = flake.config.my.username;
+      userName = config.my.username;
 
       aliases = {
         co = "checkout";
@@ -121,13 +121,13 @@
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
-      userEmail = flake.config.my.email;
+      userEmail = config.my.email;
 
       # difftastic = { enable = true; };
       delta = { enable = true; };
 
       signing = {
-        key = flake.config.my.gpgKey;
+        key = config.my.gpgKey;
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];

@@ -29,7 +29,7 @@ in
 
     # colorScheme = nix-colors.colorSchemes.dracula;
 
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home = {
         file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
         packages = [
@@ -188,15 +188,15 @@ in
           settings = {
             font = {
               normal = {
-                family = flake.config.my.font;
+                family = config.my.font;
                 style = "Regular";
               };
               bold = {
-                family = flake.config.my.font;
+                family = config.my.font;
                 style = "Bold";
               };
               italic = {
-                family = flake.config.my.font;
+                family = config.my.font;
                 style = "Italic";
               };
               size = 18;

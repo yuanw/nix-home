@@ -17,7 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home = { file."startpage".source = ./startpage; };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;

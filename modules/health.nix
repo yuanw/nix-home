@@ -2,7 +2,7 @@
 
 with lib;
 let
-  homeDir = flake.config.my.homeDirectory;
+  homeDir = config.my.homeDirectory;
   cfg = config.modules.health;
 in
 {
@@ -26,9 +26,9 @@ in
         # in secs
         StartInterval = 900;
       };
-      serviceConfig.UserName = flake.config.my.username;
+      serviceConfig.UserName = config.my.username;
     };
-    home-manager.users.${flake.config.my.username} = {
+    home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.haskellPackages.mono-stretchly
         pkgs.SDL2
