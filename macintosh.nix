@@ -69,7 +69,7 @@ with lib; {
   };
   time.timeZone = "America/Regina";
 
-  users.users.${flake.config.my.username} = {
+  users.users.${config.my.username} = {
     shell = pkgs.zsh;
     home = flake.config.my.homeDirectory;
   };
