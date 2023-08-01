@@ -3,7 +3,7 @@
 # this module aims to encapsulate all configurations
 # to have a functional tiling window manager environment on MacOS
 # yabai/skhd
-{ flake, config, lib, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let

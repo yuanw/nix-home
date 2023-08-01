@@ -1,4 +1,4 @@
-{ config, lib, flake, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let cfg = config.modules.dev.python;

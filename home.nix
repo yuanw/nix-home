@@ -1,4 +1,4 @@
-{ flake, pkgs, lib, config, ... }:
+{ pkgs, lib, config, ... }:
 
 {
   home.username = config.my.username;

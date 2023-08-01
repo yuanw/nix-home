@@ -1,5 +1,5 @@
 # https://github.com/maaslalani/_/blob/main/modules/helix.nix
-{ config, flake, ... }: {
+{ config, ... }: {
 
   home-manager.users.${config.my.username} = {
 
