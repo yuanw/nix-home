@@ -3,7 +3,7 @@
   nix = {
     # configureBuildUsers = true;
     settings = {
-      # trusted-users = [ "root" flake.config.my.username ];
+      trusted-users = [ "root" flake.config.my.username ];
       substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
