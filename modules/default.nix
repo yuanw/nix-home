@@ -26,8 +26,8 @@
       ./brew.nix
       ./wm/yabai.nix
       ../macintosh.nix
-      ({ config, ... }: {
-        config.my = {
+      ({  ... }: {
+        my = {
           username = "yuanwang";
           name = "Yuan Wang";
           email = "yuan.wang@workiva.com";
