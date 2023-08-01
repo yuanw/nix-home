@@ -51,32 +51,24 @@
       WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         imports = [
           inputs.self.nixosModules.common
-          # inputs.self.nixosModules.wk011474
           inputs.self.nixosModules.darwin
           ../hosts/wk01174.nix
         ];
       };
-      # WK01174 =   inputs.darwin.lib.darwinSystem {
-      #   system = "aarch64-darwin";
-      #   modules = [
-      #     inputs.agenix.darwinModules.age
-      #     inputs.home-manager.darwinModules.home-manager
-      #     ../macintosh.nix
-      #     ../hosts/wk01174.nix
-      #      # ../modules
-      #   ];
-      # };
-      # wf17084 = self.nixos-flake.lib.mkMacosSystem {
-      #   system = "x86_64-darwin";
-      #   modules = [ ../hosts/wf17084.nix ];
-      # };
+      wf17084 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
+        imports = [
+          inputs.self.nixosModules.common
+          inputs.self.nixosModules.darwin
+          ../hosts/wf17084.nix
+        ];
+      };
     };
 
   };
   perSystem = { system, ... }: {
-    # asche = self.nixosConfigurations.asche.config.system.build.toplevel;
-    #     yuanw = self.darwinConfigurations.yuanw.system;
-    #     wf17084 = self.darwinConfigurations.wf17084.system;
+    packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
+    packages.yuanw = self.darwinConfigurations.yuanw.system;
+    packages.wf17084 = self.darwinConfigurations.wf17084.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
     #     adguard = self.nixosConfigurations.adguard.system;
     #     aws = self.nixosConfigurations.aws.system;
