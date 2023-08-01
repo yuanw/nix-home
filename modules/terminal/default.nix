@@ -1,4 +1,4 @@
-{ config, lib, pkgs, nix-colors, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
@@ -14,7 +14,7 @@ let
 in
 {
 
-  imports = [ nix-colors.homeManagerModule ];
+  # imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
     mainWorkspaceDir = mkOption {
@@ -32,7 +32,7 @@ in
 
   config = mkIf cfg.enable {
 
-    colorScheme = nix-colors.colorSchemes.dracula;
+    # colorScheme = nix-colors.colorSchemes.dracula;
 
     home-manager.users.${config.my.username} = {
       home = {
