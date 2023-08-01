@@ -26,8 +26,6 @@
       ./brew.nix
       ./wm/yabai.nix
       ../macintosh.nix
-    ];
-    wk011474.imports = [
       ({ flake, ... }: {
         flake.config.my = {
           username = "yuanwang";
@@ -38,7 +36,6 @@
           homeDirectory = "/Users/yuanwang";
         };
       })
-
     ];
 
 
