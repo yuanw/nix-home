@@ -2,6 +2,10 @@
 
 with pkgs.stdenv;
 with lib; {
+  imports = [
+             flake.inputs.agenix.darwinModules.age
+             flake.inputs.home-manager.darwinModules.home-manager
+  ];
   networking.hostName = flake.config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
