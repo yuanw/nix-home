@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ pkgs, flake, ... }: {
 
   # self.config.my = {
   #   username = "yuanwang";
@@ -13,18 +13,18 @@
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  # home-manager.users.${self.config.my.username}.programs = {
-  #   go = {
-  #     enable = true;
-  #     goPath = "go";
-  #   };
-  #   git = {
-  #     extraConfig = {
-  #       github.user = "yuanwang-wf";
-  #       # url."git@github.com:".insteadOf = "https://github.com";
-  #     };
-  #   };
-  # };
+  home-manager.users.${flake.config.my.username}.programs = {
+    go = {
+      enable = true;
+      goPath = "go";
+    };
+    git = {
+      extraConfig = {
+        github.user = "yuanwang-wf";
+        # url."git@github.com:".insteadOf = "https://github.com";
+      };
+    };
+  };
   modules = {
     # common = {
     #   enable = true;
