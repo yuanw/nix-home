@@ -33,6 +33,7 @@
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true
+      extra-trusted-users   = ${config.my.username}
     '';
     # trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
