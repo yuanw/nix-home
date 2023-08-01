@@ -2,7 +2,7 @@
 
 with lib;
 let
-  homeDir = config.my.homeDirectory;
+  homeDir = flake.config.my.homeDirectory;
   cfg = config.modules.health;
 in
 {
@@ -26,7 +26,7 @@ in
         # in secs
         StartInterval = 900;
       };
-      serviceConfig.UserName = config.my.username;
+      serviceConfig.UserName = flake.config.my.username;
     };
     home-manager.users.${flake.config.my.username} = {
       home.packages = [

@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, ... }:
+{ config, flake, lib, pkgs, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -45,7 +45,7 @@ with lib; {
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
-    home-manager.users.${config.my.username} = { pkgs, ... }: {
+    home-manager.users.${flake.config.my.username} = { pkgs, ... }: {
       home = {
         packages = with pkgs; [
           # git

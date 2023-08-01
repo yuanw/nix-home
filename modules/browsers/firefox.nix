@@ -1,7 +1,7 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
 # should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
 # https://github.com/mozilla/policy-templates
-{ config, lib, pkgs, ... }:
+{ config, flake, lib, pkgs, ... }:
 
 with lib;
 let
@@ -17,7 +17,7 @@ in
   };
 
   config = mkIf cfg.enable {
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       home = { file."startpage".source = ./startpage; };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;

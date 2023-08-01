@@ -3,6 +3,7 @@
 { config
 , pkgs
 , lib
+, flake
 , astro-nvim
 , ...
 }:
@@ -63,7 +64,7 @@ in
   options.modules.editors.neovim = { enable = mkEnableOption "neovim"; };
 
   config = mkIf cfg.enable {
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       home.packages = with pkgs; [
         neovim
         # nvim-open
@@ -101,7 +102,7 @@ in
         stylua
         # does not build yet on aarch64
       ] ++ lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-linux") pkgs.deno; # lsp
-      xdg.dataHome = "${config.my.homeDirectory}/.data";
+      xdg.dataHome = "${flake.config.my.homeDirectory}/.data";
       xdg.dataFile."nvim/lazy/telescope-fzf-native.nvim/build/libfzf.so".source = "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so";
       xdg.configFile."nvim".source = pkgs.runCommand "nvim" { } ''
         mkdir -p $out/parser

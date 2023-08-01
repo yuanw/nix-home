@@ -1,7 +1,7 @@
 { config, flake, lib, pkgs, ... }:
 
 with lib;
-let homeDir = config.my.homeDirectory;
+let homeDir = flake.config.my.homeDirectory;
 in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 

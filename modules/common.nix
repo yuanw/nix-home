@@ -48,8 +48,8 @@
     };
     overlays = [
       flake.inputs.emacs.overlay
-      # inputs.nur.overlay
-      # inputs.agenix.overlays.default
+      flake.inputs.nur.overlay
+      flake.inputs.agenix.overlays.default
       (_final: _prev: {
         stable = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system};
         mesa = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
