@@ -3,7 +3,7 @@
   flake.nixosModules = {
     common.imports  = [
       ./common.nix
-      ./browsers/firefix.nix
+      ./browsers/firefox.nix
     ];
     darwin.imports = [
       ./brew.nix
