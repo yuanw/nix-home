@@ -1,4 +1,4 @@
-{  config, lib, pkgs, ... }:
+{ flake, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
@@ -11,7 +11,7 @@ with lib; {
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      user = "${config.my.username}";
+      user = "${flake.config.my.username}";
       automatic = true;
       interval = { Hour = 168; };
 

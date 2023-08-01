@@ -66,7 +66,7 @@ in
       font = mkOptStr "PragmataPro";
     };
   };
-  # config = {
-  #   my = import ./config.nix;
-  # };
+  config = {
+    # my = import ./config.nix;
+  };
 }
