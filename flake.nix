@@ -49,7 +49,7 @@
       imports = [
         ./devshell.nix
         # ./packages
-        ./users
+        # ./users
         # ./homeConfigurations
         ./osConfigurations
         ./modules
