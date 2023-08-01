@@ -13,6 +13,7 @@
       ./dev/python.nix
       ./dev/zig.nix
       ./editor.nix
+      ./neovim
     ];
     darwin.imports = [
       ./brew.nix
