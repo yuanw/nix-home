@@ -3,7 +3,6 @@
 with lib;
 let
   cfg = config.modules.terminal;
-  colorScheme = nix-colors.colorSchemes.dracula;
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
@@ -14,7 +13,7 @@ let
 in
 {
 
-       # error: infinite recursion encountered
+  # error: infinite recursion encountered
   # imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
@@ -24,7 +23,7 @@ in
       description = "directory for prefix+m to point to";
     };
 
-   };
+  };
 
   config = mkIf cfg.enable {
 

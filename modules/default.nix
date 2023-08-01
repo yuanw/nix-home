@@ -1,7 +1,7 @@
 { ... }:
 {
   flake.nixosModules = {
-    common.imports  = [
+    common.imports = [
       ./agenix.nix
       ./common.nix
       ./browsers/firefox.nix
