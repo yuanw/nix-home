@@ -26,8 +26,8 @@
       ./brew.nix
       ./wm/yabai.nix
       ../macintosh.nix
-      ({ flake, ... }: {
-        flake.config.my = {
+      ({ config, ... }: {
+        config.my = {
           username = "yuanwang";
           name = "Yuan Wang";
           email = "yuan.wang@workiva.com";
