@@ -23,6 +23,7 @@ let
         type = lib.types.str;
         description = ''
         '';
+        default = "PragmataPro";
       };
       hostname = lib.mkOption {
         type = lib.types.str;
