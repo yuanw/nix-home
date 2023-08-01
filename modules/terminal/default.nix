@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, flake, lib, pkgs, ... }:
 
 with lib;
 let
@@ -30,7 +30,7 @@ in
 
     # colorScheme = nix-colors.colorSchemes.dracula;
 
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       home = {
         file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
         packages = [
