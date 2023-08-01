@@ -188,15 +188,15 @@ in
           settings = {
             font = {
               normal = {
-                family = config.my.font;
+                family = flake.config.my.font;
                 style = "Regular";
               };
               bold = {
-                family = config.my.font;
+                family = flake.config.my.font;
                 style = "Bold";
               };
               italic = {
-                family = config.my.font;
+                family = flake.config.my.font;
                 style = "Italic";
               };
               size = 18;
