@@ -1,4 +1,4 @@
-{ self, inputs, config, lib, ... }:
+{ inputs, config, lib, ... }:
 let
   nix-colors = inputs.nix-colors;
   astro-nvim = inputs.astro-nvim;

@@ -1,8 +1,10 @@
 { ... }:
 {
   flake.nixosModules = {
-    common =
-      ./common.nix;
+    common.imports  = [
+      ./common.nix
+      ./browsers/firefix.nix
+    ];
     darwin.imports = [
       ./brew.nix
       ./wm/yabai.nix
