@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, flake, lib, pkgs, ... }:
 
 with lib;
 let homeDir = config.my.homeDirectory;
@@ -6,7 +6,7 @@ in {
   options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.programs.workShell.enable {
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       home.packages = [
         pkgs.kubernetes-helm
         pkgs.aws-iam-authenticator
