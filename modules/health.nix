@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, flake, lib, pkgs, ... }:
 
 with lib;
 let
@@ -28,7 +28,7 @@ in
       };
       serviceConfig.UserName = config.my.username;
     };
-    home-manager.users.${config.my.username} = {
+    home-manager.users.${flake.config.my.username} = {
       home.packages = [
         pkgs.haskellPackages.mono-stretchly
         pkgs.SDL2
