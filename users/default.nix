@@ -51,7 +51,7 @@ in
       type = mySubmodule;
     };
   };
-  config = {
-    my = import ./config.nix;
-  };
+  # config = {
+  #   my = import ./config.nix;
+  # };
 }
