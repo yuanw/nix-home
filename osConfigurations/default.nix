@@ -1,20 +1,7 @@
 { self, inputs, system, ... }:
 {
   flake = {
-    # All nixos/nix-darwin configurations are kept here.
-    # nixosModules = {
-    #   # Common nixos/nix-darwin configuration shared between Linux and macOS.
-    #   # common.imports = [
-    #   #   # ../modules/common.nix
-    #   # ];
-    #       # NixOS specific configuration
-    #   linux = { ... }: { };
-    #   # nix-darwin specific configuration
-    #   darwin.imports = [
-    #     ../macintosh.nix
-    #   ];
-    # };
-    nixosConfigurations = {
+      nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
@@ -29,7 +16,6 @@
         system = "x86_64-linux";
         modules = [
           { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
-
           inputs.agenix.nixosModules.age
           ../modules/aws.nix
           ../modules/adguradhome-with-user.nix
