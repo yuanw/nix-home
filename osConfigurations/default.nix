@@ -50,8 +50,8 @@
       };
       WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         imports = [
-          ({flake, ...}: {
-              flake.config.my = {
+          ({config, ...}: {
+              config.my = {
     username = "yuanwang";
     name = "Yuan Wang";
     email = "yuan.wang@workiva.com";
