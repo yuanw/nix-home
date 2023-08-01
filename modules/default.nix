@@ -17,7 +17,7 @@
       ./neovim
       ./health.nix
       ./terminal
-      # ./typing
+      ./typing
     ];
     darwin.imports = [
       ./brew.nix

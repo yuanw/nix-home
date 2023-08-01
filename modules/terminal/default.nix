@@ -14,6 +14,7 @@ let
 in
 {
 
+       # error: infinite recursion encountered
   # imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
@@ -23,12 +24,7 @@ in
       description = "directory for prefix+m to point to";
     };
 
-    # secondaryWorkspaceDir = mkOption {
-    #   default = "$HOME/workspace";
-    #   type = types.str;
-    #   description = "secondary directory for prefix+O to point to";
-    # };
-  };
+   };
 
   config = mkIf cfg.enable {
 
