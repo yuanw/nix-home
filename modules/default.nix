@@ -14,6 +14,7 @@
       ./dev/zig.nix
       ./editor.nix
       ./neovim
+      ./health.nix
     ];
     darwin.imports = [
       ./brew.nix
