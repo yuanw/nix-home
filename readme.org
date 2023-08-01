@@ -97,6 +97,8 @@ nix flake update --recreate-lock-file
 ~nix build .#yuan-mac~
 *** switch ?
 ~./result/sw/bin/darwin-rebuild switch --flake .~
+** How to rollback
+darwin-rebuild --rollback
 
 
 * Nixos
