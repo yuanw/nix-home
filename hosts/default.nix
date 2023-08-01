@@ -1,7 +1,7 @@
 { self, inputs, system, ... }:
 {
   flake = {
-      nixosConfigurations = {
+    nixosConfigurations = {
       aws = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
@@ -30,9 +30,12 @@
       };
     };
     darwinConfigurations = {
-      yuanw = self.nixos-flake.lib.mkMacosSystem {
-        system = "x86_64-darwin";
-        modules = [ ../hosts/yuan-mac.nix ];
+      yuanw = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
+        imports = [
+          inputs.self.nixosModules.common
+          inputs.self.nixosModules.darwin
+          ./yuan-mac.nix
+        ];
       };
       WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
         imports = [
@@ -45,7 +48,7 @@
         imports = [
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
-          ./hosts/wf17084.nix
+          ./wf17084.nix
         ];
       };
     };
