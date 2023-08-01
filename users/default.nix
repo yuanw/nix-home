@@ -52,6 +52,6 @@ in
     };
   };
   config = {
-    # my = import ./config.nix;
+    my = import ./config.nix;
   };
 }
