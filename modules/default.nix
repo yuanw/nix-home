@@ -14,6 +14,7 @@
       ./dev/python.nix
       ./dev/zig.nix
       ./editor.nix
+      ./helix.nix
       ./neovim
       ./health.nix
       ./terminal
