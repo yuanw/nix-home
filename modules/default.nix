@@ -16,7 +16,7 @@
       ./editor.nix
       ./neovim
       ./health.nix
-      # ./terminal
+      ./terminal
       # ./typing
     ];
     darwin.imports = [
