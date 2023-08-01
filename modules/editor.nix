@@ -1,22 +1,10 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, doom-emacs, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
   # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
-  writeDoomScript = name: text:
-    pkgs.writeTextFile {
-      inherit name;
-      executable = true;
-      text = ''
-        #!/usr/bin/env doomscript
-        ${text}
-      '';
-      checkPhase = ''
-        ${lib.stdenv.shellDryRun} "$target"
-      '';
-    };
 
 in
 with lib; {
@@ -57,7 +45,7 @@ with lib; {
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
-    home-manager.users.${config.my.username} = { config, pkgs, ... }: {
+    home-manager.users.${config.my.username} = { pkgs, ... }: {
       home = {
         packages = with pkgs; [
           # git

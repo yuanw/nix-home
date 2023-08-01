@@ -2,7 +2,6 @@
 , base
 , data-default
 , lens
-, lib
 , monomer
 , text
 , text-show

@@ -1,9 +1,8 @@
-{ config, lib, pkgs, nix-colors, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
   cfg = config.modules.terminal;
-  colorScheme = nix-colors.colorSchemes.dracula;
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
@@ -14,7 +13,8 @@ let
 in
 {
 
-  imports = [ nix-colors.homeManagerModule ];
+  # error: infinite recursion encountered
+  # imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
     mainWorkspaceDir = mkOption {
@@ -23,16 +23,11 @@ in
       description = "directory for prefix+m to point to";
     };
 
-    # secondaryWorkspaceDir = mkOption {
-    #   default = "$HOME/workspace";
-    #   type = types.str;
-    #   description = "secondary directory for prefix+O to point to";
-    # };
   };
 
   config = mkIf cfg.enable {
 
-    colorScheme = nix-colors.colorSchemes.dracula;
+    # colorScheme = nix-colors.colorSchemes.dracula;
 
     home-manager.users.${config.my.username} = {
       home = {

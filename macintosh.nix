@@ -1,7 +1,11 @@
-{ nixvim, config, lib, pkgs, ... }:
+{ flake, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
+  imports = [
+    flake.inputs.agenix.darwinModules.age
+    flake.inputs.home-manager.darwinModules.home-manager
+  ];
   networking.hostName = config.my.hostname;
   nix = {
     package = pkgs.nixUnstable;
@@ -72,7 +76,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit flake pkgs lib config; };
 
   fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [

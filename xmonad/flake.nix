@@ -5,7 +5,7 @@
     xmonad-contrib.url = "github:xmonad/xmonad-contrib";
     taffybar.url = "github:taffybar/taffybar";
   };
-  outputs = { self, flake-utils, nixpkgs, xmonad, xmonad-contrib, taffybar }:
+  outputs = { self, flake-utils, nixpkgs, taffybar }:
     let
       supportedSystems = [ "x86_64-linux" ];
       forAllSystems = f:
@@ -17,7 +17,7 @@
         });
     in
     rec {
-      overlay = (final: prev: {
+      overlay = (final: _prev: {
         my-xmobar = final.haskellPackages.callCabal2nix "my-xmobar" ./. { };
       });
       packages =
@@ -29,7 +29,7 @@
       devShell = forAllSystems (system:
         let haskellPackages = nixpkgsFor.${system}.haskellPackages;
         in haskellPackages.shellFor {
-          packages = p: [ self.packages.${system}.my-xmobar ];
+          packages = _p: [ self.packages.${system}.my-xmobar ];
           withHoogle = true;
           buildInputs = with haskellPackages; [
             haskell-language-server

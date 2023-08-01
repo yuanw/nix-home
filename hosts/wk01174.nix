@@ -1,5 +1,4 @@
-{ lib, pkgs, config, services, ... }: {
-
+{ pkgs, config, ... }: {
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
@@ -8,6 +7,7 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
+
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
@@ -17,12 +17,6 @@
       enable = true;
       goPath = "go";
     };
-    # zsh = {
-    #   initExtra = lib.mkAfter ''
-    #       export PATH=/opt/homebrew/bin:$PATH
-    #       export PATH=/opt/homebrew/sbin:$PATH
-    #   '';
-    # };
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
@@ -31,10 +25,10 @@
     };
   };
   modules = {
-    common = {
-      enable = true;
-      supportLocalVirtualBuilder = true;
-    };
+    # common = {
+    #   enable = true;
+    #   supportLocalVirtualBuilder = true;
+    # };
     secrets.agenix = { enable = true; };
     brew = {
       enable = true;
@@ -49,7 +43,6 @@
         "slack"
         "sloth"
         "mysql-shell"
-        # "stretchly"
         "viscosity"
       ];
       brews = [
@@ -67,7 +60,7 @@
       enableService = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+        ((emacsPackagesFor pkgs.emacsPlusNativeComp).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
     health.enable = true;
@@ -79,8 +72,6 @@
         dart.enable = true;
         haskell.enable = true;
         python.enable = true;
-        # zig.enable = true;
-        # node.enable = true;
       };
 
     terminal = {

@@ -1,4 +1,4 @@
-{ stdenv, unzip, fetchurl, lib }:
+{ stdenv, lib }:
 stdenv.mkDerivation rec {
 
   pname = "alerter";

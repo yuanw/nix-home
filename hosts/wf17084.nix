@@ -1,4 +1,4 @@
-{ lib, pkgs, config, services, ... }: {
+{ pkgs, config, ... }: {
 
   my = {
     username = "yuanwang";
@@ -21,10 +21,10 @@
     };
   };
   modules = {
-    common = {
-      enable = true;
-      supportLocalVirtualBuilder = true;
-    };
+    # common = {
+    #   enable = true;
+    #   supportLocalVirtualBuilder = true;
+    # };
     secrets.agenix = { enable = true; };
     brew = {
       enable = true;

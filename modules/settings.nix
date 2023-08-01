@@ -1,4 +1,4 @@
-{ config, lib, pkgs, home-manager, options, ... }:
+{ lib, options, ... }:
 
 with lib;
 

@@ -1,4 +1,4 @@
-{ stdenv, fetchurl, config, lib, pkgs, ... }:
+{ stdenv, fetchurl, lib, pkgs, ... }:
 # https://github.com/Homebrew/homebrew-cask/blob/d5acc87dd9ebf3cc1a38f2e4f99c1c2872f5ceb6/Casks/sf-symbols.rb
 stdenv.mkDerivation rec {
   pname = "sf-symbols";

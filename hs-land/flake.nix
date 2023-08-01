@@ -12,7 +12,7 @@
     mission-control.url = "github:Platonic-Systems/mission-control";
 
   };
-  outputs = inputs@{ self, nixpkgs, nixpkgs-stable, flake-parts, ... }:
+  outputs = inputs@{ nixpkgs, nixpkgs-stable, flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [
@@ -25,7 +25,7 @@
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
-            (final: prev: {
+            (_final: prev: {
               mesa = nixpkgs-stable.legacyPackages.${prev.system}.mesa;
               # ... things you need to patch ...
             })
@@ -45,7 +45,7 @@
           # overrides = self: super: { };
           devShell = {
             # enable = true; # Enabled by default
-            tools = hp:
+            tools = _hp:
               {
                 treefmt = config.treefmt.build.wrapper;
               } // config.treefmt.build.programs;
