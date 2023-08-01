@@ -36,6 +36,7 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
     };
+    };
 
     # desktop = ./desktop.nix;
     # gnome = ./gnome.nix;
