@@ -48,7 +48,7 @@
       imports = [
         ./devshell.nix
         # ./packages
-        ./osConfigurations
+        ./host
         ./modules
         # ./systemModule.nix
         inputs.nixos-flake.flakeModule

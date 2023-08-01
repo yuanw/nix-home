@@ -26,7 +26,7 @@
 
       asche = inputs.nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        modules = [ ./machines/asche/configuration.nix ./hosts/asche.nix ];
+        modules = [ ./machines/asche/configuration.nix ./asche.nix ];
       };
     };
     darwinConfigurations = {
@@ -38,14 +38,14 @@
         imports = [
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
-          ../hosts/wk01174.nix
+          ./wk01174.nix
         ];
       };
       wf17084 = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
         imports = [
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
-          ../hosts/wf17084.nix
+          ./hosts/wf17084.nix
         ];
       };
     };
