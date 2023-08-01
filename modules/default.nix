@@ -18,7 +18,7 @@
       ./health.nix
       ./terminal
       ./typing
-      ./workShell
+      ./workShell.nix
     ];
     darwin.imports = [
       ./brew.nix
