@@ -47,7 +47,7 @@
       ];
       imports = [
         ./devshell.nix
-        ./user.nix
+        # ./user.nix
         ./hosts
         ./modules
         # ./systemModule.nix
