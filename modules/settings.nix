@@ -26,8 +26,13 @@ in
       hostname = mkOptStr "yuan-mac";
       gpgKey = mkOptStr "BF2ADAA2A98F45E7";
       homeDirectory = mkOptStr "/Users/yuanwang";
+      packages = mkOption {
+        type = types.listOf types.package;
+        default = [ ];
+        description = "The set of packages to appear in the user environment.";
+      };
       font = mkOptStr "PragmataPro";
-       hm = {
+      hm = {
         file = mkOpt' attrs { } "Files to place directly in $HOME";
         cacheHome = mkOpt' path "${home}/.cache" "Absolute path to directory holding application caches.";
         configFile = mkOpt' attrs { } "Files to place in $XDG_CONFIG_HOME";
