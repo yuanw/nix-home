@@ -3,6 +3,8 @@
 with lib;
 
 let
+  mkOpt' = type: default: description:
+    mkOption { inherit type default description; };
   mkOptStr = value:
     mkOption {
       type = with types; uniq str;
@@ -25,6 +27,15 @@ in
       gpgKey = mkOptStr "BF2ADAA2A98F45E7";
       homeDirectory = mkOptStr "/Users/yuanwang";
       font = mkOptStr "PragmataPro";
+       hm = {
+        file = mkOpt' attrs { } "Files to place directly in $HOME";
+        cacheHome = mkOpt' path "${home}/.cache" "Absolute path to directory holding application caches.";
+        configFile = mkOpt' attrs { } "Files to place in $XDG_CONFIG_HOME";
+        configHome = mkOpt' path "${home}/.config" "Absolute path to directory holding application configurations.";
+        dataFile = mkOpt' attrs { } "Files to place in $XDG_DATA_HOME";
+        dataHome = mkOpt' path "${home}/.local/share" "Absolute path to directory holding application data.";
+        stateHome = mkOpt' path "${home}/.local/state" "Absolute path to directory holding application states.";
+      };
     };
   };
   # config = {
