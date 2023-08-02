@@ -17,18 +17,18 @@
   #   })
   ];
 
-  home-manager.users.${config.my.username}.programs = {
-    go = {
-      enable = true;
-      goPath = "go";
-    };
-    git = {
-      extraConfig = {
-        github.user = "yuanwang-wf";
-        # url."git@github.com:".insteadOf = "https://github.com";
-      };
-    };
-  };
+  # home-manager.users.${config.my.username}.programs = {
+  #   go = {
+  #     enable = true;
+  #     goPath = "go";
+  #   };
+  #   git = {
+  #     extraConfig = {
+  #       github.user = "yuanwang-wf";
+  #       # url."git@github.com:".insteadOf = "https://github.com";
+  #     };
+  #   };
+  # };
   modules = {
     # common = {
     #   enable = true;
