@@ -1,10 +1,10 @@
-{ flake, config, lib, pkgs, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
   imports = [
-    flake.inputs.agenix.darwinModules.age
-    flake.inputs.home-manager.darwinModules.home-manager
+    inputs.agenix.darwinModules.age
+    inputs.home-manager.darwinModules.home-manager
   ];
   networking.hostName = config.my.hostname;
   nix = {
@@ -76,7 +76,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
-    import ./home.nix { inherit flake pkgs lib config; };
+    import ./home.nix { inherit inputs pkgs lib config; };
 
   fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
