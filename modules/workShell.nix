@@ -3,9 +3,9 @@
 with lib;
 let homeDir = config.my.homeDirectory;
 in {
-  options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
+  options.modules.workShell = { enable = mkEnableOption "workivaShell"; };
 
-  config = mkIf config.programs.workShell.enable {
+  config = mkIf config.modules.workShell.enable {
       programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
         profileExtra = mkAfter ''

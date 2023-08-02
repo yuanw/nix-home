@@ -85,6 +85,7 @@
       mainWorkspaceDir = "$HOME/workspaces";
     };
     wm.yabai.enable = true;
+
+    workShell.enable = true;
   };
-  programs = { workShell.enable = true; };
 }
