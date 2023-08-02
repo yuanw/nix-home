@@ -47,10 +47,8 @@
       ];
       imports = [
         ./devshell.nix
-        # ./user.nix
         ./hosts
         ./modules
-        # ./systemModule.nix
         inputs.nixos-flake.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
