@@ -46,9 +46,7 @@ in
       WK01174 =  darwinSystem  {
         system =  "aarch64-darwin";
         modules =  [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.darwin
-          ./wk01174.nix
+                  ./wk01174.nix
         ];
       };
       wf17084 = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {

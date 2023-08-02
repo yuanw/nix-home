@@ -1,4 +1,10 @@
-{ pkgs, config, ... }: {
+{ pkgs, inputs, config, ... }: {
+
+   imports = [
+       inputs.self.nixosModules.common
+          inputs.self.nixosModules.darwin
+
+  ];
 
   my = {
     username = "yuanwang";
