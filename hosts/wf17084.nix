@@ -1,18 +1,18 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, inputs, ... }:
 {
 
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
-    ({...}: {
-        my = {
-    username = "yuanwang";
-    name = "Yuan Wang";
-    email = "yuan.wang@workiva.com";
-    hostname = "wf17084";
-    gpgKey = "19AD3F6B1A5BF3BF";
-    homeDirectory = "/Users/yuanwang";
-  };
+    ({ ... }: {
+      my = {
+        username = "yuanwang";
+        name = "Yuan Wang";
+        email = "yuan.wang@workiva.com";
+        hostname = "wf17084";
+        gpgKey = "19AD3F6B1A5BF3BF";
+        homeDirectory = "/Users/yuanwang";
+      };
 
     })
   ];

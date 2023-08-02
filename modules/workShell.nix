@@ -23,7 +23,7 @@ in {
         pkgs.terraform-ls
         # pkgs.podman
       ];
-       programs.zsh = {
+      programs.zsh = {
         shellAliases = { bt = "bigskyTest"; };
         profileExtra = mkAfter ''
 
@@ -41,6 +41,6 @@ in {
         '';
       };
 
-        };
+    };
   };
 }
