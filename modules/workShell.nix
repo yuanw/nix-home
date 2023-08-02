@@ -6,23 +6,6 @@ in {
   options.modules.workShell = { enable = mkEnableOption "workivaShell"; };
 
   config = mkIf config.modules.workShell.enable {
-      programs.zsh = {
-        shellAliases = { bt = "bigskyTest"; };
-        profileExtra = mkAfter ''
-
-          [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
-        '';
-        initExtra = mkAfter ''
-          # eval "$(pyenv init -)"
-          # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
-
-          # function bigskyTest {
-          #    python manage.py test $1 --http-integration --traceback -v 2
-          # }
-
-          export PATH=$PATH:$HOME/go/bin
-        '';
-      };
 
     home-manager.users.${config.my.username} = {
       home.packages = [
@@ -40,6 +23,24 @@ in {
         pkgs.terraform-ls
         # pkgs.podman
       ];
+       programs.zsh = {
+        shellAliases = { bt = "bigskyTest"; };
+        profileExtra = mkAfter ''
+
+          [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
+        '';
+        initExtra = mkAfter ''
+          # eval "$(pyenv init -)"
+          # export PYENV_ROOT="${homeDir}/.pyenv" # needed by pipenv
+
+          # function bigskyTest {
+          #    python manage.py test $1 --http-integration --traceback -v 2
+          # }
+
+          export PATH=$PATH:$HOME/go/bin
+        '';
+      };
+
         };
   };
 }
