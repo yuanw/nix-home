@@ -420,21 +420,6 @@
         "type": "github"
       }
     },
-    "nixos-flake": {
-      "locked": {
-        "lastModified": 1690424850,
-        "narHash": "sha256-pPELqUXbNdZ7nMLPL8A+BSyUsxjxMO3q2Wb7plW/Wf8=",
-        "owner": "srid",
-        "repo": "nixos-flake",
-        "rev": "df6fe273ff64dc29de2c93805045b5348d70bc26",
-        "type": "github"
-      },
-      "original": {
-        "owner": "srid",
-        "repo": "nixos-flake",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1678875422,
@@ -670,7 +655,6 @@
         "hosts": "hosts",
         "nix-colors": "nix-colors",
         "nix-darwin": "nix-darwin",
-        "nixos-flake": "nixos-flake",
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nur": "nur",
