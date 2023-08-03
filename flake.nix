@@ -34,7 +34,7 @@
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
     nixos-flake.url = "github:srid/nixos-flake";
-    pre-commit.url = "github:cachix/re-commit-hooks.nix";
+    pre-commit.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit.inputs.nixpkgs.follows = "nixpkgs";
 
   };
