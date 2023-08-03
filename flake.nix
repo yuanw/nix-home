@@ -57,5 +57,7 @@
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];
+      # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
+      perSystem.pre-commit.settings.hooks.treefmt.enable = true;
     };
 }
