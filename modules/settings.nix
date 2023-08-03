@@ -21,16 +21,16 @@ in
   #  Use `lib.mkForce value` or `lib.mkDefault value` to change the priority on any of these definitions.
   options = with types; {
     my = {
-           system = lib.mkOption {
-            type = lib.types.enum  [
-        "aarch64-darwin"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "x86_64-linux"
-      ];
-            description = "The system used when defining the host";
-            default = "aarch64-darwin";
-          };
+      system = lib.mkOption {
+        type = lib.types.enum [
+          "aarch64-darwin"
+          "aarch64-linux"
+          "x86_64-darwin"
+          "x86_64-linux"
+        ];
+        description = "The system used when defining the host";
+        default = "aarch64-darwin";
+      };
 
       username = mkOptStr "yuanwang";
       name = mkOptStr "Yuan Wang";
