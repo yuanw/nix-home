@@ -49,13 +49,14 @@ in
           ./wk01174.nix
         ];
       };
-      wf17084 = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
-        imports = [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.darwin
+      wf17084 =  darwinSystem {
+        system = "x86_64-darwin"  ;
+        modules = [
           ./wf17084.nix
         ];
       };
+
+
     };
 
   };

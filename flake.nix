@@ -33,7 +33,6 @@
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    nixos-flake.url = "github:srid/nixos-flake";
     pre-commit.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -52,7 +51,6 @@
         ./devshell.nix
         ./hosts
         ./modules
-        inputs.nixos-flake.flakeModule
         inputs.pre-commit.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
