@@ -84,6 +84,6 @@
       mainWorkspaceDir = "$HOME/workiva";
     };
     wm.yabai.enable = true;
+    workShell.enable = true;
   };
-  programs = { workShell.enable = true; };
 }
