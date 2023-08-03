@@ -1,4 +1,10 @@
 { self, inputs, system, ... }:
+let
+  nixosSystem = args:
+    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; }; } // args);
+  darwinSystem = args:
+    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; }; } // args);
+in
 {
   flake = {
     nixosConfigurations = {
@@ -37,20 +43,20 @@
           ./yuan-mac.nix
         ];
       };
-      WK01174 = self.nixos-flake.lib.mkMacosSystem "aarch64-darwin" {
-        imports = [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.darwin
+      WK01174 = darwinSystem {
+        system = "aarch64-darwin";
+        modules = [
           ./wk01174.nix
         ];
       };
-      wf17084 = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
-        imports = [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.darwin
+      wf17084 =  darwinSystem {
+        system = "x86_64-darwin"  ;
+        modules = [
           ./wf17084.nix
         ];
       };
+
+
     };
 
   };

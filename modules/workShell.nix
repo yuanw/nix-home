@@ -3,9 +3,10 @@
 with lib;
 let homeDir = config.my.homeDirectory;
 in {
-  options.programs.workShell = { enable = mkEnableOption "workivaShell"; };
+  options.modules.workShell = { enable = mkEnableOption "workivaShell"; };
 
-  config = mkIf config.programs.workShell.enable {
+  config = mkIf config.modules.workShell.enable {
+
     home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.kubernetes-helm
@@ -39,6 +40,7 @@ in {
           export PATH=$PATH:$HOME/go/bin
         '';
       };
+
     };
   };
 }

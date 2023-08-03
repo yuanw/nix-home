@@ -5,21 +5,21 @@
   home.homeDirectory = config.my.homeDirectory;
   # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
   home.stateVersion = "22.11";
-  home.packages = (import ./modules/packages.nix { inherit pkgs; })
+  home.packages = (import ./packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin
-    (import ./modules/macos_packages.nix { inherit pkgs; })
+    (import ./macos_packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isLinux
-    (import ./modules/linux_packages.nix { inherit pkgs; });
+    (import ./linux_packages.nix { inherit pkgs; });
 
   xdg = {
     enable = true;
     configFile = {
       # "startpage".source = ./startpage;
       "wallpapers/haskell-red-noise.png".source =
-        ./pictures/haskell-red-noise.png;
-      "wallpapers/doom.svg".source = ./pictures/doomEmacs.svg;
+        ../pictures/haskell-red-noise.png;
+      "wallpapers/doom.svg".source = ../pictures/doomEmacs.svg;
       "wallpapers/nix-wallpaper-dracula.png".source =
-        ./pictures/nix-wallpaper-dracula.png;
+        ../pictures/nix-wallpaper-dracula.png;
     };
   };
   manual.manpages.enable = false;

@@ -1,4 +1,4 @@
-{ flake, config, ... }:
+{ inputs, config, ... }:
 {
   nix = {
     # configureBuildUsers = true;
@@ -48,12 +48,12 @@
       allowUnsupportedSystem = true;
     };
     overlays = [
-      flake.inputs.emacs.overlay
-      flake.inputs.nur.overlay
-      flake.inputs.agenix.overlays.default
+      inputs.emacs.overlay
+      inputs.nur.overlay
+      inputs.agenix.overlays.default
       (_final: _prev: {
-        stable = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system};
-        mesa = flake.inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
+        stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
+        mesa = inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
         # use this variant if unfree packages are needed:
         # unstable = import nixpkgs-unstable {
         #   inherit system;

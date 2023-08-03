@@ -42,3 +42,6 @@ terraform.rc
 .lego/
 wireguard-keys
 AdGuardHome.yaml
+/.pre-commit-config.yaml
+
+diff.json

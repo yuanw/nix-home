@@ -1,4 +1,10 @@
-{ pkgs, config, ... }: {
+{ pkgs, inputs, config, ... }: {
+
+  imports = [
+    inputs.self.nixosModules.common
+    inputs.self.nixosModules.darwin
+  ];
+
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
@@ -79,6 +85,7 @@
       mainWorkspaceDir = "$HOME/workspaces";
     };
     wm.yabai.enable = true;
+
+    workShell.enable = true;
   };
-  programs = { workShell.enable = true; };
 }

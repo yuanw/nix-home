@@ -33,7 +33,9 @@
     };
     treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    nixos-flake.url = "github:srid/nixos-flake";
+    pre-commit.url = "github:cachix/pre-commit-hooks.nix";
+    pre-commit.inputs.nixpkgs.follows = "nixpkgs";
+
   };
 
 
@@ -47,13 +49,13 @@
       ];
       imports = [
         ./devshell.nix
-        # ./packages
         ./hosts
         ./modules
-        # ./systemModule.nix
-        inputs.nixos-flake.flakeModule
+        inputs.pre-commit.flakeModule
         inputs.treefmt-nix.flakeModule
       ];
       perSystem.treefmt.imports = [ ./treefmt.nix ];
+      # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
+      perSystem.pre-commit.settings.hooks.treefmt.enable = true;
     };
 }

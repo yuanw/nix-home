@@ -1,5 +1,10 @@
-{ pkgs, config, ... }: {
+{ pkgs, inputs, config, ... }:
+{
 
+  imports = [
+    inputs.self.nixosModules.common
+    inputs.self.nixosModules.darwin
+  ];
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
@@ -8,6 +13,8 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
+
+
   home-manager.users.${config.my.username}.programs = {
     go = {
       enable = true;
@@ -77,6 +84,6 @@
       mainWorkspaceDir = "$HOME/workiva";
     };
     wm.yabai.enable = true;
+    workShell.enable = true;
   };
-  programs = { workShell.enable = true; };
 }
