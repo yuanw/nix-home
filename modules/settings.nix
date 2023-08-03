@@ -17,9 +17,21 @@ in
 {
   # https://github.com/ahmedelgabri/dotfiles/blob/16bc31166025ed450654ae5be08e840525d4c02f/nix/modules/shared/settings.nix#L38
   # https://github.com/hlissner/dotfiles/blob/089f1a9da9018df9e5fc200c2d7bef70f4546026/modules/options.nix#L39
+  # https://codeberg.org/adamcstephens/profile-parts/src/branch/main/parts/nixos.nix
   #  Use `lib.mkForce value` or `lib.mkDefault value` to change the priority on any of these definitions.
   options = with types; {
     my = {
+           system = lib.mkOption {
+            type = lib.types.enum  [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+            description = "The system used when defining the host";
+            default = "aarch64-darwin";
+          };
+
       username = mkOptStr "yuanwang";
       name = mkOptStr "Yuan Wang";
       email = mkOptStr (mailAddr "me" "yuanwang.ca");
