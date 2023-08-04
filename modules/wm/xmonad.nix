@@ -13,7 +13,6 @@ in
 
   config = mkIf cfg.enable {
 
-    networking.networkmanager = { enable = true; };
     services.dbus = {
       enable = true;
       packages = [ pkgs.dconf ];
@@ -80,7 +79,8 @@ in
 
       # services.caffeine.enable = true;
       services.blueman-applet.enable = true;
-      services.network-manager-applet.enable = true;
+      # networking.networkmanager = { enable = true; };
+      # services.network-manager-applet.enable = true;
       services.dunst.enable = true;
 
       services.xscreensaver.enable = true;
