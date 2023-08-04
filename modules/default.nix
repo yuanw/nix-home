@@ -19,10 +19,10 @@
       ./settings.nix
       ./terminal
       ./typing
-      ./qmk.nix
       ./workShell.nix
     ];
     linux.imports = [
+      ./qmk.nix
       ./nixos_system.nix
       ./wm/xmonad.nix
     ];
