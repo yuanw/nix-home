@@ -3,6 +3,7 @@
     devShells.default = pkgs.mkShell {
       buildInputs = with pkgs; [
         nix-diff
+        nix-tree
         awscli
         lego
         terraform
