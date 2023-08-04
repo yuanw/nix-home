@@ -30,9 +30,13 @@ in
         ];
       };
 
-      asche = inputs.nixpkgs.lib.nixosSystem {
+      asche = nixosSystem {
         system = "x86_64-linux";
-        modules = [ ./machines/asche/configuration.nix ./asche.nix ];
+        modules = [
+          inputs.self.nixosModules.common
+          ../machines/asche/configuration.nix
+          ./asche.nix
+        ];
       };
     };
     darwinConfigurations = {
@@ -49,8 +53,8 @@ in
           ./wk01174.nix
         ];
       };
-      wf17084 =  darwinSystem {
-        system = "x86_64-darwin"  ;
+      wf17084 = darwinSystem {
+        system = "x86_64-darwin";
         modules = [
           ./wf17084.nix
         ];
