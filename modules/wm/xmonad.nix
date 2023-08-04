@@ -17,6 +17,8 @@ in
       enable = true;
       packages = [ pkgs.dconf ];
     };
+
+    networking.networkmanager = { enable = true; };
     programs.dconf.enable = true;
     services.upower.enable = true;
     services.xserver.windowManager.xmonad = {
@@ -79,7 +81,6 @@ in
 
       # services.caffeine.enable = true;
       services.blueman-applet.enable = true;
-      networking.networkmanager = { enable = true; };
       # services.network-manager-applet.enable = true;
       services.dunst.enable = true;
 
