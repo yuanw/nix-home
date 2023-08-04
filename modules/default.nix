@@ -22,6 +22,10 @@
       ./typing
       ./workShell.nix
     ];
+    linux.imports = [
+      ./nixos_system.nix
+      ./wm/xmonad.nix
+    ];
     darwin.imports = [
       ./brew.nix
       ./wm/yabai.nix
