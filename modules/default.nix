@@ -16,7 +16,6 @@
       ./editor.nix
       ./helix.nix
       ./neovim
-      ./health.nix
       ./settings.nix
       ./terminal
       ./typing
@@ -28,6 +27,7 @@
     ];
     darwin.imports = [
       ./brew.nix
+      ./health.nix
       ./wm/yabai.nix
       ./macintosh.nix
     ];
