@@ -18,7 +18,7 @@ in
       packages = [ pkgs.dconf ];
     };
 
-    networking.networkmanager = { enable = true; };
+    # networking.networkmanager = { enable = true; };
     programs.dconf.enable = true;
     services.upower.enable = true;
     services.xserver.windowManager.xmonad = {
