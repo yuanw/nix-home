@@ -1,9 +1,8 @@
-{ config, lib, pkgs, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 with pkgs.stdenv;
 with lib; {
   imports = [
-
     inputs.agenix.nixosModules.age
     inputs.home-manager.nixosModules.home-manager
   ];
