@@ -3,6 +3,9 @@
     devShells.default = pkgs.mkShell {
       buildInputs = with pkgs; [
         nix-diff
+        awscli
+        lego
+        terraform
       ];
       # See https://haskell.flake.page/devshell#composing-devshells
       inputsFrom = [
