@@ -19,6 +19,7 @@
       ./settings.nix
       ./terminal
       ./typing
+      ./qmk.nix
       ./workShell.nix
     ];
     linux.imports = [
