@@ -28,4 +28,4 @@ jobs:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: yuanwang-wf,nix-community
-    - run: nix build .#NetwokManageer-openconnect -L
+    - run: nix build .#NetworkManager-openconnect -L
