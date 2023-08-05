@@ -71,7 +71,7 @@ in
     packages.wf17084 = self.darwinConfigurations.wf17084.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
     packages.hello = pkgs.hello;
-    packages.NetworkManager-openconnect = pkgs.NetworkManager-openconnect;
+    packages.NetworkManager-openconnect = pkgs.networkmanager-openconnect;
     #     adguard = self.nixosConfigurations.adguard.system;
     #     aws = self.nixosConfigurations.aws.system;
 
