@@ -70,6 +70,7 @@ in
     packages.yuanw = self.darwinConfigurations.yuanw.system;
     packages.wf17084 = self.darwinConfigurations.wf17084.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
+    packages.NetworkManager-openconnect = self.x86_64-linux.packages.NetworkManager-openconnect;
     #     adguard = self.nixosConfigurations.adguard.system;
     #     aws = self.nixosConfigurations.aws.system;
 
