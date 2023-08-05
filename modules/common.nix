@@ -53,7 +53,7 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
-        mesa = inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
+        # mesa = inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
         # use this variant if unfree packages are needed:
         # unstable = import nixpkgs-unstable {
         #   inherit system;
