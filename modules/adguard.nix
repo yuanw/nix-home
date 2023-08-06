@@ -3,8 +3,9 @@
 {
   environment.systemPackages = [
     pkgs.dig
-    # pkgs.lego
+    pkgs.lego
     pkgs.wireguard-tools
+    pkgs.vim
   ];
 
   networking.firewall = {
