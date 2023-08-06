@@ -226,8 +226,8 @@
         protection_enabled = true;
         blocking_mode = "default"; # NXDOMAIN
         filtering_enabled = true;
-        blocked_services =
-          [ "bilibili" "ok" "snapchat" "tiktok" "tinder" "9gag" "twitch" ];
+        # blocked_services =
+        #   [ "bilibili" "ok" "snapchat" "tiktok" "tinder" "9gag" "twitch" ];
         # upstream DNS
         upstream_dns = [ "127.0.0.1:5335" ];
         # if upstream has any hostnames
