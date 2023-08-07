@@ -14,5 +14,13 @@
         config.pre-commit.devShell
       ];
     };
+    devShells.haskell = pkgs.mkShell {
+      inputsFrom = [
+        config.treefmt.build.devShell
+        config.pre-commit.devShell
+        config.haskellPackages.devShell
+      ];
+    };
+
   };
 }
