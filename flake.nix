@@ -24,6 +24,7 @@
       url = "github:AstroNvim/AstroNvim";
       flake = false;
     };
+    haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
@@ -39,7 +40,7 @@
   };
 
 
-  outputs = inputs @ { flake-parts, systems, ... }:
+  outputs = inputs @ { flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "aarch64-darwin"
@@ -53,9 +54,36 @@
         ./modules
         inputs.pre-commit.flakeModule
         inputs.treefmt-nix.flakeModule
+        inputs.haskell-flake.flakeModule
       ];
-      perSystem.treefmt.imports = [ ./treefmt.nix ];
-      # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
-      perSystem.pre-commit.settings.hooks.treefmt.enable = true;
+      perSystem = { config, system, pkgs, ... }: {
+        _module.args.pkgs = import inputs.nixpkgs {
+          inherit system;
+          overlays = [
+            (_final: _prev: {
+              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+              inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+            })
+          ];
+          config = {
+            allowUnsupportedSystem = true;
+          };
+        };
+        haskellProjects.default = {
+          projectRoot = ./hs-land;
+          settings = { };
+          # overrides = self: super: { };
+          autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
+          devShell = {
+            hlsCheck.enable = false;
+          };
+        };
+
+        treefmt.imports = [ ./treefmt.nix ];
+        # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
+        pre-commit.settings.hooks.treefmt.enable = true;
+
+      };
+
     };
 }

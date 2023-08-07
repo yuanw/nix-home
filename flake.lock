@@ -282,6 +282,21 @@
         "type": "github"
       }
     },
+    "haskell-flake": {
+      "locked": {
+        "lastModified": 1690398210,
+        "narHash": "sha256-1wnx2K3U2xmUI5rUulOZ66tcIva+OGWS47dyHdZJjsA=",
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "rev": "d3c8d8be31d3a5dcf9d49e9dacfc570b5c736658",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "type": "github"
+      }
+    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -654,6 +669,7 @@
         "emacs": "emacs",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils_3",
+        "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
         "hosts": "hosts",
         "nix-colors": "nix-colors",
@@ -662,7 +678,6 @@
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nur": "nur",
         "pre-commit": "pre-commit",
-        "systems": "systems_6",
         "treefmt-nix": "treefmt-nix"
       }
     },
@@ -739,20 +754,6 @@
         "owner": "nix-systems",
         "repo": "default",
         "type": "github"
-      }
-    },
-    "systems_6": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "id": "systems",
-        "type": "indirect"
       }
     },
     "treefmt-nix": {

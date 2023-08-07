@@ -7,7 +7,6 @@
         awscli
         lego
         terraform
-        wifish
       ];
       # See https://haskell.flake.page/devshell#composing-devshells
       inputsFrom = [
