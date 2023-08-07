@@ -53,17 +53,17 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
-        # mesa = inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa;
+        mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+        inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+        #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
+        #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
+
         # use this variant if unfree packages are needed:
         # unstable = import nixpkgs-unstable {
         #   inherit system;
         #   config.allowUnfree = true;
         # };
 
-      })
-      (_final: _prev: {
-        # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
-        # devenv = inputs.devenv.packages.${prev.system}.devenv;
       })
       (import ../hs-land/overlay.nix)
       (import ../packages)
