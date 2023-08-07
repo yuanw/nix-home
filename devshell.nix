@@ -18,7 +18,7 @@
       inputsFrom = [
         config.treefmt.build.devShell
         config.pre-commit.devShell
-        config.haskellProjects.devShell
+        config.haskellProjects.default.devShell
       ];
     };
 
