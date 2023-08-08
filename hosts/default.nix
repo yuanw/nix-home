@@ -1,9 +1,9 @@
 { self, inputs, system, ... }:
 let
   nixosSystem = args:
-    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; }; } // args);
+    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
   darwinSystem = args:
-    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; }; } // args);
+    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; isDarwin = true; isNixOS = false; }; } // args);
 in
 {
   flake = {

@@ -73,12 +73,11 @@ with lib; {
     import ./home.nix { inherit pkgs lib config; };
 
   fonts.fontDir.enable = true;
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     fira-code
     font-awesome
     iosevka
     roboto
     roboto-mono
-    #   pragmata-pro
   ];
 }

@@ -1,6 +1,6 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -106,7 +106,6 @@ with lib; {
     };
 
 
-    fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
 
     system.activationScripts.postUserActivation.text = ''
       if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
@@ -115,13 +114,21 @@ with lib; {
     '';
 
   }
+    (if (isDarwin) then {
+      fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+    } else {
+
+      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
+    })
     (if (builtins.hasAttr "launchd" options) then {
+
       launchd.user.agents.emacs.serviceConfig = {
         StandardOutPath = "/tmp/emacs.log";
         StandardErrorPath = "/tmp/emacs.log";
       };
     } else
       {
+
         # systemd
       })]);
 }
