@@ -41,8 +41,9 @@ in
       };
     };
     darwinConfigurations = {
-      yuanw = self.nixos-flake.lib.mkMacosSystem "x86_64-darwin" {
-        imports = [
+      yuanw = darwinSystem {
+        system = "x86_64-darwin";
+        modules = [
           inputs.self.nixosModules.common
           inputs.self.nixosModules.darwin
           ./yuan-mac.nix

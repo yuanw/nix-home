@@ -1,4 +1,9 @@
 { pkgs, config, ... }: {
+  imports = [
+    inputs.self.nixosModules.common
+    inputs.self.nixosModules.darwin
+  ];
+
   home-manager.users.${config.my.username}.programs.git = {
     extraConfig = { github.user = "yuanw"; };
   };
@@ -13,7 +18,7 @@
   };
 
   modules = {
-    common = { enable = true; };
+    # common = { enable = true; };
 
     browsers.firefox = {
       enable = true;
