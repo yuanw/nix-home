@@ -1,7 +1,7 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
-
+[[https://builtwithnix.org/badge.svg]]
 [[./screenshots/macos.png]]
 
 The goal for this repo is to declaratively configure MacOS and Linux system using nixos/[[https://github.com/LnL7/nix-darwin][nix-darwin]] and [[https://github.com/nix-community/home-manager][home-manger]].
