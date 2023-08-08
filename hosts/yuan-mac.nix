@@ -1,4 +1,4 @@
-{ pkgs, config, ... }: {
+{ pkgs, config, inputs, ... }: {
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
