@@ -65,7 +65,7 @@
         # };
 
       })
-      (import ../hs-land/overlay.nix)
+      (import ../packages/hs-land/overlay.nix)
       (import ../packages)
     ];
 

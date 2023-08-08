@@ -70,7 +70,7 @@
           };
         };
         haskellProjects.default = {
-          projectRoot = ./hs-land;
+          projectRoot = ./packages/hs-land;
           settings = { };
           # overrides = self: super: { };
           autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
