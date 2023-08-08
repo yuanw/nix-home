@@ -1,6 +1,7 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
+[[https://github.com/yuanw/nix-home/workflows/CI/badge.svg]]
 [[https://builtwithnix.org/badge.svg]]
 [[./screenshots/macos.png]]
 
