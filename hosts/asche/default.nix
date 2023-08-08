@@ -27,7 +27,7 @@
       rofi = {
         enable = true;
         terminal = "${pkgs.alacritty}/bin/alaritty";
-        theme = ../modules/theme.rafi;
+        theme = ../../modules/theme.rafi;
       };
       git.extraConfig = {
         github.user = "yuanw";
