@@ -136,7 +136,7 @@ in
         windowManager.xmonad = {
           enable = true;
           enableContribAndExtras = true;
-          config = ../../packages/hs-land/xmonad/xmonad.hs;
+          config = ../../packages/xmonad/xmonad.hs;
 
         };
       };
