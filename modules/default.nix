@@ -14,9 +14,9 @@
       ./dev/node.nix
       ./dev/python.nix
       ./dev/zig.nix
-      ./editor.nix
       ./helix.nix
-      ./neovim
+      ./editor/doom
+      ./editor/neovim
       ./settings.nix
       ./terminal
       ./typing
