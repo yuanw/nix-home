@@ -31,15 +31,15 @@ status_bracket=(
   background.border_color="$BACKGROUND_2"
 )
 
-sketchybar --add slider volume right            \
-           --set volume "${volume_slider[@]}"   \
-           --subscribe volume volume_change     \
-                              mouse.clicked     \
-                              mouse.entered     \
-                              mouse.exited      \
-                                                \
-           --add item volume_icon right         \
-           --set volume_icon "${volume_icon[@]}"
+sketchybar --add slider volume right \
+  --set volume "${volume_slider[@]}" \
+  --subscribe volume volume_change \
+  mouse.clicked \
+  mouse.entered \
+  mouse.exited \
+  \
+  --add item volume_icon right \
+  --set volume_icon "${volume_icon[@]}"
 
 sketchybar --add bracket status brew github.bell volume_icon \
-           --set status "${status_bracket[@]}"
+  --set status "${status_bracket[@]}"

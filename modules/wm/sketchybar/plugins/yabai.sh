@@ -25,56 +25,54 @@ window_state() {
     ICON+=$YABAI_STACK
     LABEL="$(printf "[%s/%s]" "$STACK_INDEX" "$LAST_STACK_INDEX")"
     COLOR=$RED
-  elif [[ $LAYOUT = "bsp" ]]; then
+  elif [[ $LAYOUT == "bsp" ]]; then
     ICON+=$YABAI_BSP
   fi
 
   args=(--animate sin 10 --bar border_color=$COLOR
-                         --set $NAME icon.color=$COLOR)
+    --set $NAME icon.color=$COLOR)
 
-  [ -z "$LABEL" ] && args+=(label.width=0) \
-                  || args+=(label="$LABEL" label.width=40)
+  [ -z "$LABEL" ] && args+=(label.width=0) ||
+    args+=(label="$LABEL" label.width=40)
 
-  [ -z "$ICON" ] && args+=(icon.width=0) \
-                 || args+=(icon="$ICON" icon.width=30)
+  [ -z "$ICON" ] && args+=(icon.width=0) ||
+    args+=(icon="$ICON" icon.width=30)
 
   sketchybar -m "${args[@]}"
 }
 
-windows_on_spaces () {
+windows_on_spaces() {
   CURRENT_SPACES="$(yabai -m query --displays | jq -r '.[].spaces | @sh')"
 
   args=(--set spaces_bracket drawing=off
-        --set '/space\..*/' background.drawing=on
-        --animate sin 10)
+    --set '/space\..*/' background.drawing=on
+    --animate sin 10)
 
-  while read -r line
-  do
-    for space in $line
-    do
+  while read -r line; do
+    for space in $line; do
       icon_strip=" "
       apps=$(yabai -m query --windows --space $space | jq -r ".[].app")
       if [ "$apps" != "" ]; then
         while IFS= read -r app; do
           icon_strip+=" $($CONFIG_DIR/plugins/icon_map.sh "$app")"
-        done <<< "$apps"
+        done <<<"$apps"
       fi
       args+=(--set space.$space label="$icon_strip" label.drawing=on)
     done
-  done <<< "$CURRENT_SPACES"
+  done <<<"$CURRENT_SPACES"
 
   sketchybar -m "${args[@]}"
 }
 
 mouse_clicked() {
   case "$LAYOUT" in
-    bsp)
+  bsp)
     yabai -m space --layout stack
     ;;
-    stack)
+  stack)
     yabai -m space --layout bsp
     ;;
-    float)
+  float)
     yabai -m space --layout bsp
     ;;
   esac
@@ -82,12 +80,16 @@ mouse_clicked() {
 }
 
 case "$SENDER" in
-  "mouse.clicked") mouse_clicked
+"mouse.clicked")
+  mouse_clicked
   ;;
-  "forced") exit 0
+"forced")
+  exit 0
   ;;
-  "window_focus") window_state 
+"window_focus")
+  window_state
   ;;
-  "windows_on_spaces" | "space_change") windows_on_spaces
+"windows_on_spaces" | "space_change")
+  windows_on_spaces
   ;;
 esac

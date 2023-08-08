@@ -10,6 +10,6 @@ battery=(
   updates=on
 )
 
-sketchybar --add item battery right      \
-           --set battery "${battery[@]}" \
-           --subscribe battery power_source_change system_woke
+sketchybar --add item battery right \
+  --set battery "${battery[@]}" \
+  --subscribe battery power_source_change system_woke
