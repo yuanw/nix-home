@@ -33,10 +33,7 @@ in
       asche = nixosSystem {
         system = "x86_64-linux";
         modules = [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.linux
-          ../machines/asche/configuration.nix
-          ./asche.nix
+          ./asche
         ];
       };
     };

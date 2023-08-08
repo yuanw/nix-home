@@ -1,6 +1,12 @@
-{ config, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 
 {
+  imports = [
+    inputs.self.nixosModules.common
+    inputs.self.nixosModules.linux
+    ./configuration.nix
+  ];
+
   my = {
     username = "yuanw";
     name = "Yuan Wang";
