@@ -21,11 +21,10 @@ source-repository head
   location: https://github.com/yuanwang-wf/resource-id
 
 library
-  exposed-modules:  Lib
-  other-modules:    Paths_resource_id
-  hs-source-dirs:   src
-  default-extensions:
-      ImportQualifiedPost
+  exposed-modules:    Lib
+  other-modules:      Paths_resource_id
+  hs-source-dirs:     src
+  default-extensions: ImportQualifiedPost
   build-depends:
       base                  >=4.7 && <5
     , base64-bytestring
@@ -34,16 +33,14 @@ library
     , pretty-terminal
     , text
 
-  default-language: Haskell2010
+  default-language:   Haskell2010
 
 executable rid
-  main-is:          Main.hs
-  other-modules:    Paths_resource_id
-  hs-source-dirs:   app
-  ghc-options:      -threaded -rtsopts -with-rtsopts=-N
-  default-extensions:
-      ImportQualifiedPost
-
+  main-is:            Main.hs
+  other-modules:      Paths_resource_id
+  hs-source-dirs:     app
+  ghc-options:        -threaded -rtsopts -with-rtsopts=-N
+  default-extensions: ImportQualifiedPost
   build-depends:
       base                  >=4.7 && <5
     , base64-bytestring
@@ -53,7 +50,7 @@ executable rid
     , resource-id
     , text
 
-  default-language: Haskell2010
+  default-language:   Haskell2010
 
 test-suite resource-id-test
   type:             exitcode-stdio-1.0
