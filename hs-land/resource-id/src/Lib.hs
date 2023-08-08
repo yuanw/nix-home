@@ -14,6 +14,7 @@ import Data.Text.IO qualified as TIO
 import System.Console.Pretty (Color (..), Pretty, color)
 
 type Kind = B.ByteString
+
 type KeyPath = [(B.ByteString, B.ByteString)]
 
 appendMissingChar :: B.ByteString -> B.ByteString
@@ -26,7 +27,7 @@ splitBy :: B.ByteString -> [B.ByteString]
 splitBy = join . map (C.split (chr 31)) . C.split (chr 30)
 
 decode :: B.ByteString -> Either String KeyPath
-decode = (pairUp =<<) . (splitBy <$>) . Base64.decode . appendMissingChar
+decode = (pairUp . splitBy) <=< (Base64.decode . appendMissingChar)
 
 pairUp :: [B.ByteString] -> Either String KeyPath
 pairUp [] = Right []
@@ -35,17 +36,17 @@ pairUp _ = Left "unmatch kind name"
 
 keyPathToPrettyText :: KeyPath -> T.Text
 keyPathToPrettyText paths =
-    color Default "Key("
-        `T.append` T.intercalate
-            ", "
-            ( foldl
-                ( \ls (kind, name) ->
-                    ls ++ [color Blue (E.decodeUtf8 kind), color Green (E.decodeUtf8 name)]
-                )
-                []
-                paths
-            )
-        `T.append` color Default ")"
+  color Default "Key("
+    `T.append` T.intercalate
+      ", "
+      ( foldl
+          ( \ls (kind, name) ->
+              ls ++ [color Blue (E.decodeUtf8 kind), color Green (E.decodeUtf8 name)]
+          )
+          []
+          paths
+      )
+    `T.append` color Default ")"
 
 displayKeyPath :: KeyPath -> IO ()
 displayKeyPath = TIO.putStrLn . keyPathToPrettyText
