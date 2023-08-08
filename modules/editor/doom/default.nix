@@ -88,7 +88,7 @@ with lib; {
         ];
 
         file = mkIf cfg.enableDoomConfig {
-          ".doom.d".source = ./doom;
+          ".doom.d".source = ./config;
         };
       };
 
