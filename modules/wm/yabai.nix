@@ -115,7 +115,7 @@ in
 
       ];
 
-      xdg.configFile."sketchybar".source = ../../conf.d/sketchybar;
+      xdg.configFile."sketchybar".source = ./sketchybar;
     };
     services.skhd = {
       enable = true;
