@@ -52,10 +52,10 @@ in
           ./wk01174.nix
         ];
       };
-      wf17084 = darwinSystem {
+      ci = darwinSystem {
         system = "x86_64-darwin";
         modules = [
-          ./wf17084.nix
+          ./wk01174.nix
         ];
       };
 
@@ -67,7 +67,7 @@ in
     packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
     packages.yuanw = self.darwinConfigurations.yuanw.system;
     packages.wf17084 = self.darwinConfigurations.wf17084.system;
-    packages.wk01174 = self.darwinConfigurations.WK01174.system;
+    packages.wk01174 = self.darwinConfigurations.ci.system;
     #     adguard = self.nixosConfigurations.adguard.system;
     #     aws = self.nixosConfigurations.aws.system;
 
