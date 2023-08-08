@@ -8,6 +8,7 @@
       ./dev/agda.nix
       ./dev/dart.nix
       ./dev/haskell.nix
+      ./dev/haxe.nix
       ./dev/java.nix
       ./dev/julia.nix
       ./dev/node.nix
