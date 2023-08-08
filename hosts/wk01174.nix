@@ -77,6 +77,7 @@
         agda.enable = false;
         dart.enable = true;
         haskell.enable = true;
+        haxe.enable = true;
         python.enable = true;
       };
 
