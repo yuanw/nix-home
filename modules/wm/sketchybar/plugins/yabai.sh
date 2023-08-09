@@ -2,8 +2,8 @@
 LAYOUT=$(yabai -m query --spaces --space | jq -r .type)
 
 window_state() {
-  source "$CONFIG_DIR/colors.sh"
-  source "$CONFIG_DIR/icons.sh"
+  # source "$CONFIG_DIR/colors.sh"
+  # source "$CONFIG_DIR/icons.sh"
 
   WINDOW=$(yabai -m query --windows --window)
   STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
@@ -29,8 +29,8 @@ window_state() {
     ICON+=$YABAI_BSP
   fi
 
-  args=(--animate sin 10 --bar border_color=$COLOR
-    --set $NAME icon.color=$COLOR)
+  args=(--animate sin 10 --bar border_color="$COLOR"
+    --set "$NAME" icon.color="$COLOR")
 
   [ -z "$LABEL" ] && args+=(label.width=0) ||
     args+=(label="$LABEL" label.width=40)
@@ -51,13 +51,13 @@ windows_on_spaces() {
   while read -r line; do
     for space in $line; do
       icon_strip=" "
-      apps=$(yabai -m query --windows --space $space | jq -r ".[].app")
+      apps=$(yabai -m query --windows --space "$space" | jq -r ".[].app")
       if [ "$apps" != "" ]; then
         while IFS= read -r app; do
-          icon_strip+=" $($CONFIG_DIR/plugins/icon_map.sh "$app")"
+          icon_strip+=" $("$CONFIG_DIR"/plugins/icon_map.sh "$app")"
         done <<<"$apps"
       fi
-      args+=(--set space.$space label="$icon_strip" label.drawing=on)
+      args+=(--set "space.$space" label="$icon_strip" label.drawing=on)
     done
   done <<<"$CURRENT_SPACES"
 

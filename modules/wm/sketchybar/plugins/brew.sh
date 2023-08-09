@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source "$CONFIG_DIR/colors.sh"
-
 COUNT=$(brew outdated | wc -l | tr -d ' ')
 
 COLOR=$RED
@@ -22,4 +20,4 @@ case "$COUNT" in
   ;;
 esac
 
-sketchybar --set $NAME label=$COUNT icon.color=$COLOR
+sketchybar --set "$NAME" label="$COUNT" icon.color="$COLOR"
