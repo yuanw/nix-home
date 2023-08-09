@@ -23,9 +23,9 @@ launchctl unload -F /System/Library/LaunchAgents/com.apple.OSDUIHelper.plist > /
 # Setting up the general bar appearance of the bar
 bar=(
   height=45
-  color=$BAR_COLOR
+  color="$BAR_COLOR"
   border_width=2
-  border_color=$BAR_BORDER_COLOR
+  border_color="$BAR_BORDER_COLOR"
   shadow=off
   position=top
   sticky=on
@@ -41,22 +41,22 @@ sketchybar --bar "${bar[@]}"
 defaults=(
   updates=when_shown
   icon.font="$FONT:Bold:14.0"
-  icon.color=$ICON_COLOR
-  icon.padding_left=$PADDINGS
-  icon.padding_right=$PADDINGS
+  icon.color="$ICON_COLOR"
+  icon.padding_left="$PADDINGS"
+  icon.padding_right="$PADDINGS"
   label.font="$FONT:Semibold:13.0"
-  label.color=$LABEL_COLOR
-  label.padding_left=$PADDINGS
-  label.padding_right=$PADDINGS
-  padding_right=$PADDINGS
-  padding_left=$PADDINGS
+  label.color="$LABEL_COLOR"
+  label.padding_left="$PADDINGS"
+  label.padding_right="$PADDINGS"
+  padding_right="$PADDINGS"
+  padding_left="$PADDINGS"
   background.height=26
   background.corner_radius=9
   background.border_width=2
   popup.background.border_width=2
   popup.background.corner_radius=9
-  popup.background.border_color=$POPUP_BORDER_COLOR
-  popup.background.color=$POPUP_BACKGROUND_COLOR
+  popup.background.border_color="$POPUP_BORDER_COLOR"
+  popup.background.color="$POPUP_BACKGROUND_COLOR"
   popup.blur_radius=20
   popup.background.shadow.drawing=on
 )

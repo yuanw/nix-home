@@ -61,6 +61,7 @@
           inherit system;
           overlays = [
             (_final: _prev: {
+              # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
               mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
               inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
             })

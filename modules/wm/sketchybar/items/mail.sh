@@ -8,6 +8,6 @@ sketchybar --add item mail left \
   click_script="$PLUGIN_DIR/mail.sh" \
   icon.padding_left=22 \
   icon.font="$ICON_FONT:Solid:16.0" \
-  icon=$MAIL \
-  icon.color=$BLUE \
+  icon="$MAIL" \
+  icon.color="$BLUE" \
   label=!

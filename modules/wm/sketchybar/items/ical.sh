@@ -4,8 +4,8 @@ POPUP_CLICK_SCRIPT="sketchybar --set ical popup.drawing=toggle"
 sketchybar --add item ical right \
   --set ical update_freq=180 \
   icon=􀉉 \
-  icon.color=${YELLOW} \
-  label.color=${YELLOW} \
+  icon.color="${YELLOW}" \
+  label.color="${YELLOW}" \
   popup.align=right \
   script="$PLUGIN_DIR/ical.sh" \
   click_script="$POPUP_CLICK_SCRIPT" \

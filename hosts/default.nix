@@ -41,8 +41,6 @@ in
       yuanw = darwinSystem {
         system = "x86_64-darwin";
         modules = [
-          inputs.self.nixosModules.common
-          inputs.self.nixosModules.darwin
           ./yuan-mac.nix
         ];
       };
@@ -52,16 +50,14 @@ in
           ./wk01174.nix
         ];
       };
+      # Github Action runners do not support M1 yet.
       ci = darwinSystem {
         system = "x86_64-darwin";
         modules = [
           ./wk01174.nix
         ];
       };
-
-
     };
-
   };
   perSystem = { system, ... }: {
     packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;

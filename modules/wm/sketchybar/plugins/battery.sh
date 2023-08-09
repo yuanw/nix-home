@@ -1,13 +1,10 @@
 #!/bin/bash
 
-source "$CONFIG_DIR/icons.sh"
-source "$CONFIG_DIR/colors.sh"
-
 BATTERY_INFO="$(pmset -g batt)"
 PERCENTAGE=$(echo "$BATTERY_INFO" | rg -o "\d+%" | cut -d% -f1)
 CHARGING=$(echo "$BATTERY_INFO" | grep 'AC Power')
 
-if [ $PERCENTAGE = "" ]; then
+if [ "$PERCENTAGE" = "" ]; then
   exit 0
 fi
 
@@ -40,4 +37,4 @@ if [[ $CHARGING != "" ]]; then
   DRAWING=off
 fi
 
-sketchybar --set $NAME drawing=$DRAWING icon="$ICON" icon.color=$COLOR
+sketchybar --set "$NAME" drawing=$DRAWING icon="$ICON" icon.color="$COLOR"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FRONT_APP_SCRIPT='sketchybar --set $NAME label="$INFO"'
+FRONT_APP_SCRIPT="sketchybar --set $NAME label=$INFO"
 
 front_app=(
   icon.drawing=off
