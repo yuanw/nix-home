@@ -1,5 +1,9 @@
 #!/usr/bin/env sh
-#
+# shellcheck source=$CONFIG_DIR/colors.sh
+# shellcheck source=$CONFIG_DIR/icons.sh
+. "$CONFIG_DIR/colors.sh" # Loads all defined colors
+. "$CONFIG_DIR/icons.sh"  # Loads all defined icons
+
 sketchybar --add item mail left \
   --subscribe mail system_woke \
   --set mail update_freq=60 \

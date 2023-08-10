@@ -2,8 +2,8 @@
 LAYOUT=$(yabai -m query --spaces --space | jq -r .type)
 
 window_state() {
-  # source "$CONFIG_DIR/colors.sh"
-  # source "$CONFIG_DIR/icons.sh"
+  source "$CONFIG_DIR/colors.sh"
+  source "$CONFIG_DIR/icons.sh"
 
   WINDOW=$(yabai -m query --windows --window)
   STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')

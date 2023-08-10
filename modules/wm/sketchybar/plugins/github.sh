@@ -1,4 +1,6 @@
 #!/bin/bash
+. "$CONFIG_DIR/colors.sh" # Loads all defined colors
+. "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
 update() {
   NOTIFICATIONS="$(gh api notifications)"

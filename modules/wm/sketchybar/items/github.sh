@@ -1,4 +1,6 @@
 #!/bin/bash
+. "$CONFIG_DIR/colors.sh" # Loads all defined colors
+. "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
 POPUP_CLICK_SCRIPT="sketchybar --set $NAME popup.drawing=toggle"
 
