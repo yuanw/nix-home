@@ -16,6 +16,8 @@ export -n LOCK
 export -n BELL
 export -n BELL_DOT
 MAIL=􀍕
+
+export -n MAIL
 # Git Icons
 GIT_ISSUE=􀍷
 GIT_DISCUSSION=􀒤
