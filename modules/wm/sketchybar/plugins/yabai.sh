@@ -2,7 +2,9 @@
 LAYOUT=$(yabai -m query --spaces --space | jq -r .type)
 
 window_state() {
+  # shellcheck disable=SC1091
   source "$CONFIG_DIR/colors.sh"
+  # shellcheck disable=SC1091
   source "$CONFIG_DIR/icons.sh"
 
   WINDOW=$(yabai -m query --windows --window)
