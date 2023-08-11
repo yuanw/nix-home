@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
-# shellcheck source=$CONFIG_DIR/colors.sh
-# shellcheck source=$CONFIG_DIR/icons.sh
+# shellcheck disable=SC1091
 . "$CONFIG_DIR/colors.sh" # Loads all defined colors
 . "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 

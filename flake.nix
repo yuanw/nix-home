@@ -36,7 +36,6 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     pre-commit.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit.inputs.nixpkgs.follows = "nixpkgs";
-
   };
 
 

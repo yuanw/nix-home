@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1091
 . "$CONFIG_DIR/colors.sh" # Loads all defined colors
 . "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
