@@ -64,7 +64,7 @@ in
     packages.yuanw = self.darwinConfigurations.yuanw.system;
     packages.ci = self.darwinConfigurations.ci.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
-    packages.activate = pkgs.writeShellApplication
+    app.activate = pkgs.writeShellApplication
       {
         name = "activate";
         text =
