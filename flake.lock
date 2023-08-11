@@ -284,15 +284,15 @@
     },
     "haskell-flake": {
       "locked": {
-        "lastModified": 1691761683,
-        "narHash": "sha256-R1+Z1v1bBuPc/pXtjIDrLywOPz4EU+NFFkBX+aQOWSM=",
-        "owner": "yuanwang-wf",
+        "lastModified": 1691763544,
+        "narHash": "sha256-QQsSI5VXm0bBijeGSXXNf4fyw76/XmN67NGbmTCx71s=",
+        "owner": "srid",
         "repo": "haskell-flake",
-        "rev": "65494847115495a3fdeda970b3883ff3acd84b15",
+        "rev": "f16e7ac05b1f22b66ef05b7fcc8a96281bb2b749",
         "type": "github"
       },
       "original": {
-        "owner": "yuanwang-wf",
+        "owner": "srid",
         "repo": "haskell-flake",
         "type": "github"
       }
