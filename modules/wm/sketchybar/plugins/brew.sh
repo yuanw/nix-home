@@ -1,8 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC1091
 . "$CONFIG_DIR/colors.sh" # Loads all defined colors
-# shellcheck disable=SC1091
-. "$CONFIG_DIR/icons.sh" # Loads all defined icons
+. "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
 COUNT=$(brew outdated | wc -l | tr -d ' ')
 
