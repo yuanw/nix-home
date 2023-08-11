@@ -7,6 +7,7 @@
         awscli
         lego
         terraform
+        shellcheck
       ];
       # See https://haskell.flake.page/devshell#composing-devshells
       inputsFrom = [
