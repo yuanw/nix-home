@@ -24,7 +24,7 @@
       url = "github:AstroNvim/AstroNvim";
       flake = false;
     };
-    haskell-flake.url = "github:yuanwang-wf/haskell-flake";
+    haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
