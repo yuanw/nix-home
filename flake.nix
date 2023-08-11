@@ -24,7 +24,7 @@
       url = "github:AstroNvim/AstroNvim";
       flake = false;
     };
-    haskell-flake.url = "github:srid/haskell-flake";
+    haskell-flake.url = "github:yuanwang-wf/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs.url = "github:nix-community/emacs-overlay";
     agenix = {
@@ -36,7 +36,6 @@
     treefmt-nix.url = "github:numtide/treefmt-nix";
     pre-commit.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit.inputs.nixpkgs.follows = "nixpkgs";
-
   };
 
 
