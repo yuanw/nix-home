@@ -100,6 +100,11 @@
 ;;; :ui modeline
 ;; An evil mode indicator is redundant with cursor shape
 ;; (advice-add #'doom-modeline-segment--modals :override #'ignore)
+(setq org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
 
 (setq org-agenda-custom-commands
       `(("d" "Dashboard"
