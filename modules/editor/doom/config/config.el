@@ -60,7 +60,9 @@
 
 ;; Prevents some cases of Emacs flickering.
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
-
+(use-package! justl
+  :config
+  (map! :n "e" 'justl-exec-recipe))
 ;;
 ;;; Keybinds
 

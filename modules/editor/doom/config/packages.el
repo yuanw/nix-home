@@ -58,6 +58,7 @@
 (package! evil-replace-with-register)
 (package! keycast)
 (package! eglot-java)
+(package! justl)
 (package! atomic-chrome)
 ;https://github.com/emacs-tree-sitter/tree-sitter-langs/pull/110
 ;; (package! tree-sitter-langs
