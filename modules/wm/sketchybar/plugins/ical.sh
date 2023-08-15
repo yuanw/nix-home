@@ -4,7 +4,7 @@
 # 0 is today, 1 is tomorrow, 2 the day after tomorrow etc...
 list_events() {
   SEP="%"
-  local -n args=$2
+  local args=$2
   EVENT_COUNT=0
   DAY_COUNT=$1
   args+=(--remove '/ical.day\.*/')
