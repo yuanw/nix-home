@@ -44,7 +44,7 @@ list_events() {
       click_script="sketchybar --set $NAME popup.drawing=off"
       position=popup.ical
       drawing=on)
-  done <<<"cmd EVENTS"
+  done <<<"echo EVENTS"
 }
 
 mouse_clicked() {
@@ -73,11 +73,13 @@ update() {
   else
     args+=(--set "$NAME" label="")
   fi
+  echo "before ical update"
   echo args
   sketchybar -m "${args[@]}" >/dev/null
   if [ "$SENDER" = "forced" ]; then
     sketchybar --animate tanh 15 --set "$NAME" label.y_offset=5 label.y_offset=0
   fi
+  echo "after ical update"
 }
 
 popup() {
