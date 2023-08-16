@@ -7,7 +7,7 @@ SEP="%"
 # This function takes an integer as argument which represents a day.
 # 0 is today, 1 is tomorrow, 2 the day after tomorrow etc...
 list_events() {
-  local -n args=$2
+  local args=$2
   EVENT_COUNT=0
   DAY_COUNT=$1
   args+=(--remove '/ical.day\.*/')
