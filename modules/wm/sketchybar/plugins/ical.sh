@@ -44,7 +44,7 @@ list_events() {
       click_script="sketchybar --set $NAME popup.drawing=off"
       position=popup.ical
       drawing=on)
-  done <<<"echo EVENTS"
+  done <<<"$(echo "$EVENTS")"
 }
 
 mouse_clicked() {
