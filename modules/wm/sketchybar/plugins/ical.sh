@@ -73,7 +73,7 @@ update() {
   else
     args+=(--set "$NAME" label="")
   fi
-
+  echo args
   sketchybar -m "${args[@]}" >/dev/null
   if [ "$SENDER" = "forced" ]; then
     sketchybar --animate tanh 15 --set "$NAME" label.y_offset=5 label.y_offset=0
