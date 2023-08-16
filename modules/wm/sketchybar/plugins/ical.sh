@@ -1,10 +1,12 @@
 #!/bin/bash
+# shellcheck disable=SC1091
+. "$CONFIG_DIR/colors.sh" # Loads all defined colors
+. "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
+SEP="%"
 # This function takes an integer as argument which represents a day.
 # 0 is today, 1 is tomorrow, 2 the day after tomorrow etc...
 list_events() {
-  source "$HOME/.config/sketchybar/colors.sh"
-  SEP="%"
   local -n args=$2
   EVENT_COUNT=0
   DAY_COUNT=$1
