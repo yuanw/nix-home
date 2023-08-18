@@ -1,7 +1,11 @@
 builds:
  exclude:
- - 'packages.aarch64-darwin.*'
+ - 'packages.x86_64-linux.yuanw'
+ - 'packages.x86_64-linux.ci'
+ - 'packages.x86_64-linux.wk01174'
  include:
  - '*.x86_64-linux.*'
- - 'defaultPackage.x86_64-linux'
- - 'devShell.x86_64-linux'
+ - defaultPackage.x86_64-linux
+ - devShell.x86_64-linux
+ - homeConfigurations.*
+ - nixosConfigurations.*
