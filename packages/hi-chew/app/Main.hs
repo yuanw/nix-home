@@ -3,6 +3,7 @@
 
 module Main where
 
+import Control.Monad
 import Data.Map qualified as Map
 import Data.Maybe (fromJust, isJust)
 import Data.Text qualified as T
