@@ -184,20 +184,27 @@ placed, otherwise they come first.")
   :after corfu
   :hook (corfu-mode . corfu-popupinfo-mode))
 
+(use-package! yasnippet-capf
+  :after cape
+  :config
+  (add-to-list 'completion-at-point-functions #'yasnippet-capf))
+;; (use-package! cape-yasnippet
+;;   :after corfu
+;;   :init
+;;   (add-to-list '+corfu-global-capes #'cape-yasnippet))
+(use-package! package-capf
+  :after cape
+  :hook (emacs-lisp-mode . (lambda ()
+                             (make-local-variable 'completion-at-point-functions)
+                             (add-to-list 'completion-at-point-functions #'package-capf))))
 
-(use-package! cape-yasnippet
-  :after corfu
-  :init
-  (add-to-list '+corfu-global-capes #'cape-yasnippet))
-
-
-(use-package! cape-use-package
-  :after corfu
-  :init
-  (add-hook! 'emacs-lisp-mode-hook
-    (defun +corfu--emacs-lisp-set-capfs ()
-      (make-local-variable '+corfu-global-capes)
-      (add-to-list '+corfu-global-capes #'cape-use-package))))
+;; (use-package! cape-use-package
+;;   :after corfu
+;;   :init
+;;   (add-hook! 'emacs-lisp-mode-hook
+;;     (defun +corfu--emacs-lisp-set-capfs ()
+;;       (make-local-variable '+corfu-global-capes)
+;;       (add-to-list '+corfu-global-capes #'cape-use-package))))
 
 
 (use-package! evil-collection-corfu
