@@ -20,7 +20,7 @@ _final: prev: {
           postInstall =
             if prev.stdenv.isDarwin then ''
               ${drv.postInstall or ""}
-              mkdir $out/Applications
+              mkdir $out/Applications/Mono-Stretchly.app/Contents/MacOS
               ln -s $out/bin $out/Applications/Mono-Stretchly.app/Contents/MacOS
             '' else ''
               ${drv.postInstall or ""}
