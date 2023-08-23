@@ -15,8 +15,19 @@ _final: prev: {
         haskellPackagesNew.callPackage ./ws-access-token/release.nix { };
       resource-id =
         haskellPackagesNew.callPackage ./resource-id/release.nix { };
-      mono-stretchly =
-        haskellPackagesNew.callPackage ./mono-stretchly/project.nix { };
+      mono-stretchly = prev.haskell.lib.compose.overrideCabal
+        (drv: {
+          postInstall =
+            if prev.stdenv.isDarwin then ''
+              ${drv.postInstall or ""}
+              mkdir $out/Applications
+              ln -s $out/bin $out/Applications/Mono-Stretchly.app/Contents/MacOS
+            '' else ''
+              ${drv.postInstall or ""}
+            ''
+          ;
+        })
+        (haskellPackagesNew.callPackage ./mono-stretchly/project.nix { });
       hi-chew = haskellPackagesNew.callPackage ./hi-chew/release.nix { };
     };
   };
