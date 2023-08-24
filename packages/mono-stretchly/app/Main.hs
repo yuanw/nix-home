@@ -100,7 +100,7 @@ main = do
   startApp model handleEvent buildUI config
   where
     config =
-      [ appWindowTitle "Stretch",
+      [ appWindowTitle "Let's stretch",
         -- how to bundle a png
         appWindowIcon "/Users/yuanwang/workspaces/nix-home/packages/mono-stretchly/data/assets/images/icon.png",
         appTheme darkTheme,
