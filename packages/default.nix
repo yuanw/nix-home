@@ -18,10 +18,10 @@ _final: prev: {
       mono-stretchly = prev.haskell.lib.compose.overrideCabal
         (_drv: {
           # https://github.com/alacritty/alacritty/tree/master/extra/osx/Alacritty.app
-          installPhase = ''
-            mkdir -p $out/Applications
+          # installPhase = ''
+          #   mkdir -p $out/Applications
 
-          '';
+          # '';
           passthru = {
             binaryPath = "Applications/mono-stretchly.app/Contents/MacOS/mono-stretchly";
           };
