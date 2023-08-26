@@ -57,7 +57,7 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type nil
-      abbrev-file-name (concat doom-private-dir "abbrevs.el")
+      abbrev-file-name (concat doom-private-dir "abbrevs.el"))
 ;; Prevents some cases of Emacs flickering.
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
 (use-package! justl
@@ -66,7 +66,7 @@
 ;;
 ;;; Keybinds
 
-(map!
+;; (map!
 
  ;; (:after evil-org
 
@@ -96,7 +96,7 @@
  ;;          "k" #'keycast-mode
  ;;          )
 
- )
+ ;; )
 
 
 ;;; :ui modeline
@@ -133,17 +133,6 @@
           (tags-todo "+next"
                      ((org-agenda-overriding-header "Next Tasks")))))))
 
-;; Disable invasive lsp-mode features
-(setq
- ;; lsp-ui-sideline-enable nil   ; not anymore useful than flycheck
- ;; lsp-ui-doc-enable nil        ; slow and redundant with K
- ;; lsp-enable-symbol-highlighting nil
- ;; lsp-file-watch-threshold 5000
- ;; If an LSP server isn't present when I start a prog-mode buffer, you
- ;; don't need to tell me. I know. On some systems I don't care to have a
- ;; whole development environment for some ecosystems.
- ;;+lsp-prompt-to-install-server 'quiet
- )
 
 ;; (use-package! interaction-log)
 (use-package! thrift-mode
@@ -160,7 +149,7 @@
 (after! browse-at-remote
   (setq browse-at-remote-add-line-number-if-no-region-selected t))
 ;; I like abbrevs, at least in org mode
-(add-hook 'org-mode-hook #'abbrev-mode)
+;; (add-hook 'org-mode-hook #'abbrev-mode)
 (add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
 (after! org
   (setq org-eukleides-path (getenv "EUKLEIDES_PATH")
@@ -169,6 +158,7 @@
         org-agenda-use-tag-inheritance nil)
   (add-to-list 'org-modules 'org-habit)
   )
+
 (use-package! super-save
   :config
   (add-to-list 'super-save-triggers 'vertico)
