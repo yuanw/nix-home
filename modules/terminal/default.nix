@@ -50,7 +50,7 @@ in
           snippets = [
             {
               description = "update a flake source";
-              command = " nix flake lock --update-input <input=nixpkgs>";
+              command = " ix flake lock --update-input <input=nixpkgs>";
               tag = [ "nix" ];
             }
             {
@@ -65,6 +65,11 @@ in
               tag = [ "nix" ];
             }
 
+            {
+              description = "combine pdf";
+              command = "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=merged.pdf source1.pdf source2.pdf source3.pdf";
+              tag = [ "pdf" ];
+            }
             {
               description = "restart emacs user agent service in macos";
               command = "sudo launchctl kickstart -k gui/$UID/org.nixos.emacs";
