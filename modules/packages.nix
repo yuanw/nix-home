@@ -63,6 +63,7 @@ with pkgs; [
   # vhs
   csvkit
   gum
+  ghostscript
 
   dig
   just
