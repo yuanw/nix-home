@@ -1,5 +1,5 @@
 packages:
     ./hi-chew
-    ./mono-stretchly
+    -- ./mono-stretchly
     ./resource-id
     ./ws-access-token
