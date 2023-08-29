@@ -55,6 +55,7 @@
         "jdtls"
         "redis"
         "frugal"
+        "docker-compose"
       ];
     };
     browsers.firefox = {
