@@ -44,4 +44,5 @@ wireguard-keys
 AdGuardHome.yaml
 /.pre-commit-config.yaml
 
+ssh_host_ed25519_key.pub
 diff.json
