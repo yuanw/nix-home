@@ -47,7 +47,7 @@ myBorderWidth = 1
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask = mod4Mask
+myModMask = mod1Mask
 
 -- NOTE: from 0.9.1 on numlock mask is set automatically. The numlockMask
 -- setting should be removed from configs.
