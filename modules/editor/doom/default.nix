@@ -48,7 +48,7 @@ with lib; {
     home-manager.users.${config.my.username} = { pkgs, ... }: {
       home = {
         packages = with pkgs; [
-          git
+          # git
           (ripgrep.override { withPCRE2 = true; })
           gnutls # for TLS connectivity
           cmake
@@ -107,7 +107,7 @@ with lib; {
 
 
 
-    system.userActivationScripts.installDoomEmacs = ''
+    system.activationScripts.postUserActivation.text = ''
       if [ ! -d "$XDG_CONFIG_HOME/emacs" ]; then
          git clone --depth=1 --single-branch "https://github.com/doomemacs/doomemacs" "$XDG_CONFIG_HOME/emacs"
       fi
