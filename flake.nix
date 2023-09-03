@@ -32,10 +32,14 @@
       inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    treefmt-nix.inputs.nixpkgs.follows = "nixpkgs";
-    treefmt-nix.url = "github:numtide/treefmt-nix";
-    pre-commit.url = "github:cachix/pre-commit-hooks.nix";
-    pre-commit.inputs.nixpkgs.follows = "nixpkgs";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    pre-commit = {
+      url = "github:cachix/pre-commit-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
 
