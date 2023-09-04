@@ -9,14 +9,12 @@ in {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
         lombok
-
         google-java-format
       ];
       programs = {
         # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/libraries/java/lombok/default.nix#L26
-        zsh = { sessionVariables = { LOMBOK_DIR = "${pkgs.lombok}/out/share"; }; };
+        zsh = { sessionVariables = { LOMBOK_DIR = "${pkgs.lombok}/share/java"; }; };
       };
-
     };
   };
 }
