@@ -38,7 +38,6 @@ in
           tkill
           temacs
           pkgs.jo
-          pkgs.google-java-format
           (pkgs.writeShellScriptBin "jsonify" ''
             cat $1 | jq | sponge $1
           '')
