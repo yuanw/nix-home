@@ -57,7 +57,7 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type nil
-      abbrev-file-name (concat doom-private-dir "abbrevs.el"))
+      abbrev-file-name (concat doom-user-dir "abbrevs.el"))
 ;; Prevents some cases of Emacs flickering.
 (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
 (use-package! justl
