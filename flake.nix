@@ -40,8 +40,16 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-  };
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    open-interpreter = {
+      url = "github:KillianLucas/open-interpreter";
+      flake = false;
 
+    };
+  };
 
   outputs = inputs @ { flake-parts, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
@@ -59,35 +67,52 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { config, system, pkgs, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [
-            (_final: _prev: {
-              # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-              inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
-            })
-          ];
-          config = {
-            allowUnsupportedSystem = true;
+      perSystem = { config, system, pkgs, ... }:
+        let
+          inherit (inputs.poetry2nix.legacyPackages.${system}) defaultPoetryOverrides mkPoetryApplication;
+        in
+        {
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              (_final: _prev: {
+                # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
+                mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+                inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+              })
+            ];
+            config = {
+              allowUnsupportedSystem = true;
+            };
           };
-        };
-        haskellProjects.default = {
-          projectRoot = ./packages;
-          settings = { };
-          # overrides = self: super: { };
-          autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
-          devShell = {
-            hlsCheck.enable = false;
+          packages.open-interpreter = mkPoetryApplication {
+            projectDir = inputs.open-interpreter;
+            overrides = defaultPoetryOverrides.extend
+              (_self: super: {
+                deptry = super.deptry.overridePythonAttrs
+                  (
+                    old: {
+                      buildInputs = (old.buildInputs or [ ]) ++ [ super.poetry ];
+                    }
+                  );
+              });
           };
+          haskellProjects.default = {
+            projectRoot = ./packages;
+            settings = { };
+            # overrides = self: super: { };
+            autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
+            devShell = {
+              hlsCheck.enable = false;
+            };
+          };
+
+          treefmt.imports = [ ./treefmt.nix ];
+          # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
+          pre-commit.settings.hooks.treefmt.enable = true;
+
         };
-
-        treefmt.imports = [ ./treefmt.nix ];
-        # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
-        pre-commit.settings.hooks.treefmt.enable = true;
-
-      };
 
     };
+
 }

@@ -20,7 +20,6 @@ _final: prev: {
           # https://github.com/alacritty/alacritty/tree/master/extra/osx/Alacritty.app
           # installPhase = ''
           #   mkdir -p $out/Applications
-
           # '';
           passthru = {
             binaryPath = "Applications/mono-stretchly.app/Contents/MacOS/mono-stretchly";
