@@ -69,7 +69,7 @@
       enable = true;
       enableService = true;
       enableDoomConfig = true;
-      pkg = pkgs.emacs29-macport;
+      pkg = pkgs.emacsPlusNativeComp;
     };
     health.enable = false;
     editors.neovim.enable = true;
