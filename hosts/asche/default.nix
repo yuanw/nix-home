@@ -127,7 +127,7 @@
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;
-      pkg = pkgs.emacsPlusNativeComp;
+      pkg = pkgs.emacs-unstable;
     };
     qmk.enable = true;
     terminal.enable = true;
