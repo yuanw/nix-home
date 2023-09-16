@@ -26,11 +26,9 @@
     };
     editors.emacs = {
       enable = true;
-      # usePackage = false;
-      pkg = with pkgs;
-        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      enableService = true;
       enableDoomConfig = true;
+      pkg = pkgs.emacsPlusNativeComp;
     };
 
     terminal.enable = true;

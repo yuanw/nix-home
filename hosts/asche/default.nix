@@ -127,10 +127,7 @@
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;
-      pkg = with pkgs;
-        # 28.2 + native-comp
-        ((emacsPackagesFor emacs-unstable).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      pkg = pkgs.emacsPlusNativeComp;
     };
     qmk.enable = true;
     terminal.enable = true;
