@@ -67,7 +67,7 @@
     };
     editors.emacs = {
       enable = true;
-      enableService = true;
+      # enableService = true;
       enableDoomConfig = true;
       pkg = with pkgs;
         ((emacsPackagesFor pkgs.emacsPlusNativeComp).emacsWithPackages
