@@ -127,9 +127,7 @@
     editors.emacs = {
       enable = true;
       enableDoomConfig = true;
-      pkg = with pkgs;
-        ((emacsPackagesFor emacs29).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      pkg = pkgs.emacsPlusNativeComp;
     };
     qmk.enable = true;
     terminal.enable = true;
