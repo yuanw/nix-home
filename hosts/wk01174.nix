@@ -67,11 +67,9 @@
     };
     editors.emacs = {
       enable = true;
-      # enableService = true;
+      enableService = true;
       enableDoomConfig = true;
-      pkg = with pkgs;
-        ((emacsPackagesFor pkgs.emacs29-macport).emacsWithPackages
-          (epkgs: [ epkgs.vterm ]));
+      pkg = pkgs.emacs29-macport;
     };
     health.enable = false;
     editors.neovim.enable = true;
