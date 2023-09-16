@@ -70,7 +70,7 @@
       # enableService = true;
       enableDoomConfig = true;
       pkg = with pkgs;
-        ((emacsPackagesFor pkgs.emacsPlusNativeComp).emacsWithPackages
+        ((emacsPackagesFor pkgs.emacs29-macport).emacsWithPackages
           (epkgs: [ epkgs.vterm ]));
     };
     health.enable = false;
