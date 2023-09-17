@@ -69,7 +69,7 @@ with pkgs; [
   just
   # toybox
   pkg-config
-  open-interpreter
+  # open-interpreter
   # reiryoku-firmware
   # reiryoku-flash
 ]
