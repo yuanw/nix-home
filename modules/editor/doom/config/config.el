@@ -168,6 +168,9 @@
   (super-save-mode +1)
  )
 
+(use-package! chatgpt-shell
+  :requires shell-maker
+  )
 (use-package! embark-vc
   :after embark)
 (use-package! evil-replace-with-register
