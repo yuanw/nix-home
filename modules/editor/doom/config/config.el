@@ -63,6 +63,17 @@
 (use-package! justl
   :config
   (map! :n "e" 'justl-exec-recipe))
+(use-package! shell-maker)
+
+(use-package! chatgpt-shell
+  :requires shell-maker
+  :config
+  ;; if you are using the "pass" password manager
+(setq chatgpt-shell-openai-key
+      (lambda ()
+        ;; (auth-source-pass-get 'secret "openai-key") ; alternative using pass support in auth-sources
+        (nth 0 (process-lines "pass" "show" "openapi"))))
+  )
 ;;
 ;;; Keybinds
 
