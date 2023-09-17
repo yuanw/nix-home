@@ -3,5 +3,5 @@
 with pkgs; [
   # alerter
   pinentry_mac
-  open-interpreter
+  # open-interpreter
 ]
