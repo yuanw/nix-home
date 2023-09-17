@@ -49,6 +49,8 @@ myBorderWidth = 1
 --
 myModMask = mod1Mask
 
+commandMask = mod4Mask
+
 -- NOTE: from 0.9.1 on numlock mask is set automatically. The numlockMask
 -- setting should be removed from configs.
 --
@@ -121,7 +123,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
     -- launch a terminal
     [ ((modm .|. shiftMask, xK_Return), spawn $ XMonad.terminal conf),
       -- launch rofi
-      ((modm, xK_space), spawn appLauncher),
+      ((commandMask, xK_space), spawn appLauncher),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_l), spawn screenLocker),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_r), spawn "autorandr-load-home"),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_d), spawn myEditor),
