@@ -60,6 +60,8 @@
 (package! eglot-java)
 (package! justl)
 (package! atomic-chrome)
+(package! shell-maker)
+(package! chatgpt-shell)
 ;https://github.com/emacs-tree-sitter/tree-sitter-langs/pull/110
 ;; (package! tree-sitter-langs
 ;;   :pin "388dcbbc237b2b1360e5b148e67b158eecede805"

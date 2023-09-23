@@ -13,6 +13,7 @@ in {
           #ipython
           black
           pandas
+          numpy
           isort
           setuptools
           pylint
