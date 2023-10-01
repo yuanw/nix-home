@@ -50,13 +50,13 @@ in
           ./wk01174.nix
         ];
       };
-      # Github Action runners do not support M1 yet.
-      ci = darwinSystem {
-        system = "x86_64-darwin";
-        modules = [
-          ./wk01174.nix
-        ];
-      };
+      # # Github Action runners do not support M1 yet.
+      # ci = darwinSystem {
+      #   system = "x86_64-darwin";
+      #   modules = [
+      #     ./wk01174.nix
+      #   ];
+      # };
     };
   };
   perSystem = { system, pkgs, lib, ... }: {
