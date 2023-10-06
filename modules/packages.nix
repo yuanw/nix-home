@@ -69,6 +69,7 @@ with pkgs; [
   just
   # toybox
   pkg-config
+  racket
   # open-interpreter
   # reiryoku-firmware
   # reiryoku-flash
