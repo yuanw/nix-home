@@ -83,6 +83,8 @@
         haskell.enable = true;
         haxe.enable = true;
         python.enable = true;
+        zig.enable = true;
+        scheme.enable = true;
       };
 
     terminal = {
