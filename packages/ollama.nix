@@ -13,7 +13,7 @@ buildGoModule rec {
     owner = "jmorganca";
     repo = "ollama";
     rev = "v${version}";
-    hash = lib.fakeSha256;
+    sha256 = lib.fakeSha256;
   };
 
   buildInputs = lib.optionals stdenv.isDarwin (with darwin.apple_sdk_11_0.frameworks; [
