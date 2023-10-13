@@ -22,7 +22,7 @@ buildGoModule rec {
     MetalKit
   ]);
 
-  vendorHash = "sha256-IgEf/WOc1eNGCif1fViIFxbgZAd6mHBqfxcaqH/WvGg=";
+  vendorHash = "sha256-WqV4UN/W3mwIeGFJhp7zcWqWzUL0ClHagUOZYg07faU=";
 
   ldflags = [ "-s" "-w" ];
 
