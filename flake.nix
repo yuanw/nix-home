@@ -59,20 +59,20 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { config, system, pkgs, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [
-            (_final: _prev: {
-              # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-              inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
-            })
-          ];
-          config = {
-            allowUnsupportedSystem = true;
-          };
-        };
+      perSystem = { ... }: {
+        # _module.args.pkgs = import inputs.nixpkgs {
+        #   inherit system;
+        #   overlays = [
+        #     (_final: _prev: {
+        #       # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
+        #       mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+        #       inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+        #     })
+        #   ];
+        #   config = {
+        #     allowUnsupportedSystem = true;
+        #   };
+        # };
         haskellProjects.default = {
           projectRoot = ./packages;
           settings = { };
