@@ -4,7 +4,7 @@ on:
   push:
 jobs:
   mac:
-    runs-on: macos-latest-xlarge
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - name: Install Nix
@@ -14,7 +14,7 @@ jobs:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     #https://github.com/github/roadmap/issues/528
-    - run: nix build .#wk01174
+    - run: nix flake check
   nixos:
     runs-on: ubuntu-latest
     steps:
