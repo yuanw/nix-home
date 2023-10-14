@@ -60,17 +60,17 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { system, ... }: {
+      perSystem = { ... }: {
         _module.args.pkgs = import inputs.nixpkgs {
-          inherit system;
-          overlays = [
-            (_final: _prev: {
-              ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
-              # # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-              # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-              # inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
-            })
-          ];
+          # inherit system;
+          # overlays = [
+          #   (_final: _prev: {
+          #     ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
+          #     # # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
+          #     # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+          #     # inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+          #   })
+          # ];
           config = {
             allowUnfree = true;
             # allowUnsupportedSystem = true;
