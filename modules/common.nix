@@ -52,10 +52,12 @@
       inputs.nur.overlay
       inputs.agenix.overlays.default
       (_final: _prev: {
+
+        ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
         stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-        mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-        inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
+        # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+        # inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
         #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
         #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
 
