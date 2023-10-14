@@ -590,6 +590,22 @@
         "type": "github"
       }
     },
+    "ollama-nixpkgs": {
+      "locked": {
+        "lastModified": 1697261562,
+        "narHash": "sha256-J3sST/RtkkWjZnYudoEOoVlYeqoACLAubcq0I0GOTRA=",
+        "owner": "elohmeier",
+        "repo": "nixpkgs",
+        "rev": "5a65a6f6d528f472d6fe9787e681364b5a6f7ba4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "elohmeier",
+        "ref": "ollama",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "pre-commit": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -658,6 +674,7 @@
         "nixpkgs": "nixpkgs_4",
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nur": "nur",
+        "ollama-nixpkgs": "ollama-nixpkgs",
         "pre-commit": "pre-commit",
         "treefmt-nix": "treefmt-nix"
       }
