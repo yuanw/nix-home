@@ -60,9 +60,9 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { ... }: {
+      perSystem = { system, ... }: {
         _module.args.pkgs = import inputs.nixpkgs {
-          # inherit system;
+          inherit system;
           # overlays = [
           #   (_final: _prev: {
           #     ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
