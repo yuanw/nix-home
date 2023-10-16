@@ -8,7 +8,7 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       # http://wiki.call-cc.org/man/5/Using%20the%20interpreter
-      home.packages = [ pkgs.chicken ];
+      home.packages = [ pkgs.chicken pkgs.guile ];
     };
   };
 }
