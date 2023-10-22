@@ -27,7 +27,7 @@ in {
           virtualenvwrapper
           huggingface-hub
           litellm
-          tiktoken
+          tokenizers
         ]))
     ];
   };
