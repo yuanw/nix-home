@@ -26,6 +26,7 @@ in {
           virtualenv
           virtualenvwrapper
           huggingface-hub
+          litellm
         ]))
     ];
   };
