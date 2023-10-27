@@ -27,6 +27,7 @@ in {
           virtualenvwrapper
           huggingface-hub
           litellm
+          tokenizers
         ]))
     ];
   };
