@@ -55,6 +55,7 @@
         # https://github.com/NixOS/nixpkgs/pull/257760/files
         ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
         stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
+        # https://nixpk.gs/pr-tracker.html?pr=263500
         udiskie = inputs.nixpkgs-master.legacyPackages.${_prev.system}.udiskie;
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
         # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
