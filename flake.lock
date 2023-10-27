@@ -592,11 +592,11 @@
     },
     "ollama-nixpkgs": {
       "locked": {
-        "lastModified": 1697653527,
-        "narHash": "sha256-jC2MG+Wz8TEPc5nuhWndyyCeU+fdcpMp27rENFWd/v4=",
+        "lastModified": 1698306065,
+        "narHash": "sha256-oldBngftldz6l5uIlaPLAXRTG0fXLdym2DhYHi42UKk=",
         "owner": "elohmeier",
         "repo": "nixpkgs",
-        "rev": "a80f8017e1ea4e9834a46ed29cac1518cb61b066",
+        "rev": "a6ef35a3c0ab6071c1921645eaf85aff9278504b",
         "type": "github"
       },
       "original": {
