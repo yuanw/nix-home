@@ -1,10 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
-
 module Main where
 
-import Hedgehog
-import Hedgehog.Main
-import WsAccessToken
-
 main :: IO ()
-main = defaultMain [checkParallel $$(discover)]
+main = putStrLn "Test suite not yet implemented"

@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
     # https://github.com/NixOS/nixpkgs/pull/257760
     ollama-nixpkgs.url = "github:elohmeier/nixpkgs/ollama";
     nixpkgs.url = "nixpkgs/nixos-unstable";

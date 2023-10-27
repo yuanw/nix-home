@@ -47,5 +47,4 @@ test-suite ws-access-token-tests
   ghc-options:      -Wall -threaded
   build-depends:
       base             >=4.11 && <5
-    , hedgehog
     , ws-access-token
