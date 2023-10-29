@@ -14,6 +14,7 @@
       ./dev/node.nix
       ./dev/python.nix
       ./dev/zig.nix
+      ./dev/scheme.nix
       ./helix.nix
       ./editor/doom
       ./editor/neovim

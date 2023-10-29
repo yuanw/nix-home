@@ -55,6 +55,8 @@
         "jdtls"
         "redis"
         "frugal"
+        "picat"
+        # "mit-scheme"
         # https://formulae.brew.sh/formula/docker-compose
         # mkdir -p ~/.docker/cli-plugins
         # ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
@@ -82,6 +84,8 @@
         haskell.enable = true;
         haxe.enable = true;
         python.enable = true;
+        zig.enable = true;
+        scheme.enable = true;
       };
 
     terminal = {

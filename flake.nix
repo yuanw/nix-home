@@ -3,6 +3,9 @@
 
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs-master.url = "github:nixos/nixpkgs/master";
+    # https://github.com/NixOS/nixpkgs/pull/257760
+    ollama-nixpkgs.url = "github:elohmeier/nixpkgs/ollama";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
@@ -59,18 +62,11 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { config, system, pkgs, ... }: {
+      perSystem = { system, ... }: {
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
-          overlays = [
-            (_final: _prev: {
-              # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-              inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
-            })
-          ];
           config = {
-            allowUnsupportedSystem = true;
+            allowUnfree = true;
           };
         };
         haskellProjects.default = {

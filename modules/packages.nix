@@ -67,8 +67,9 @@ with pkgs; [
 
   dig
   just
-  # toybox
   pkg-config
+  racket
+  ollama
   # open-interpreter
   # reiryoku-firmware
   # reiryoku-flash
