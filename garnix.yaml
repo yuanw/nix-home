@@ -1,6 +1,5 @@
 builds:
  exclude:
- - 'packages.aarch64-darwin.activate'
  - 'packages.aarch64-darwin.asche'
  - 'packages.x86_64-linux.yuanw'
  - 'packages.x86_64-linux.ci'
