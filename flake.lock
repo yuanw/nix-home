@@ -450,6 +450,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-master": {
+      "locked": {
+        "lastModified": 1698678039,
+        "narHash": "sha256-dZvi6XILTxI2S27l8BvLMk/d0omHoXuC7/1qj5S5lHI=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2ab8359bdd56006534babd35844803551086a1f5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-regression": {
       "locked": {
         "lastModified": 1643052045,
@@ -672,6 +688,7 @@
         "nix-colors": "nix-colors",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_4",
+        "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nur": "nur",
         "ollama-nixpkgs": "ollama-nixpkgs",
