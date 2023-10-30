@@ -10,8 +10,8 @@ stdenv.mkDerivation rec {
     # https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.6/sdk/dartsdk-macos-x64-release.zip
     url =
       "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-arm64-release.zip";
-    # sha256 = "15a9gzkvmlnw9g1dnkxssh0c6skwf7z40i176ck7hzagd5r71fjj";
-    sha256 = lib.fakeSha256;
+    sha256 = "PGtUtvRLyji9x4WOpFc08peVHrpfsQyPp7hrSj9D7bY=";
+    # sha256 = lib.fakeSha256;
   };
 
   installPhase = ''
@@ -41,6 +41,6 @@ stdenv.mkDerivation rec {
       mixins, abstract classes, reified generics, and optional typing.
     '';
     license = lib.licenses.bsd3;
-    platforms = [ "x86_64-darwin" ];
+    platforms = [ "aarch64-darwin" ];
   };
 }
