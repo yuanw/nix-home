@@ -153,6 +153,7 @@
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ; a language you can depend on
        ;;json              ; At least it ain't XML
+       go
        (java +lsp
              +eglot
              +tree-sitter
