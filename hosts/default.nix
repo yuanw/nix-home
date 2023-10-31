@@ -62,7 +62,7 @@ in
   perSystem = { system, ... }: {
     packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
     packages.yuanw = self.darwinConfigurations.yuanw.system;
-    packages.ci = self.darwinConfigurations.ci.system;
+    # packages.ci = self.darwinConfigurations.ci.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
     # packages.activate = pkgs.writeShellApplication
     #   {
