@@ -71,7 +71,10 @@
       enable = true;
       enableService = true;
       enableDoomConfig = true;
-      pkg = pkgs.emacsPlusNativeComp;
+      pkg = with pkgs;
+        ((emacsPackagesFor emacsPlusNativeComp).emacsWithPackages
+          (epkgs: [ epkgs.vterm ]));
+
     };
     health.enable = false;
     editors.neovim.enable = true;
