@@ -69,7 +69,6 @@ with pkgs; [
   just
   pkg-config
   racket
-  ollama
   # open-interpreter
   # reiryoku-firmware
   # reiryoku-flash

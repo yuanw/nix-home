@@ -3,6 +3,7 @@
   flake.nixosModules = {
     common.imports = [
       ./agenix.nix
+      ./ai.nix
       ./common.nix
       ./browsers/firefox.nix
       ./dev/agda.nix
