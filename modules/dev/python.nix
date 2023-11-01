@@ -25,7 +25,6 @@ in {
           # pylsp-mypy
           virtualenv
           virtualenvwrapper
-          huggingface-hub
           litellm
           tokenizers
         ]))

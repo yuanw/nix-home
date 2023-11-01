@@ -35,6 +35,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
+    ai.enable = true;
     secrets.agenix = { enable = true; };
     brew = {
       enable = true;
