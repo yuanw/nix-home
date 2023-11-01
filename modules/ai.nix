@@ -10,11 +10,11 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [
-        (pkgs.python3.withPackages (ps:
-          with ps; [
-            huggingface-hub
-          ]))
-        ollama
+        # (pkgs.python3.withPackages (ps:
+        #   with ps; [
+        #     huggingface-hub
+        #   ]))
+        pkgs.ollama
       ];
     };
   };
