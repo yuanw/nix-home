@@ -7,7 +7,22 @@ in {
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ pkgs.cabal2nix ];
+      home.packages = [
+        pkgs.cabal2nix
+        pkgs.haskellPackages.shellFor
+        {
+          # development environment
+          packages = p: [ p.attoparsec ];
+          buildInputs = with pkgs.haskellPackages; [
+            cabal-install
+            ghcid
+            ormolu
+            hlint
+            pkgs.nixpkgs-fmt
+          ];
+          withHoogle = true;
+        }
+      ];
       home.file = {
         ".ghci".text = ''
           :set prompt "λ> "
