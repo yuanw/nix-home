@@ -12,12 +12,13 @@ in {
         pkgs.haskellPackages.shellFor
         {
           # development environment
-          packages = p: [ p.attoparsec ];
+          # packages = p: [ p.attoparsec ];
           buildInputs = with pkgs.haskellPackages; [
             cabal-install
             ghcid
             ormolu
             hlint
+            attoparsec
             pkgs.nixpkgs-fmt
           ];
           withHoogle = true;
