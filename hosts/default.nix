@@ -54,8 +54,7 @@ in
           };
           modules = [
             {
-
-              nixpkgs.hostPlatform = system;
+              nixpkgs.hostPlatform = "aarch64-darwin";
             }
             ./wk01174.nix
           ];
