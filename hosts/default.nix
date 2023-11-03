@@ -1,9 +1,9 @@
-{ self, inputs, system, ... }:
+{ self, inputs, system, withSystem, ... }:
 let
   nixosSystem = args:
-    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; packages = self.packages; isDarwin = false; isNixOS = true; }; } // args);
+    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
   darwinSystem = args:
-    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; packages = self.packages; isDarwin = true; isNixOS = false; }; } // args);
+    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; isDarwin = true; isNixOS = false; }; } // args);
 in
 {
   flake = {
@@ -44,12 +44,15 @@ in
           ./yuan-mac.nix
         ];
       };
-      WK01174 = darwinSystem {
-        system = "aarch64-darwin";
-        modules = [
-          ./wk01174.nix
-        ];
-      };
+      WK01174 = withSystem "aarch64-darwin" ({ config, ... }:
+        darwinSystem {
+          specialArgs = {
+            packages = config.packages;
+          };
+          modules = [
+            ./wk01174.nix
+          ];
+        });
     };
   };
   perSystem = { system, ... }: {
