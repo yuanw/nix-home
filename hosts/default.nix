@@ -45,10 +45,10 @@ in
         ];
       };
       WK01174 = withSystem "aarch64-darwin" ({ config, inputs', ... }:
-        inputs.nix-darwin.lib.darwinSystem {
+        darwinSystem {
           specialArgs = {
-            isDarwin = true;
-            isNixOS = false;
+            # isDarwin = true;
+            # isNixOS = false;
             packages = config.packages;
             inherit inputs inputs';
           };
