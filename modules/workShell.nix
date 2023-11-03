@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, packages, ... }:
 
 with lib;
 let homeDir = config.my.homeDirectory;
@@ -14,8 +14,8 @@ in {
         pkgs.clang-tools
         # pkgs.antlr4
 
-        pkgs.haskellPackages.resource-id
-        pkgs.haskellPackages.ws-access-token
+        packages.resource-id
+        packages.ws-access-token
         # pkgs.haskellPackages.mono-stretchly
         pkgs.csvkit
         # pkgs.visidata

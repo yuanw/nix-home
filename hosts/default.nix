@@ -1,9 +1,9 @@
 { self, inputs, system, ... }:
 let
   nixosSystem = args:
-    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
+    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; packages = self.packages; isDarwin = false; isNixOS = true; }; } // args);
   darwinSystem = args:
-    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; isDarwin = true; isNixOS = false; }; } // args);
+    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; packages = self.packages; isDarwin = true; isNixOS = false; }; } // args);
 in
 {
   flake = {
@@ -50,19 +50,12 @@ in
           ./wk01174.nix
         ];
       };
-      # # Github Action runners do not support M1 yet.
-      # ci = darwinSystem {
-      #   system = "x86_64-darwin";
-      #   modules = [
-      #     ./wk01174.nix
-      #   ];
-      # };
     };
   };
   perSystem = { system, ... }: {
     packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
     packages.yuanw = self.darwinConfigurations.yuanw.system;
-    # packages.ci = self.darwinConfigurations.ci.system;
+    packages.ci = self.darwinConfigurations.yuanw.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
     # packages.activate = pkgs.writeShellApplication
     #   {
