@@ -52,8 +52,11 @@ in
             packages = config.packages;
             inherit inputs inputs';
           };
-          nixpkgs.hostPlatform = system;
           modules = [
+            {
+
+              nixpkgs.hostPlatform = system;
+            }
             ./wk01174.nix
           ];
         });
