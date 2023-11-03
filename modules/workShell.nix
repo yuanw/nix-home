@@ -15,7 +15,7 @@ in {
         # pkgs.antlr4
 
         packages.resource-id
-        packages.ws-access-token
+        # packages.ws-access-token
         # pkgs.haskellPackages.mono-stretchly
         pkgs.csvkit
         # pkgs.visidata

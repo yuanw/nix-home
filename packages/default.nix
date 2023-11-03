@@ -9,25 +9,4 @@ _final: prev: {
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
-  haskellPackages = prev.haskellPackages.override {
-    overrides = haskellPackagesNew: _haskellPackagesOld: rec {
-      ws-access-token =
-        haskellPackagesNew.callPackage ./ws-access-token/release.nix { };
-      resource-id =
-        haskellPackagesNew.callPackage ./resource-id/release.nix { };
-      mono-stretchly = prev.haskell.lib.compose.overrideCabal
-        (_drv: {
-          # https://github.com/alacritty/alacritty/tree/master/extra/osx/Alacritty.app
-          # installPhase = ''
-          #   mkdir -p $out/Applications
-
-          # '';
-          passthru = {
-            binaryPath = "Applications/mono-stretchly.app/Contents/MacOS/mono-stretchly";
-          };
-        })
-        (haskellPackagesNew.callPackage ./mono-stretchly/project.nix { });
-      hi-chew = haskellPackagesNew.callPackage ./hi-chew/release.nix { };
-    };
-  };
 }
