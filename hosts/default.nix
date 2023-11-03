@@ -1,4 +1,4 @@
-{ self, inputs, system, withSystem, ... }:
+{ self, inputs, withSystem, ... }:
 let
   nixosSystem = args:
     inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
@@ -44,17 +44,17 @@ in
           ./yuan-mac.nix
         ];
       };
-      WK01174 = withSystem "aarch64-darwin" ({ config, inputs', ... }:
-        darwinSystem {
+      WK01174 = withSystem "aarch64-darwin" ({ config, inputs', system, ... }:
+        inputs.nix-darwin.lib.darwinSystem {
           specialArgs = {
-            # isDarwin = true;
-            # isNixOS = false;
+            isDarwin = true;
+            isNixOS = false;
             packages = config.packages;
             inherit inputs inputs';
           };
           modules = [
             {
-              nixpkgs.hostPlatform = "aarch64-darwin";
+              nixpkgs.hostPlatform = system;
             }
             ./wk01174.nix
           ];
