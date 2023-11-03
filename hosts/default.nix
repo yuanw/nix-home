@@ -3,7 +3,7 @@ let
   nixosSystem = args:
     inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
   darwinSystem = args:
-    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { inherit inputs; isDarwin = true; isNixOS = false; }; } // args);
+    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { isDarwin = true; isNixOS = false; }; } // args);
 in
 {
   flake = {
@@ -44,10 +44,11 @@ in
           ./yuan-mac.nix
         ];
       };
-      WK01174 = withSystem "aarch64-darwin" ({ config, ... }:
+      WK01174 = withSystem "aarch64-darwin" ({ config, inputs', ... }:
         darwinSystem {
           specialArgs = {
             packages = config.packages;
+            inherit inputs inputs';
           };
           modules = [
             ./wk01174.nix
