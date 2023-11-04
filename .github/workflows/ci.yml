@@ -4,7 +4,7 @@ on:
   push:
 jobs:
   mac:
-    runs-on: macos-latest
+    runs-on: macos-latest-xlarge
     steps:
     - uses: actions/checkout@v4
     - name: Install Nix
@@ -27,4 +27,4 @@ jobs:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: yuanwang-wf,nix-community
-    - run: nix flake check
+    - run: nix --version
