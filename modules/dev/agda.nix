@@ -12,6 +12,7 @@ in {
       ];
     };
     home-manager.users.${config.my.username} = {
+      home.file = { "agda/defaults".text = "standard-library"; };
       home.packages = [
         (pkgs.agda.withPackages (p: [
           (p.standard-library.overrideAttrs (_oldAttrs: {
@@ -29,7 +30,6 @@ in {
         zsh = { sessionVariables = { AGDA_DIR = "$XDG_CONFIG_HOME/agda"; }; };
       };
       # agda does not use xdg
-      file = { "agda/defaults".text = "standard-library"; };
       xdg.configFile = { "agda/defaults".text = "standard-library"; };
     };
   };
