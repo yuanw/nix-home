@@ -4,7 +4,7 @@ on:
   push:
 jobs:
   mac:
-    runs-on: macos-latest-xlarge
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v4
     - name: Install Nix
