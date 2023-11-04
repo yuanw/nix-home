@@ -72,7 +72,7 @@
     secrets.agenix = { enable = true; };
     dev = {
       agda.enable = true;
-      haskell.enable = true;
+      haskell.enable = false;
       python.enable = true;
     };
     editors.emacs = {
