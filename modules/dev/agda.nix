@@ -28,6 +28,8 @@ in {
       programs = {
         zsh = { sessionVariables = { AGDA_DIR = "$XDG_CONFIG_HOME/agda"; }; };
       };
+      # agda does not use xdg
+      file = { "agda/defaults".text = "standard-library"; };
       xdg.configFile = { "agda/defaults".text = "standard-library"; };
     };
   };
