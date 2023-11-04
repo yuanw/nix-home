@@ -30,20 +30,44 @@ in
         ];
       };
 
-      asche = nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          ./asche
-        ];
-      };
+      asche =
+
+        withSystem "x86_64-linux" ({ config, inputs', system, ... }:
+          inputs.nixpkgs.lib.nixosSystem {
+            specialArgs = {
+              isDarwin = true;
+              isNixOS = false;
+              packages = config.packages;
+              inherit inputs inputs';
+            };
+
+            modules = [
+              {
+                nixpkgs.hostPlatform = system;
+              }
+
+              ./asche
+            ];
+          });
     };
     darwinConfigurations = {
-      yuanw = darwinSystem {
-        system = "x86_64-darwin";
-        modules = [
-          ./yuan-mac.nix
-        ];
-      };
+      yuanw =
+        withSystem "aarch64-darwin" ({ config, inputs', system, ... }:
+          inputs.nix-darwin.lib.darwinSystem {
+            specialArgs = {
+              isDarwin = true;
+              isNixOS = false;
+              packages = config.packages;
+              inherit inputs inputs';
+            };
+
+            modules = [
+              {
+                nixpkgs.hostPlatform = system;
+              }
+              ./yuan-mac.nix
+            ];
+          });
       WK01174 = withSystem "aarch64-darwin" ({ config, inputs', system, ... }:
         inputs.nix-darwin.lib.darwinSystem {
           specialArgs = {
