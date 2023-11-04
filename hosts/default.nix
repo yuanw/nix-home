@@ -46,7 +46,7 @@
     };
     darwinConfigurations = {
       yuanw =
-        withSystem "aarch64-darwin" ({ config, inputs', system, ... }:
+        withSystem "x86-darwin" ({ config, inputs', system, ... }:
           inputs.nix-darwin.lib.darwinSystem {
             specialArgs = {
               isDarwin = true;
@@ -116,8 +116,6 @@
     #         '';
 
     #   };
-    #     adguard = self.nixosConfigurations.adguard.system;
-    #     aws = self.nixosConfigurations.aws.system;
 
   };
 
