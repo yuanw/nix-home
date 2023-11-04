@@ -1,10 +1,4 @@
 { self, inputs, withSystem, ... }:
-let
-  nixosSystem = args:
-    inputs.nixpkgs.lib.nixosSystem ({ specialArgs = { inherit inputs; isDarwin = false; isNixOS = true; }; } // args);
-  darwinSystem = args:
-    inputs.nix-darwin.lib.darwinSystem ({ specialArgs = { isDarwin = true; isNixOS = false; }; } // args);
-in
 {
   flake = {
     nixosConfigurations = {
