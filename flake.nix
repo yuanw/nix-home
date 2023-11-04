@@ -35,6 +35,9 @@
       inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agda = {
+      url = "github:agda/agda";
+    };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
