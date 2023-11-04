@@ -1,4 +1,4 @@
-{ inputs, lib, pkgs, ... }:
+{ inputs, config, lib, pkgs, ... }:
 
 with lib;
 let cfg = config.modules.dev.agda;
