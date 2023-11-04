@@ -46,7 +46,7 @@
     };
     darwinConfigurations = {
       yuanw =
-        withSystem "x86-darwin" ({ config, inputs', system, ... }:
+        withSystem "x86_64-darwin" ({ config, inputs', system, ... }:
           inputs.nix-darwin.lib.darwinSystem {
             specialArgs = {
               isDarwin = true;
