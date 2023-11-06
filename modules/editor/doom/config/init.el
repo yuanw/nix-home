@@ -126,7 +126,7 @@
        (tty +osc)          ; improve the terminal Emacs experience
 
        :lang
-       ( agda +tree-sitter)              ; types of types of types of types...
+       ( agda +local +tree-sitter)              ; types of types of types of types...
        ;;beancount         ; mind the GAAP
        ;;cc                ; C > C++ == 1
        ;;clojure           ; java with a lisp
