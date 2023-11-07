@@ -10,6 +10,7 @@
       ./dev/dart.nix
       ./dev/haskell.nix
       ./dev/haxe.nix
+      ./dev/idris2.nix
       ./dev/java.nix
       ./dev/julia.nix
       ./dev/node.nix
