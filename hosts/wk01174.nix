@@ -84,6 +84,7 @@
         java.enable = true;
         haskell.enable = true;
         haxe.enable = true;
+        idris2.enable = true;
         python.enable = true;
         zig.enable = true;
         scheme.enable = true;
