@@ -67,6 +67,7 @@ with pkgs; [
 
   glew
   SDL2
+  mono-stretchly
 
   dig
   just
