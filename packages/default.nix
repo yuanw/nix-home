@@ -3,7 +3,6 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  emacsPlusNativeComp = prev.callPackage ./emacs-plus.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
