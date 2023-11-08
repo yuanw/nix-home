@@ -74,7 +74,7 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [{
     services.emacs = mkIf cfg.usePackage {
       enable = cfg.enableService;
-      package = emacsWithDeps;
+      package = emacsPatched;
     };
     # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
