@@ -18,11 +18,9 @@
   };
 
   modules = {
-    # common = { enable = true; };
-
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+      pkg = pkgs.firefox-bin;
     };
     editors.emacs = {
       enable = true;
@@ -37,15 +35,8 @@
       taps = [
         "homebrew/core"
         "homebrew/cask"
-        # "d12frosted/emacs-plus"
       ];
-      # brews = [ "emacs-plus@29" ];
-      casks = [ "brave-browser" "firefox" ];
+      casks = [ "brave-browser" ];
     };
   };
-  # programs = {
-  #   node.enable = true;
-  #   python.enable = false;
-  #   haskell.enable = false;
-  # };
 }

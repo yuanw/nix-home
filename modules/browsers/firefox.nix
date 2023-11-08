@@ -23,9 +23,7 @@ in
         packages = [
           pkgs.tridactyl-native
         ];
-
       };
-
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       programs.firefox.profiles = {
@@ -45,8 +43,8 @@ in
             order = [ "Google" "DuckDuckGo" ];
             engines = {
               "Bing".metaData.hidden = true;
-              "ebay".metaData.hidden = true;
-              "Amazon.ca".metaData.hidden = true;
+              "Ebay".metaData.hidden = true;
+              "Amazon".metaData.hidden = true;
               "Nix Packages" = {
                 urls = [{
                   template = "https://search.nixos.org/packages";

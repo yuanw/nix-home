@@ -67,13 +67,11 @@
     browsers.firefox = {
       enable = true;
       pkg = pkgs.firefox-bin;
-      # pkg =  runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
       enable = true;
       enableService = true;
       enableDoomConfig = true;
-      # pkg = pkgs.emacsPlusNativeComp;
     };
     health.enable = false;
     editors.neovim.enable = true;
