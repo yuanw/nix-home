@@ -50,6 +50,7 @@
     overlays = [
       inputs.emacs.overlay
       inputs.nur.overlay
+      inputs.firefox-darwin.overlay
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;

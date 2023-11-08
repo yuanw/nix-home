@@ -44,7 +44,7 @@
       casks = [
         "brave-browser"
         "docker"
-        "firefox"
+        # "firefox"
         "google-chrome"
         "insomnia"
         "slack"
@@ -66,7 +66,8 @@
     };
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+      pkg = pkgs.firefox-bin;
+      # pkg =  runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
       enable = true;
