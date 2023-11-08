@@ -84,7 +84,13 @@
         };
         haskellProjects.default = {
           projectRoot = ./packages;
-          settings = { };
+          settings = {
+            monomer = {
+              package.meta.badPlatforms = [
+              ];
+
+            };
+          };
           # overrides = self: super: { };
           autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
           devShell = {
