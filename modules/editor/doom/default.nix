@@ -1,10 +1,36 @@
 # most of this is stealed from hlissner emacs module
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
-{ config, lib, pkgs, isDarwin, ... }:
+# and adamcstephens emacs module
+# https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
+{ config, lib, pkgs, inputs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
   # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
+  emacsPatched = cfg.pkg.overrideAttrs (
+    prev: {
+      patches =
+        (lib.optionals pkgs.stdenv.isDarwin [
+          "${inputs.emacs-plus}/patches/emacs-28/fix-window-role.patch"
+          "${inputs.emacs-plus}/patches/emacs-28/no-frame-refocus-cocoa.patch"
+          "${inputs.emacs-plus}/patches/emacs-29/poll.patch"
+          # "${inputs.emacs-plus}/patches/emacs-30/round-undecorated-frame.patch"
+          "${inputs.emacs-plus}/patches/emacs-28/system-appearance.patch"
+        ])
+        ++ prev.patches;
+    }
+  );
+  emacsWithDeps =
+    (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
+      with epkgs;
+      # Use Nix to manage packages with non-trivial userspace dependencies.
+      [
+        emacsql
+        emacsql-sqlite
+        jinx
+        vterm
+      ]
+    );
 
 in
 with lib; {
@@ -17,7 +43,7 @@ with lib; {
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacsMacport;
+      default = pkgs.emacs29;
     };
 
     usePackage = mkOption {
@@ -39,7 +65,7 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [{
     services.emacs = mkIf cfg.usePackage {
       enable = cfg.enableService;
-      package = cfg.pkg;
+      package = emacsWithDeps;
     };
     # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -85,17 +111,15 @@ with lib; {
           nodePackages.stylelint
           # :lang yaml
           nodePackages.yaml-language-server
+          emacsWithDeps
         ];
 
         file = mkIf cfg.enableDoomConfig {
           ".doom.d".source = ./config;
         };
       };
-
-      programs.emacs = mkIf cfg.usePackage {
-        enable = true;
-        package = cfg.pkg;
-      };
+      # not use home-manager programs.emacs due to it wraps
+      # emacsWithPackages again
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
