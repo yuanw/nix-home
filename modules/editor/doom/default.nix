@@ -20,26 +20,26 @@ let
         ++ prev.patches;
     }
   );
-  # emacsWithDeps =
-  #   (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
-  #     with epkgs;
-  #     # Use Nix to manage packages with non-trivial userspace dependencies.
-  #     [
-  #       emacsql
-  #       emacsql-sqlite
+  emacsWithDeps =
+    (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
+      with epkgs;
+      # Use Nix to manage packages with non-trivial userspace dependencies.
+      [
+        emacsql
+        emacsql-sqlite
 
-  #       # FIXME: Currently building `epdinfo` on macOS like so:
-  #       # ; git clone https://github.com/vedang/pdf-tools.git
-  #       # ; cd pdf-tools/server
-  #       # ; nix-shell -p pkg-config poppler automake libtool libpng autoconf
-  #       # ; autoreconf -i -f
-  #       # ; ./autobuild -i \
-  #       #   /Users/mbaillie/.config/emacs/.local/straight/build-29.0.50/pdf-tools \
-  #       #   --os nixos
-  #       # org-pdftools
-  #       vterm
-  #     ]
-  #   );
+        # FIXME: Currently building `epdinfo` on macOS like so:
+        # ; git clone https://github.com/vedang/pdf-tools.git
+        # ; cd pdf-tools/server
+        # ; nix-shell -p pkg-config poppler automake libtool libpng autoconf
+        # ; autoreconf -i -f
+        # ; ./autobuild -i \
+        #   /Users/mbaillie/.config/emacs/.local/straight/build-29.0.50/pdf-tools \
+        #   --os nixos
+        # org-pdftools
+        vterm
+      ]
+    );
 
 in
 with lib; {
@@ -74,7 +74,7 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [{
     services.emacs = mkIf cfg.usePackage {
       enable = cfg.enableService;
-      package = emacsPatched;
+      package = emacsWithDeps;
     };
     # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -120,6 +120,7 @@ with lib; {
           nodePackages.stylelint
           # :lang yaml
           nodePackages.yaml-language-server
+          emacsWithDeps
         ];
 
         file = mkIf cfg.enableDoomConfig {
@@ -127,11 +128,11 @@ with lib; {
         };
       };
 
-      programs.emacs = mkIf cfg.usePackage {
-        enable = true;
-        package = emacsPatched;
-        extraPackages = epkgs: [ epkgs.vterm ];
-      };
+      # programs.emacs = mkIf cfg.usePackage {
+      #   enable = true;
+      #   package = emacsPatched;
+      #   extraPackages = epkgs: [ epkgs.vterm ];
+      # };
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
