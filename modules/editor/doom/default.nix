@@ -129,7 +129,7 @@ with lib; {
 
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
-        package = emacsWithDeps;
+        package = emacsPatched;
       };
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
