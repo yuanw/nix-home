@@ -15,6 +15,8 @@ in {
         # pkgs.antlr4
 
         packages.resource-id
+
+        packages.mono-stretchly
         pkgs.csvkit
         # pkgs.visidata
         pkgs.terraform
