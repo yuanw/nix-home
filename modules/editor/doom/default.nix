@@ -7,7 +7,7 @@ let
   cfg = config.modules.editors.emacs;
   emacsclient = "emacsclient -c -a 'emacs'";
   # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
-  emacsPatched = cfg.package.overrideAttrs (
+  emacsPatched = cfg.pkg.overrideAttrs (
     prev: {
       patches =
         (lib.optionals pkgs.stdenv.isDarwin [
