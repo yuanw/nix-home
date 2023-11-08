@@ -18,7 +18,14 @@ in
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home = { file."startpage".source = ./startpage; };
+      home = {
+        file."startpage".source = ./startpage;
+        packages = [
+          pkgs.tridactyl-native
+        ];
+
+      };
+
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       programs.firefox.profiles = {
