@@ -38,6 +38,8 @@ in
             order = [ "Google" "DuckDuckGo" ];
             engines = {
               "Bing".metaData.hidden = true;
+              "ebay".metaData.hidden = true;
+              "Amazon.ca".metaData.hidden = true;
               "Nix Packages" = {
                 urls = [{
                   template = "https://search.nixos.org/packages";
