@@ -27,16 +27,7 @@ let
       [
         emacsql
         emacsql-sqlite
-
-        # FIXME: Currently building `epdinfo` on macOS like so:
-        # ; git clone https://github.com/vedang/pdf-tools.git
-        # ; cd pdf-tools/server
-        # ; nix-shell -p pkg-config poppler automake libtool libpng autoconf
-        # ; autoreconf -i -f
-        # ; ./autobuild -i \
-        #   /Users/mbaillie/.config/emacs/.local/straight/build-29.0.50/pdf-tools \
-        #   --os nixos
-        # org-pdftools
+        jinx
         vterm
       ]
     );
@@ -127,12 +118,8 @@ with lib; {
           ".doom.d".source = ./config;
         };
       };
-
-      # programs.emacs = mkIf cfg.usePackage {
-      #   enable = true;
-      #   package = emacsPatched;
-      #   extraPackages = epkgs: [ epkgs.vterm ];
-      # };
+      # not use home-manager programs.emacs due to it wraps
+      # emacsWithPackages again
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
