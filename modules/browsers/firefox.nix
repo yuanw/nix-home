@@ -77,6 +77,7 @@ in
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";
             "app.update.auto" = false;
+            "app.update.service.enabled" = false;
             # Enable ETP for decent security (makes firefox containers and many
             # common security/privacy add-ons redundant).
             "browser.contentblocking.category" = "strict";
