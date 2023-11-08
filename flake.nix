@@ -79,15 +79,23 @@
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
-            (_self: super: {
-              # Stork is marked as broken on intel mac, but it does work.
-              # Unfortunately we cannot test this code PATH due to lack of CI for intel mac (#335).
-              _self.haskellPackages = super.haskellPackages.override {
-                overrides = _hself: hsuper: {
-                  monomer = hsuper.monomer.overrideAttrs (_oa: { meta.broken = false; });
+            (_self: _super: {
+
+              haskellPackages = prev.haskellPackages.override {
+                overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
+
+                  monomer = _haskellPackagesOld.monomer.overrideAttrs (_oa: { meta.broken = false; });
                 };
               };
             })
+            # Stork is marked as broken on intel mac, but it does work.
+            # Unfortunately we cannot test this code PATH due to lack of CI for intel mac (#335).
+            #   _self.haskellPackages = super.haskellPackages.override {
+            #     overrides = _hself: hsuper: {
+            #       monomer = hsuper.monomer.overrideAttrs (_oa: { meta.broken = false; });
+            #     };
+            #   };
+            # })
           ];
           config = {
             allowUnfree = true;
