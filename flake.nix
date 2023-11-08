@@ -86,7 +86,7 @@
           projectRoot = ./packages;
           settings = {
             monomer = {
-              package.meta.badPlatforms = [
+              badPlatforms = [
               ];
 
             };
