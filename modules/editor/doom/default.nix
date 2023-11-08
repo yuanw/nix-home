@@ -130,6 +130,7 @@ with lib; {
       programs.emacs = mkIf cfg.usePackage {
         enable = true;
         package = emacsPatched;
+        extraPackages = epkgs: [ epkgs.vterm ];
       };
       programs.zsh = {
         sessionVariables = { EDITOR = "${emacsclient}"; };
