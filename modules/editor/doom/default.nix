@@ -21,7 +21,7 @@ let
     }
   );
   emacsWithDeps =
-    (pkgs.emacsPackagesFor emacsPatched.emacsWithPackages (epkgs:
+    (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
       with epkgs;
       # Use Nix to manage packages with non-trivial userspace dependencies.
       [
@@ -39,7 +39,7 @@ let
         # org-pdftools
         vterm
       ]
-    ));
+    );
 
 in
 with lib; {

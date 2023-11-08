@@ -116,6 +116,42 @@
         "type": "github"
       }
     },
+    "emacs-plus": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1696310580,
+        "narHash": "sha256-wSs7p3EmG0aXTindf6Djaqv0cVfCN18OlrjwnHzJqfg=",
+        "owner": "d12frosted",
+        "repo": "homebrew-emacs-plus",
+        "rev": "e8695a9e92b2a52cdbf702fd81c1b988eb123922",
+        "type": "github"
+      },
+      "original": {
+        "owner": "d12frosted",
+        "repo": "homebrew-emacs-plus",
+        "type": "github"
+      }
+    },
+    "firefox-darwin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1699404064,
+        "narHash": "sha256-j90fB8kBFvHlt6wAPghN1mA3LN4MyTua3gDjWDCJq24=",
+        "owner": "bandithedoge",
+        "repo": "nixpkgs-firefox-darwin",
+        "rev": "db82dcd2674329a24824f03667940e12c57b51c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "bandithedoge",
+        "repo": "nixpkgs-firefox-darwin",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -729,6 +765,8 @@
         "astro-nvim": "astro-nvim",
         "devenv": "devenv",
         "emacs": "emacs",
+        "emacs-plus": "emacs-plus",
+        "firefox-darwin": "firefox-darwin",
         "flake-parts": "flake-parts",
         "flake-utils": "flake-utils_4",
         "haskell-flake": "haskell-flake",
