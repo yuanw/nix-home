@@ -65,6 +65,9 @@ with pkgs; [
   gum
   ghostscript
 
+  glew
+  SDL2
+
   dig
   just
   pkg-config
