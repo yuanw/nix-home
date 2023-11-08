@@ -28,7 +28,6 @@
       enable = true;
       enableService = true;
       enableDoomConfig = true;
-      pkg = pkgs.emacsPlusNativeComp;
     };
 
     terminal.enable = true;
