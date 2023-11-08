@@ -81,10 +81,11 @@
           overlays = [
             (_self: _super: {
 
-              haskellPackages = prev.haskellPackages.override {
+              haskellPackages = _super.haskellPackages.override {
                 overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
 
                   monomer = _haskellPackagesOld.monomer.overrideAttrs (_oa: { meta.broken = false; });
+                  nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
                 };
               };
             })
@@ -98,6 +99,7 @@
             # })
           ];
           config = {
+            allowUnsupportedSystem = true;
             allowUnfree = true;
           };
         };
