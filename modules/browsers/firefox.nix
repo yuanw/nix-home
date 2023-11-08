@@ -23,7 +23,7 @@ in
       programs.firefox.package = cfg.pkg;
       programs.firefox.profiles = {
         home = {
-          id = 0;
+          name = "home";
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
           extensions = with pkgs.nur.repos.rycee.firefox-addons; [
             tridactyl
@@ -37,6 +37,7 @@ in
             default = "Google";
             order = [ "Google" "DuckDuckGo" ];
             engines = {
+              "Bing".metaData.hidden = true;
               "Nix Packages" = {
                 urls = [{
                   template = "https://search.nixos.org/packages";
