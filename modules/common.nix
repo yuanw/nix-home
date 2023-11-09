@@ -52,16 +52,6 @@
       inputs.nur.overlay
       inputs.firefox-darwin.overlay
       inputs.agenix.overlays.default
-      (_self: super: {
-        # Stork is marked as broken on intel mac, but it does work.
-        # Unfortunately we cannot test this code PATH due to lack of CI for intel mac (#335).
-        _self.haskellPackages = super.haskellPackages.override {
-          overrides = _hself: hsuper: {
-            monomer = hsuper.monomer.overrideAttrs (_oa: { meta.broken = false; });
-          };
-        };
-      })
-
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
 

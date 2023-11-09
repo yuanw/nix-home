@@ -4,7 +4,6 @@
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
-    mesa-macos-nixpkgs.url = "github:nixos/nixpkgs/d3edadc491f05f105ded0fb5c026e1a21b336ab2";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
