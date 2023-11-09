@@ -74,41 +74,45 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
-      perSystem = { system, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs-stable {
-          inherit system;
-          overlays = [
-            (_final: _prev: {
-              # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
-              # haskellPackages = _super.haskellPackages.override {
-              #   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
+      perSystem = { system, ... }:
+        let oldhaskellPackage = inputs.nixpkgs-stable.haskellPackages;
+        in
+        {
+          _module.args.pkgs = import inputs.nixpkgs {
+            inherit system;
+            overlays = [
+              (_final: _prev: {
+                mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
+                haskellPackages = _prev.haskellPackages.override {
+                  overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
+                    monomer = oldhaskellPackage.monomer;
+                    nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
+                  };
+                };
+              }
+              )
+            ];
+            config = {
 
-              #     monomer = _haskellPackagesOld.monomer.overrideAttrs (_oa: { meta.broken = false; });
-              #     nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
-              #   };
-              # };
-            })
-          ];
-          config = {
-            allowUnsupportedSystem = true;
-            allowUnfree = true;
+              allowUnsupportedSystem = true;
+              allowUnfree = true;
+            };
           };
-        };
-        haskellProjects.default = {
-          projectRoot = ./packages;
-          settings = { };
-          # overrides = self: super: { };
-          autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
-          devShell = {
-            hlsCheck.enable = false;
+          haskellProjects.default = {
+            projectRoot = ./packages;
+            settings = { };
+            # overrides = self: super: { };
+            autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
+            devShell = {
+              hlsCheck.enable = false;
+            };
           };
+
+          treefmt.imports = [ ./treefmt.nix ];
+          # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
+          pre-commit.settings.hooks.treefmt.enable = true;
+
         };
-
-        treefmt.imports = [ ./treefmt.nix ];
-        # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
-        pre-commit.settings.hooks.treefmt.enable = true;
-
-      };
 
     };
 }
