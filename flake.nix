@@ -75,7 +75,7 @@
         inputs.haskell-flake.flakeModule
       ];
       perSystem = { system, ... }:
-        let oldhaskellPackage = inputs.nixpkgs-stable.haskellPackages;
+        let oldhaskellPackage = inputs.nixpkgs-stable.legacyPackages.${system}.haskellPackages;
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -86,7 +86,7 @@
                 haskellPackages = _prev.haskellPackages.override {
                   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
                     monomer = oldhaskellPackage.monomer;
-                    nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
+                    nanovg = oldhaskellPackage.nanovg;
                   };
                 };
               }
