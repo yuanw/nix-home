@@ -85,7 +85,7 @@
                 mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
                 haskellPackages = _prev.haskellPackages.override {
                   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
-                    monomer = oldhaskellPackage.monomer;
+                    # monomer = oldhaskellPackage.monomer;
                     nanovg = oldhaskellPackage.nanovg;
                   };
                 };
