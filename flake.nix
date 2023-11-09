@@ -75,11 +75,11 @@
         inputs.haskell-flake.flakeModule
       ];
       perSystem = { system, ... }: {
-        _module.args.pkgs = import inputs.nixpkgs {
+        _module.args.pkgs = import inputs.nixpkgs-stable {
           inherit system;
           overlays = [
             (_final: _prev: {
-              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
+              # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
               # haskellPackages = _super.haskellPackages.override {
               #   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
 
