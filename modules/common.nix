@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ inputs, inputs', config, ... }:
 {
   nix = {
     # configureBuildUsers = true;
@@ -50,16 +50,13 @@
     overlays = [
       inputs.emacs.overlay
       inputs.nur.overlay
+      inputs.firefox-darwin.overlay
       inputs.agenix.overlays.default
       (_final: _prev: {
-        # https://github.com/NixOS/nixpkgs/pull/257760/files
-        ollama = inputs.ollama-nixpkgs.legacyPackages.${_prev.system}.ollama;
-        stable = inputs.nixpkgs-stable.legacyPackages.${_prev.system};
+        stable = inputs'.nixpkgs-stable.legacyPackages;
         # https://nixpk.gs/pr-tracker.html?pr=263500
-        # udiskie = inputs.nixpkgs-master.legacyPackages.${_prev.system}.udiskie;
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
         # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-        # inputs.nixpkgs.legacyPackages.${_prev.system}.mesa;
         #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
         #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
 

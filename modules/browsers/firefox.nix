@@ -18,12 +18,17 @@ in
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home = { file."startpage".source = ./startpage; };
+      home = {
+        file."startpage".source = ./startpage;
+        packages = [
+          pkgs.tridactyl-native
+        ];
+      };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       programs.firefox.profiles = {
         home = {
-          id = 0;
+          name = "home";
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
           extensions = with pkgs.nur.repos.rycee.firefox-addons; [
             tridactyl
@@ -37,6 +42,9 @@ in
             default = "Google";
             order = [ "Google" "DuckDuckGo" ];
             engines = {
+              "Bing".metaData.hidden = true;
+              "Ebay".metaData.hidden = true;
+              "Amazon".metaData.hidden = true;
               "Nix Packages" = {
                 urls = [{
                   template = "https://search.nixos.org/packages";

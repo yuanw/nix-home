@@ -44,7 +44,6 @@
       casks = [
         "brave-browser"
         "docker"
-        "firefox"
         "google-chrome"
         "insomnia"
         "slack"
@@ -66,13 +65,12 @@
     };
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+      pkg = pkgs.firefox-bin;
     };
     editors.emacs = {
       enable = true;
       enableService = true;
       enableDoomConfig = true;
-      # pkg = pkgs.emacsPlusNativeComp;
     };
     health.enable = false;
     editors.neovim.enable = true;
