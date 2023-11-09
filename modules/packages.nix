@@ -65,10 +65,6 @@ with pkgs; [
   gum
   ghostscript
 
-  glew
-  SDL2
-  # mono-stretchly
-
   dig
   just
   pkg-config

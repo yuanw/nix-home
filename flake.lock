@@ -425,22 +425,6 @@
         "type": "github"
       }
     },
-    "mesa-macos-nixpkgs": {
-      "locked": {
-        "lastModified": 1685357076,
-        "narHash": "sha256-XqeJnLEqwgtNoNk1dg2NXXL51UydFJHDylMpIQIvUfw=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "d3edadc491f05f105ded0fb5c026e1a21b336ab2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "d3edadc491f05f105ded0fb5c026e1a21b336ab2",
-        "type": "github"
-      }
-    },
     "nix": {
       "inputs": {
         "lowdown-src": "lowdown-src",
@@ -772,7 +756,6 @@
         "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
         "hosts": "hosts",
-        "mesa-macos-nixpkgs": "mesa-macos-nixpkgs",
         "nix-colors": "nix-colors",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_5",
