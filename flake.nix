@@ -90,7 +90,6 @@
             })
           ];
           config = {
-
             allowUnsupportedSystem = true;
             allowUnfree = true;
           };
