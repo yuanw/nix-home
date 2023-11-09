@@ -4,8 +4,7 @@
   inputs = {
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
-    # https://github.com/NixOS/nixpkgs/pull/257760
-    ollama-nixpkgs.url = "github:elohmeier/nixpkgs/ollama";
+    mesa-macos-nixpkgs.url = "github:nixos/nixpkgs/d3edadc491f05f105ded0fb5c026e1a21b336ab2";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
@@ -79,15 +78,15 @@
         _module.args.pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
-            (_self: _super: {
+            (_final: _prev: {
+              mesa = if _prev.stdenv.isDarwin then inputs.mesa-macos-nixpkgs.legacyPackages.${_prev.system}.mesa else _prev.mesa;
+              # haskellPackages = _super.haskellPackages.override {
+              #   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
 
-              haskellPackages = _super.haskellPackages.override {
-                overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
-
-                  monomer = _haskellPackagesOld.monomer.overrideAttrs (_oa: { meta.broken = false; });
-                  nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
-                };
-              };
+              #     monomer = _haskellPackagesOld.monomer.overrideAttrs (_oa: { meta.broken = false; });
+              #     nanovg = _haskellPackagesOld.nanovg.overrideAttrs (_oa: { meta.broken = false; });
+              #   };
+              # };
             })
             # Stork is marked as broken on intel mac, but it does work.
             # Unfortunately we cannot test this code PATH due to lack of CI for intel mac (#335).
@@ -99,6 +98,8 @@
             # })
           ];
           config = {
+
+            # allowBroken = true;
             allowUnsupportedSystem = true;
             allowUnfree = true;
           };
