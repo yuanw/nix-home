@@ -425,6 +425,22 @@
         "type": "github"
       }
     },
+    "mesa-macos-nixpkgs": {
+      "locked": {
+        "lastModified": 1685357076,
+        "narHash": "sha256-XqeJnLEqwgtNoNk1dg2NXXL51UydFJHDylMpIQIvUfw=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d3edadc491f05f105ded0fb5c026e1a21b336ab2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "d3edadc491f05f105ded0fb5c026e1a21b336ab2",
+        "type": "github"
+      }
+    },
     "nix": {
       "inputs": {
         "lowdown-src": "lowdown-src",
@@ -520,11 +536,11 @@
     },
     "nixpkgs-master": {
       "locked": {
-        "lastModified": 1698967992,
-        "narHash": "sha256-qGiGHAwXiykm4Pvs2Ei/HeUs1bzmQm2cRrmIVL5VMag=",
+        "lastModified": 1699542973,
+        "narHash": "sha256-V5zjRCP5CY96U3bLe2BeBih/Qmpz6hDUXLN6VNZnQc8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "529fd47f28707310775d5ddcc5763740e2feed01",
+        "rev": "0b1e66e485e67e5bc06c2ba4411d82f208e02007",
         "type": "github"
       },
       "original": {
@@ -690,22 +706,6 @@
         "type": "github"
       }
     },
-    "ollama-nixpkgs": {
-      "locked": {
-        "lastModified": 1698913918,
-        "narHash": "sha256-56GZjDgSOQWx+l7/ZAGWe+SKgyIyQ5BqaJfznd/rHao=",
-        "owner": "elohmeier",
-        "repo": "nixpkgs",
-        "rev": "ea3a7c56fd076111f0f1afe5b36a9f79c5660c8c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "elohmeier",
-        "ref": "ollama",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "pre-commit": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -772,13 +772,13 @@
         "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
         "hosts": "hosts",
+        "mesa-macos-nixpkgs": "mesa-macos-nixpkgs",
         "nix-colors": "nix-colors",
         "nix-darwin": "nix-darwin",
         "nixpkgs": "nixpkgs_5",
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable_3",
         "nur": "nur",
-        "ollama-nixpkgs": "ollama-nixpkgs",
         "pre-commit": "pre-commit",
         "treefmt-nix": "treefmt-nix"
       }

@@ -79,7 +79,7 @@
           inherit system;
           overlays = [
             (_final: _prev: {
-              mesa = if _prev.stdenv.isDarwin then inputs.mesa-macos-nixpkgs.legacyPackages.${_prev.system}.mesa else _prev.mesa;
+              mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa_22_3 else _prev.mesa;
               # haskellPackages = _super.haskellPackages.override {
               #   overrides = _haskellPackagesNew: _haskellPackagesOld: rec {
 
@@ -88,18 +88,9 @@
               #   };
               # };
             })
-            # Stork is marked as broken on intel mac, but it does work.
-            # Unfortunately we cannot test this code PATH due to lack of CI for intel mac (#335).
-            #   _self.haskellPackages = super.haskellPackages.override {
-            #     overrides = _hself: hsuper: {
-            #       monomer = hsuper.monomer.overrideAttrs (_oa: { meta.broken = false; });
-            #     };
-            #   };
-            # })
           ];
           config = {
 
-            # allowBroken = true;
             allowUnsupportedSystem = true;
             allowUnfree = true;
           };
