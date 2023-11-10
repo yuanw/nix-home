@@ -48,7 +48,9 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
+    mono-stretchly-darwin = {
+      url = "github:yuanw/mono-stretchly";
+    };
     # Firefox Darwin overlay.
     firefox-darwin = {
       url = "github:bandithedoge/nixpkgs-firefox-darwin";
@@ -78,7 +80,6 @@
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
             config = {
-              allowUnsupportedSystem = true;
               allowUnfree = true;
             };
           };

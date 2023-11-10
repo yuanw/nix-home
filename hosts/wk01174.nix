@@ -72,7 +72,7 @@
       enableService = true;
       enableDoomConfig = true;
     };
-    health.enable = false;
+    health.enable = true;
     editors.neovim.enable = true;
     typing.enable = true;
     dev =

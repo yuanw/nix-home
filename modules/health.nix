@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, inputs', ... }:
 
 with lib;
 let
@@ -11,28 +11,25 @@ in
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
       # path = [ config.environment.systemPath ];
-
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "${pkgs.haskellPackages.mono-stretchly}/bin/mono-stretchly"
+            "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
           ];
-        # RunAtLoad = false;
+        RunAtLoad = true;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
         # in secs
         StartInterval = 900;
       };
-      serviceConfig.UserName = config.my.username;
+      # serviceConfig.UserName = config.my.username;
     };
     home-manager.users.${config.my.username} = {
       home.packages = [
-        pkgs.haskellPackages.mono-stretchly
-        pkgs.SDL2
-        pkgs.glew
+        inputs'.mono-stretchly-darwin.packages.default
       ];
     };
   };
