@@ -18,14 +18,14 @@ in
           [
             "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
           ];
-        # RunAtLoad = false;
+        RunAtLoad = true;
         EnvironmentVariables = {
           PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
         };
         # in secs
         StartInterval = 900;
       };
-      serviceConfig.UserName = config.my.username;
+      # serviceConfig.UserName = config.my.username;
     };
     home-manager.users.${config.my.username} = {
       home.packages = [
