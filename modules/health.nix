@@ -11,7 +11,6 @@ in
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
       # path = [ config.environment.systemPath ];
-
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
         StandardErrorPath = "/tmp/strecthly.log";
