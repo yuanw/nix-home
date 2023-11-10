@@ -54,6 +54,7 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
+
         # https://nixpk.gs/pr-tracker.html?pr=263500
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
         # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else

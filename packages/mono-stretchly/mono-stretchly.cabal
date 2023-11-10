@@ -32,7 +32,7 @@ executable mono-stretchly
 
   -- Other library packages from which modules are imported.
   build-depends:
-    , base          ^>=4.11 && <5
+    , base
     , data-default
     , lens
     , monomer
