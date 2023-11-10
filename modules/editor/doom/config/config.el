@@ -64,7 +64,6 @@
   :config
   (map! :n "e" 'justl-exec-recipe))
 
-(unpin! haskell-mode)
 ;; (use-package! chatgpt-shell
 ;;   :requires shell-maker
 ;;   :config
