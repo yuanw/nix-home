@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, inputs', ... }:
 
 with lib;
 let
@@ -17,7 +17,7 @@ in
         StandardErrorPath = "/tmp/strecthly.log";
         ProgramArguments =
           [
-            "${pkgs.haskellPackages.mono-stretchly}/bin/mono-stretchly"
+            "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
           ];
         # RunAtLoad = false;
         EnvironmentVariables = {
@@ -30,9 +30,7 @@ in
     };
     home-manager.users.${config.my.username} = {
       home.packages = [
-        pkgs.haskellPackages.mono-stretchly
-        pkgs.SDL2
-        pkgs.glew
+        inputs'.mono-stretchly-darwin.packages.default
       ];
     };
   };

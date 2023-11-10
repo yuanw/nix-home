@@ -13,7 +13,6 @@ in {
         pkgs.aws-iam-authenticator
         pkgs.clang-tools
         # pkgs.antlr4
-
         packages.resource-id
         pkgs.csvkit
         # pkgs.visidata
