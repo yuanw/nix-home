@@ -27,4 +27,4 @@ jobs:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
         extraPullNames: yuanwang-wf,nix-community
-    - run: nix --version
+    - run: nix flake check
