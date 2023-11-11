@@ -87,21 +87,8 @@ resource "aws_security_group" "adguard" {
    }
 
   # Allow port 53 so that we can do dns
-  ingress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 
   # Allow port 53 so that we can do dns
-  ingress {
-    from_port   = 53
-    to_port     = 53
-    protocol    = "udp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
 }
 
 
