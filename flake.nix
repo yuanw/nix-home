@@ -9,6 +9,9 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    roc = {
+      url = "github:roc-lang/roc";
+    };
     devenv.url = "github:cachix/devenv";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
