@@ -15,6 +15,7 @@
       ./dev/julia.nix
       ./dev/node.nix
       ./dev/python.nix
+      ./dev/roc.nix
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix
