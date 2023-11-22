@@ -9,8 +9,8 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [
-        inputs'.roc.cli
-        inputs'.roc.lang-server
+        inputs'.roc.packages.cli
+        inputs'.roc.packages.lang-server
       ];
     };
   };
