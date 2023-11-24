@@ -73,7 +73,7 @@ in
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
         pkgs.ical-buddy
-        # pkgs.sketchybar-cpu-helper
+        pkgs.yabai-zsh-completions
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
@@ -127,6 +127,13 @@ in
         ${moveConfig}
       '';
     };
+    # https://github.com/IvarWithoutBones/dotfiles/blob/main/modules/darwin/yabai/default.nix#L42
+    launchd.user.agents.yabai-load-sa = {
+      path = [ pkgs.yabai config.environment.systemPath ];
+      command = "/usr/bin/sudo ${pkgs.yabai}/bin/yabai --load-sa";
+      serviceConfig.RunAtLoad = true;
+    };
+
     launchd.user.agents.skhd.serviceConfig = {
       StandardOutPath = "/tmp/skhd.log";
       StandardErrorPath = "/tmp/skhd.log";
