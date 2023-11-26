@@ -177,7 +177,7 @@
         )               ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
-       ;; (purescript +lsp +tree-sitter )        ; javascript, but functional
+       (purescript +lsp +tree-sitter )        ; javascript, but functional
 
        (python +lsp  +tree-sitter )            ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
