@@ -99,7 +99,7 @@ with lib; {
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
           #: js
-          nodePackages.eslint
+          # nodePackages.eslint
           #: markdown
           nodePackages.unified-language-server
           #: sh
