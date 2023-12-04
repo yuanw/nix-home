@@ -14,7 +14,7 @@ with pkgs; [
   nix-prefetch-git
   cachix
   nixfmt
-  sass
+  # sass
   tree
   # broot
   wget
