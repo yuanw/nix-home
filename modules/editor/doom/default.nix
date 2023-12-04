@@ -95,7 +95,7 @@ with lib; {
           sqlite
           tree-sitter
           (tree-sitter.withPlugins (p: [ p.tree-sitter-c p.tree-sitter-java ]))
-          wordnet
+          # wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
           #: js
