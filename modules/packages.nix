@@ -45,7 +45,7 @@ with pkgs; [
   keychain
 
   # devenv
-  eukleides
+  # eukleides
   #mu
   #offlineimap
   #notmuch
