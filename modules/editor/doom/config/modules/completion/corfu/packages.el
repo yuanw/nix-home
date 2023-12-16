@@ -12,12 +12,9 @@
 (package! cape)
  (package! cape-yasnippet
    :recipe (:host github :repo "elken/cape-yasnippet"))
-(package! yasnippet-capf
-  :recipe (:host github :repo "elken/yasnippet-capf"))
- (package! cape-use-package
-   :recipe (:host github :repo "elken/cape-use-package"))
-(package! package-capf
-  :recipe (:host github :repo "elken/package-capf"))
+(package! cape-use-package
+  :recipe (:host github :repo "elken/cape-use-package"))
+
 (when (modulep! :os tty)
   (package! popon
     :recipe (:type git :repo "https://codeberg.org/akib/emacs-popon"))
