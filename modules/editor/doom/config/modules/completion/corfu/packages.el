@@ -10,12 +10,12 @@
 (package! corfu-doc
   :recipe (:host github :repo "galeo/corfu-doc"))
 (package! cape)
-;; (package! cape-yasnippet
-;;   :recipe (:host github :repo "elken/cape-yasnippet"))
+ (package! cape-yasnippet
+   :recipe (:host github :repo "elken/cape-yasnippet"))
 (package! yasnippet-capf
   :recipe (:host github :repo "elken/yasnippet-capf"))
-;; (package! cape-use-package
-;;   :recipe (:host github :repo "elken/cape-use-package"))
+ (package! cape-use-package
+   :recipe (:host github :repo "elken/cape-use-package"))
 (package! package-capf
   :recipe (:host github :repo "elken/package-capf"))
 (when (modulep! :os tty)

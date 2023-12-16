@@ -189,19 +189,6 @@
   :config
   (setq evil-replace-with-register-key (kbd "gr"))
   (evil-replace-with-register-install))
-;; (use-package! elgot-java
-;;   :after elgot
-;;   :config
-;;   (
-;;    (add-hook 'java-mode-hook 'eglot-java-mode)
-;;    (add-hook 'eglot-java-mode-hook (lambda ()
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh)))
-;;    ))
 
 ;; (use-package! keycast
 ;;   :commands keycast-mode
