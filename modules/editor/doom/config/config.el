@@ -143,7 +143,15 @@
           (tags-todo "+next"
                      ((org-agenda-overriding-header "Next Tasks")))))))
 
-
+(flycheck-define-checker vale
+  "A checker for prose"
+  :command ("vale" "--output" "line"
+            source)
+  :standard-input nil
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
+  :modes (markdown-mode gfm-mode org-mode text-mode))
+ (add-to-list 'flycheck-checkers 'vale 'append)
 ;; (use-package! interaction-log)
 (use-package! protobuf-mode)
 
@@ -162,7 +170,7 @@
   (setq browse-at-remote-add-line-number-if-no-region-selected t))
 ;; I like abbrevs, at least in org mode
 ;; (add-hook 'org-mode-hook #'abbrev-mode)
-(add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
+;; (add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
 (after! org
   (setq org-eukleides-path (getenv "EUKLEIDES_PATH")
         org-agenda-dim-blocked-tasks nil
@@ -180,9 +188,9 @@
   (super-save-mode +1)
  )
 
-(use-package! chatgpt-shell
-  :requires shell-maker
-  )
+;; (use-package! chatgpt-shell
+;;   :requires shell-maker
+;;   )
 (use-package! embark-vc
   :after embark)
 (use-package! evil-replace-with-register
