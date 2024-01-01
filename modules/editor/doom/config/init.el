@@ -21,13 +21,11 @@
        ;;layout            ; auie,ctsrnm is the superior home row
 
        :completion
-       ;; (company +childframe)           ; the ultimate code completion backend
+       (company +childframe)           ; the ultimate code completion backend
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;;ivy               ; a search engine for love and life
-       (corfu
-        +icons
-        +orderless)
+       ;;(corfu +icons +orderless)
        ( vertico +icons  )           ; the search engine of the future
 
 
@@ -177,7 +175,7 @@
         )               ; organize your plain life in plain text
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
-       ;; (purescript +lsp +tree-sitter )        ; javascript, but functional
+       (purescript +lsp +tree-sitter )        ; javascript, but functional
 
        (python +lsp  +tree-sitter )            ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever

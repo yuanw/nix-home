@@ -48,7 +48,7 @@
       allowUnsupportedSystem = true;
     };
     overlays = [
-      inputs.emacs.overlay
+      # inputs.emacs.overlay
       inputs.nur.overlay
       inputs.firefox-darwin.overlay
       inputs.agenix.overlays.default

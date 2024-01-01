@@ -60,7 +60,7 @@ with lib; {
   environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
   programs.bash.enable = false;
   programs.zsh = {
-    enableCompletion = false;
+    enableCompletion = true;
     enable = true;
   };
   programs.gnupg.agent = {

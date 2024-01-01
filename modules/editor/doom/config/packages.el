@@ -56,6 +56,7 @@
 (package! super-save)
 (package! org-wild-notifier)
 (package! thrift-mode)
+(package! protobuf-mode)
 (package! embark-vc)
 (package! evil-replace-with-register)
 (package! keycast)

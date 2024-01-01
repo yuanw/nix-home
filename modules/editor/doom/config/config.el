@@ -143,8 +143,18 @@
           (tags-todo "+next"
                      ((org-agenda-overriding-header "Next Tasks")))))))
 
-
+(flycheck-define-checker vale
+  "A checker for prose"
+  :command ("vale" "--output" "line"
+            source)
+  :standard-input nil
+  :error-patterns
+  ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
+  :modes (markdown-mode gfm-mode org-mode text-mode))
+ (add-to-list 'flycheck-checkers 'vale 'append)
 ;; (use-package! interaction-log)
+(use-package! protobuf-mode)
+
 (use-package! thrift-mode
   :config
   (add-to-list 'auto-mode-alist '("\\.frugal\\'" . thrift-mode ) ))
@@ -160,7 +170,7 @@
   (setq browse-at-remote-add-line-number-if-no-region-selected t))
 ;; I like abbrevs, at least in org mode
 ;; (add-hook 'org-mode-hook #'abbrev-mode)
-(add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
+;; (add-transient-hook! 'focus-out-hook (atomic-chrome-start-server))
 (after! org
   (setq org-eukleides-path (getenv "EUKLEIDES_PATH")
         org-agenda-dim-blocked-tasks nil
@@ -178,28 +188,15 @@
   (super-save-mode +1)
  )
 
-(use-package! chatgpt-shell
-  :requires shell-maker
-  )
+;; (use-package! chatgpt-shell
+;;   :requires shell-maker
+;;   )
 (use-package! embark-vc
   :after embark)
 (use-package! evil-replace-with-register
   :config
   (setq evil-replace-with-register-key (kbd "gr"))
   (evil-replace-with-register-install))
-;; (use-package! elgot-java
-;;   :after elgot
-;;   :config
-;;   (
-;;    (add-hook 'java-mode-hook 'eglot-java-mode)
-;;    (add-hook 'eglot-java-mode-hook (lambda ()
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
-;;                                      (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh)))
-;;    ))
 
 ;; (use-package! keycast
 ;;   :commands keycast-mode

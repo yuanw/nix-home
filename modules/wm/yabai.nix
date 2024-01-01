@@ -28,6 +28,7 @@ let
     shift + ctrl + alt - d: ${emacsclient}
     shift + ctrl + alt - e: ${emacsEveryWhere}
     shift + ctrl + alt - x: org-capture -k n
+    shift + ctrl + alt - f : open -n -a ~/.nix-profile/Applications/Firefox.app
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
@@ -72,7 +73,6 @@ in
       # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
         pkgs.ical-buddy
-        # pkgs.sketchybar-cpu-helper
         (
 
           pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
@@ -126,6 +126,13 @@ in
         ${moveConfig}
       '';
     };
+    # https://github.com/IvarWithoutBones/dotfiles/blob/main/modules/darwin/yabai/default.nix#L42
+    launchd.user.agents.yabai-load-sa = {
+      path = [ pkgs.yabai config.environment.systemPath ];
+      command = "/usr/bin/sudo ${pkgs.yabai}/bin/yabai --load-sa";
+      serviceConfig.RunAtLoad = true;
+    };
+
     launchd.user.agents.skhd.serviceConfig = {
       StandardOutPath = "/tmp/skhd.log";
       StandardErrorPath = "/tmp/skhd.log";

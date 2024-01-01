@@ -31,7 +31,14 @@ let
         vterm
       ]
     );
-
+  valeStyles = [
+    { name = "alex"; path = "${inputs.vale-alex}/alex"; }
+    { name = "Google"; path = "${inputs.vale-Google}/Google"; }
+    { name = "Microsoft"; path = "${inputs.vale-Microsoft}/Microsoft"; }
+    { name = "Joblint"; path = "${inputs.vale-Joblint}/Joblint"; }
+    { name = "proselint"; path = "${inputs.vale-proselint}/proselint"; }
+    { name = "write-good"; path = "${inputs.vale-write-good}/write-good"; }
+  ];
 in
 with lib; {
 
@@ -95,11 +102,11 @@ with lib; {
           sqlite
           tree-sitter
           (tree-sitter.withPlugins (p: [ p.tree-sitter-c p.tree-sitter-java ]))
-          wordnet
+          # wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
           #: js
-          nodePackages.eslint
+          # nodePackages.eslint
           #: markdown
           nodePackages.unified-language-server
           #: sh
@@ -112,11 +119,22 @@ with lib; {
           # :lang yaml
           nodePackages.yaml-language-server
           emacsWithDeps
+          vale
         ];
 
-        file = mkIf cfg.enableDoomConfig {
-          ".doom.d".source = ./config;
-        };
+        file.".vale.ini".text =
+          let
+            stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
+            basedOnStyles = concatStringsSep ", "
+              (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
+          in
+          ''
+            StylesPath = ${stylesPath}
+            [*]
+            BasedOnStyles = ${basedOnStyles}
+          '';
+
+        file.".doom.d".source = ./config;
       };
       # not use home-manager programs.emacs due to it wraps
       # emacsWithPackages again

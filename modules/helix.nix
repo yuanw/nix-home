@@ -32,18 +32,13 @@
       };
       languages =
         {
-          language = [
+          nix =
             {
               name = "nix";
               auto-format = true;
               formatter = { command = "alejandra"; };
               language-server = { command = "nil"; };
-            }
-            {
-              name = "html";
-              auto-format = false;
-            }
-          ];
+            };
 
         };
     };
