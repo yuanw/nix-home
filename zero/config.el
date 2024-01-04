@@ -43,7 +43,137 @@
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
+;; Install a package via the elpaca macro
+;; See the "recipes" section of the manual for more details.
+
+;; (elpaca example-package)
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+;; Block until current queue processed.
+(elpaca-wait)
+
+;;When installing a package which modifies a form used at the top-level
+;;(e.g. a package which adds a use-package key word),
+;;use `elpaca-wait' to block until that package has been installed/configured.
+;;For example:
+;;(use-package general :demand t)
+;;(elpaca-wait)
+
+;; Expands to: (elpaca evil (use-package evil :demand t))
+(use-package evil
+    :init      ;; tweak evil's configuration before loading it
+    (setq evil-want-integration t) ;; This is optional since it's already set to t by default.
+    (setq evil-want-keybinding nil)
+    (setq evil-vsplit-window-right t)
+    (setq evil-split-window-below t)
+    (evil-mode))
+  (use-package evil-collection
+    :after evil
+    :config
+    (setq evil-collection-mode-list '(dashboard dired ibuffer))
+    (evil-collection-init))
+  (use-package evil-tutor)
+
+;;Turns off elpaca-use-package-mode current declartion
+;;Note this will cause the declaration to be interpreted immediately (not deferred).
+;;Useful for configuring built-in emacs features.
+(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
+
+;; Don't install anything. Defer execution of BODY
+(elpaca nil (message "deferred"))
+
+;; (use-package emacs
+;;   :elpaca nil
+;;   :init
+;;   (defalias 'yes-or-no-p 'y-or-n-p))
+
+;; (use-package emacs
+;;   :elpaca nil
+;;   :init
+;;   (set-charset-priority 'unicode)
+;;   (setq locale-coding-system 'utf-8
+;;         coding-system-for-read 'utf-8
+;;         coding-system-for-write 'utf-8)
+;;   (set-terminal-coding-system 'utf-8)
+;;   (set-keyboard-coding-system 'utf-8)
+;;   (set-selection-coding-system 'utf-8)
+;;   (prefer-coding-system 'utf-8)
+;;   (setq default-process-coding-system '(utf-8-unix . utf-8-unix)))
+
+;; (use-package emacs
+;;   :elpaca nil
+;;   :init
+;;   (setq-default indent-tabs-mode nil)
+;;   (setq-default tab-width 2))
+
+;; (use-package emacs
+;;   :elpaca nil
+;;   :init
+;; 	(when (eq system-type 'darwin)
+;; 		(setq mac-command-modifier 'super)
+;; 		(setq mac-option-modifier 'meta)
+;; 		(setq mac-control-modifier 'control)))
+
+(use-package general
+  :config
+  (general-evil-setup)
+
+  ;; set up 'SPC' as the global leader key
+  (general-create-definer yw/leader-keys
+    :states '(normal insert visual emacs)
+    :keymaps 'override
+    :prefix "SPC" ;; set leader
+    :global-prefix "M-SPC") ;; access leader in insert mode
+
+  (yw/leader-keys
+    "b" '(:ignore t :wk "buffer")
+    "bb" '(switch-to-buffer :wk "Switch buffer")
+    "bk" '(kill-this-buffer :wk "Kill this buffer")
+    "bn" '(next-buffer :wk "Next buffer")
+    "bp" '(previous-buffer :wk "Previous buffer")
+    "br" '(revert-buffer :wk "Reload buffer"))
+
+)
+
+(use-package which-key
+  :init
+    (which-key-mode 1)
+  :config
+  (setq which-key-side-window-location 'bottom
+	  which-key-sort-order #'which-key-key-order-alpha
+	  which-key-sort-uppercase-first nil
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 6
+	  which-key-side-window-slot -10
+	  which-key-side-window-max-height 0.25
+	  which-key-idle-delay 0.8
+	  which-key-max-description-length 25
+	  which-key-allow-imprecise-window-fit t
+	  which-key-separator " → " ))
+
 (set-face-attribute 'default nil
   :font "PragmataPro Mono Liga"
   :height 160
   :weight 'medium)
+
+(use-package doom-themes
+  :demand
+  :config
+  (load-theme 'doom-challenger-deep t))
+
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
+
+(use-package nerd-icons)
+
+(use-package nyan-mode
+  :init
+  (nyan-mode))

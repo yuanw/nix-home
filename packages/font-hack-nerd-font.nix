@@ -2,11 +2,12 @@
 
 stdenv.mkDerivation rec {
   pname = "font-hack-nerd-font";
-  version = "3.0.2";
+  version = "3.1.1";
 
   src = fetchurl {
     url = "https://github.com//ryanoasis/nerd-fonts/releases/download/v${version}/Hack.zip";
-    hash = "sha256-6eYgqlyaAq5gzEHpWb90spWS+e/WQjXtm5Or+kSGdKE=";
+    # hash = "sha256-6eYgqlyaAq5gzEHpWb90spWS+e/WQjXtm5Or+kSGdKE=";
+    hask = lib.fakeHash;
   };
 
   buildInputs = [ unzip ];
