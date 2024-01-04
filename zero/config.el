@@ -1,4 +1,3 @@
-#+begin_src elisp
 (tool-bar-mode -1)             ; Hide the outdated icons
 (scroll-bar-mode -1)           ; Hide the always-visible scrollbar
 (setq inhibit-splash-screen t) ; Remove the "Welcome to GNU Emacs" splash screen
@@ -6,12 +5,7 @@
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-#+end_src
 
-* Elpaca package manager
-https://github.com/progfolio/elpaca
-
-#+begin_src elisp
 (defvar elpaca-installer-version 0.6)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
@@ -48,13 +42,8 @@ https://github.com/progfolio/elpaca
     (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
-#+end_src
 
-* Font
-
-#+begin_src elisp
 (set-face-attribute 'default nil
   :font "PragmataPro Mono Liga"
   :height 160
   :weight 'medium)
-#+end_src
