@@ -80,10 +80,7 @@ with lib; {
     # the context of home-manager
     home-manager.users.${config.my.username} = { pkgs, ... }: {
 
-      xdg.configFile."doom-profiles.el".source = ''
-        ((default ("DOOMDIR" . "~/.doom.d/"))
-         (zero   (user-emacs-directory . "~/workspaces/nix-home/zero")))
-      '';
+      xdg.configFile."doom-profiles.el".source = ./profiles.el;
       home = {
         packages = with pkgs; [
           # git
