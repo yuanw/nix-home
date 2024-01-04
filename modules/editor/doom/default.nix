@@ -79,6 +79,11 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { pkgs, ... }: {
+
+      xdg.configFile."doom-profiles.el".source = ''
+        ((default ("DOOMDIR" . "~/.doom.d/"))
+         (zero   (user-emacs-directory . "~/workspaces/nix-home/zero")))
+      '';
       home = {
         packages = with pkgs; [
           # git
