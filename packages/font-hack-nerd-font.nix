@@ -7,7 +7,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "https://github.com//ryanoasis/nerd-fonts/releases/download/v${version}/Hack.zip";
     # hash = "sha256-6eYgqlyaAq5gzEHpWb90spWS+e/WQjXtm5Or+kSGdKE=";
-    hask = lib.fakeHash;
+    hash = lib.fakeHash;
   };
 
   buildInputs = [ unzip ];
