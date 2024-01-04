@@ -1,0 +1,8 @@
+#+title: Readme
+
+
+https://gitlab.com/dwt1/configuring-emacs/-/tree/main?ref_type=heads
+
+~doom profiles sync~
+
+~emacs --profile zero~
