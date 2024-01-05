@@ -91,13 +91,9 @@
  ;; :o "o" #'evil-inner-symbol
 
  :leader
- ;; (:prefix "n"
- ;;  "b" #'org-roam-buffer-toggle
- ;;  "d" #'org-roam-dailies-goto-today
- ;;  "D" #'org-roam-dailies-goto-date
- ;;  "i" #'org-roam-node-insert
- ;;  "r" #'org-roam-node-find
- ;;  "R" #'org-roam-capture)
+ (:prefix "w"
+  "w" #'ace-window
+   )
 
  ;; (:prefix "i"
  ;;  "o" #'org-insert-todo-heading
