@@ -7,10 +7,10 @@ let cfg = config.modules.brew;
 in {
   options.modules.brew = {
     enable = mkEnableOption "brew";
-    taps = mkOption {
-      type = types.listOf types.str;
-      default = [ "homebrew/core" "homebrew/cask" ];
-    };
+    # taps = mkOption {
+    #   type = types.listOf types.str;
+    #   default = [ "homebrew/core" "homebrew/cask" ];
+    # };
     brews = mkOption {
       type = types.listOf types.str;
       default = [ ];
@@ -39,7 +39,7 @@ in {
     homebrew.global.brewfile = true;
     homebrew.global.autoUpdate = true;
     homebrew.global.lockfiles = true;
-    homebrew.taps = cfg.taps;
+    # homebrew.taps = cfg.taps;
     homebrew.brews = cfg.brews;
     homebrew.casks = cfg.casks;
     homebrew.masApps = cfg.masApps;
