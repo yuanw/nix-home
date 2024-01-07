@@ -295,10 +295,10 @@ Make everything use UTF-8:
   :demand
   :config
   (load-theme 'doom-palenight t))
-
-(use-package telephone-line
+(use-package doom-modeline
   :ensure t
-  :init (telephone-line-mode 1))
+  :init (doom-modeline-mode 1))
+
 
 (use-package nerd-icons)
 

@@ -24,6 +24,7 @@
 ;; `load-theme' function. This is the default:
 (setq
  doom-theme 'doom-palenight
+ doom-modeline-icon nil
  ;; doom-theme 'doom-nano-dark-theme
  doom-font (font-spec :family "PragmataPro" :size 18))
 ;; (after! doom-themes

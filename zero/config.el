@@ -258,12 +258,8 @@
   :config
   (load-theme 'doom-palenight t))
 
-(use-package telephone-line
-  :ensure t
-  :init (telephone-mode 1))
+;; (use-package telephone-line
+;;   :ensure t
+;;   :init (telephone-line-mode 1))
 
 (use-package nerd-icons)
-
-(use-package nyan-mode
-  :init
-  (nyan-mode))
