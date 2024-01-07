@@ -64,7 +64,7 @@ with pkgs; [
   csvkit
   gum
   ghostscript
-
+  djvu2pdf
   dig
   just
   pkg-config
