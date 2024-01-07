@@ -39,7 +39,7 @@
     secrets.agenix = { enable = true; };
     brew = {
       enable = true;
-      taps = [ "homebrew/core" "homebrew/cask" ];
+      # taps = [ "homebrew/core" "homebrew/cask" ];
 
       casks = [
         "brave-browser"
