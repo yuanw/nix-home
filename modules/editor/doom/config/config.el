@@ -91,10 +91,10 @@
 
  ;; :o "o" #'evil-inner-symbol
 
- :leader
- (:prefix "w"
-  "w" #'ace-window
-   )
+ ;; :leader
+ ;; (:prefix "w"
+ ;;  "w" #'ace-window
+ ;;   )
 
  ;; (:prefix "i"
  ;;  "o" #'org-insert-todo-heading

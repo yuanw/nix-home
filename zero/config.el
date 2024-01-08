@@ -257,9 +257,12 @@
   :demand
   :config
   (load-theme 'doom-palenight t))
+(use-package telephone-line
+  :ensure t
+  :init (telephone-line-mode 1))
+(use-package command-log-mode
+  :ensure t
+  :init (command-log-mode 1))
 
-;; (use-package telephone-line
-;;   :ensure t
-;;   :init (telephone-line-mode 1))
 
 (use-package nerd-icons)
