@@ -259,10 +259,62 @@
   (load-theme 'doom-palenight t))
 (use-package telephone-line
   :ensure t
-  :init (telephone-line-mode 1))
+  :init
+
+  (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+      telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
+      telephone-line-primary-right-separator 'telephone-line-cubed-right
+      telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+(setq telephone-line-height 24)
+(setq telephone-line-evil-use-short-tag t)
+(telephone-line-defsegment* telephone-line-simpler-major-mode-segment ()
+  (concat "["
+          (if (listp mode-name)
+              (car mode-name)
+            mode-name)
+          "]"))
+
+(telephone-line-defsegment* telephone-line-simple-pos-segment ()
+  (concat "%c : " "%l/" (number-to-string (count-lines (point-min) (point-max)))))
+
+(setq telephone-line-lhs
+      '((nil . (telephone-line-projectile-buffer-segment))
+        (accent . (telephone-line-simpler-major-mode-segment))
+        (nil . (telephone-line-meow-tag-segment
+                telephone-line-misc-info-segment)))
+      telephone-line-rhs
+      '((nil . (telephone-line-simple-pos-segment))
+        (accent . (telephone-line-buffer-modified-segment))))
+
+(telephone-line-mode 1)
+
+;; (setq telephone-line-lhs
+;;       '((nil . (telephone-line-projectile-buffer-segment))
+;;         (accent . (telephone-line-simpler-major-mode-segment))
+;;         (nil . (telephone-line-meow-tag-segment
+;;                 telephone-line-misc-info-segment)))
+;;       telephone-line-rhs
+;;       '((nil . (telephone-line-simple-pos-segment))
+;;         (accent . (telephone-line-buffer-modified-segment))))
+
+
+)
+
 (use-package command-log-mode
   :ensure t
-  :init (command-log-mode 1))
+  :init
+  (command-log-mode 1)
+  )
 
 
 (use-package nerd-icons)
+
+(defun pixel-scroll-setup ()
+  (interactive)
+  (setq pixel-scroll-precision-large-scroll-height 1)
+  (setq pixel-scroll-precision-interpolation-factor 1))
+
+(when (boundp 'pixel-scroll-precision-mode)
+  (pixel-scroll-setup)
+  (add-hook 'prog-mode-hook #'pixel-scroll-precision-mode)
+  (add-hook 'org-mode-hook #'pixel-scroll-precision-mode))
