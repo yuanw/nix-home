@@ -25,6 +25,7 @@ let
       with epkgs;
       # Use Nix to manage packages with non-trivial userspace dependencies.
       [
+        seq
         emacsql
         emacsql-sqlite
         jinx

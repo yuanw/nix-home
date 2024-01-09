@@ -5,6 +5,7 @@
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
+(setq package-install-upgrade-built-in t)
 
 (defvar elpaca-installer-version 0.6)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
@@ -210,26 +211,26 @@
 		(setq mac-option-modifier 'meta)
 		(setq mac-control-modifier 'control)))
 
-(use-package general
-  :config
-  (general-evil-setup)
+;; (use-package general
+;;   :config
+;;   (general-evil-setup)
 
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer yw/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+;;   ;; set up 'SPC' as the global leader key
+;;   (general-create-definer yw/leader-keys
+;;     :states '(normal insert visual emacs)
+;;     :keymaps 'override
+;;     :prefix "SPC" ;; set leader
+;;     :global-prefix "M-SPC") ;; access leader in insert mode
 
-  (yw/leader-keys
-    "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "Switch buffer")
-    "bk" '(kill-this-buffer :wk "Kill this buffer")
-    "bn" '(next-buffer :wk "Next buffer")
-    "bp" '(previous-buffer :wk "Previous buffer")
-    "br" '(revert-buffer :wk "Reload buffer"))
+;;   (yw/leader-keys
+;;     "b" '(:ignore t :wk "buffer")
+;;     "bb" '(switch-to-buffer :wk "Switch buffer")
+;;     "bk" '(kill-this-buffer :wk "Kill this buffer")
+;;     "bn" '(next-buffer :wk "Next buffer")
+;;     "bp" '(previous-buffer :wk "Previous buffer")
+;;     "br" '(revert-buffer :wk "Reload buffer"))
 
-)
+;; )
 
 (use-package which-key
   :init
@@ -601,3 +602,21 @@
 
   ;; Enable recursive minibuffers
   (setq enable-recursive-minibuffers t))
+
+;; Minimising & quitting Emacs way too many times without wanting to.
+(global-unset-key "\C-z")
+(global-unset-key "\C-x\C-c")
+
+(use-package ace-window
+  :bind
+  ("M-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+        aw-dispatch-always t))
+
+(use-package avy
+  :bind
+  ( "C-:" . 'avy-goto-char)
+)
+
+(use-package magit)

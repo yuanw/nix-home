@@ -16,6 +16,7 @@ https://arne.me/articles/emacs-from-scratch-part-one-foundations
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
+(setq package-install-upgrade-built-in t)
 #+end_src
 
 * Elpaca package manager
@@ -239,26 +240,26 @@ Make everything use UTF-8:
 
 * General keybinding
 #+begin_src elisp
-(use-package general
-  :config
-  (general-evil-setup)
+;; (use-package general
+;;   :config
+;;   (general-evil-setup)
 
-  ;; set up 'SPC' as the global leader key
-  (general-create-definer yw/leader-keys
-    :states '(normal insert visual emacs)
-    :keymaps 'override
-    :prefix "SPC" ;; set leader
-    :global-prefix "M-SPC") ;; access leader in insert mode
+;;   ;; set up 'SPC' as the global leader key
+;;   (general-create-definer yw/leader-keys
+;;     :states '(normal insert visual emacs)
+;;     :keymaps 'override
+;;     :prefix "SPC" ;; set leader
+;;     :global-prefix "M-SPC") ;; access leader in insert mode
 
-  (yw/leader-keys
-    "b" '(:ignore t :wk "buffer")
-    "bb" '(switch-to-buffer :wk "Switch buffer")
-    "bk" '(kill-this-buffer :wk "Kill this buffer")
-    "bn" '(next-buffer :wk "Next buffer")
-    "bp" '(previous-buffer :wk "Previous buffer")
-    "br" '(revert-buffer :wk "Reload buffer"))
+;;   (yw/leader-keys
+;;     "b" '(:ignore t :wk "buffer")
+;;     "bb" '(switch-to-buffer :wk "Switch buffer")
+;;     "bk" '(kill-this-buffer :wk "Kill this buffer")
+;;     "bn" '(next-buffer :wk "Next buffer")
+;;     "bp" '(previous-buffer :wk "Previous buffer")
+;;     "br" '(revert-buffer :wk "Reload buffer"))
 
-)
+;; )
 #+end_src
 
 * Which key
@@ -669,5 +670,34 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 (global-unset-key "\C-z")
 (global-unset-key "\C-x\C-c")
 
+
+#+end_src
+
+* ace window
+
+  Quickly switch between open buffer windows
+#+begin_src elisp
+(use-package ace-window
+  :bind
+  ("M-o" . ace-window)
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+        aw-dispatch-always t))
+
+
+#+end_src
+
+* avy
+#+begin_src elisp
+(use-package avy
+  :bind
+  ( "C-:" . 'avy-goto-char)
+)
+
+#+end_src
+
+* magit
+#+begin_src elisp
+(use-package magit)
 
 #+end_src
