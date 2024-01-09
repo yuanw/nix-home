@@ -25,6 +25,14 @@ let
       with epkgs;
       # Use Nix to manage packages with non-trivial userspace dependencies.
       [
+        meow
+        which-key
+        doom-themes
+        nerd-icons
+        marginalia
+        corfu
+        vertico
+        avy
         seq
         emacsql
         emacsql-sqlite
