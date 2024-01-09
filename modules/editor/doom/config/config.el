@@ -65,6 +65,9 @@
   :config
   (map! :n "e" 'justl-exec-recipe))
 
+
+
+
 ;; (use-package! chatgpt-shell
 ;;   :requires shell-maker
 ;;   :config
@@ -194,6 +197,12 @@
   :config
   (setq evil-replace-with-register-key (kbd "gr"))
   (evil-replace-with-register-install))
+
+(use-package! eglot-java
+  :after eglot
+  :config
+  (add-hook 'java-mode-hook 'eglot-java-mode)
+)
 
 ;; (use-package! keycast
 ;;   :commands keycast-mode

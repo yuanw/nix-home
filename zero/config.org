@@ -661,3 +661,13 @@ https://github.com/minad/vertico
   (setq enable-recursive-minibuffers t))
 
 #+end_src
+
+
+https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
+#+begin_src elisp
+;; Minimising & quitting Emacs way too many times without wanting to.
+(global-unset-key "\C-z")
+(global-unset-key "\C-x\C-c")
+
+
+#+end_src
