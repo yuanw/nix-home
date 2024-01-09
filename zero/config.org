@@ -698,6 +698,6 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 * magit
 #+begin_src elisp
-(use-package magit)
+(require 'magit)
 
 #+end_src

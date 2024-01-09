@@ -29,6 +29,7 @@ let
         emacsql
         emacsql-sqlite
         jinx
+        magit
         vterm
       ]
     );
