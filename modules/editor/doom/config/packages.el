@@ -60,7 +60,6 @@
 (package! embark-vc)
 (package! evil-replace-with-register)
 (package! keycast)
-(package! eglot-java)
 (package! justl)
 (package! atomic-chrome)
 (package! shell-maker)

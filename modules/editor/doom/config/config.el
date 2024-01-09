@@ -198,32 +198,27 @@
   (setq evil-replace-with-register-key (kbd "gr"))
   (evil-replace-with-register-install))
 
-(use-package! eglot-java
-  :after eglot
-  :config
-  (add-hook 'java-mode-hook 'eglot-java-mode)
-)
 
-;; (use-package! keycast
-;;   :commands keycast-mode
-;;   :config
-;;   (define-minor-mode keycast-mode
-;;     "Show current command and its key binding in the mode line."
-;;     :global t
-;;     (if keycast-mode
-;;         (progn
-;;           (add-hook 'pre-command-hook 'keycast--update t)
-;;           (add-to-list 'global-mode-string '("" keycast-mode-line " ")))
-;;       (remove-hook 'pre-command-hook 'keycast--update)
-;;       (setq global-mode-string (remove '("" keycast-mode-line " ") global-mode-string))))
-;;   (custom-set-faces!
-;;     '(keycast-command :inherit doom-modeline-debug
-;;       :height 0.9)
-;;     '(keycast-key :inherit custom-modified
-;;       :height 1.1
-;;       :weight bold))
-;;   )
-;; (use-package! vlf-setup
+(use-package! keycast
+  :commands keycast-mode
+  :config
+  (define-minor-mode keycast-mode
+    "Show current command and its key binding in the mode line."
+    :global t
+    (if keycast-mode
+        (progn
+          (add-hook 'pre-command-hook 'keycast--update t)
+          (add-to-list 'global-mode-string '("" keycast-mode-line " ")))
+      (remove-hook 'pre-command-hook 'keycast--update)
+      (setq global-mode-string (remove '("" keycast-mode-line " ") global-mode-string))))
+  (custom-set-faces!
+    '(keycast-command :inherit doom-modeline-debug
+      :height 0.9)
+    '(keycast-key :inherit custom-modified
+      :height 1.1
+      :weight bold))
+  )
+(use-package! vlf-setup
 ;;   :defer-incrementally  vlf-base vlf-write vlf-search vlf-occur vlf-follow vlf-ediff vlf)
 (setq
  magit-list-refs-sortby "-committerdate"
