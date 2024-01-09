@@ -39,7 +39,7 @@ let
         meow
         nerd-icons
         telephone-line
-        orderlss
+        orderless
         vertico
         vterm
         which-key
