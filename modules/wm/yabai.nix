@@ -54,6 +54,8 @@ in
       sketchybar-app-font
       font-hack-nerd-font
       sf-symbols
+      emacs-all-the-icons-fonts
+      iosevka
     ];
 
     home-manager.users.${config.my.username} = {

@@ -153,7 +153,7 @@ with lib; {
 
   }
     (if (isDarwin) then {
-      fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+      # fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
     } else {
 
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
