@@ -25,20 +25,24 @@ let
       with epkgs;
       # Use Nix to manage packages with non-trivial userspace dependencies.
       [
-        meow
-        which-key
-        doom-themes
-        nerd-icons
-        marginalia
-        corfu
-        vertico
+        ace-window
         avy
-        seq
+        cape
+        corfu
+        doom-themes
         emacsql
         emacsql-sqlite
+        embark
         jinx
         magit
+        marginalia
+        meow
+        nerd-icons
+        telephone-line
+        orderlss
+        vertico
         vterm
+        which-key
       ]
     );
   valeStyles = [

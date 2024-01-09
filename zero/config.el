@@ -1,3 +1,6 @@
+(setq gc-cons-percentage 0.5
+      gc-cons-threshold (* 128 1024 1024))
+
 (tool-bar-mode -1)             ; Hide the outdated icons
 (scroll-bar-mode -1)           ; Hide the always-visible scrollbar
 (setq inhibit-splash-screen t) ; Remove the "Welcome to GNU Emacs" splash screen
@@ -7,57 +10,74 @@
 (push '(vertical-scroll-bars) default-frame-alist)
 (setq package-install-upgrade-built-in t)
 
-(defvar elpaca-installer-version 0.6)
-(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
-                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-                              :build (:not elpaca--activate-package)))
-(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-       (build (expand-file-name "elpaca/" elpaca-builds-directory))
-       (order (cdr elpaca-order))
-       (default-directory repo))
-  (add-to-list 'load-path (if (file-exists-p build) build repo))
-  (unless (file-exists-p repo)
-    (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
-    (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
-            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-          (error "%s" (with-current-buffer buffer (buffer-string))))
-      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-  (unless (require 'elpaca-autoloads nil t)
-    (require 'elpaca)
-    (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
-(add-hook 'after-init-hook #'elpaca-process-queues)
-(elpaca `(,@elpaca-order))
+(eval-and-compile
+  (defsubst emacs-path (path)
+    (expand-file-name path user-emacs-directory))
 
-;; Install a package via the elpaca macro
-;; See the "recipes" section of the manual for more details.
+  (setq package-enable-at-startup nil
+        load-path
+        (append (list (emacs-path "use-package"))
+                (delete-dups load-path)
+                (list (emacs-path "lisp")))))
 
-;; (elpaca example-package)
+(require 'use-package)
 
-;; Install use-package support
-(elpaca elpaca-use-package
-  ;; Enable :elpaca use-package keyword.
-  (elpaca-use-package-mode)
-  ;; Assume :elpaca t unless otherwise specified.
-  (setq elpaca-use-package-by-default t))
+(setq use-package-verbose init-file-debug
+      use-package-expand-minimally (not init-file-debug)
+      use-package-compute-statistics t
+      debug-on-error init-file-debug)
 
-;; Block until current queue processed.
-(elpaca-wait)
+;; (defvar elpaca-installer-version 0.6)
+;; (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+;; (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+;; (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+;; (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+;;                               :ref nil
+;;                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+;;                               :build (:not elpaca--activate-package)))
+;; (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+;;        (build (expand-file-name "elpaca/" elpaca-builds-directory))
+;;        (order (cdr elpaca-order))
+;;        (default-directory repo))
+;;   (add-to-list 'load-path (if (file-exists-p build) build repo))
+;;   (unless (file-exists-p repo)
+;;     (make-directory repo t)
+;;     (when (< emacs-major-version 28) (require 'subr-x))
+;;     (condition-case-unless-debug err
+;;         (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+;;                  ((zerop (call-process "git" nil buffer t "clone"
+;;                                        (plist-get order :repo) repo)))
+;;                  ((zerop (call-process "git" nil buffer t "checkout"
+;;                                        (or (plist-get order :ref) "--"))))
+;;                  (emacs (concat invocation-directory invocation-name))
+;;                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+;;                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+;;                  ((require 'elpaca))
+;;                  ((elpaca-generate-autoloads "elpaca" repo)))
+;;             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+;;           (error "%s" (with-current-buffer buffer (buffer-string))))
+;;       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+;;   (unless (require 'elpaca-autoloads nil t)
+;;     (require 'elpaca)
+;;     (elpaca-generate-autoloads "elpaca" repo)
+;;     (load "./elpaca-autoloads")))
+;; (add-hook 'after-init-hook #'elpaca-process-queues)
+;; (elpaca `(,@elpaca-order))
+
+;; ;; Install a package via the elpaca macro
+;; ;; See the "recipes" section of the manual for more details.
+
+;; ;; (elpaca example-package)
+
+;; ;; Install use-package support
+;; (elpaca elpaca-use-package
+;;   ;; Enable :elpaca use-package keyword.
+;;   (elpaca-use-package-mode)
+;;   ;; Assume :elpaca t unless otherwise specified.
+;;   (setq elpaca-use-package-by-default t))
+
+;; ;; Block until current queue processed.
+;; (elpaca-wait)
 
 ;;When installing a package which modifies a form used at the top-level
 ;;(e.g. a package which adds a use-package key word),
@@ -151,9 +171,10 @@
    '("'" . repeat)
    '("<escape>" . ignore)))
 (use-package meow
+  :demand t
   :config
-(meow-setup)
-(meow-global-mode 1)
+  (meow-setup)
+  (meow-global-mode 1)
 
   )
 ;; Expands to: (elpaca evil (use-package evil :demand t))
@@ -174,18 +195,16 @@
 ;;Turns off elpaca-use-package-mode current declartion
 ;;Note this will cause the declaration to be interpreted immediately (not deferred).
 ;;Useful for configuring built-in emacs features.
-(use-package emacs :elpaca nil :config (setq ring-bell-function #'ignore))
+(use-package emacs :config (setq ring-bell-function #'ignore))
 
 ;; Don't install anything. Defer execution of BODY
-(elpaca nil (message "deferred"))
+;; (elpaca nil (message "deferred"))
 
 (use-package emacs
-  :elpaca nil
   :init
   (defalias 'yes-or-no-p 'y-or-n-p))
 
 (use-package emacs
-  :elpaca nil
   :init
   (set-charset-priority 'unicode)
   (setq locale-coding-system 'utf-8
@@ -198,13 +217,11 @@
   (setq default-process-coding-system '(utf-8-unix . utf-8-unix)))
 
 (use-package emacs
-  :elpaca nil
   :init
   (setq-default indent-tabs-mode nil)
   (setq-default tab-width 2))
 
 (use-package emacs
-  :elpaca nil
   :init
 	(when (eq system-type 'darwin)
 		(setq mac-command-modifier 'super)
@@ -233,8 +250,6 @@
 ;; )
 
 (use-package which-key
-  :init
-    (which-key-mode 1)
   :config
   (setq which-key-side-window-location 'bottom
 	  which-key-sort-order #'which-key-key-order-alpha
@@ -247,7 +262,10 @@
 	  which-key-idle-delay 0.8
 	  which-key-max-description-length 25
 	  which-key-allow-imprecise-window-fit t
-	  which-key-separator " → " ))
+	  which-key-separator " → " )
+
+    (which-key-mode 1)
+  )
 
 (set-face-attribute 'default nil
   :font "PragmataPro Mono Liga"
@@ -258,44 +276,44 @@
   :demand
   :config
   (load-theme 'doom-palenight t))
-(use-package telephone-line
-  :ensure t
-  :init
+;; (use-package telephone-line
+;;   :ensure t
+;;   :init
 
-  (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
-      telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
-      telephone-line-primary-right-separator 'telephone-line-cubed-right
-      telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
-(setq telephone-line-height 24)
-(setq telephone-line-evil-use-short-tag t)
-(telephone-line-defsegment* telephone-line-simpler-major-mode-segment ()
-  (concat "["
-          (if (listp mode-name)
-              (car mode-name)
-            mode-name)
-          "]"))
+;;   (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+;;       telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
+;;       telephone-line-primary-right-separator 'telephone-line-cubed-right
+;;       telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+;; (setq telephone-line-height 24)
+;; (setq telephone-line-evil-use-short-tag t)
+;; (telephone-line-defsegment* telephone-line-simpler-major-mode-segment ()
+;;   (concat "["
+;;           (if (listp mode-name)
+;;               (car mode-name)
+;;             mode-name)
+;;           "]"))
 
-(telephone-line-defsegment* telephone-line-simple-pos-segment ()
-  (concat "%c : " "%l/" (number-to-string (count-lines (point-min) (point-max)))))
+;; (telephone-line-defsegment* telephone-line-simple-pos-segment ()
+;;   (concat "%c : " "%l/" (number-to-string (count-lines (point-min) (point-max)))))
 
-(setq telephone-line-lhs
-      '((nil . (telephone-line-projectile-buffer-segment))
-        (accent . (telephone-line-simpler-major-mode-segment))
-        (nil . (telephone-line-meow-tag-segment
-                telephone-line-misc-info-segment)))
-      telephone-line-rhs
-      '((nil . (telephone-line-simple-pos-segment))
-        (accent . (telephone-line-buffer-modified-segment))))
+;; (setq telephone-line-lhs
+;;       '((nil . (telephone-line-projectile-buffer-segment))
+;;         (accent . (telephone-line-simpler-major-mode-segment))
+;;         (nil . (telephone-line-meow-tag-segment
+;;                 telephone-line-misc-info-segment)))
+;;       telephone-line-rhs
+;;       '((nil . (telephone-line-simple-pos-segment))
+;;         (accent . (telephone-line-buffer-modified-segment))))
 
-(telephone-line-mode 1)
+;; (telephone-line-mode 1)
 
-)
+;; )
 
-(use-package command-log-mode
-  :ensure t
-  :init
-  (command-log-mode 1)
-  )
+;; (use-package command-log-mode
+;;   :ensure t
+;;   :init
+;;   (command-log-mode 1)
+;;   )
 
 
 (use-package nerd-icons)
@@ -372,12 +390,11 @@
   ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
   ;; be used globally (M-/).  See also the customization variable
   ;; `global-corfu-modes' to exclude certain modes.
-  :init
+  :config
   (global-corfu-mode))
 
 ;; A few more useful configurations...
 (use-package emacs
-  :elpaca nil
   :init
   ;; TAB cycle if there are only few candidates
   (setq completion-cycle-threshold 3)
@@ -553,7 +570,7 @@
 
 ;; Enable vertico
 (use-package vertico
-  :init
+  :config
   (vertico-mode)
 
   ;; Different scroll margin
@@ -571,13 +588,11 @@
 
 ;; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
-  :elpaca nil
-  :init
+  :config
   (savehist-mode))
 
 ;; A few more useful configurations...
 (use-package emacs
-  :elpaca nil
   :init
   ;; Add prompt indicator to `completing-read-multiple'.
   ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
@@ -619,4 +634,13 @@
   ( "C-:" . 'avy-goto-char)
 )
 
-(use-package magit)
+(require 'magit)
+(use-package eglot
+  :config
+ (add-to-list 'eglot-server-programs
+              `(java-mode "/opt/homebrew/bin/jdtls"
+                           "-Djava.format.settings.url=https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml"
+                           "-Djava.format.settings.profile=GoogleStyle"
+                           ,(concat "--jvm-arg=-javaagent:" (expand-file-name "/Users/yuanwang/Downloads/lombok.jar"))))
+
+  )
