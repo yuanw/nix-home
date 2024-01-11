@@ -29,7 +29,9 @@ let
         avy
         cape
         corfu
+        command-log-mode
         consult
+
         doom-themes
         emacsql
         emacsql-sqlite
