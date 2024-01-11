@@ -19,50 +19,12 @@
         (append (list (emacs-path "use-package"))
                 (delete-dups load-path)
                 (list (emacs-path "lisp")))))
-
 (require 'use-package)
 
 (setq use-package-verbose init-file-debug
       use-package-expand-minimally (not init-file-debug)
       use-package-compute-statistics t
       debug-on-error init-file-debug)
-
-;; (defvar elpaca-installer-version 0.6)
-;; (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
-;; (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
-;; (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
-;; (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-;;                               :ref nil
-;;                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
-;;                               :build (:not elpaca--activate-package)))
-;; (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
-;;        (build (expand-file-name "elpaca/" elpaca-builds-directory))
-;;        (order (cdr elpaca-order))
-;;        (default-directory repo))
-;;   (add-to-list 'load-path (if (file-exists-p build) build repo))
-;;   (unless (file-exists-p repo)
-;;     (make-directory repo t)
-;;     (when (< emacs-major-version 28) (require 'subr-x))
-;;     (condition-case-unless-debug err
-;;         (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-;;                  ((zerop (call-process "git" nil buffer t "clone"
-;;                                        (plist-get order :repo) repo)))
-;;                  ((zerop (call-process "git" nil buffer t "checkout"
-;;                                        (or (plist-get order :ref) "--"))))
-;;                  (emacs (concat invocation-directory invocation-name))
-;;                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-;;                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-;;                  ((require 'elpaca))
-;;                  ((elpaca-generate-autoloads "elpaca" repo)))
-;;             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
-;;           (error "%s" (with-current-buffer buffer (buffer-string))))
-;;       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
-;;   (unless (require 'elpaca-autoloads nil t)
-;;     (require 'elpaca)
-;;     (elpaca-generate-autoloads "elpaca" repo)
-;;     (load "./elpaca-autoloads")))
-;; (add-hook 'after-init-hook #'elpaca-process-queues)
-;; (elpaca `(,@elpaca-order))
 
 ;; ;; Install a package via the elpaca macro
 ;; ;; See the "recipes" section of the manual for more details.
@@ -228,6 +190,19 @@
 		(setq mac-option-modifier 'meta)
 		(setq mac-control-modifier 'control)))
 
+(use-package dired
+   :commands dired-jump
+  :diminish dired-omit-mode
+   :hook
+   (dired-mode . dired-hide-details-mode)
+   (dired-mode . dired-omit-mode)
+  :custom
+  (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
+  (dired-dwim-target t)
+  :config
+
+  )
+
 ;; (use-package general
 ;;   :config
 ;;   (general-evil-setup)
@@ -250,6 +225,8 @@
 ;; )
 
 (use-package which-key
+  :demand t
+  :diminish
   :config
   (setq which-key-side-window-location 'bottom
 	  which-key-sort-order #'which-key-key-order-alpha
@@ -264,7 +241,7 @@
 	  which-key-allow-imprecise-window-fit t
 	  which-key-separator " → " )
 
-    (which-key-mode 1)
+    (which-key-mode)
   )
 
 (set-face-attribute 'default nil
@@ -276,38 +253,38 @@
   :demand
   :config
   (load-theme 'doom-palenight t))
-;; (use-package telephone-line
-;;   :ensure t
-;;   :init
 
-;;   (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
-;;       telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
-;;       telephone-line-primary-right-separator 'telephone-line-cubed-right
-;;       telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
-;; (setq telephone-line-height 24)
-;; (setq telephone-line-evil-use-short-tag t)
-;; (telephone-line-defsegment* telephone-line-simpler-major-mode-segment ()
-;;   (concat "["
-;;           (if (listp mode-name)
-;;               (car mode-name)
-;;             mode-name)
-;;           "]"))
+(use-package telephone-line
+  :config
 
-;; (telephone-line-defsegment* telephone-line-simple-pos-segment ()
-;;   (concat "%c : " "%l/" (number-to-string (count-lines (point-min) (point-max)))))
+  (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+      telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
+      telephone-line-primary-right-separator 'telephone-line-cubed-right
+      telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right)
+(setq telephone-line-height 24)
+(setq telephone-line-evil-use-short-tag t)
+(telephone-line-defsegment* telephone-line-simpler-major-mode-segment ()
+  (concat "["
+          (if (listp mode-name)
+              (car mode-name)
+            mode-name)
+          "]"))
 
-;; (setq telephone-line-lhs
-;;       '((nil . (telephone-line-projectile-buffer-segment))
-;;         (accent . (telephone-line-simpler-major-mode-segment))
-;;         (nil . (telephone-line-meow-tag-segment
-;;                 telephone-line-misc-info-segment)))
-;;       telephone-line-rhs
-;;       '((nil . (telephone-line-simple-pos-segment))
-;;         (accent . (telephone-line-buffer-modified-segment))))
+(telephone-line-defsegment* telephone-line-simple-pos-segment ()
+  (concat "%c : " "%l/" (number-to-string (count-lines (point-min) (point-max)))))
 
-;; (telephone-line-mode 1)
+(setq telephone-line-lhs
+      '((nil . (telephone-line-projectile-buffer-segment))
+        (accent . (telephone-line-simpler-major-mode-segment))
+        (nil . (telephone-line-meow-tag-segment
+                telephone-line-misc-info-segment)))
+      telephone-line-rhs
+      '((nil . (telephone-line-simple-pos-segment))
+        (accent . (telephone-line-buffer-modified-segment))))
 
-;; )
+(telephone-line-mode 1)
+
+)
 
 ;; (use-package command-log-mode
 ;;   :ensure t
@@ -328,13 +305,18 @@
   (add-hook 'prog-mode-hook #'pixel-scroll-precision-mode)
   (add-hook 'org-mode-hook #'pixel-scroll-precision-mode))
 
+(use-package orderless
+  :demand t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides
+   '((file (styles basic partial-completion)))))
+
 (use-package marginalia
-  :ensure t
   :config
   (marginalia-mode))
 
 (use-package embark
-  :ensure t
 
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
@@ -630,8 +612,10 @@
         aw-dispatch-always t))
 
 (use-package avy
-  :bind
-  ( "C-:" . 'avy-goto-char)
+  :bind ("C-." . avy-goto-char-timer)
+  :custom
+  (avy-case-fold-search t)
+  (avy-timeout-seconds 0.3)
 )
 
 (require 'magit)

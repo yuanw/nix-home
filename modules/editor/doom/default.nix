@@ -29,6 +29,7 @@ let
         avy
         cape
         corfu
+        consult
         doom-themes
         emacsql
         emacsql-sqlite
