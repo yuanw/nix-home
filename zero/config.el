@@ -8,7 +8,6 @@
 (push '(menu-bar-lines . 0) default-frame-alist)
 (push '(tool-bar-lines . 0) default-frame-alist)
 (push '(vertical-scroll-bars) default-frame-alist)
-(setq package-install-upgrade-built-in t)
 
 (eval-and-compile
   (defsubst emacs-path (path)
@@ -203,26 +202,9 @@
 
   )
 
-;; (use-package general
-;;   :config
-;;   (general-evil-setup)
-
-;;   ;; set up 'SPC' as the global leader key
-;;   (general-create-definer yw/leader-keys
-;;     :states '(normal insert visual emacs)
-;;     :keymaps 'override
-;;     :prefix "SPC" ;; set leader
-;;     :global-prefix "M-SPC") ;; access leader in insert mode
-
-;;   (yw/leader-keys
-;;     "b" '(:ignore t :wk "buffer")
-;;     "bb" '(switch-to-buffer :wk "Switch buffer")
-;;     "bk" '(kill-this-buffer :wk "Kill this buffer")
-;;     "bn" '(next-buffer :wk "Next buffer")
-;;     "bp" '(previous-buffer :wk "Previous buffer")
-;;     "br" '(revert-buffer :wk "Reload buffer"))
-
-;; )
+(use-package command-log-mode
+  :bind (("C-c e M" . command-log-mode)
+         ("C-c e L" . clm/open-command-log-buffer)))
 
 (use-package which-key
   :demand t
@@ -628,3 +610,8 @@
                            ,(concat "--jvm-arg=-javaagent:" (expand-file-name "/Users/yuanwang/Downloads/lombok.jar"))))
 
   )
+
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))

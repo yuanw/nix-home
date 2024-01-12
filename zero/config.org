@@ -697,3 +697,12 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
   )
 
 #+end_src
+
+* jinx
+#+begin_src elisp
+(use-package jinx
+  :hook (emacs-startup . global-jinx-mode)
+  :bind (("M-$" . jinx-correct)
+         ("C-M-$" . jinx-languages)))
+
+#+end_src
