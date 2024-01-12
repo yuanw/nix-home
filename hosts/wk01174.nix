@@ -83,7 +83,6 @@
         haskell.enable = true;
         idris2.enable = true;
         python.enable = true;
-        roc.enable = true;
         zig.enable = true;
         scheme.enable = true;
       };
