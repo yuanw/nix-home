@@ -31,7 +31,7 @@ let
         corfu
         command-log-mode
         consult
-
+        keycast
         doom-themes
         emacsql
         emacsql-sqlite
