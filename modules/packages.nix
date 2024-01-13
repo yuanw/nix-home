@@ -63,6 +63,7 @@ with pkgs; [
   # vhs
   csvkit
   gum
+  inkscape-with-extensions
   ghostscript
   djvu2pdf
   dig
