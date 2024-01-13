@@ -31,7 +31,7 @@ in
 
     home-manager.users.${config.my.username} = {
       home = {
-        file."moonlander.pdf".source = ../../pictures/moonlander.pdf;
+        file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
         packages = [
           tat
           td
