@@ -29,8 +29,11 @@ let
         avy
         cape
         corfu
-        command-log-mode
         consult
+        consult-dir
+        consult-flycheck
+        consult-git-log-grep
+        consult-yasnippet
         keycast
         doom-themes
         emacsql
