@@ -426,16 +426,9 @@
   ;;(add-to-list 'completion-at-point-functions #'cape-line)
 )
 
-(use-package consult-xref
-  :defer t
-  :init
-  (setq xref-show-xrefs-function       #'consult-xref
-        xref-show-definitions-function #'consult-xref)
-  )
-
 (use-package consult
-  :defer 0.5
-  :bind (([remap repeat-complex-command] . consult-complex-command)
+  ;; Replace bindings. Lazily loaded due by `use-package'.
+  :bind  (([remap repeat-complex-command] . consult-complex-command)
          ([remap switch-to-buffer] . consult-buffer)
          ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
          ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
@@ -445,48 +438,71 @@
          ([remap imenu] . consult-imenu)
          ([remap yank-pop] . consult-yank-pop)
          ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
-         ([remap Info-search] . consult-info)
-         ("M-g e" . consult-compile-error)
-         ("M-g f" . consult-flymake)
-         ("M-g o" . consult-outline)
-         ("M-g m" . consult-mark)
-         ("M-g k" . consult-global-mark)
-         ("M-s d" . consult-fd)
-         ("M-s D" . consult-locate)
-         ("M-s g" . consult-grep)
-         ("M-s G" . consult-git-grep)
-         ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
-         ("M-s k" . consult-keep-lines)
-         ("M-s u" . consult-focus-lines)
-         ("M-s e" . consult-isearch-history)
-         :map isearch-mode-map
-         ("M-s e" . consult-isearch-history)
-         ("M-s l" . consult-line)
-         :map minibuffer-local-map
-         ("M-s" . consult-history))
+         ("C-c h"   . consult-history)
+         ("C-c K"   . consult-kmacro)
+         ;; ("C-c i"   . consult-info)
+         )
+  ;; Enable automatic preview at point in the *Completions* buffer. This is
+  ;; relevant when you use the default completion UI.
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+
   :custom
-  (register-preview-delay 0.5)
-  (register-preview-function #'consult-register-format)
+  ;; (consult-preview-key "M-i")
   (consult-narrow-key "<")
-  (xref-search-program 'ripgrep)
-  (xref-show-xrefs-function #'consult-xref)
-  (xref-show-definitions-function #'consult-xref)
-  :commands consult--customize-put
+
+  :custom-face
+  (consult-file ((t (:inherit font-lock-string-face))))
+
+  :functions
+  (consult-register-format
+   consult-register-window
+   consult-xref)
+
+  ;; The :init configuration is always executed (Not lazy)
   :init
+
+  ;; Optionally configure the register formatting. This improves the register
+  ;; preview for `consult-register', `consult-register-load',
+  ;; `consult-register-store' and the Emacs built-ins.
+  (setq register-preview-delay 0.5
+        register-preview-function #'consult-register-format)
+
+  ;; Optionally tweak the register preview window.
+  ;; This adds thin lines, sorting and hides the mode line of the window.
   (advice-add #'register-preview :override #'consult-register-window)
+
+  ;; Use Consult to select xref locations with preview
+  (setq xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref)
+
+  ;; Configure other variables and modes in the :config section,
+  ;; after lazily loading the package.
   :config
+  (use-package consult-xref)
+
   (consult-customize
-   consult-theme :preview-key '(:debounce 0.2 any)
-   consult-ripgrep consult-git-grep consult-grep
-   consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
-   :preview-key "M-."))
+   consult-theme
+   :preview-key '(:debounce 0.2 any)
+   consult-ripgrep
+   consult-git-grep
+   consult-grep
+   consult-bookmark
+   consult-recent-file
+   consult-xref
+   consult--source-bookmark
+   consult--source-file-register
+   consult--source-recent-file
+   consult--source-project-recent-file
+   :preview-key '(:debounce 0.4 any))
+
+  )
+
+(use-package consult-dir
+  :ensure t
+  :bind (("C-x C-d" . consult-dir)
+         :map minibuffer-local-completion-map
+         ("C-x C-d" . consult-dir)
+         ("C-x C-j" . consult-dir-jump-file)))
 
 ;; Enable vertico
 (use-package vertico
