@@ -184,7 +184,7 @@ in
               Exit q detach"
           '';
         };
-        zellij = { enable = true; };
+        zellij = { enable = false; };
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {
