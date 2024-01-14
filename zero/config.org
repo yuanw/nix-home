@@ -13,6 +13,7 @@ turn of keycast mode is
 keycast-tab-bar-mode
 
 ~SPC x s~ ~C-x C-s~ save-buffer
+~SPC x d~  ~C-x C-d~  consult-dir
 
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 
@@ -21,10 +22,6 @@ https://arne.me/articles/emacs-from-scratch-part-one-foundations
 #+begin_src elisp
 (setq gc-cons-percentage 0.5
       gc-cons-threshold (* 128 1024 1024))
-
-#+end_src
-
-#+begin_src elisp
 
 #+end_src
 

@@ -35,6 +35,11 @@ let
         consult-git-log-grep
         consult-yasnippet
         keycast
+        google-this
+        goto-last-change
+        gptel
+        graphviz-dot-mode
+        haskell-mode
         doom-themes
         emacsql
         emacsql-sqlite
