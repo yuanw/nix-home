@@ -5,6 +5,8 @@
 { config, lib, pkgs, inputs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
+
+  aspell = (pkgs.aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]));
   emacsclient = "emacsclient -c -a 'emacs'";
   # https://gist.github.com/hlissner/ba8c3b4c6f37c24ff27b72194942b7aa
   emacsPatched = cfg.pkg.overrideAttrs (
@@ -34,6 +36,7 @@ let
         consult-flycheck
         consult-git-log-grep
         consult-yasnippet
+        direnv
         keycast
         google-this
         goto-last-change
@@ -121,7 +124,7 @@ with lib; {
           shfmt
           ## Module dependencies
           # :checkers spell
-          (aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]))
+          aspell
           # :checkers grammar
           languagetool
           # :tools editorconfig
@@ -150,6 +153,7 @@ with lib; {
           vale
         ];
 
+        file.".aspell.conf".text = "data-dir ${aspell}/lib/aspell";
         file.".vale.ini".text =
           let
             stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
@@ -167,6 +171,7 @@ with lib; {
       # not use home-manager programs.emacs due to it wraps
       # emacsWithPackages again
       programs.zsh = {
+        # phpEnv.ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (_: cfg.dicts)}/lib/aspell";
         sessionVariables = { EDITOR = "${emacsclient}"; };
         initExtra = ''
           export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin

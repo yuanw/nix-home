@@ -206,17 +206,7 @@ Make everything use UTF-8:
 #+begin_src elisp
 (use-package keycast
   :commands keycast-mode
-  :config
-  (define-minor-mode keycast-mode
-    "Show current command and its key binding in the mode line."
-    :global t
-    (if keycast-mode
-        (progn
-          (add-hook 'pre-command-hook 'keycast--update t)
-          (add-to-list 'global-mode-string '("" mode-line-keycast " ")))
-      (remove-hook 'pre-command-hook 'keycast--update)
-      (setq global-mode-string (remove '("" mode-line-keycast " ") global-mode-string))))
-  )
+   )
 #+end_src
 
 * Which key
@@ -230,7 +220,6 @@ Make everything use UTF-8:
 	  which-key-sort-uppercase-first nil
 	  which-key-add-column-padding 1
 	  which-key-max-display-columns nil
-	  which-key-min-display-lines 6
 	  which-key-side-window-slot -10
 	  which-key-side-window-max-height 0.25
 	  which-key-idle-delay 0.8
@@ -454,7 +443,7 @@ https://github.com/minad/consult
          ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
          ([remap project-switch-to-buffer] . consult-project-buffer)
          ([remap bookmark-jump] . consult-bookmark)
-         ([remap goto-line] . consult-goto-line)
+         ([remap goto-line] . consult-line)
          ([remap imenu] . consult-imenu)
          ([remap yank-pop] . consult-yank-pop)
          ("C-c M-x" . consult-mode-command)
@@ -634,6 +623,14 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 #+end_src
 
+* consult-eglot
+
+#+begin_src elisp
+  (use-package consult-eglot
+  :after (consult eglot)
+  :bind (:map eglot-mode-map ("M-g s" . consult-eglot-symbols)))
+  #+end_src
+
 * jinx
 
 https://github.com/minad/jinx
@@ -652,6 +649,13 @@ https://github.com/minad/jinx
   :custom
   (nix-indent-function 'nix-indent-line))
 
+#+end_src
+
+* direnv
+
+#+begin_src elisp
+    (use-package direnv
+    )
 #+end_src
 
 * haskell mode
