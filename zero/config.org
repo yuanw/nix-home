@@ -5,6 +5,14 @@ I use doom emacs as my daily driver.
 
 ~emacs --profile zero~
 
+* speed run
+
+~SPC m x~ to ~M-x~
+turn of keycast mode is
+~SPC m x~ ~keycast~
+keycast-tab-bar-mode
+
+~SPC x s~ ~C-x C-s~ save-buffer
 
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 
@@ -22,7 +30,7 @@ https://arne.me/articles/emacs-from-scratch-part-one-foundations
 
 
 * use-package
-seems play well with nix
+use nix for package management, use-package for configuration.
 #+begin_src elisp
 (eval-and-compile
   (defsubst emacs-path (path)
@@ -41,29 +49,8 @@ seems play well with nix
       debug-on-error init-file-debug)
 #+end_src
 
-* Evil
+* Meow
 #+begin_src elisp
-    ;; ;; Install a package via the elpaca macro
-    ;; ;; See the "recipes" section of the manual for more details.
-
-    ;; ;; (elpaca example-package)
-
-    ;; ;; Install use-package support
-    ;; (elpaca elpaca-use-package
-    ;;   ;; Enable :elpaca use-package keyword.
-    ;;   (elpaca-use-package-mode)
-    ;;   ;; Assume :elpaca t unless otherwise specified.
-    ;;   (setq elpaca-use-package-by-default t))
-
-    ;; ;; Block until current queue processed.
-    ;; (elpaca-wait)
-
-    ;;When installing a package which modifies a form used at the top-level
-    ;;(e.g. a package which adds a use-package key word),
-    ;;use `elpaca-wait' to block until that package has been installed/configured.
-    ;;For example:
-    ;;(use-package general :demand t)
-    ;;(elpaca-wait)
     (defun meow-setup ()
       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
       (meow-motion-overwrite-define-key
@@ -153,9 +140,7 @@ seems play well with nix
       :demand t
       :config
       (meow-setup)
-      (meow-global-mode 1)
-
-      )
+      (meow-global-mode 1))
 
   (use-package emacs
       :custom
