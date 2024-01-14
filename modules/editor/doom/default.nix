@@ -153,7 +153,6 @@ with lib; {
           vale
         ];
 
-        file.".aspell.conf".text = "data-dir ${aspell}/lib/aspell";
         file.".vale.ini".text =
           let
             stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
@@ -171,8 +170,10 @@ with lib; {
       # not use home-manager programs.emacs due to it wraps
       # emacsWithPackages again
       programs.zsh = {
-        # phpEnv.ASPELL_CONF = "dict-dir ${pkgs.aspellWithDicts (_: cfg.dicts)}/lib/aspell";
-        sessionVariables = { EDITOR = "${emacsclient}"; };
+        sessionVariables = {
+          EDITOR = "${emacsclient}";
+          ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+        };
         initExtra = ''
           export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
           export PATH=$PATH:$HOME/.doom.d/bin
