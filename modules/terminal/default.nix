@@ -206,7 +206,7 @@ in
               size = 18;
             };
             cursor.style = "Beam";
-            key_bindings = [
+            key.bindings = [
               # { key = "Space";  mods= "Control";                 action= "ToggleViMode";            }
             ];
             window.padding = {
