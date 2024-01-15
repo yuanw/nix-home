@@ -19,8 +19,7 @@ keycast-tab-bar-mode
 
 ~SPC x s~ ~C-x C-s~ save-buffer
 ~SPC x d~  ~C-x C-d~  consult-dir
-~project-switch-project~
-
+~project-switch-project~ bind to ~C-x p p~ in meow is ~SPC x SPC p p~
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 https://www.patrickdelliott.com/emacs.d/#org256bd49
 https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD41-40F58FFAB736
@@ -258,6 +257,14 @@ Make everything use UTF-8:
 		(setq mac-control-modifier 'control)))
 
 #+end_src
+
+* free-keys
+#+begin_src elisp
+(use-package free-keys
+  :commands free-keys)
+
+#+end_src
+
 * dired
 #+begin_src elisp
 (use-package dired

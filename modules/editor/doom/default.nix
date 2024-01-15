@@ -37,6 +37,7 @@ let
         consult-git-log-grep
         consult-yasnippet
         direnv
+        free-keys
         keycast
         google-this
         goto-last-change
