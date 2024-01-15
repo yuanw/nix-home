@@ -1,5 +1,4 @@
 * TODO
-recentf
 restart-emacs
 vterm
 vterm-toggle
@@ -53,6 +52,15 @@ use nix for package management, use-package for configuration.
 
 * global variables
 #+begin_src elisp
+(defconst emacs-environment (system-name))
+
+(defconst emacs-data-suffix
+  (cond ((string= "emacsERC" emacs-environment) "alt")
+        ((string-match "emacs2[6789]\\(.+\\)$" emacs-environment)
+         (match-string 1 emacs-environment))))
+
+(defconst alternate-emacs (string= emacs-data-suffix "alt"))
+
 (defconst user-data-directory
   (emacs-path (if emacs-data-suffix
                   (format "data-%s" emacs-data-suffix)
@@ -60,7 +68,7 @@ use nix for package management, use-package for configuration.
 
 (defun user-data (dir)
   (expand-file-name dir user-data-directory))
-#+end_src
+  #+end_src
 
 * Meow
 it's not a good idea to have a complex leader keymap
@@ -118,7 +126,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("p" . project-find-file)
    ;; '("j" . project-switch-to-buffer)
    ;; '("t" . tab-bar-switch-to-tab)
-   ;; '("l" . project-switch-project)
+     ;; '("l" . project-switch-project)
    ;; '("y" . magit)
    ;; '("n" . org-roam-keymap)
    ;; toggles
@@ -213,7 +221,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
       :config (setq ring-bell-function #'ignore))
 #+end_src
 * sane default
-In confirmation dialogs, we want to be able to type y and n instead of having to spell the whole words:
+In confirmation dialogues, we want to be able to type y and n instead of having to spell the whole words:
 
 
 Make everything use UTF-8:
@@ -276,6 +284,7 @@ Make everything use UTF-8:
   (recentf-exclude
    '("~\\'" "\\`out\\'" "\\.log\\'" "^/[^/]*:" "\\.el\\.gz\\'"))
   (recentf-max-saved-items 2000)
+  (recentf-save-file (user-data "recentf"))
   :preface
   (defun recentf-add-dired-directory ()
     "Add directories visit by dired into recentf."
@@ -535,7 +544,7 @@ https://github.com/minad/consult
          ([remap project-switch-to-buffer] . consult-project-buffer)
          ([remap bookmark-jump] . consult-bookmark)
          ([remap goto-line] . consult-line)
-         ([remap imenu] . consult-imenu)
+         ;; ([remap imenu] . consult-imenu)
          ([remap yank-pop] . consult-yank-pop)
          ("C-c M-x" . consult-mode-command)
          ("C-c h"   . consult-history)
@@ -589,6 +598,7 @@ https://github.com/minad/consult
    consult-bookmark
    consult-recent-file
    consult-xref
+   consult-imenu
    consult--source-bookmark
    consult--source-file-register
    consult--source-recent-file
