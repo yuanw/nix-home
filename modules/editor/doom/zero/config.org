@@ -117,10 +117,10 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; high frequency commands
    ;; '(";" . comment-dwim)
    '("k" . kill-this-buffer)
-   '("d" . consult-dir)
+   '("d" . dired)
    '("b" . switch-to-buffer)
    ;; '("r" . rg-project)
-   '("f" . consult-find)
+   '("f" . find-file)
    ;;'("i" . imenu)
    ;; '("a" . execute-extended-command)
    ;; '("=" . smerge-basic-map)
@@ -128,7 +128,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("j" . project-switch-to-buffer)
    ;; '("t" . tab-bar-switch-to-tab)
      ;; '("l" . project-switch-project)
-   '("y" . magit)
+   ;;'("y" . magit)
    ;; '("n" . org-roam-keymap)
    ;; toggles
     ;; '("L" . display-line-numbers-mode)
@@ -205,8 +205,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
        '("'" . repeat)
        '("<escape>" . ignore)))
     (use-package meow
-      :after
-      (consult consult-dir)
+      :demand t
       :config
       (meow-setup)
       (meow-global-mode 1))
@@ -313,15 +312,12 @@ Make everything use UTF-8:
 #+end_src
 
 * keycast
+still cannot get it to work with line-mode
 #+begin_src elisp
-
 (use-package keycast
-  :after (doom-modeline )
-  :config
-  (setq keycast-mode-line-insert-after '(:eval (doom-modeline-format--main)))
-  (add-to-list 'global-mode-string '("" keycast-mode-line))
-  :hook
-  (doom-modeline-mode . keycast-mode-line-mode))
+  :commands (keycast-tab-bar-mode
+             keycast-header-line-mode)
+  )
 #+end_src
 
 * Which key
@@ -361,7 +357,6 @@ Make everything use UTF-8:
   :config
   (load-theme 'doom-palenight t))
 (use-package doom-modeline
-  :ensure t
   :config (doom-modeline-mode 1))
 
 (use-package telephone-line
