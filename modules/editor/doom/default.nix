@@ -45,6 +45,7 @@ let
         graphviz-dot-mode
         haskell-mode
         doom-themes
+        doom-modeline
         emacsql
         emacsql-sqlite
         embark
@@ -52,6 +53,7 @@ let
         magit
         marginalia
         meow
+        nix-mode
         nerd-icons
         telephone-line
         orderless

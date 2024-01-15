@@ -12,8 +12,7 @@ I use doom emacs as my daily driver.
 
 * speed run
 
-~SPC m x~ to ~M-x~
-turn of keycast mode is
+~SPC m x~ to ~M-x~turn of keycast mode is
 ~SPC m x~ ~keycast~
 keycast-tab-bar-mode
 
@@ -122,14 +121,14 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    '("b" . switch-to-buffer)
    ;; '("r" . rg-project)
    '("f" . consult-find)
-   '("i" . imenu)
+   ;;'("i" . imenu)
    ;; '("a" . execute-extended-command)
    ;; '("=" . smerge-basic-map)
    ;; '("p" . project-find-file)
    ;; '("j" . project-switch-to-buffer)
    ;; '("t" . tab-bar-switch-to-tab)
      ;; '("l" . project-switch-project)
-   ;; '("y" . magit)
+   '("y" . magit)
    ;; '("n" . org-roam-keymap)
    ;; toggles
     ;; '("L" . display-line-numbers-mode)
@@ -620,12 +619,14 @@ https://github.com/minad/consult
 * consult-dir
 
 #+begin_src elisp
-(use-package consult-dir
-  :ensure t
-  :bind (("C-x C-d" . consult-dir)
-         :map vertico-map
-         ("C-x C-d" . consult-dir)
-         ("C-x C-j" . consult-dir-jump-file)))
+  (use-package consult-dir
+    :ensure t
+    :custom
+    (consult-dir-default-command consult-find)
+    :bind (("C-x C-d" . consult-dir)
+           :map vertico-map
+           ("C-x C-d" . consult-dir)
+           ("C-x C-j" . consult-dir-jump-file)))
 
 #+end_src
 * vertico
