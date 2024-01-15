@@ -29,7 +29,7 @@
     };
     # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''
-      experimental-features = nix-command flakes repl-flake
+      experimental-features = nix-command flakes repl-flake auto-allocate-uids configurable-impure-env
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true
