@@ -1,5 +1,5 @@
 * TODO
-restart-emacs
+
 vterm
 vterm-toggle
 keycast-mode-line does not work with telephone-line-mode
@@ -205,7 +205,8 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
        '("'" . repeat)
        '("<escape>" . ignore)))
     (use-package meow
-      :demand t
+      :after
+      (consult consult-dir)
       :config
       (meow-setup)
       (meow-global-mode 1))
@@ -313,9 +314,14 @@ Make everything use UTF-8:
 
 * keycast
 #+begin_src elisp
+
 (use-package keycast
-  :commands keycast-mode
-   )
+  :after (doom-modeline )
+  :config
+  (setq keycast-mode-line-insert-after '(:eval (doom-modeline-format--main)))
+  (add-to-list 'global-mode-string '("" keycast-mode-line))
+  :hook
+  (doom-modeline-mode . keycast-mode-line-mode))
 #+end_src
 
 * Which key
@@ -354,8 +360,12 @@ Make everything use UTF-8:
   :demand
   :config
   (load-theme 'doom-palenight t))
+(use-package doom-modeline
+  :ensure t
+  :config (doom-modeline-mode 1))
 
 (use-package telephone-line
+  :disabled
   :config
 
   (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
