@@ -19,14 +19,15 @@ keycast-tab-bar-mode
 
 ~SPC x s~ ~C-x C-s~ save-buffer
 ~SPC x d~  ~C-x C-d~  consult-dir
+~project-switch-project~
 
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 https://www.patrickdelliott.com/emacs.d/#org256bd49
 https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD41-40F58FFAB736
+
 #+begin_src elisp
 (setq gc-cons-percentage 0.5
       gc-cons-threshold (* 128 1024 1024))
-
 #+end_src
 
 
@@ -71,8 +72,11 @@ use nix for package management, use-package for configuration.
   #+end_src
 
 * Meow
+https://github.com/meow-edit/meow
+
 it's not a good idea to have a complex leader keymap
 here we create bindings for necessary, high frequency commands
+
 https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
 #+begin_src elisp
     (defun meow-setup ()
@@ -113,13 +117,12 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; overwrited motion key
    ;; '("$" . "H-$")
    ;; high frequency commands
-   ;; '("&" . +change-theme)
    ;; '(";" . comment-dwim)
    '("k" . kill-this-buffer)
-   '("d" . dired)
+   '("d" . consult-dir)
    '("b" . switch-to-buffer)
    ;; '("r" . rg-project)
-   '("f" . find-file)
+   '("f" . consult-find)
    '("i" . imenu)
    ;; '("a" . execute-extended-command)
    ;; '("=" . smerge-basic-map)
@@ -598,7 +601,6 @@ https://github.com/minad/consult
    consult-bookmark
    consult-recent-file
    consult-xref
-   consult-imenu
    consult--source-bookmark
    consult--source-file-register
    consult--source-recent-file
@@ -614,7 +616,7 @@ https://github.com/minad/consult
 (use-package consult-dir
   :ensure t
   :bind (("C-x C-d" . consult-dir)
-         :map minibuffer-local-completion-map
+         :map vertico-map
          ("C-x C-d" . consult-dir)
          ("C-x C-j" . consult-dir-jump-file)))
 
