@@ -1,3 +1,8 @@
+* TODO
+recentf
+restart-emacs
+vterm
+vterm-toggle
 
 * configure emacs from stratch with nix
 I use doom emacs as my daily driver. 
