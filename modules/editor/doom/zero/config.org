@@ -117,7 +117,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; high frequency commands
    ;; '(";" . comment-dwim)
    '("k" . kill-this-buffer)
-   '("d" . dired)
+   ;; '("d" . dired)
    '("b" . switch-to-buffer)
    ;; '("r" . rg-project)
    '("f" . find-file)
@@ -558,6 +558,7 @@ https://github.com/minad/consult
          ([remap project-switch-to-buffer] . consult-project-buffer)
          ([remap bookmark-jump] . consult-bookmark)
          ([remap goto-line] . consult-line)
+         ([remap find-file] . consult-find)
          ;; ([remap imenu] . consult-imenu)
          ([remap yank-pop] . consult-yank-pop)
          ("C-c M-x" . consult-mode-command)
@@ -621,19 +622,6 @@ https://github.com/minad/consult
   )
   #+end_src
 
-* consult-dir
-
-#+begin_src elisp
-  (use-package consult-dir
-    :ensure t
-    :custom
-    (consult-dir-default-command consult-find)
-    :bind (("C-x C-d" . consult-dir)
-           :map vertico-map
-           ("C-x C-d" . consult-dir)
-           ("C-x C-j" . consult-dir-jump-file)))
-
-#+end_src
 * vertico
 https://github.com/minad/vertico
 #+begin_src elisp
@@ -687,6 +675,34 @@ https://github.com/minad/vertico
   ;; Enable recursive minibuffers
   (setq enable-recursive-minibuffers t))
 
+#+end_src
+
+
+* consult-dir
+https://github.com/karthink/consult-dir
+https://github.com/karthink/.emacs.d/blob/6aa2e034ce641af60c317697de786bedc2f43a71/lisp/setup-consult.el#L297
+#+begin_src elisp
+ (use-package consult-dir
+  :bind (("M-g d" . consult-dir)
+         :map minibuffer-local-filename-completion-map
+         ("M-g d" . consult-dir)
+         ("M-s f" . consult-dir-jump-file)
+         ;; :map embark-become-file+buffer-map
+         ;; ("d" . consult-dir)
+         )
+  :init
+  (use-package vertico
+    :bind (:map vertico-map
+           ("M-g d" . consult-dir)
+           ("M-s f" . consult-dir-jump-file)
+           ))
+  (use-package meow
+    :config
+      (meow-leader-define-key
+          '("d" . consult-dir)))
+   :config
+  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
+  (setq consult-dir-shadow-filenames nil))
 #+end_src
 
 
