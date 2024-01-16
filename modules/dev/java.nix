@@ -12,7 +12,7 @@ in {
         google-java-format
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
-            jdtls -jvm-arg=-Dlog.level=ALL -javaagent:${pkgs.lombok}/share/java/lombok.jar
+            jdtls -jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
           '')
       ];
       programs = {
