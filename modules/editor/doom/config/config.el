@@ -232,10 +232,8 @@
 (after! eglot
   :config
  (add-to-list 'eglot-server-programs
-              `(java-mode "/opt/homebrew/bin/jdtls"
-                           "-Djava.format.settings.url=https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml"
-                           "-Djava.format.settings.profile=GoogleStyle"
-                           ,(concat "--jvm-arg=-javaagent:" (expand-file-name "/Users/yuanwang/Downloads/lombok.jar"))))
+              `(java-mode "jdtls-with-lomok"
+                           ))
 
   )
 
