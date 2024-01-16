@@ -10,6 +10,10 @@ in {
       home.packages = with pkgs; [
         lombok
         google-java-format
+        (pkgs.writeShellScriptBin "jdtls-with-lombok"
+          ''
+            jdtls -jvm-arg=-Dlog.level=ALL -javaagent:${pkgs.lombok}/share/java/lombok.jar
+          '')
       ];
       programs = {
         # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/libraries/java/lombok/default.nix#L26
