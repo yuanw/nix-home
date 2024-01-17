@@ -974,3 +974,11 @@ https://github.com/minad/jinx
                (haskell-left-arrows . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+"))))))
 
 #+end_src
+
+* vterm
+#+begin_src elisp
+  (use-package vterm
+   :defer t
+    :commands (vterm vterm-other-window)
+   )
+#+end_src
