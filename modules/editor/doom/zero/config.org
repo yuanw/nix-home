@@ -1,8 +1,10 @@
 * TODO
 
+** TODO vterm-toggle
+** TODO keycast-mode-line does not work with telephone-line-mode nor doom-modeline
+** TODO configure org-mode
+** TODO configure org-roam
 
-vterm-toggle
-keycast-mode-line does not work with telephone-line-mode
 
 * configure emacs from stratch with nix
 I use doom emacs as my daily driver. 
@@ -10,7 +12,7 @@ I use doom emacs as my daily driver.
 
 ~emacs --profile zero~
 
-* speed run
+* cheatsheet
 
 ~SPC m x~ to ~M-x~turn of keycast mode is
 ~SPC m x~ ~keycast~
@@ -20,10 +22,12 @@ keycast-tab-bar-mode
 ~SPC x d~  ~C-x C-d~  consult-dir
 ~project-switch-project~ bind to ~C-x p p~ in meow is ~SPC x SPC p p~
 
+* other configs
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 https://www.patrickdelliott.com/emacs.d/#org256bd49
 https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD41-40F58FFAB736
 
+* GC
 #+begin_src elisp
 (setq gc-cons-percentage 0.5
       gc-cons-threshold (* 128 1024 1024))
