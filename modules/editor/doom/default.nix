@@ -59,6 +59,8 @@ let
         orderless
         vertico
         vterm
+        vterm-toggle
+        multi-vterm
         which-key
       ]
     );
