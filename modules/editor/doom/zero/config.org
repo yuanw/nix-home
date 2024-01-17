@@ -744,10 +744,10 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 * magit
 #+begin_src elisp
 (require 'magit)
-(use-package java-mode
+(use-package eglot
   :config
  (add-to-list 'eglot-server-programs
-              `(java-mode "jdtls-with-lomok"))
+              `(java-mode "jdtls-with-lombok"))
   )
 
 #+end_src
