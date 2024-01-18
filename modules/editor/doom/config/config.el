@@ -232,7 +232,7 @@
 (after! eglot
   :config
  (add-to-list 'eglot-server-programs
-              `(java-mode "jdtls-with-lomok"
+              `(java-mode "jdtls-with-lombok"
                            ))
 
   )
