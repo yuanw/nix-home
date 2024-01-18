@@ -74,6 +74,16 @@ use nix for package management, use-package for configuration.
   (expand-file-name dir user-data-directory))
   #+end_src
 
+* auto-revert
+#+begin_src elisp
+(use-package autorevert
+  :custom
+  (auto-revert-use-notify nil)
+  :config
+  (global-auto-revert-mode t))
+
+#+end_src
+
 * Meow
 https://github.com/meow-edit/meow
 
@@ -122,7 +132,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; high frequency commands
    ;; '(";" . comment-dwim)
    '("k" . kill-this-buffer)
-   ;; '("d" . dired)
+   '("d" . dired)
    '("b" . switch-to-buffer)
    ;; '("r" . rg-project)
    '("f" . find-file)
@@ -703,10 +713,6 @@ https://github.com/karthink/.emacs.d/blob/6aa2e034ce641af60c317697de786bedc2f43a
            ("M-g d" . consult-dir)
            ("M-s f" . consult-dir-jump-file)
            ))
-  (use-package meow
-    :config
-      (meow-leader-define-key
-          '("d" . consult-dir)))
    :config
   (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
   (setq consult-dir-shadow-filenames nil))
@@ -749,12 +755,14 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 * magit
 #+begin_src elisp
-(require 'magit)
-(use-package eglot
-  :config
- (add-to-list 'eglot-server-programs
-              `(java-mode "jdtls-with-lombok"))
-  )
+    (use-package magit
+      :custom
+      (magit-list-refs-sortby "-committerdate"))
+    (use-package eglot
+      :config
+     (add-to-list 'eglot-server-programs
+                  `(java-mode "jdtls-with-lombok"))
+      )
 
 #+end_src
 
