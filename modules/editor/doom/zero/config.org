@@ -1002,3 +1002,9 @@ https://github.com/minad/jinx
     :commands (vterm vterm-other-window)
    )
 #+end_src
+
+* yaml
+#+begin_src elisp
+  (use-package yaml-mode
+  :mode "\\.ya?ml\\'")
+#+end_src

@@ -50,6 +50,7 @@ let
         emacsql-sqlite
         embark
         jinx
+        just-mode
         magit
         marginalia
         meow
@@ -57,6 +58,7 @@ let
         nerd-icons
         telephone-line
         orderless
+        yaml-mode
         vertico
         vterm
         vterm-toggle
