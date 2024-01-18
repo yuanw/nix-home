@@ -33,10 +33,12 @@ let
         corfu
         consult
         consult-dir
+        consult-eglot
         consult-flycheck
         consult-git-log-grep
         consult-yasnippet
         direnv
+        eglot-tempel
         free-keys
         keycast
         google-this
