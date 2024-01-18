@@ -142,7 +142,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("p" . project-find-file)
    ;; '("j" . project-switch-to-buffer)
    ;; '("t" . tab-bar-switch-to-tab)
-     ;; '("l" . project-switch-project)
+   '("l" . project-switch-project)
    '("y" . magit)
    ;; '("n" . org-roam-keymap)
    ;; toggles
@@ -761,9 +761,6 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
          ("C-x G" . magit-status-with-prefix))
   :bind (:map magit-mode-map
               ("U" . magit-unstage-all)
-              ("d" . magit-discard)
-              ("D" . magit-diff)
-              ("p" . magit-push)
               )
     :custom
     (magit-list-refs-sortby "-committerdate"))
