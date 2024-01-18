@@ -763,6 +763,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
               ("U" . magit-unstage-all)
               ("d" . magit-discard)
               ("D" . magit-diff)
+              ("p" . magit-push)
               )
     :custom
     (magit-list-refs-sortby "-committerdate"))
