@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: while loop
+# key: while
+# uuid: while
+# condition: (not (sp-point-in-string-or-comment))
+# --
+while (${1:true}) {
+      $0
+}
