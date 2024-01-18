@@ -761,7 +761,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
          ("C-x G" . magit-status-with-prefix))
   :bind (:map magit-mode-map
               ("U" . magit-unstage-all)
-              ("d" . magit-discard)
+              ("D'" . magit-discard)
               )
     :custom
     (magit-list-refs-sortby "-committerdate"))
