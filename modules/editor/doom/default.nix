@@ -58,6 +58,7 @@ let
         meow
         nix-mode
         nerd-icons
+        java-snippets
         telephone-line
         orderless
         yaml-mode
