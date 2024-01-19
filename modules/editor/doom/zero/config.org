@@ -1,6 +1,7 @@
 * TODO
 
-** TODO vterm-toggle
+** TODO setup vterm with mewo insert mode
+** TODO turn off modeline for vterm
 ** TODO keycast-mode-line does not work with telephone-line-mode nor doom-modeline
 ** TODO configure org-mode
 ** TODO configure org-roam
@@ -799,14 +800,14 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 #+end_src
 
 * ace window
-
+ 
   Quickly switch between open buffer windows
 #+begin_src elisp
 (use-package ace-window
   :bind
   ("M-o" . ace-window)
   :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)
+  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
         aw-dispatch-always t))
 
 
@@ -826,9 +827,9 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 * magit
 #+begin_src elisp
   (use-package magit
-    :demand t
+ :demand t
    :bind (("C-x g" . magit-status)
-         ("C-x G" . magit-status-with-prefix))
+         ("C-x G" . magit-status-with-prefix)) 
   :bind (:map magit-mode-map
               ("U" . magit-unstage-all)
               ("k" . magit-discard)
@@ -1175,4 +1176,16 @@ key is looked up in that map.
   (defun size-callback ()
     (cond ((> (frame-pixel-width) 1280) '(90 . 0.75))
           (t '(0.5 . 0.5)))))
+#+end_src
+
+* winner
+undo redo window management
+#+begin_src elisp
+  (use-package winner
+  :unless noninteractive
+  :demand t
+  :bind (("M-N" . winner-redo)
+         ("M-P" . winner-undo))
+  :config
+  (winner-mode 1))
 #+end_src
