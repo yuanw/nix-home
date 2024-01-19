@@ -221,6 +221,17 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
        '("<escape>" . ignore)))
     (use-package meow
       :demand t
+      :preface
+      (defun meow-clipboard-toggle ()
+        (interactive)
+  (if meow-use-clipboard
+      (progn
+        (setq meow-use-clipboard nil)
+        (message "Meow clipboard usage disabled"))
+    (progn
+      (setq meow-use-clipboard t)
+      (message "Meow clipboard usage enabled"))))
+
       :config
       (meow-setup)
       (meow-global-mode 1))
