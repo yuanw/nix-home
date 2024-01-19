@@ -66,6 +66,7 @@ let
         vterm-toggle
         multi-vterm
         which-key
+        zoom
       ]
     );
   valeStyles = [
