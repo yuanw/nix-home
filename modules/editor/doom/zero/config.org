@@ -1123,3 +1123,32 @@ https://github.com/minad/jinx
  (add-to-list 'flycheck-checkers 'vale 'append))
 
 #+end_src
+
+* project
+
+(defcustom project-switch-commands
+  '((project-find-file "Find file")
+    (project-find-regexp "Find regexp")
+    (project-find-dir "Find directory")
+    (project-vc-dir "VC-Dir")
+    (project-eshell "Eshell")
+    (project-any-command "Other"))
+    
+  "Alist mapping commands to descriptions.
+Used by `project-switch-project' to construct a dispatch menu of
+commands available upon \"switching\" to another project.
+
+Each element is of the form (COMMAND LABEL &optional KEY) where
+COMMAND is the command to run when KEY is pressed.  LABEL is used
+to distinguish the menu entries in the dispatch menu.  If KEY is
+absent, COMMAND must be bound in `project-prefix-map', and the
+key is looked up in that map.
+
+#+begin_src elisp
+  (use-package project
+    :custom
+    (project-switch-commands '((project-find-file "Find file")
+                               (magit "Magit!" "g")
+                               )
+    ))
+#+end_src
