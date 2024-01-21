@@ -38,6 +38,7 @@ let
         consult-flycheck
         consult-git-log-grep
         consult-yasnippet
+        consult-org-roam
         direnv
         eglot-tempel
         free-keys
@@ -64,6 +65,8 @@ let
         nerd-icons
         telephone-line
         orderless
+        org
+        org-roam
         yaml-mode
         vertico
         vterm

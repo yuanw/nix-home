@@ -1215,13 +1215,13 @@ undo redo window management
 #+end_src
 * justfile
 #+begin_src elisp
-          (use-package just-mode
-               :mode (("\\`justfile\\'" . just-mode)
-             )
+  (use-package just-mode
+      :mode (("\\`justfile\\'" . just-mode))
 
-            )
-            (use-package justfl
-              :commands justl-exec-recipe)
+   )
+  
+   (use-package justfl
+      :commands justl-exec-recipe)
 #+end_src
 * org
 #+begin_src elisp
@@ -1239,33 +1239,32 @@ undo redo window management
 
 * org-roam
 #+begin_src elisp
-  (use-package org-roam
-  :after org
-  :bind (
+    (use-package org-roam
+    :after org
+    :bind (
+           :map org-mode-map
+           ("C-M-i" . completion-at-point))
+    :custom
+    (org-roam-directory (concat org-directory "roam/"))
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
 
-
-         :map org-mode-map
-         ("C-M-i" . completion-at-point))
-  :custom
-  (org-roam-directory (concat org-directory "roam/")
-  (org-roam-completion-everywhere t)
-  (org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %?"
-         :target (file+head "%<%Y-%m-%d>.org"
-                            "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-
-  :defines
-  (org-roam-v2-ack)
-  :functions
-  (org-roam-db-autosync-mode
-   org-roam-db-query
-   org-roam-node-read
-   org-roam-capture-
-   org-roam-node-list
-   org-roam-node-file)
-  :init
-  (setq org-roam-v2-ack t)
-  :config
-  (org-roam-db-autosync-enable))
+    :defines
+    (org-roam-v2-ack)
+    :functions
+    (org-roam-db-autosync-mode
+     org-roam-db-query
+     org-roam-node-read
+     org-roam-capture-
+     org-roam-node-list
+     org-roam-node-file)
+    :init
+    (setq org-roam-v2-ack t)
+    :commands (org-roam-node-find)
+    :config
+    (org-roam-db-autosync-enable))
 #+end_src
