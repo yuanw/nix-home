@@ -1193,51 +1193,79 @@ undo redo window management
 
 * markdown-mode
 #+begin_src elisp
-(use-package markdown-mode
-  :demand t
-  :mode (("\\`README\\.md\\'" . gfm-mode)
-         ("\\.md\\'"          . markdown-mode)
-         ("\\.markdown\\'"    . markdown-mode))
-  :custom
-  (markdown-command "pandoc -f markdown_github+smart")
-  (markdown-command-needs-filename t)
-  (markdown-enable-math t)
-  (markdown-open-command "marked")
-  :custom-face
-  (markdown-header-face-1 ((t (:inherit markdown-header-face :height 2.0))))
-  (markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
-  (markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
-  (markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
-  :init
-  (setq markdown-command "multimarkdown"))
+  (use-package markdown-mode
+    :demand t
+    :mode (("\\`README\\.md\\'" . gfm-mode)
+           ("\\.md\\'"          . markdown-mode)
+           ("\\.markdown\\'"    . markdown-mode))
+    :custom
+    (markdown-command "pandoc -f markdown_github+smart")
+    (markdown-command-needs-filename t)
+    (markdown-enable-math t)
+    (markdown-open-command "marked")
+    :custom-face
+    (markdown-header-face-1 ((t (:inherit markdown-header-face :height 2.0))))
+    (markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
+    (markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
+    (markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
+    :init
+    (setq markdown-command "multimarkdown")
+ )
 
+#+end_src
+* justfile
+#+begin_src elisp
+          (use-package just-mode
+               :mode (("\\`justfile\\'" . just-mode)
+             )
+
+            )
+            (use-package justfl
+              :commands justl-exec-recipe)
 #+end_src
 * org
 #+begin_src elisp
 (use-package org
-  :preface
-  (defun +org/opened-buffer-files ()
-  "Return the list of files currently opened in Emacs."
-  (delq nil
-        (mapcar (lambda (x)
-                  (if (and (buffer-file-name x)
-                           (string-match "\\.org$"
-                                         (buffer-file-name x)))
-                      (buffer-file-name x)))
-                (buffer-list))))
-
   :config
   (setq org-directory  "~/org/")
   (setq org-agenda-files (append
                            (file-expand-wildcards (concat org-directory "*.org"))
                            (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                           (file-expand-wildcards (concat org-directory "projects/*.org"))
-                        )
-
-    (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
-
-
-
+                           (file-expand-wildcards (concat org-directory "projects/*.org"))))
+  (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
  )
 
+#+end_src
+
+* org-roam
+#+begin_src elisp
+  (use-package org-roam
+  :after org
+  :bind (
+
+
+         :map org-mode-map
+         ("C-M-i" . completion-at-point))
+  :custom
+  (org-roam-directory (concat org-directory "roam/")
+  (org-roam-completion-everywhere t)
+  (org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+
+  :defines
+  (org-roam-v2-ack)
+  :functions
+  (org-roam-db-autosync-mode
+   org-roam-db-query
+   org-roam-node-read
+   org-roam-capture-
+   org-roam-node-list
+   org-roam-node-file)
+  :init
+  (setq org-roam-v2-ack t)
+  :config
+  (org-roam-db-autosync-enable))
 #+end_src

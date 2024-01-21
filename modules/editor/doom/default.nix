@@ -55,6 +55,7 @@ let
         embark
         jinx
         justl
+        just-mode
         magit
         marginalia
         markdown-mode
