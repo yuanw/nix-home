@@ -1148,26 +1148,9 @@ https://github.com/minad/jinx
 
 #+end_src
 
-* COMMENT project
+*  project
 
-(defcustom project-switch-commands
-  '((project-find-file "Find file")
-    (project-find-regexp "Find regexp")
-    (project-find-dir "Find directory")
-    (project-vc-dir "VC-Dir")
-    (project-eshell "Eshell")
-    (project-any-command "Other"))
-    
-  "Alist mapping commands to descriptions.
-Used by `project-switch-project' to construct a dispatch menu of
-commands available upon \"switching\" to another project.
-
-Each element is of the form (COMMAND LABEL &optional KEY) where
-COMMAND is the command to run when KEY is pressed.  LABEL is used
-to distinguish the menu entries in the dispatch menu.  If KEY is
-absent, COMMAND must be bound in `project-prefix-map', and the
-key is looked up in that map.
-
+copied for https://github.com/karthink/.emacs.d/blob/6aa2e034ce641af60c317697de786bedc2f43a71/init.el
 
 #+begin_src elisp
   (use-package project
@@ -1295,6 +1278,7 @@ undo redo window management
   :after org-roam
   :bind (("C-c n j" . org-roam-dailies-capture-today)
          :map org-roam-dailies-map
+         ("D" . org-roam-dailies--capture)
          ("Y" . org-roam-dailies-capture-yesterday)
          ("T" . org-roam-dailies-capture-tomorrow))
   :bind-keymap ("C-c n d" . org-roam-dailies-map)
