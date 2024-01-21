@@ -57,6 +57,7 @@ let
         justl
         magit
         marginalia
+        markdown-mode
         meow
         nix-mode
         nerd-icons
