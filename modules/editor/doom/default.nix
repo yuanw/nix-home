@@ -28,6 +28,7 @@ let
       # Use Nix to manage packages with non-trivial userspace dependencies.
       [
         ace-window
+        aggressive-indent
         avy
         cape
         corfu
@@ -46,13 +47,14 @@ let
         gptel
         graphviz-dot-mode
         haskell-mode
+        hydra
         doom-themes
         doom-modeline
         emacsql
         emacsql-sqlite
         embark
         jinx
-        just-mode
+        justl
         magit
         marginalia
         meow
@@ -67,6 +69,7 @@ let
         multi-vterm
         which-key
         zoom
+        yaml-mode
       ]
     );
   valeStyles = [
