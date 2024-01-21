@@ -23,6 +23,17 @@ keycast-tab-bar-mode
 ~SPC x d~  ~C-x C-d~  consult-dir
 ~project-switch-project~ bind to ~C-x p p~ in meow is ~SPC x SPC p p~
 
+how to compile elisp snippet
+
+~C-c '~ (org-edit-special). This opens another buffer in emacs-lisp-mode,
+
+org-edit-special call org-edit-src-code when it in a source code block, which edit the source or example
+block at point. 
+
+
+so you can use ~M-x eval-buffer~ to load the changes.
+If you want to explore how functions work, use ~M-x edebug-defun~ to set up debugging for t
+
 * other configs
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 https://www.patrickdelliott.com/emacs.d/#org256bd49
@@ -1137,7 +1148,7 @@ https://github.com/minad/jinx
 
 #+end_src
 
-* project
+* COMMENT project
 
 (defcustom project-switch-commands
   '((project-find-file "Find file")
@@ -1157,13 +1168,27 @@ to distinguish the menu entries in the dispatch menu.  If KEY is
 absent, COMMAND must be bound in `project-prefix-map', and the
 key is looked up in that map.
 
+
 #+begin_src elisp
   (use-package project
+    :preface
+     (defun project-magit-status ()
+      "Run magit-status in the current project's root."
+      (interactive)
+      (magit-status-setup-buffer (project-root (project-current t))))
     :custom
-    (project-switch-commands '((project-find-file "Find file")
-                               (magit "Magit!" "g")
-                               )
-    ))
+    (project-switch-commands
+     '((?f "Find file" project-find-file)
+            (?g "Find regexp" project-find-regexp)
+            (?d "Dired" project-dired)
+            (?b "Buffer" project-switch-to-buffer)
+            (?q "Query replace" project-query-replace-regexp)
+            (?v "magit" project-magit-status)
+            (?k "Kill buffers" project-kill-buffers)
+            (?! "Shell command" project-shell-command)
+            (?e "Eshell" project-eshell)))
+
+    )
 #+end_src
 
 * zoom
@@ -1247,11 +1272,7 @@ undo redo window management
     :custom
     (org-roam-directory (concat org-directory "roam/"))
     (org-roam-completion-everywhere t)
-    (org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           "* %?"
-           :target (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+
 
     :defines
     (org-roam-v2-ack)
@@ -1259,12 +1280,35 @@ undo redo window management
     (org-roam-db-autosync-mode
      org-roam-db-query
      org-roam-node-read
-     org-roam-capture-
      org-roam-node-list
      org-roam-node-file)
     :init
     (setq org-roam-v2-ack t)
-    :commands (org-roam-node-find)
+    :commands (org-roam-node-find org-roam-node-list org-roam-node-read)
     :config
     (org-roam-db-autosync-enable))
+#+end_src
+
+** org-roam dailies
+#+begin_src elisp
+  (use-package org-roam-dailies
+  :after org-roam
+  :bind (("C-c n j" . org-roam-dailies-capture-today)
+         :map org-roam-dailies-map
+         ("Y" . org-roam-dailies-capture-yesterday)
+         ("T" . org-roam-dailies-capture-tomorrow))
+  :bind-keymap ("C-c n d" . org-roam-dailies-map)
+  :custom
+  (org-roam-dailies-directory
+   (expand-file-name "daily/" org-roam-directory))
+  (org-roam-dailies-capture-templates
+        '(("d" "default" entry
+           "* %?"
+           :target (file+head "%<%Y-%m-%d>.org"
+                              "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+  :functions
+  (org-roam-dailies-capture-tomorrow
+   org-roam-dailies-capture-yesterday
+   org-roam-dailies-capture-today
+   org-roam-dailies--capture))
 #+end_src
