@@ -73,7 +73,6 @@ let
           p.tree-sitter-markdown
           p.tree-sitter-java
         ]))
-        tsc
         vertico
         vterm
         vterm-toggle
