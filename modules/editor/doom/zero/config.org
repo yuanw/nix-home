@@ -96,6 +96,13 @@ use nix for package management, use-package for configuration.
 
 #+end_src
 
+* Reload configuration
+#+begin_src elisp
+  (defun my-reload-emacs-configuration ()
+  (interactive)
+  
+  (load-file "~/workspaces/nix-home/modules/editor/doom/zero/init.el"))
+#+end_src
 * Meow
 https://github.com/meow-edit/meow
 
@@ -126,7 +133,6 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
        '("9" . meow-digit-argument)
        '("0" . meow-digit-argument)
        '("/" . meow-keypad-describe-key)
-       '("?" . meow-cheatsheet)
         ;; high frequency keybindings
    ;; '("e" . "C-x C-e")
    ;; '(")" . "C-)")
@@ -639,87 +645,88 @@ https://github.com/minad/cape
 https://github.com/minad/consult
 
 #+begin_src elisp
-  (use-package consult
-    ;; Replace bindings. Lazily loaded due by `use-package'.
-    :bind  (([remap repeat-complex-command] . consult-complex-command)
-           ([remap switch-to-buffer] . consult-buffer)
-           ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-           ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
-           ([remap project-switch-to-buffer] . consult-project-buffer)
-           ([remap bookmark-jump] . consult-bookmark)
-           ([remap goto-line] . consult-line)
-           ([remap find-file] . consult-find)
-           ;; ([remap imenu] . consult-imenu)
-           ([remap yank-pop] . consult-yank-pop)
-           ("C-c M-x" . consult-mode-command)
-           ("C-c h"   . consult-history)
-           ("C-c K"   . consult-kmacro)
-           ;; ("C-c i"   . consult-info)
-            ;; M-s bindings (search-map)
-         ("M-s f"   . consult-find)
-         ("M-s M-g" . consult-grep)
-         ("M-s g"   . consult-ripgrep)
-         ("M-s G"   . consult-git-grep)
-         ("M-s r"   . consult-ripgrep)
-         ("M-s l"   . consult-line)
-         ("M-s L"   . consult-line-multi)
-         ("M-s k"   . consult-keep-lines)
-         ("M-s u"   . consult-focus-lines)
-           )
-    ;; Enable automatic preview at point in the *Completions* buffer. This is
-    ;; relevant when you use the default completion UI.
-    :hook (completion-list-mode . consult-preview-at-point-mode)
+    (use-package consult
+      ;; Replace bindings. Lazily loaded due by `use-package'.
+      :bind  (([remap repeat-complex-command] . consult-complex-command)
+             ([remap switch-to-buffer] . consult-buffer)
+             ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+             ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+             ([remap project-switch-to-buffer] . consult-project-buffer)
+             ([remap bookmark-jump] . consult-bookmark)
+             ([remap goto-line] . consult-line)
+             ([remap find-file] . consult-find)
+             ;; ([remap imenu] . consult-imenu)
+             ([remap yank-pop] . consult-yank-pop)
+             ("C-c M-x" . consult-mode-command)
+             ("C-c h"   . consult-history)
+             ("C-c K"   . consult-kmacro)
+             ;; ("C-c i"   . consult-info)
+              ;; M-s bindings (search-map)
+           ("M-s f"   . consult-find)
+           ("M-s M-g" . consult-grep)
+           ("M-s g"   . consult-ripgrep)
+           ("M-s G"   . consult-git-grep)
+           ("M-s r"   . consult-ripgrep)
+           ("M-s l"   . consult-line)
+           ("M-s L"   . consult-line-multi)
+           ("M-s k"   . consult-keep-lines)
+           ("M-s u"   . consult-focus-lines)
+             )
+      ;; Enable automatic preview at point in the *Completions* buffer. This is
+      ;; relevant when you use the default completion UI.
+      :hook (completion-list-mode . consult-preview-at-point-mode)
 
-    :custom
-    ;; (consult-preview-key "M-i")
-    (consult-narrow-key "<")
+      :custom
+      ;; (consult-preview-key "M-i")
+      (consult-narrow-key "<")
 
-    :custom-face
-    (consult-file ((t (:inherit font-lock-string-face))))
+      :custom-face
+      (consult-file ((t (:inherit font-lock-string-face))))
 
-    :functions
-    (consult-register-format
-     consult-register-window
-     consult-xref)
+      :functions
+      (consult-register-format
+       consult-register-window
+       consult-xref)
 
-    ;; The :init configuration is always executed (Not lazy)
-    :init
+      ;; The :init configuration is always executed (Not lazy)
+      :init
 
-    ;; Optionally configure the register formatting. This improves the register
-    ;; preview for `consult-register', `consult-register-load',
-    ;; `consult-register-store' and the Emacs built-ins.
-    (setq register-preview-delay 0.5
-          register-preview-function #'consult-register-format)
+      ;; Optionally configure the register formatting. This improves the register
+      ;; preview for `consult-register', `consult-register-load',
+      ;; `consult-register-store' and the Emacs built-ins.
+      (setq register-preview-delay 0.5
+            register-preview-function #'consult-register-format)
 
-    ;; Optionally tweak the register preview window.
-    ;; This adds thin lines, sorting and hides the mode line of the window.
-    (advice-add #'register-preview :override #'consult-register-window)
+      ;; Optionally tweak the register preview window.
+      ;; This adds thin lines, sorting and hides the mode line of the window.
+      (advice-add #'register-preview :override #'consult-register-window)
 
-    ;; Use Consult to select xref locations with preview
-    (setq xref-show-xrefs-function #'consult-xref
-          xref-show-definitions-function #'consult-xref)
+      ;; Use Consult to select xref locations with preview
+      (setq xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref)
 
-    ;; Configure other variables and modes in the :config section,
-    ;; after lazily loading the package.
-    :config
-    (use-package consult-xref)
+      ;; Configure other variables and modes in the :config section,
+      ;; after lazily loading the package.
+      :config
+      (use-package consult-xref)
+      (use-package consult-register)
 
-    (consult-customize
-     consult-theme
-     :preview-key '(:debounce 0.2 any)
-     consult-ripgrep
-     consult-git-grep
-     consult-grep
-     consult-bookmark
-     consult-recent-file
-     consult-xref
-     consult--source-bookmark
-     consult--source-file-register
-     consult--source-recent-file
-     consult--source-project-recent-file
-     :preview-key '(:debounce 0.4 any))
+      (consult-customize
+       consult-theme
+       :preview-key '(:debounce 0.2 any)
+       consult-ripgrep
+       consult-git-grep
+       consult-grep
+       consult-bookmark
+       consult-recent-file
+       consult-xref
+       consult--source-bookmark
+       consult--source-file-register
+       consult--source-recent-file
+       consult--source-project-recent-file
+       :preview-key '(:debounce 0.4 any))
 
-    )
+      )
   #+end_src
 
 * vertico
@@ -1310,3 +1317,36 @@ undo redo window management
    org-roam-dailies-capture-today
    org-roam-dailies--capture))
 #+end_src
+
+* hydra
+
+https://github.com/Ladicle/hydra-posframe
+vs https://github.com/jerrypnz/major-mode-hydra.el
+vs
+https://gitlab.com/to1ne/use-package-hydra/
+
+
+https://github.com/jerrypnz/.emacs.d/blob/master/config/jp-hydra.el
+major mode hydra seems still maintained and in nix package
+
+example in here
+
+https://github.com/jerrypnz/.emacs.d/blob/c5023ba23579a70c17e168502bcd79b6db84c151/config/jp-base.el#L101
+
+this main menu is probably written using transient, since we are not going to compose it
+
+#+begin_src elisp
+  (use-package hydra
+    :after (meow)
+    :config
+
+    (defhydra hydra-main-menu (:color blue)
+      "main menu"
+     ("p" project-switch-project "switch projects")
+     ("g" magit "magit")
+     ("q" nil "cancel"))
+    (meow-leader-define-key
+     '("?" . 'hydra-main-menu/body))
+
+    )
+  #+end_src
