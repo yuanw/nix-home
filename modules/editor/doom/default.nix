@@ -133,7 +133,7 @@ with lib; {
       {
 
         xdg.configFile."doom-profiles.el".source = ./profiles.el;
-        xdg.configFile."emacs.d".source = mkLink
+        xdg.configFile."emacs".source = mkLink
           "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
         home = {
           packages = with pkgs; [
