@@ -69,7 +69,7 @@ let
         org-roam
         yaml-mode
         tree-sitter
-        (epkgs.tree-sitter-langs.withPlugins (p: epkgsB.tree-sitter-langs.plugins ++ [
+        (epkgs.tree-sitter-langs.withPlugins (p: epkgs.tree-sitter-langs.plugins ++ [
           p.tree-sitter-markdown
         ]))
         vertico
