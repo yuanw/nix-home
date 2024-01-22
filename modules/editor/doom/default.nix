@@ -69,7 +69,7 @@ let
         org-roam
         yaml-mode
         tree-sitter
-        (epkgs.tree-sitter-langs.withPlugins (p: epkgs.tree-sitter-langs.plugins ++ [
+        (epkgs.tree-sitter-langs.withPlugins (p: epkgsB.tree-sitter-langs.plugins ++ [
           p.tree-sitter-markdown
         ]))
         vertico
@@ -128,78 +128,82 @@ with lib; {
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
-    home-manager.users.${config.my.username} = { pkgs, ... }: {
+    home-manager.users.${config.my.username} = { pkgs, config, ... }:
+      let mkLink = config.lib.file.mkOutOfStoreSymlink; in
+      {
 
-      xdg.configFile."doom-profiles.el".source = ./profiles.el;
-      home = {
-        packages = with pkgs; [
-          # git
-          (ripgrep.override { withPCRE2 = true; })
-          gnutls # for TLS connectivity
-          cmake
-          enchant
-          ## Optional dependencies
-          fd # faster projectile indexing
-          imagemagick # for image-dired
-          zstd
-          html-tidy
-          shfmt
-          ## Module dependencies
-          # :checkers spell
-          aspell
-          # :checkers grammar
-          languagetool
-          # :tools editorconfig
-          editorconfig-core-c # per-project style config
-          # :tools lookup & :lang org +roam
-          sqlite
-          # wordnet
-          # :lang latex & :lang org (latex previews)
-          texlive.combined.scheme-medium
-          #: js
-          # nodePackages.eslint
-          #: markdown
-          nodePackages.unified-language-server
-          #: sh
-          nodePackages.bash-language-server
-          #: toml
-          taplo-lsp
-          #: web-mode
-          nodePackages.js-beautify
-          nodePackages.stylelint
-          # :lang yaml
-          nodePackages.yaml-language-server
-          emacsWithDeps
-          vale
-        ];
+        xdg.configFile."doom-profiles.el".source = ./profiles.el;
+        xdg.configFile."emacs.d".source = mkLink
+          "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
+        home = {
+          packages = with pkgs; [
+            # git
+            (ripgrep.override { withPCRE2 = true; })
+            gnutls # for TLS connectivity
+            cmake
+            enchant
+            ## Optional dependencies
+            fd # faster projectile indexing
+            imagemagick # for image-dired
+            zstd
+            html-tidy
+            shfmt
+            ## Module dependencies
+            # :checkers spell
+            aspell
+            # :checkers grammar
+            languagetool
+            # :tools editorconfig
+            editorconfig-core-c # per-project style config
+            # :tools lookup & :lang org +roam
+            sqlite
+            # wordnet
+            # :lang latex & :lang org (latex previews)
+            texlive.combined.scheme-medium
+            #: js
+            # nodePackages.eslint
+            #: markdown
+            nodePackages.unified-language-server
+            #: sh
+            nodePackages.bash-language-server
+            #: toml
+            taplo-lsp
+            #: web-mode
+            nodePackages.js-beautify
+            nodePackages.stylelint
+            # :lang yaml
+            nodePackages.yaml-language-server
+            emacsWithDeps
+            vale
+          ];
 
-        file.".vale.ini".text =
-          let
-            stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
-            basedOnStyles = concatStringsSep ", "
-              (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
-          in
-          ''
-            StylesPath = ${stylesPath}
-            [*]
-            BasedOnStyles = ${basedOnStyles}
-          '';
+          file.".vale.ini".text =
+            let
+              stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
+              basedOnStyles = concatStringsSep ", "
+                (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
+            in
+            ''
+              StylesPath = ${stylesPath}
+              [*]
+              BasedOnStyles = ${basedOnStyles}
+            '';
 
-        file.".doom.d".source = ./config;
-      };
-      # not use home-manager programs.emacs due to it wraps
-      # emacsWithPackages again
-      programs.zsh = {
-        sessionVariables = {
-          EDITOR = "${emacsclient}";
-          ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+          file.".doom.d".source = ./config;
         };
-        initExtra = ''
-          export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
-          export PATH=$PATH:$HOME/.doom.d/bin
-        '';
+        # not use home-manager programs.emacs due to it wraps
+        # emacsWithPackages again
+        programs.zsh = {
+          sessionVariables = {
+            EDITOR = "${emacsclient}";
+            ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+          };
+          initExtra = ''
+            export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
+            export PATH=$PATH:$HOME/.doom.d/bin
+          '';
+        };
       };
-    };
 
 
 
