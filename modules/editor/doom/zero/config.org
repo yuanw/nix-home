@@ -838,22 +838,36 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 * magit
 #+begin_src elisp
-  (use-package magit
- :demand t
-   :bind (("C-x g" . magit-status)
-         ("C-x G" . magit-status-with-prefix)) 
-  :bind (:map magit-mode-map
-              ("U" . magit-unstage-all)
-              ("k" . magit-discard)
-              )
-    :custom
-    (magit-list-refs-sortby "-committerdate"))
-  (use-package eglot
-    :config
-   (add-to-list 'eglot-server-programs
-                `(java-mode "jdtls-with-lombok"))
-    )
+   (use-package magit
+  :demand t
+    :bind (("C-x g" . magit-status)
+          ("C-x G" . magit-status-with-prefix)) 
+   :bind (:map magit-mode-map
+               ("U" . magit-unstage-all)
+               ("k" . magit-discard)
+               )
+     :custom
+     (magit-list-refs-sortby "-committerdate"))
+   (use-package eglot
+     :custom
+     (eglot-autoshutdown t)
+     :config
+     (setq read-process-output-max (* 1024 1024))
+     (add-to-list 'eglot-server-programs
+                 `(java-mode "jdtls-with-lombok"))
+     )
 
+#+end_src
+
+* after eglot and orderless
+
+#+begin_src elisp
+  (use-package eglot-orderless
+  :no-require t
+  :after (eglot orderless)
+  :config
+  (add-to-list 'completion-category-overrides
+               '(eglot (styles orderless basic))))
 #+end_src
 
 * consult-eglot
