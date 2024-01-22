@@ -71,7 +71,6 @@ let
         tree-sitter
         (epkgs.tree-sitter-langs.withPlugins (p: epkgs.tree-sitter-langs.plugins ++ [
           p.tree-sitter-markdown
-          p.tree-sitter-java
         ]))
         vertico
         vterm
