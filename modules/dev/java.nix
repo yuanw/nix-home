@@ -11,6 +11,7 @@ in {
         lombok
         google-java-format
         jdtls
+        jdk17
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
             ${pkgs.jdtls}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
