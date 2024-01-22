@@ -54,6 +54,7 @@ let
         emacsql
         emacsql-sqlite
         embark
+        embark-consult
         jinx
         justl
         just-mode
