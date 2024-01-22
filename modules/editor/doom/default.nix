@@ -71,6 +71,7 @@ let
         tree-sitter
         (epkgs.tree-sitter-langs.withPlugins (p: epkgs.tree-sitter-langs.plugins ++ [
           p.tree-sitter-markdown
+          p.tree-sitter-java
         ]))
         vertico
         vterm
@@ -153,8 +154,8 @@ with lib; {
           editorconfig-core-c # per-project style config
           # :tools lookup & :lang org +roam
           sqlite
-          tree-sitter
-          (tree-sitter.withPlugins (p: [ p.tree-sitter-c p.tree-sitter-java ]))
+          # tree-sitter
+          #(tree-sitter.withPlugins (p: [ p.tree-sitter-c p.tree-sitter-java ]))
           # wordnet
           # :lang latex & :lang org (latex previews)
           texlive.combined.scheme-medium
