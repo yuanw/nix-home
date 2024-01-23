@@ -85,7 +85,14 @@ use nix for package management, use-package for configuration.
 (defun user-data (dir)
   (expand-file-name dir user-data-directory))
   #+end_src
-
+* load env
+#+begin_src elisp
+    (use-package exec-path-from-shell
+      :if (memq window-system '(mac ns))
+  :config
+  (exec-path-from-shell-initialize)
+  )
+#+end_src
 * auto-revert
 #+begin_src elisp
 (use-package autorevert

@@ -54,6 +54,7 @@ let
         emacsql
         emacsql-sqlite
         embark
+        exec-path-from-shell
         embark-consult
         jinx
         justl
