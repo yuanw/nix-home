@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: lombok log
+# --
+
+import lombok.extern.slf4j.Slf4j;
+@Slf4j

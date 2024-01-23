@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: @Override method
+# key: method@
+# uuid: method@
+# condition: (not (sp-point-in-string-or-comment))
+# --
+@Override ${1:public} ${2:void} ${3:methodName}($4) {
+          $0
+}

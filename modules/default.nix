@@ -19,7 +19,7 @@
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix
-      ./editor/doom
+      ./editor/emacs
       ./editor/neovim
       ./settings.nix
       ./terminal
