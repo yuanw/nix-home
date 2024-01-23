@@ -855,9 +855,10 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
   :demand t
     :bind (("C-x g" . magit-status)
           ("C-x G" . magit-status-with-prefix)) 
-   :bind (:map magit-mode-map
+   :bind (:map magit-section-mode-map
                ("U" . magit-unstage-all)
                ("k" . magit-discard)
+               ("p" . magit-push)
                )
      :custom
      (magit-list-refs-sortby "-committerdate"))
