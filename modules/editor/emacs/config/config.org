@@ -1272,40 +1272,38 @@ undo redo window management
 
 * org-roam
 #+begin_src elisp
-  (use-package org-roam
-  :after org
-  :bind (
-         :map org-mode-map
-         ("C-M-i" . completion-at-point))
-  :custom
-  (org-roam-directory (concat org-directory "roam/"))
-  (org-roam-completion-everywhere t)
+   (use-package org-roam
+   :after org
+   :bind (
+          :map org-mode-map
+          ("C-M-i" . completion-at-point))
+   :custom
+   (org-roam-directory (concat org-directory "roam/"))
+   (org-roam-completion-everywhere t)
 
-  :defines
-  (org-roam-v2-ack)
-  :functions
-  (org-roam-db-autosync-mode
-   org-roam-db-query
-   org-roam-node-read
-   org-roam-node-list
-   org-roam-node-file)
-  :init
-  (setq org-roam-v2-ack t)
-  (setq org-roam-dailies-directory "daily/")
-  (setq org-roam-dailies-capture-templates
-              '(("d" "default" entry
-                 "* %?"
-                 :target (file+head "%<%Y-%m-%d>.org"
-                                    "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-  :commands (org-roam-node-find org-roam-node-list org-roam-node-read
-                                 org-roam-dailies-goto-yesterday
-                                  org-roam-dailies-goto-date
-                                  org-roam-dailies-goto-previous-note
-                                  org-roam-dailies-goto-next-note
-             org-roam-dailies-capture-today org-roam-dailies-goto-today)
+   :defines
+   (org-roam-v2-ack)
+   :functions
+   (org-roam-db-autosync-mode
+    org-roam-db-query
+    org-roam-node-read
+    org-roam-node-list
+    org-roam-node-file)
+   :init
+   (setq org-roam-v2-ack t)
+   (setq org-roam-dailies-directory "daily/")
+   (setq org-roam-dailies-capture-templates
+               '(("d" "default" entry
+                  "* %?"
+                  :target (file+head "%<%Y-%m-%d>.org"
+                                     "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+   :commands (org-roam-node-find org-roam-node-list org-roam-node-read
 
-  :config
-  (org-roam-db-autosync-enable))
+                         
+              )
+
+   :config
+   (org-roam-db-autosync-enable))
 #+end_src
 
 ** org-roam dailies
@@ -1320,8 +1318,7 @@ undo redo window management
                ("T" . org-roam-dailies-capture-tomorrow))
         :bind-keymap ("C-c n d" . org-roam-dailies-map)
         :custom
-        (org-roam-dailies-directory
-         (expand-file-name "daily/" org-roam-directory))
+        (org-roam-dailies-directory "daily" )
   
   
         )
