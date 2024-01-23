@@ -1301,27 +1301,30 @@ undo redo window management
 
 ** org-roam dailies
 #+begin_src elisp
-  (use-package org-roam-dailies
-  :after org-roam
-  :bind (("C-c n j" . org-roam-dailies-capture-today)
-         :map org-roam-dailies-map
-         ("D" . org-roam-dailies--capture)
-         ("Y" . org-roam-dailies-capture-yesterday)
-         ("T" . org-roam-dailies-capture-tomorrow))
-  :bind-keymap ("C-c n d" . org-roam-dailies-map)
-  :custom
-  (org-roam-dailies-directory
-   (expand-file-name "daily/" org-roam-directory))
-  (org-roam-dailies-capture-templates
-        '(("d" "default" entry
-           "* %?"
-           :target (file+head "%<%Y-%m-%d>.org"
-                              "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-  :functions
-  (org-roam-dailies-capture-tomorrow
-   org-roam-dailies-capture-yesterday
-   org-roam-dailies-capture-today
-   org-roam-dailies--capture))
+        (use-package org-roam-dailies
+          :no-require t
+        :after org-roam
+        :bind (("C-c n j" . org-roam-dailies-capture-today)
+               :map org-roam-dailies-map
+               ("D" . org-roam-dailies--capture)
+               ("Y" . org-roam-dailies-capture-yesterday)
+               ("T" . org-roam-dailies-capture-tomorrow))
+        :bind-keymap ("C-c n d" . org-roam-dailies-map)
+        :custom
+        (org-roam-dailies-directory
+         (expand-file-name "daily/" org-roam-directory))
+        (org-roam-dailies-capture-templates
+              '(("d" "default" entry
+                 "* %?"
+                 :target (file+head "%<%Y-%m-%d>.org"
+                                    "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+        :functions
+        (org-roam-dailies-capture-tomorrow
+         org-roam-dailies-capture-yesterday
+         org-roam-dailies-capture-today
+         org-roam-dailies--capture)
+  :commands (org-roam-dailies-capture-today org-roam-dailies-goto-today)
+        )
 #+end_src
 
 * hydra
@@ -1343,7 +1346,6 @@ this main menu is probably written using transient, since we are not going to co
 
 #+begin_src elisp
   (use-package hydra
-    :after (meow)
     :config
 
     (defhydra hydra-main-menu (:color blue)
@@ -1352,7 +1354,7 @@ this main menu is probably written using transient, since we are not going to co
      ("g" magit "magit")
      ("q" nil "cancel"))
     (meow-leader-define-key
-     '("?" . 'hydra-main-menu/body))
+     '("?" . hydra-main-menu/body))
 
     )
   #+end_src
