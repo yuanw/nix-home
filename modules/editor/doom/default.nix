@@ -102,7 +102,7 @@ with lib; {
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs29;
+      default = pkgs.emacs-unstable;
     };
 
     usePackage = mkOption {
