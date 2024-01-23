@@ -133,8 +133,6 @@ with lib; {
     home-manager.users.${config.my.username} = { pkgs, config, ... }:
       let mkLink = config.lib.file.mkOutOfStoreSymlink; in
       {
-
-        xdg.configFile."doom-profiles.el".source = ./profiles.el;
         xdg.configFile."emacs".source = mkLink
           "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
         home = {
@@ -191,7 +189,6 @@ with lib; {
               BasedOnStyles = ${basedOnStyles}
             '';
 
-          file.".doom.d".source = ./config;
         };
         # not use home-manager programs.emacs due to it wraps
         # emacsWithPackages again
@@ -200,10 +197,7 @@ with lib; {
             EDITOR = "${emacsclient}";
             ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
           };
-          initExtra = ''
-            export PATH=$PATH:$XDG_CONFIG_HOME/emacs/bin
-            export PATH=$PATH:$HOME/.doom.d/bin
-          '';
+
         };
       };
 
