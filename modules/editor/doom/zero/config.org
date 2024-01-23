@@ -86,6 +86,7 @@ use nix for package management, use-package for configuration.
   (expand-file-name dir user-data-directory))
   #+end_src
 * load env
+to get ~JAVA_HOME~ working 
 #+begin_src elisp
     (use-package exec-path-from-shell
       :when (daemonp )
@@ -855,7 +856,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
   :demand t
     :bind (("C-x g" . magit-status)
           ("C-x G" . magit-status-with-prefix)) 
-   :bind (:map magit-section-mode-map
+   :bind (:map magit-mode-map
                ("U" . magit-unstage-all)
                ("k" . magit-discard)
                ("p" . magit-push)
