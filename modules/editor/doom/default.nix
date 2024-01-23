@@ -16,7 +16,7 @@ let
           "${inputs.emacs-plus}/patches/emacs-28/fix-window-role.patch"
           "${inputs.emacs-plus}/patches/emacs-28/no-frame-refocus-cocoa.patch"
           "${inputs.emacs-plus}/patches/emacs-29/poll.patch"
-          # "${inputs.emacs-plus}/patches/emacs-30/round-undecorated-frame.patch"
+          "${inputs.emacs-plus}/patches/emacs-29/round-undecorated-frame.patch"
           "${inputs.emacs-plus}/patches/emacs-28/system-appearance.patch"
         ])
         ++ prev.patches;
