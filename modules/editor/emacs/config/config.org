@@ -106,7 +106,7 @@ use nix for package management, use-package for configuration.
   (defun my-reload-emacs-configuration ()
   (interactive)
   
-  (load-file "~/workspaces/nix-home/modules/editor/emacs/zero/init.el"))
+  (load-file "~/workspaces/nix-home/modules/editor/emacs/config/init.el"))
 #+end_src
 * Meow
 https://github.com/meow-edit/meow

@@ -133,7 +133,7 @@ with lib; {
       let mkLink = config.lib.file.mkOutOfStoreSymlink; in
       {
         xdg.configFile."emacs".source = mkLink
-          "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
+          "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
         home = {
           packages = with pkgs; [
             # git
