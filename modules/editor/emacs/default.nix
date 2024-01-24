@@ -129,8 +129,13 @@ with lib; {
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
     # the context of home-manager
     home-manager.users.${config.my.username} = { pkgs, config, ... }:
-      let mkLink = config.lib.file.mkOutOfStoreSymlink; in
+      let
+        mkLink = config.lib.file.mkOutOfStoreSymlink;
+        emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
+
+      in
       {
+        xdg.configFile."emacs".source = emacsConfigPath;
 
         home = {
           packages = with pkgs; [
@@ -173,8 +178,7 @@ with lib; {
             emacsWithDeps
             vale
           ];
-          file.".emacs.d".source = mkLink
-            "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
+          file.".emacs.d".source = emacsConfigPath;
           file.".vale.ini".text =
             let
               stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
