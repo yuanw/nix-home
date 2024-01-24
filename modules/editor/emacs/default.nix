@@ -131,7 +131,7 @@ with lib; {
     home-manager.users.${config.my.username} = { pkgs, config, ... }:
       let
         mkLink = config.lib.file.mkOutOfStoreSymlink;
-        emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
+        emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
 
       in
       {

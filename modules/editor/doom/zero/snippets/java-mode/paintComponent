@@ -1,9 +1,0 @@
-# -*- mode: snippet -*-
-# name: paintComponent (Swing)
-# key: paintComponent
-# uuid: paintComponent
-# condition: (not (sp-point-in-string-or-comment))
-# --
-@Override public void paintComponent(Graphics g) {
-          `%`$0
-}

@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: main
-# --
-
-const std = @import("std");
-pub fn main() void {
-
-}

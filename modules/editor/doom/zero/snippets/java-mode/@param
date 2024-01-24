@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: param
-# key: @param
-# uuid: @param
-# condition: (sp-point-in-comment)
-# --
-@param ${1:paramater} $0

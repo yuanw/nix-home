@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: toString
-# key: toStr
-# uuid: toStr
-# --
-public String toString() {
-       $0
-}
