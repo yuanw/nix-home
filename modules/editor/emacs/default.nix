@@ -12,11 +12,10 @@ let
     prev: {
       patches =
         (lib.optionals pkgs.stdenv.isDarwin [
-          "${inputs.emacs-plus}/patches/emacs-28/fix-window-role.patch"
-          "${inputs.emacs-plus}/patches/emacs-28/no-frame-refocus-cocoa.patch"
-          "${inputs.emacs-plus}/patches/emacs-29/poll.patch"
-          "${inputs.emacs-plus}/patches/emacs-29/round-undecorated-frame.patch"
-          "${inputs.emacs-plus}/patches/emacs-28/system-appearance.patch"
+          "${inputs.emacs-plus}/patches/emacs-30/fix-window-role.patch"
+          "${inputs.emacs-plus}/patches/emacs-30/poll.patch"
+          "${inputs.emacs-plus}/patches/emacs-30/round-undecorated-frame.patch"
+          "${inputs.emacs-plus}/patches/emacs-30/system-appearance.patch"
         ])
         ++ prev.patches;
     }
@@ -132,8 +131,7 @@ with lib; {
     home-manager.users.${config.my.username} = { pkgs, config, ... }:
       let mkLink = config.lib.file.mkOutOfStoreSymlink; in
       {
-        xdg.configFile."emacs".source = mkLink
-          "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
+
         home = {
           packages = with pkgs; [
             # git
@@ -175,7 +173,8 @@ with lib; {
             emacsWithDeps
             vale
           ];
-
+          file.".emacs.d".source = mkLink
+            "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
           file.".vale.ini".text =
             let
               stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
