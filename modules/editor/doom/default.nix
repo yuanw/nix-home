@@ -133,8 +133,7 @@ with lib; {
     home-manager.users.${config.my.username} = { pkgs, config, ... }:
       let mkLink = config.lib.file.mkOutOfStoreSymlink; in
       {
-        xdg.configFile."emacs".source = mkLink
-          "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
+
         home = {
           packages = with pkgs; [
             # git
@@ -176,7 +175,8 @@ with lib; {
             emacsWithDeps
             vale
           ];
-
+          file."emacs.d".source = mkLink
+            "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/doom/zero";
           file.".vale.ini".text =
             let
               stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
