@@ -101,7 +101,7 @@ with lib; {
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-unstable;
+      default = pkgs.emacsGit;
     };
 
     usePackage = mkOption {
