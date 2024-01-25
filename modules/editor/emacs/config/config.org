@@ -155,6 +155,7 @@ https://github.com/meow-edit/meow
 it's not a good idea to have a complex leader keymap
 here we create bindings for necessary, high frequency commands
 
+
 https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
 #+begin_src elisp
     (defun meow-setup ()
@@ -179,42 +180,6 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
        '("9" . meow-digit-argument)
        '("0" . meow-digit-argument)
        '("/" . meow-keypad-describe-key)
-        ;; high frequency keybindings
-   ;; '("e" . "C-x C-e")
-   ;; '(")" . "C-)")
-   ;; '("}" . "C-}")
-   ;; '("," . xref-pop-marker-stack)
-   ;; '("." . xref-find-definitions)
-
-   ;; overwrited motion key
-   ;; '("$" . "H-$")
-   ;; high frequency commands
-   ;; '(";" . comment-dwim)
-   ;'("k" . kill-this-buffer)
-   ; '("d" . dired)
-   ;'("b" . switch-to-buffer)
-   ;; '("r" . rg-project)
-   ;'("f" . find-file)
-   ;;'("i" . imenu)
-   ;; '("a" . execute-extended-command)
-   ;; '("=" . smerge-basic-map)
-   ;; '("p" . project-find-file)
-   ;; '("j" . project-switch-to-buffer)
-   ;; '("t" . tab-bar-switch-to-tab)
-   ;;'("l" . project-switch-project)
-   ;;'("y" . magit)
-   ;; '("n" . org-roam-keymap)
-   ;; toggles
-    ;; '("L" . display-line-numbers-mode)
-   ;; '("S" . smartparens-strict-mode)
-   ;; '("T" . telega)
-   ;; '("P" . pass)
-   ;; '("A" . org-agenda)
-   ;; '("D" . docker)
-   ;; '("E" . elfeed)
-   ;; '("F" . flymake-mode)
-   ;; '("\\" . dired-sidebar-toggle-sidebar)
-   ;; '("#" . +project-previous-buffer)
    )
       (meow-normal-define-key
        '("0" . meow-expand-0)
@@ -883,13 +848,13 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
                '(eglot (styles orderless basic))))
 #+end_src
 
-* consult-eglot
-
+* flycheck with eglot
 #+begin_src elisp
-  (use-package consult-eglot
-  :after (consult eglot)
-  :bind (:map eglot-mode-map ("M-g s" . consult-eglot-symbols)))
-  #+end_src
+  (use-package flycheck-eglot
+  :after (flycheck eglot)
+  :config
+  (global-flycheck-eglot-mode 1))
+#+end_src
 
 * jinx
 

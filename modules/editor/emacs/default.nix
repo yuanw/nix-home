@@ -38,6 +38,9 @@ let
         consult-yasnippet
         consult-org-roam
         direnv
+        flycheck
+        flycheck-eglot
+        eglot
         eglot-tempel
         free-keys
         keycast
