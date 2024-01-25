@@ -1293,18 +1293,7 @@ due the file strutcture, i have to do the nested config
           ;; Dailies
 
    :config
-   (use-package org-roam-dailies
-     :bind (("C-c n j" . org-roam-dailies-capture-today)
-             ("C-c n g" . org-roam-dailies-goto-today))
-     :bind-keymap ("C-c n d" . org-roam-dailies-map)
-     :config 
-  (setq org-roam-dailies-directory "daily/")
-   (setq org-roam-dailies-capture-templates
-      '(("d" "default" entry
-         "* %?"
-         :target (file+head "%<%Y-%m-%d>.org"
-                            "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-     )
+
    ;; If you're using a vertical completion framework, you might want a more informative completion interface
   ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
  
@@ -1316,6 +1305,21 @@ due the file strutcture, i have to do the nested config
 
  #+end_src
 
+ #+begin_src elisp
+       (use-package org-roam-dailies
+         :after org-roam
+      :bind (("C-c n j" . org-roam-dailies-capture-today)
+              ("C-c n g" . org-roam-dailies-goto-today))
+      :bind-keymap ("C-c n d" . org-roam-dailies-map)
+      :config 
+   (setq org-roam-dailies-directory "daily/")
+    (setq org-roam-dailies-capture-templates
+       '(("d" "default" entry
+          "* %?"
+          :target (file+head "%<%Y-%m-%d>.org"
+                             "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+      )
+ #+end_src
 
 * hydra
 
