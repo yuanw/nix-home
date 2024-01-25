@@ -159,10 +159,10 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
 #+begin_src elisp
     (defun meow-setup ()
       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-      (meow-motion-overwrite-define-key
-       '("j" . meow-next)
-       '("k" . meow-prev)
-       '("<escape>" . ignore))
+       (meow-motion-overwrite-define-key
+        '("j" . meow-next)
+        '("k" . meow-prev)
+        '("<escape>" . ignore))
       (meow-leader-define-key
        ;; SPC j/k will run the original command in MOTION state.
        '("j" . "H-j")
@@ -190,11 +190,11 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("$" . "H-$")
    ;; high frequency commands
    ;; '(";" . comment-dwim)
-   '("k" . kill-this-buffer)
-   '("d" . dired)
-   '("b" . switch-to-buffer)
+   ;'("k" . kill-this-buffer)
+   ; '("d" . dired)
+   ;'("b" . switch-to-buffer)
    ;; '("r" . rg-project)
-   '("f" . find-file)
+   ;'("f" . find-file)
    ;;'("i" . imenu)
    ;; '("a" . execute-extended-command)
    ;; '("=" . smerge-basic-map)
