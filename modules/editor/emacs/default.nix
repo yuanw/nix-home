@@ -77,6 +77,7 @@ let
         vterm
         vterm-toggle
         multi-vterm
+        use-package
         which-key
         zoom
         yaml-mode
