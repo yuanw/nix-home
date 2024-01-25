@@ -185,12 +185,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("}" . "C-}")
    ;; '("," . xref-pop-marker-stack)
    ;; '("." . xref-find-definitions)
-      ;; window management
-   '("w" . other-window)
-   '("W" . window-swap-states)
-   '("o" . delete-other-windows)
-   '("s" . split-window-right)
-   '("-" . split-window-below)
+
    ;; overwrited motion key
    ;; '("$" . "H-$")
    ;; high frequency commands
@@ -206,8 +201,8 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
    ;; '("p" . project-find-file)
    ;; '("j" . project-switch-to-buffer)
    ;; '("t" . tab-bar-switch-to-tab)
-   '("l" . project-switch-project)
-   '("y" . magit)
+   ;;'("l" . project-switch-project)
+   ;;'("y" . magit)
    ;; '("n" . org-roam-keymap)
    ;; toggles
     ;; '("L" . display-line-numbers-mode)
@@ -297,6 +292,7 @@ https://github.com/DogLooksGood/dogEmacs/blob/master/elisp/init-modal.el
       (message "Meow clipboard usage enabled"))))
 
       :config
+      (setq meow-use-clipboard t)
       (meow-setup)
       (meow-global-mode 1))
 
@@ -1289,14 +1285,24 @@ due the file strutcture, i have to do the nested config
    :bind (("C-c n l" . org-roam-buffer-toggle) 
           ("C-c n f" . org-roam-node-find)
           ("C-c n i" . org-roam-node-insert)
-          ("C-c n c" . org-roam-capture))
+          ("C-c n c" . org-roam-capture)
+          ("C-c n j" . org-roam-dailies-capture-today)
+          ("C-c n g" . org-roam-dailies-goto-today)
+          )
           ;; Dailies
 
    :config
+   (use-package org-roam-dailies)
 
    ;; If you're using a vertical completion framework, you might want a more informative completion interface
   ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
- 
+  (setq org-roam-dailies-directory "daily/")
+    (setq org-roam-dailies-capture-templates
+       '(("d" "default" entry
+          "* %?"
+          :target (file+head "%<%Y-%m-%d>.org"
+                             "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+
 
    (org-roam-db-autosync-mode)
    ;; If using org-roam-protocol
@@ -1305,21 +1311,6 @@ due the file strutcture, i have to do the nested config
 
  #+end_src
 
- #+begin_src elisp
-       (use-package org-roam-dailies
-         :after org-roam
-      :bind (("C-c n j" . org-roam-dailies-capture-today)
-              ("C-c n g" . org-roam-dailies-goto-today))
-      :bind-keymap ("C-c n d" . org-roam-dailies-map)
-      :config 
-   (setq org-roam-dailies-directory "daily/")
-    (setq org-roam-dailies-capture-templates
-       '(("d" "default" entry
-          "* %?"
-          :target (file+head "%<%Y-%m-%d>.org"
-                             "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-      )
- #+end_src
 
 * hydra
 
@@ -1337,18 +1328,52 @@ example in here
 https://github.com/jerrypnz/.emacs.d/blob/c5023ba23579a70c17e168502bcd79b6db84c151/config/jp-base.el#L101
 
 this main menu is probably written using transient, since we are not going to compose it
+the loading order on this is tricky, need wrap my head of :define :function
 
+right now the hydra is not repeatable, kind of missing the point. need to figure out how to setup correctly
+
+blue pill means back. red pill means stay
+how add winner undo here
 #+begin_src elisp
-  (use-package hydra
-    :config
+    (use-package hydra
+      :config
+  (defhydra my-window-movement ()
+    "window movement"
+      ("h" windmove-left "up")
+      ("o" windmove-right "right")
+      ("a" windmove-down "down")
+      ("i" windmove-up "up")
+      ("n" other-window "next")
+      ("h" switch-window "switch-window")
+      ("*" enlarge-window "height+" )
+      ("@" shrink-window "height-" )
+      ("$" enlarge-window-horizontally "width+" )
+      ("^" shrink-window-horizontally "width-" )
+      ("b" consult-buffer "buffer")
+      ("f" find-file "file")
+      ("F" find-file-other-window "other file")
+      ("d" delete-other-windows :color blue)
+      ("j" ace-window "ace-window")
+      ("v" split-window-right "split right")
+      ("s" split-window-below "below")
+      ("k" delete-window "delete")
+      ("r" winner-redo "redo")
+      ("u" winner-undo "undo")
+      ("D" ace-delete-window "ace delete") ;; TODO not working
+      ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+      ("q" nil "cancel"))
 
-    (defhydra hydra-main-menu (:color blue)
-      "main menu"
-     ("p" project-switch-project "switch projects")
-     ("g" magit "magit")
-     ("q" nil "cancel"))
-    (meow-leader-define-key
-     '("?" . hydra-main-menu/body))
+      (defhydra hydra-main-menu (:color blue)
+        "main menu"
+       ("p" project-switch-project "switch projects")
+       ("g" magit "magit")
+       ("n" org-roam-node-find "find note")
+       ("t" org-roam-dailies-goto-today "today note")
+       ("q" nil "cancel"))
+      (meow-leader-define-key
+       '("?" . hydra-main-menu/body)
+       '("w" . my-window-movement/body)
+       )
 
-    )
+      )
   #+end_src
