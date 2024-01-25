@@ -5,11 +5,10 @@
 ** TODO keycast-mode-line does not work with telephone-line-mode nor doom-modeline
 
 
-* configure emacs from stratch with nix
-I use doom emacs as my daily driver. 
-~doom profiles sync~
+* Configure emacs from scratch with nix
+doom emacs is my gateway to emacs. For the first time, I can be as productive if not more
+in other editor or IDE. I didn't how to quit vi/m before that. 
 
-~emacs --profile zero~
 
 * cheatsheet
 
@@ -32,7 +31,8 @@ block at point.
 so you can use ~M-x eval-buffer~ to load the changes.
 If you want to explore how functions work, use ~M-x edebug-defun~ to set up debugging for t
 
-* other configs
+* Other emacs configurations inspired me
+
 https://github.com/jwiegley/dot-emacs/blob/master/init.org
 https://www.patrickdelliott.com/emacs.d/#org256bd49
 https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD41-40F58FFAB736
@@ -45,7 +45,7 @@ https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD4
 
 
 * use-package
-use nix for package management, use-package for configuration.
+use nix for the actual package management, use-package for configuration.
 #+begin_src elisp
 (eval-and-compile
   (defsubst emacs-path (path)
@@ -64,7 +64,7 @@ use nix for package management, use-package for configuration.
       debug-on-error init-file-debug)
 #+end_src
 
-* global variables
+* Global variables
 #+begin_src elisp
 (defconst emacs-environment (system-name))
 
@@ -83,15 +83,18 @@ use nix for package management, use-package for configuration.
 (defun user-data (dir)
   (expand-file-name dir user-data-directory))
   #+end_src
-* load env
+  
+* Load env
+so I can get JAVA_HOME and jdtls working with emacs daemon
+
 #+begin_src elisp
-    (use-package exec-path-from-shell
-      :when (daemonp )
+(use-package exec-path-from-shell
+  :when (daemonp )
   :config
-  (exec-path-from-shell-initialize)
-  )
+  (exec-path-from-shell-initialize))
 #+end_src
 * auto-revert
+this and backup are probably the first things need to changed
 #+begin_src elisp
 (use-package autorevert
   :custom
@@ -101,12 +104,50 @@ use nix for package management, use-package for configuration.
 
 #+end_src
 
+* Backup file
+#+begin_src elisp
+
+;; Don't generate backups or lockfiles. While auto-save maintains a copy so long
+;; as a buffer is unsaved, backups create copies once, when the file is first
+;; written, and never again until it is killed and reopened. This is better
+;; suited to version control, and I don't want world-readable copies of
+;; potentially sensitive material floating around our filesystem.
+(setq create-lockfiles nil
+      make-backup-files nil
+      ;; But in case the user does enable it, some sensible defaults:
+      version-control t     ; number each backup file
+      backup-by-copying t   ; instead of renaming current file (clobbers links)
+      delete-old-versions t ; clean up after itself
+      kept-old-versions 5
+      kept-new-versions 5
+      backup-directory-alist (list ( user-data "backup/"))
+      tramp-backup-directory-alist backup-directory-alist)
+
+;; But turn on auto-save, so we have a fallback in case of crashes or lost data.
+;; Use `recover-file' or `recover-session' to recover them.
+(setq auto-save-default t
+      ;; Don't auto-disable auto-save after deleting big chunks. This defeats
+      ;; the purpose of a failsafe. This adds the risk of losing the data we
+      ;; just deleted, but I believe that's VCS's jurisdiction, not ours.
+      auto-save-include-big-deletions t
+      ;; Keep it out of `doom-emacs-dir' or the local directory.
+      auto-save-list-file-prefix (user-data "autosave/")
+      tramp-auto-save-directory  (user-data "tramp-autosave/")
+      auto-save-file-name-transforms
+      (list (list "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
+                  ;; Prefix tramp autosaves to prevent conflicts with local ones
+                  (concat auto-save-list-file-prefix "tramp-\\2") t)
+            (list ".*" auto-save-list-file-prefix t)))
+
+#+end_src
+
 * Reload configuration
 #+begin_src elisp
-  (defun my-reload-emacs-configuration ()
-  (interactive)
-  
-  (load-file "~/workspaces/nix-home/modules/editor/emacs/config/init.el"))
+ (defun my-reload-emacs-configuration ()
+      "reload my emacs configuratio"
+      (interactive)
+
+    (load-file "~/workspaces/nix-home/modules/editor/emacs/config/init.el"))
 #+end_src
 * Meow
 https://github.com/meow-edit/meow
@@ -372,7 +413,7 @@ Make everything use UTF-8:
 #+end_src
 
 * keycast
-still cannot get it to work with line-mode
+still cannot get it to work with line-mode yet, tab-bar-mode work good enough most time.
 #+begin_src elisp
 (use-package keycast
   :commands (keycast-tab-bar-mode
@@ -381,42 +422,7 @@ still cannot get it to work with line-mode
 #+end_src
 
 
-* Backup file
-#+begin_src elisp
 
-;; Don't generate backups or lockfiles. While auto-save maintains a copy so long
-;; as a buffer is unsaved, backups create copies once, when the file is first
-;; written, and never again until it is killed and reopened. This is better
-;; suited to version control, and I don't want world-readable copies of
-;; potentially sensitive material floating around our filesystem.
-(setq create-lockfiles nil
-      make-backup-files nil
-      ;; But in case the user does enable it, some sensible defaults:
-      version-control t     ; number each backup file
-      backup-by-copying t   ; instead of renaming current file (clobbers links)
-      delete-old-versions t ; clean up after itself
-      kept-old-versions 5
-      kept-new-versions 5
-      backup-directory-alist (list ( user-data "backup/"))
-      tramp-backup-directory-alist backup-directory-alist)
-
-;; But turn on auto-save, so we have a fallback in case of crashes or lost data.
-;; Use `recover-file' or `recover-session' to recover them.
-(setq auto-save-default t
-      ;; Don't auto-disable auto-save after deleting big chunks. This defeats
-      ;; the purpose of a failsafe. This adds the risk of losing the data we
-      ;; just deleted, but I believe that's VCS's jurisdiction, not ours.
-      auto-save-include-big-deletions t
-      ;; Keep it out of `doom-emacs-dir' or the local directory.
-      auto-save-list-file-prefix (user-data "autosave/")
-      tramp-auto-save-directory  (user-data "tramp-autosave/")
-      auto-save-file-name-transforms
-      (list (list "\\`/[^/]*:\\([^/]*/\\)*\\([^/]*\\)\\'"
-                  ;; Prefix tramp autosaves to prevent conflicts with local ones
-                  (concat auto-save-list-file-prefix "tramp-\\2") t)
-            (list ".*" auto-save-list-file-prefix t)))
-
-#+end_src
 
 
 * Which key
@@ -918,6 +924,7 @@ https://github.com/minad/jinx
 #+end_src
 
 * haskell mode
+steal from jwiegley
 
 #+begin_src elisp
 
@@ -1248,13 +1255,10 @@ undo redo window management
 #+end_src
 * justfile
 #+begin_src elisp
-  (use-package just-mode
-      :mode (("\\`justfile\\'" . just-mode))
-
-   )
+ (use-package just-mode)
   
-   (use-package justfl
-      :commands justl-exec-recipe)
+     (use-package justfl
+        :commands justl-exec-recipe)
 #+end_src
 * org
 #+begin_src elisp
@@ -1272,7 +1276,45 @@ undo redo window management
 
 * org-roam
 
+using nix as emacs package manager can be werid sometime.
 
+due the file strutcture, i have to do the nested config
+
+#+begin_src elisp
+
+   (use-package org-roam
+   :custom
+     (org-roam-directory (concat org-directory "roam/"))
+
+   :bind (("C-c n l" . org-roam-buffer-toggle) 
+          ("C-c n f" . org-roam-node-find)
+          ("C-c n i" . org-roam-node-insert)
+          ("C-c n c" . org-roam-capture))
+          ;; Dailies
+
+   :config
+   (use-package org-roam-dailies
+     :bind (("C-c n j" . org-roam-dailies-capture-today)
+             ("C-c n g" . org-roam-dailies-goto-today))
+     :bind-keymap ("C-c n d" . org-roam-dailies-map)
+     :config 
+  (setq org-roam-dailies-directory "daily/")
+   (setq org-roam-dailies-capture-templates
+      '(("d" "default" entry
+         "* %?"
+         :target (file+head "%<%Y-%m-%d>.org"
+                            "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+     )
+   ;; If you're using a vertical completion framework, you might want a more informative completion interface
+  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+ 
+
+   (org-roam-db-autosync-mode)
+   ;; If using org-roam-protocol
+  ;; (require 'org-roam-protocol)
+   )
+
+ #+end_src
 
 
 * hydra

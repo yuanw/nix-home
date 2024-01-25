@@ -46,6 +46,7 @@ let
         gptel
         graphviz-dot-mode
         haskell-mode
+        helpful
         hydra
         doom-themes
         doom-modeline
