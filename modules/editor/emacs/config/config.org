@@ -1281,18 +1281,19 @@ due the file strutcture, i have to do the nested config
 * denote
 https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 #+begin_src elisp
-    (use-package denote
-      :config
-      (use-package denote-org-dblock)
-      (denote-rename-buffer-mode t)
-      :custom
-      (denote-directory (concat org-directory "denote/"))
-      :hook
-      (dired-mode . denote-dired-mode)
-      :custom-face
-      (denote-faces-link ((t (:slant italic))))
-    
-      )
+  (use-package denote
+    :config
+    (use-package denote-org-dblock)
+    (denote-rename-buffer-mode t)
+    :custom
+    (denote-directory (concat org-directory "denote/"))
+    :hook
+    (dired-mode . denote-dired-mode)
+    :custom-face
+    (denote-faces-link ((t (:slant italic))))
+    :commands
+    (denote)
+    )
 #+end_src
 
 * hydra
