@@ -49,8 +49,8 @@ let
         gptel
         graphviz-dot-mode
         haskell-mode
-          p.tree-sitter-markdown
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
+          _p.tree-sitter-markdown
         ]))
         doom-modeline
         doom-themes
