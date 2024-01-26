@@ -785,7 +785,8 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 ;; Minimising & quitting Emacs way too many times without wanting to.
 (global-unset-key "\C-z")
 (global-unset-key "\C-x\C-c")
-
+(global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
+(global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
 
 #+end_src
 
@@ -1276,6 +1277,23 @@ due the file strutcture, i have to do the nested config
 
  #+end_src
 
+ 
+* denote
+https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
+#+begin_src elisp
+    (use-package denote
+      :config
+      (use-package denote-org-dblock)
+      (denote-rename-buffer-mode t)
+      :custom
+      (denote-directory (concat org-directory "denote/"))
+      :hook
+      (dired-mode . denote-dired-mode)
+      :custom-face
+      (denote-faces-link ((t (:slant italic))))
+    
+      )
+#+end_src
 
 * hydra
 
