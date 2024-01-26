@@ -74,6 +74,7 @@ let
         orderless
         org
         org-roam
+        smartparens
         super-save
         telephone-line
         tree-sitter
