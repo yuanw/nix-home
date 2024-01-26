@@ -49,41 +49,43 @@ let
         gptel
         graphviz-dot-mode
         haskell-mode
-        helpful
-        hydra
-        doom-themes
+        (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
+          _p.tree-sitter-markdown
+        ]))
         doom-modeline
+        doom-themes
         emacsql
         emacsql-sqlite
         embark
-        exec-path-from-shell
         embark-consult
+        exec-path-from-shell
+        helpful
+        hydra
         jinx
-        justl
         just-mode
+        justl
         magit
         marginalia
         markdown-mode
         meow
-        nix-mode
+        multi-vterm
         nerd-icons
-        telephone-line
+        nix-mode
         orderless
         org
         org-roam
-        yaml-mode
+        smartparens
+        super-save
+        telephone-line
         tree-sitter
-        (epkgs.tree-sitter-langs.withPlugins (p: epkgs.tree-sitter-langs.plugins ++ [
-          p.tree-sitter-markdown
-        ]))
+        use-package
         vertico
         vterm
         vterm-toggle
-        multi-vterm
-        use-package
         which-key
-        zoom
         yaml-mode
+        yaml-mode
+        zoom
       ]
     );
   valeStyles = [
@@ -105,7 +107,7 @@ with lib; {
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacsGit;
+      default = pkgs.emacs-git;
     };
 
     usePackage = mkOption {

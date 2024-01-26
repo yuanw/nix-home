@@ -484,6 +484,27 @@ still cannot get it to work with line-mode yet, tab-bar-mode work good enough mo
 
 #+end_src
 
+* super-save
+try it out, save-buffer
+#+begin_src elisp
+  (use-package super-save
+  :defer 1
+  :diminish super-save-mode
+  :config
+  (super-save-mode +1)
+  (setq super-save-auto-save-when-idle t))
+#+end_src
+
+* smartparent
+https://github.com/Fuco1/smartparens
+#+begin_src elisp
+  (use-package smartparens-config
+     :commands smartparens-mode
+  :custom
+  (sp-highlight-pair-overlay nil))
+  
+
+#+end_src
 * embark
 https://github.com/oantolin/embark
 #+begin_src elisp
@@ -624,7 +645,7 @@ https://github.com/minad/consult
              ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
              ([remap project-switch-to-buffer] . consult-project-buffer)
              ([remap bookmark-jump] . consult-bookmark)
-             ([remap goto-line] . consult-line)
+
              ([remap find-file] . consult-find)
              ;; ([remap imenu] . consult-imenu)
              ([remap yank-pop] . consult-yank-pop)
@@ -785,7 +806,8 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 ;; Minimising & quitting Emacs way too many times without wanting to.
 (global-unset-key "\C-z")
 (global-unset-key "\C-x\C-c")
-
+(global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
+(global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
 
 #+end_src
 
@@ -805,12 +827,13 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 * avy
 #+begin_src elisp
-(use-package avy
-  :bind ("C-." . avy-goto-char-timer)
-  :custom
-  (avy-case-fold-search t)
-  (avy-timeout-seconds 0.3)
-)
+  (use-package avy
+    :bind ("C-." . avy-goto-char-timer)
+         ([remap goto-line] . avy-goto-line)
+    :custom
+    (avy-case-fold-search t)
+    (avy-timeout-seconds 0.5)
+  )
 
 #+end_src
 
@@ -1276,6 +1299,24 @@ due the file strutcture, i have to do the nested config
 
  #+end_src
 
+ 
+* denote
+https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
+#+begin_src elisp
+  (use-package denote
+    :config
+    (use-package denote-org-dblock)
+    (denote-rename-buffer-mode t)
+    :custom
+    (denote-directory (concat org-directory "denote/"))
+    ;; :hook
+    ;; (dired-mode . denote-dired-mode)
+    :custom-face
+    (denote-faces-link ((t (:slant italic))))
+    :commands
+    (denote)
+    )
+#+end_src
 
 * hydra
 
@@ -1305,18 +1346,15 @@ how add winner undo here
   (defhydra my-window-movement ()
     "window movement"
       ("h" windmove-left "up")
-      ("o" windmove-right "right")
+      ("o" windmove-right "->")
       ("a" windmove-down "down")
       ("i" windmove-up "up")
       ("n" other-window "next")
-      ("h" switch-window "switch-window")
-      ("*" enlarge-window "height+" )
-      ("@" shrink-window "height-" )
-      ("$" enlarge-window-horizontally "width+" )
-      ("^" shrink-window-horizontally "width-" )
-      ("b" consult-buffer "buffer")
-      ("f" find-file "file")
-      ("F" find-file-other-window "other file")
+      ("*" enlarge-window "h+" )
+      ("@" shrink-window "h-" )
+      ("$" enlarge-window-horizontally "w+" )
+      ("^" shrink-window-horizontally "w-" )
+      ("f" find-file-other-window "other file")
       ("d" delete-other-windows :color blue)
       ("j" ace-window "ace-window")
       ("v" split-window-right "split right")
