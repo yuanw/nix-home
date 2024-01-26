@@ -105,7 +105,7 @@ with lib; {
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacsGit;
+      default = pkgs.emacs-git;
     };
 
     usePackage = mkOption {
