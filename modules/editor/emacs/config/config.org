@@ -46,6 +46,40 @@ https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD4
 
 * use-package
 use nix for the actual package management, use-package for configuration.
+
+https://emacs.stackexchange.com/questions/33591/use-package-does-not-execute-config
+(message "DEBUG: my-shortconfig start")
+
+;; init package and use-package
+(setq package-archives '(("gnu" . "https://elpa.gnu.org/packages/")
+                         ("melpa" . "https://melpa.org/packages/")))
+(require 'package)
+(package-initialize)
+(require 'use-package)
+
+;; auto-complete-config:
+(use-package auto-complete
+    :commands (global-auto-complete-mode auto-complete auto-complete-mode)
+    :bind ("M-<tab>" . my--auto-complete)
+    :bind (:map ac-mode-map
+                ("M-<tab>" . auto-complete))
+    :init (progn
+              (message "DEBUG: auto-complete-config init")
+              (defun my--auto-complete ()
+                  (interactive)
+                  (message "DEBUG: my--auto-complete inside")
+                  (unless (boundp 'auto-complete-mode)
+                      (require 'auto-complete-config)
+                      (global-set-key (kbd "M-<tab>") nil)
+                      (global-auto-complete-mode 1))
+                  (auto-complete))
+              (setq ac-auto-start nil
+                    ac-quick-help-delay 0.5))
+    :config (progn
+                (message "DEBUG: auto-complete-config config")))
+
+(message "DEBUG: my-shortconfig done")
+
 #+begin_src elisp
 (eval-and-compile
   (defsubst emacs-path (path)
@@ -1376,8 +1410,10 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
     :config
     (setq denote-directory "~/org/denote/")
 
-    ; (denote-rename-buffer-mode)
   (use-package denote-org-dblock)
+  (use-package denote-rename-buffer)
+  (use-package denote-journal-extras)
+  (denote-rename-buffer-mode)
 
   (with-eval-after-load 'org-capture
     (add-to-list 'org-capture-templates
