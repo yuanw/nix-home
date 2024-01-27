@@ -318,18 +318,18 @@ Make everything use UTF-8:
 
 * dired
 #+begin_src elisp
-(use-package dired
-   :commands dired-jump
-  :diminish dired-omit-mode
-   :hook
-   (dired-mode . dired-hide-details-mode)
-   (dired-mode . dired-omit-mode)
-  :custom
-  (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
-  (dired-dwim-target t)
-  :config
+  (use-package dired
+     :commands dired-jump
+    :diminish dired-omit-mode
+     :hook
+     (dired-mode . dired-hide-details-mode)
+     (dired-mode . dired-omit-mode)
+     (dired-mode .  (function (lambda () (load "dired-x"))) )
+    :custom
+    (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
+    (dired-dwim-target t)
 
-  )
+    )
 
 #+end_src
 
