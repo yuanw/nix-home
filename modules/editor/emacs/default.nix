@@ -52,6 +52,7 @@ let
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
           _p.tree-sitter-markdown
         ]))
+        denote
         doom-modeline
         doom-themes
         emacsql
