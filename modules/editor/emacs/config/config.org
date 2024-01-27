@@ -1303,19 +1303,7 @@ due the file strutcture, i have to do the nested config
  #+end_src
 
  
-* denote
-https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
-#+begin_src elisp
-  (use-package denote
-    :after org
-    :config
-    (use-package denote-org-dblock)
-    (denote-rename-buffer-mode t)
-    :config
-    (setq denote-directory  "~org/denote")
-    :commands (denote)
-    )
-#+end_src
+
 
 * hydra
 
@@ -1379,3 +1367,17 @@ how add winner undo here
 
       )
   #+end_src
+
+* denote
+https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
+#+begin_src elisp
+  (use-package denote
+    :after org
+    :config
+    (use-package denote-org-dblock)
+    (denote-rename-buffer-mode t)
+    :config
+    (setq denote-directory  "~org/denote")
+    :commands (denote)
+    )
+#+end_src
