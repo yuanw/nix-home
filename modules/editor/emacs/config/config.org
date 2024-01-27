@@ -1374,9 +1374,9 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
   (use-package denote
     :after org
     :config
-    (setq denote-directory "~/org")
+    (setq denote-directory "~/org/denote/")
 
-     (denote-rename-buffer-mode)
+    ; (denote-rename-buffer-mode)
   (use-package denote-org-dblock)
 
   (with-eval-after-load 'org-capture
