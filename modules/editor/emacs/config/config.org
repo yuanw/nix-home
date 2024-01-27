@@ -324,7 +324,7 @@ Make everything use UTF-8:
      :hook
      (dired-mode . dired-hide-details-mode)
      (dired-mode . dired-omit-mode)
-     (dired-mode .  (function (lambda () (load "dired-x"))) )
+     (dired-mode .   (lambda () (load "dired-x"))) 
     :custom
     (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
     (dired-dwim-target t)
@@ -495,14 +495,17 @@ try it out, save-buffer
   (setq super-save-auto-save-when-idle t))
 #+end_src
 
-* smartparent
+* smartparens
+
 https://github.com/Fuco1/smartparens
 #+begin_src elisp
   (use-package smartparens-config
      :commands smartparens-mode
+     :hook
+     (smartparen . smartparens-mode)
   :custom
   (sp-highlight-pair-overlay nil))
-  
+
 
 #+end_src
 * embark
@@ -1304,17 +1307,13 @@ due the file strutcture, i have to do the nested config
 https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 #+begin_src elisp
   (use-package denote
+    :after org
     :config
     (use-package denote-org-dblock)
     (denote-rename-buffer-mode t)
-    :custom
-    (denote-directory (concat org-directory "denote/"))
-    ;; :hook
-    ;; (dired-mode . denote-dired-mode)
-    :custom-face
-    (denote-faces-link ((t (:slant italic))))
-    :commands
-    (denote)
+    :config
+    (setq denote-directory  "~org/denote")
+    :commands (denote)
     )
 #+end_src
 
