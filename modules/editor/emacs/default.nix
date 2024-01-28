@@ -65,6 +65,7 @@ let
         jinx
         just-mode
         justl
+        kind-icon
         magit
         marginalia
         markdown-mode
