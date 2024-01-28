@@ -79,6 +79,7 @@ let
         super-save
         telephone-line
         tree-sitter
+        tmr
         use-package
         vertico
         vterm
