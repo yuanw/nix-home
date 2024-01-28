@@ -1378,8 +1378,14 @@ how add winner undo here
       ("f" find-file-other-window "other file")
       ("d" delete-other-windows :color blue)
       ("j" ace-window "ace-window")
-      ("v" split-window-right "split right")
-      ("s" split-window-below "below")
+      ("v" (lambda ()
+         (interactive)
+         (split-window-right)
+         (windmove-right)) "split right")
+      ("s" (lambda ()
+         (interactive)
+         (split-window-below)
+         (windmove-down)) "below")
       ("k" delete-window "delete")
       ("r" winner-redo "redo")
       ("u" winner-undo "undo")
@@ -1425,4 +1431,12 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
                    :kill-buffer t
                    :jump-to-captured t))))
 
+#+end_src
+
+* git-link
+#+begin_src elisp
+(use-package git-link
+  :bind ("C-c Y" . git-link)
+  :commands (git-link git-link-commit git-link-homepage))
+  
 #+end_src
