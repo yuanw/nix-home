@@ -52,7 +52,6 @@ let
         graphviz-dot-mode
         haskell-mode
         (callPackage ./transient-showcase.nix {
-          inherit lib;
           inherit (pkgs) fetchFromGitHub;
           inherit (epkgs) trivialBuild transient;
         })
