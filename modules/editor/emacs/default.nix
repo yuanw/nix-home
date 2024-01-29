@@ -46,6 +46,7 @@ let
         eglot-tempel
         free-keys
         keycast
+        git-link
         google-this
         goto-last-change
         gptel
