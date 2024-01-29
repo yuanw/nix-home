@@ -5,6 +5,7 @@
 { config, lib, pkgs, inputs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
+  # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
 
   aspell = (pkgs.aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]));
   emacsclient = "emacsclient -c -a 'emacs'";
@@ -20,6 +21,7 @@ let
         ++ prev.patches;
     }
   );
+
   emacsWithDeps =
     (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
       with epkgs;
@@ -49,6 +51,11 @@ let
         gptel
         graphviz-dot-mode
         haskell-mode
+        (callPackage ./transient-showcase.nix {
+          inherit lib;
+          inherit (pkgs) fetchFromGitHub;
+          inherit (epkgs) trivialBuild transient;
+        })
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
           _p.tree-sitter-markdown
         ]))
