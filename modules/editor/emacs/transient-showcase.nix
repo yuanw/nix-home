@@ -1,5 +1,4 @@
-{ lib
-, trivialBuild
+{ trivialBuild
 , fetchFromGitHub
 , transient
 ,
@@ -12,7 +11,7 @@ trivialBuild rec {
     owner = "positron-solutions";
     repo = "transient-showcase";
     rev = "814b85eab2bbfffd827502ce830f72ff82fd3ae9";
-    sha256 = lib.fakeSha256;
+    sha256 = "sha256-YH3qlezGsi9FtF4OocwF/K4MG+GVrv4tw53E6gjwtok=";
   };
   # elisp dependencies
   propagatedUserEnvPkgs = [
