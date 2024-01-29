@@ -788,7 +788,7 @@ https://github.com/minad/vertico
     (setq vertico-scroll-margin 0)
 
     ;; Show more candidates
-     (setq vertico-count 20)
+    ;; (setq vertico-count 20)
 
     ;; Grow and shrink the Vertico minibuffer
     (setq vertico-resize t)
@@ -813,8 +813,8 @@ https://github.com/minad/vertico
          ("C-q" . vertico-quick-exit))
   :init
   (progn
-    (setq vertico-quick1 "arstdhn")
-    (setq vertico-quick2 "oie")))
+    (setq vertico-quick1 "haio")
+    (setq vertico-quick2 "luy")))
 
 (use-package vertico-multiform
   :demand t
