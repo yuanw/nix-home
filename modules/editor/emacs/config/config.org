@@ -1198,7 +1198,7 @@ steal from jwiegley
 
 * groovy
 #+begin_src elisp
-    (use-package! groovy-mode
+    (use-package groovy-mode
     :mode "\\.g\\(?:radle\\|roovy\\)$"
   )
 #+end_src
