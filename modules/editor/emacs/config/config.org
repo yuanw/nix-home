@@ -927,24 +927,23 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 * magit
 #+begin_src elisp
-   (use-package magit
-  :demand t
-    :bind (("C-x C-g" . magit-status)
-          ("C-x C-G" . magit-status-with-prefix)) 
-   :bind (:map magit-mode-map
-               ("U" . magit-unstage-all)
-               ("k" . magit-discard)
-               )
-     :custom
-     (magit-list-refs-sortby "-committerdate"))
-   (use-package eglot
-     :custom
-     (eglot-autoshutdown t)
-     :config
-     (setq read-process-output-max (* 1024 1024))
-     (add-to-list 'eglot-server-programs
-                 `(java-mode "jdtls-with-lombok"))
-     )
+     (use-package magit
+    :demand t
+      :bind (("C-x g" . magit-status)) 
+     :bind (:map magit-mode-map
+                 ("U" . magit-unstage-all)
+                 ("k" . magit-discard)
+                 )
+       :custom
+       (magit-list-refs-sortby "-committerdate"))
+     (use-package eglot
+       :custom
+       (eglot-autoshutdown t)
+       :config
+       (setq read-process-output-max (* 1024 1024))
+       (add-to-list 'eglot-server-programs
+                   `(java-mode "jdtls-with-lombok"))
+       )
 
 #+end_src
 
@@ -1197,6 +1196,12 @@ steal from jwiegley
   :mode "\\.ya?ml\\'")
 #+end_src
 
+* groovy
+#+begin_src elisp
+    (use-package! groovy-mode
+    :mode "\\.g\\(?:radle\\|roovy\\)$"
+  )
+#+end_src
 * yasnippet
 #+begin_src elisp
 (use-package yasnippet
@@ -1492,9 +1497,11 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 
 * git-link
 #+begin_src elisp
-(use-package git-link
-  :commands (git-link git-link-commit git-link-homepage))
-  
+  (use-package git-link
+  :config
+  (setq git-link-open-in-browser t)
+    :commands (git-link git-link-commit  git-link-homepage))
+
 #+end_src
 
 * showcase

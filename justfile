@@ -7,4 +7,4 @@ build:
 update-all: nix flake update
 
 update INPUT:
-       nix flake update lock --update-input {{INPUT}}
+    nix flake update lock --update-input {{INPUT}}

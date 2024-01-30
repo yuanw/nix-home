@@ -48,6 +48,7 @@ let
         keycast
         git-link
         google-this
+        groovy-mode
         goto-last-change
         gptel
         graphviz-dot-mode
