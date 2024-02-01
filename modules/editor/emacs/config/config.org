@@ -46,6 +46,7 @@ https://www.lucacambiaghi.com/vanilla-emacs/readme.html#h:0642C8C0-3B4E-4C72-BD4
 
 * use-package
 use nix for the actual package management, use-package for configuration.
+there is leaf.
 
 https://emacs.stackexchange.com/questions/33591/use-package-does-not-execute-config
 (message "DEBUG: my-shortconfig start")
@@ -792,19 +793,21 @@ https://github.com/minad/vertico
 
         ;; Grow and shrink the Vertico minibuffer
         (setq vertico-resize t)
+        (setq vertico-preselect 'prompt)
+
 
         ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
          (setq vertico-cycle t))
 
-      ;; (use-package vertico-directory
-      ;; :bind (:map vertico-map
-      ;;             ("RET" . vertico-directory-enter)
-      ;;             ("DEL" . vertico-directory-delete-char)
-      ;;             ("M-DEL" . vertico-directory-delete-word))
+      (use-package vertico-directory
+      :bind (:map vertico-map
+                  ("RET" . vertico-directory-enter)
+                  ("DEL" . vertico-directory-delete-char)
+                  ("M-DEL" . vertico-directory-delete-word))
       ;; Tidy shadowed file names
-      ;:hook (rfn-eshadow-update-overlay . vertico-directory-tidy) ;
+      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy) 
 
-      ;;)
+      )
 
     ;; (use-package vertico-quick
     ;;   :demand t
@@ -1418,50 +1421,58 @@ right now the hydra is not repeatable, kind of missing the point. need to figure
 blue pill means back. red pill means stay
 how add winner undo here
 #+begin_src elisp
-    (use-package hydra
-      :config
-  (defhydra my-window-movement ()
-    "window movement"
-      ("h" windmove-left "up")
-      ("o" windmove-right "->")
-      ("a" windmove-down "down")
-      ("i" windmove-up "up")
-      ("n" other-window "next")
-      ("*" enlarge-window "h+" )
-      ("@" shrink-window "h-" )
-      ("$" enlarge-window-horizontally "w+" )
-      ("^" shrink-window-horizontally "w-" )
-      ("f" find-file-other-window "other file")
-      ("d" delete-other-windows :color blue)
-      ("j" ace-window "ace-window")
-      ("v" (lambda ()
-         (interactive)
-         (split-window-right)
-         (windmove-right)) "split right")
-      ("s" (lambda ()
-         (interactive)
-         (split-window-below)
-         (windmove-down)) "below")
-      ("k" delete-window "delete")
-      ("r" winner-redo "redo")
-      ("u" winner-undo "undo")
-      ("D" ace-delete-window "ace delete") ;; TODO not working
-      ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-      ("q" nil "cancel"))
+      (use-package hydra
+        :config
+    (defhydra my-window-movement ()
+      "window movement"
+        ("h" windmove-left "up")
+        ("o" windmove-right "->")
+        ("a" windmove-down "down")
+        ("i" windmove-up "up")
+        ("n" other-window "next")
+        ("*" enlarge-window "h+" )
+        ("@" shrink-window "h-" )
+        ("$" enlarge-window-horizontally "w+" )
+        ("^" shrink-window-horizontally "w-" )
+        ("f" find-file-other-window "other file")
+        ("d" delete-other-windows :color blue)
+        ("j" ace-window "ace-window")
+        ("v" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)) "split right")
+        ("s" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)) "below")
+        ("k" delete-window "delete")
+        ("r" winner-redo "redo")
+        ("u" winner-undo "undo")
+        ("D" ace-delete-window "ace delete") ;; TODO not working
+        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+        ("q" nil "cancel"))
+  
+    (defhydra hydra-main-menu (:color blue)
+          "main menu"
+         ("p" project-switch-project "switch projects")
+         ("g" magit "magit")
+         ("n" org-roam-node-find "find note")
+         ("t" org-roam-dailies-goto-today "today note")
+         ("q" nil "cancel"))
 
-      (defhydra hydra-main-menu (:color blue)
-        "main menu"
-       ("p" project-switch-project "switch projects")
-       ("g" magit "magit")
-       ("n" org-roam-node-find "find note")
-       ("t" org-roam-dailies-goto-today "today note")
-       ("q" nil "cancel"))
-      (meow-leader-define-key
-       '("?" . hydra-main-menu/body)
-       '("w" . my-window-movement/body)
-       )
+        (defhydra hydra-search-menu (:color blue)
+          "search menu"
+         ("l" consult-line "search line")
+         ("r" consult-ripgrep "search word")
+         ("f" consult-fd "searc file")
+         ("q" nil "cancel"))
+        (meow-leader-define-key
+         '("?" . hydra-main-menu/body)
+         '("w" . my-window-movement/body)
+         '("s" . hydra-search-menu/body)
+         )
 
-      )
+        )
   #+end_src
 
 * denote
