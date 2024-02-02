@@ -693,88 +693,88 @@ https://github.com/minad/cape
 https://github.com/minad/consult
 
 #+begin_src elisp
-    (use-package consult
-      ;; Replace bindings. Lazily loaded due by `use-package'.
-      :bind  (([remap repeat-complex-command] . consult-complex-command)
-             ([remap switch-to-buffer] . consult-buffer)
-             ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
-             ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
-             ([remap project-switch-to-buffer] . consult-project-buffer)
-             ([remap bookmark-jump] . consult-bookmark)
+  (use-package consult
+    ;; Replace bindings. Lazily loaded due by `use-package'.
+    :bind  (([remap repeat-complex-command] . consult-complex-command)
+           ([remap switch-to-buffer] . consult-buffer)
+           ([remap switch-to-buffer-other-window] . consult-buffer-other-window)
+           ([remap switch-to-buffer-other-frame] . consult-buffer-other-frame)
+           ([remap project-switch-to-buffer] . consult-project-buffer)
+           ([remap bookmark-jump] . consult-bookmark)
 
-             ([remap find-file] . consult-find)
-             ;; ([remap imenu] . consult-imenu)
-             ([remap yank-pop] . consult-yank-pop)
-             ("C-c M-x" . consult-mode-command)
-             ("C-c h"   . consult-history)
-             ("C-c K"   . consult-kmacro)
-             ;; ("C-c i"   . consult-info)
-              ;; M-s bindings (search-map)
-           ("M-s f"   . consult-find)
-           ("M-s M-g" . consult-grep)
-           ("M-s g"   . consult-ripgrep)
-           ("M-s G"   . consult-git-grep)
-           ("M-s r"   . consult-ripgrep)
-           ("M-s l"   . consult-line)
-           ("M-s L"   . consult-line-multi)
-           ("M-s k"   . consult-keep-lines)
-           ("M-s u"   . consult-focus-lines)
-             )
-      ;; Enable automatic preview at point in the *Completions* buffer. This is
-      ;; relevant when you use the default completion UI.
-      :hook (completion-list-mode . consult-preview-at-point-mode)
+           ;; ([remap find-file] . consult-find)
+           ;; ([Remap imenu] . consult-imenu)
+           ([remap yank-pop] . consult-yank-pop)
+           ("C-c M-x" . consult-mode-command)
+           ("C-c h"   . consult-history)
+           ("C-c K"   . consult-kmacro)
+           ;; ("C-c i"   . consult-info)
+            ;; M-s bindings (search-map)
+         ("M-s f"   . consult-find)
+         ("M-s M-g" . consult-grep)
+         ("M-s g"   . consult-ripgrep)
+         ("M-s G"   . consult-git-grep)
+         ("M-s r"   . consult-ripgrep)
+         ("M-s l"   . consult-line)
+         ("M-s L"   . consult-line-multi)
+         ("M-s k"   . consult-keep-lines)
+         ("M-s u"   . consult-focus-lines)
+           )
+    ;; Enable automatic preview at point in the *Completions* buffer. This is
+    ;; relevant when you use the default completion UI.
+    :hook (completion-list-mode . consult-preview-at-point-mode)
 
-      :custom
-      ;; (consult-preview-key "M-i")
-      (consult-narrow-key "<")
+    :custom
+    ;; (consult-preview-key "M-i")
+    (consult-narrow-key "<")
 
-      :custom-face
-      (consult-file ((t (:inherit font-lock-string-face))))
+    :custom-face
+    (consult-file ((t (:inherit font-lock-string-face))))
 
-      :functions
-      (consult-register-format
-       consult-register-window
-       consult-xref)
+    :functions
+    (consult-register-format
+     consult-register-window
+     consult-xref)
 
-      ;; The :init configuration is always executed (Not lazy)
-      :init
+    ;; The :init configuration is always executed (Not lazy)
+    :init
 
-      ;; Optionally configure the register formatting. This improves the register
-      ;; preview for `consult-register', `consult-register-load',
-      ;; `consult-register-store' and the Emacs built-ins.
-      (setq register-preview-delay 0.5
-            register-preview-function #'consult-register-format)
+    ;; Optionally configure the register formatting. This improves the register
+    ;; preview for `consult-register', `consult-register-load',
+    ;; `consult-register-store' and the Emacs built-ins.
+    (setq register-preview-delay 0.5
+          register-preview-function #'consult-register-format)
 
-      ;; Optionally tweak the register preview window.
-      ;; This adds thin lines, sorting and hides the mode line of the window.
-      (advice-add #'register-preview :override #'consult-register-window)
+    ;; Optionally tweak the register preview window.
+    ;; This adds thin lines, sorting and hides the mode line of the window.
+    (advice-add #'register-preview :override #'consult-register-window)
 
-      ;; Use Consult to select xref locations with preview
-      (setq xref-show-xrefs-function #'consult-xref
-            xref-show-definitions-function #'consult-xref)
+    ;; Use Consult to select xref locations with preview
+    (setq xref-show-xrefs-function #'consult-xref
+          xref-show-definitions-function #'consult-xref)
 
-      ;; Configure other variables and modes in the :config section,
-      ;; after lazily loading the package.
-      :config
-      (use-package consult-xref)
-      (use-package consult-register)
+    ;; Configure other variables and modes in the :config section,
+    ;; after lazily loading the package.
+    :config
+    (use-package consult-xref)
+    (use-package consult-register)
 
-      (consult-customize
-       consult-theme
-       :preview-key '(:debounce 0.2 any)
-       consult-ripgrep
-       consult-git-grep
-       consult-grep
-       consult-bookmark
-       consult-recent-file
-       consult-xref
-       consult--source-bookmark
-       consult--source-file-register
-       consult--source-recent-file
-       consult--source-project-recent-file
-       :preview-key '(:debounce 0.4 any))
+    (consult-customize
+     consult-theme
+     :preview-key '(:debounce 0.2 any)
+     consult-ripgrep
+     consult-git-grep
+     consult-grep
+     consult-bookmark
+     consult-recent-file
+     consult-xref
+     consult--source-bookmark
+     consult--source-file-register
+     consult--source-recent-file
+     consult--source-project-recent-file
+     :preview-key '(:debounce 0.4 any))
 
-      )
+    )
   #+end_src
 
 * vertico

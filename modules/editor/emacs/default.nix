@@ -88,6 +88,7 @@ let
         super-save
         telephone-line
         tree-sitter
+        tsc
         tmr
         use-package
         vertico
