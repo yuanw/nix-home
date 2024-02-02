@@ -60,8 +60,8 @@ let
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
           _p.tree-sitter-markdown
         ]))
-        (lsp-bridge.overrideAttrs (old: {
-          src = fetchFromGitHub {
+        (lsp-bridge.overrideAttrs (_old: {
+          src = pkgs.fetchFromGitHub {
             owner = "manateelazycat";
             repo = "lsp-bridge";
             rev = "a4b2be85ceee88520b0aa7f16ed7b8550b8e1e03";
