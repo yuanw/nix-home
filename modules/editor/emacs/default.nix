@@ -70,7 +70,7 @@ let
           };
         }))
         denote
-        doom-modelin
+        doom-modeline
         doom-themes
         emacsql
         emacsql-sqlite
