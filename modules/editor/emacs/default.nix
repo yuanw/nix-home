@@ -65,7 +65,8 @@ let
             owner = "manateelazycat";
             repo = "lsp-bridge";
             rev = "a4b2be85ceee88520b0aa7f16ed7b8550b8e1e03";
-            hash = lib.fakeHash;
+            hash = "sha256-pURcrzo0rWQrjxloReG6LuP+dBtUMuHd07uCNh4RqIc=";
+            # hash = lib.fakeHash;
 
           };
         }))
