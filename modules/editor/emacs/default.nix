@@ -60,7 +60,6 @@ let
         (callPackage ./auto-save.nix {
           inherit (pkgs) fetchFromGitHub;
           inherit (epkgs) trivialBuild;
-          inherit lib;
         })
         treesit-grammars.with-all-grammars
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
