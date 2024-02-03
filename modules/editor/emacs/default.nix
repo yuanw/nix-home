@@ -57,6 +57,7 @@ let
           inherit (pkgs) fetchFromGitHub;
           inherit (epkgs) trivialBuild transient;
         })
+        treesit-grammars.with-all-grammars
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
           _p.tree-sitter-markdown
         ]))
