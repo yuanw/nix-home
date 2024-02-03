@@ -205,6 +205,7 @@ with lib; {
             nodePackages.stylelint
             # :lang yaml
             nodePackages.yaml-language-server
+            tree-sitter
             emacsWithDeps
             vale
           ];
