@@ -20,7 +20,10 @@ with lib; {
   };
 
   system.stateVersion = 4;
-  services.nix-daemon.enable = true;
+  services.nix-daemon = {
+    enable = true;
+    logFile = "/var/log/nix-daemon.log";
+  };
   system.defaults = {
     dock = {
       autohide = true;

@@ -525,6 +525,7 @@ still cannot get it to work with line-mode yet, tab-bar-mode work good enough mo
 try it out, save-buffer
 #+begin_src elisp
   (use-package super-save
+    :disabled
   :defer 1
   :diminish super-save-mode
   :config
@@ -532,6 +533,22 @@ try it out, save-buffer
   (setq super-save-auto-save-when-idle t))
 #+end_src
 
+* auto-save
+#+begin_src elisp
+(require 'auto-save)
+(auto-save-enable)
+
+(setq auto-save-silent t)   ; quietly save
+(setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
+
+;;; custom predicates if you don't want auto save.
+;;; disable auto save mode when current filetype is an gpg file.
+(setq auto-save-disable-predicates
+      '((lambda ()
+      (string-suffix-p
+      "gpg"
+      (file-name-extension (buffer-name)) t))))
+#+end_src
 * smartparens
 
 https://github.com/Fuco1/smartparens
