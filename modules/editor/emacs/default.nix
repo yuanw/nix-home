@@ -65,29 +65,12 @@ let
         (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
           _p.tree-sitter-markdown
         ]))
-        (lsp-bridge.overrideAttrs (_old: {
-          src = pkgs.fetchFromGitHub {
-            owner = "manateelazycat";
-            repo = "lsp-bridge";
-            rev = "a4b2be85ceee88520b0aa7f16ed7b8550b8e1e03";
-            hash = "sha256-pURcrzo0rWQrjxloReG6LuP+dBtUMuHd07uCNh4RqIc=";
-            # hash = lib.fakeHash;
-
-          };
-          dontBuild = true;
-
-          installPhase = ''
-            runHook preInstall
-
-            LISPDIR=$out/share/emacs/site-lisp
-            install -d $LISPDIR
-            install *.el *.elc $LISPDIR
-            emacs --batch -l package --eval "(package-generate-autoloads \"${args.pname}\" \"$LISPDIR\")"
-
-            runHook postInstall
-          '';
-
-        }))
+        (
+          callPackage ./lsp-bridge.nix {
+            inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
+            inherit (epkgs) melpaBuild markdown-mode yasnippet;
+          }
+        )
         denote
         doom-modeline
         doom-themes
