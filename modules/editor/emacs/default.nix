@@ -74,12 +74,19 @@ let
             # hash = lib.fakeHash;
 
           };
-          buildPhase = ''
-            runHook preBuild
+          dontBuild = true;
 
+          installPhase = ''
+            runHook preInstall
 
-            runHook postBuild
+            LISPDIR=$out/share/emacs/site-lisp
+            install -d $LISPDIR
+            install *.el *.elc $LISPDIR
+            emacs --batch -l package --eval "(package-generate-autoloads \"${args.pname}\" \"$LISPDIR\")"
+
+            runHook postInstall
           '';
+
         }))
         denote
         doom-modeline
