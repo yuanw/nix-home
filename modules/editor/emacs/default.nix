@@ -74,6 +74,12 @@ let
             # hash = lib.fakeHash;
 
           };
+          buildPhase = ''
+            runHook preBuild
+
+
+            runHook postBuild
+          '';
         }))
         denote
         doom-modeline
