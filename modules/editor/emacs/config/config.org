@@ -7,7 +7,7 @@
 
 * Configure emacs from scratch with nix
 doom emacs is my gateway to emacs. For the first time, I can be as productive if not more
-in other editor or IDE. I didn't how to quit vi/m before that. 
+in other editor or IDE. I didn't how to quit vi/m before that.
 
 
 * cheatsheet
@@ -25,7 +25,7 @@ how to compile elisp snippet
 ~C-c '~ (org-edit-special). This opens another buffer in emacs-lisp-mode,
 
 org-edit-special call org-edit-src-code when it in a source code block, which edit the source or example
-block at point. 
+block at point.
 
 
 so you can use ~M-x eval-buffer~ to load the changes.
@@ -118,7 +118,7 @@ https://emacs.stackexchange.com/questions/33591/use-package-does-not-execute-con
 (defun user-data (dir)
   (expand-file-name dir user-data-directory))
   #+end_src
-  
+
 * Load env
 so I can get JAVA_HOME and jdtls working with emacs daemon
 
@@ -361,7 +361,7 @@ Make everything use UTF-8:
      :hook
      (dired-mode . dired-hide-details-mode)
      (dired-mode . dired-omit-mode)
-     (dired-mode .   (lambda () (load "dired-x"))) 
+     (dired-mode .   (lambda () (load "dired-x")))
     :custom
     (dired-omit-files "\\`[.]?#\\|\\`[.][.]?\\'\\|^\\.DS_Store\\'\\|^\\.project\\(?:ile\\)?\\'\\|^\\.\\(?:svn\\|git\\)\\'\\|^\\.ccls-cache\\'\\|\\(?:\\.js\\)?\\.meta\\'\\|\\.\\(?:elc\\|o\\|pyo\\|swp\\|class\\)\\'")
     (dired-dwim-target t)
@@ -464,7 +464,7 @@ still cannot get it to work with line-mode yet, tab-bar-mode work good enough mo
     :config (doom-modeline-mode 1))
 
   (use-package telephone-line
-    
+
     :config
 
     (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
@@ -610,84 +610,87 @@ https://github.com/minad/corfu
 
 https://github.com/minad/cape
 #+begin_src elisp
-(use-package corfu
-  ;; Optional customizations
-  :custom
-  (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
-  (corfu-auto t)                 ;; Enable auto completion
-  (corfu-separator ?\s)          ;; Orderless field separator
-  (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
-  (corfu-quit-no-match t)       ;; Never quit, even if there is no match
-  (corfu-preview-current nil)    ;; Disable current candidate preview
-  (corfu-preselect 'prompt)      ;; Preselect the prompt
-  (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-  (corfu-scroll-margin 5)        ;; Use scroll margin
+  (use-package corfu
+   :disabled
+    ;; Optional customizations
+    :custom
+    (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
+    (corfu-auto t)                 ;; Enable auto completion
+    (corfu-separator ?\s)          ;; Orderless field separator
+    (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
+    (corfu-quit-no-match t)       ;; Never quit, even if there is no match
+    (corfu-preview-current nil)    ;; Disable current candidate preview
+    (corfu-preselect 'prompt)      ;; Preselect the prompt
+    (corfu-on-exact-match nil)     ;; Configure handling of exact matches
+    (corfu-scroll-margin 5)        ;; Use scroll margin
 
-  ;; Enable Corfu only for certain modes.
-  ;; :hook ((prog-mode . corfu-mode)
-  ;;        (shell-mode . corfu-mode)
-  ;;        (eshell-mode . corfu-mode))
+    ;; Enable Corfu only for certain modes.
+    ;; :hook ((prog-mode . corfu-mode)
+    ;;        (shell-mode . corfu-mode)
+    ;;        (eshell-mode . corfu-mode))
 
-  ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
-  ;; be used globally (M-/).  See also the customization variable
-  ;; `global-corfu-modes' to exclude certain modes.
-  :config
-  (global-corfu-mode))
+    ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
+    ;; be used globally (M-/).  See also the customization variable
+    ;; `global-corfu-modes' to exclude certain modes.
+    :config
+    (global-corfu-mode))
 
-;; A few more useful configurations...
-(use-package emacs
-  :init
-  ;; TAB cycle if there are only few candidates
-  (setq completion-cycle-threshold 3)
+  ;; A few more useful configurations...
+  (use-package emacs
+    :init
+    ;; TAB cycle if there are only few candidates
+    (setq completion-cycle-threshold 3)
 
-  ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
-  ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
-  ;; (setq read-extended-command-predicate
-  ;;       #'command-completion-default-include-p)
+    ;; Emacs 28: Hide commands in M-x which do not apply to the current mode.
+    ;; Corfu commands are hidden, since they are not supposed to be used via M-x.
+    ;; (setq read-extended-command-predicate
+    ;;       #'command-completion-default-include-p)
 
-  ;; Enable indentation+completion using the TAB key.
-  ;; `completion-at-point' is often bound to M-TAB.
-  (setq tab-always-indent 'complete))
+    ;; Enable indentation+completion using the TAB key.
+    ;; `completion-at-point' is often bound to M-TAB.
+    (setq tab-always-indent 'complete))
 
-;; Add extensions
-(use-package cape
-  ;; Bind dedicated completion commands
-  ;; Alternative prefix keys: C-c p, M-p, M-+, ...
-  :bind (("C-c p p" . completion-at-point) ;; capf
-         ("C-c p t" . complete-tag)        ;; etags
-         ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
-         ("C-c p h" . cape-history)
-         ("C-c p f" . cape-file)
-         ("C-c p k" . cape-keyword)
-         ("C-c p s" . cape-elisp-symbol)
-         ("C-c p e" . cape-elisp-block)
-         ("C-c p a" . cape-abbrev)
-         ("C-c p l" . cape-line)
-         ("C-c p w" . cape-dict)
-         ("C-c p :" . cape-emoji)
-         ("C-c p \\" . cape-tex)
-         ("C-c p _" . cape-tex)
-         ("C-c p ^" . cape-tex)
-         ("C-c p &" . cape-sgml)
-         ("C-c p r" . cape-rfc1345))
-  :init
-  ;; Add to the global default value of `completion-at-point-functions' which is
-  ;; used by `completion-at-point'.  The order of the functions matters, the
-  ;; first function returning a result wins.  Note that the list of buffer-local
-  ;; completion functions takes precedence over the global list.
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-  ;;(add-to-list 'completion-at-point-functions #'cape-history)
-  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-  ;;(add-to-list 'completion-at-point-functions #'cape-line)
-)
+  ;; Add extensions
+  (use-package cape
+       :disabled
+
+    ;; Bind dedicated completion commands
+    ;; Alternative prefix keys: C-c p, M-p, M-+, ...
+    :bind (("C-c p p" . completion-at-point) ;; capf
+           ("C-c p t" . complete-tag)        ;; etags
+           ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
+           ("C-c p h" . cape-history)
+           ("C-c p f" . cape-file)
+           ("C-c p k" . cape-keyword)
+           ("C-c p s" . cape-elisp-symbol)
+           ("C-c p e" . cape-elisp-block)
+           ("C-c p a" . cape-abbrev)
+           ("C-c p l" . cape-line)
+           ("C-c p w" . cape-dict)
+           ("C-c p :" . cape-emoji)
+           ("C-c p \\" . cape-tex)
+           ("C-c p _" . cape-tex)
+           ("C-c p ^" . cape-tex)
+           ("C-c p &" . cape-sgml)
+           ("C-c p r" . cape-rfc1345))
+    :init
+    ;; Add to the global default value of `completion-at-point-functions' which is
+    ;; used by `completion-at-point'.  The order of the functions matters, the
+    ;; first function returning a result wins.  Note that the list of buffer-local
+    ;; completion functions takes precedence over the global list.
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+    ;;(add-to-list 'completion-at-point-functions #'cape-history)
+    ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+    ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+    ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+    ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+    ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+    ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+    ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+    ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  )
 #+end_src
 
 * kind-icon
@@ -822,7 +825,7 @@ https://github.com/minad/vertico
                   ("DEL" . vertico-directory-delete-char)
                   ("M-DEL" . vertico-directory-delete-word))
       ;; Tidy shadowed file names
-      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy) 
+      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
 
       )
 
@@ -920,7 +923,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 #+end_src
 
 * ace window
- 
+
   Quickly switch between open buffer windows
 #+begin_src elisp
 (use-package ace-window
@@ -949,7 +952,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 #+begin_src elisp
      (use-package magit
     :demand t
-      :bind (("C-x g" . magit-status)) 
+      :bind (("C-x g" . magit-status))
      :bind (:map magit-mode-map
                  ("U" . magit-unstage-all)
                  ("k" . magit-discard)
@@ -1353,7 +1356,7 @@ undo redo window management
 * justfile
 #+begin_src elisp
  (use-package just-mode)
-  
+
      (use-package justfl
         :commands justl-exec-recipe)
 #+end_src
@@ -1383,7 +1386,7 @@ due the file strutcture, i have to do the nested config
    :custom
      (org-roam-directory (concat org-directory "roam/"))
 
-   :bind (("C-c n l" . org-roam-buffer-toggle) 
+   :bind (("C-c n l" . org-roam-buffer-toggle)
           ("C-c n f" . org-roam-node-find)
           ("C-c n i" . org-roam-node-insert)
           ("C-c n c" . org-roam-capture)
@@ -1412,7 +1415,7 @@ due the file strutcture, i have to do the nested config
 
  #+end_src
 
- 
+
 
 
 * hydra
@@ -1468,7 +1471,7 @@ how add winner undo here
         ("D" ace-delete-window "ace delete") ;; TODO not working
         ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
         ("q" nil "cancel"))
-  
+
     (defhydra hydra-main-menu (:color blue)
           "main menu"
          ("p" project-switch-project "switch projects")
@@ -1505,7 +1508,7 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
                            "\n\n"
                            "* TIL"
                            "\n\n"))))
-  
+
     (use-package denote-org-dblock)
     (use-package denote-rename-buffer)
     (use-package denote-journal-extras)
@@ -1573,3 +1576,16 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
     (add-to-list 'tree-sitter-major-mode-language-alist '(markdown-mode . markdown))
     )
 #+End_src
+
+*  lsp-bridge
+#+begin_src elisp
+
+    (require 'yasnippet)
+    (yas-global-mode 1)
+
+    (require 'lsp-bridge)
+    (global-lsp-bridge-mode)
+    (require 'lsp-bridge-jdtls)
+    (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
+    (setq lsp-bridge-enable-auto-import t)
+#+end_src
