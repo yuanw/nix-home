@@ -122,9 +122,7 @@ let
   ];
 in
 with lib; {
-  imports = [
-    pkgs.nur.repos.rycee.hmModules.emacs-init
-  ];
+
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -168,6 +166,9 @@ with lib; {
 
       in
       {
+        #        imports = [
+        #   pkgs.nur.repos.rycee.hmModules.emacs-init
+        # ];
         programs.emacs.extraPackages = epkgs:
           with epkgs;
           [ epkgs.treesit-grammars.with-all-grammars ];
