@@ -122,7 +122,9 @@ let
   ];
 in
 with lib; {
-
+  imports = [
+    pkgs.nur.repos.rycee.hmModules.emacs-init
+  ];
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -153,7 +155,7 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [{
     services.emacs = mkIf cfg.usePackage {
       enable = cfg.enableService;
-      package = emacsWithDeps;
+      package = programs.emacs.finalPackage;
     };
     # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -166,6 +168,12 @@ with lib; {
 
       in
       {
+        programs.emacs.extraPackages = epkgs:
+          with epkgs;
+          [ epkgs.treesit-grammars.with-all-grammars ];
+        programs.emacs.package = emacsPatched;
+
+
         xdg.configFile."emacs".source = emacsConfigPath;
 
         home = {
