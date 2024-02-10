@@ -4,6 +4,7 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
+      ./catppuccin.nix
       ./common.nix
       ./browsers/firefox.nix
       ./dev/agda.nix
