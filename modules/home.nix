@@ -1,6 +1,9 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, config, inputs, ... }:
 
 {
+  imports = [
+    inputs.catppuccin.homeManagerModules.catppuccin
+  ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
   # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11

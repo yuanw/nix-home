@@ -9,6 +9,8 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    catppuccin.url = "github:Stonks3141/ctp-nix";
     roc = {
       url = "github:roc-lang/roc";
     };
