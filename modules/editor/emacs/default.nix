@@ -6,7 +6,6 @@
 let
   cfg = config.modules.editors.emacs;
   # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
-
   aspell = (pkgs.aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]));
   emacsclient = "emacsclient -c -a 'emacs'";
   emacsPatched = cfg.pkg.overrideAttrs (
@@ -167,7 +166,7 @@ with lib; {
       in
       {
         imports = [
-          pkgs.nur.repos.rycee.hmModules.emacs-init
+          nurNoPkg.repos.rycee.hmModules.emacs-init
         ];
         programs.emacs.extraPackages = epkgs:
           with epkgs;
