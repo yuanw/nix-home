@@ -149,196 +149,151 @@ with lib; {
     };
   };
 
-  config = mkIf cfg.enable (mkMerge [{
-    # services.emacs = mkIf cfg.usePackage {
-    #   enable = cfg.enableService;
-    #   package = programs.emacs.finalPackage;
-    # };
-    # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
-    # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
-    # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
-    # the context of home-manager
-    home-manager.users.${config.my.username} = { pkgs, config, ... }:
-      let
-        mkLink = config.lib.file.mkOutOfStoreSymlink;
-        emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
+  config = mkIf cfg.enable (mkMerge [
+    {
+      # services.emacs = mkIf cfg.usePackage {
+      #   enable = cfg.enableService;
+      #   package = programs.emacs.finalPackage;
+      # };
+      # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
+      # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
+      # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
+      # the context of home-manager
+      home-manager.users.${config.my.username} = { pkgs, config, ... }:
+        let
+          mkLink = config.lib.file.mkOutOfStoreSymlink;
+          emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
 
-      in
-      {
-        imports = [
-          nurNoPkg.repos.rycee.hmModules.emacs-init
-        ];
-        programs.emacs.extraPackages = epkgs:
-          with epkgs;
-          [ epkgs.treesit-grammars.with-all-grammars ];
-        programs.emacs.package = emacsPatched;
-        programs.emacs.init = {
-          enable = true;
-          packageQuickstart = false;
-          recommendedGcSettings = true;
-          usePackageVerbose = false;
-
-          earlyInit = ''
-            ;; Disable some GUI distractions. We set these manually to avoid starting
-            ;; the corresponding minor modes.
-            (push '(menu-bar-lines . 0) default-frame-alist)
-            (push '(tool-bar-lines . nil) default-frame-alist)
-            (push '(vertical-scroll-bars . nil) default-frame-alist)
-
-            ;; Set up fonts early.
-            (set-face-attribute 'default
-                                nil
-                                :height 110
-                                :family "Fantasque Sans Mono")
-            (set-face-attribute 'variable-pitch
-                                nil
-                                :family "DejaVu Sans")
-
-            (require 'doom-modeline)
-            (doom-modeline-mode 1)
-          '';
-
-          prelude = ''
-            ;; Disable startup message.
-            (setq inhibit-startup-screen t
-                  inhibit-startup-echo-area-message (user-login-name))
-
-            (setq initial-major-mode 'fundamental-mode
-                  initial-scratch-message nil)
-
-            ;; Don't blink the cursor.
-            (setq blink-cursor-mode nil)
-
-            ;; Set frame title.
-            (setq frame-title-format
-                  '("" invocation-name ": "(:eval
-                                            (if (buffer-file-name)
-                                                (abbreviate-file-name (buffer-file-name))
-                                              "%b"))))
-
-          '';
-
-          postlude = ''
-            (unbind-key "C-a")
-            (unbind-key "C-e")
-
-            (bind-keys ("C-o" . find-file)
-                       ("C-<right>" . forward-word)
-                       ("C-<left>" . backward-word))
-          '';
-          usePackage = {
-
-            adaptive-wrap = {
-              enable = true;
-              command = [ "adaptive-wrap-prefix-mode" ];
-            };
-
-            adoc-mode = {
-              enable = true;
-              mode = [ ''"\\.adoc\\'"'' ];
-              hook = [
-                ''
-                  (adoc-mode . (lambda ()
-                                 (visual-line-mode)
-                                 (buffer-face-mode)))
-                ''
-              ];
-              config = ''
-                (set-face-background 'adoc-verbatim-face nil)
-              '';
-            };
-          };
-
-        };
-
-        xdg.configFile."emacs".source = emacsConfigPath;
-
-        home = {
-          packages = with pkgs; [
-            # git
-            (ripgrep.override { withPCRE2 = true; })
-            gnutls # for TLS connectivity
-            cmake
-            enchant
-            ## Optional dependencies
-            fd # faster projectile indexing
-            imagemagick # for image-dired
-            zstd
-            html-tidy
-            shfmt
-            ## Module dependencies
-            # :checkers spell
-            aspell
-            # :checkers grammar
-            languagetool
-            # :tools editorconfig
-            editorconfig-core-c # per-project style config
-            # :tools lookup & :lang org +roam
-            sqlite
-            # wordnet
-            # :lang latex & :lang org (latex previews)
-            texlive.combined.scheme-medium
-            #: js
-            # nodePackages.eslint
-            #: markdown
-            nodePackages.unified-language-server
-            #: sh
-            nodePackages.bash-language-server
-            #: toml
-            taplo-lsp
-            #: web-mode
-            nodePackages.js-beautify
-            nodePackages.stylelint
-            # :lang yaml
-            nodePackages.yaml-language-server
-            tree-sitter
-            emacsWithDeps
-            vale
+        in
+        {
+          imports = [
+            nurNoPkg.repos.rycee.hmModules.emacs-init
           ];
-          file.".emacs.d".source = emacsConfigPath;
-          file.".vale.ini".text =
-            let
-              stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
-              basedOnStyles = concatStringsSep ", "
-                (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
-            in
-            ''
-              StylesPath = ${stylesPath}
-              [*]
-              BasedOnStyles = ${basedOnStyles}
+          programs.emacs.extraPackages = epkgs:
+            with epkgs;
+            [ epkgs.treesit-grammars.with-all-grammars ];
+          programs.emacs.package = emacsPatched;
+          programs.emacs.init = {
+            enable = true;
+            packageQuickstart = false;
+            recommendedGcSettings = true;
+            usePackageVerbose = false;
+
+            earlyInit = ''
+              ;; Disable some GUI distractions. We set these manually to avoid starting
+              ;; the corresponding minor modes.
+              (push '(menu-bar-lines . 0) default-frame-alist)
+              (push '(tool-bar-lines . nil) default-frame-alist)
+              (push '(vertical-scroll-bars . nil) default-frame-alist)
+
+              ;; Set up fonts early.
+              (set-face-attribute 'default
+                                  nil
+                                  :height 110
+                                  :family "Fantasque Sans Mono")
+              (set-face-attribute 'variable-pitch
+                                  nil
+                                  :family "DejaVu Sans")
+
+              (require 'doom-modeline)
+              (doom-modeline-mode 1)
             '';
 
-        };
-        # not use home-manager programs.emacs due to it wraps
-        # emacsWithPackages again
-        programs.zsh = {
-          sessionVariables = {
-            EDITOR = "${emacsclient}";
-            EMACS_DIR = "${emacsWithDeps}";
-            ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+
+
+
+
           };
 
+          xdg.configFile."emacs".source = emacsConfigPath;
+
+          home = {
+            packages = with pkgs; [
+              # git
+              (ripgrep.override { withPCRE2 = true; })
+              gnutls # for TLS connectivity
+              cmake
+              enchant
+              ## Optional dependencies
+              fd # faster projectile indexing
+              imagemagick # for image-dired
+              zstd
+              html-tidy
+              shfmt
+              ## Module dependencies
+              # :checkers spell
+              aspell
+              # :checkers grammar
+              languagetool
+              # :tools editorconfig
+              editorconfig-core-c # per-project style config
+              # :tools lookup & :lang org +roam
+              sqlite
+              # wordnet
+              # :lang latex & :lang org (latex previews)
+              texlive.combined.scheme-medium
+              #: js
+              # nodePackages.eslint
+              #: markdown
+              nodePackages.unified-language-server
+              #: sh
+              nodePackages.bash-language-server
+              #: toml
+              taplo-lsp
+              #: web-mode
+              nodePackages.js-beautify
+              nodePackages.stylelint
+              # :lang yaml
+              nodePackages.yaml-language-server
+              tree-sitter
+              emacsWithDeps
+              vale
+            ];
+            file.".emacs.d".source = emacsConfigPath;
+            file.".vale.ini".text =
+              let
+                stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
+                basedOnStyles = concatStringsSep ", "
+                  (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
+              in
+              ''
+                StylesPath = ${stylesPath}
+                [*]
+                BasedOnStyles = ${basedOnStyles}
+              '';
+
+          };
+          # not use home-manager programs.emacs due to it wraps
+          # emacsWithPackages again
+          programs.zsh = {
+            sessionVariables = {
+              EDITOR = "${emacsclient}";
+              EMACS_DIR = "${emacsWithDeps}";
+              ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+            };
+
+          };
         };
-      };
 
 
 
-  }
-    (if (isDarwin) then {
-      # fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
-    } else {
+    }
+    # (if (isDarwin) then {
+    #   # fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+    # } else {
 
-      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
-    })
-    (if (builtins.hasAttr "launchd" options) then {
+    #   fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
+    # })
 
-      launchd.user.agents.emacs.serviceConfig = {
-        StandardOutPath = "/tmp/emacs.log";
-        StandardErrorPath = "/tmp/emacs.log";
-      };
-    } else
-      {
+    # (if (builtins.hasAttr "launchd" options) then {
 
-        # systemd
-      })]);
+    #   launchd.user.agents.emacs.serviceConfig = {
+    #     StandardOutPath = "/tmp/emacs.log";
+    #     StandardErrorPath = "/tmp/emacs.log";
+    #   };
+    # } else
+    #   {
+
+    #   })
+  ]);
 }
