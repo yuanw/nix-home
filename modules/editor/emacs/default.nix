@@ -166,9 +166,9 @@ with lib; {
 
       in
       {
-        #        imports = [
-        #   pkgs.nur.repos.rycee.hmModules.emacs-init
-        # ];
+        imports = [
+          pkgs.nur.repos.rycee.hmModules.emacs-init
+        ];
         programs.emacs.extraPackages = epkgs:
           with epkgs;
           [ epkgs.treesit-grammars.with-all-grammars ];
