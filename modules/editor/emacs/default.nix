@@ -153,10 +153,10 @@ with lib; {
   };
 
   config = mkIf cfg.enable (mkMerge [{
-    services.emacs = mkIf cfg.usePackage {
-      enable = cfg.enableService;
-      package = programs.emacs.finalPackage;
-    };
+    # services.emacs = mkIf cfg.usePackage {
+    #   enable = cfg.enableService;
+    #   package = programs.emacs.finalPackage;
+    # };
     # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
     # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
     # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
