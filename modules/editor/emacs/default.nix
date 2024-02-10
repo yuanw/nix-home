@@ -279,20 +279,18 @@ with lib; {
 
     }
     (if (isDarwin) then {
-      # fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
+      fonts.fonts = [ pkgs.emacs-all-the-icons-fonts ];
     } else {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
     })
 
-    # (if (builtins.hasAttr "launchd" options) then {
+    (if (builtins.hasAttr "launchd" options) then {
 
-    #   launchd.user.agents.emacs.serviceConfig = {
-    #     StandardOutPath = "/tmp/emacs.log";
-    #     StandardErrorPath = "/tmp/emacs.log";
-    #   };
-    # } else
-    #   {
-
-    #   })
+      launchd.user.agents.emacs.serviceConfig = {
+        StandardOutPath = "/tmp/emacs.log";
+        StandardErrorPath = "/tmp/emacs.log";
+      };
+    } else
+      { })
   ]);
 }
