@@ -89,6 +89,8 @@ in
         };
         starship = {
           enable = true;
+          catppuccin.enable = true;
+
           enableZshIntegration = true;
           # https://starship.rs/config/#prompt
           settings = {
