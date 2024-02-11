@@ -151,10 +151,7 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-      services.emacs = mkIf cfg.usePackage {
-        enable = cfg.enableService;
-        package = config.programs.emacs.finalPackage;
-      };
+
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -285,7 +282,10 @@ with lib; {
     })
 
     (if (builtins.hasAttr "launchd" options) then {
-
+      services.emacs = mkIf cfg.usePackage {
+        enable = cfg.enableService;
+        package = config.programs.emacs.finalPackage;
+      };
       launchd.user.agents.emacs.serviceConfig = {
         StandardOutPath = "/tmp/emacs.log";
         StandardErrorPath = "/tmp/emacs.log";
