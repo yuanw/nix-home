@@ -177,25 +177,176 @@ with lib; {
             usePackageVerbose = false;
 
             earlyInit = ''
-              ;; Disable some GUI distractions. We set these manually to avoid starting
-              ;; the corresponding minor modes.
-              (push '(menu-bar-lines . 0) default-frame-alist)
-              (push '(tool-bar-lines . nil) default-frame-alist)
-              (push '(vertical-scroll-bars . nil) default-frame-alist)
+                        ;; Disable some GUI distractions. We set these manually to avoid starting
+                        ;; the corresponding minor modes.
+                        (push '(menu-bar-lines . 0) default-frame-alist)
+                        (push '(tool-bar-lines . nil) default-frame-alist)
+                        (push '(vertical-scroll-bars . nil) default-frame-alist)
 
-              ;; Set up fonts early.
-              (set-face-attribute 'default
-                                  nil
-                                  :height 110
-                                  :family "Fantasque Sans Mono")
-              (set-face-attribute 'variable-pitch
-                                  nil
-                                  :family "DejaVu Sans")
+                        ;; Set up fonts early.
+                          (set-face-attribute 'default nil
+              :font "PragmataPro Mono Liga"
+              :height 180
+              :weight 'medium)
 
-              (require 'doom-modeline)
-              (doom-modeline-mode 1)
+
             '';
 
+            prelude = ''
+              ;; Disable startup message.
+              (setq inhibit-startup-screen t
+                    inhibit-startup-echo-area-message (user-login-name))
+
+              (setq initial-major-mode 'fundamental-mode
+                    initial-scratch-message nil)
+
+              ;; Don't blink the cursor.
+              (setq blink-cursor-mode nil)
+
+              ;; Set frame title.
+              (setq frame-title-format
+                    '("" invocation-name ": "(:eval
+                                              (if (buffer-file-name)
+                                                  (abbreviate-file-name (buffer-file-name))
+                                                "%b"))))
+
+              ;; Make sure the mouse cursor is visible at all times.
+              (set-face-background 'mouse "#ffffff")
+
+              ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
+              (defalias 'yes-or-no-p 'y-or-n-p)
+
+              ;; Don't want to move based on visual line.
+              (setq line-move-visual nil)
+
+              ;; Stop creating backup and autosave files.
+              (setq make-backup-files nil
+                    auto-save-default nil)
+
+              ;; Default is 4k, which is too low for LSP.
+              (setq read-process-output-max (* 1024 1024))
+
+              ;; Always show line and column number in the mode line.
+              (line-number-mode)
+              (column-number-mode)
+
+              ;; Enable CUA mode.
+              (cua-mode 1)
+
+              ;; Enable some features that are disabled by default.
+              (put 'narrow-to-region 'disabled nil)
+
+              ;; Typically, I only want spaces when pressing the TAB key. I also
+              ;; want 4 of them.
+              (setq-default indent-tabs-mode nil
+                            tab-width 4
+                            c-basic-offset 4)
+
+              ;; Trailing white space are banned!
+              (setq-default show-trailing-whitespace t)
+
+              ;; Use one space to end sentences.
+              (setq sentence-end-double-space nil)
+
+              ;; I typically want to use UTF-8.
+              (prefer-coding-system 'utf-8)
+
+              ;; Nicer handling of regions.
+              (transient-mark-mode 1)
+
+              ;; Make moving cursor past bottom only scroll a single line rather
+              ;; than half a page.
+              (setq scroll-step 1
+                    scroll-conservatively 5)
+
+              ;; Enable highlighting of current line.
+              (global-hl-line-mode 1)
+
+              ;; Avoid noisy bell.
+              (setq visible-bell t)
+
+              ;; Improved handling of clipboard in GNU/Linux and otherwise.
+              (setq select-enable-clipboard t
+                    select-enable-primary t
+                    save-interprogram-paste-before-kill t)
+
+              ;; Pasting with middle click should insert at point, not where the
+              ;; click happened.
+              (setq mouse-yank-at-point t)
+
+              ;; Only do candidate cycling if there are very few candidates.
+              (setq completion-cycle-threshold 3)
+
+              ;; Enable a few useful commands that are initially disabled.
+              (put 'upcase-region 'disabled nil)
+              (put 'downcase-region 'disabled nil)
+
+              (setq custom-file (locate-user-emacs-file "custom.el"))
+              (load custom-file)
+
+              ;; When finding file in non-existing directory, offer to create the
+              ;; parent directory.
+              (defun with-buffer-name-prompt-and-make-subdirs ()
+                (let ((parent-directory (file-name-directory buffer-file-name)))
+                  (when (and (not (file-exists-p parent-directory))
+                             (y-or-n-p (format "Directory `%s' does not exist! Create it? " parent-directory)))
+                    (make-directory parent-directory t))))
+
+              (add-to-list 'find-file-not-found-functions #'with-buffer-name-prompt-and-make-subdirs)
+
+              ;; Don't want to complete .hi files.
+              (add-to-list 'completion-ignored-extensions ".hi")
+
+              ;; Try out some tree-sitter modes.
+              (setq major-mode-remap-alist
+               '((bash-mode . bash-ts-mode)))
+
+              (defun rah-disable-trailing-whitespace-mode ()
+                (setq show-trailing-whitespace nil))
+
+              ;; Shouldn't highlight trailing spaces in terminal mode.
+              (add-hook 'term-mode #'rah-disable-trailing-whitespace-mode)
+              (add-hook 'term-mode-hook #'rah-disable-trailing-whitespace-mode)
+
+              ;; Ignore trailing white space in compilation mode.
+              (add-hook 'compilation-mode-hook #'rah-disable-trailing-whitespace-mode)
+
+              (defun rah-prog-mode-setup ()
+                ;; Use a bit wider fill column width in programming modes
+                ;; since we often work with indentation to start with.
+                (setq fill-column 80))
+
+              (add-hook 'prog-mode-hook #'rah-prog-mode-setup)
+
+              (defun rah-lsp ()
+                (interactive)
+                (envrc-mode)
+                (lsp))
+
+              (defun rah-insert-uuid-v4 ()
+                (interactive)
+                (let ((lines (process-lines "uuidgen" "--random")))
+                  (insert (car lines))))
+
+              (defun rah-insert-timestamp ()
+                (interactive)
+                (let ((lines (process-lines "date" "--iso-8601=second" "--universal")))
+                  (insert (car lines))))
+
+              ;(defun rah-sort-lines-ignore-case ()
+              ;  (interactive)
+              ;  (let ((sort-fold-case t))
+              ;    (call-interactively 'sort-lines)))
+            '';
+
+            postlude = ''
+              (unbind-key "C-a")
+              (unbind-key "C-e")
+
+              (bind-keys ("C-o" . find-file)
+                         ("C-<right>" . forward-word)
+                         ("C-<left>" . backward-word))
+            '';
 
 
 
