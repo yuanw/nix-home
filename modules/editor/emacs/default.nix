@@ -156,12 +156,7 @@ with lib; {
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
       # the context of home-manager
-      home-manager.users.${config.my.username} = { pkgs, config, ... }:
-        let
-          mkLink = config.lib.file.mkOutOfStoreSymlink;
-          emacsConfigPath = mkLink "${config.home.homeDirectory}/workspaces/nix-home/modules/editor/emacs/config";
-
-        in
+      home-manager.users.${config.my.username} = { pkgs, ... }:
         {
           imports = [
             nurNoPkg.repos.rycee.hmModules.emacs-init
@@ -353,7 +348,7 @@ with lib; {
 
           };
 
-          xdg.configFile."emacs".source = emacsConfigPath;
+          # xdg.configFile."emacs".source = emacsConfigPath;
 
           home = {
             packages = with pkgs; [
@@ -397,7 +392,7 @@ with lib; {
               emacsWithDeps
               vale
             ];
-            file.".emacs.d".source = emacsConfigPath;
+            # file.".emacs.d".source = emacsConfigPath;
             file.".vale.ini".text =
               let
                 stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
