@@ -165,6 +165,7 @@ with lib; {
             with epkgs;
             [ epkgs.treesit-grammars.with-all-grammars ];
           programs.emacs.package = emacsPatched;
+          programs.emacs.enable = true;
           programs.emacs.init = {
             enable = true;
             packageQuickstart = false;
@@ -276,8 +277,8 @@ with lib; {
               (put 'upcase-region 'disabled nil)
               (put 'downcase-region 'disabled nil)
 
-              (setq custom-file (locate-user-emacs-file "custom.el"))
-              (load custom-file)
+              ;;(setq custom-file (locate-user-emacs-file "custom.el"))
+              ;;(load custom-file)
 
               ;; When finding file in non-existing directory, offer to create the
               ;; parent directory.
@@ -389,7 +390,7 @@ with lib; {
               # :lang yaml
               nodePackages.yaml-language-server
               tree-sitter
-              emacsWithDeps
+              # emacsWithDeps
               vale
             ];
             # file.".emacs.d".source = emacsConfigPath;
