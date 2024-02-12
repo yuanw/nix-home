@@ -611,7 +611,6 @@ https://github.com/minad/corfu
 https://github.com/minad/cape
 #+begin_src elisp
   (use-package corfu
-   :disabled
     ;; Optional customizations
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -652,7 +651,6 @@ https://github.com/minad/cape
 
   ;; Add extensions
   (use-package cape
-       :disabled
 
     ;; Bind dedicated completion commands
     ;; Alternative prefix keys: C-c p, M-p, M-+, ...
@@ -813,7 +811,7 @@ https://github.com/minad/vertico
 
         ;; Grow and shrink the Vertico minibuffer
         (setq vertico-resize t)
-        (setq vertico-preselect 'prompt)
+        ;;(setq vertico-preselect 'prompt)
 
 
         ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
@@ -1580,12 +1578,12 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 *  lsp-bridge
 #+begin_src elisp
 
-    (require 'yasnippet)
-    (yas-global-mode 1)
+  ;; (require 'yasnippet)
+  ;; (yas-global-mode 1)
 
-    (require 'lsp-bridge)
-    (global-lsp-bridge-mode)
-    (require 'lsp-bridge-jdtls)
-    (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
-    (setq lsp-bridge-enable-auto-import t)
+  ;; (require 'lsp-bridge)
+  ;; (global-lsp-bridge-mode)
+  ;; (require 'lsp-bridge-jdtls)
+  ;; (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
+  ;; (setq lsp-bridge-enable-auto-import t)
 #+end_src
