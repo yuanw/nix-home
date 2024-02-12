@@ -456,8 +456,10 @@ with lib; {
               autorevert = {
                 enable = true;
                 hook = "(dired-mode . auto-revert-mode)";
-                custom = "(auto-revert-use-notify nil)";
-                config = "(global-auto-revert-mode t)";
+                config = ''
+                  (setq auto-revert-use-notfiy nil)
+                  (global-auto-revert-mode t)
+                '';
               };
 
               auto-save = {
