@@ -434,8 +434,8 @@ with lib; {
                        '("z" . meow-pop-selection)
                        '("'" . repeat)
                        '("<escape>" . ignore)))
-     
-    
+
+
                       (defun meow-clipboard-toggle ()
                         (interactive)
                   (if meow-use-clipboard
@@ -454,12 +454,44 @@ with lib; {
               };
 
               autorevert = {
+                enable = true;
                 hook = "(dired-mode . auto-revert-mode)";
                 custom = "(auto-revert-use-notify nil)";
                 config = "(global-auto-revert-mode t)";
               };
             };
 
+            auto-save = {
+              enable = true;
+              package = epkgs:
+                epkgs.trivialBuild {
+                  pname = "auto-save";
+                  version = "0.0.1";
+                  src = fetchFromGitHub {
+
+                    owner = "manateelazycat";
+                    repo = "auto-save";
+                    rev = "0fb3c0f38191c0e74f00bae6adaa342de3750e83";
+                    sha256 = "sha256-MCa28kGMBKLA/WqcDgJVtbul//R80nwWuI757wc12KI=";
+                  };
+                  preferLocalBuild = true;
+                  allowSubstitutes = false;
+                };
+              config = ''
+                     (auto-save-enable)
+
+                (setq auto-save-silent t)   ; quietly save
+                (setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
+
+                ;;; custom predicates if you don't want auto save.
+                ;;; disable auto save mode when current filetype is an gpg file.
+                (setq auto-save-disable-predicates
+                      '((lambda ()
+                      (string-suffix-p
+                      "gpg"
+                      (file-name-extension (buffer-name)) t))))
+              '';
+            };
 
 
           };
