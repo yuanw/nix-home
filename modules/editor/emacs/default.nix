@@ -502,6 +502,13 @@ with lib; {
                    '((file (styles basic partial-completion))))
                 '';
               };
+
+              keycast = {
+                command = [
+                  "keycast-tab-bar-mode"
+                  "keycast-header-line-mode"
+                ];
+              };
             };
 
 
