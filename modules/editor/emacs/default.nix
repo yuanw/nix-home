@@ -455,7 +455,7 @@ with lib; {
 
               autorevert = {
                 enable = true;
-                hook = "(dired-mode . auto-revert-mode)";
+                hook = [ "(dired-mode . auto-revert-mode)" ];
                 config = ''
                   (setq auto-revert-use-notfiy nil)
                   (global-auto-revert-mode t)
@@ -468,7 +468,7 @@ with lib; {
                   epkgs.trivialBuild {
                     pname = "auto-save";
                     version = "0.0.1";
-                    src = fetchFromGitHub {
+                    src = pkgs.fetchFromGitHub {
 
                       owner = "manateelazycat";
                       repo = "auto-save";
@@ -492,6 +492,10 @@ with lib; {
                         "gpg"
                         (file-name-extension (buffer-name)) t))))
                 '';
+              };
+
+              orderless = {
+                demand = true;
               };
             };
 
