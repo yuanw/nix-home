@@ -496,6 +496,11 @@ with lib; {
 
               orderless = {
                 demand = true;
+                config = ''
+                                    (setq completion-styles '(orderless basic))
+                  (setq completion-category-overrides
+                   '((file (styles basic partial-completion))))
+                '';
               };
             };
 
