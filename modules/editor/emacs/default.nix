@@ -776,19 +776,13 @@ with lib; {
               popper = {
                 enable = false;
                 bind = {
-                  "
-                    C-`" = "
-                    popper-toggle-latest ";
-                  "
-                    M-`" = "
-                    popper-cycle ";
-                  "
-                    C-M-`" = "
-                    popper-toggle-type ";
+                  "C-`" = "popper-toggle-latest";
+                  "M-`" = "popper-cycle";
+                  "C-M-`" = "popper-toggle-type";
                 };
                 command = [
-                  "popper-mode "
-                  "popper-group-by-project "
+                  "popper-mode"
+                  "popper-group-by-project"
                 ];
                 config = ''
                   (setq popper-reference-buffers
