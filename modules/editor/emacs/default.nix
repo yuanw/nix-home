@@ -628,22 +628,20 @@ with lib; {
                                             embark-isearch-highlight-indicator))
                 '';
               };
-
+              vertico = {
+                enable = true;
+                command = [ "vertico-mode" "vertico-next" ];
+                config = "(vertico-mode)";
+              };
 
               consult = {
                 enable = true;
-                bind = {
-                  "C-s" = "consult-line";
-                  "C-x b" = "consult-buffer";
-                  "M-g M-g" = "consult-goto-line";
-                  "M-g g" = "consult-goto-line";
-                  "M-s f" = "consult-find";
-                  "M-s r" = "consult-ripgrep";
-                  "M-y" = "consult-yank-pop";
-                  "C-S-v" = "consult-yank-pop";
-                };
+                hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
+
                 config = ''
                   (setq consult-narrow-key "<")
+                  (require 'consult-xref)
+                  (require 'consull-register)
 
                 '';
               };

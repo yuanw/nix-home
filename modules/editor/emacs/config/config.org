@@ -534,19 +534,7 @@ try it out, save-buffer
       "gpg"
       (file-name-extension (buffer-name)) t))))
 #+end_src
-* smartparens
 
-https://github.com/Fuco1/smartparens
-#+begin_src elisp
-  (use-package smartparens-config
-     :commands smartparens-mode
-     :hook
-     (smartparen . smartparens-mode)
-  :custom
-  (sp-highlight-pair-overlay nil))
-
-
-#+end_src
 * embark
 https://github.com/oantolin/embark
 #+begin_src elisp
@@ -837,10 +825,7 @@ https://github.com/minad/vertico
     ;;           '(;; show grep results in a dedicated buffer:
     ;;             (consult-ripgrep buffer)))))
 
-      ;; Persist history over Emacs restarts. Vertico sorts by history position.
-      (use-package savehist
-        :config
-        (savehist-mode))
+ 
 
       ;; A few more useful configurations...
       (use-package emacs
