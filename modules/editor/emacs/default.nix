@@ -345,6 +345,13 @@ with lib; {
             '';
 
             usePackage = {
+              enable = true;
+
+              exec-path-from-shell = {
+                config = "(exec-path-from-shell-initialize)";
+              };
+
+
               meow = {
                 enable = true;
                 demand = true;
@@ -469,7 +476,6 @@ with lib; {
                     pname = "auto-save";
                     version = "0.0.1";
                     src = pkgs.fetchFromGitHub {
-
                       owner = "manateelazycat";
                       repo = "auto-save";
                       rev = "0fb3c0f38191c0e74f00bae6adaa342de3750e83";
@@ -482,7 +488,7 @@ with lib; {
                        (auto-save-enable)
 
                   (setq auto-save-silent t)   ; quietly save
-                  (setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
+                  (setq auto-save-delete-trailing-whitespace nil)  ; automatically delete spaces at the end of the line when saving
 
                   ;;; custom predicates if you don't want auto save.
                   ;;; disable auto save mode when current filetype is an gpg file.
@@ -494,12 +500,36 @@ with lib; {
                 '';
               };
 
-              orderless = {
-                demand = true;
+              # Remember where we where in a previously visited file. Built-in.
+              saveplace = {
+                enable = true;
+                defer = 1;
                 config = ''
-                                    (setq completion-styles '(orderless basic))
-                  (setq completion-category-overrides
-                   '((file (styles basic partial-completion))))
+                  (setq-default save-place t)
+                  (setq save-place-file (locate-user-emacs-file "places"))
+                  (save-place-mode 1)
+                '';
+              };
+
+              recentf = {
+                enable = true;
+                command = [
+                  "recentf-mode"
+                  "recentf-add-file"
+                  "recentf-apply-filename-handlers"
+                ];
+                config = ''
+                         (setq recentf-save-file (locate-user-emacs-file "recentf")
+                               recentf-max-menu-items 20
+                               recentf-max-saved-items 500
+                               recentf-exclude
+                  '("~\\'" "\\`out\\'" "\\.log\\'" "^/[^/]*:" "\\.el\\.gz\\'")
+                               recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
+
+                         ;; Save the file list every 10 minutes.
+                         (run-at-time nil (* 10 60) 'recentf-save-list)
+
+                         (recentf-mode)
                 '';
               };
 
@@ -509,6 +539,21 @@ with lib; {
                   "keycast-header-line-mode"
                 ];
               };
+
+              free-keys = {
+                enable = true;
+                command = [ "free-keys" ];
+              };
+
+              orderless = {
+                demand = true;
+                config = ''
+                                    (setq completion-styles '(orderless basic))
+                  (setq completion-category-overrides
+                   '((file (styles basic partial-completion))))
+                '';
+              };
+
             };
 
 
