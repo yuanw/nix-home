@@ -260,6 +260,7 @@ with lib; {
 
               ;; Avoid noisy bell.
               (setq visible-bell t)
+              
 
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
