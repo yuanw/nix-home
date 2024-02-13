@@ -174,6 +174,8 @@ with lib; {
               consult-git-log-grep
               consult-yasnippet
               consult-org-roam
+              kind-icon
+              vertico
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
