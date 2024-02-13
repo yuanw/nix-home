@@ -342,6 +342,7 @@ with lib; {
             '';
 
             postlude = ''
+              ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-z")
               (global-unset-key "\C-x\C-c")
               (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
@@ -628,6 +629,7 @@ with lib; {
                 '';
               };
 
+
               consult = {
                 enable = true;
                 bind = {
@@ -669,6 +671,58 @@ with lib; {
                 '';
               };
 
+              hydra = {
+                enable = true;
+                demand = true;
+              };
+
+              ace-window = {
+                enable = true;
+                command = [ "ace-window" ];
+                config = ''
+                  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
+                        aw-dispatch-always t))
+
+                '';
+              };
+
+              winner = {
+                enable = true;
+                after = [ "hydra" "ace-window" ];
+                config = ''
+                        (winner-mode 1)
+                      (defhydra my-window-movement ()
+                        "window movement"
+                          ("h" windmove-left "up")
+                          ("o" windmove-right "->")
+                          ("a" windmove-down "down")
+                          ("i" windmove-up "up")
+                          ("n" other-window "next")
+                          ("*" enlarge-window "h+" )
+                          ("@" shrink-window "h-" )
+                          ("$" enlarge-window-horizontally "w+" )
+                          ("^" shrink-window-horizontally "w-" )
+                          ("f" find-file-other-window "other file")
+                          ("d" delete-other-windows :color blue)
+                          ("j" ace-window "ace-window")
+                          ("v" (lambda ()
+                             (interactive)
+                             (split-window-right)
+                             (windmove-right)) "split right")
+                          ("s" (lambda ()
+                             (interactive)
+                             (split-window-below)
+                             (windmove-down)) "below")
+                          ("k" delete-window "delete")
+                          ("r" winner-redo "redo")
+                          ("u" winner-undo "undo")
+                          ("D" ace-delete-window "ace delete") ;; TODO not working
+                          ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+                          ("q" nil "cancel"))
+                  (global-set-key "C-c w" 'my-window-movement/body)
+                '';
+              };
+
 
               smartparens = {
                 enable = true;
@@ -690,34 +744,60 @@ with lib; {
               # Configure magit, a nice mode for the git SCM.
               magit = {
                 enable = true;
+                bind = { "C-x g" = "magit-status"; };
                 command = [ "magit-project-status" ];
                 config = ''
-                  (setq forge-add-pullreq-refspec 'ask)
-                  (add-to-list 'git-commit-style-convention-checks
-                               'overlong-summary-line)
+                  (setq magit-list-refs-sortby "-committerdate")
+                             (setq forge-add-pullreq-refspec 'ask)
+                             (add-to-list 'git-commit-style-convention-checks
+                                          'overlong-summary-line)
                 '';
               };
 
+
+              jinx = {
+                enable = true;
+                hook = [ "(emacs-startup . global-jinx-mode)" ];
+                bind = {
+                  "M-$" = "jinx-correct";
+                  "C-M-$" = "jinx-languages ";
+                };
+              };
               nix-mode = {
                 enable = true;
-                hook = [ "(nix-mode . subword-mode)" ];
+                hook = [
+                  "
+                  (nix-mode.subword-mode) "
+                ];
+                config = "
+                    (setq nix-indent-function 'nix-indent-line) ";
               };
 
               popper = {
                 enable = true;
                 bind = {
-                  "C-`" = "popper-toggle-latest";
-                  "M-`" = "popper-cycle";
-                  "C-M-`" = "popper-toggle-type";
+                  "
+                    C-`" = "
+                    popper-toggle-latest ";
+                  "
+                    M-`" = "
+                    popper-cycle ";
+                  "
+                    C-M-`" = "
+                    popper-toggle-type ";
                 };
-                command = [ "popper-mode" "popper-group-by-project" ];
+                command = [
+                  "popper-mode "
+                  "popper-group-by-project "
+                ];
                 config = ''
                   (setq popper-reference-buffers
-                          '("Output\\*$"
-                            "\\*Async Shell Command\\*"
-                            "\\*Buffer List\\*"
-                            "\\*Flycheck errors\\*"
-                            "\\*Messages\\*"
+                          '("
+                    Output\\ * $"
+                            "\\ * Async Shell Command\\ * "
+                            "\\ * Buffer List\\ * "
+                            "\\ * Flycheck errors\\ * "
+                            "\\ * Messages\\ * "
                             compilation-mode
                             help-mode)
                         popper-group-function #'popper-group-by-project)
@@ -725,22 +805,35 @@ with lib; {
                 '';
               };
 
+              ## there is also browes-at-remote
+              git-link = {
+                enable = true;
+                command = [
+                  " git-link
+                    git-link-commit "
+                  "
+                    git-link-homepage "
+                ];
+                config = "
+                    (setq git-link-open-in-browser t) ";
+              };
               vterm = {
                 enable = true;
-                command = [ "vterm" ];
+                defer = true;
+                command = [
+                  "
+                    vterm "
+                  "
+                    vterm-other-window
+                    "
+                ];
                 config = ''
                   (setq vterm-kill-buffer-on-exit t
                         vterm-max-scrollback 10000)
                 '';
               };
-
-
             };
-
-
           };
-
-          # xdg.configFile."emacs".source = emacsConfigPath;
 
           home = {
             packages = with pkgs; [
@@ -785,9 +878,11 @@ with lib; {
               vale
             ];
             # file.".emacs.d".source = emacsConfigPath;
-            file.".vale.ini".text =
+            file.".vale.ini ".text =
               let
-                stylesPath = pkgs.linkFarm "vale-styles" valeStyles;
+                stylesPath = pkgs.linkFarm "
+            vale-styles "
+                  valeStyles;
                 basedOnStyles = concatStringsSep ", "
                   (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
               in
@@ -832,3 +927,8 @@ with lib; {
       { })
   ]);
 }
+
+
+
+
+
