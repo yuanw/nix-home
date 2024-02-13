@@ -597,6 +597,7 @@ with lib; {
               };
 
               orderless = {
+                enable = true;
                 demand = true;
                 config = ''
                   (setq completion-styles '(orderless basic))
@@ -607,7 +608,6 @@ with lib; {
               };
               marginalia = {
                 enable = true;
-                defer = 1;
                 config = "(marginalia-mode)";
               };
 
@@ -640,6 +640,13 @@ with lib; {
       ;; Tidy shadowed file names
       :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
               '';
+              };
+
+              corfu = {
+                enable = true;
+                config = ''
+                  (global-corfu-mode)
+                '';
               };
 
               consult = {
