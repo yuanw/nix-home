@@ -351,7 +351,6 @@ with lib; {
 
               exec-path-from-shell = {
                 enable = true;
-
                 config = "(exec-path-from-shell-initialize)";
                 extraConfig = ":when (daemonp)";
               };
@@ -607,20 +606,6 @@ with lib; {
                 config = ''
                   (setq consult-narrow-key "<")
 
-                  (defvar rah/consult-line-map
-                    (let ((map (make-sparse-keymap)))
-                      (define-key map "\C-s" #'vertico-next)
-                      map))
-
-                  (consult-customize
-                    consult-line
-                      :history t ;; disable history
-                      :keymap rah/consult-line-map
-                    consult-buffer consult-find consult-ripgrep
-                      :preview-key "M-."
-                    consult-theme
-                      :preview-key '(:debounce 1 any)
-                  )
                 '';
               };
               embark-consult = {
