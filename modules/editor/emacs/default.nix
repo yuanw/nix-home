@@ -261,6 +261,10 @@ with lib; {
               ;; Avoid noisy bell.
               (setq visible-bell t)
 
+              ;; Enable indentation+completion using the TAB key.
+              ;; `completion-at-point' is often bound to M-TAB.
+              (setq tab-always-indent 'complete))
+
               ;; Improved handling of clipboard in GNU/Linux and otherwise.
               (setq select-enable-clipboard t
                     select-enable-primary t
@@ -336,12 +340,11 @@ with lib; {
             '';
 
             postlude = ''
-              ;(unbind-key "C-a")
-              ;(unbind-key "C-e")
-
-              ;(bind-keys ("C-o" . find-file)
-              ;           ("C-<right>" . forward-word)
-              ;           ("C-<left>" . backward-word))
+              (global-unset-key "\C-z")
+              (global-unset-key "\C-x\C-c")
+              (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
+              (global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
+            
             '';
 
             usePackage = {
@@ -349,6 +352,7 @@ with lib; {
 
               exec-path-from-shell = {
                 config = "(exec-path-from-shell-initialize)";
+                extraConfig = ":when (daemonp)";
               };
 
 
@@ -533,6 +537,15 @@ with lib; {
                 '';
               };
 
+              savehist = {
+                enable = true;
+                init = "(savehist-mode)";
+                config = ''
+                  (setq history-delete-duplicates t
+                        history-length 100)
+                '';
+              };
+
               keycast = {
                 command = [
                   "keycast-tab-bar-mode"
@@ -548,9 +561,87 @@ with lib; {
               orderless = {
                 demand = true;
                 config = ''
-                                    (setq completion-styles '(orderless basic))
+                  (setq completion-styles '(orderless basic))
+                  (setq read-file-name-completion-ignore-case t)
                   (setq completion-category-overrides
                    '((file (styles basic partial-completion))))
+                '';
+              };
+              marginalia = {
+                enable = true;
+                defer = 1;
+                config = "(marginalia-mode)";
+              };
+
+              embark = {
+                enable = true;
+                command = [ "embark-prefix-help-command" ];
+                bind = {
+                  "C-." = "embark-act";
+                  "M-." = "embark-dwim";
+                  "C-h B" = "embark-bindings";
+                };
+                init = ''
+                  (setq prefix-help-command #'embark-prefix-help-command)
+                '';
+                config = ''
+                  (setq embark-indicators '(embark-minimal-indicator
+                                            embark-highlight-indicator
+                                            embark-isearch-highlight-indicator))
+                '';
+              };
+
+              consult = {
+                enable = true;
+                bind = {
+                  "C-s" = "consult-line";
+                  "C-x b" = "consult-buffer";
+                  "M-g M-g" = "consult-goto-line";
+                  "M-g g" = "consult-goto-line";
+                  "M-s f" = "consult-find";
+                  "M-s r" = "consult-ripgrep";
+                  "M-y" = "consult-yank-pop";
+                  "C-S-v" = "consult-yank-pop";
+                };
+                config = ''
+                  (setq consult-narrow-key "<")
+
+                  (defvar rah/consult-line-map
+                    (let ((map (make-sparse-keymap)))
+                      (define-key map "\C-s" #'vertico-next)
+                      map))
+
+                  (consult-customize
+                    consult-line
+                      :history t ;; disable history
+                      :keymap rah/consult-line-map
+                    consult-buffer consult-find consult-ripgrep
+                      :preview-key "M-."
+                    consult-theme
+                      :preview-key '(:debounce 1 any)
+                  )
+                '';
+              };
+              embark-consult = {
+                enable = true;
+                after = [ "embark" "consult" ];
+              };
+
+
+              smartparens = {
+                enable = true;
+                defer = 3;
+                command = [ "smartparens-global-mode" "show-smartparens-global-mode" ];
+                bindLocal = {
+                  smartparens-mode-map = {
+                    "M-<right>" = "sp-forward-sexp";
+                    "M-<left>" = "sp-backward-sexp";
+                  };
+                };
+                config = ''
+                  (require 'smartparens-config)
+                  (smartparens-global-mode t)
+                  (show-smartparens-global-mode t)
                 '';
               };
 

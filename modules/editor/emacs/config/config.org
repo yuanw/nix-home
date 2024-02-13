@@ -813,7 +813,7 @@ https://github.com/minad/vertico
 
         ;; Grow and shrink the Vertico minibuffer
         (setq vertico-resize t)
-        (setq vertico-preselect 'prompt)
+        ;;(setq vertico-preselect 'prompt)
 
 
         ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
