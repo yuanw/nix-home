@@ -504,15 +504,15 @@ with lib; {
               };
 
               # Remember where we where in a previously visited file. Built-in.
-              saveplace = {
-                enable = true;
-                defer = 1;
-                config = ''
-                  (setq-default save-place t)
-                  (setq save-place-file (locate-user-emacs-file "places"))
-                  (save-place-mode 1)
-                '';
-              };
+              # saveplace = {
+              #   enable = true;
+              #   defer = 1;
+              #   config = ''
+              #     (setq-default save-place t)
+              #     (setq save-place-file (locate-user-emacs-file "places"))
+              #     (save-place-mode 1)
+              #   '';
+              # };
 
               recentf = {
                 enable = true;
