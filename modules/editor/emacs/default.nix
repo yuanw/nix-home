@@ -339,13 +339,13 @@ with lib; {
               ;    (call-interactively 'sort-lines)))
             '';
 
-            postlude = ''
-              (global-unset-key "\C-z")
-              (global-unset-key "\C-x\C-c")
-              (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
-              (global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
-            
-            '';
+            # postlude = ''
+            #   (global-unset-key "\C-z")
+            #   (global-unset-key "\C-x\C-c")
+            #   (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
+            #   (global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
+
+            # '';
 
             usePackage = {
 
