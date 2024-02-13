@@ -631,7 +631,15 @@ with lib; {
               vertico = {
                 enable = true;
                 command = [ "vertico-mode" "vertico-next" ];
-                config = "(vertico-mode)";
+                config = ''(vertico-mode)
+                   (use-package vertico-directory
+      :bind (:map vertico-map
+                  ("RET" . vertico-directory-enter)
+                  ("DEL" . vertico-directory-delete-char)
+                  ("M-DEL" . vertico-directory-delete-word))
+      ;; Tidy shadowed file names
+      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
+              '';
               };
 
               consult = {
@@ -639,9 +647,23 @@ with lib; {
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
 
                 config = ''
-                  (setq consult-narrow-key "<")
-                  (require 'consult-xref)
-                  (require 'consull-register)
+                               (setq consult-narrow-key "<")
+                               (require 'consult-xref)
+                               (require 'consull-register)
+                                (consult-customize
+                  consult-theme
+                  :preview-key '(:debounce 0.2 any)
+                  consult-ripgrep
+                  consult-git-grep
+                  consult-grep
+                  consult-bookmark
+                  consult-recent-file
+                  consult-xref
+                  consult--source-bookmark
+                  consult--source-file-register
+                  consult--source-recent-file
+                  consult--source-project-recent-file
+                  :preview-key '(:debounce 0.4 any))
 
                 '';
               };
@@ -749,7 +771,7 @@ with lib; {
                        ("k" save-buffers-kill-emacs "quit emacs")
                        ("q" nil "cancel"))
                                  
-                                  (global-set-key (kbd "C-c h") 'hydra-main-menu/body)
+                                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
                                   (global-set-key (kbd "C-c o")  'my-window-movement/body)
                 '';
               };
