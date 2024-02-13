@@ -671,11 +671,29 @@ with lib; {
                 '';
               };
 
+
+
+              ace-window = {
+                enable = true;
+                command = [ "ace-window" ];
+                config = ''
+                  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
+                        aw-dispatch-always t)
+
+                '';
+              };
+
+              winner = {
+                enable = true;
+                config = ''
+                  (winner-mode 1)
+                '';
+              };
+
               hydra = {
                 enable = true;
-                after = [ "winner" "ace-window" "meow" ];
                 config = ''
-                                 (defhydra my-window-movement ()
+                  (defhydra my-window-movement ()
                     "window movement"
                       ("h" windmove-left "up")
                       ("o" windmove-right "->")
@@ -704,46 +722,12 @@ with lib; {
                       ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
                       ("q" nil "cancel"))
 
-                  (defhydra hydra-main-menu (:color blue)
-                        "main menu"
-                       ("p" project-switch-project "switch projects")
-                       ("g" magit "magit")
-                       ("n" org-roam-node-find "find note")
-                       ("t" org-roam-dailies-goto-today "today note")
-                       ("q" nil "cancel"))
-
-                      (defhydra hydra-search-menu (:color blue)
-                        "search menu"
-                       ("l" consult-line "search line")
-                       ("r" consult-ripgrep "search word")
-                       ("f" consult-fd "searc file")
-                       ("q" nil "cancel"))
+              
                       (meow-leader-define-key
-                       '("?" . hydra-main-menu/body)
                        '("w" . my-window-movement/body)
-                       '("s" . hydra-search-menu/body)
                        )
                 '';
               };
-
-              ace-window = {
-                enable = true;
-                command = [ "ace-window" ];
-                config = ''
-                  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
-                        aw-dispatch-always t)
-
-                '';
-              };
-
-              winner = {
-                enable = true;
-                config = ''
-                  (winner-mode 1)
-                '';
-              };
-
-
               smartparens = {
                 enable = true;
                 defer = 3;
