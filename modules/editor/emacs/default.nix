@@ -673,7 +673,57 @@ with lib; {
 
               hydra = {
                 enable = true;
-                demand = true;
+                after = [ "winner" "ace-window" "meow" ]
+                  config = ''
+                   (defhydra my-window-movement ()
+      "window movement"
+        ("h" windmove-left "up")
+        ("o" windmove-right "->")
+        ("a" windmove-down "down")
+        ("i" windmove-up "up")
+        ("n" other-window "next")
+        ("*" enlarge-window "h+" )
+        ("@" shrink-window "h-" )
+        ("$" enlarge-window-horizontally "w+" )
+        ("^" shrink-window-horizontally "w-" )
+        ("f" find-file-other-window "other file")
+        ("d" delete-other-windows :color blue)
+        ("j" ace-window "ace-window")
+        ("v" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)) "split right")
+        ("s" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)) "below")
+        ("k" delete-window "delete")
+        ("r" winner-redo "redo")
+        ("u" winner-undo "undo")
+        ("D" ace-delete-window "ace delete") ;; TODO not working
+        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+        ("q" nil "cancel"))
+
+    (defhydra hydra-main-menu (:color blue)
+          "main menu"
+         ("p" project-switch-project "switch projects")
+         ("g" magit "magit")
+         ("n" org-roam-node-find "find note")
+         ("t" org-roam-dailies-goto-today "today note")
+         ("q" nil "cancel"))
+
+        (defhydra hydra-search-menu (:color blue)
+          "search menu"
+         ("l" consult-line "search line")
+         ("r" consult-ripgrep "search word")
+         ("f" consult-fd "searc file")
+         ("q" nil "cancel"))
+        (meow-leader-define-key
+         '("?" . hydra-main-menu/body)
+         '("w" . my-window-movement/body)
+         '("s" . hydra-search-menu/body)
+         )
+                '';
               };
 
               ace-window = {
@@ -688,38 +738,8 @@ with lib; {
 
               winner = {
                 enable = true;
-                after = [ "hydra" "ace-window" ];
                 config = ''
-                        (winner-mode 1)
-                      (defhydra my-window-movement ()
-                        "window movement"
-                          ("h" windmove-left "up")
-                          ("o" windmove-right "->")
-                          ("a" windmove-down "down")
-                          ("i" windmove-up "up")
-                          ("n" other-window "next")
-                          ("*" enlarge-window "h+" )
-                          ("@" shrink-window "h-" )
-                          ("$" enlarge-window-horizontally "w+" )
-                          ("^" shrink-window-horizontally "w-" )
-                          ("f" find-file-other-window "other file")
-                          ("d" delete-other-windows :color blue)
-                          ("j" ace-window "ace-window")
-                          ("v" (lambda ()
-                             (interactive)
-                             (split-window-right)
-                             (windmove-right)) "split right")
-                          ("s" (lambda ()
-                             (interactive)
-                             (split-window-below)
-                             (windmove-down)) "below")
-                          ("k" delete-window "delete")
-                          ("r" winner-redo "redo")
-                          ("u" winner-undo "undo")
-                          ("D" ace-delete-window "ace delete") ;; TODO not working
-                          ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-                          ("q" nil "cancel"))
-                  (global-set-key "C-c w" 'my-window-movement/body)
+                  (winner-mode 1)
                 '';
               };
 
@@ -756,7 +776,7 @@ with lib; {
 
 
               jinx = {
-                enable = false;
+                enable = true;
                 defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
@@ -765,7 +785,7 @@ with lib; {
                 };
               };
               nix-mode = {
-                enable = false;
+                enable = true;
                 hook = [
                   "(nix-mode . subword-mode) "
                 ];
@@ -774,7 +794,7 @@ with lib; {
               };
 
               popper = {
-                enable = false;
+                enable = true;
                 bind = {
                   "C-`" = "popper-toggle-latest";
                   "M-`" = "popper-cycle";
@@ -801,7 +821,7 @@ with lib; {
 
               ## there is also browes-at-remote
               git-link = {
-                enable = false;
+                enable = true;
                 command = [
                   "git-link"
                   "git-link-commit"
@@ -812,7 +832,7 @@ with lib; {
                 '';
               };
               vterm = {
-                enable = false;
+                enable = true;
                 defer = true;
                 command = [
                   "
