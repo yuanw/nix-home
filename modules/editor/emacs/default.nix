@@ -504,16 +504,16 @@ with lib; {
                 '';
               };
 
-              # Remember where we where in a previously visited file. Built-in.
-              # saveplace = {
-              #   enable = true;
-              #   defer = 1;
-              #   config = ''
-              #     (setq-default save-place t)
-              #     (setq save-place-file (locate-user-emacs-file "places"))
-              #     (save-place-mode 1)
-              #   '';
-              # };
+              ## Remember where we where in a previously visited file. Built-in.
+              saveplace = {
+                enable = true;
+                defer = 1;
+                config = ''
+                  (setq-default save-place t)
+                  (setq save-place-file (locate-user-emacs-file "places"))
+                  (save-place-mode 1)
+                '';
+              };
 
               recentf = {
                 enable = true;
@@ -628,6 +628,23 @@ with lib; {
                   (smartparens-global-mode t)
                   (show-smartparens-global-mode t)
                 '';
+              };
+
+              # Configure magit, a nice mode for the git SCM.
+              magit = {
+                enable = true;
+                command = [ "magit-project-status" ];
+                bind = { "C-c g" = "magit-status"; };
+                config = ''
+                  (setq forge-add-pullreq-refspec 'ask)
+                  (add-to-list 'git-commit-style-convention-checks
+                               'overlong-summary-line)
+                '';
+              };
+
+              nix-mode = {
+                enable = true;
+                hook = [ "(nix-mode . subword-mode)" ];
               };
 
             };
