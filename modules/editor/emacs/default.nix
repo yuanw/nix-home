@@ -751,7 +751,7 @@ with lib; {
                        ("k" save-buffers-kill-emacs "quit emacs")
                        ("q" nil "cancel"))
                                  
-                                  (global-set-key (kbd "C-c h") 'hydra-main-mene/body)
+                                  (global-set-key (kbd "C-c h") 'hydra-main-menu/body)
                                   (global-set-key (kbd "C-c o")  'my-window-movement/body)
                 '';
               };
