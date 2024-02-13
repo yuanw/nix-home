@@ -723,8 +723,8 @@ with lib; {
                       ("q" nil "cancel"))
 
               
-                      (meow-leader-define-key
-                       '("w" . my-window-movement/body)
+                      (global-set-key 
+                      (kbd "C-c w") . 'my-window-movement/body)
                        )
                 '';
               };
