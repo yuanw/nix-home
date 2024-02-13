@@ -65,7 +65,7 @@ let
           _p.tree-sitter-markdown
         ]))
         (
-          callPackage ./lsp-bridge.nix {
+          callPackage ./lsp-bridge {
             inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
             inherit (epkgs) melpaBuild markdown-mode yasnippet;
           }
