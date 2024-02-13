@@ -260,7 +260,6 @@ with lib; {
 
               ;; Avoid noisy bell.
               (setq visible-bell t)
-              
 
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
@@ -338,6 +337,7 @@ with lib; {
               ;  (interactive)
               ;  (let ((sort-fold-case t))
               ;    (call-interactively 'sort-lines)))
+              
             '';
 
             # postlude = ''
