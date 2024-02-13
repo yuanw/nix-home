@@ -527,12 +527,10 @@ with lib; {
                   (setq recentf-save-file (locate-user-emacs-file "recentf")
                         recentf-max-menu-items 20
                         recentf-max-saved-items 500
-                
                         recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
 
                   ;; Save the file list every 10 minutes.
                   (run-at-time nil (* 10 60) 'recentf-save-list)
-
                   (recentf-mode)
                 '';
               };
@@ -650,6 +648,25 @@ with lib; {
               embark-consult = {
                 enable = true;
                 after = [ "embark" "consult" ];
+              };
+
+              which-key = {
+                enable = true;
+                config = ''
+                    (setq which-key-side-window-location 'bottom
+                  	  which-key-sort-order #'which-key-key-order-alpha
+                  	  which-key-sort-uppercase-first nil
+                  	  which-key-add-column-padding 1
+                  	  which-key-max-display-columns nil
+                  	  which-key-side-window-slot -10
+                  	  which-key-side-window-max-height 0.25
+                  	  which-key-idle-delay 0.8
+                  	  which-key-max-description-length 25
+                  	  which-key-allow-imprecise-window-fit t
+                  	  which-key-separator " → " )
+
+                      (which-key-mode)
+                '';
               };
 
 
