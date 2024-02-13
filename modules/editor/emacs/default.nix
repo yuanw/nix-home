@@ -672,6 +672,25 @@ with lib; {
               };
 
 
+              project = {
+                enable = true;
+                config = ''
+                                   (defun project-magit-status ()
+                    "Run magit-status in the current project's root."
+                    (interactive)
+                    (magit-status-setup-buffer (project-root (project-current t))))
+                  (setq project-switch-commands
+                   '((?f "Find file" project-find-file)
+                          (?g "Find regexp" project-find-regexp)
+                          (?d "Dired" project-dired)
+                          (?b "Buffer" project-switch-to-buffer)
+                          (?q "Query replace" project-query-replace-regexp)
+                          (?v "magit" project-magit-status)
+                          (?k "Kill buffers" project-kill-buffers)
+                          (?! "Shell command" project-shell-command)
+                          (?e "Eshell" project-eshell)))
+                '';
+              };
 
               ace-window = {
                 enable = true;
@@ -693,44 +712,47 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                                    (defhydra my-window-movement ()
-                                      "window movement"
-                                        ("h" windmove-left "up")
-                                        ("o" windmove-right "->")
-                                        ("a" windmove-down "down")
-                                        ("i" windmove-up "up")
-                                        ("n" other-window "next")
-                                        ("*" enlarge-window "h+" )
-                                        ("@" shrink-window "h-" )
-                                        ("$" enlarge-window-horizontally "w+" )
-                                        ("^" shrink-window-horizontally "w-" )
-                                        ("f" find-file-other-window "other file")
-                                        ("d" delete-other-windows :color blue)
-                                        ("j" ace-window "ace-window")
-                                        ("v" (lambda ()
-                                           (interactive)
-                                           (split-window-right)
-                                           (windmove-right)) "split right")
-                                        ("s" (lambda ()
-                                           (interactive)
-                                           (split-window-below)
-                                           (windmove-down)) "below")
-                                        ("k" delete-window "delete")
-                                        ("r" winner-redo "redo")
-                                        ("u" winner-undo "undo")
-                                        ("D" ace-delete-window "ace delete") ;; TODO not working
-                                        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-                                        ("q" nil "cancel"))
+                                                    (defhydra my-window-movement (:color blue)
+                                                      "window movement"
+                                                        ("h" windmove-left "up")
+                                                        ("o" windmove-right "->")
+                                                        ("a" windmove-down "down")
+                                                        ("i" windmove-up "up")
+                                                        ("n" other-window "next")
+                                                        ("*" enlarge-window "h+" )
+                                                        ("@" shrink-window "h-" )
+                                                        ("$" enlarge-window-horizontally "w+" )
+                                                        ("^" shrink-window-horizontally "w-" )
+                                                        ("f" find-file-other-window "other file")
+                                                        ("d" delete-other-windows :color blue)
+                                                        ("j" ace-window "ace-window")
+                                                        ("v" (lambda ()
+                                                           (interactive)
+                                                           (split-window-right)
+                                                           (windmove-right)) "split right")
+                                                        ("s" (lambda ()
+                                                           (interactive)
+                                                           (split-window-below)
+                                                           (windmove-down)) "below")
+                                                        ("k" delete-window "delete")
+                                                        ("r" winner-redo "redo")
+                                                        ("u" winner-undo "undo")
+                                                        ("D" ace-delete-window "ace delete") ;; TODO not working
+                                                        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+                                                        ("q" nil "cancel"))
 
-                                        (defhydra hydra-launcher (:color blue)
-                     "Launch"
-                     ("h" man "man")
-                     ("r" (browse-url "http://www.reddit.com/r/emacs/") "reddit")
-                     ("w" (browse-url "http://www.emacswiki.org/") "emacswiki")
-                     ("s" shell "shell")
-                     ("q" nil "cancel"))
-                  (global-set-key (kbd "C-c r") 'hydra-launcher/body)
-                  (global-set-key (kbd "C-c w")  'my-window-movement/body)
+                                        
+                  (defhydra hydra-main-menu (:color blue)
+                        "main menu"
+                       ("p" project-switch-project "switch projects")
+                       ("g" magit "magit")
+                       ("n" org-roam-node-find "find note")
+                       ("t" org-roam-dailies-goto-today "today note")
+                       ("k" save-buffers-kill-emacs "quit emacs")
+                       ("q" nil "cancel"))
+                                 
+                                  (global-set-key (kbd "C-c h") 'hydra-main-mene/body)
+                                  (global-set-key (kbd "C-c o")  'my-window-movement/body)
                 '';
               };
               smartparens = {
@@ -772,6 +794,10 @@ with lib; {
                   "M-$" = "jinx-correct";
                   "C-M-$" = "jinx-languages ";
                 };
+              };
+
+              yaml-ts-mode = {
+                enable = true;
               };
               nix-mode = {
                 enable = true;
@@ -824,11 +850,8 @@ with lib; {
                 enable = true;
                 defer = true;
                 command = [
-                  "
-                    vterm "
-                  "
-                    vterm-other-window
-                    "
+                  "vterm"
+                  "vterm-other-window"
                 ];
                 config = ''
                   (setq vterm-kill-buffer-on-exit t
