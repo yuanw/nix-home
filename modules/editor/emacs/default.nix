@@ -348,9 +348,10 @@ with lib; {
             '';
 
             usePackage = {
-              enable = true;
 
               exec-path-from-shell = {
+                enable = true;
+
                 config = "(exec-path-from-shell-initialize)";
                 extraConfig = ":when (daemonp)";
               };
