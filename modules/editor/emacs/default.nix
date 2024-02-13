@@ -681,7 +681,7 @@ with lib; {
                 command = [ "ace-window" ];
                 config = ''
                   (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
-                        aw-dispatch-always t))
+                        aw-dispatch-always t)
 
                 '';
               };
