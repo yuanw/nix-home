@@ -725,7 +725,7 @@ with lib; {
               
                       (global-set-key 
                       (kbd "C-c w") . 'my-window-movement/body)
-                       )
+                       
                 '';
               };
               smartparens = {
