@@ -703,6 +703,16 @@ with lib; {
                 hook = [ "(nix-mode . subword-mode)" ];
               };
 
+              vterm = {
+                enable = true;
+                command = [ "vterm" ];
+                config = ''
+                  (setq vterm-kill-buffer-on-exit t
+                        vterm-max-scrollback 10000)
+                '';
+              };
+
+
             };
 
 
