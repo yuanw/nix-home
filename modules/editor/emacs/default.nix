@@ -771,6 +771,7 @@ with lib; {
                           (?! "Shell command" project-shell-command)
                           (?e "Eshell" project-eshell)))
                 '';
+                after = [ "magit" ];
               };
 
               ace-window = {
