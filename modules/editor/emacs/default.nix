@@ -163,7 +163,18 @@ with lib; {
           ];
           programs.emacs.extraPackages = epkgs:
             with epkgs;
-            [ epkgs.treesit-grammars.with-all-grammars ];
+            [
+              epkgs.treesit-grammars.with-all-grammars
+              cape
+              corfu
+              consult
+              consult-dir
+              consult-eglot
+              consult-flycheck
+              consult-git-log-grep
+              consult-yasnippet
+              consult-org-roam
+            ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
           programs.emacs.init = {
