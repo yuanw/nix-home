@@ -756,7 +756,7 @@ with lib; {
 
 
               jinx = {
-                enable = true;
+                enable = false;
                 defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
@@ -765,17 +765,16 @@ with lib; {
                 };
               };
               nix-mode = {
-                enable = true;
+                enable = false;
                 hook = [
-                  "
-                  (nix-mode.subword-mode) "
+                  "(nix-mode . subword-mode) "
                 ];
-                config = "
-                    (setq nix-indent-function 'nix-indent-line) ";
+                config = ''
+                  (setq nix-indent-function 'nix-indent-line) '';
               };
 
               popper = {
-                enable = true;
+                enable = false;
                 bind = {
                   "
                     C-`" = "
@@ -808,18 +807,18 @@ with lib; {
 
               ## there is also browes-at-remote
               git-link = {
-                enable = true;
+                enable = false;
                 command = [
-                  " git-link
-                    git-link-commit "
-                  "
-                    git-link-homepage "
+                  "git-link"
+                  "git-link-commit"
+                  "git-link-homepage"
                 ];
-                config = "
-                    (setq git-link-open-in-browser t) ";
+                config = ''
+                  (setq git-link-open-in-browser t)
+                '';
               };
               vterm = {
-                enable = true;
+                enable = false;
                 defer = true;
                 command = [
                   "
