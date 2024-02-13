@@ -710,7 +710,7 @@ with lib; {
                 config = ''
                                (setq consult-narrow-key "<")
                                (require 'consult-xref)
-                               (require 'consull-register)
+                               (require 'consult-register)
                                 (consult-customize
                   consult-theme
                   :preview-key '(:debounce 0.2 any)
@@ -756,7 +756,7 @@ with lib; {
               project = {
                 enable = true;
                 config = ''
-                                   (defun project-magit-status ()
+                  (defun project-magit-status ()
                     "Run magit-status in the current project's root."
                     (interactive)
                     (magit-status-setup-buffer (project-root (project-current t))))
