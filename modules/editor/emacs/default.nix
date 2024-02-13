@@ -263,7 +263,7 @@ with lib; {
 
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
-              (setq tab-always-indent 'complete))
+              (setq tab-always-indent 'complete)
 
               ;; Improved handling of clipboard in GNU/Linux and otherwise.
               (setq select-enable-clipboard t
@@ -340,13 +340,13 @@ with lib; {
               
             '';
 
-            # postlude = ''
-            #   (global-unset-key "\C-z")
-            #   (global-unset-key "\C-x\C-c")
-            #   (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
-            #   (global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
+            postlude = ''
+              (global-unset-key "\C-z")
+              (global-unset-key "\C-x\C-c")
+              (global-unset-key "\C-x\C-b") ;; list-buffer, i just use switch-buffer
+              (global-unset-key "\C-x\C-d") ;; list-directory, i just use dired
 
-            # '';
+            '';
 
             usePackage = {
 
