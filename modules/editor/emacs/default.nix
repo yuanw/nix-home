@@ -703,6 +703,28 @@ with lib; {
                 hook = [ "(nix-mode . subword-mode)" ];
               };
 
+              popper = {
+                enable = true;
+                bind = {
+                  "C-`" = "popper-toggle-latest";
+                  "M-`" = "popper-cycle";
+                  "C-M-`" = "popper-toggle-type";
+                };
+                command = [ "popper-mode" "popper-group-by-project" ];
+                config = ''
+                  (setq popper-reference-buffers
+                          '("Output\\*$"
+                            "\\*Async Shell Command\\*"
+                            "\\*Buffer List\\*"
+                            "\\*Flycheck errors\\*"
+                            "\\*Messages\\*"
+                            compilation-mode
+                            help-mode)
+                        popper-group-function #'popper-group-by-project)
+                  (popper-mode)
+                '';
+              };
+
               vterm = {
                 enable = true;
                 command = [ "vterm" ];
