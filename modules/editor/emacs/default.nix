@@ -673,56 +673,56 @@ with lib; {
 
               hydra = {
                 enable = true;
-                after = [ "winner" "ace-window" "meow" ]
-                  config = ''
-                   (defhydra my-window-movement ()
-      "window movement"
-        ("h" windmove-left "up")
-        ("o" windmove-right "->")
-        ("a" windmove-down "down")
-        ("i" windmove-up "up")
-        ("n" other-window "next")
-        ("*" enlarge-window "h+" )
-        ("@" shrink-window "h-" )
-        ("$" enlarge-window-horizontally "w+" )
-        ("^" shrink-window-horizontally "w-" )
-        ("f" find-file-other-window "other file")
-        ("d" delete-other-windows :color blue)
-        ("j" ace-window "ace-window")
-        ("v" (lambda ()
-           (interactive)
-           (split-window-right)
-           (windmove-right)) "split right")
-        ("s" (lambda ()
-           (interactive)
-           (split-window-below)
-           (windmove-down)) "below")
-        ("k" delete-window "delete")
-        ("r" winner-redo "redo")
-        ("u" winner-undo "undo")
-        ("D" ace-delete-window "ace delete") ;; TODO not working
-        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-        ("q" nil "cancel"))
+                after = [ "winner" "ace-window" "meow" ];
+                config = ''
+                                 (defhydra my-window-movement ()
+                    "window movement"
+                      ("h" windmove-left "up")
+                      ("o" windmove-right "->")
+                      ("a" windmove-down "down")
+                      ("i" windmove-up "up")
+                      ("n" other-window "next")
+                      ("*" enlarge-window "h+" )
+                      ("@" shrink-window "h-" )
+                      ("$" enlarge-window-horizontally "w+" )
+                      ("^" shrink-window-horizontally "w-" )
+                      ("f" find-file-other-window "other file")
+                      ("d" delete-other-windows :color blue)
+                      ("j" ace-window "ace-window")
+                      ("v" (lambda ()
+                         (interactive)
+                         (split-window-right)
+                         (windmove-right)) "split right")
+                      ("s" (lambda ()
+                         (interactive)
+                         (split-window-below)
+                         (windmove-down)) "below")
+                      ("k" delete-window "delete")
+                      ("r" winner-redo "redo")
+                      ("u" winner-undo "undo")
+                      ("D" ace-delete-window "ace delete") ;; TODO not working
+                      ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+                      ("q" nil "cancel"))
 
-    (defhydra hydra-main-menu (:color blue)
-          "main menu"
-         ("p" project-switch-project "switch projects")
-         ("g" magit "magit")
-         ("n" org-roam-node-find "find note")
-         ("t" org-roam-dailies-goto-today "today note")
-         ("q" nil "cancel"))
+                  (defhydra hydra-main-menu (:color blue)
+                        "main menu"
+                       ("p" project-switch-project "switch projects")
+                       ("g" magit "magit")
+                       ("n" org-roam-node-find "find note")
+                       ("t" org-roam-dailies-goto-today "today note")
+                       ("q" nil "cancel"))
 
-        (defhydra hydra-search-menu (:color blue)
-          "search menu"
-         ("l" consult-line "search line")
-         ("r" consult-ripgrep "search word")
-         ("f" consult-fd "searc file")
-         ("q" nil "cancel"))
-        (meow-leader-define-key
-         '("?" . hydra-main-menu/body)
-         '("w" . my-window-movement/body)
-         '("s" . hydra-search-menu/body)
-         )
+                      (defhydra hydra-search-menu (:color blue)
+                        "search menu"
+                       ("l" consult-line "search line")
+                       ("r" consult-ripgrep "search word")
+                       ("f" consult-fd "searc file")
+                       ("q" nil "cancel"))
+                      (meow-leader-define-key
+                       '("?" . hydra-main-menu/body)
+                       '("w" . my-window-movement/body)
+                       '("s" . hydra-search-menu/body)
+                       )
                 '';
               };
 
