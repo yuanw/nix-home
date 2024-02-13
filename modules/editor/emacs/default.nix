@@ -178,7 +178,8 @@ with lib; {
               (push '(menu-bar-lines . 0) default-frame-alist)
               (push '(tool-bar-lines . nil) default-frame-alist)
               (push '(vertical-scroll-bars . nil) default-frame-alist)
-
+              ;; no title bar
+              (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               (set-face-attribute 'default nil
               :font "PragmataPro Mono Liga"
@@ -545,6 +546,45 @@ with lib; {
                 '';
               };
 
+              dired = {
+                enable = true;
+                command = [ "dired" "dired-jump" ];
+                config = ''
+                  (put 'dired-find-alternate-file 'disabled nil)
+
+                  ;; Be smart about choosing file targets.
+                  (setq dired-dwim-target t)
+
+                  ;; Use the system trash can.
+                  (setq delete-by-moving-to-trash t)
+                  (setq dired-listing-switches "-alvh --group-directories-first")
+                '';
+              };
+
+              wdired = {
+                enable = true;
+                bindLocal = {
+                  dired-mode-map = { "C-c C-w" = "wdired-change-to-wdired-mode"; };
+                };
+                config = ''
+                  ;; I use wdired quite often and this setting allows editing file
+                  ;; permissions as well.
+                  (setq wdired-allow-to-change-permissions t)
+                '';
+              };
+
+              # Hide hidden files when opening a dired buffer. But allow showing them by
+              # pressing `.`.
+              dired-x = {
+                enable = true;
+                hook = [ "(dired-mode . dired-omit-mode)" ];
+                bindLocal.dired-mode-map = { "." = "dired-omit-mode"; };
+                config = ''
+                  (setq dired-omit-verbose nil
+                        dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
+                '';
+              };
+
               keycast = {
                 command = [
                   "keycast-tab-bar-mode"
@@ -634,7 +674,6 @@ with lib; {
               magit = {
                 enable = true;
                 command = [ "magit-project-status" ];
-                bind = { "C-c g" = "magit-status"; };
                 config = ''
                   (setq forge-add-pullreq-refspec 'ask)
                   (add-to-list 'git-commit-style-convention-checks

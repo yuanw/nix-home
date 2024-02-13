@@ -316,9 +316,6 @@ In confirmation dialogues, we want to be able to type y and n instead of having 
 
 Make everything use UTF-8:
 #+begin_src elisp
-(use-package emacs
-  :init
-  (defalias 'yes-or-no-p 'y-or-n-p))
 
 (use-package emacs
   :init
@@ -346,10 +343,6 @@ Make everything use UTF-8:
 
 #+end_src
 
-* free-keys
-#+begin_src elisp
-(use-package free-keys
-  :commands free-keys)
 
 #+end_src
 
@@ -410,14 +403,6 @@ Make everything use UTF-8:
 
 #+end_src
 
-* keycast
-still cannot get it to work with line-mode yet, tab-bar-mode work good enough most time.
-#+begin_src elisp
-(use-package keycast
-  :commands (keycast-tab-bar-mode
-             keycast-header-line-mode)
-  )
-#+end_src
 
 
 
