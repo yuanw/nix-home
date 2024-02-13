@@ -757,6 +757,7 @@ with lib; {
 
               jinx = {
                 enable = true;
+                defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
                   "M-$" = "jinx-correct";
