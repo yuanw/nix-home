@@ -523,17 +523,16 @@ with lib; {
                   "recentf-apply-filename-handlers"
                 ];
                 config = ''
-                         (setq recentf-save-file (locate-user-emacs-file "recentf")
-                               recentf-max-menu-items 20
-                               recentf-max-saved-items 500
-                               recentf-exclude
-                  '("~\\'" "\\`out\\'" "\\.log\\'" "^/[^/]*:" "\\.el\\.gz\\'")
-                               recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
+                  (setq recentf-save-file (locate-user-emacs-file "recentf")
+                        recentf-max-menu-items 20
+                        recentf-max-saved-items 500
+                
+                        recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
 
-                         ;; Save the file list every 10 minutes.
-                         (run-at-time nil (* 10 60) 'recentf-save-list)
+                  ;; Save the file list every 10 minutes.
+                  (run-at-time nil (* 10 60) 'recentf-save-list)
 
-                         (recentf-mode)
+                  (recentf-mode)
                 '';
               };
 
