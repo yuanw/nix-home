@@ -1092,12 +1092,12 @@ with lib; {
                                    ("$" enlarge-window-horizontally "w+" )
                                                                          ("^" shrink-window-horizontally "w-" )
                                                                          ("f" find-file-other-window "other file")
-                                                                         ("d" delete-other-windows)
+                                                                         ("d" delete-other-windows "d")
                                                                          ("j" ace-window "ace-window")
                                                                          ("v" (lambda ()
                                                                             (interactive)
                                                                             (split-window-right)
-                                                                            (windmove-right)) "split right")
+                                                                            (windmove-right)) "right")
                                                                          ("s" w(lambda ()
                                                                             (interactive)
                                                                             (split-window-below)
@@ -1105,8 +1105,6 @@ with lib; {
                                                                          ("k" delete-window "delete")
                                                                          ("r" winner-redo "redo")
                                                                          ("u" winner-undo "undo")
-                                                                         ("D" ace-delete-window "ace delete") ;; TODO not working
-                                                                         ("m" ace-maximize-window "maximize") ;; TODO not working
                                                                          ("q" nil "cancel"))
 
                     (defhydra hydra-main-menu (:color blue)
