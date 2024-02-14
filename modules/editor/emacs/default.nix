@@ -1080,28 +1080,36 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                  (defhydra hydra-window-menu (:color blue)
-                                    "window movement"
-                                    ("q" nil "cancel"))
+                              (defhydra hydra-window-menu (:color blue)
+                              "window movement"
+                               ("v" (lambda ()
+                     (interactive)
+                     (split-window-right)
+                     (windmove-right)) "split right")
+                  ("s" (lambda ()
+                     (interactive)
+                     (split-window-below)
+                     (windmove-down)) "below")
+                                                ("q" nil "cancel"))
 
-                    (defhydra hydra-main-menu (:color blue)
-                                         "main menu"
-                                        ("p" project-switch-project "switch projects")
-                                        ("g" magit "magit")
-                                        ("n" org-roam-node-find "find note")
-                                        ("t" org-roam-dailies-goto-today "today note")
-                                        ("k" save-buffers-kill-emacs "quit emacs")
-                                        ("q" nil "cancel"))
-                   (defhydra hydra-search-menu (:color teal)
-                       "search menu"
-                      ("l" consult-line "search line")
-                      ("r" consult-ripgrep "search word")
-                      ("f" consult-fd "searc file")
-                      ("q" nil "cancel"))
+                                (defhydra hydra-main-menu (:color blue)
+                                                     "main menu"
+                                                    ("p" project-switch-project "switch projects")
+                                                    ("g" magit "magit")
+                                                    ("n" org-roam-node-find "find note")
+                                                    ("t" org-roam-dailies-goto-today "today note")
+                                                    ("k" save-buffers-kill-emacs "quit emacs")
+                                                    ("q" nil "cancel"))
+                               (defhydra hydra-search-menu (:color teal)
+                                   "search menu"
+                                  ("l" consult-line "search line")
+                                  ("r" consult-ripgrep "search word")
+                                  ("f" consult-fd "searc file")
+                                  ("q" nil "cancel"))
 
-                    (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
-                    (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                    (global-set-key (kbd "C-c w") 'hydra-window-menu/body)
+                                (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
+                                (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
+                                (global-set-key (kbd "C-c w") 'hydra-window-menu/body)
                 '';
               };
               smartparens = {
