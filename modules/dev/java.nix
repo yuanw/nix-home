@@ -3,11 +3,19 @@
 with lib;
 let cfg = config.modules.dev.java;
 in {
-  options.modules.dev.java = { enable = mkEnableOption "java"; };
+  options.modules.dev.java = {
+    enable = mkEnableOption "java";
+    pkg = mkOption {
+      type = types.package;
+      default = pkgs.jdk17;
+    };
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
+        maven.override
+        { jdk = cfg.pkg; }
         lombok
         google-java-format
         jdtls
@@ -18,7 +26,7 @@ in {
       ];
       programs = {
         java = {
-          package = pkgs.jdk17;
+          package = cfg.pkg;
           enable = true;
         };
         # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/libraries/java/lombok/default.nix#L26
