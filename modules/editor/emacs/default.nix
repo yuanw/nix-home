@@ -1090,6 +1090,9 @@ with lib; {
                      (interactive)
                      (split-window-below)
                      (windmove-down)) "below")
+                     ("k" delete-window "delete")
+                           ("d" delete-other-windows "delete other")
+
                                                 ("q" nil "cancel"))
 
                                 (defhydra hydra-main-menu (:color blue)
