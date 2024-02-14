@@ -1139,8 +1139,8 @@ with lib; {
                 command = [ "magit-project-status" ];
                 config = ''
                   (setq magit-list-refs-sortby "-committerdate")
-                             (setq forge-add-pullreq-refspec 'ask)
-                             (add-to-list 'git-commit-style-convention-checks
+                  (setq forge-add-pullreq-refspec 'ask)
+                  (add-to-list 'git-commit-style-convention-checks
                                           'overlong-summary-line)
                 '';
               };
@@ -1194,6 +1194,18 @@ with lib; {
                 '';
               };
 
+
+              eglot = {
+                enable = true;
+                config = ''
+                             (setq eglot-autoshutdown t)
+                  (add-to-list 'eglot-server-programs
+                              `(java-mode "jdtls-with-lombok"))
+                ''
+
+                ;
+              };
+
               ## there is also browes-at-remote
               git-link = {
                 enable = true;
@@ -1214,7 +1226,7 @@ with lib; {
                 earlyInit = ''
                   ;; Set color theme in early init to avoid flashing during start.
                   (require 'catppuccin-theme)
-                  (setq catppuccin-flavor 'latte) ;; or 'latte, 'macchiato, 'frappe or 'mocha
+                  (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, 'frappe or 'mocha
                   (load-theme 'catppuccin :no-confirm)
                 '';
               };
