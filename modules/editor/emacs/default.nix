@@ -1103,8 +1103,8 @@ with lib; {
                                                                             (split-window-below)
                                                                             (windmove-down)) "below")
                                                                          ("k" delete-window "delete")
-                                                                         ("r" winner-redo "redo")
-                                                                         ("u" winner-undo "undo")
+                                                                        ;; ("r" winner-redo "redo")
+                                                                       ;;  ("u" winner-undo "undo")
                                                                          ("q" nil "cancel"))
 
                     (defhydra hydra-main-menu (:color blue)
