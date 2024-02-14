@@ -1081,31 +1081,8 @@ with lib; {
                 enable = true;
                 config = ''
                   (defhydra hydra-window-menu (:color blue)
-                                   "window movement"
-                                   ("h" windmove-left "up")
-                                   ("o" windmove-right "->")
-                                   ("a" windmove-down "down")
-                                   ("i" windmove-up "up")
-                                   ("n" other-window "next")
-                                   ("*" enlarge-window "h+" )
-                                   ("@" shrink-window "h-" )
-                                   ("$" enlarge-window-horizontally "w+" )
-                                                                         ("^" shrink-window-horizontally "w-" )
-                                                                         ("f" find-file-other-window "other file")
-                                                                         ("d" delete-other-windows "d")
-                                                                         ("j" ace-window "ace-window")
-                                                                         ("v" (lambda ()
-                                                                            (interactive)
-                                                                            (split-window-right)
-                                                                            (windmove-right)) "right")
-                                                                         ("s" w(lambda ()
-                                                                            (interactive)
-                                                                            (split-window-below)
-                                                                            (windmove-down)) "below")
-                                                                         ("k" delete-window "delete")
-                                                                        ;; ("r" winner-redo "redo")
-                                                                       ;;  ("u" winner-undo "undo")
-                                                                         ("q" nil "cancel"))
+                                    "window movement"
+                                    ("q" nil "cancel"))
 
                     (defhydra hydra-main-menu (:color blue)
                                          "main menu"
