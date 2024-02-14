@@ -349,11 +349,11 @@ with lib; {
               ;  (interactive)
               ;  (let ((sort-fold-case t))
               ;    (call-interactively 'sort-lines)))
-              
+
             '';
 
             postlude = ''
-              
+
 (use-package corfu
   ;; Optional customizations
   :custom
@@ -508,18 +508,16 @@ with lib; {
   (use-package consult-xref)
   (use-package consult-register)
 
-  
+
           (defvar rah/consult-line-map
             (let ((map (make-sparse-keymap)))
               (define-key map "\C-s" #'vertico-next)
               map))
-  
+
   (consult-customize
-              consult-line
-              :history t ;; disable history
-              :keymap rah/consult-line-map
-            consult-buffer consult-find consult-ripgrep
-              :preview-key "M-."
+
+  consult-buffer
+  consult-find
    consult-ripgrep
    consult-git-grep
    consult-grep
@@ -1001,7 +999,7 @@ with lib; {
                   ;; Minibuffer history
                   :map minibuffer-local-map
                   ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-                  ("M-r" . consult-history))  
+                  ("M-r" . consult-history))
                 '';
 
                 config = ''
@@ -1330,8 +1328,3 @@ with lib; {
       { })
   ]);
 }
-
-
-
-
-
