@@ -436,9 +436,9 @@ with lib; {
 
 (use-package kind-icon
 :after corfu
-;:custom
-; (kind-icon-blend-background t)
-; (kind-icon-default-face 'corfu-default) ; only needed with blend-background
+:custom
+(kind-icon-blend-background t)
+(kind-icon-default-face 'corfu-default) ; only needed with blend-background
 :config
 (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
@@ -541,7 +541,6 @@ with lib; {
      ("f" consult-fd "searc file")
      ("q" nil "cancel"))
    (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
-
   )
 
 ;; Enable vertico
@@ -571,17 +570,17 @@ with lib; {
 
     )
 
-  ;; (use-package vertico-quick
-  ;;   :demand t
-  ;;   :after vertico
-  ;;   :bind (
-  ;;          :map vertico-map
-  ;;          ("M-q" . vertico-quick-insert)
-  ;;          ("C-q" . vertico-quick-exit))
-  ;;   :init
-  ;;   (progn
-  ;;     (setq vertico-quick1 "haio")
-  ;;     (setq vertico-quick2 "luy")))
+   (use-package vertico-quick
+     :demand t
+    :after vertico
+    :bind (
+            :map vertico-map
+            ("M-q" . vertico-quick-insert)
+            ("C-q" . vertico-quick-exit))
+     :init
+     (progn
+       (setq vertico-quick1 "haio")
+       (setq vertico-quick2 "luy")))
 
   ;; (use-package vertico-multiform
   ;;   :demand t
@@ -653,13 +652,10 @@ with lib; {
             '';
 
             usePackage = {
-
               exec-path-from-shell = {
                 enable = true;
                 config = "(exec-path-from-shell-initialize)";
               };
-
-
               meow = {
                 enable = true;
                 demand = true;
@@ -796,7 +792,7 @@ with lib; {
                        (auto-save-enable)
 
                   (setq auto-save-silent t)   ; quietly save
-                  (setq auto-save-delete-trailing-whitespace nil)  ; automatically delete spaces at the end of the line when saving
+                  (setq auto-save-delete-trailing-whitespace t)  ; automatically delete spaces at the end of the line when saving
 
                   ;;; custom predicates if you don't want auto save.
                   ;;; disable auto save mode when current filetype is an gpg file.
@@ -900,7 +896,6 @@ with lib; {
 
               orderless = {
                 enable = true;
-                demand = true;
                 config = ''
                   (setq completion-styles '(orderless basic))
                   (setq read-file-name-completion-ignore-case t)
@@ -1134,7 +1129,7 @@ with lib; {
                        ("k" save-buffers-kill-emacs "quit emacs")
                        ("q" nil "cancel"))
                   (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                  (global-set-key (kbd "C-c o")  'my-window-movement/body)
+                  (global-set-key (kbd "C-c w")  'my-window-movement/body)
                 '';
               };
               smartparens = {
