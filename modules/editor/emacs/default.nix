@@ -1221,6 +1221,20 @@ with lib; {
                   (setq git-link-open-in-browser t)
                 '';
               };
+
+
+              catppuccin-theme = {
+                enable = true;
+                defer = true;
+                earlyInit = ''
+                  ;; Set color theme in early init to avoid flashing during start.
+                  (require 'catppuccin-theme)
+                  (setq catppuccin-flavor 'Mocha)
+                  (load-theme 'catppuccin :no-confirm)
+                '';
+              };
+
+
               vterm = {
                 enable = true;
                 defer = true;
