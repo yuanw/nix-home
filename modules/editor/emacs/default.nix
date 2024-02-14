@@ -455,7 +455,6 @@ with lib; {
          ;; ([Remap imenu] . consult-imenu)
          ([remap yank-pop] . consult-yank-pop)
          ("C-c M-x" . consult-mode-command)
-         ("C-c h"   . consult-history)
          ("C-c K"   . consult-kmacro)
          ;; ("C-c i"   . consult-info)
           ;; M-s bindings (search-map)
@@ -507,7 +506,13 @@ with lib; {
   :config
   (use-package consult-xref)
   (use-package consult-register)
-
+  (defhydra hydra-search-menu (:color teal)
+      "search menu"
+     ("l" consult-line "search line")
+     ("r" consult-ripgrep "search word")
+     ("f" consult-fd "searc file")
+     ("q" nil "cancel"))
+   (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
 
           (defvar rah/consult-line-map
             (let ((map (make-sparse-keymap)))
@@ -515,9 +520,6 @@ with lib; {
               map))
 
   (consult-customize
-
-  consult-buffer
-  consult-find
    consult-ripgrep
    consult-git-grep
    consult-grep
@@ -532,13 +534,7 @@ with lib; {
    consult-theme
               :preview-key '(:debounce 1 any)
               )
-   (defhydra hydra-search-menu (:color teal)
-      "search menu"
-     ("l" consult-line "search line")
-     ("r" consult-ripgrep "search word")
-     ("f" consult-fd "searc file")
-     ("q" nil "cancel"))
-   (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
+
   )
 
 ;; Enable vertico
@@ -1126,7 +1122,7 @@ with lib; {
                        ("t" org-roam-dailies-goto-today "today note")
                        ("k" save-buffers-kill-emacs "quit emacs")
                        ("q" nil "cancel"))
-                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
+                  (global-set-key (kbd "C-c h") 'hydra-main-menu/body)
                   (global-set-key (kbd "C-c w")  'my-window-movement/body)
                 '';
               };
@@ -1229,6 +1225,7 @@ with lib; {
                 earlyInit = ''
                   ;; Set color theme in early init to avoid flashing during start.
                   (require 'catppuccin-theme)
+                  (setq catppuccin-flavor 'latte) ;; or 'latte, 'macchiato, 'frappe or 'mocha
                   (load-theme 'catppuccin :no-confirm)
                 '';
               };
