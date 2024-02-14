@@ -195,7 +195,7 @@ with lib; {
               (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               (set-face-attribute 'default nil
-              :font "PragmataPro Mono Liga"
+              :font "PragmataPro Liga"
               :height 180
               :weight 'medium)
             '';
@@ -1123,9 +1123,8 @@ with lib; {
                      ("f" consult-fd "searc file")
                      ("q" nil "cancel"))
                    (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
-
-                                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                                  (global-set-key (kbd "C-c w")  'my-window-movement/body)
+                   (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
+                   (global-set-key (kbd "C-c h")  'my-window-movement/body)
                 '';
               };
               smartparens = {
