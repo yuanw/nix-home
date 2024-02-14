@@ -198,8 +198,6 @@ with lib; {
               :font "PragmataPro Mono Liga"
               :height 180
               :weight 'medium)
-
-
             '';
 
             prelude = ''
@@ -503,16 +501,25 @@ with lib; {
   ;; Use Consult to select xref locations with preview
   (setq xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
-
+        :commands (  consult-theme)
   ;; Configure other variables and modes in the :config section,
   ;; after lazily loading the package.
   :config
   (use-package consult-xref)
   (use-package consult-register)
 
+  
+          (defvar rah/consult-line-map
+            (let ((map (make-sparse-keymap)))
+              (define-key map "\C-s" #'vertico-next)
+              map))
+  
   (consult-customize
-   consult-theme
-   :preview-key '(:debounce 0.2 any)
+              consult-line
+              :history t ;; disable history
+              :keymap rah/consult-line-map
+            consult-buffer consult-find consult-ripgrep
+              :preview-key "M-."
    consult-ripgrep
    consult-git-grep
    consult-grep
@@ -523,7 +530,17 @@ with lib; {
    consult--source-file-register
    consult--source-recent-file
    consult--source-project-recent-file
-   :preview-key '(:debounce 0.4 any))
+   :preview-key '(:debounce 0.4 any)
+   consult-theme
+              :preview-key '(:debounce 1 any)
+              )
+   (defhydra hydra-search-menu (:color teal)
+      "search menu"
+     ("l" consult-line "search line")
+     ("r" consult-ripgrep "search word")
+     ("f" consult-fd "searc file")
+     ("q" nil "cancel"))
+   (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
 
   )
 
@@ -540,8 +557,6 @@ with lib; {
 
       ;; Grow and shrink the Vertico minibuffer
       (setq vertico-resize t)
-      ;;(setq vertico-preselect 'prompt)
-
 
       ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
        (setq vertico-cycle t))
@@ -1081,15 +1096,15 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                                                    (defhydra my-window-movement (:color blue)
-                                                      "window movement"
-                                                        ("h" windmove-left "up")
-                                                        ("o" windmove-right "->")
-                                                        ("a" windmove-down "down")
-                                                        ("i" windmove-up "up")
-                                                        ("n" other-window "next")
-                                                        ("*" enlarge-window "h+" )
-                                                        ("@" shrink-window "h-" )
+                  (defhydra my-window-movement (:color blue)
+                  "window movement"
+                  ("h" windmove-left "up")
+                  ("o" windmove-right "->")
+                  ("a" windmove-down "down")
+                  ("i" windmove-up "up")
+                  ("n" other-window "next")
+                  ("*" enlarge-window "h+" )
+                  ("@" shrink-window "h-" )
                                                         ("$" enlarge-window-horizontally "w+" )
                                                         ("^" shrink-window-horizontally "w-" )
                                                         ("f" find-file-other-window "other file")
@@ -1110,7 +1125,6 @@ with lib; {
                                                         ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
                                                         ("q" nil "cancel"))
 
-                                        
                   (defhydra hydra-main-menu (:color blue)
                         "main menu"
                        ("p" project-switch-project "switch projects")
@@ -1119,9 +1133,8 @@ with lib; {
                        ("t" org-roam-dailies-goto-today "today note")
                        ("k" save-buffers-kill-emacs "quit emacs")
                        ("q" nil "cancel"))
-                                 
-                                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                                  (global-set-key (kbd "C-c o")  'my-window-movement/body)
+                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
+                  (global-set-key (kbd "C-c o")  'my-window-movement/body)
                 '';
               };
               smartparens = {
