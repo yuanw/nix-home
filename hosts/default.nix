@@ -67,6 +67,9 @@
           specialArgs = {
             isDarwin = true;
             isNixOS = false;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { system = system; };
+            };
             packages = config.packages;
             inherit inputs inputs';
           };

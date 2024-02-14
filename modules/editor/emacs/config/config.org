@@ -316,9 +316,6 @@ In confirmation dialogues, we want to be able to type y and n instead of having 
 
 Make everything use UTF-8:
 #+begin_src elisp
-(use-package emacs
-  :init
-  (defalias 'yes-or-no-p 'y-or-n-p))
 
 (use-package emacs
   :init
@@ -346,10 +343,6 @@ Make everything use UTF-8:
 
 #+end_src
 
-* free-keys
-#+begin_src elisp
-(use-package free-keys
-  :commands free-keys)
 
 #+end_src
 
@@ -410,14 +403,6 @@ Make everything use UTF-8:
 
 #+end_src
 
-* keycast
-still cannot get it to work with line-mode yet, tab-bar-mode work good enough most time.
-#+begin_src elisp
-(use-package keycast
-  :commands (keycast-tab-bar-mode
-             keycast-header-line-mode)
-  )
-#+end_src
 
 
 
@@ -549,19 +534,7 @@ try it out, save-buffer
       "gpg"
       (file-name-extension (buffer-name)) t))))
 #+end_src
-* smartparens
 
-https://github.com/Fuco1/smartparens
-#+begin_src elisp
-  (use-package smartparens-config
-     :commands smartparens-mode
-     :hook
-     (smartparen . smartparens-mode)
-  :custom
-  (sp-highlight-pair-overlay nil))
-
-
-#+end_src
 * embark
 https://github.com/oantolin/embark
 #+begin_src elisp
@@ -850,10 +823,7 @@ https://github.com/minad/vertico
     ;;           '(;; show grep results in a dedicated buffer:
     ;;             (consult-ripgrep buffer)))))
 
-      ;; Persist history over Emacs restarts. Vertico sorts by history position.
-      (use-package savehist
-        :config
-        (savehist-mode))
+ 
 
       ;; A few more useful configurations...
       (use-package emacs
@@ -1317,16 +1287,7 @@ copied for https://github.com/karthink/.emacs.d/blob/6aa2e034ce641af60c317697de7
           (t '(0.5 . 0.5)))))
 #+end_src
 
-* winner
-undo redo window management
-#+begin_src elisp
-  (use-package winner
-  :unless noninteractive
-  :demand t
-  :bind (("M-N" . winner-redo)
-         ("M-P" . winner-undo))
-  :config
-  (winner-mode 1))
+
 #+end_src
 
 * markdown-mode
@@ -1439,58 +1400,59 @@ right now the hydra is not repeatable, kind of missing the point. need to figure
 blue pill means back. red pill means stay
 how add winner undo here
 #+begin_src elisp
-      (use-package hydra
-        :config
-    (defhydra my-window-movement ()
-      "window movement"
-        ("h" windmove-left "up")
-        ("o" windmove-right "->")
-        ("a" windmove-down "down")
-        ("i" windmove-up "up")
-        ("n" other-window "next")
-        ("*" enlarge-window "h+" )
-        ("@" shrink-window "h-" )
-        ("$" enlarge-window-horizontally "w+" )
-        ("^" shrink-window-horizontally "w-" )
-        ("f" find-file-other-window "other file")
-        ("d" delete-other-windows :color blue)
-        ("j" ace-window "ace-window")
-        ("v" (lambda ()
-           (interactive)
-           (split-window-right)
-           (windmove-right)) "split right")
-        ("s" (lambda ()
-           (interactive)
-           (split-window-below)
-           (windmove-down)) "below")
-        ("k" delete-window "delete")
-        ("r" winner-redo "redo")
-        ("u" winner-undo "undo")
-        ("D" ace-delete-window "ace delete") ;; TODO not working
-        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-        ("q" nil "cancel"))
+    (use-package hydra
+      :config
+  (defhydra my-window-movement ()
+    "window movement"
+      ("h" windmove-left "up")
+      ("o" windmove-right "->")
+      ("a" windmove-down "down")
+      ("i" windmove-up "up")
+      ("n" other-window "next")
+      ("*" enlarge-window "h+" )
+      ("@" shrink-window "h-" )
+      ("$" enlarge-window-horizontally "w+" )
+      ("^" shrink-window-horizontally "w-" )
+      ("f" find-file-other-window "other file")
 
-    (defhydra hydra-main-menu (:color blue)
-          "main menu"
-         ("p" project-switch-project "switch projects")
-         ("g" magit "magit")
-         ("n" org-roam-node-find "find note")
-         ("t" org-roam-dailies-goto-today "today note")
-         ("q" nil "cancel"))
+      ("d" delete-other-windows :color blue)
+      ("j" ace-window "ace-window")
+      ("v" (lambda ()
+         (interactive)
+         (split-window-right)
+         (windmove-right)) "split right")
+      ("s" (lambda ()
+         (interactive)
+         (split-window-below)
+         (windmove-down)) "below")
+      ("k" delete-window "delete")
+      ("r" winner-redo "redo")
+      ("u" winner-undo "undo")
+      ("D" ace-delete-window "ace delete") ;; TODO not working
+      ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+      ("q" nil "cancel"))
 
-        (defhydra hydra-search-menu (:color blue)
-          "search menu"
-         ("l" consult-line "search line")
-         ("r" consult-ripgrep "search word")
-         ("f" consult-fd "searc file")
-         ("q" nil "cancel"))
-        (meow-leader-define-key
-         '("?" . hydra-main-menu/body)
-         '("w" . my-window-movement/body)
-         '("s" . hydra-search-menu/body)
-         )
+  (defhydra hydra-main-menu (:color blue)
+        "main menu"
+       ("p" project-switch-project "switch projects")
+       ("g" magit "magit")
+       ("n" org-roam-node-find "find note")
+       ("t" org-roam-dailies-goto-today "today note")
+       ("q" nil "cancel"))
 
-        )
+      (defhydra hydra-search-menu (:color blue)
+        "search menu"
+       ("l" consult-line "search line")
+       ("r" consult-ripgrep "search word")
+       ("f" consult-fd "searc file")
+       ("q" nil "cancel"))
+      (meow-leader-define-key
+       '("?" . hydra-main-menu/body)
+       '("w" . my-window-movement/body)
+       '("s" . hydra-search-menu/body)
+       )
+
+      )
   #+end_src
 
 * denote
@@ -1524,14 +1486,6 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 
 #+end_src
 
-* git-link
-#+begin_src elisp
-  (use-package git-link
-  :config
-  (setq git-link-open-in-browser t)
-    :commands (git-link git-link-commit  git-link-homepage))
-
-#+end_src
 
 * showcase
 #+begin_src elisp
