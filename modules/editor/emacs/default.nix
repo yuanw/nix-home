@@ -1229,7 +1229,6 @@ with lib; {
                 earlyInit = ''
                   ;; Set color theme in early init to avoid flashing during start.
                   (require 'catppuccin-theme)
-                  (setq catppuccin-flavor 'Mocha)
                   (load-theme 'catppuccin :no-confirm)
                 '';
               };
