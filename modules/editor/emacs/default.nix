@@ -1080,7 +1080,7 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                  (defhydra my-window-movement (:color blue)
+                  (defhydra hydra-window-menu (:color blue)
                                    "window movement"
                                    ("h" windmove-left "up")
                                    ("o" windmove-right "->")
@@ -1089,7 +1089,7 @@ with lib; {
                                    ("n" other-window "next")
                                    ("*" enlarge-window "h+" )
                                    ("@" shrink-window "h-" )
-                                                                         ("$" enlarge-window-horizontally "w+" )
+                                   ("$" enlarge-window-horizontally "w+" )
                                                                          ("^" shrink-window-horizontally "w-" )
                                                                          ("f" find-file-other-window "other file")
                                                                          ("d" delete-other-windows)
@@ -1126,7 +1126,7 @@ with lib; {
 
                     (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
                     (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                    (global-set-key (kbd "C-c w") 'my-window-movement/body)
+                    (global-set-key (kbd "C-c w") 'hydra-window-menu/body)
                 '';
               };
               smartparens = {
