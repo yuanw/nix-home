@@ -506,13 +506,7 @@ with lib; {
   :config
   (use-package consult-xref)
   (use-package consult-register)
-  (defhydra hydra-search-menu (:color teal)
-      "search menu"
-     ("l" consult-line "search line")
-     ("r" consult-ripgrep "search word")
-     ("f" consult-fd "searc file")
-     ("q" nil "cancel"))
-   (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
+
 
           (defvar rah/consult-line-map
             (let ((map (make-sparse-keymap)))
@@ -1085,45 +1079,53 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                  (defhydra my-window-movement (:color blue)
-                  "window movement"
-                  ("h" windmove-left "up")
-                  ("o" windmove-right "->")
-                  ("a" windmove-down "down")
-                  ("i" windmove-up "up")
-                  ("n" other-window "next")
-                  ("*" enlarge-window "h+" )
-                  ("@" shrink-window "h-" )
-                                                        ("$" enlarge-window-horizontally "w+" )
-                                                        ("^" shrink-window-horizontally "w-" )
-                                                        ("f" find-file-other-window "other file")
-                                                        ("d" delete-other-windows :color blue)
-                                                        ("j" ace-window "ace-window")
-                                                        ("v" (lambda ()
-                                                           (interactive)
-                                                           (split-window-right)
-                                                           (windmove-right)) "split right")
-                                                        ("s" w(lambda ()
-                                                           (interactive)
-                                                           (split-window-below)
-                                                           (windmove-down)) "below")
-                                                        ("k" delete-window "delete")
-                                                        ("r" winner-redo "redo")
-                                                        ("u" winner-undo "undo")
-                                                        ("D" ace-delete-window "ace delete") ;; TODO not working
-                                                        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
-                                                        ("q" nil "cancel"))
+                                  (defhydra my-window-movement (:color blue)
+                                  "window movement"
+                                  ("h" windmove-left "up")
+                                  ("o" windmove-right "->")
+                                  ("a" windmove-down "down")
+                                  ("i" windmove-up "up")
+                                  ("n" other-window "next")
+                                  ("*" enlarge-window "h+" )
+                                  ("@" shrink-window "h-" )
+                                                                        ("$" enlarge-window-horizontally "w+" )
+                                                                        ("^" shrink-window-horizontally "w-" )
+                                                                        ("f" find-file-other-window "other file")
+                                                                        ("d" delete-other-windows :color blue)
+                                                                        ("j" ace-window "ace-window")
+                                                                        ("v" (lambda ()
+                                                                           (interactive)
+                                                                           (split-window-right)
+                                                                           (windmove-right)) "split right")
+                                                                        ("s" w(lambda ()
+                                                                           (interactive)
+                                                                           (split-window-below)
+                                                                           (windmove-down)) "below")
+                                                                        ("k" delete-window "delete")
+                                                                        ("r" winner-redo "redo")
+                                                                        ("u" winner-undo "undo")
+                                                                        ("D" ace-delete-window "ace delete") ;; TODO not working
+                                                                        ("m" ace-maximize-window "maximize" :color blue) ;; TODO not working
+                                                                        ("q" nil "cancel"))
 
-                  (defhydra hydra-main-menu (:color blue)
-                        "main menu"
-                       ("p" project-switch-project "switch projects")
-                       ("g" magit "magit")
-                       ("n" org-roam-node-find "find note")
-                       ("t" org-roam-dailies-goto-today "today note")
-                       ("k" save-buffers-kill-emacs "quit emacs")
-                       ("q" nil "cancel"))
-                  (global-set-key (kbd "C-c h") 'hydra-main-menu/body)
-                  (global-set-key (kbd "C-c w")  'my-window-movement/body)
+                                  (defhydra hydra-main-menu (:color blue)
+                                        "main menu"
+                                       ("p" project-switch-project "switch projects")
+                                       ("g" magit "magit")
+                                       ("n" org-roam-node-find "find note")
+                                       ("t" org-roam-dailies-goto-today "today note")
+                                       ("k" save-buffers-kill-emacs "quit emacs")
+                                       ("q" nil "cancel"))
+                  (defhydra hydra-search-menu (:color teal)
+                      "search menu"
+                     ("l" consult-line "search line")
+                     ("r" consult-ripgrep "search word")
+                     ("f" consult-fd "searc file")
+                     ("q" nil "cancel"))
+                   (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
+
+                                  (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
+                                  (global-set-key (kbd "C-c w")  'my-window-movement/body)
                 '';
               };
               smartparens = {
