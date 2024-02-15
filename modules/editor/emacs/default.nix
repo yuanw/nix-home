@@ -1193,7 +1193,7 @@ with lib; {
                                      :no-save t
                                      :immediate-finish nil
                                      :kill-buffer t
-                                     :jump-to-captured t))))
+                                     :jump-to-captured t)))
                 '';
               };
 
