@@ -1115,10 +1115,95 @@ with lib; {
                                 (global-set-key (kbd "C-c w") 'hydra-window-menu/body)
                 '';
               };
+              org = {
+                enable = true;
+                config = ''
+                                   (setq org-directory  "~/org/")
+                  (setq org-agenda-files (append
+                                           (file-expand-wildcards (concat org-directory "*.org"))
+                                           (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                                           (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                  (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                '';
+              };
+
+              org-agenda = {
+                enable = true;
+                after = [ "org" ];
+                defer = true;
+                config = ''
+                  ;; Set up agenda view.
+                  (setq org-agenda-files (rah-all-org-files)
+                        org-agenda-span 5
+                        org-deadline-warning-days 14
+                        org-agenda-show-all-dates t
+                        org-agenda-skip-deadline-if-done t
+                        org-agenda-skip-scheduled-if-done t
+                        org-agenda-start-on-weekday nil)
+                '';
+              };
+
+              org-roam = {
+                enable = true;
+
+                after = [ "org" ];
+                init = ''
+                  (setq org-roam-v2-ack t)
+                '';
+                config = ''
+                          (use-package org-roam-dailies)
+
+                   ;; If you're using a vertical completion framework, you might want a more informative completion interface
+                  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
+                  (setq org-roam-dailies-directory "daily/")
+                    (setq org-roam-dailies-capture-templates
+                       '(("d" "default" entry
+                          "* %?"
+                          :target (file+head "%<%Y-%m-%d>.org"
+                                             "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
+
+
+                          (setq org-roam-directory (concat org-directory "roam/"))
+                          (org-roam-db-autosync-mode)
+                '';
+              };
+
+              denote = {
+                enable = true;
+                after = [ "org" ];
+                config = ''
+                                  (setq denote-directory "~/org/denote/")
+                  (setq denote-templates
+                        `((report . "* Some heading\n\n* Another heading")
+                          (journal . ,(concat "* Tasks todo"
+                                           "\n\n"
+                                           "* TIL"
+                                           "\n\n"))))
+
+                    (use-package denote-org-dblock)
+                    (use-package denote-rename-buffer)
+                    (use-package denote-journal-extras)
+                    (denote-rename-buffer-mode)
+
+                    (with-eval-after-load 'org-capture
+                      (add-to-list 'org-capture-templates
+                                   '("n" "New note (with Denote)" plain
+                                     (file denote-last-path)
+                                     #'denote-org-capture
+                                     :no-save t
+                                     :immediate-finish nil
+                                     :kill-buffer t
+                                     :jump-to-captured t))))
+                '';
+              };
+
               smartparens = {
                 enable = true;
                 defer = 3;
-                command = [ "smartparens-global-mode" "show-smartparens-global-mode" ];
+                command = [
+                  "smartparens-global-mode"
+                  "show-smartparens-global-mode"
+                ];
                 bindLocal = {
                   smartparens-mode-map = {
                     "M-<right>" = "sp-forward-sexp";
@@ -1222,6 +1307,13 @@ with lib; {
               };
 
               direnv.enable = true;
+              just-mode.enable = true;
+              justfl = {
+                enable = true;
+                command = [ "justl-exec-recipe" ];
+              };
+
+
 
               eglot = {
                 enable = true;
