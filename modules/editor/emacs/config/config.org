@@ -927,15 +927,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
                  )
        :custom
        (magit-list-refs-sortby "-committerdate"))
-     (use-package eglot
-       :custom
-       (eglot-autoshutdown t)
-       :config
-       (setq read-process-output-max (* 1024 1024))
-       (add-to-list 'eglot-server-programs
-                   `(java-mode "jdtls-with-lombok"))
-       )
-
+ 
 #+end_src
 
 * after eglot and orderless
@@ -957,17 +949,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
   (global-flycheck-eglot-mode 1))
 #+end_src
 
-* jinx
 
-https://github.com/minad/jinx
-
-#+begin_src elisp
-(use-package jinx
-  :hook (emacs-startup . global-jinx-mode)
-  :bind (("M-$" . jinx-correct)
-         ("C-M-$" . jinx-languages)))
-
-#+end_src
 
 * nix
 #+begin_src elisp
@@ -1173,26 +1155,8 @@ steal from jwiegley
 
 #+end_src
 
-* vterm
-#+begin_src elisp
-  (use-package vterm
-   :defer t
-    :commands (vterm vterm-other-window)
-   )
-#+end_src
 
-* yaml
-#+begin_src elisp
-  (use-package yaml-mode
-  :mode "\\.ya?ml\\'")
-#+end_src
 
-* groovy
-#+begin_src elisp
-    (use-package groovy-mode
-    :mode "\\.g\\(?:radle\\|roovy\\)$"
-  )
-#+end_src
 * yasnippet
 #+begin_src elisp
 (use-package yasnippet

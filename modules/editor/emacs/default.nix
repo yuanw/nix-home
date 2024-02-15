@@ -1136,6 +1136,12 @@ with lib; {
               magit = {
                 enable = true;
                 bind = { "C-x g" = "magit-status"; };
+                bindLocal = {
+                  magit-mode-map = {
+                    "U" = "magit-unstage-all";
+                    "k" = "magit-discard";
+                  };
+                };
                 command = [ "magit-project-status" ];
                 config = ''
                   (setq magit-list-refs-sortby "-committerdate")
@@ -1167,6 +1173,14 @@ with lib; {
                 config = ''
                   (setq nix-indent-function 'nix-indent-line) '';
               };
+              groovy-mode = {
+                enable = true;
+                mode = [
+                  ''"\\.gradle\\'"'' # \
+                  ''"\\.groovy\\'"'' # \
+                  ''"Jenkinsfile\\'"'' # \
+                ];
+              };
 
               popper = {
                 enable = true;
@@ -1194,6 +1208,7 @@ with lib; {
                 '';
               };
 
+              direnv.enable = true;
 
               eglot = {
                 enable = true;
@@ -1202,7 +1217,6 @@ with lib; {
                   (add-to-list 'eglot-server-programs
                               `(java-mode "jdtls-with-lombok"))
                 ''
-
                 ;
               };
 
