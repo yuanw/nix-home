@@ -509,10 +509,7 @@ with lib; {
                 (use-package consult-register)
 
 
-                        (defvar rah/consult-line-map
-                          (let ((map (make-sparse-keymap)))
-                            (define-key map "\C-s" #'vertico-next)
-                            map))
+                     
 
                 (consult-customize
                  consult-ripgrep
