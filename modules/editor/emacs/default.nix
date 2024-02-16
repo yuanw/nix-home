@@ -634,6 +634,7 @@ with lib; {
  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
  (setq consult-dir-shadow-filenames nil))
 
+ 
  (use-package yasnippet
   :demand t
   :diminish yas-minor-mode
