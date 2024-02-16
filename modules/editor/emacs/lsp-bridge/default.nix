@@ -2,7 +2,7 @@
 , fetchFromGitHub
 , writeText
 , substituteAll
-, fakeHash
+, lib
   # Elisp dependencies
 
 , markdown-mode
@@ -39,7 +39,7 @@ melpaBuild {
     owner = "manateelazycat";
     repo = "lsp-bridge";
     rev = "270e42d52c545f959a9e5c79e8f317f6cf4b2162";
-    hash = fakeHash;
+    hash = lib.fakeHash;
 
   };
 
