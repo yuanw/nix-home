@@ -42,15 +42,12 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
 
       casks = [
-        "brave-browser"
         "docker"
         "google-chrome"
-        "insomnia"
         "slack"
         "sloth"
         "mysql-shell"
         "viscosity"
-        "parsec"
       ];
       brews = [
         # "jdtls"
