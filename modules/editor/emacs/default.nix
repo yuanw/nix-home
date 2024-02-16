@@ -1385,8 +1385,7 @@ with lib; {
               };
               transient-showcase = {
                 enable = true;
-                pkg =
-
+                pkg = epkgs:
                   (pkgs.callPackage ./transient-showcase.nix {
                     inherit (pkgs) fetchFromGitHub;
                     inherit (epkgs) trivialBuild transient;
