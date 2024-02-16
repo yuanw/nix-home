@@ -1308,9 +1308,33 @@ with lib; {
 
               direnv.enable = true;
               just-mode.enable = true;
-              justfl = {
+
+              justl = {
                 enable = true;
                 command = [ "justl-exec-recipe" ];
+              };
+
+              markdown-mode = {
+                enable = true;
+                mode = [
+                  ''("\\`README\\.md\\'" . gfm-mode)''
+                  ''("\\.md\\'"          . markdown-mode)''
+                  ''("\\.markdown\\'"    . markdown-mode)''
+                ];
+                config = ''
+                  (markdown-command "pandoc -f markdown_github+smart")
+                  (markdown-command-needs-filename t)
+                  (markdown-enable-math t)
+                  (markdown-open-command "marked")
+                  :custom-face
+                  (markdown-header-face-1 ((t (:inherit markdown-header-face :height 2.0))))
+                  (markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
+                  (markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
+                  (markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
+                '';
+                init = ''
+                  (setq markdown-command "multimarkdown")
+                '';
               };
 
 
