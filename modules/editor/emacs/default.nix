@@ -912,7 +912,9 @@ with lib; {
               };
 
               keycast = {
+                enable = true;
                 command = [
+                  "keycast-mode-line-mode"
                   "keycast-tab-bar-mode"
                   "keycast-header-line-mode"
                 ];
