@@ -1359,7 +1359,6 @@ with lib; {
 
                 '';
               };
-              )
 
 
               catppuccin-theme = {
