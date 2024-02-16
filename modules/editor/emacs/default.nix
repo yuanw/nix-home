@@ -642,13 +642,11 @@ with lib; {
                 :hook (prog-mode . yas-minor-mode-on)
                 :custom
                 (yas-prompt-functions '(yas-completing-prompt yas-no-prompt))
-                (yas-snippet-dirs (list (emacs-path "snippets") ))
                 (yas-triggers-in-field t)
                 (yas-wrap-around-region t)
                 :custom-face
                 (yas-field-highlight-face ((t (:background "#e4edfc"))))
-                :config
-                (yas-load-directory (emacs-path "snippets")))
+                )
 
               (use-package consult-yasnippet
                 :after (consult yasnippet))
