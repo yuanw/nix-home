@@ -176,6 +176,7 @@ with lib; {
               consult-org-roam
               kind-icon
               vertico
+              yasnippet
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
@@ -632,6 +633,40 @@ with lib; {
   :config
  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
  (setq consult-dir-shadow-filenames nil))
+
+ (use-package yasnippet
+  :demand t
+  :diminish yas-minor-mode
+  :commands yas-minor-mode-on
+  ;; :bind (("C-c y d" . yas-load-directory)
+  ;;        ("C-c y i" . yas-insert-snippet)
+  ;;        ("C-c y f" . yas-visit-snippet-file)
+  ;;        ("C-c y n" . yas-new-snippet)
+  ;;        ("C-c y t" . yas-tryout-snippet)
+  ;;        ("C-c y l" . yas-describe-tables)
+  ;;        ("C-c y g" . yas-global-mode)
+  ;;        ("C-c y m" . yas-minor-mode)
+  ;;        ("C-c y r" . yas-reload-all)
+  ;;        ("C-c y x" . yas-expand)
+  ;;        :map yas-keymap
+  ;;        ("C-i" . yas-next-field-or-maybe-expand))
+  ;; TODO need to figure this out
+  ;; :mode ("/\\.emacs\\.d/snippets/" . snippet-mode)
+  :hook (prog-mode . yas-minor-mode-on)
+  :custom
+  (yas-prompt-functions '(yas-completing-prompt yas-no-prompt))
+  (yas-snippet-dirs (list (emacs-path "snippets") ))
+  (yas-triggers-in-field t)
+  (yas-wrap-around-region t)
+  :custom-face
+  (yas-field-highlight-face ((t (:background "#e4edfc"))))
+  :config
+  (yas-load-directory (emacs-path "snippets")
+                      ))
+
+(use-package consult-yasnippet
+  :after (consult yasnippet))
+
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-z")
               (global-unset-key "\C-x\C-c")
@@ -1236,6 +1271,7 @@ with lib; {
                 '';
               };
               flycheck = {
+                enable = true;
                 config = ''
                   (global-flycheck-mode)
                   (flycheck-define-checker vale
@@ -1249,6 +1285,7 @@ with lib; {
                   (add-to-list 'flycheck-checkers 'vale 'append))
                 '';
               };
+
 
               jinx = {
                 enable = true;
@@ -1345,9 +1382,14 @@ with lib; {
                              (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
                               `(java-mode "jdtls-with-lombok"))
-                ''
-                ;
+                '';
               };
+              flycheck-eglot = {
+                enable = true;
+                after = [ "flycheck" "eglot" ];
+                config = "(global-flycheck-eglot-mode 1))";
+              };
+
 
               ## there is also browes-at-remote
               git-link = {
@@ -1431,6 +1473,7 @@ with lib; {
           };
 
           home = {
+            file.".emacs.d/snippets".source = ./config/snippets;
             packages = with pkgs; [
               # git
               (ripgrep.override { withPCRE2 = true; })

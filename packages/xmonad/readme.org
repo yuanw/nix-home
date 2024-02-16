@@ -1,6 +1,6 @@
 #+TITLE: XMonad Config
 
-* How to restart xmonad withour quiting
+* How to restart xmonad without quitting
 \https://discourse.nixos.org/t/xmonad-reloading-without-quitting/10206
 
 * References

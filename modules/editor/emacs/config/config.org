@@ -890,19 +890,7 @@ https://gitlab.com/skybert/my-little-friends/-/blob/master/emacs/.emacs
 
 #+end_src
 
-* ace window
 
-  Quickly switch between open buffer windows
-#+begin_src elisp
-(use-package ace-window
-  :bind
-  ("M-o" . ace-window)
-  :config
-  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
-        aw-dispatch-always t))
-
-
-#+end_src
 
 * avy
 #+begin_src elisp
