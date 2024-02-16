@@ -1536,7 +1536,7 @@ with lib; {
               vale
             ];
             # file.".emacs.d".source = emacsConfigPath;
-            file.".vale.ini ".text =
+            file.".vale.ini".text =
               let
                 stylesPath = pkgs.linkFarm "
             vale-styles "
