@@ -853,6 +853,26 @@ with lib; {
                 '';
               };
 
+              ediff = {
+                enable = true;
+                config = ''
+                  ;; don't use a separate Frame for the control panel
+                  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+                  ;; horizontal split is more readable
+                  (setq ediff-split-window-function 'split-window-horizontally)
+
+                  ;; restore window config upon quitting ediff
+                  (defvar ue-ediff-window-config nil "Window config before ediffing.")
+                  (add-hook 'ediff-before-setup-hook
+                  (lambda ()
+                  (setq ue-ediff-window-config (current-window-configuration))))
+                  (dolist (hook '(ediff-suspend-hook ediff-quit-hook))
+                  (add-hook hook
+                  (lambda ()
+                  (set-window-configuration ue-ediff-window-config))))
+                '';
+              };
+
               dired = {
                 enable = true;
                 command = [ "dired" "dired-jump" ];
@@ -1268,7 +1288,7 @@ with lib; {
                   :error-patterns
                   ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
                   :modes (markdown-mode gfm-mode org-mode text-mode))
-                  (add-to-list 'flycheck-checkers 'vale 'append))
+                  (add-to-list 'flycheck-checkers 'vale 'append)
                 '';
               };
 
@@ -1365,7 +1385,7 @@ with lib; {
               eglot = {
                 enable = true;
                 config = ''
-                             (setq eglot-autoshutdown t)
+                  (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
                               `(java-mode "jdtls-with-lombok"))
                 '';
@@ -1439,9 +1459,6 @@ with lib; {
                   (load-theme 'catppuccin :no-confirm)
                 '';
               };
-
-
-
 
               vterm = {
                 enable = true;
