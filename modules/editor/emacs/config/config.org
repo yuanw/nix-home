@@ -1469,29 +1469,7 @@ https://lucidmanager.org/productivity/taking-notes-with-emacs-denote/
 #+RESULTS:
 | [1 transient-column nil ((1 transient-suffix (:key s :description call suffix :command transient:tsc-hello:call suffix)))] |
 
-* tree-sitter
 
-#+begin_src elisp
-
-  ;; ;; Tree sitter
-  (use-package tree-sitter
-    :config
-    (global-tree-sitter-mode)
-    (add-hook 'tree-sitter-mode-hook 'tree-sitter-hl-mode)
-    (setq major-mode-remap-alist
- '((yaml-mode . yaml-ts-mode)
-   (bash-mode . bash-ts-mode)
-   (js2-mode . js-ts-mode)
-   (java-mode . java-ts-mode)
-   (json-mode . json-ts-mode)
-   (css-mode . css-ts-mode)
-   (python-mode . python-ts-mode)))
-    )
-  (use-package tree-sitter-langs
-    :config
-    (add-to-list 'tree-sitter-major-mode-language-alist '(markdown-mode . markdown))
-    )
-#+End_src
 
 *  lsp-bridge
 #+begin_src elisp
