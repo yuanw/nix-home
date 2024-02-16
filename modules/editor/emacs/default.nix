@@ -1448,6 +1448,23 @@ with lib; {
                 '';
               };
 
+              lsp-bridge = {
+                enable = true;
+                package = epkgs: (
+                  pkgs.callPackage ./lsp-bridge {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
+                    inherit (epkgs) melpaBuild markdown-mode yasnippet;
+                  }
+                );
+                hook = [ "(java-mode . lsp-bridge-mode)" ];
+                config = ''
+                  (require 'yasnippet)
+                  (yas-global-mode 1)
+                  (require 'lsp-bridge-jdtls)
+                  (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
+                  (setq lsp-bridge-enable-auto-import t)
+                '';
+              };
 
               catppuccin-theme = {
                 enable = true;
