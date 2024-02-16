@@ -852,7 +852,7 @@ with lib; {
                         history-length 100)
                 '';
               };
-
+              # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
               ediff = {
                 enable = true;
                 config = ''
