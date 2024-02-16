@@ -2,12 +2,11 @@
 , fetchFromGitHub
 , writeText
 , substituteAll
-
+, fakeHash
   # Elisp dependencies
 
 , markdown-mode
 , yasnippet
-, fakeHash
 
   # Native dependencies
 , python3
