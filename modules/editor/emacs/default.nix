@@ -1387,7 +1387,7 @@ with lib; {
               flycheck-eglot = {
                 enable = true;
                 after = [ "flycheck" "eglot" ];
-                config = "(global-flycheck-eglot-mode 1))";
+                config = "(global-flycheck-eglot-mode 1)";
               };
 
 
