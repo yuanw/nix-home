@@ -50,7 +50,6 @@
         "viscosity"
       ];
       brews = [
-        # "jdtls"
         "redis"
         "frugal"
         "picat"

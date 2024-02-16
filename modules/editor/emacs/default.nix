@@ -665,6 +665,16 @@ with lib; {
                 extraConfig = ":when (daemonp)";
                 config = "(exec-path-from-shell-initialize)";
               };
+
+              gcmh = {
+                enable = true;
+                defer = 1;
+                command = [ "gcmh-mode" ];
+                config = ''
+                  (setq gcmh-idle-delay 'auto)
+                  (gcmh-mode)
+                '';
+              };
               meow = {
                 enable = true;
                 demand = true;
@@ -1185,6 +1195,20 @@ with lib; {
                 '';
               };
 
+              org-modern = {
+                enable = true;
+                hook = [
+                  "(org-mode . org-modern-mode)"
+                  "(org-agenda-finalize . org-modern-agenda)"
+                ];
+              };
+
+              envrc = {
+                enable = true;
+                command = [ "envrc-mode" ];
+              };
+
+
               org-roam = {
                 enable = true;
 
@@ -1446,6 +1470,24 @@ with lib; {
                      (lambda ()
                        (interactive)
                        (message "Called a suffix")))])
+                '';
+              };
+
+
+              undo-tree = {
+                enable = true;
+                defer = 1;
+                command = [ "global-undo-tree-mode" ];
+                bind = {
+                  "C-z" = "undo-tree-undo";
+                  "C-y" = "undo-tree-redo";
+                };
+                config = ''
+                  (setq undo-tree-visualizer-relative-timestamps t
+                        undo-tree-visualizer-timestamps t
+                        undo-tree-enable-undo-in-region t
+                        undo-tree-auto-save-history nil)
+                  (global-undo-tree-mode)
                 '';
               };
 
