@@ -638,20 +638,7 @@ with lib; {
   :demand t
   :diminish yas-minor-mode
   :commands yas-minor-mode-on
-  ;; :bind (("C-c y d" . yas-load-directory)
-  ;;        ("C-c y i" . yas-insert-snippet)
-  ;;        ("C-c y f" . yas-visit-snippet-file)
-  ;;        ("C-c y n" . yas-new-snippet)
-  ;;        ("C-c y t" . yas-tryout-snippet)
-  ;;        ("C-c y l" . yas-describe-tables)
-  ;;        ("C-c y g" . yas-global-mode)
-  ;;        ("C-c y m" . yas-minor-mode)
-  ;;        ("C-c y r" . yas-reload-all)
-  ;;        ("C-c y x" . yas-expand)
-  ;;        :map yas-keymap
-  ;;        ("C-i" . yas-next-field-or-maybe-expand))
-  ;; TODO need to figure this out
-  ;; :mode ("/\\.emacs\\.d/snippets/" . snippet-mode)
+  :mode ("/\\.emacs\\.d/snippets/" . snippet-mode)
   :hook (prog-mode . yas-minor-mode-on)
   :custom
   (yas-prompt-functions '(yas-completing-prompt yas-no-prompt))
@@ -661,8 +648,7 @@ with lib; {
   :custom-face
   (yas-field-highlight-face ((t (:background "#e4edfc"))))
   :config
-  (yas-load-directory (emacs-path "snippets")
-                      ))
+  (yas-load-directory (emacs-path "snippets")))
 
 (use-package consult-yasnippet
   :after (consult yasnippet))
