@@ -1453,6 +1453,7 @@ with lib; {
                 package = epkgs: (
                   pkgs.callPackage ./lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
+                    inherit (lib) fakeHash;
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
                   }
                 );

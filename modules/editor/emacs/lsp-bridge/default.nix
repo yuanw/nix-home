@@ -7,6 +7,7 @@
 
 , markdown-mode
 , yasnippet
+, fakeHash
 
   # Native dependencies
 , python3
@@ -28,7 +29,7 @@ let
 
 
   pname = "lsp-bridge";
-  version = "20240201.0";
+  version = "20240216.0";
 
 in
 melpaBuild {
@@ -38,8 +39,8 @@ melpaBuild {
   src = fetchFromGitHub {
     owner = "manateelazycat";
     repo = "lsp-bridge";
-    rev = "a4b2be85ceee88520b0aa7f16ed7b8550b8e1e03";
-    hash = "sha256-pURcrzo0rWQrjxloReG6LuP+dBtUMuHd07uCNh4RqIc=";
+    rev = "270e42d52c545f959a9e5c79e8f317f6cf4b2162";
+    hash = fakeHash;
 
   };
 
