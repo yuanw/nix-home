@@ -1359,6 +1359,23 @@ with lib; {
 
                 '';
               };
+              transient-showcase = {
+                enable = true;
+                pkg =
+
+                  (callPackage ./transient-showcase.nix {
+                    inherit (pkgs) fetchFromGitHub;
+                    inherit (epkgs) trivialBuild transient;
+                  });
+                config = ''
+                  (transient-define-prefix tsc-hello ()
+                   "Prefix that is minimal and uses an anonymous command suffix."
+                   [("s" "call suffix"
+                     (lambda ()
+                       (interactive)
+                       (message "Called a suffix")))])
+                '';
+              };
 
 
               catppuccin-theme = {
@@ -1371,6 +1388,8 @@ with lib; {
                   (load-theme 'catppuccin :no-confirm)
                 '';
               };
+
+
 
 
               vterm = {
