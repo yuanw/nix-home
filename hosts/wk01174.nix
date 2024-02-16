@@ -50,6 +50,7 @@
         "sloth"
         "mysql-shell"
         "viscosity"
+        "parsec"
       ];
       brews = [
         # "jdtls"
