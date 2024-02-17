@@ -1195,7 +1195,7 @@ with lib; {
               popper = {
                 enable = true;
                 bind = {
-                  "C-`" = "popper-toggle-latest";
+                  "C-`" = "popper-toggle";
                   "M-`" = "popper-cycle";
                   "C-M-`" = "popper-toggle-type";
                 };
@@ -1382,12 +1382,51 @@ with lib; {
 
               kind-icon = {
                 after = [ "corfu" ];
-
                 config = ''
                   (setq kind-icon-blend-background t)
                   (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
                   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
                 '';
+              };
+
+              copy-as-format = {
+                enable = true;
+                command = [
+                  "copy-as-format"
+                  "copy-as-format-asciidoc"
+                  "copy-as-format-bitbucket"
+                  "copy-as-format-disqus"
+                  "copy-as-format-github"
+                  "copy-as-format-gitlab"
+                  "copy-as-format-hipchat"
+                  "copy-as-format-html"
+                  "copy-as-format-jira"
+                  "copy-as-format-markdown"
+                  "copy-as-format-mediawiki"
+                  "copy-as-format-org-mode"
+                  "copy-as-format-pod"
+                  "copy-as-format-rst"
+                  "copy-as-format-slack"
+                ];
+              };
+
+              css-ts-mode.enable = true;
+
+              deadgrep = {
+                enable = true;
+                command = [ "deadgrep" ];
+              };
+
+              # Enable Electric Indent mode to do automatic indentation on RET.
+              electric = {
+                enable = true;
+                command = [ "electric-indent-local-mode" ];
+                hook = [
+                  "(prog-mode . electric-indent-mode)"
+
+                  # Disable for some modes.
+                  "(purescript-mode . (lambda () (electric-indent-local-mode -1)))"
+                ];
               };
 
               vterm = {
