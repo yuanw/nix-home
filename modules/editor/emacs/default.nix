@@ -437,23 +437,7 @@ with lib; {
 
 
 
-              (use-package consult-dir
-               :bind (("M-g d" . consult-dir)
-                      :map minibuffer-local-filename-completion-map
-                      ("M-g d" . consult-dir)
-                      ("M-s f" . consult-dir-jump-file)
-                      ;; :map embark-become-file+buffer-map
-                      ;; ("d" . consult-dir)
-                      )
-               :init
-               (use-package vertico
-                 :bind (:map vertico-map
-                        ("M-g d" . consult-dir)
-                        ("M-s f" . consult-dir-jump-file)
-                        ))
-                :config
-               (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
-               (setq consult-dir-shadow-filenames nil))
+          
 
 
                             ;; Minimising & quitting Emacs way too many times without wanting to.
@@ -1378,6 +1362,30 @@ with lib; {
               consult-yasnippet = {
                 enable = true;
                 command = [ "consult-yasnippet" ];
+              };
+
+              consult-dir = {
+                enable = true;
+                bind = {
+                  "M-g d" = "consult-dir";
+                };
+
+                bindLocal = {
+                  minibuffer-local-filename-completion-map = {
+                    "M-g d" = "consult-dir";
+                    "M-s f" = "consult-dir-jump-file";
+                  };
+                };
+                init = ''
+                  (use-package vertico
+                    :bind (:map vertico-map
+                           ("M-g d" . consult-dir)
+                           ("M-s f" . consult-dir-jump-file)
+                           ))
+                   :config
+                  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
+                  (setq consult-dir-shadow-filenames nil))
+                '';
               };
 
               kind-icon = {
