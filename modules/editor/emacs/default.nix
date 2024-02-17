@@ -931,7 +931,6 @@ with lib; {
                   	  which-key-max-description-length 25
                   	  which-key-allow-imprecise-window-fit t
                   	  which-key-separator " → " )
-
                       (which-key-mode)
                 '';
               };
