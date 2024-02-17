@@ -1474,11 +1474,13 @@ with lib; {
               undo-tree = {
                 enable = true;
                 defer = 1;
-                command = [ "global-undo-tree-mode" ];
-                bind = {
-                  "C-z" = "undo-tree-undo";
-                  "C-y" = "undo-tree-redo";
-                };
+                command = [
+                  "global-undo-tree-mode"
+                  "undo-tree-redo"
+                  "undo-tree-undo"
+                ];
+
+
                 config = ''
                   (setq undo-tree-visualizer-relative-timestamps t
                         undo-tree-visualizer-timestamps t
