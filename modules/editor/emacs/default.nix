@@ -963,19 +963,7 @@ with lib; {
                                             embark-isearch-highlight-indicator))
                 '';
               };
-              vertico = {
-                enable = false;
-                command = [ "vertico-mode" "vertico-next" ];
-                config = ''(vertico-mode)
-                   (use-package vertico-directory
-      :bind (:map vertico-map
-                  ("RET" . vertico-directory-enter)
-                  ("DEL" . vertico-directory-delete-char)
-                  ("M-DEL" . vertico-directory-delete-word))
-      ;; Tidy shadowed file names
-      :hook (rfn-eshadow-update-overlay . vertico-directory-tidy))
-              '';
-              };
+
 
               corfu = {
                 enable = false;
