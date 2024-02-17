@@ -434,15 +434,7 @@ with lib; {
                 ;;(add-to-list 'completion-at-point-functions #'cape-line)
               )
 
-              (use-package kind-icon
-              :after corfu
-              :custom
-              (kind-icon-blend-background t)
-              (kind-icon-default-face 'corfu-default) ; only needed with blend-background
-              :config
-              (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-  
 
 
               (use-package consult-dir
@@ -463,23 +455,6 @@ with lib; {
                (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
                (setq consult-dir-shadow-filenames nil))
 
- 
-               (use-package yasnippet
-                :demand t
-                :diminish yas-minor-mode
-                :commands yas-minor-mode-on
-                :mode ("/\\.emacs\\.d/snippets/" . snippet-mode)
-                :hook (prog-mode . yas-minor-mode-on)
-                :custom
-                (yas-prompt-functions '(yas-completing-prompt yas-no-prompt))
-                (yas-triggers-in-field t)
-                (yas-wrap-around-region t)
-                :custom-face
-                (yas-field-highlight-face ((t (:background "#e4edfc"))))
-                )
-
-              (use-package consult-yasnippet
-                :after (consult yasnippet))
 
                             ;; Minimising & quitting Emacs way too many times without wanting to.
                             (global-unset-key "\C-z")
@@ -925,6 +900,16 @@ with lib; {
                   consult--source-project-recent-file
                   :preview-key '(:debounce 0.4 any))
 
+                '';
+              };
+
+              consult-xref = {
+                enable = true;
+                after = [ "consult" "xref" ];
+                command = [ "consult-xref" ];
+                init = ''
+                  (setq xref-show-definitions-function #'consult-xref
+                        xref-show-xrefs-function #'consult-xref)
                 '';
               };
               embark-consult = {
@@ -1377,6 +1362,32 @@ with lib; {
                   (require 'catppuccin-theme)
                   (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, 'frappe or 'mocha
                   (load-theme 'catppuccin :no-confirm)
+                '';
+              };
+
+              yasnippet = {
+                enable = true;
+                command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
+                hook = [
+                  # Yasnippet interferes with tab completion in ansi-term.
+                  "(term-mode . (lambda () (yas-minor-mode -1)))"
+                  "(prog-mode . yas-minor-mode-on)"
+                ];
+                config = "(yas-global-mode 1)";
+              };
+
+              consult-yasnippet = {
+                enable = true;
+                command = [ "consult-yasnippet" ];
+              };
+
+              kind-icon = {
+                after = [ "corfu" ];
+
+                config = ''
+                  (setq kind-icon-blend-background t)
+                  (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
+                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
                 '';
               };
 
