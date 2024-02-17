@@ -1026,11 +1026,7 @@ with lib; {
 
               org-roam = {
                 enable = true;
-
                 after = [ "org" ];
-                init = ''
-                  (setq org-roam-v2-ack t)
-                '';
                 config = ''
                           (use-package org-roam-dailies)
 
