@@ -119,27 +119,6 @@ https://emacs.stackexchange.com/questions/33591/use-package-does-not-execute-con
   (expand-file-name dir user-data-directory))
   #+end_src
 
-* Load env
-so I can get JAVA_HOME and jdtls working with emacs daemon
-
-#+begin_src elisp
-(use-package exec-path-from-shell
-  :when (daemonp )
-  :config
-  (exec-path-from-shell-initialize))
-#+end_src
-* auto-revert
- ;; Activate auto-revert for dired buffers which are not included in
-this and backup are probably the first things need to changed
-#+begin_src elisp
-  (use-package autorevert
-    :hook (dired-mode . auto-revert-mode)
-    :custom
-    (auto-revert-use-notify nil)
-    :config
-    (global-auto-revert-mode t))
-
-#+end_src
 
 * Backup file
 #+begin_src elisp

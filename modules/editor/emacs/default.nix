@@ -942,7 +942,7 @@ with lib; {
                 '';
               };
               marginalia = {
-                enable = false;
+                enable = true;
                 config = "(marginalia-mode)";
               };
 
@@ -1182,8 +1182,7 @@ with lib; {
                 defer = true;
                 config = ''
                   ;; Set up agenda view.
-                  (setq org-agenda-files (rah-all-org-files)
-                        org-agenda-span 5
+                  (setq org-agenda-span 5
                         org-deadline-warning-days 14
                         org-agenda-show-all-dates t
                         org-agenda-skip-deadline-if-done t
@@ -1470,7 +1469,6 @@ with lib; {
                 '';
               };
 
-
               undo-tree = {
                 enable = true;
                 defer = 1;
@@ -1479,8 +1477,6 @@ with lib; {
                   "undo-tree-redo"
                   "undo-tree-undo"
                 ];
-
-
                 config = ''
                   (setq undo-tree-visualizer-relative-timestamps t
                         undo-tree-visualizer-timestamps t
