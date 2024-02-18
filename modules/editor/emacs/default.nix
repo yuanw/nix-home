@@ -404,6 +404,7 @@ with lib; {
               gcmh = {
                 enable = true;
                 defer = 1;
+                diminsh = [ "gcmh-mode" ];
                 command = [ "gcmh-mode" ];
                 config = ''
                   (setq gcmh-idle-delay 'auto)
@@ -1090,6 +1091,7 @@ with lib; {
 
               jinx = {
                 enable = true;
+                diminsh = [ "jinx-mode" ];
                 defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
