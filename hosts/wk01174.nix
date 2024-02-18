@@ -83,10 +83,12 @@
         zig.enable = true;
         scheme.enable = true;
       };
-
-    terminal = {
+    tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
+    };
+    terminal = {
+      enable = true;
     };
     wm.yabai.enable = true;
 
