@@ -11,7 +11,10 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       programs = {
-        zellij = { enable = true; };
+        zellij = {
+          enable = true;
+          enableZshIntegration = true;
+        };
 
       };
     };
