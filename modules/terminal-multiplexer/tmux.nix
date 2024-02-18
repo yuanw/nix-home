@@ -10,7 +10,7 @@ let
 in
 with lib; {
   options.modules.tmux = {
-    enablg = mkOption {
+    enable = mkOption {
       type = types.bool;
       default = false;
     };
