@@ -21,10 +21,6 @@ in
       home = {
         file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
         packages = [
-          tat
-          td
-          tkill
-          temacs
           pkgs.jo
           (pkgs.writeShellScriptBin "jsonify" ''
             cat $1 | jq | sponge $1
