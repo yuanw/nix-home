@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 let
   cfg = config.modules.tmux;
+  tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
   temacs = pkgs.writeShellScriptBin "temacs" ''
