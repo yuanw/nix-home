@@ -1,0 +1,1 @@
+tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header jump-to-session --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t
