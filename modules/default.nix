@@ -20,6 +20,7 @@
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix
+      ./terminal-multiplexer/zellij.nix
       ./terminal-multiplexer/tmux.nix
       ./editor/emacs
       ./editor/neovim

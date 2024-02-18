@@ -10,7 +10,6 @@ in
   # imports = [ nix-colors.homeManagerModule ];
   options.modules.terminal = {
     enable = mkEnableOption "terminal";
-
   };
 
   config = mkIf cfg.enable {
@@ -91,7 +90,6 @@ in
         };
 
 
-        zellij = { enable = false; };
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {
