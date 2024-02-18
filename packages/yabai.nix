@@ -7,8 +7,7 @@ stdenv.mkDerivation rec {
   src = fetchzip {
     url =
       "https://github.com/koekeishiya/yabai/releases/download/v${version}/${pname}-v${version}.tar.gz";
-    # hash = "sha256-w4MTHHYWwBq0/WkemYIeV49aA/DzFxXITD8gF5St0Yo=";
-    hash = lib.fakeHash;
+    hash = "sha256-wCxx/XqUrdD2xyoS6VCKMt6PhiQ8ALM6PHkv9lSCYsM=";
   };
 
   installPhase = ''
