@@ -3,6 +3,7 @@
 with lib;
 let
   cfg = config.modules.zellij;
+  zellijCmd = getExe config.programs.zellij.package;
 in
 {
   options.modules.zellij = {
@@ -15,6 +16,10 @@ in
           enable = true;
           enableZshIntegration = true;
         };
+
+        zsh.initExtra = mkOrder 199 ''
+          eval "$(${zellijCmd} setup --generate-completion zsh)"
+        '';
 
       };
     };
