@@ -85,11 +85,11 @@
       };
     zellij.enable = true;
     tmux = {
-      enable = false;
+      enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
     };
     terminal = {
-      enable = true;
+      enable = false;
     };
     wm.yabai.enable = true;
 
