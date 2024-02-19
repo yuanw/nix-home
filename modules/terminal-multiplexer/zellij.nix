@@ -11,6 +11,9 @@ in
   };
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
+      home.packages = [
+        (pkgs.writeShellScriptBin "zellij-session" (builtins.readFile ./zellij-session.sh))
+      ];
       programs = {
         zellij = {
           enable = true;
@@ -20,7 +23,7 @@ in
           };
         };
 
-        # https://github.com/zellij-org/zellij/issues/1933
+        # https://github.om/zellij-org/zellij/issues/1933
         zsh.initExtra = mkOrder 199 ''
           eval "$(${zellijCmd} setup --generate-completion zsh | grep "^function")"
         '';
