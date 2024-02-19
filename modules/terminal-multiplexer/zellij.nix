@@ -15,6 +15,9 @@ in
         zellij = {
           enable = true;
           enableZshIntegration = true;
+          settings = {
+            themes = "catppuccin-mocha";
+          };
         };
 
         zsh.initExtra = mkOrder 199 ''
