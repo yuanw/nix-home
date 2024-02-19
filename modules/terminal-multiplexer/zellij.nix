@@ -20,8 +20,9 @@ in
           };
         };
 
+        # https://github.com/zellij-org/zellij/issues/1933
         zsh.initExtra = mkOrder 199 ''
-          eval "$(${zellijCmd} setup --generate-completion zsh)"
+          eval "$(${zellijCmd} setup --generate-completion zsh | grep "^function")"
         '';
 
       };
