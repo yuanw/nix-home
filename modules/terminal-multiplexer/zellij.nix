@@ -1,9 +1,9 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 
 with lib;
 let
   cfg = config.modules.zellij;
-  zellijCmd = getExe config.programs.zellij.package;
+  zellijCmd = getExe pkgs.zellij;
 in
 {
   options.modules.zellij = {
