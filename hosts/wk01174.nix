@@ -83,13 +83,13 @@
         zig.enable = true;
         scheme.enable = true;
       };
-    zellij.enable = true;
+    zellij.enable = false;
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
     };
     terminal = {
-      enable = false;
+      enable = true;
     };
     wm.yabai.enable = true;
 
