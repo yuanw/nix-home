@@ -25,13 +25,15 @@
       };
 
       asche =
-
         withSystem "x86_64-linux" ({ config, inputs', system, ... }:
           inputs.nixpkgs.lib.nixosSystem {
             specialArgs = {
-              isDarwin = true;
-              isNixOS = false;
+              isDarwin = false;
+              isNixOS = true;
               packages = config.packages;
+              nurNoPkg = import inputs.nur {
+                nurpkgs = import inputs.nixpkgs { system = system; };
+              };
               inherit inputs inputs';
             };
 
@@ -51,6 +53,9 @@
             specialArgs = {
               isDarwin = true;
               isNixOS = false;
+              nurNoPkg = import inputs.nur {
+                nurpkgs = import inputs.nixpkgs { system = system; };
+              };
               packages = config.packages;
               inherit inputs inputs';
             };
