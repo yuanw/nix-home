@@ -958,7 +958,7 @@ with lib; {
 
 
               org-roam = {
-                enable = true;
+                enable = false;
                 after = [ "org" ];
                 config = ''
                           (use-package org-roam-dailies)
@@ -982,7 +982,7 @@ with lib; {
                 enable = true;
                 after = [ "org" ];
                 config = ''
-                                  (setq denote-directory "~/org/denote/")
+                  (setq denote-directory "~/org/denote/")
                   (setq denote-templates
                         `((report . "* Some heading\n\n* Another heading")
                           (journal . ,(concat "* Tasks todo"
@@ -1051,8 +1051,7 @@ with lib; {
                   (global-flycheck-mode)
                   (flycheck-define-checker vale
                   "A checker for prose"
-                  :command ("vale" "--output" "line"
-                            source)
+                  :command ("vale" "--output" "line" source)
                   :standard-input nil
                   :error-patterns
                   ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
