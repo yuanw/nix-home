@@ -70,7 +70,7 @@ with lib; {
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
-    import ./home.nix { inherit pkgs lib config; };
+    import ./home.nix { inherit inputs pkgs lib config; };
 
   fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [
