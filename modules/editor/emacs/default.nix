@@ -197,7 +197,7 @@ with lib; {
               ;; Set up fonts early.
               (set-face-attribute 'default nil
               :font "PragmataPro Liga"
-              :height 180
+              :height 160
               :weight 'medium)
             '';
 
