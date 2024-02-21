@@ -1173,7 +1173,7 @@ with lib; {
 
               yasnippet = {
                 enable = true;
-                diminish = "yas-minor-mode";
+                diminish = [ "yas-minor-mode" ];
 
                 command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
                 hook = [
