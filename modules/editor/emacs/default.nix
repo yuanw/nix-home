@@ -1359,7 +1359,6 @@ with lib; {
           programs.zsh = {
             sessionVariables = {
               EDITOR = "${emacsclient}";
-              EMACS_DIR = "${emacsWithDeps}";
               ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
             };
 
