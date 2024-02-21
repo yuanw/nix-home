@@ -23,6 +23,7 @@ in {
       programs.zsh = {
         profileExtra = mkAfter ''
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
+          export PATH=$PATH:$HOME/go/bin
         '';
       };
 
