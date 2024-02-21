@@ -1116,8 +1116,16 @@ with lib; {
                 '';
               };
 
-              undo-tree = {
+              vundo = {
                 enable = true;
+                defer = 1;
+                command = [
+                  "vundo"
+                ];
+              };
+
+              undo-tree = {
+                enable = false;
                 defer = 1;
                 command = [
                   "global-undo-tree-mode"
@@ -1165,7 +1173,9 @@ with lib; {
 
               yasnippet = {
                 enable = true;
-                command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
+                diminish = "yas-minor-mode";
+                l
+                  command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
                 hook = [
                   # Yasnippet interferes with tab completion in ansi-term.
                   "(term-mode . (lambda () (yas-minor-mode -1)))"
