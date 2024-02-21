@@ -1102,7 +1102,7 @@ with lib; {
               transient-showcase = {
                 enable = true;
                 package = epkgs:
-                  (pkgs.callPackage ./transient-showcase.nix {
+                  (pkgs.callPackage ./packages/transient-showcase.nix {
                     inherit (pkgs) fetchFromGitHub;
                     inherit (epkgs) trivialBuild transient;
                   });
