@@ -1302,6 +1302,11 @@ with lib; {
                         vterm-max-scrollback 10000)
                 '';
               };
+              multi-vterm = {
+                enable = true;
+                defer = true;
+                after = [ "vterm" ];
+              };
             };
           };
 
