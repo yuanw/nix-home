@@ -21,96 +21,7 @@ let
     }
   );
 
-  emacsWithDeps =
-    (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
-      with epkgs;
-      # Use Nix to manage packages with non-trivial userspace dependencies.
-      [
-        ace-window
-        aggressive-indent
-        avy
-        cape
-        corfu
-        consult
-        consult-dir
-        consult-eglot
-        consult-flycheck
-        consult-git-log-grep
-        consult-yasnippet
-        consult-org-roam
-        direnv
-        flycheck
-        flycheck-eglot
-        eglot
-        eglot-tempel
-        free-keys
-        keycast
-        git-link
-        google-this
-        groovy-mode
-        goto-last-change
-        gptel
-        graphviz-dot-mode
-        haskell-mode
-        (callPackage ./transient-showcase.nix {
-          inherit (pkgs) fetchFromGitHub;
-          inherit (epkgs) trivialBuild transient;
-        })
-        (callPackage ./auto-save.nix {
-          inherit (pkgs) fetchFromGitHub;
-          inherit (epkgs) trivialBuild;
-        })
-        treesit-grammars.with-all-grammars
-        (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
-          _p.tree-sitter-markdown
-        ]))
-        (
-          callPackage ./lsp-bridge {
-            inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
-            inherit (epkgs) melpaBuild markdown-mode yasnippet;
-          }
-        )
-        denote
-        doom-modeline
-        doom-themes
-        emacsql
-        emacsql-sqlite
-        embark
-        embark-consult
-        exec-path-from-shell
-        helpful
-        hydra
-        jinx
-        just-mode
-        justl
 
-        kind-icon
-        magit
-        marginalia
-        markdown-mode
-        meow
-        multi-vterm
-        nerd-icons
-        nix-mode
-        orderless
-        org
-        org-roam
-        smartparens
-        super-save
-        telephone-line
-        tree-sitter
-        tsc
-        tmr
-        use-package
-        vertico
-        vterm
-        vterm-toggle
-        which-key
-        yaml-mode
-        yaml-mode
-        zoom
-      ]
-    );
   valeStyles = [
     { name = "alex"; path = "${inputs.vale-alex}/alex"; }
     { name = "Google"; path = "${inputs.vale-Google}/Google"; }
@@ -165,18 +76,6 @@ with lib; {
             with epkgs;
             [
               epkgs.treesit-grammars.with-all-grammars
-              cape
-              corfu
-              consult
-              consult-dir
-              consult-eglot
-              consult-flycheck
-              consult-git-log-grep
-              consult-yasnippet
-              consult-org-roam
-              kind-icon
-              vertico
-              yasnippet
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
@@ -817,7 +716,7 @@ with lib; {
                 '';
               };
               embark-consult = {
-                enable = false;
+                enable = true;
                 after = [ "embark" "consult" ];
               };
 
