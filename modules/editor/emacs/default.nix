@@ -1174,8 +1174,8 @@ with lib; {
               yasnippet = {
                 enable = true;
                 diminish = "yas-minor-mode";
-                l
-                  command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
+
+                command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
                 hook = [
                   # Yasnippet interferes with tab completion in ansi-term.
                   "(term-mode . (lambda () (yas-minor-mode -1)))"
