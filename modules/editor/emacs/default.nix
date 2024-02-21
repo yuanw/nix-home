@@ -1296,7 +1296,7 @@ with lib; {
           };
 
           home = {
-            file.".emacs.d/snippets".source = ./config/snippets;
+            file.".emacs.d/snippets".source = ./snippets;
             packages = with pkgs; [
               # git
               (ripgrep.override { withPCRE2 = true; })
