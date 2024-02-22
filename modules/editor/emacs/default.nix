@@ -86,25 +86,21 @@ with lib; {
             usePackageVerbose = false;
 
             earlyInit = ''
-                            ;; Disable some GUI distractions. We set these manually to avoid starting
-                            ;; the corresponding minor modes.
-                            (push '(menu-bar-lines . 0) default-frame-alist)
-                            (push '(tool-bar-lines . nil) default-frame-alist)
-                            (push '(vertical-scroll-bars . nil) default-frame-alist)
-                            ;; no title bar
-                            (add-to-list 'default-frame-alist '(undecorated-round . t))
-                            ;; Set up fonts early.
-                            ;;--------------------
-              ;; Theme and font
-              (let ((face "PragmataPro")
-                    (height 16))
-                (set-font-info face (* 10 height) (+ 4 height) "outline" 'default nil)
-                (update-font))
+              ;; Disable some GUI distractions. We set these manually to avoid starting
+              ;; the corresponding minor modes.
+              (push '(menu-bar-lines . 0) default-frame-alist)
+              (push '(tool-bar-lines . nil) default-frame-alist)
+              (push '(vertical-scroll-bars . nil) default-frame-alist)
+              ;; no title bar
+              (add-to-list 'default-frame-alist '(undecorated-round . t))
+              ;; Set up fonts early.
+              ;;--------------------
+           
 
-                            ;; (set-face-attribute 'default nil
-                            ;; :font "PragmataPro Liga"
-                           ;; :height 160
-                           ;; :weight 'medium)
+              (set-face-attribute 'default nil
+               :font "PragmataPro"
+              :height 160
+              )
             '';
 
             prelude = ''
