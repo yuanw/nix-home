@@ -101,10 +101,10 @@ with lib; {
                 (set-font-info face (* 10 height) (+ 4 height) "outline" 'default nil)
                 (update-font))
 
-                            # (set-face-attribute 'default nil
-                            # :font "PragmataPro Liga"
-                            # :height 160
-                            # :weight 'medium)
+                            ;; (set-face-attribute 'default nil
+                            ;; :font "PragmataPro Liga"
+                           ;; :height 160
+                           ;; :weight 'medium)
             '';
 
             prelude = ''
