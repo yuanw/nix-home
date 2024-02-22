@@ -1292,6 +1292,11 @@ with lib; {
                 '';
               };
 
+              ws-butler = {
+                enable = true;
+                hook = [ "(prog-mode . ws-butler-mode)" ];
+              };
+
 
               vterm = {
                 enable = true;
