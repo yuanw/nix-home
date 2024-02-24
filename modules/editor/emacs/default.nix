@@ -21,96 +21,7 @@ let
     }
   );
 
-  emacsWithDeps =
-    (pkgs.emacsPackagesFor (emacsPatched)).emacsWithPackages (epkgs:
-      with epkgs;
-      # Use Nix to manage packages with non-trivial userspace dependencies.
-      [
-        ace-window
-        aggressive-indent
-        avy
-        cape
-        corfu
-        consult
-        consult-dir
-        consult-eglot
-        consult-flycheck
-        consult-git-log-grep
-        consult-yasnippet
-        consult-org-roam
-        direnv
-        flycheck
-        flycheck-eglot
-        eglot
-        eglot-tempel
-        free-keys
-        keycast
-        git-link
-        google-this
-        groovy-mode
-        goto-last-change
-        gptel
-        graphviz-dot-mode
-        haskell-mode
-        (callPackage ./transient-showcase.nix {
-          inherit (pkgs) fetchFromGitHub;
-          inherit (epkgs) trivialBuild transient;
-        })
-        (callPackage ./auto-save.nix {
-          inherit (pkgs) fetchFromGitHub;
-          inherit (epkgs) trivialBuild;
-        })
-        treesit-grammars.with-all-grammars
-        (epkgs.tree-sitter-langs.withPlugins (_p: epkgs.tree-sitter-langs.plugins ++ [
-          _p.tree-sitter-markdown
-        ]))
-        (
-          callPackage ./lsp-bridge {
-            inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
-            inherit (epkgs) melpaBuild markdown-mode yasnippet;
-          }
-        )
-        denote
-        doom-modeline
-        doom-themes
-        emacsql
-        emacsql-sqlite
-        embark
-        embark-consult
-        exec-path-from-shell
-        helpful
-        hydra
-        jinx
-        just-mode
-        justl
 
-        kind-icon
-        magit
-        marginalia
-        markdown-mode
-        meow
-        multi-vterm
-        nerd-icons
-        nix-mode
-        orderless
-        org
-        org-roam
-        smartparens
-        super-save
-        telephone-line
-        tree-sitter
-        tsc
-        tmr
-        use-package
-        vertico
-        vterm
-        vterm-toggle
-        which-key
-        yaml-mode
-        yaml-mode
-        zoom
-      ]
-    );
   valeStyles = [
     { name = "alex"; path = "${inputs.vale-alex}/alex"; }
     { name = "Google"; path = "${inputs.vale-Google}/Google"; }
@@ -165,18 +76,6 @@ with lib; {
             with epkgs;
             [
               epkgs.treesit-grammars.with-all-grammars
-              cape
-              corfu
-              consult
-              consult-dir
-              consult-eglot
-              consult-flycheck
-              consult-git-log-grep
-              consult-yasnippet
-              consult-org-roam
-              kind-icon
-              vertico
-              yasnippet
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
@@ -195,10 +94,13 @@ with lib; {
               ;; no title bar
               (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
+              ;;--------------------
+           
+
               (set-face-attribute 'default nil
-              :font "PragmataPro Liga"
+               :font "PragmataPro"
               :height 160
-              :weight 'medium)
+              )
             '';
 
             prelude = ''
@@ -817,7 +719,7 @@ with lib; {
                 '';
               };
               embark-consult = {
-                enable = false;
+                enable = true;
                 after = [ "embark" "consult" ];
               };
 
@@ -958,7 +860,7 @@ with lib; {
 
 
               org-roam = {
-                enable = true;
+                enable = false;
                 after = [ "org" ];
                 config = ''
                           (use-package org-roam-dailies)
@@ -982,7 +884,7 @@ with lib; {
                 enable = true;
                 after = [ "org" ];
                 config = ''
-                                  (setq denote-directory "~/org/denote/")
+                  (setq denote-directory "~/org/denote/")
                   (setq denote-templates
                         `((report . "* Some heading\n\n* Another heading")
                           (journal . ,(concat "* Tasks todo"
@@ -1051,8 +953,7 @@ with lib; {
                   (global-flycheck-mode)
                   (flycheck-define-checker vale
                   "A checker for prose"
-                  :command ("vale" "--output" "line"
-                            source)
+                  :command ("vale" "--output" "line" source)
                   :standard-input nil
                   :error-patterns
                   ((error line-start (file-name) ":" line ":" column ":" (id (one-or-more (not (any ":")))) ":" (message) line-end))
@@ -1204,7 +1105,7 @@ with lib; {
               transient-showcase = {
                 enable = true;
                 package = epkgs:
-                  (pkgs.callPackage ./transient-showcase.nix {
+                  (pkgs.callPackage ./packages/transient-showcase.nix {
                     inherit (pkgs) fetchFromGitHub;
                     inherit (epkgs) trivialBuild transient;
                   });
@@ -1218,8 +1119,16 @@ with lib; {
                 '';
               };
 
-              undo-tree = {
+              vundo = {
                 enable = true;
+                defer = 1;
+                command = [
+                  "vundo"
+                ];
+              };
+
+              undo-tree = {
+                enable = false;
                 defer = 1;
                 command = [
                   "global-undo-tree-mode"
@@ -1267,6 +1176,8 @@ with lib; {
 
               yasnippet = {
                 enable = true;
+                diminish = [ "yas-minor-mode" ];
+
                 command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
                 hook = [
                   # Yasnippet interferes with tab completion in ansi-term.
@@ -1381,6 +1292,11 @@ with lib; {
                 '';
               };
 
+              ws-butler = {
+                enable = true;
+                hook = [ "(prog-mode . ws-butler-mode)" ];
+              };
+
 
               vterm = {
                 enable = true;
@@ -1394,11 +1310,16 @@ with lib; {
                         vterm-max-scrollback 10000)
                 '';
               };
+              multi-vterm = {
+                enable = true;
+                defer = true;
+                after = [ "vterm" ];
+              };
             };
           };
 
           home = {
-            file.".emacs.d/snippets".source = ./config/snippets;
+            file.".emacs.d/snippets".source = ./snippets;
             packages = with pkgs; [
               # git
               (ripgrep.override { withPCRE2 = true; })
@@ -1461,7 +1382,6 @@ with lib; {
           programs.zsh = {
             sessionVariables = {
               EDITOR = "${emacsclient}";
-              EMACS_DIR = "${emacsWithDeps}";
               ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
             };
 
