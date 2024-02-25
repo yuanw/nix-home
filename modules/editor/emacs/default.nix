@@ -95,7 +95,6 @@ with lib; {
               (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
-           
 
               (set-face-attribute 'default nil
                :font "PragmataPro"
@@ -1036,17 +1035,15 @@ with lib; {
                   ''("\\.markdown\\'"    . markdown-mode)''
                 ];
                 config = ''
-                  (setq markdown-command "multimarkdown")
-
-                  (markdown-command "pandoc -f markdown_github+smart")
-                  (markdown-command-needs-filename t)
-                  (markdown-enable-math t)
-                  (markdown-open-command "marked")
-                  :custom-face
-                  (markdown-header-face-1 ((t (:inherit markdown-header-face :height 2.0))))
-                  (markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
-                  (markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
-                  (markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
+                  (setq markdown-command "pandoc -f markdown_github+smart")
+                  (setq markdown-command-needs-filename t)
+                  (setq markdown-enable-math t)
+                  (setq markdown-open-command "marked")
+                  ;;:custom-face
+                  ;;(markdown-header-face-1 ((t (:inherit markdown-header-face :height 2.0))))
+                  ;;(markdown-header-face-2 ((t (:inherit markdown-header-face :height 1.6))))
+                  ;;(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
+                  ;;(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
                 '';
 
               };
