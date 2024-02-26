@@ -14,11 +14,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://download.eclipse.org/jdtls/milestones/${finalAttrs.version}/jdt-language-server-${finalAttrs.version}-${timestamp}.tar.gz";
-    hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY="
-      ";
-        }
+    hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
+  };
 
-        sourceRoot = ".";
+  sourceRoot = ".";
 
   buildInputs = [
     # Used for the included wrapper
@@ -31,7 +30,7 @@ stdenv.mkDerivation (finalAttrs: {
     substituteInPlace bin/jdtls.py \
       --replace "
       jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
-    '';
+  '';
 
   installPhase =
     let
@@ -41,11 +40,11 @@ stdenv.mkDerivation (finalAttrs: {
       configDir = if stdenv.isDarwin then "config_mac" else "config_linux";
     in
     ''
-    install -Dm444 -t $out/share/java/jdtls/plugins/ plugins/*
-      install -Dm444 -t $out/share/java/jdtls/features/ features/*
-      install -Dm444 -t $out/share/java/jdtls/${configDir} ${configDir}/*
-      install -Dm555 -t $out/bin bin/jdtls
-      install -Dm444 -t $out/bin bin/jdtls.py
+      install -Dm444 -t $out/share/java/jdtls/plugins/ plugins/*
+        install -Dm444 -t $out/share/java/jdtls/features/ features/*
+        install -Dm444 -t $out/share/java/jdtls/${configDir} ${configDir}/*
+        install -Dm555 -t $out/bin bin/jdtls
+        install -Dm444 -t $out/bin bin/jdtls.py
     '';
 
   meta = {
