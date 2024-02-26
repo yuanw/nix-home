@@ -7,7 +7,7 @@ in {
     enable = mkEnableOption "java";
     pkg = mkOption {
       type = types.package;
-      default = pkgs.jdk17;
+      default = pkgs.jdk21;
     };
   };
 
