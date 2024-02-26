@@ -26,10 +26,11 @@ stdenv.mkDerivation (finalAttrs: {
 
   postPatch = ''
     # We store the plugins, config, and features folder in different locations
-    # than in the original package.
+    # than in the original package. In addition, hard-code the path to the jdk
+    # in the wrapper, instead of searching for it in PATH at runtime.
     substituteInPlace bin/jdtls.py \
-      --replace "
-      jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
+      --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")" \
+      --replace "java_executable = get_java_executable(known_args.validate_java_version)" "java_executable = '${lib.getExe jdk}'"
   '';
 
   installPhase =
@@ -40,12 +41,18 @@ stdenv.mkDerivation (finalAttrs: {
       configDir = if stdenv.isDarwin then "config_mac" else "config_linux";
     in
     ''
+      runHook preInstall
+
       install -Dm444 -t $out/share/java/jdtls/plugins/ plugins/*
-        install -Dm444 -t $out/share/java/jdtls/features/ features/*
-        install -Dm444 -t $out/share/java/jdtls/${configDir} ${configDir}/*
-        install -Dm555 -t $out/bin bin/jdtls
-        install -Dm444 -t $out/bin bin/jdtls.py
+      install -Dm444 -t $out/share/java/jdtls/features/ features/*
+      install -Dm444 -t $out/share/java/jdtls/${configDir} ${configDir}/*
+      install -Dm555 -t $out/bin bin/jdtls
+      install -Dm444 -t $out/bin bin/jdtls.py
+
+      runHook postInstall
     '';
+
+  passthru.updateScript = ./update.sh;
 
   meta = {
     homepage = "https://github.com/eclipse/eclipse.jdt.ls";
@@ -57,4 +64,3 @@ stdenv.mkDerivation (finalAttrs: {
     mainProgram = "jdtls";
   };
 })
-
