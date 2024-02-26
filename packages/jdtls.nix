@@ -6,7 +6,7 @@
 }:
 
 let
-  timestamp = "202402151230";
+  timestamp = "202402151717";
 in
 stdenv.mkDerivation (finalAttrs: {
   pname = "jdt-language-server";
