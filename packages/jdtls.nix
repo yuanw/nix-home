@@ -3,6 +3,7 @@
 , stdenv
 , fetchurl
 , python3
+, jdk
 }:
 
 let
