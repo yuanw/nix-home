@@ -1291,7 +1291,9 @@ with lib; {
 
               ws-butler = {
                 enable = true;
-                hook = [ "(prog-mode . ws-butler-mode)" ];
+                init = "(setq ws-butler-keep-whitespace-before-point nil)";
+                config = "(ws-butler-global-mode)";
+
               };
 
 
