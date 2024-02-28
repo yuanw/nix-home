@@ -142,10 +142,16 @@
         signByDefault = true;
       };
       ignores = [ ".direnv" ".DS_Store" ".envrc" ];
+      # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
       extraConfig = {
         core = { editor = "emacsclient -c"; };
         init.defaultBranch = "main";
         pull.rebase = true;
+        rebase.autosquash = true;
+        push.default = "current";
+        commit.verbose = true;
+        help.autocorrect = 10;
+        diff.algorithm = "histogram";
         branch.autosetupmerge = true;
         diff = {
           ignoreSubmodules = "dirty";
@@ -154,7 +160,7 @@
         };
 
         merge = {
-          conflictstyle = "diff3";
+          conflictstyle = "zdiff3";
           stat = true;
         };
         remote.origin.prune = true;
