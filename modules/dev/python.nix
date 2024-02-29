@@ -25,8 +25,8 @@ in {
           # pylsp-mypy
           virtualenv
           virtualenvwrapper
-          litellm
-          tokenizers
+          #litellm
+          #tokenizers
         ]))
     ];
   };
