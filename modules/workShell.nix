@@ -14,7 +14,7 @@ in {
         pkgs.clang-tools
         # pkgs.antlr4
         packages.resource-id
-        pkgs.csvkit
+        # pkgs.csvkit
         # pkgs.visidata
         pkgs.terraform
         pkgs.terraform-ls
