@@ -61,7 +61,7 @@ with pkgs; [
   fontconfig
   #kubectl
   # vhs
-  csvkit
+  # csvkit
   gum
   inkscape-with-extensions
   ghostscript
