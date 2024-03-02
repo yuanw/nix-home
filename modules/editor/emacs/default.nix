@@ -921,7 +921,10 @@ with lib; {
                   (setq magit-list-refs-sortby "-committerdate")
                   (setq forge-add-pullreq-refspec 'ask)
                   (add-to-list 'git-commit-style-convention-checks
-                                          'overlong-summary-line)
+                  'overlong-summary-line)
+                  (setq magit-display-buffer-function
+                   #'magit-display-buffer-fullframe-status-v1)
+                  (setq magit-bury-buffer-function #'magit-restore-window-configuration)
                 '';
               };
               flycheck = {
@@ -1023,10 +1026,7 @@ with lib; {
                   ;;(markdown-header-face-3 ((t (:inherit markdown-header-face :height 1.4))))
                   ;;(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
                 '';
-
               };
-
-
 
               eglot = {
                 enable = true;
