@@ -173,7 +173,6 @@ in
         normal_window_border_color = "0xff3b4252";
         focus_follows_mouse = "autoraise";
         mouse_follows_focus = "off";
-
         mouse_drop_action = "stack";
         window_placement = "second_child";
         window_opacity = "off";
