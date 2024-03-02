@@ -1,4 +1,6 @@
-# most of this is stealed from hlissner emacs module
+# most of this is stealed from rycee emacs module
+# https://git.sr.ht/~rycee/configurations/tree/master/item/user/emacs.nix
+# other codes stealed from
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
@@ -20,7 +22,6 @@ let
         ++ prev.patches;
     }
   );
-
 
   valeStyles = [
     { name = "alex"; path = "${inputs.vale-alex}/alex"; }
@@ -221,39 +222,20 @@ with lib; {
               ;; Ignore trailing white space in compilation mode.
               (add-hook 'compilation-mode-hook #'rah-disable-trailing-whitespace-mode)
 
-              (defun rah-prog-mode-setup ()
+              (defun my-prog-mode-setup ()
                 ;; Use a bit wider fill column width in programming modes
                 ;; since we often work with indentation to start with.
                 (setq fill-column 80))
 
-              (add-hook 'prog-mode-hook #'rah-prog-mode-setup)
-
-              (defun rah-lsp ()
-                (interactive)
-                (envrc-mode)
-                (lsp))
-
-              (defun rah-insert-uuid-v4 ()
-                (interactive)
-                (let ((lines (process-lines "uuidgen" "--random")))
-                  (insert (car lines))))
-
-              (defun rah-insert-timestamp ()
-                (interactive)
-                (let ((lines (process-lines "date" "--iso-8601=second" "--universal")))
-                  (insert (car lines))))
-
-              ;(defun rah-sort-lines-ignore-case ()
-              ;  (interactive)
-              ;  (let ((sort-fold-case t))
-              ;    (call-interactively 'sort-lines)))
-
+              (add-hook 'prog-mode-hook #'my-prog-mode-setup)
             '';
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-z")
               (global-unset-key "\C-x\C-c")
+              (global-unset-key "\C-x\C-b") ;; list-buffer with meow is little odd
+              (global-unset-key "\C-x\C-d") ;; list-directory with meow is little odd
             '';
 
             usePackage = {
@@ -406,11 +388,8 @@ with lib; {
                     allowSubstitutes = false;
                   };
                 config = ''
-                       (auto-save-enable)
-
+                  (auto-save-enable)
                   (setq auto-save-silent t)   ; quietly save
-                  (setq auto-save-delete-trailing-whitespace nil)  ; automatically delete spaces at the end of the line when saving
-
                   ;;; custom predicates if you don't want auto save.
                   ;;; disable auto save mode when current filetype is an gpg file.
                   (setq auto-save-disable-predicates
@@ -420,7 +399,6 @@ with lib; {
                         (file-name-extension (buffer-name)) t))))
                 '';
               };
-
               ## Remember where we where in a previously visited file. Built-in.
               saveplace = {
                 enable = true;
@@ -928,7 +906,7 @@ with lib; {
                 '';
               };
 
-              # Configure magit, a nice mode for the git SCM.
+              # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
               magit = {
                 enable = true;
                 bind = { "C-x g" = "magit-status"; };
