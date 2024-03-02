@@ -19,6 +19,8 @@ with lib; {
     };
   };
 
+  launchd.daemons.nix-daemon.serviceConfig.SoftResourceLimits.NumberOfFiles = 10240;
+
   system.stateVersion = 4;
   services.nix-daemon = {
     enable = true;
