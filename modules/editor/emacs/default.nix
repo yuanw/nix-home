@@ -561,9 +561,15 @@ with lib; {
                     (progn
                       (setq vertico-quick1 "haio")
                       (setq vertico-quick2 "luy")))
-
-
                 '';
+              };
+
+              vertico-repeat = {
+                enable = true;
+                bind = {
+                  "C-S-r" = "vertico-repeat";
+                };
+                config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
               };
 
               marginalia = {
