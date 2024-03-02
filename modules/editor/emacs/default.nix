@@ -1120,7 +1120,7 @@ with lib; {
               };
 
               lsp-bridge = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
