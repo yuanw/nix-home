@@ -154,7 +154,7 @@ with lib; {
                             c-basic-offset 4)
 
               ;; Trailing white space are banned!
-              (setq-default show-trailing-whitespace t)
+              ;;(setq-default show-trailing-whitespace t)
 
               ;; Use one space to end sentences.
               (setq sentence-end-double-space nil)
@@ -175,6 +175,9 @@ with lib; {
 
               ;; Avoid noisy bell.
               (setq visible-bell t)
+
+              ;; https://www.emacswiki.org/emacs/RecursiveEdit
+              (setq enable-recursive-minibuffer t)
 
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
@@ -835,28 +838,6 @@ with lib; {
                 command = [ "envrc-mode" ];
               };
 
-
-              org-roam = {
-                enable = false;
-                after = [ "org" ];
-                config = ''
-                          (use-package org-roam-dailies)
-
-                   ;; If you're using a vertical completion framework, you might want a more informative completion interface
-                  ;; (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
-                  (setq org-roam-dailies-directory "daily/")
-                    (setq org-roam-dailies-capture-templates
-                       '(("d" "default" entry
-                          "* %?"
-                          :target (file+head "%<%Y-%m-%d>.org"
-                                             "#+title: %<%Y-%m-%d>\n* Tasks to do \n* Journal \n* TIL \n"))))
-
-
-                          (setq org-roam-directory (concat org-directory "roam/"))
-                          (org-roam-db-autosync-mode)
-                '';
-              };
-
               denote = {
                 enable = true;
                 after = [ "org" ];
@@ -1002,7 +983,6 @@ with lib; {
 
               direnv.enable = true;
               just-mode.enable = true;
-
               justl = {
                 enable = true;
                 command = [ "justl-exec-recipe" ];
@@ -1120,7 +1100,7 @@ with lib; {
               };
 
               lsp-bridge = {
-                enable = false;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
@@ -1152,7 +1132,6 @@ with lib; {
               yasnippet = {
                 enable = true;
                 diminish = [ "yas-minor-mode" ];
-
                 command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
                 hook = [
                   # Yasnippet interferes with tab completion in ansi-term.
@@ -1245,17 +1224,18 @@ with lib; {
                 bind = {
                   "C-c p p" = "completion-at-point";
                   "C-c p t" = "complete-tag";
+                  "C-c p h" = "cape-history";
                 };
                 init = ''
                   ;; Add to the global default value of `completion-at-point-functions' which is
                   ;; used by `completion-at-point'.  The order of the functions matters, the
                   ;; first function returning a result wins.  Note that the list of buffer-local
                   ;; completion functions takes precedence over the global list.
-                  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+                  ;;(add-to-list 'completion-at-point-functions #'cape-dabbrev)
                   (add-to-list 'completion-at-point-functions #'cape-file)
                   (add-to-list 'completion-at-point-functions #'cape-abbrev)
                   ;;(add-to-list 'completion-at-point-functions #'cape-elisp-block)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+                  (add-to-list 'completion-at-point-functions #'cape-history)
                   ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
                   ;;(add-to-list 'completion-at-point-functions #'cape-tex)
                   ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
@@ -1271,10 +1251,7 @@ with lib; {
                 enable = true;
                 init = "(setq ws-butler-keep-whitespace-before-point nil)";
                 config = "(ws-butler-global-mode)";
-
               };
-
-
               vterm = {
                 enable = true;
                 defer = true;
