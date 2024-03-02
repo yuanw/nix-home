@@ -1122,7 +1122,7 @@ with lib; {
               lsp-bridge = {
                 enable = true;
                 package = epkgs: (
-                  pkgs.callPackage ./lsp-bridge {
+                  pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
                     inherit lib;
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
