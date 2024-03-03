@@ -517,7 +517,7 @@ with lib; {
               orderless = {
                 enable = true;
                 config = ''
-                  (setq completion-styles '(orderless basic))
+                  (setq completion-styles '( basic substring orderless))
                   (setq read-file-name-completion-ignore-case t)
                   (setq completion-category-overrides
                    '((file (styles basic partial-completion))))
@@ -566,6 +566,7 @@ with lib; {
 
               vertico-repeat = {
                 enable = true;
+                after = [ "vertico" ];
                 bind = {
                   "C-S-r" = "vertico-repeat";
                 };
