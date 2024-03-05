@@ -834,9 +834,18 @@ with lib; {
 
               org-modern = {
                 enable = true;
+                after = [ "org" ];
                 hook = [
                   "(org-mode . org-modern-mode)"
                   "(org-agenda-finalize . org-modern-agenda)"
+                ];
+              };
+
+              org-download = {
+                enable = true;
+                after = [ "org" ];
+                hook = [
+                  "(dired-mode-hook .org-download-enable)"
                 ];
               };
 
