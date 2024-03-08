@@ -1265,7 +1265,6 @@ with lib; {
 
               ws-butler = {
                 enable = true;
-                init = "(setq ws-butler-keep-whitespace-before-point nil)";
                 config = "(ws-butler-global-mode)";
               };
               vterm = {
