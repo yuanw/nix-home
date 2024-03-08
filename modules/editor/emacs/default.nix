@@ -152,7 +152,6 @@ with lib; {
               (setq-default indent-tabs-mode nil
                             tab-width 4
                             c-basic-offset 4)
-
               ;; Trailing white space are banned!
               ;;(setq-default show-trailing-whitespace t)
 
@@ -1116,7 +1115,7 @@ with lib; {
               };
 
               lsp-bridge = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3;

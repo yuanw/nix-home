@@ -114,11 +114,7 @@ shift + cmd - d : yabai -m window --resize right:-20:0
 # rotate tree
 alt - r : yabai -m space --rotate 90
 
-# mirror tree y-axis
-alt - y : yabai -m space --mirror y-axis
 
-# mirror tree x-axis
-alt - x : yabai -m space --mirror x-axis
 
 # toggle desktop offset
 alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
