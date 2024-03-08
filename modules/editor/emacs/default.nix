@@ -1217,7 +1217,10 @@ with lib; {
               };
 
               css-ts-mode.enable = true;
+              wgrep = {
+                enable = true;
 
+              };
               deadgrep = {
                 enable = true;
                 command = [ "deadgrep" ];
