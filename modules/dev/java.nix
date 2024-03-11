@@ -17,10 +17,10 @@ in {
         (maven.override { jdk = cfg.pkg; })
         lombok
         google-java-format
-        (jdtls.override { jdk = cfg.pkg; })
+        (jdt-language-server.override { jdk = cfg.pkg; })
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
-            ${pkgs.jdt-language-serve}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
+            ${pkgs.jdt-language-server}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
           '')
       ];
       programs = {
