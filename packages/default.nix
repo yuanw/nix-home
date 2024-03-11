@@ -3,7 +3,13 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  jdtls = prev.callPackage ./jdtls.nix { };
+  jdt-language-server = prev.jdt-language-server.override {
+    version = "1.33.0";
+    src = prev.fetchurl {
+      url = "https://download.eclipse.org/jdtls/milestones/1.33.0/jdt-language-server-1.33.0-202402151717.tar.gz";
+      hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
+    };
+  };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
