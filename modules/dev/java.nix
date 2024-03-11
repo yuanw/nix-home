@@ -20,7 +20,7 @@ in {
         (jdtls.override { jdk = cfg.pkg; })
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
-            ${pkgs.jdtls}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
+            ${pkgs.jdt-language-serve}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
           '')
       ];
       programs = {
