@@ -145,7 +145,7 @@ in
     services.yabai = {
       enable = false;
       package = pkgs.yabai;
-      enableScriptingAddition = true;
+      enableScriptingAddition = false;
       config = {
         window_border = "off";
         window_border_width = 2;
