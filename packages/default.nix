@@ -1,5 +1,11 @@
 _final: prev: {
-  yabai = prev.callPackage ./yabai.nix { };
+  yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
+    version = "6.0.16-pre";
+    src = prev.fetchurl {
+      url = "https://download.eclipse.org/jdtls/milestones/1.33.0/jdt-language-server-1.33.0-202402151717.tar.gz";
+      hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
+    };
+  });
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };

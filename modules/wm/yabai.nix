@@ -19,8 +19,6 @@ let
     else
       "doom +everywhere";
 
-  daemonPath = "/Library/LaunchDaemons/org.nixos.yabai-sa.plist";
-
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
@@ -73,27 +71,9 @@ in
           };
         };
       };
-      # https://github.com/montchr/dotfield/blob/8bb31c05a1eb4ec76c31a0ca192368ede1ebae0a/profiles/os-specific/darwin/gui/yabai.nix
       home.packages = [
         pkgs.ical-buddy
-        (
 
-          pkgs.writeShellScriptBin "yabai-sa-kickstart" ''
-            #
-            # yabai-sa-kickstart
-            #
-            # Kickstart the scripting addition in case it fails to load.
-            #
-            set -x
-            # See https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)#updating-to-latest-head
-            [[ $(sudo launchctl list | grep yabai-sa) ]] && {
-              sudo launchctl unload ${daemonPath}
-             }
-            sudo yabai --load-sa
-            sudo launchctl load ${daemonPath}
-            set +x
-          ''
-        )
         (
           pkgs.writeShellScriptBin "yabai-next-window" ''
             #
@@ -130,20 +110,20 @@ in
       '';
     };
     # https://github.com/IvarWithoutBones/dotfiles/blob/main/modules/darwin/yabai/default.nix#L42
-    launchd.user.agents.yabai-load-sa = {
-      path = [ pkgs.yabai config.environment.systemPath ];
-      command = "/usr/bin/sudo ${pkgs.yabai}/bin/yabai --load-sa";
-      serviceConfig.RunAtLoad = true;
-    };
+    # launchd.user.agents.yabai-load-sa = {
+    #   path = [ pkgs.yabai config.environment.systemPath ];
+    #   command = "/usr/bin/sudo ${pkgs.yabai}/bin/yabai --load-sa";
+    #   serviceConfig.RunAtLoad = true;
+    # };
 
     launchd.user.agents.skhd.serviceConfig = {
       StandardOutPath = "/tmp/skhd.log";
       StandardErrorPath = "/tmp/skhd.log";
     };
-    launchd.user.agents.yabai.serviceConfig = {
-      StandardOutPath = "/tmp/yabai.log";
-      StandardErrorPath = "/tmp/yabai.log";
-    };
+    # launchd.user.agents.yabai.serviceConfig = {
+    #   StandardOutPath = "/tmp/yabai.log";
+    #   StandardErrorPath = "/tmp/yabai.log";
+    # };
 
     services.sketchybar = {
       extraPackages = [
@@ -163,7 +143,7 @@ in
     };
 
     services.yabai = {
-      enable = true;
+      enable = false;
       package = pkgs.yabai;
       enableScriptingAddition = true;
       config = {
