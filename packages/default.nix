@@ -3,7 +3,7 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  jdt-language-server = prev.jdt-language-server.overrideAttr (_finalAttrs: _previousAttrs: {
+  jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "1.33.0";
     src = prev.fetchurl {
       url = "https://download.eclipse.org/jdtls/milestones/1.33.0/jdt-language-server-1.33.0-202402151717.tar.gz";
