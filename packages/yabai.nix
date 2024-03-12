@@ -11,6 +11,7 @@
 , Cocoa
 , ScriptingBridge
 , SkyLight
+, Kernel
 }:
 
 let
@@ -66,6 +67,7 @@ in
         Cocoa
         ScriptingBridge
         SkyLight
+        Kernel
       ];
 
       dontConfigure = true;
