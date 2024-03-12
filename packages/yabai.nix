@@ -75,7 +75,11 @@ in
 
       env = {
         # silence service.h error
-        NIX_CFLAGS_COMPILE = "-Wno-implicit-function-declaration";
+        NIX_CFLAGS_COMPILE = [
+          "-I${Kernel}/Library/Frameworks/Kernel.framework/Headers/"
+          "-Wno-implicit-function-declaration"
+
+        ];
       };
 
       postPatch = ''
