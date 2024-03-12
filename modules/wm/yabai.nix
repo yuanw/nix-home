@@ -120,10 +120,10 @@ in
       StandardOutPath = "/tmp/skhd.log";
       StandardErrorPath = "/tmp/skhd.log";
     };
-    # launchd.user.agents.yabai.serviceConfig = {
-    #   StandardOutPath = "/tmp/yabai.log";
-    #   StandardErrorPath = "/tmp/yabai.log";
-    # };
+    launchd.user.agents.yabai.serviceConfig = {
+      StandardOutPath = "/tmp/yabai.log";
+      StandardErrorPath = "/tmp/yabai.log";
+    };
 
     services.sketchybar = {
       extraPackages = [
@@ -143,9 +143,9 @@ in
     };
 
     services.yabai = {
-      enable = false;
+      enable = true;
       package = pkgs.yabai;
-      enableScriptingAddition = false;
+      enableScriptingAddition = true;
       config = {
         window_border = "off";
         window_border_width = 2;
