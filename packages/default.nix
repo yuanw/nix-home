@@ -2,7 +2,7 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  yabai = _final.callPackage ./yabai {
+  yabai = _final.callPackage ./yabai.nix {
     inherit (_final.darwin.apple_sdk_11_0.frameworks) SkyLight Cocoa Carbon ScriptingBridge;
   };
   jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
