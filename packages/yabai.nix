@@ -12,6 +12,7 @@
 , ScriptingBridge
 , SkyLight
 , Kernel
+, OSAKit
 }:
 
 let
@@ -68,6 +69,7 @@ in
         ScriptingBridge
         SkyLight
         Kernel
+        OSAKit
       ];
 
       dontConfigure = true;
