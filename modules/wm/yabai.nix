@@ -109,12 +109,7 @@ in
         ${moveConfig}
       '';
     };
-    # https://github.com/IvarWithoutBones/dotfiles/blob/main/modules/darwin/yabai/default.nix#L42
-    # launchd.user.agents.yabai-load-sa = {
-    #   path = [ pkgs.yabai config.environment.systemPath ];
-    #   command = "/usr/bin/sudo ${pkgs.yabai}/bin/yabai --load-sa";
-    #   serviceConfig.RunAtLoad = true;
-    # };
+
 
     launchd.user.agents.skhd.serviceConfig = {
       StandardOutPath = "/tmp/skhd.log";
