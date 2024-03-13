@@ -2,9 +2,16 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
-  yabai = _final.callPackage ./yabai.nix {
-    inherit (_final.darwin.apple_sdk_11_0.frameworks) SkyLight Cocoa Carbon ScriptingBridge Kernel OSAKit;
-  };
+  yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
+    version = "7.0.0";
+    src = fetchzip {
+      url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
+      hash = _final.lib.fakeHash;
+    };
+
+  });
+
+
   jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "1.33.0";
     src = prev.fetchurl {

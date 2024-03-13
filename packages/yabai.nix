@@ -78,7 +78,7 @@ in
       env = {
         # silence service.h error
         NIX_CFLAGS_COMPILE =
-          "-I${Kernel}/Library/Frameworks/Kernel.framework/Headers/ -Wno-implicit-function-declaration";
+          "-I${Kernel}/Library/Frameworks/Kernel.framework/Headers/ -I${OSAKit}/Library/Frameworks/Kernel.framework/Headers/ -Wno-implicit-function-declaration";
 
 
       };
