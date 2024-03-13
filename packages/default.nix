@@ -6,7 +6,7 @@ _final: prev: {
     version = "7.0.0";
     src = prev.fetchzip {
       url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
-      hash = _final.lib.fakeHash;
+      hash = "sha256-FJ4HHiniyvNvwQq5cxpGTAIS8g5vEoHAdtJ33qNzRZo=";
     };
 
   });
