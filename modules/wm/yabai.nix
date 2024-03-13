@@ -171,7 +171,10 @@ in
       };
       # https://github.com/koekeishiya/yabai/blob/master/doc/yabai.asciidoc#signal
       # https://felixkratz.github.io/SketchyBar/config/events#triggering-custom-events
+      # https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)
       extraConfig = ''
+        yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
+        sudo yabai --load-sa
         # rules
         yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
         yabai -m rule --add app='System Preferences' manage=off
