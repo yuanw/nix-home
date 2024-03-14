@@ -5,7 +5,7 @@ _final: prev: {
   yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "7.0.2";
     src =
-      if _final.stdenv.hostPlatform == "aarch-darwin" then
+      if _final.stdenv.hostPlatform == "aarch64-darwin" then
         (prev.fetchzip {
           url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
           hash = "sha256-/MOAKsY7MlRWdvUQwHeITTeGJbCUdX7blZZAl2zXuic=";
@@ -15,7 +15,7 @@ _final: prev: {
           owner = "koekeishiya";
           repo = "yabai";
           rev = "v7.0.2";
-          hash = _final.lib.fakeHash;
+          hash = "sha256-/MOAKsY7MlRWdvUQwHeITTeGJbCUdX7blZZAl2zXuic=";
         });
   });
 
