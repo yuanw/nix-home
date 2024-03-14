@@ -8,7 +8,7 @@ _final: prev: {
       if _final.stdenv.hostPlatform == "aarch-darwin" then
         (prev.fetchzip {
           url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
-          hash = _final.lib.fakeHash;
+          hash = "sha256-/MOAKsY7MlRWdvUQwHeITTeGJbCUdX7blZZAl2zXuic=";
         })
       else
         (prev.fetchFromGitHub {
