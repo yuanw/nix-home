@@ -3,12 +3,20 @@ _final: prev: {
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
   yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
-    version = "7.0.0";
-    src = prev.fetchzip {
-      url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
-      hash = "sha256-FJ4HHiniyvNvwQq5cxpGTAIS8g5vEoHAdtJ33qNzRZo=";
-    };
-
+    version = "7.0.2";
+    src =
+      if _final.stdenv.hostPlatform == "aarch-darwin" then
+        (prev.fetchzip {
+          url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.0/yabai-v7.0.0.tar.gz";
+          hash = _final.lib.fakeHash;
+        })
+      else
+        (prev.fetchFromGitHub {
+          owner = "koekeishiya";
+          repo = "yabai";
+          rev = "v7.0.2";
+          hash = _final.lib.fakeHash;
+        });
   });
 
 
