@@ -5,10 +5,19 @@ _final: prev: {
   yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "7.0.2";
     src =
-      prev.fetchzip {
-        url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.2/yabai-v7.0.2.tar.gz";
-        hash = "sha256-FeNiJJM5vdzFT9s7N9cTjLYxKEfzZnKE9br13lkQhJo=";
-      };
+      if prev.hostPlatform.system == "x86_64-darwin" then
+        (
+          prev.fetchFromGitHub {
+            owner = "koekeishiya";
+            repo = "yabai";
+            rev = "v7.0.2";
+            hash = "sha256-/MOAKsY7MlRWdvUQwHeITTeGJbCUdX7blZZAl2zXuic=";
+          }
+        ) else
+        (prev.fetchzip {
+          url = "https://github.com/koekeishiya/yabai/releases/download/v7.0.2/yabai-v7.0.2.tar.gz";
+          hash = "sha256-FeNiJJM5vdzFT9s7N9cTjLYxKEfzZnKE9br13lkQhJo=";
+        });
   });
 
 
