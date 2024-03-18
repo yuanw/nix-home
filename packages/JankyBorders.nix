@@ -7,13 +7,6 @@
 , SkyLight
 }:
 
-let
-  inherit (stdenv.hostPlatform) system;
-  target = {
-    "aarch64-darwin" = "arm64";
-    "x86_64-darwin" = "x86";
-  }.${system} or (throw "Unsupported system: ${system}");
-in
 stdenv.mkDerivation (finalAttrs: {
   pname = "jankyBorders";
   version = "1.6.0";
@@ -30,10 +23,6 @@ stdenv.mkDerivation (finalAttrs: {
     Carbon
     CoreVideo
     SkyLight
-  ];
-
-  makeFlags = [
-    target
   ];
 
   installPhase = ''
