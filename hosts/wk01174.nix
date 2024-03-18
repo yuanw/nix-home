@@ -48,6 +48,7 @@
         "sloth"
         "mysql-shell"
         "viscosity"
+        "vial"
       ];
       brews = [
         "redis"
