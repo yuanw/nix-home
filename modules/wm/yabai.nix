@@ -127,6 +127,7 @@ in
         pkgs.ripgrep
         pkgs.ical-buddy
         pkgs.sketchybar-cpu-helper
+        pkgs.janky-borders
       ];
       enable = true;
     };
