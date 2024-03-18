@@ -25,6 +25,10 @@ stdenv.mkDerivation (finalAttrs: {
     SkyLight
   ];
 
+  makeFlags = [
+    "all"
+  ];
+
   installPhase = ''
     runHook preInstall
 
