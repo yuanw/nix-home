@@ -33,6 +33,7 @@ stdenv.mkDerivation (finalAttrs: {
     runHook preInstall
 
     mkdir -p $out/bin
+    mkdir -p $out/share/man/man1/
     cp ./bin/borders $out/bin/borders
     cp ./docs/borders.1 $out/share/man/man1/borders.1
     runHook postInstall
