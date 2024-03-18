@@ -34,7 +34,7 @@ stdenv.mkDerivation (finalAttrs: {
 
     mkdir -p $out/bin
     cp ./bin/borders $out/bin/borders
-
+    installManPage ./doc/borders.1
     runHook postInstall
   '';
 
