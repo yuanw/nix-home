@@ -73,7 +73,7 @@ in
       };
       home.packages = [
         pkgs.ical-buddy
-
+        pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "yabai-next-window" ''
             #
@@ -127,7 +127,6 @@ in
         pkgs.ripgrep
         pkgs.ical-buddy
         pkgs.sketchybar-cpu-helper
-        pkgs.janky-borders
       ];
       enable = true;
     };
