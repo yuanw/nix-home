@@ -8,7 +8,10 @@ with lib; {
   ];
   networking.hostName = config.my.hostname;
   nix = {
+    daemonProcessType = "Adaptive";
     package = pkgs.nixUnstable;
+    #  sysctl -n hw.ncpu
+    settings.cores = 4;
     # extra-trusted-users = [ config.my.username ];
     gc = {
       user = "${config.my.username}";

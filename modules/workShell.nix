@@ -16,6 +16,7 @@ in {
         packages.resource-id
         # pkgs.csvkit
         # pkgs.visidata
+        pkgs.trivy
         pkgs.terraform
         pkgs.terraform-ls
         # pkgs.podman
