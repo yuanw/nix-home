@@ -10,7 +10,8 @@ with lib; {
   nix = {
     daemonProcessType = "Adaptive";
     package = pkgs.nixUnstable;
-    setting.cores = 4;
+    #  sysctl -n hw.ncpu
+    settings.cores = 4;
     # extra-trusted-users = [ config.my.username ];
     gc = {
       user = "${config.my.username}";
