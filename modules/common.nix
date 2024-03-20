@@ -37,7 +37,7 @@
     '';
     # trustedBinaryCaches = config.nix.binaryCaches;
     gc = {
-      automatic = true;
+      # automatic = true;
       # interval = { Hour = 24 * 7; };
     };
   };

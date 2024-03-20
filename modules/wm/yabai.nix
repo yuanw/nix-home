@@ -73,7 +73,7 @@ in
       };
       home.packages = [
         pkgs.ical-buddy
-
+        pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "yabai-next-window" ''
             #
