@@ -8,7 +8,7 @@ with lib; {
   ];
   networking.hostName = config.my.hostname;
   nix = {
-    daemonProcessType = "Background";
+    daemonProcessType = "Adaptive";
     package = pkgs.nixUnstable;
     # extra-trusted-users = [ config.my.username ];
     gc = {
