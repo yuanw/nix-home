@@ -29,6 +29,12 @@
     };
     # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''
+      gc-keep-derivations = true
+      gc-keep-outputs = true
+      min-free = 17179870000
+      max-free = 17179870000
+      log-lines = 128
+
       experimental-features = nix-command flakes repl-flake auto-allocate-uids 
       keep-outputs          = true
       keep-derivations      = true
