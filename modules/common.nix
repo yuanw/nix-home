@@ -25,7 +25,7 @@
       ];
       # https://github.com/NixOS/nix/issues/7273
       # auto-optimise-store = true;
-      max-jobs = 4;
+      max-jobs = 12;
     };
     # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''

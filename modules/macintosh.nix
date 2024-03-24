@@ -11,7 +11,7 @@ with lib; {
     daemonProcessType = "Adaptive";
     package = pkgs.nixUnstable;
     #  sysctl -n hw.ncpu
-    settings.cores = 4;
+    settings.cores = 12;
     # extra-trusted-users = [ config.my.username ];
     gc = {
       user = "${config.my.username}";
