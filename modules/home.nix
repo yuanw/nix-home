@@ -187,7 +187,7 @@
         GITSTATUS_LOG_LEVEL = "DEBUG";
       };
 
-      enableAutosuggestions = true;
+      autosuggestions.enable = true;
       history = {
         size = 50000;
         save = 500000;
