@@ -3,6 +3,6 @@
 with pkgs; [
   # alerter
   pinentry_mac
-  choose_mac
+  choose-mac
   # xquartz
 ]
