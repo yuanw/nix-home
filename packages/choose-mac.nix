@@ -14,6 +14,7 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out/bin
+    ls
     cp -r choose $out/bin
     chmod +x $out/bin/choose
   '';
