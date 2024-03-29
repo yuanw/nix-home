@@ -7,7 +7,6 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     url = "https://github.com/chipsenkbeil/choose/releases/download/${version}/choose";
     sha256 = "1d0efb2e2a2c1d6a39830726ab7433da64cc22ca2eed19efd6678090cbb9e325";
-    stripRoot = false;
   };
 
   dontBuild = true;
