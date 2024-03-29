@@ -13,10 +13,13 @@ stdenv.mkDerivation rec {
   dontUnpack = true;
 
   installPhase = ''
+    runHook preInstall
+
     mkdir -p $out/bin
-    ls
-    cp -r choose $out/bin
+    cp $src $out/bin/choose
     chmod +x $out/bin/choose
+
+    runHook postInstall
   '';
 
   meta = with lib; {
