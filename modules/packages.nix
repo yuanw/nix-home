@@ -62,7 +62,7 @@ with pkgs; [
   #kubectl
   # vhs
   # csvkit
-  dmenu
+  # dmenu
   gum
   inkscape-with-extensions
   ghostscript

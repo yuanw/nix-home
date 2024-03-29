@@ -21,6 +21,7 @@ _final: prev: {
         });
   });
 
+  choose-mac = prev.callPackage ./choose-mac.nix { };
 
   jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "1.33.0";
