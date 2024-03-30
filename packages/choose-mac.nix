@@ -15,7 +15,7 @@ stdenv.mkDerivation (_finalAttrs: {
     owner = "chipsenkbeil";
     repo = "choose";
     rev = "29b07318a8c1e929c8b84e0e7a936763eabf2f89";
-    sha256 = lib.fakeSha256;
+    sha256 = "sha256-6/HHuzDA3KmGzVbvM9FHUtm4tRxr/D4bKNHNYXNEiKo=";
     # sha256 = "sha256-oR0GgMinKcBHaZWdE7O+mdbiLKKjkweECKbi80bjW+c=";
   };
 
