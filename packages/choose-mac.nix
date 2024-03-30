@@ -28,8 +28,10 @@ stdenv.mkDerivation (finalAttrs: {
 
   makeFlags =
     if stdenv.isAarch64 then [
+      "clean"
       "choose-arm64"
     ] else [
+      "clean"
       "choose-x86_64"
     ];
 
