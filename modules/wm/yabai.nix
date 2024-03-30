@@ -37,8 +37,9 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
+    shift + ctrl + alt - m : echo -e "poweroff\nreboot\nsuspend" | dmenu
 
-    shift + ctrl + alt - m : open ~/reiryoku.svg
+    #shift + ctrl + alt - m : open ~/reiryoku.svg
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
