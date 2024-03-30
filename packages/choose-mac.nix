@@ -1,31 +1,53 @@
-{ stdenv, lib, fetchurl }:
-
-stdenv.mkDerivation rec {
+{ lib
+, stdenv
+, fetchFromGitHub
+, AppKit
+, Carbon
+, CoreVideo
+, SkyLight
+, xcbuild
+}:
+stdenv.mkDerivation (finalAttrs: {
   pname = "choose-mac";
-
   version = "1.3.1";
-  src = fetchurl {
-    url = "https://github.com/chipsenkbeil/choose/releases/download/${version}/choose";
-    sha256 = "1d0efb2e2a2c1d6a39830726ab7433da64cc22ca2eed19efd6678090cbb9e325";
+
+  src = fetchFromGitHub {
+    owner = "chipsenkbeil";
+    repo = "choose";
+    rev = "${finalAttrs.version}";
+    sha256 = "sha256-oR0GgMinKcBHaZWdE7O+mdbiLKKjkweECKbi80bjW+c=";
   };
 
-  dontBuild = true;
-  dontUnpack = true;
+  buildInputs = [
+    AppKit
+    Carbon
+    CoreVideo
+    xcbuild
+    SkyLight
+  ];
+
+  makeFlags =
+    if stdenv.isAarch64 then [
+      "choose-arm64"
+    ] else [
+      "choose-x86_64"
+    ];
 
   installPhase = ''
     runHook preInstall
 
     mkdir -p $out/bin
-    cp $src $out/bin/choose
-    chmod +x $out/bin/choose
+    cp choose $out/bin/choose
 
     runHook postInstall
   '';
 
-  meta = with lib; {
-    maintainers = with maintainers; [ ];
-    homepage = "https://github.com/chipsenkbeil/choose";
-    license = licenses.mit;
-    platforms = platforms.darwin;
+
+  meta = {
+    description = "A lightweight tool designed to add colored borders to user windows on macOS 14.0+";
+    homepage = "https://github.com/FelixKratz/JankyBorders";
+    license = lib.licenses.gpl3;
+    mainProgram = "choose";
+    platforms = lib.platforms.darwin;
   };
-}
+})

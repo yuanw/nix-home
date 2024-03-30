@@ -13,7 +13,7 @@ with pkgs; [
   htop
   nix-prefetch-git
   cachix
-  nixfmt
+
   # sass
   tree
   # broot
