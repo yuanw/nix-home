@@ -26,12 +26,7 @@ stdenv.mkDerivation (finalAttrs: {
     SkyLight
   ];
 
-  makeFlags =
-    if stdenv.isAarch64 then [
-      "release"
-    ] else [
-      "choose-x86_64"
-    ];
+  makeFlags = [ "release" ];
 
   installPhase = ''
     runHook preInstall
