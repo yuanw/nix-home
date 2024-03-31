@@ -13,7 +13,7 @@ with pkgs; [
   htop
   nix-prefetch-git
   cachix
-  nixfmt
+
   # sass
   tree
   # broot
@@ -62,6 +62,7 @@ with pkgs; [
   #kubectl
   # vhs
   # csvkit
+  # dmenu
   gum
   inkscape-with-extensions
   ghostscript
