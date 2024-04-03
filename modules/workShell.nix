@@ -25,6 +25,10 @@ in {
         profileExtra = mkAfter ''
           [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
           export PATH=$PATH:$HOME/go/bin
+
+          function scan-image {
+             trivy image $1 --scanners vuln
+          }
         '';
       };
 
