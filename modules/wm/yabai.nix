@@ -46,7 +46,13 @@ let
 
 in
 {
-  options.modules.wm.yabai = { enable = mkEnableOption "yabai"; };
+  options.modules.wm.yabai = {
+    enable = mkEnableOption "yabai";
+    overideAppLanucher = mkOption {
+      type = types.bool;
+      default = false;
+    };
+  };
 
   config = mkIf cfg.enable {
     fonts.fonts = with pkgs; [
@@ -77,7 +83,7 @@ in
         pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "app-launcher" ''
-            ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ | \
+            ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ ~/.nix-profile/Applications/ | \
             grep '\.app$' | \
             sed 's/\.app$//g' | \
             choose | \
