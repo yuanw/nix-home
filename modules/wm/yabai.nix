@@ -73,7 +73,7 @@ in
       };
       home.packages = [
         pkgs.ical-buddy
-        pkgs.choose
+        pkgs.choose-mac
         pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "app-launcher" ''
