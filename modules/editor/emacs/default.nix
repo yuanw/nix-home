@@ -176,8 +176,13 @@ with lib; {
               (setq visible-bell t)
 
               ;; https://www.emacswiki.org/emacs/RecursiveEdit
-              (setq enable-recursive-minibuffer t)
+              ;;(setq enable-recursive-minibuffer t)
+              (defun stop-using-minibuffer ()
+              "kill the minibuffer"
+              (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+              (abort-recursive-edit)))
 
+              (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
               (setq tab-always-indent 'complete)
