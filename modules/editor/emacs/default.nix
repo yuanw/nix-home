@@ -865,7 +865,7 @@ with lib; {
                                            "* TIL"
                                            "\n\n"))))
 
-                    (use-package denote-org-dblock)
+                    (use-package denote-org-extras)
                     (use-package denote-rename-buffer)
                     (use-package denote-journal-extras)
                     (denote-rename-buffer-mode)
