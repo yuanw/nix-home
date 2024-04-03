@@ -37,11 +37,11 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
-    cmd + space: app-launcher
     shift + ctrl + alt - m : open ~/reiryoku.svg
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
+    cmd - space: app-launcher
   '';
 
 in
@@ -77,7 +77,7 @@ in
         pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "app-launcher" ''
-                    ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ | \
+            ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ | \
             grep '\.app$' | \
             sed 's/\.app$//g' | \
             choose | \
