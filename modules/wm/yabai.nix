@@ -37,7 +37,7 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
-
+    cmd + space: app-launcher
     shift + ctrl + alt - m : open ~/reiryoku.svg
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
@@ -73,7 +73,17 @@ in
       };
       home.packages = [
         pkgs.ical-buddy
+        pkgs.choose
         pkgs.janky-borders
+        (
+          pkgs.writeShellScriptBin "app-launcher" ''
+                    ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ | \
+            grep '\.app$' | \
+            sed 's/\.app$//g' | \
+            choose | \
+            xargs -I {} open -a "{}.app"
+          ''
+        )
         (
           pkgs.writeShellScriptBin "yabai-next-window" ''
             #
