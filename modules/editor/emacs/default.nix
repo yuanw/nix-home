@@ -966,6 +966,10 @@ with lib; {
                 config = ''
                   (setq nix-indent-function 'nix-indent-line) '';
               };
+
+              kotlin-mode = {
+                enable = true;
+              };
               groovy-mode = {
                 enable = true;
                 mode = [
