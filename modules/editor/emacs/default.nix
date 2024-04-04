@@ -852,6 +852,12 @@ with lib; {
                   "(dired-mode-hook .org-download-enable)"
                 ];
               };
+              easy-kill = {
+                enable = true;
+                extraConfig = ''
+                  :bind ([remap kill-ring-save] . easy-kill)
+                '';
+              };
 
               envrc = {
                 enable = true;
