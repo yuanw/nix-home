@@ -92,7 +92,11 @@
     terminal = {
       enable = true;
     };
-    wm.yabai.enable = true;
+    wm = {
+      yabai.enable = true;
+      enableJankyborders = true;
+    };
+
 
     workShell.enable = true;
   };
