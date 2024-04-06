@@ -203,7 +203,7 @@ in
         '';
       };
     })
-    (mkIf cfg.enableJankyborders.enable {
+    (mkIf cfg.enableJankyborders {
       launchd.user.agents.jankyborders = {
         path = [
           pkgs.janky-borders
