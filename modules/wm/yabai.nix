@@ -52,9 +52,13 @@ in
       type = types.bool;
       default = false;
     };
+    enableJankyborders = mkOption {
+      type = types.bool;
+      default = false;
+    };
   };
 
-  config = mkIf cfg.enable {
+  config = mkIf cfg.enable (mkMerge [{
     fonts.fonts = with pkgs; [
       sketchybar-app-font
       font-hack-nerd-font
@@ -80,7 +84,6 @@ in
       home.packages = [
         pkgs.ical-buddy
         pkgs.choose-mac
-        pkgs.janky-borders
         (
           pkgs.writeShellScriptBin "app-launcher" ''
             ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ ~/.nix-profile/Applications/ | \
@@ -198,5 +201,17 @@ in
         yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
       '';
     };
-  };
+  }
+    (mkIf cfg.enableJankyborders.enable {
+      launchd.user.agents.jankyborders = {
+        path = [
+          pkgs.janky-borders
+
+        ];
+        serviceConfig.ProgramArguments = [ "${cfg.package}/bin/borders" ];
+        serviceConfig.KeepAlive = true;
+        serviceConfig.RunAtLoad = true;
+      };
+    }
+    )]);
 }
