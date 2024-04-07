@@ -94,7 +94,7 @@
     };
     wm = {
       yabai.enable = true;
-      enableJankyborders = true;
+      yabai.enableJankyborders = true;
     };
 
 
