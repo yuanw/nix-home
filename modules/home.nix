@@ -175,6 +175,12 @@
       enable = true;
       enableZshIntegration = true;
     };
+    # https://github.com/nix-community/home-manager/blob/master/modules/programs/atuin.nix
+    # https://docs.atuin.sh/configuration/config/
+    atuin = {
+      enable = true;
+      enableZshIntegration = true;
+    };
     zsh = rec {
       enable = true;
       # seems have collision with nix.24
