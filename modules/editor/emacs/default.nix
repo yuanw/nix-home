@@ -55,6 +55,10 @@ with lib; {
       default = false;
     };
 
+    enableCopilot = mkOption {
+      type = types.bool;
+      default = false;
+    };
     enableDoomConfig = mkOption {
       type = types.bool;
       default = false;
@@ -1127,6 +1131,18 @@ with lib; {
                         undo-tree-auto-save-history nil)
                   (global-undo-tree-mode)
                 '';
+              };
+              copilot = {
+                enable = config.enableCopilot;
+                package = epkgs: (
+                  pkgs.callPackage ./packages/copilot-emacs {
+                    inherit (pkgs) fetchFromGitHub nodejs;
+                    inherit lib;
+                    inherit (epkgs) trivialBuild dash editorconfig s f jsonrpc;
+                  }
+                );
+                hook = [ "(prog-mode . copilot-mode)" ];
+
               };
 
               lsp-bridge = {

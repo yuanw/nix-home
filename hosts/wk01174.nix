@@ -69,6 +69,7 @@
       enable = true;
       enableService = true;
       enableDoomConfig = true;
+      enableCopilot = true;
     };
     health.enable = true;
     editors.neovim.enable = true;
