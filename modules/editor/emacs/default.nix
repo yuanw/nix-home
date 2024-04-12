@@ -1133,7 +1133,7 @@ with lib; {
                 '';
               };
               copilot = {
-                enable = config.enableCopilot;
+                enable = cfg.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
