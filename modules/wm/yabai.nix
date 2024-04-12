@@ -204,14 +204,26 @@ in
       };
     })
     (mkIf cfg.enableJankyborders {
+      home-manager.users.${config.my.username} = {
+        xdg.configFile = {
+          "borders/bordersrc".source = ./bordersrc;
+        };
+      };
       launchd.user.agents.jankyborders = {
         path = [
           pkgs.janky-borders
 
         ];
-        serviceConfig.ProgramArguments = [ "${cfg.package}/bin/borders" ];
-        serviceConfig.KeepAlive = true;
-        serviceConfig.RunAtLoad = true;
+        serviceConfig = {
+          ProgramArguments = [ "${pkgs.janky-borders}/bin/borders" ];
+
+          KeepAlive = true;
+          RunAtLoad = true;
+          StandardOutPath = "/tmp/borders.log";
+          StandardErrorPath = "/tmp/borders.log";
+        };
+
+
       };
     }
     )

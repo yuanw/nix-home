@@ -175,6 +175,12 @@
       enable = true;
       enableZshIntegration = true;
     };
+    # https://github.com/nix-community/home-manager/blob/master/modules/programs/atuin.nix
+    # https://docs.atuin.sh/configuration/config/
+    atuin = {
+      enable = true;
+      enableZshIntegration = true;
+    };
     zsh = rec {
       enable = true;
       # seems have collision with nix.24
@@ -185,6 +191,7 @@
         # EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
         LANG = "en_US.UTF-8";
         GITSTATUS_LOG_LEVEL = "DEBUG";
+        HIST_STAMPS = "yyyy-mm-dd";
       };
 
       autosuggestion.enable = true;
@@ -194,20 +201,30 @@
         path = "$HOME/.config/zsh/history";
         ignoreDups = true;
         share = true;
+        ignoreSpace = true;
+        extended = true;
+        expireDuplicatesFirst = true;
+        ignorePatterns = [ "rm *" "pkill *" "ls" ];
       };
 
       initExtra =
         if pkgs.stdenvNoCC.isDarwin then
           lib.mkBefore ''
-            export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+            setopt HIST_NO_STORE         # Don't store history commands
+            setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.i
+
+              export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
 
           ''
         else
-          lib.mkBefore "";
+          lib.mkBefore ''
+            setopt HIST_NO_STORE         # Don't store history commands
+            setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.
+          '';
 
       oh-my-zsh = {
         enable = true;
-        plugins = [ "history" "autojump" "history-substring-search" ];
+        plugins = [ "history" "autojump" "history-substring-search" "git" "fzf" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
