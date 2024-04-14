@@ -65,6 +65,7 @@ with lib; {
 
       services.emacs = {
         enable = cfg.enableService;
+        additionalPath = "${config.my.homeDirectory}";
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
 
@@ -72,7 +73,7 @@ with lib; {
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
       # the context of home-manager
-      home-manager.users.${config.my.username} = { pkgs, osConfig, ... }:
+      home-manager.users.${config.my.username} = { pkgs, ... }:
         {
           imports = [
             nurNoPkg.repos.rycee.hmModules.emacs-init
