@@ -62,10 +62,7 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-      services.emacs = {
-        enable = cfg.enableService;
-        package = config.programs.emacs.finalPackage;
-      };
+
 
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -1401,6 +1398,13 @@ with lib; {
     } else {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
     })
+
+    {
+      services.emacs = {
+        enable = cfg.enableService;
+        package = config.programs.emacs.finalPackage;
+      };
+    }
 
     (if (builtins.hasAttr "launchd" options) then {
 
