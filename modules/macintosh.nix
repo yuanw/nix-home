@@ -78,7 +78,7 @@ with lib; {
   time.timeZone = "America/Regina";
 
   users.users.${config.my.username} = {
-    shell = pkgs.zsh;
+    shell = pgs.zsh;
     home = config.my.homeDirectory;
   };
   home-manager.useGlobalPkgs = true;
