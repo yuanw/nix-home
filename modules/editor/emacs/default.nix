@@ -76,7 +76,7 @@ with lib; {
           ];
           osConfig.service.emacs = {
             enable = cfg.enableService;
-            package = programs.emacs.finalPackage;
+            package = config.home-manager.user.${config.my.username}.programs.emacs.finalPackage;
           };
           programs.emacs.extraPackages = epkgs:
             with epkgs;
