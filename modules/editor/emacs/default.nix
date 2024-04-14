@@ -1402,7 +1402,7 @@ with lib; {
     {
       services.emacs = {
         enable = cfg.enableService;
-        package = config.programs.emacs.finalPackage;
+        package = home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
     }
 
