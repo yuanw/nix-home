@@ -63,7 +63,10 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [
     {
 
-
+      services.emacs = {
+        enable = cfg.enableService;
+        package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+      };
 
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -74,10 +77,7 @@ with lib; {
           imports = [
             nurNoPkg.repos.rycee.hmModules.emacs-init
           ];
-          osConfig.service.emacs = {
-            enable = cfg.enableService;
-            package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-          };
+
           programs.emacs.extraPackages = epkgs:
             with epkgs;
             [
