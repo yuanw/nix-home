@@ -112,31 +112,31 @@ shift + cmd - d : yabai -m window --resize right:-20:0
 # ctrl + alt - l : yabai -m window --insert east
 
 # rotate tree
-alt - r : yabai -m space --rotate 90
+# alt - r : yabai -m space --rotate 90
 
 
 
 # toggle desktop offset
-alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
+# alt - a : yabai -m space --toggle padding; yabai -m space --toggle gap
 
 # toggle window parent zoom
 # alt - d : yabai -m window --toggle zoom-parent
 
 # toggle window fullscreen zoom
-alt - z : yabai -m window --toggle zoom-fullscreen
+# alt - z : yabai -m window --toggle zoom-fullscreen
 
 # toggle window native fullscreen
-shift + alt - z : yabai -m window --toggle native-fullscreen
+# shift + alt - z : yabai -m window --toggle native-fullscreen
 
 # toggle window border
-shift + alt - b : yabai -m window --toggle border
+# shift + alt - b : yabai -m window --toggle border
 
 # toggle window split type
-alt - e : yabai -m window --toggle split
+# alt - e : yabai -m window --toggle split
 
 # float / unfloat window and center on screen
-alt - t : yabai -m window --toggle float;\
-          yabai -m window --grid 4:4:1:1:2:2
+#alt - t : yabai -m window --toggle float;\
+#          yabai -m window --grid 4:4:1:1:2:2
 
 # # toggle sticky
 # alt - s : yabai -m window --toggle sticky
