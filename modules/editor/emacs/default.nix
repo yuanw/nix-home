@@ -64,6 +64,12 @@ with lib; {
     {
 
 
+      services.emacs = {
+        enable = cfg.enableService;
+        package = home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+      };
+
+
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -1399,12 +1405,7 @@ with lib; {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
     })
 
-    {
-      services.emacs = {
-        enable = cfg.enableService;
-        package = home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-      };
-    }
+
 
     (if (builtins.hasAttr "launchd" options) then {
 
