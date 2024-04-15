@@ -70,7 +70,9 @@ with pkgs; [
   dig
   just
   pkg-config
-  racket
+  coreutils
+
+  # racket
   # open-interpreter
   # reiryoku-firmware
   # reiryoku-flash
