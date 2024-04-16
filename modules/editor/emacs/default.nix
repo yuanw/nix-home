@@ -1148,7 +1148,13 @@ with lib; {
                   }
                 );
                 hook = [ "(prog-mode . copilot-mode)" ];
-
+                bindLocal = {
+                  copilot-completion-map = {
+                    "<tab>" = "copilot-accept-completion";
+                    "M-n" = "copilot-next-completion";
+                    "M-p" = "copilot-previous-completion";
+                  };
+                };
               };
 
               lsp-bridge = {
