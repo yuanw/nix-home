@@ -3,7 +3,7 @@
 with lib;
 let cfg = config.modules.dev.kotlin;
 in {
-  options.modules.dev.java = {
+  options.modules.dev.kotlin = {
     enable = mkEnableOption "kotlin";
 
   };
