@@ -622,7 +622,7 @@ with lib; {
                   (corfu-scroll-margin 5)        ;; Use scroll margin
                 '';
                 config = ''
-                  (global-corfu-mode)
+                  ;;(global-corfu-mode)
                 '';
               };
 
@@ -1146,6 +1146,7 @@ with lib; {
                     inherit lib;
                     inherit (epkgs) trivialBuild dash editorconfig s f jsonrpc;
                   }
+
                 );
                 hook = [ "(prog-mode . copilot-mode)" ];
                 bindLocal = {
@@ -1158,10 +1159,10 @@ with lib; {
               };
 
               lsp-bridge = {
-                enable = false;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
-                    inherit (pkgs) fetchFromGitHub substituteAll writeText python3;
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
                     inherit lib;
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
                   }

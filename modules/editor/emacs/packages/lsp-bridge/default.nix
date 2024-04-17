@@ -2,6 +2,7 @@
 , fetchFromGitHub
 , writeText
 , substituteAll
+, unstableGitUpdater
 , lib
   # Elisp dependencies
 
@@ -28,23 +29,22 @@ let
 
 
   pname = "lsp-bridge";
-  version = "20240216.0";
+  version = "20240416.0";
 
 in
 melpaBuild {
 
   inherit pname version;
-
   src = fetchFromGitHub {
     owner = "manateelazycat";
     repo = "lsp-bridge";
-    rev = "270e42d52c545f959a9e5c79e8f317f6cf4b2162";
-    hash = "sha256-s9RxnbBs4nEvHCx/1K3I8cWFo46PJby9E5+/unkYguk=";
-
+    rev = "c59aaf65e27c12ac4f45e11dd83ac75c2d5c46aa";
+    hash = lib.fakeHash;
   };
 
   dontConfigure = true;
   dontBuild = true;
+  passthru.updateScript = unstableGitUpdater { };
 
   patches = [
     # Hardcode the python dependencies needed for lsp-bridge, so users
