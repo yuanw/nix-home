@@ -1083,10 +1083,11 @@ with lib; {
                   (add-hook 'tree-sitter-mode-hook 'tree-sitter-hl-mode)
                   (setq major-mode-remap-alist
                   '((yaml-mode . yaml-ts-mode)
-                    (bash-mode . bash-ts-mode)
+                  (bash-mode . bash-ts-mode)
                     (js2-mode . js-ts-mode)
                     (java-mode . java-ts-mode)
                     (json-mode . json-ts-mode)
+                    (kotlin-mode . kotlin-ts-mode)
                     (css-mode . css-ts-mode)
                     (python-mode . python-ts-mode)))'';
               };
