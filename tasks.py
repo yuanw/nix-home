@@ -14,8 +14,12 @@ def do(c, count=0, hide=False):
         try:
             result = c.run("nix build .#wk01174", hide=hide)
             print("done with " + str(count) + " try")
+        except KeyboardInterrupt:
+            print("KeyboardInterrupt")
+            count = 100
+            return
         except Exception as e:
-            print("retry")
+            print("retry " + str(e))
             do(c, count=count+1)
 
     else:
