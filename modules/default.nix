@@ -14,6 +14,7 @@
       ./dev/idris2.nix
       ./dev/java.nix
       ./dev/julia.nix
+      ./dev/kotlin.nix
       ./dev/node.nix
       ./dev/python.nix
       ./dev/roc.nix

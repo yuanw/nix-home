@@ -75,14 +75,15 @@
     typing.enable = true;
     dev =
       {
-        agda.enable = true;
+        agda.enable = false;
         dart.enable = true;
         java.enable = true;
         haskell.enable = true;
-        idris2.enable = true;
+        idris2.enable = false;
         python.enable = true;
         zig.enable = true;
         scheme.enable = true;
+        kotlin.enable = true;
       };
     zellij.enable = false;
     tmux = {
