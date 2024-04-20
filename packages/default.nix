@@ -12,10 +12,12 @@ _final: prev: {
         name = "${name}-${version}";
         version = "${version}";
         src = src;
-        buildInputs = [ prev.pkgs.undmg ];
+        buildInputs = [ prev.pkgs._7zz ];
         sourceRoot = ".";
         phases = [ "unpackPhase" "installPhase" ];
-
+        unpackCmd = ''
+          7zz x $src
+        '';
         installPhase = ''
              runHook preInstall
 
