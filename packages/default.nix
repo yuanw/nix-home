@@ -32,7 +32,7 @@ _final: prev: {
     version = "7.9.0";
     src = prev.fetchurl {
       url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
-      hash = prev.lib.fakeSha;
+      hash = prev.lib.fakeSha256;
     };
     description = "e-book library management";
     homepage = "https://calibre-ebook.com/";
@@ -66,7 +66,7 @@ _final: prev: {
     version = "1.33.0";
     src = prev.fetchurl {
       url = "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.34.0/jdt-language-server-1.34.0-202404031240.tar.gz";
-      hash = prev.lib.fakeSha;
+      hash = prev.lib.fakeSha256;
       # hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
     };
   });
