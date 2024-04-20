@@ -32,7 +32,8 @@ _final: prev: {
     version = "7.9.0";
     src = prev.fetchurl {
       url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
-      hash = prev.lib.fakeHash;
+      # hash = prev.lib.fakeHash;
+      hash = "sha256-1gdTsAdYUKBgltlarblZ/6fPwe+CGGVeFT0b9LOatw0=";
 
     };
     description = "e-book library management";
