@@ -1,12 +1,10 @@
 _final: prev: {
   installApplication =
     { name
-    , appname ? name
     , version
     , src
     , description
     , homepage
-    , postInstall ? ""
     , sourceRoot ? "."
     , ...
     }:
@@ -14,13 +12,21 @@ _final: prev: {
         name = "${name}-${version}";
         version = "${version}";
         src = src;
-        buildInputs = [ undmg unzip ];
-        sourceRoot = sourceRoot;
+        buildInputs = [ prev.pkgs.undmg ];
+        sourceRoot = ".";
         phases = [ "unpackPhase" "installPhase" ];
+
         installPhase = ''
-          mkdir -p "$out/Applications/${appname}.app"
-          cp -pR * "$out/Applications/${appname}.app"
-        '' + postInstall;
+             runHook preInstall
+
+             ls
+
+          mkdir -p $out/Applications
+          cp -r calibre.app "$out/Applications/"
+
+          runHook postInstall
+        '';
+
         meta = with super.lib; {
           description = description;
           homepage = homepage;
