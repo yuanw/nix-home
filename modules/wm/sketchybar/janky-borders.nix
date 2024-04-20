@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 
 let
-  inherit (lib) mdDoc mkEnableOption mkIf mkPackageOptionMD mkOption types;
+  inherit (lib) mkEnableOption mkIf mkPackageOptionMD mkOption types;
 
   cfg = config.services.janky-borders;
 in
@@ -30,7 +30,7 @@ in
           background_color=0x302c2e34
           )
         '';
-        description = mdDoc ''
+        description = ''
           Contents of sketchybar's configuration file. If empty (the default), the configuration file won't be managed.
 
           See [documentation](https://felixkratz.github.io/SketchyBar/)
