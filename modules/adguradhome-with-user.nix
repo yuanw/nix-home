@@ -37,23 +37,23 @@ in
     ];
 
   options.services.adguardhome-with-user = with types; {
-    enable = mkEnableOption (lib.mdDoc "AdGuard Home network-wide ad blocker");
+    enable = mkEnableOption ("AdGuard Home network-wide ad blocker");
     user = mkOption {
       type = types.str;
       example = "nss-user";
       description =
-        lib.mdDoc "The username to use when connecting to the database";
+        "The username to use when connecting to the database";
     };
     passwordFile = mkOption {
       type = types.path;
       example = "/run/secrets/mysql-auth-db-passwd";
       description =
-        lib.mdDoc "The path to the file containing the password for the user";
+        "The path to the file containing the password for the user";
     };
     openFirewall = mkOption {
       default = false;
       type = bool;
-      description = lib.mdDoc ''
+      description = ''
         Open ports in the firewall for the AdGuard Home web interface. Does not
         open the port needed to access the DNS resolver.
       '';
@@ -62,7 +62,7 @@ in
     mutableSettings = mkOption {
       default = true;
       type = bool;
-      description = lib.mdDoc ''
+      description = ''
         Allow changes made on the AdGuard Home web interface to persist between
         service restarts.
       '';
@@ -85,14 +85,14 @@ in
           bind_host = mkOption {
             default = "0.0.0.0";
             type = str;
-            description = lib.mdDoc ''
+            description = ''
               Host address to bind HTTP server to.
             '';
           };
           bind_port = mkOption {
             default = 3000;
             type = port;
-            description = lib.mdDoc ''
+            description = ''
               Port to serve HTTP pages on.
             '';
           };
