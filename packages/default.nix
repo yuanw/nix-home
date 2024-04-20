@@ -16,7 +16,7 @@ _final: prev: {
         sourceRoot = ".";
         phases = [ "unpackPhase" "installPhase" ];
         unpackCmd = ''
-          7zz x $src
+          7zz x $src -snld
         '';
         installPhase = ''
              runHook preInstall
@@ -24,7 +24,7 @@ _final: prev: {
              ls
 
           mkdir -p $out/Applications
-          cp -r calibre.app "$out/Applications/"
+          cp -r calibre*.app "$out/Applications/"
 
           runHook postInstall
         '';
