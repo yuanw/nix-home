@@ -77,7 +77,7 @@ in
             default = pkgs.adguardhome.schema_version;
             defaultText = literalExpression "pkgs.adguardhome.schema_version";
             type = int;
-            description = lib.mdDoc ''
+            description = ''
               Schema version for the configuration.
               Defaults to the `schema_version` supplied by `pkgs.adguardhome`.
             '';
@@ -98,7 +98,7 @@ in
           };
         };
       });
-      description = lib.mdDoc ''
+      description = ''
         AdGuard Home configuration. Refer to
         <https://github.com/AdguardTeam/AdGuardHome/wiki/Configuration#configuration-file>
         for details on supported values.
@@ -118,7 +118,7 @@ in
     extraArgs = mkOption {
       default = [ ];
       type = listOf str;
-      description = lib.mdDoc ''
+      description = ''
         Extra command line parameters to be passed to the adguardhome binary.
       '';
     };

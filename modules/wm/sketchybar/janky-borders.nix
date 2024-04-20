@@ -10,7 +10,7 @@ in
 
   options.services.sketchybar =
     {
-      enable = mkEnableOption (mdDoc "jankyBorders");
+      enable = mkEnableOption ("jankyBorders");
 
       package = mkPackageOptionMD pkgs "jankyBorders" { };
 
