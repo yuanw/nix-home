@@ -1,4 +1,43 @@
 _final: prev: {
+  installApplication =
+    { name
+    , appname ? name
+    , version
+    , src
+    , description
+    , homepage
+    , postInstall ? ""
+    , sourceRoot ? "."
+    , ...
+    }:
+      with _final; stdenv.mkDerivation {
+        name = "${name}-${version}";
+        version = "${version}";
+        src = src;
+        buildInputs = [ undmg unzip ];
+        sourceRoot = sourceRoot;
+        phases = [ "unpackPhase" "installPhase" ];
+        installPhase = ''
+          mkdir -p "$out/Applications/${appname}.app"
+          cp -pR * "$out/Applications/${appname}.app"
+        '' + postInstall;
+        meta = with super.lib; {
+          description = description;
+          homepage = homepage;
+          platforms = platforms.darwin;
+        };
+      };
+  calibre = _final.installApplication rec {
+    name = "calibre";
+    version = "7.9.0";
+    src = prev.fetchurl {
+      url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
+      hash = prev.lib.fakeSha;
+    };
+    description = "e-book library management";
+    homepage = "https://calibre-ebook.com/";
+  };
+
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
@@ -26,8 +65,9 @@ _final: prev: {
   jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
     version = "1.33.0";
     src = prev.fetchurl {
-      url = "https://download.eclipse.org/jdtls/milestones/1.33.0/jdt-language-server-1.33.0-202402151717.tar.gz";
-      hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
+      url = "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.34.0/jdt-language-server-1.34.0-202404031240.tar.gz";
+      hash = prev.lib.fakeSha;
+      # hash = "sha256-UZQQl3lFPmN6Azglf97xevwA6OehO/2bSM0bg93z8YY=";
     };
   });
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
