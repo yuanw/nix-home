@@ -309,7 +309,7 @@ with lib; {
                        '("-" . negative-argument)
                        '(";" . meow-reverse)
                        '("," . meow-inner-of-thing)
-                       '("." . meow-bounds-of-thing)
+                       '("." . dot-mode-execute)
                        '("[" . meow-beginning-of-thing)
                        '("]" . meow-end-of-thing)
                        '("a" . meow-append)
@@ -343,7 +343,7 @@ with lib; {
                        '("Q" . meow-goto-line)
                        '("r" . meow-replace)
                        '("R" . meow-swap-grab)
-                       '("s" . meow-kill)
+                       '("s" . meow-bounds-of-thing)
                        '("t" . meow-till)
                        '("u" . meow-undo)
                        '("U" . meow-undo-in-selection)
@@ -373,6 +373,8 @@ with lib; {
                   (setq meow-use-clipboard t)
                   (meow-setup)
                   (meow-global-mode 1)'';
+
+                after = [ "dot-mode" ];
 
               };
 
@@ -521,8 +523,9 @@ with lib; {
               # https://melpa.org/#/dot-mode
               dot-mode = {
                 enable = true;
-                command = [ "dot-mode" ];
+                command = [ "dot-mode" "dot-mode-execute" ];
                 config = ''
+                  (global-dot-mode)
                   (require 'dot-mode)
                   (add-hook 'find-file-hooks 'dot-mode-on)
                 '';
