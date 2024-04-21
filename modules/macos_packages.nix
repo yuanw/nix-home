@@ -3,5 +3,5 @@
 with pkgs; [
   # alerter
   pinentry_mac
-  calibre-mac
+  calibre_mac
 ]

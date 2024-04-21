@@ -20,10 +20,12 @@ _final: prev: {
         '';
         installPhase = ''
           runHook preInstall
-          mkdir -p $out/bin
           mkdir -p $out/Applications
           cp -r calibre*.app "$out/Applications/"
-          cp calibre.app/Contents/MacOS/ebook-convert $out/bin/ebook-convert
+
+          mkdir -p $out/bin
+
+          ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
 
 
           runHook postInstall
@@ -36,7 +38,7 @@ _final: prev: {
         };
       };
   # https://github.com/Homebrew/homebrew-cask/blob/f144ade7bcc8884fdf2a57b114cf11e7d98b2c93/Casks/c/calibre.rb
-  calibre-mac = _final.installApplication rec {
+  calibre_mac = _final.installApplication rec {
     name = "calibre";
     version = "7.9.0";
     src = prev.fetchurl {
