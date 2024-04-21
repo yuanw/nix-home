@@ -19,10 +19,8 @@ _final: prev: {
           7zz x $src -snld
         '';
         installPhase = ''
-             runHook preInstall
-
-             ls
-
+          runHook preInstall
+          mkdir -p $out/bin
           mkdir -p $out/Applications
           cp -r calibre*.app "$out/Applications/"
 
@@ -35,6 +33,7 @@ _final: prev: {
           platforms = platforms.darwin;
         };
       };
+  # https://github.com/Homebrew/homebrew-cask/blob/f144ade7bcc8884fdf2a57b114cf11e7d98b2c93/Casks/c/calibre.rb
   calibre = _final.installApplication rec {
     name = "calibre";
     version = "7.9.0";
