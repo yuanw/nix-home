@@ -518,6 +518,15 @@ with lib; {
                   "keycast-header-line-mode"
                 ];
               };
+              # https://melpa.org/#/dot-mode
+              dot-mode = {
+                enable = true;
+                command = [ "dot-mode" ];
+                config = ''
+                  (require 'dot-mode)
+                  (add-hook 'find-file-hooks 'dot-mode-on)
+                '';
+              };
 
               free-keys = {
                 enable = true;
