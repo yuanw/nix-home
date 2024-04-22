@@ -309,7 +309,6 @@ with lib; {
                        '("-" . negative-argument)
                        '(";" . meow-reverse)
                        '("," . meow-inner-of-thing)
-                       '("." . dot-mode-execute)
                        '("[" . meow-beginning-of-thing)
                        '("]" . meow-end-of-thing)
                        '("a" . meow-append)
@@ -317,7 +316,7 @@ with lib; {
                        '("b" . meow-back-word)
                        '("B" . meow-back-symbol)
                        '("c" . meow-change)
-                       '("d" . meow-delete)
+                       '("d" . meow-kill)
                        '("D" . meow-backward-delete)
                        '("e" . meow-next-word)
                        '("E" . meow-next-symbol)
@@ -374,7 +373,7 @@ with lib; {
                   (meow-setup)
                   (meow-global-mode 1)'';
 
-                after = [ "dot-mode" ];
+
 
               };
 
