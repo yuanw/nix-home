@@ -40,7 +40,7 @@
                        '("-" . negative-argument)
                        '(";" . meow-reverse)
                        '("," . meow-inner-of-thing)
-                       '("." . mdot-mode-execute)
+                       '("." . dot-mode-execute)
                        '("[" . meow-beginning-of-thing)
                        '("]" . meow-end-of-thing)
                        '("a" . meow-append)
