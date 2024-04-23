@@ -271,7 +271,7 @@ with lib; {
               my-meow = {
                 enable = true;
                 package = epkgs: (
-                  pkgs.callPackage ./packages/my-meow.nix {
+                  pkgs.callPackage ./packages/my-meow {
 
                     inherit (epkgs) trivialBuild meow dot-mode;
                   }
