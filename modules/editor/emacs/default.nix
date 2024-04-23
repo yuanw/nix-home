@@ -771,6 +771,16 @@ with lib; {
                   "(dired-mode-hook .org-download-enable)"
                 ];
               };
+              emacs-reveal = {
+                enable = true;
+                after = [ "org" ];
+                package = epkgs:
+                  (pkgs.callPackage ./packages/emacs-reveal.nix {
+                    inherit (pkgs) fetchFromGitLab lib;
+                    inherit (epkgs) trivialBuild;
+                  });
+
+              };
               easy-kill = {
                 enable = true;
                 extraConfig = ''
