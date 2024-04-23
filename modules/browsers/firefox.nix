@@ -36,14 +36,14 @@ in
             ghosttext
             privacy-badger
             leechblock-ng
+            kagi-search
+
           ];
 
           search = {
-            default = "Google";
-            order = [ "Google" "DuckDuckGo" ];
             engines = {
               "Bing".metaData.hidden = true;
-              "Ebay".metaData.hidden = true;
+              "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
               "Nix Packages" = {
                 urls = [{
