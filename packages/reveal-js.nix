@@ -15,6 +15,7 @@ stdenv.mkDerivation rec {
     runHook preInstall
 
     mkdir -p $out/share/
+    cp -r plugin $out/share/
     cp -r dist $out/share/
     runHook postInstall
 
