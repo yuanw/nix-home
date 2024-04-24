@@ -775,7 +775,7 @@ with lib; {
                 enable = true;
                 after = [ "org" ];
                 config = ''
-                  (setq org-re-reveal-root "${pkgs.reveal-js}/share/reveal.js")
+                  (setq org-re-reveal-root "${pkgs.reveal-js}/share/dist/reveal.js")
                 '';
 
               };
