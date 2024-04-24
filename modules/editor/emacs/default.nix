@@ -771,14 +771,12 @@ with lib; {
                   "(dired-mode-hook .org-download-enable)"
                 ];
               };
-              emacs-reveal = {
+              org-re-reveal = {
                 enable = true;
                 after = [ "org" ];
-                package = epkgs:
-                  (pkgs.callPackage ./packages/emacs-reveal.nix {
-                    inherit (pkgs) fetchFromGitLab lib;
-                    inherit (epkgs) trivialBuild;
-                  });
+                config = ''
+                  (setq org-re-reveal-root "${pkgs.reveal-js}/share/reveal.js")
+                '';
 
               };
               easy-kill = {
