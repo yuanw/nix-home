@@ -54,6 +54,7 @@ _final: prev: {
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
+  reveal-js = prev.callPackage ./reveal-js.nix { };
   # https://github.com/NixOS/nixpkgs/pull/295747
   # yabai = prev.yabai.overrideAttrs (_finalAttrs: _previousAttrs: {
   #   version = "7.0.2";
