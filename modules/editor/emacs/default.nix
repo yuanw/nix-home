@@ -906,9 +906,7 @@ with lib; {
 
               kotlin-mode = {
                 enable = true;
-                mode = [
-                  ''"\\.kt\\'"'' # \
-                ];
+                config = "(require 'kotlin-mode)";
               };
               groovy-mode = {
                 enable = true;
