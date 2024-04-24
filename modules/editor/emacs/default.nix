@@ -1009,7 +1009,7 @@ with lib; {
                     (js2-mode . js-ts-mode)
                     (java-mode . java-ts-mode)
                     (json-mode . json-ts-mode)
-                    (kotlin-mode . kotlin-ts-mode)
+                    ;;(kotlin-mode . kotlin-ts-mode)
                     (css-mode . css-ts-mode)
                     (python-mode . python-ts-mode)))'';
               };
