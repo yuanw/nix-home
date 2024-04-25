@@ -413,6 +413,10 @@ with lib; {
                 '';
               };
 
+              dired-subtree = {
+                enable = true;
+              };
+
               keycast = {
                 enable = true;
                 command = [
