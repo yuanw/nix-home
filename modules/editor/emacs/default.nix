@@ -350,7 +350,7 @@ with lib; {
                 init = "(savehist-mode)";
                 config = ''
                   (setq history-delete-duplicates t
-                        history-length 100)
+                        history-length 1000)
                 '';
               };
               # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
@@ -1048,23 +1048,6 @@ with lib; {
                   "vundo"
                 ];
               };
-
-              undo-tree = {
-                enable = false;
-                defer = 1;
-                command = [
-                  "global-undo-tree-mode"
-                  "undo-tree-redo"
-                  "undo-tree-undo"
-                ];
-                config = ''
-                  (setq undo-tree-visualizer-relative-timestamps t
-                        undo-tree-visualizer-timestamps t
-                        undo-tree-enable-undo-in-region t
-                        undo-tree-auto-save-history nil)
-                  (global-undo-tree-mode)
-                '';
-              };
               copilot = {
                 enable = cfg.enableCopilot;
                 package = epkgs: (
@@ -1254,8 +1237,12 @@ with lib; {
               };
               multi-vterm = {
                 enable = true;
+                command = [
+                  "multi-vterm"
+                  "multi-vterm-project"
+
+                ];
                 defer = true;
-                after = [ "vterm" ];
               };
             };
           };
