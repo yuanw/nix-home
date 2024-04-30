@@ -80,8 +80,8 @@ _final: prev: {
     version = "1.35.0";
     src = prev.fetchurl {
       url = "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.35.0/jdt-language-server-1.35.0-202404251256.tar.gz";
-      hash = prev.lib.fakeHash;
-      # hash = "sha256-N5p5aFby/vX360tB8oAKtu6TsHikkzJ/q6LYNRQu/dM=";
+      # hash = prev.lib.fakeHash;
+      hash = "sha256-ATncoa4mSDTDYg18udvjMQGGIhpC/0ClZzlCwHsIDxU=";
     };
   });
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
