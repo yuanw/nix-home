@@ -4,11 +4,7 @@
 
 (defhydra my-window-movement ()
   "window movement"
-    ("h" windmove-left "up")
-    ("o" windmove-right "->")
-    ("a" windmove-down "down")
-    ("i" windmove-up "up")
-    ("n" other-window "next")
+    ("o" other-window "next")
     ("*" enlarge-window "h+" )
     ("@" shrink-window "h-" )
     ("$" enlarge-window-horizontally "w+" )
