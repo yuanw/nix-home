@@ -1240,7 +1240,6 @@ with lib; {
                 command = [
                   "multi-vterm"
                   "multi-vterm-project"
-
                 ];
                 defer = true;
               };
