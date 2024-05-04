@@ -9,7 +9,7 @@ with lib; {
   networking.hostName = config.my.hostname;
   nix = {
     daemonProcessType = "Adaptive";
-    package = pkgs.nixUnstable;
+    package = pkgs.nixGit;
     #  sysctl -n hw.ncpu
     settings.cores = 12;
     # extra-trusted-users = [ config.my.username ];
