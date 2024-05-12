@@ -350,7 +350,7 @@ with lib; {
                 init = "(savehist-mode)";
                 config = ''
                   (setq history-delete-duplicates t
-                        history-length 100)
+                        history-length 1000)
                 '';
               };
               # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
@@ -697,23 +697,8 @@ with lib; {
               hydra = {
                 enable = true;
                 config = ''
-                              (defhydra hydra-window-menu (:color blue)
-                              "window movement"
-                               ("v" (lambda ()
-                     (interactive)
-                     (split-window-right)
-                     (windmove-right)) "split right")
-                  ("s" (lambda ()
-                     (interactive)
-                     (split-window-below)
-                     (windmove-down)) "below")
-                     ("k" delete-window "delete")
-                           ("d" delete-other-windows "delete other")
-
-                                                ("q" nil "cancel"))
-
-                                (defhydra hydra-main-menu (:color blue)
-                                                     "main menu"
+                  (defhydra hydra-main-menu (:color blue)
+                  "main menu"
                                                     ("p" project-switch-project "switch projects")
                                                     ("g" magit "magit")
                                                     ("n" org-roam-node-find "find note")
@@ -729,7 +714,6 @@ with lib; {
 
                                 (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
                                 (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                                (global-set-key (kbd "C-c w") 'hydra-window-menu/body)
                 '';
               };
               org = {
@@ -1048,23 +1032,6 @@ with lib; {
                   "vundo"
                 ];
               };
-
-              undo-tree = {
-                enable = false;
-                defer = 1;
-                command = [
-                  "global-undo-tree-mode"
-                  "undo-tree-redo"
-                  "undo-tree-undo"
-                ];
-                config = ''
-                  (setq undo-tree-visualizer-relative-timestamps t
-                        undo-tree-visualizer-timestamps t
-                        undo-tree-enable-undo-in-region t
-                        undo-tree-auto-save-history nil)
-                  (global-undo-tree-mode)
-                '';
-              };
               copilot = {
                 enable = cfg.enableCopilot;
                 package = epkgs: (
@@ -1252,10 +1219,28 @@ with lib; {
                         vterm-max-scrollback 10000)
                 '';
               };
+              wm = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild rec {
+                    pname = "wm";
+                    version = "0.0.1";
+                    src = ./packages/wm.el;
+                    propagatedUserEnvPkgs = [
+                      epkgs.hydra
+                      epkgs.ace-window
+                    ];
+                    buildInputs = propagatedUserEnvPkgs;
+                  };
+
+              };
               multi-vterm = {
                 enable = true;
+                command = [
+                  "multi-vterm"
+                  "multi-vterm-project"
+                ];
                 defer = true;
-                after = [ "vterm" ];
               };
             };
           };
