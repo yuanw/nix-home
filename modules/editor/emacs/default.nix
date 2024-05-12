@@ -760,7 +760,7 @@ with lib; {
                 ];
               };
               org-re-reveal = {
-                enable = true;
+                enable = false;
                 after = [ "org" ];
                 config = ''
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
