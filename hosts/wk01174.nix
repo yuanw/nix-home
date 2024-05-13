@@ -71,7 +71,6 @@
       enableCopilot = true;
     };
     health.enable = true;
-    editors.neovim.enable = true;
     typing.enable = true;
     dev =
       {
