@@ -971,7 +971,7 @@ with lib; {
                 enable = true;
                 after = [ "eglot" ];
                 extraPackage = [
-                  pkgs.eglot-booster
+                  pkgs.emacs-lsp-booster
                 ];
                 config = ''
                   	                                (eglot-booster-mode))
