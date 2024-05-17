@@ -39,7 +39,8 @@ melpaBuild {
     owner = "manateelazycat";
     repo = "lsp-bridge";
     rev = "72b02ecec0449335fefda56054251a35d834e26b";
-    sha256 = lib.fakeSha256;
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-K+aqK0N9k8dWwZGfqVS+9zNRgoCe9HjlTQXQgFpcJ54=";
     # hash = "sha256-ZgFSIR4nHgri7TpFLH1aVcD3vKHx3MSt4wSrv5KE13g=";
   };
 
