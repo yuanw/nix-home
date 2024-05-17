@@ -973,6 +973,9 @@ with lib; {
                 config = ''
                   (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
                   (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
+                  (setq eglot-java-eclipse-jdt-args (list "-Dosgi.sharedConfiguration.area.readOnly=true"
+                                          (concat "-javaagent:"
+                                                  "${pkgs.lombok}/share/java/lombok.jar")))
                   (add-hook 'java-mode-hook 'eglot-java-mode)
                   (with-eval-after-load 'eglot-java
                     (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
