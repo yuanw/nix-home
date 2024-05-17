@@ -977,8 +977,7 @@ with lib; {
                       owner = "jdtsmith";
                       repo = "eglot-booster";
                       rev = "e19dd7ea81bada84c66e8bdd121408d9c0761fe6";
-                      sha256 = lib.fakeSha256;
-
+                      sha256 = "sha256-vF34ZoUUj8RENyH9OeKGSPk34G6KXZhEZozQKEcRNhs=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;
