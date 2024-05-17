@@ -974,7 +974,7 @@ with lib; {
                     pname = "eglot-booster";
                     version = "0.0.1";
                     src = pkgs.fetchFromGitHub {
-                      owenr = "jdtsmith";
+                      owner = "jdtsmith";
                       repo = "eglot-booster";
                       rev = "e19dd7ea81bada84c66e8bdd121408d9c0761fe6";
                       sha256 = lib.fakeSha256;
