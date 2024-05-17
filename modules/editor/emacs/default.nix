@@ -962,8 +962,16 @@ with lib; {
                 enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
-                  (add-to-list 'eglot-server-programs
-                              `(java-mode "jdtls-with-lombok"))
+                  ;;(add-to-list 'eglot-server-programs
+                  ;;            `(java-mode "jdtls-with-lombok"))
+                '';
+              };
+
+              eglot-java = {
+                enable = true;
+                after = [ "eglot" ];
+                config = ''
+                  (setq eglot-java-server-install-dir ${pkgs.jdtls})
                 '';
               };
               flycheck-eglot = {
@@ -1052,8 +1060,9 @@ with lib; {
                 };
               };
 
+
               lsp-bridge = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
