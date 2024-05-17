@@ -974,7 +974,7 @@ with lib; {
                   pkgs.emacs-lsp-booster
                 ];
                 config = ''
-                  	                                (eglot-booster-mode))
+                  	     (eglot-booster-mode)
                 '';
               };
 
