@@ -525,7 +525,7 @@ with lib; {
 
 
               corfu = {
-                enable = true;
+                enable = false;
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -959,7 +959,7 @@ with lib; {
               };
 
               eglot = {
-                enable = true;
+                enable = false;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -968,7 +968,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = true;
+                enable = false;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1082,7 +1082,7 @@ with lib; {
                 ];
               };
               copilot = {
-                enable = cfg.enableCopilot;
+                # enable = cfg.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
@@ -1111,13 +1111,17 @@ with lib; {
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
                   }
                 );
-                hook = [ "(java-mode . lsp-bridge-mode)" ];
+                # hook = [ "(java-mode . lsp-bridge-mode)" ];
+                init = ''
+                  (require 'lsp-bridge-jdtls)
+
+                '';
                 config = ''
                   (require 'yasnippet)
                   (yas-global-mode 1)
-                  (require 'lsp-bridge-jdtls)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
+                  (global-lsp-bridge-mode)
                 '';
               };
 
