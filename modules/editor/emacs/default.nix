@@ -967,6 +967,18 @@ with lib; {
                 '';
               };
 
+              eglot-booster = {
+                enable = true;
+                after = [ "eglot" ];
+                extraPackage = [
+                  pkgs.eglot-booster
+                ];
+                config = ''
+                  	                                (eglot-booster-mode))
+                '';
+              };
+
+
               eglot-java = {
                 enable = false;
                 after = [ "eglot" ];
