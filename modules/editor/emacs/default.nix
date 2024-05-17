@@ -962,8 +962,8 @@ with lib; {
                 enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
-                  ;;(add-to-list 'eglot-server-programs
-                  ;;            `(java-mode "jdtls-with-lombok"))
+                  (add-to-list 'eglot-server-programs
+                              `(java-mode "jdtls-with-lombok"))
                 '';
               };
 
