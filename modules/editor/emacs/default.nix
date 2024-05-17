@@ -1103,7 +1103,7 @@ with lib; {
 
 
               lsp-bridge = {
-                enable = false;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
