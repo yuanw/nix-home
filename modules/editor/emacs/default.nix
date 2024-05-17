@@ -968,7 +968,7 @@ with lib; {
               };
 
               eglot-java = {
-                enable = true;
+                enable = false;
                 after = [ "eglot" ];
                 config = ''
                   (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
