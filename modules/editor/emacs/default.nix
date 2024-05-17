@@ -971,7 +971,7 @@ with lib; {
                 enable = true;
                 after = [ "eglot" ];
                 config = ''
-                  (setq eglot-java-server-install-dir ${pkgs.jdtls})
+                  (setq eglot-java-server-install-dir ${pkgs.jdt-language-server})
                 '';
               };
               flycheck-eglot = {
