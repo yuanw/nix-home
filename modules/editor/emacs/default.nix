@@ -659,6 +659,13 @@ with lib; {
               project = {
                 enable = true;
                 config = ''
+                  (defun zkj-project-override (dir)
+                    (let ((override (locate-dominating-file dir "build.gradle")))
+                      (if override
+                        (cons 'vc override)
+                        nil)))
+                  (add-hook 'project-find-functions #'zkj-project-override)
+
                   (defun project-magit-status ()
                     "Run magit-status in the current project's root."
                     (interactive)
