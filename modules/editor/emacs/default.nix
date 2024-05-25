@@ -1116,7 +1116,6 @@ with lib; {
                 # hook = [ "(java-mode . lsp-bridge-mode)" ];
                 init = ''
                   (require 'lsp-bridge-jdtls)
-
                 '';
                 config = ''
                   (require 'yasnippet)
