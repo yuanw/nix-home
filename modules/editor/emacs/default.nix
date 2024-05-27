@@ -769,6 +769,23 @@ with lib; {
                 '';
 
               };
+              dslide = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "dslide";
+                    version = "0.5.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "positron-solutions";
+                      repo = "dslide";
+                      rev = "145b06df68b3d584c491e76a300aead662c8271e";
+                      sha256 = lib.fakeSha256;
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+
+              };
               easy-kill = {
                 enable = true;
                 extraConfig = ''
