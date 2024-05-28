@@ -1332,7 +1332,7 @@ with lib; {
                     src = pkgs.fetchFromGitHub {
                       owner = "justinlime";
                       repo = "toggle-term";
-                      rev = "73e3dae13a28fec2c0dd52642ca7cfdf1397c730";
+                      rev = "c09f5e48f67d15ad38eed9fbf54c35d5f77b7231";
                       sha256 = lib.fakeSha256;
                     };
                     preferLocalBuild = true;
