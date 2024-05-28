@@ -1322,6 +1322,36 @@ with lib; {
                 ];
                 defer = true;
               };
+
+              toggle-term = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "toggle-term";
+                    version = "0.0.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "justinlime";
+                      repo = "toggle-term";
+                      rev = "73e3dae13a28fec2c0dd52642ca7cfdf1397c730";
+                      sha256 = lib.fakeSha256;
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+                config = ''
+                  (setq toggle-term-size 25)
+                  (setq toggle-term-switch-upon-toggle t)
+                '';
+                bind = {
+                  "M-o f" = "toggle-term-find";
+                  "M-o t" = "toggle-term-term";
+                  "M-o s" = "toggle-term-shell";
+                  "M-o e" = "toggle-term-eshell";
+                  "M-o i" = "toggle-term-ielm";
+                  "M-o o" = "toggle-term-toggle";
+                };
+              };
+
             };
           };
 
