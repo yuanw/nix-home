@@ -754,6 +754,14 @@ with lib; {
                 ];
               };
 
+              org-appear = {
+                enable = true;
+                after = [ "org" ];
+                hook = [
+                  "(org-mode . org-appear-mode)"
+                ];
+              };
+
               org-download = {
                 enable = true;
                 after = [ "org" ];
