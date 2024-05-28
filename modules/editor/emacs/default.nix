@@ -1145,6 +1145,7 @@ with lib; {
                 config = ''
                   (require 'yasnippet)
                   (yas-global-mode 1)
+                  (setq acm-enable-copilot true)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
                   (global-lsp-bridge-mode)
@@ -1333,7 +1334,7 @@ with lib; {
                       owner = "justinlime";
                       repo = "toggle-term.el";
                       rev = "c09f5e48f67d15ad38eed9fbf54c35d5f77b7231";
-                      sha256 = lib.fakeSha256;
+                      sha256 = "sha256-bOjFvL8a/cubvkSkdIxmAMQoD6q4eZ8v97kyqHgmWZk=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;
