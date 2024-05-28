@@ -1331,7 +1331,7 @@ with lib; {
                     version = "0.0.1";
                     src = pkgs.fetchFromGitHub {
                       owner = "justinlime";
-                      repo = "toggle-term";
+                      repo = "toggle-term.el";
                       rev = "c09f5e48f67d15ad38eed9fbf54c35d5f77b7231";
                       sha256 = lib.fakeSha256;
                     };
