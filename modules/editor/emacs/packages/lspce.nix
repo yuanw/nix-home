@@ -28,9 +28,7 @@ let
   lspce-module = rustPlatform.buildRustPackage {
     inherit version src meta;
     pname = "lspce-module";
-
-    cargoHash = "sha256-W9rsi7o4KvyRoG/pqRKOBbJtUoSW549Sh8+OV9sLcxs=";
-
+    cargoHash = "sha256-3Ch2PFYf5fwTuHQIvy9frbZ5NNJJfNzxqqHjMXGFuqk=";
     checkFlags = [
       # flaky test
       "--skip=msg::tests::serialize_request_with_null_params"
