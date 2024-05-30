@@ -13,8 +13,9 @@ let
   src = fetchFromGitHub {
     owner = "zbelial";
     repo = "lspce";
+
     rev = "a5e27ba7e9add9ad09804572d04810ba6568c666";
-    hash = lib.fakeHash;
+    hash = "sha256-m353lvhxgE3zbgPKXD9x5lmCq+9GGxuAn4lOi5fUAcc=";
   };
 
   meta = {
