@@ -52,7 +52,7 @@
       ];
       brews = [
         "redis"
-        "frugal"
+        #"frugal"
         "picat"
         # "mit-scheme"
         # https://formulae.brew.sh/formula/docker-compose
