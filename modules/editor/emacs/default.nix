@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = false;
+                enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -995,7 +995,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = false;
+                enable = true;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1129,7 +1129,7 @@ with lib; {
               };
 
               lspce = {
-                enable = true;
+                enable = false;
                 package = epkgs:
                   (pkgs.callPackage ./packages/lspce.nix {
                     inherit lib;
@@ -1157,7 +1157,7 @@ with lib; {
             ;; modify `lspce-server-programs' to add or change a lsp server, see document
             ;; of `lspce-lsp-type-function' to understand how to get buffer's lsp type.
             ;; Bellow is what I use
-            (setq lspce-server-programs `(("rust"  "rust-analyzer" "" lspce-ra-initializationOptions)
+            (setq lspce-server-programs `(
                                           ("python" "pylsp" "" )
                                           ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
                                           ("java" "${pkgs.jdt-language-server}/bin/jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
