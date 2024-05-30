@@ -14,10 +14,10 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
-        (maven.override { jdk = cfg.pkg; })
+        maven
         lombok
         google-java-format
-        (jdt-language-server.override { jdk = cfg.pkg; })
+        jdt-language-server
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
             ${pkgs.jdt-language-server}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
