@@ -1160,7 +1160,7 @@ with lib; {
             (setq lspce-server-programs `(("rust"  "rust-analyzer" "" lspce-ra-initializationOptions)
                                           ("python" "pylsp" "" )
                                           ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
-                                          ("java" "jdlts")
+                                          ("java" "${pkgs.jdt-language-server}/bin/jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                                           ))
             )
 
