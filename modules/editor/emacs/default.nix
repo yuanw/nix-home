@@ -1390,6 +1390,26 @@ with lib; {
                 };
               };
 
+              projectile = {
+                enable = true;
+              };
+
+              lsp-mode = {
+                enable = true;
+
+                hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
+
+              };
+              lsp-java = {
+                enable = true;
+                config = "(add-hook 'java-mode-hook 'lsp)";
+
+              };
+
+              lsp-treemacs = {
+                enable = true;
+              };
+
             };
           };
 
