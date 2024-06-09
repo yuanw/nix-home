@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = true;
+                enable = false;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -995,7 +995,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = true;
+                enable = false;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
