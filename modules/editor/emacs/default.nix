@@ -988,6 +988,22 @@ with lib; {
               eglot = {
                 enable = true;
                 config = ''
+
+                    (defun yuanw/package-name ()
+    "WIP ."
+    (interactive)
+    (let* ((pro-root-1 (substring (project-root (project-current)) 1))
+          (file-name-1 (buffer-file-name (window-buffer (minibuffer-selected-window))))
+          (tmp (car (cdr (split-string file-name-1 pro-root-1))))
+           (override (locate-dominating-file file-name-1 "build.gradle"))
+          )
+
+     (if override
+         (cons 'vc override))
+         ))
+
+         (add-hook 'project-find-functions #'zkj-project-override)
+
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
                               `(java-mode "jdtls-with-lombok"))
