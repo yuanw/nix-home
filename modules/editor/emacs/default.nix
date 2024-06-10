@@ -1251,8 +1251,8 @@ with lib; {
                 after = [ "corfu" ];
                 config = ''
                   (setq kind-icon-blend-background t)
-                  (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
-                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+                  (setq kind-icon-default-face 'corfu-default)
+                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
                 '';
               };
 
