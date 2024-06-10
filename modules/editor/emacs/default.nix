@@ -1242,6 +1242,7 @@ with lib; {
               };
 
               kind-icon = {
+                enable = true;
                 after = [ "corfu" ];
                 config = ''
                   (setq kind-icon-blend-background t)
@@ -1274,7 +1275,6 @@ with lib; {
               css-ts-mode.enable = true;
               wgrep = {
                 enable = true;
-
               };
               deadgrep = {
                 enable = true;
