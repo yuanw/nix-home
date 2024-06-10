@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = true;
+                enable = false;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -1017,7 +1017,41 @@ with lib; {
                   	     (eglot-booster-mode)
                 '';
               };
+              # https://github.com/doomemacs/doomemacs/blob/517daa4ed9168855c202ba2fd28920f6ee17249f/modules/lang/java/config.el #L21
+              projectile = {
+                enable = true;
 
+              };
+
+              lsp-mode = {
+                enable = true;
+
+                hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
+                config = ''
+                  (require 'lsp-lens)
+                '';
+              };
+              lsp-ui = {
+                enable = true;
+              };
+              lsp-java = {
+                enable = true;
+
+                config = " (add-hook 'java-mode-hook 'lsp)";
+
+              };
+              dap-mode = {
+                enable = true;
+
+                after = [ "lsp-mode" ];
+                config = "(dap-auto-configure-mode)";
+
+              };
+
+              lsp-treemacs = {
+                enable = true;
+
+              };
 
               eglot-java = {
                 enable = false;
@@ -1242,7 +1276,7 @@ with lib; {
               };
 
               kind-icon = {
-                enable = false;
+                enable = true;
                 after = [ "corfu" ];
                 # (setq kind-icon-blend-background t)
                 # (setq kind-icon-default-face 'corfu-default)
