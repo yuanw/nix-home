@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = false;
+                enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -995,7 +995,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = false;
+                enable = true;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1350,7 +1350,6 @@ with lib; {
                     ];
                     buildInputs = propagatedUserEnvPkgs;
                   };
-
               };
               multi-vterm = {
                 enable = true;
@@ -1389,27 +1388,6 @@ with lib; {
                   "M-o o" = "toggle-term-toggle";
                 };
               };
-
-              projectile = {
-                enable = true;
-              };
-
-              lsp-mode = {
-                enable = true;
-
-                hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
-
-              };
-              lsp-java = {
-                enable = true;
-                config = "(add-hook 'java-mode-hook 'lsp)";
-
-              };
-
-              lsp-treemacs = {
-                enable = true;
-              };
-
             };
           };
 
