@@ -1002,7 +1002,7 @@ with lib; {
          (cons 'vc override))
     ))
 
-         (add-hook 'project-find-functions #'zkj-project-override)
+         (add-hook 'project-find-functions #'yuanw/package-name)
 
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -1263,8 +1263,7 @@ with lib; {
                 # (setq kind-icon-blend-background t)
                 # (setq kind-icon-default-face 'corfu-default)
                 config = ''
-
-                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
+                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter )
                 '';
               };
 
