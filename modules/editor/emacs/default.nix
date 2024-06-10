@@ -1260,9 +1260,10 @@ with lib; {
               kind-icon = {
                 enable = false;
                 after = [ "corfu" ];
+                # (setq kind-icon-blend-background t)
+                # (setq kind-icon-default-face 'corfu-default)
                 config = ''
-                  (setq kind-icon-blend-background t)
-                  (setq kind-icon-default-face 'corfu-default)
+
                   (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter)
                 '';
               };
