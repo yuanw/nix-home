@@ -1041,10 +1041,14 @@ with lib; {
 
               };
               dap-mode = {
+                # want dap-ui-mode
                 enable = true;
 
                 after = [ "lsp-mode" ];
-                config = "(dap-auto-configure-mode)";
+                config = ''
+                  (require 'dap-ui)
+                  (dap-auto-configure-mode)
+                '';
 
               };
 
