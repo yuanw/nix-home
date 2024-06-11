@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = false;
+                enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -1065,7 +1065,7 @@ with lib; {
               # (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
               # (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
               eglot-java = {
-                enable = true;
+                enable = false;
                 after = [ "eglot" ];
                 config = ''
 
