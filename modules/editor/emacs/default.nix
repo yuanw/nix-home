@@ -1029,6 +1029,7 @@ with lib; {
                 hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
                 config = ''
                   (require 'lsp-lens)
+                  (require 'lsp-modeline)
                 '';
               };
               lsp-ui = {
