@@ -1024,20 +1024,22 @@ with lib; {
               };
 
               lsp-mode = {
-                enable = true;
+                enable = false;
 
                 hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
                 config = ''
                   (require 'lsp-lens)
-                  (require 'lsp-modeline)
+                  (require 'lsp-diagnostics)
                   (require 'lsp-headerline)
+                  (require 'lsp-modeline)
+
                 '';
               };
               lsp-ui = {
-                enable = true;
+                enable = false;
               };
               lsp-java = {
-                enable = true;
+                enable = false;
 
                 config = " (add-hook 'java-mode-hook 'lsp)";
 
@@ -1060,12 +1062,13 @@ with lib; {
 
               };
 
+              # (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
+              # (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
               eglot-java = {
-                enable = false;
+                enable = true;
                 after = [ "eglot" ];
                 config = ''
-                  (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
-                  (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
+
                   (setq eglot-java-eclipse-jdt-args (list
                                      "-Dosgi.configuration.area.readOnly=true"
                                      "-Dosgi.instance.area.readOnly=true"
