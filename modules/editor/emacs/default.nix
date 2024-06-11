@@ -539,7 +539,7 @@ with lib; {
                   (corfu-scroll-margin 5)        ;; Use scroll margin
                 '';
                 config = ''
-                  ;;(global-corfu-mode)
+                  (global-corfu-mode)
                 '';
               };
 
