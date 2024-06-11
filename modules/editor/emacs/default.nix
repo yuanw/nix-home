@@ -1030,6 +1030,7 @@ with lib; {
                 config = ''
                   (require 'lsp-lens)
                   (require 'lsp-modeline)
+                  (require 'lsp-headerline)
                 '';
               };
               lsp-ui = {
