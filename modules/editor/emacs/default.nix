@@ -1004,7 +1004,9 @@ with lib; {
                                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
                                        ]))))
                     )
-                  )
+                    )
+                  ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
+                  . ("${pkgs.gopls}/bin/gopls"))
                   )
                 '';
               };
