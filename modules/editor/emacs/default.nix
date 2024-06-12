@@ -982,12 +982,7 @@ with lib; {
                   ;;(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
                 '';
               };
-              # (:settings
-              #             (:java
-              #              (:configuration
-              #              (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
-              #                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
-              #                         ]))))
+
               eglot = {
                 enable = true;
                 config = ''
@@ -1000,8 +995,8 @@ with lib; {
                       '(:settings
                             (:java
                              (:configuration
-                             (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
-                                        (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+                             (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
+                                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
                                        ]))))
                     )
                     )
@@ -1034,44 +1029,6 @@ with lib; {
                   	     (eglot-booster-mode)
                 '';
               };
-              # https://github.com/doomemacs/doomemacs/blob/517daa4ed9168855c202ba2fd28920f6ee17249f/modules/lang/java/config.el #L21
-              projectile = {
-                enable = true;
-
-              };
-
-              lsp-mode = {
-                enable = false;
-                hook = [ "(lsp-mode . lsp-enable-which-key-integration)" ];
-                config = ''
-                  (require 'lsp-lens)
-                  (require 'lsp-diagnostics)
-                  (require 'lsp-headerline)
-                  (require 'lsp-modeline)
-
-                '';
-              };
-              lsp-ui = {
-                enable = false;
-              };
-              lsp-java = {
-                enable = false;
-
-                config = " (add-hook 'java-mode-hook 'lsp)";
-
-              };
-              dap-mode = {
-                # want dap-ui-mode
-                enable = false;
-                after = [ "lsp-mode" ];
-                config = ''
-                  (require 'dap-mode)
-                  (require 'dap-ui)
-                  (dap-auto-configure-mode)
-                '';
-
-              };
-
               go-mode = {
                 enable = true;
                 config = ''
