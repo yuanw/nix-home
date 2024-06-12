@@ -1004,7 +1004,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = true;
+                enable = false;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1067,7 +1067,7 @@ with lib; {
               };
 
               lsp-treemacs = {
-                enable = true;
+                enable = false;
 
               };
 
