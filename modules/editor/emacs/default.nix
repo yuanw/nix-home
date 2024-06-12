@@ -990,7 +990,8 @@ with lib; {
                 config = ''
                        (setq eglot-autoshutdown t)
                        (add-to-list 'eglot-server-programs
-                       `(java-mode "jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
+                       `(java-mode "jdtls"
+                                    "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
                        :initializationOptions (
                         (:settings
                   (:java
@@ -1004,7 +1005,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = false;
+                enable = true;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
