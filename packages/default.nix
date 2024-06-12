@@ -77,11 +77,11 @@ _final: prev: {
   choose-mac = prev.callPackage ./choose-mac.nix { };
 
   jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
-    version = "1.35.0";
+    version = "1.36.0";
     src = prev.fetchurl {
-      url = "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.35.0/jdt-language-server-1.35.0-202404251256.tar.gz";
+      url = "https://www.eclipse.org/downloads/download.php?file=/jdtls/milestones/1.36.0/jdt-language-server-1.36.0-202405301306.tar.gz";
       # hash = prev.lib.fakeHash;
-      hash = "sha256-ATncoa4mSDTDYg18udvjMQGGIhpC/0ClZzlCwHsIDxU=";
+      hash = "sha256-Ao4nTQb0phytT/1W+J70FKj2VhPG0F2UZ2Ubf7A9rns=";
     };
   });
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
