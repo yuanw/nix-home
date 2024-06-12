@@ -64,8 +64,8 @@ with lib; {
     {
 
       services.emacs = {
-        enable = cfg.enableService;
-        additionalPath = [ "${config.my.homeDirectory}" ];
+        enable = false;
+        # additionalPath = [ "${config.my.homeDirectory}" ];
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
 
