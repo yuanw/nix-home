@@ -659,8 +659,6 @@ with lib; {
               project = {
                 enable = true;
                 config = ''
-
-
                   (defun project-magit-status ()
                     "Run magit-status in the current project's root."
                     (interactive)
