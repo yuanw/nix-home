@@ -982,24 +982,25 @@ with lib; {
                   ;;(markdown-header-face-4 ((t (:inherit markdown-header-face :height 1.2))))
                 '';
               };
-
+              # (:settings
+              #             (:java
+              #              (:configuration
+              #              (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
+              #                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+              #                         ]))))
               eglot = {
                 enable = true;
                 config = ''
-                       (setq eglot-autoshutdown t)
-                       (add-to-list 'eglot-server-programs
-                       '((java-mode java-ts-mode) .
+                  (setq eglot-autoshutdown t)
+                  (add-to-list 'eglot-server-programs
+                  '((java-mode java-ts-mode) .
 
-                       ("jdtls-with-lombok"
-                       :initializationOptions (
-                        (:settings
-                  (:java
-                   (:configuration
-                   (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
-                              (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
-                               ]))))))
-                       )
-                       )
+                  ("jdtls-with-lombok"
+                  :initializationOptions (
+
+                         ))
+                  )
+                  )
                 '';
               };
 
