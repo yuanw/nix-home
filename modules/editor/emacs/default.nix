@@ -990,17 +990,14 @@ with lib; {
                 config = ''
                        (setq eglot-autoshutdown t)
                        (add-to-list 'eglot-server-programs
-                       `(java-mode "${pkgs.jdt-language-server}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
+                       `(java-mode "jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
                        :initializationOptions (
                         (:settings
                   (:java
                    (:configuration
                    (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
-                   (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
-                               ]
-                               ))))
-
-   
+                              (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+                               ]))))
                        )
                        ))
                 '';
