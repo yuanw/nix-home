@@ -81,6 +81,7 @@ with lib; {
     shell = pgs.zsh;
     home = config.my.homeDirectory;
   };
+  home-manager.backupFileExtension = "backup";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
