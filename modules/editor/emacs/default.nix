@@ -996,9 +996,14 @@ with lib; {
                   '((java-mode java-ts-mode) .
 
                   ("jdtls-with-lombok"
-                  :initializationOptions (
-
-                         ))
+                  :initializationOptions
+                      '(:settings
+                            (:java
+                             (:configuration
+                             (:runtime [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
+                                        (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+                                       ]))))
+                    )
                   )
                   )
                 '';
