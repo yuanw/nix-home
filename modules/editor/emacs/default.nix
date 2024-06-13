@@ -992,7 +992,7 @@ with lib; {
 
                   ("jdtls-with-lombok"
                   :initializationOptions
-                      '(:settings
+                      (:settings
                             (:java
                              (:configuration
                              (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
