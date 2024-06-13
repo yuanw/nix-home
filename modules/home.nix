@@ -25,7 +25,7 @@
         ../pictures/nix-wallpaper-dracula.png;
     };
   };
-  catppuccin.flavour = "mocha";
+  catppuccin.flavor = "mocha";
   # programs.bat.catppuccin.enable = true;
   # programs.starship.catppuccin.enable = true;
   # programs.alacritty.catppuccin.enable = true;
