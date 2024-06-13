@@ -5,25 +5,25 @@
         (python3.withPackages (ps: [ ps.invoke ]))
         nix-diff
         nix-tree
-        awscli
-        lego
-        terraform
+        #awscli
+        #lego
+        #terraform
       ];
       # See https://haskell.flake.page/devshell#composing-devshells
       inputsFrom = [
         config.treefmt.build.devShell
         config.pre-commit.devShell
-        config.haskellProjects.default.outputs.devShell
+        # config.haskellProjects.default.outputs.devShell
 
       ];
     };
-    devShells.haskell = pkgs.mkShell {
-      inputsFrom = [
-        config.treefmt.build.devShell
-        config.pre-commit.devShell
-        config.haskellProjects.default.outputs.devShell
-      ];
-    };
+    # devShells.haskell = pkgs.mkShell {
+    #   inputsFrom = [
+    #     config.treefmt.build.devShell
+    #     config.pre-commit.devShell
+    #     config.haskellProjects.default.outputs.devShell
+    #   ];
+    # };
 
   };
 }
