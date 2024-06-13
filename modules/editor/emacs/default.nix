@@ -525,7 +525,7 @@ with lib; {
 
 
               corfu = {
-                enable = true;
+                enable = false;
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -659,6 +659,8 @@ with lib; {
               project = {
                 enable = true;
                 config = ''
+
+
                   (defun project-magit-status ()
                     "Run magit-status in the current project's root."
                     (interactive)
@@ -984,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = true;
+                enable = false;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
@@ -1032,6 +1034,55 @@ with lib; {
               go-mode = {
                 enable = true;
                 config = ''
+                '';
+              };
+
+              eglot-booster = {
+                enable = false;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "eglot-booster";
+                    version = "0.0.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "jdtsmith";
+                      repo = "eglot-booster";
+                      rev = "e19dd7ea81bada84c66e8bdd121408d9c0761fe6";
+                      sha256 = "sha256-vF34ZoUUj8RENyH9OeKGSPk34G6KXZhEZozQKEcRNhs=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+                after = [ "eglot" ];
+                extraPackages = [
+                  pkgs.emacs-lsp-booster
+                ];
+                config = ''
+                  	     (eglot-booster-mode)
+                '';
+              };
+
+
+              eglot-java = {
+                enable = false;
+                after = [ "eglot" ];
+                config = ''
+                  (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
+                  (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
+                  (setq eglot-java-eclipse-jdt-args (list
+                                     "-Dosgi.configuration.area.readOnly=true"
+                                     "-Dosgi.instance.area.readOnly=true"
+                                     "-Dosgi.user.area.readOnly=true"
+                                     "-Dosgi.sharedConfiguration.area.readOnly=true"
+                                          (concat "-javaagent:"
+                                                  "${pkgs.lombok}/share/java/lombok.jar")))
+                  (add-hook 'java-mode-hook 'eglot-java-mode)
+                  (with-eval-after-load 'eglot-java
+                    (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
+                    (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
+                    (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
+                    (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
+                    (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
+                    (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))
                 '';
               };
               flycheck-eglot = {
@@ -1101,7 +1152,7 @@ with lib; {
                 ];
               };
               copilot = {
-                enable = cfg.enableCopilot;
+                # enable = cfg.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
@@ -1119,7 +1170,6 @@ with lib; {
                   };
                 };
               };
-
               lspce = {
                 enable = false;
                 package = epkgs:
@@ -1157,7 +1207,7 @@ with lib; {
             )
 
                 '';
-              };
+           };
               lsp-bridge = {
                 enable = false;
                 package = epkgs: (
@@ -1174,6 +1224,7 @@ with lib; {
                 config = ''
                   (require 'yasnippet)
                   (yas-global-mode 1)
+
                   (setq acm-enable-copilot true)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
