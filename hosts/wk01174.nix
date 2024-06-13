@@ -77,7 +77,7 @@
         agda.enable = false;
         dart.enable = true;
         java.enable = true;
-        haskell.enable = true;
+        haskell.enable = false;
         idris2.enable = false;
         python.enable = true;
         zig.enable = false;
