@@ -70,7 +70,6 @@ with pkgs; [
   dig
   just
   pkg-config
-  coreutils
 
   # racket
   # open-interpreter
