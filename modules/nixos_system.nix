@@ -35,7 +35,7 @@ with lib; {
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   nix = {
     # auto-optimise-store = true;
-    package = pkgs.nixUnstable;
+    package = pkgs.nixVersions.git;
     gc = {
       automatic = true;
       dates = "weekly";
