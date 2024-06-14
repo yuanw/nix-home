@@ -52,7 +52,7 @@
       ];
       brews = [
         "redis"
-        "frugal"
+        #"frugal"
         "picat"
         # "mit-scheme"
         # https://formulae.brew.sh/formula/docker-compose
@@ -77,10 +77,10 @@
         agda.enable = false;
         dart.enable = true;
         java.enable = true;
-        haskell.enable = true;
+        haskell.enable = false;
         idris2.enable = false;
         python.enable = true;
-        zig.enable = true;
+        zig.enable = false;
         scheme.enable = true;
         kotlin.enable = true;
       };

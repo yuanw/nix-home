@@ -64,8 +64,8 @@ with lib; {
     {
 
       services.emacs = {
-        enable = cfg.enableService;
-        additionalPath = [ "${config.my.homeDirectory}" ];
+        enable = false;
+        # additionalPath = [ "${config.my.homeDirectory}" ];
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
 
@@ -539,7 +539,7 @@ with lib; {
                   (corfu-scroll-margin 5)        ;; Use scroll margin
                 '';
                 config = ''
-                  ;;(global-corfu-mode)
+                  (global-corfu-mode)
                 '';
               };
 
@@ -754,6 +754,14 @@ with lib; {
                 ];
               };
 
+              org-appear = {
+                enable = true;
+                after = [ "org" ];
+                hook = [
+                  "(org-mode . org-appear-mode)"
+                ];
+              };
+
               org-download = {
                 enable = true;
                 after = [ "org" ];
@@ -767,6 +775,23 @@ with lib; {
                 config = ''
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
+
+              };
+              dslide = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "dslide";
+                    version = "0.5.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "positron-solutions";
+                      repo = "dslide";
+                      rev = "145b06df68b3d584c491e76a300aead662c8271e";
+                      sha256 = "sha256-NUxIaWcwmASxpHh7XlAahQLpwtYBj67jzeaeT5gkOLs=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
 
               };
               easy-kill = {
@@ -965,12 +990,26 @@ with lib; {
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
-                              `(java-mode "jdtls-with-lombok"))
+                  '((java-mode java-ts-mode) .
+
+                  ("jdtls-with-lombok"
+                  :initializationOptions
+                      (:settings
+                            (:java
+                             (:configuration
+                             (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
+                                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+                                       ]))))
+                    )
+                    )
+                  ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
+                  . ("${pkgs.gopls}/bin/gopls"))
+                  )
                 '';
               };
 
               eglot-booster = {
-                enable = false;
+                enable = true;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -990,6 +1029,11 @@ with lib; {
                 ];
                 config = ''
                   	     (eglot-booster-mode)
+                '';
+              };
+              go-mode = {
+                enable = true;
+                config = ''
                 '';
               };
 
@@ -1102,10 +1146,46 @@ with lib; {
                   };
                 };
               };
+              lspce = {
+                enable = false;
+                package = epkgs:
+                  (pkgs.callPackage ./packages/lspce.nix {
+                    inherit lib;
+                    inherit (pkgs) fetchFromGitHub rustPlatform;
+                    inherit (epkgs) trivialBuild f yasnippet markdown-mode
+                      ;
+                  });
+                config = ''
 
+                  (progn
+            (setq lspce-send-changes-idle-time 1)
+            (setq lspce-show-log-level-in-modeline t) ;; show log level in mode line
 
+            ;; You should call this first if you want lspce to write logs
+            (lspce-set-log-file "/tmp/lspce.log")
+
+            ;; By default, lspce will not write log out to anywhere.
+            ;; To enable logging, you can add the following line
+            ;; (lspce-enable-logging)
+            ;; You can enable/disable logging on the fly by calling `lspce-enable-logging' or `lspce-disable-logging'.
+
+            ;; enable lspce in particular buffers
+            ;; (add-hook 'rust-mode-hook 'lspce-mode)
+
+            ;; modify `lspce-server-programs' to add or change a lsp server, see document
+            ;; of `lspce-lsp-type-function' to understand how to get buffer's lsp type.
+            ;; Bellow is what I use
+            (setq lspce-server-programs `(
+                                          ("python" "pylsp" "" )
+                                          ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
+                                          ("java" "${pkgs.jdt-language-server}/bin/jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                                          ))
+            )
+
+                '';
+              };
               lsp-bridge = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
@@ -1120,6 +1200,8 @@ with lib; {
                 config = ''
                   (require 'yasnippet)
                   (yas-global-mode 1)
+
+                  (setq acm-enable-copilot true)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
                   (global-lsp-bridge-mode)
@@ -1179,11 +1261,12 @@ with lib; {
               };
 
               kind-icon = {
+                enable = true;
                 after = [ "corfu" ];
+                # (setq kind-icon-blend-background t)
+                # (setq kind-icon-default-face 'corfu-default)
                 config = ''
-                  (setq kind-icon-blend-background t)
-                  (setq kind-icon-default-face 'corfu-default) ; only needed with blend-background
-                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+                  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter )
                 '';
               };
 
@@ -1211,7 +1294,6 @@ with lib; {
               css-ts-mode.enable = true;
               wgrep = {
                 enable = true;
-
               };
               deadgrep = {
                 enable = true;
@@ -1287,7 +1369,6 @@ with lib; {
                     ];
                     buildInputs = propagatedUserEnvPkgs;
                   };
-
               };
               multi-vterm = {
                 enable = true;
@@ -1296,6 +1377,35 @@ with lib; {
                   "multi-vterm-project"
                 ];
                 defer = true;
+              };
+
+              toggle-term = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "toggle-term";
+                    version = "0.0.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "justinlime";
+                      repo = "toggle-term.el";
+                      rev = "c09f5e48f67d15ad38eed9fbf54c35d5f77b7231";
+                      sha256 = "sha256-bOjFvL8a/cubvkSkdIxmAMQoD6q4eZ8v97kyqHgmWZk=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+                config = ''
+                  (setq toggle-term-size 25)
+                  (setq toggle-term-switch-upon-toggle t)
+                '';
+                bind = {
+                  "M-o f" = "toggle-term-find";
+                  "M-o t" = "toggle-term-term";
+                  "M-o s" = "toggle-term-shell";
+                  "M-o e" = "toggle-term-eshell";
+                  "M-o i" = "toggle-term-ielm";
+                  "M-o o" = "toggle-term-toggle";
+                };
               };
             };
           };

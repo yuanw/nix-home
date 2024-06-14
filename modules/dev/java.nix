@@ -7,17 +7,17 @@ in {
     enable = mkEnableOption "java";
     pkg = mkOption {
       type = types.package;
-      default = pkgs.jdk21;
+      default = pkgs.jdk17;
     };
   };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
-        (maven.override { jdk = cfg.pkg; })
+        maven
         lombok
         google-java-format
-        (jdt-language-server.override { jdk = cfg.pkg; })
+        jdt-language-server
         (pkgs.writeShellScriptBin "jdtls-with-lombok"
           ''
             ${pkgs.jdt-language-server}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar

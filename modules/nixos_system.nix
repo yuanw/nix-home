@@ -35,7 +35,7 @@ with lib; {
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   nix = {
     # auto-optimise-store = true;
-    package = pkgs.nixUnstable;
+    package = pkgs.nixVersions.git;
     gc = {
       automatic = true;
       dates = "weekly";
@@ -67,6 +67,7 @@ with lib; {
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
   virtualisation.docker.enable = true;
+  home-manager.backupFileExtension = "backup";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} =
