@@ -986,7 +986,7 @@ with lib; {
               };
 
               eglot = {
-                enable = false;
+                enable = true;
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
