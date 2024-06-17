@@ -775,7 +775,6 @@ with lib; {
                 config = ''
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
-
               };
               dslide = {
                 enable = true;
@@ -794,6 +793,7 @@ with lib; {
                   };
 
               };
+
               easy-kill = {
                 enable = true;
                 extraConfig = ''
