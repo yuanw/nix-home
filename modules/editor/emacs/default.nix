@@ -1384,12 +1384,13 @@ with lib; {
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "toggle-term";
-                    version = "0.0.1";
+                    version = "0.0.2";
                     src = pkgs.fetchFromGitHub {
                       owner = "justinlime";
                       repo = "toggle-term.el";
-                      rev = "c09f5e48f67d15ad38eed9fbf54c35d5f77b7231";
-                      sha256 = "sha256-bOjFvL8a/cubvkSkdIxmAMQoD6q4eZ8v97kyqHgmWZk=";
+                      rev = "d17596b8ed52e6a2f0c7f6754ee6fa233d28c146";
+                      sha256 = lib.fakeSha256;
+                      # sha256 = "sha256-bOjFvL8a/cubvkSkdIxmAMQoD6q4eZ8v97kyqHgmWZk=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;
@@ -1404,6 +1405,7 @@ with lib; {
                   "M-o s" = "toggle-term-shell";
                   "M-o e" = "toggle-term-eshell";
                   "M-o i" = "toggle-term-ielm";
+                  "M-o v" = "toggle-term-vterm";
                   "M-o o" = "toggle-term-toggle";
                 };
               };
