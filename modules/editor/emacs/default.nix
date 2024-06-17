@@ -1389,8 +1389,8 @@ with lib; {
                       owner = "justinlime";
                       repo = "toggle-term.el";
                       rev = "d17596b8ed52e6a2f0c7f6754ee6fa233d28c146";
-                      sha256 = lib.fakeSha256;
-                      # sha256 = "sha256-bOjFvL8a/cubvkSkdIxmAMQoD6q4eZ8v97kyqHgmWZk=";
+                      # sha256 = lib.fakeSha256;
+                      sha256 = "sha256-haiNWztItstQPT/NPxzioYpLgf9hJcihaxeDB64ZNxA=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;

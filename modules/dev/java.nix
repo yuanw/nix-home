@@ -14,6 +14,7 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
+        gradle
         maven
         lombok
         google-java-format
