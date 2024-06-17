@@ -997,8 +997,8 @@ with lib; {
                       (:settings
                             (:java
                              (:configuration
-                             (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17.home}")
-                                         (:name "JavaSE-21" :path "${pkgs.jdk21.home}" :default t)
+                             (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17}/zulu-17.jdk/Contents/Home")
+                             (:name "JavaSE-21" :path "${pkgs.jdk21}/zulu-21.jdk/Contents/Home" :default t)
                                        ]))))
                     )
                     )
@@ -1034,31 +1034,6 @@ with lib; {
               go-mode = {
                 enable = true;
                 config = ''
-                '';
-              };
-
-
-              eglot-java = {
-                enable = false;
-                after = [ "eglot" ];
-                config = ''
-                  (setq eglot-java-server-install-dir "${pkgs.jdt-language-server}")
-                  (setq eglot-java-eclipse-jdt-config-directory "${pkgs.jdt-language-server}/share/java/jdtls")
-                  (setq eglot-java-eclipse-jdt-args (list
-                                     "-Dosgi.configuration.area.readOnly=true"
-                                     "-Dosgi.instance.area.readOnly=true"
-                                     "-Dosgi.user.area.readOnly=true"
-                                     "-Dosgi.sharedConfiguration.area.readOnly=true"
-                                          (concat "-javaagent:"
-                                                  "${pkgs.lombok}/share/java/lombok.jar")))
-                  (add-hook 'java-mode-hook 'eglot-java-mode)
-                  (with-eval-after-load 'eglot-java
-                    (define-key eglot-java-mode-map (kbd "C-c l n") #'eglot-java-file-new)
-                    (define-key eglot-java-mode-map (kbd "C-c l x") #'eglot-java-run-main)
-                    (define-key eglot-java-mode-map (kbd "C-c l t") #'eglot-java-run-test)
-                    (define-key eglot-java-mode-map (kbd "C-c l N") #'eglot-java-project-new)
-                    (define-key eglot-java-mode-map (kbd "C-c l T") #'eglot-java-project-build-task)
-                    (define-key eglot-java-mode-map (kbd "C-c l R") #'eglot-java-project-build-refresh))
                 '';
               };
               flycheck-eglot = {
