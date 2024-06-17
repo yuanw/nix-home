@@ -992,7 +992,15 @@ with lib; {
                   (add-to-list 'eglot-server-programs
                   '((java-mode java-ts-mode) .
 
-                  ("jdtls-with-lombok")
+                  ("jdtls-with-lombok"
+                  :initializationOptions
+                      (:settings
+                            (:java
+                             (:configuration
+                             (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17}/zulu-17.jdk/Contents/Home")
+                             (:name "JavaSE-21" :path "${pkgs.jdk21}/zulu-21.jdk/Contents/Home" :default t)
+                                       ]))))
+                    )
                     )
                   ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                   . ("${pkgs.gopls}/bin/gopls"))
