@@ -958,7 +958,12 @@ with lib; {
                 '';
               };
 
-              direnv.enable = true;
+              direnv = {
+                enable = true;
+                config = ''
+                  (direnv-mode)
+                '';
+              };
               just-mode.enable = true;
               justl = {
                 enable = true;
@@ -992,7 +997,8 @@ with lib; {
                                     (add-to-list 'eglot-server-programs
                                     '((java-mode java-ts-mode) .
 
-                                    ("jdtls-with-lombok"
+                                    ("jdtls"
+                                    "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
                                     :initializationOptions
                                         (:settings
                                               (:java
@@ -1105,7 +1111,7 @@ with lib; {
                 ];
               };
               copilot = {
-                # enable = cfg.enableCopilot;
+                enable = cfg.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
