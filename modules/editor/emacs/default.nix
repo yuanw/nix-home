@@ -997,16 +997,21 @@ with lib; {
                                     :initializationOptions
                                         (:settings
                                               (:java
-                                               (:configuration
+                                              (:autoBuild (:enabled t)
+                                               :import  (:maven (:enabled t)
+                                               :gradle (:enabled t)))
+                                               :configuration
+                                               (:updateBuildConfiguration "automatic")
                                                (:runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17}/zulu-17.jdk/Contents/Home")
                                                (:name "JavaSE-21" :path "${pkgs.jdk21}/zulu-21.jdk/Contents/Home" :default t)
-                                                         ]))))
+                                               ])
+                                               )))
                                       )
                                       )
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
                                     )
-                       (add-hook 'java-mode-hook #'eglot-ensure)
+                   (add-hook 'java-mode-hook #'eglot-ensure)
                   (add-hook 'java-ts-mode-hook #'eglot-ensure)
                 '';
               };
