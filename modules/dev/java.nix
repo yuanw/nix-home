@@ -19,7 +19,7 @@ in {
         # maven
         lombok
         google-java-format
-        # jdt-language-server
+        jdt-language-server
         # (pkgs.writeShellScriptBin "jdtls-with-lombok"
         #   ''
         #     ${pkgs.jdt-language-server}/bin/jdtls --jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar
