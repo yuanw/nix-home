@@ -655,12 +655,9 @@ with lib; {
                 '';
               };
 
-
               project = {
                 enable = true;
                 config = ''
-
-
                   (defun project-magit-status ()
                     "Run magit-status in the current project's root."
                     (interactive)
@@ -890,8 +887,6 @@ with lib; {
                   (add-to-list 'flycheck-checkers 'vale 'append)
                 '';
               };
-
-
               jinx = {
                 enable = true;
                 diminish = [ "jinx-mode" ];
