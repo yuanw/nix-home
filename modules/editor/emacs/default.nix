@@ -525,7 +525,7 @@ with lib; {
 
 
               corfu = {
-                enable = false;
+                enable = true;
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
