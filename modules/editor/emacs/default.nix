@@ -1109,7 +1109,7 @@ with lib; {
                 ];
               };
               copilot = {
-                enable = cfg.enableCopilot;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
@@ -1174,7 +1174,7 @@ with lib; {
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
                   }
                 );
-                # hook = [ "(java-mode . lsp-bridge-mode)" ];
+                hook = [ "(java-mode . lsp-bridge-mode)" ];
                 init = ''
                   (require 'lsp-bridge-jdtls)
                 '';
