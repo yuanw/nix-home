@@ -530,7 +530,7 @@ with lib; {
 
 
               corfu = {
-                enable = true;
+                enable = config.lspStyle != "lsp-bridge";
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -991,7 +991,7 @@ with lib; {
               };
 
               eglot = {
-                enable = true;
+                enable = config.lspStyle == "eglot";
                 config = ''
                                     (setq eglot-autoshutdown t)
                                     (add-to-list 'eglot-server-programs
@@ -1020,7 +1020,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = true;
+                enable = config.lspStyle == "eglot";
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1114,7 +1114,7 @@ with lib; {
                 ];
               };
               copilot = {
-                enable = true;
+                enable = config.lspStyle != "lsp-bridge" && config.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
@@ -1133,7 +1133,7 @@ with lib; {
                 };
               };
               lspce = {
-                enable = false;
+                enable = config.lspStyle == "lspce";
                 package = epkgs:
                   (pkgs.callPackage ./packages/lspce.nix {
                     inherit lib;
@@ -1171,7 +1171,7 @@ with lib; {
                 '';
               };
               lsp-bridge = {
-                enable = false;
+                enable = config.lspStyle == "lsp-bridge";
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
