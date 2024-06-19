@@ -530,7 +530,7 @@ with lib; {
 
 
               corfu = {
-                enable = config.lspStyle != "lsp-bridge";
+                enable = cfg.lspStyle != "lsp-bridge";
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -991,7 +991,7 @@ with lib; {
               };
 
               eglot = {
-                enable = config.lspStyle == "eglot";
+                enable = cfg.lspStyle == "eglot";
                 config = ''
                                     (setq eglot-autoshutdown t)
                                     (add-to-list 'eglot-server-programs
@@ -1020,7 +1020,7 @@ with lib; {
               };
 
               eglot-booster = {
-                enable = config.lspStyle == "eglot";
+                enable = cfg.lspStyle == "eglot";
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
@@ -1114,7 +1114,7 @@ with lib; {
                 ];
               };
               copilot = {
-                enable = config.lspStyle != "lsp-bridge" && config.enableCopilot;
+                enable = cfg.lspStyle != "lsp-bridge" && cfg.enableCopilot;
                 package = epkgs: (
                   pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
@@ -1133,7 +1133,7 @@ with lib; {
                 };
               };
               lspce = {
-                enable = config.lspStyle == "lspce";
+                enable = cfg.lspStyle == "lspce";
                 package = epkgs:
                   (pkgs.callPackage ./packages/lspce.nix {
                     inherit lib;
@@ -1171,7 +1171,7 @@ with lib; {
                 '';
               };
               lsp-bridge = {
-                enable = config.lspStyle == "lsp-bridge";
+                enable = cfg.lspStyle == "lsp-bridge";
                 package = epkgs: (
                   pkgs.callPackage ./packages/lsp-bridge {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
