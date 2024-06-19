@@ -45,6 +45,11 @@ with lib; {
       default = pkgs.emacs-git;
     };
 
+    lspStyle = mkOption {
+      type = types.enum [ "eglot" "lsp-bridge" "lspce" ];
+      default = "eglot";
+    };
+
     enableService = mkOption {
       type = types.bool;
       default = false;
