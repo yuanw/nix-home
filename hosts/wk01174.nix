@@ -69,7 +69,7 @@
       enable = true;
       enableService = true;
       enableCopilot = true;
-      lspStyle = "lsp-bridg";
+      lspStyle = "lsp-bridge";
     };
     health.enable = true;
     typing.enable = true;
