@@ -1164,7 +1164,7 @@ with lib; {
             (setq lspce-server-programs `(
                                           ("python" "pylsp" "" )
                                           ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
-                                          ("java" "${pkgs.jdt-language-server}/bin/jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                                          ("java" "jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                                           ))
             )
 
