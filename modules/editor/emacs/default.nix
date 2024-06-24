@@ -1205,6 +1205,10 @@ with lib; {
                 '';
               };
 
+              all-the-icons = {
+                enable = true;
+              };
+
               yasnippet = {
                 enable = true;
                 diminish = [ "yas-minor-mode" ];
