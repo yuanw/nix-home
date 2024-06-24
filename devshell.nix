@@ -2,7 +2,7 @@
   perSystem = { config, pkgs, ... }: {
     devShells.default = pkgs.mkShell {
       buildInputs = with pkgs; [
-        (python3.withPackages (ps: [ ps.invoke ]))
+        (python3.withPackages (ps: [ ps.invoke ps.yaml ]))
         nix-diff
         nix-tree
         #awscli
