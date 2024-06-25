@@ -803,10 +803,6 @@ with lib; {
                 '';
               };
 
-              envrc = {
-                enable = true;
-                command = [ "envrc-mode" ];
-              };
 
               denote = {
                 enable = true;
@@ -959,10 +955,14 @@ with lib; {
               };
 
               direnv = {
-                enable = true;
+                enable = false;
                 config = ''
                   (direnv-mode)
                 '';
+              };
+              envrc = {
+                enable = true;
+                hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
               justl = {
