@@ -955,13 +955,13 @@ with lib; {
               };
 
               direnv = {
-                enable = false;
+                enable = true;
                 config = ''
                   (direnv-mode)
                 '';
               };
               envrc = {
-                enable = true;
+                enable = false;
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
