@@ -974,7 +974,7 @@ with lib; {
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
                                     )
-                   (add-hook 'java-mode-hook #'eglot-ensure)
+                  (add-hook 'java-mode-hook #'eglot-ensure)
                   (add-hook 'java-ts-mode-hook #'eglot-ensure)
                 '';
               };
@@ -1082,7 +1082,7 @@ with lib; {
                   }
 
                 );
-                hook = [ "(prog-mode . copilot-mode)" ];
+                hook = [ "(java-mode . copilot-mode)" ];
                 bindLocal = {
                   copilot-completion-map = {
                     "<tab>" = "copilot-accept-completion";
