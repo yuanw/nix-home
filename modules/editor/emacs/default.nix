@@ -232,6 +232,10 @@ with lib; {
                   (gcmh-mode)
                 '';
               };
+              browse-kill-ring = {
+                enable = true;
+                command = [ "browse-kill-ring" ];
+              };
               my-meow = {
                 enable = true;
                 package = epkgs: (
