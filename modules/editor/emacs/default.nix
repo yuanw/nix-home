@@ -213,6 +213,10 @@ with lib; {
               (global-unset-key "\C-x\C-c")
               (global-unset-key "\C-x\C-b") ;; list-buffer with meow is little odd
               (global-unset-key "\C-x\C-d") ;; list-directory with meow is little odd
+              ;; effective-emacs Item 3
+              (global-set-key "\C-w" 'backward-kill-word)
+              (global-set-key "\C-x\C-k" 'kill-region)
+              (global-set-key "\C-c\C-k" 'kill-region)
             '';
 
             usePackage = {
