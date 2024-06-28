@@ -16,7 +16,7 @@ with lib; {
     gc = {
       user = "${config.my.username}";
       automatic = true;
-      interval = { Hour = 168; };
+      interval = { Hour = 22; };
 
       options = "--delete-older-than 7d";
     };
