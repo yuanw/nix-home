@@ -60,7 +60,7 @@ in
 
   config = mkMerge [
     (mkIf cfg.enable {
-      fonts.fonts = with pkgs; [
+      fonts.packages = with pkgs; [
         sketchybar-app-font
         font-hack-nerd-font
         sf-symbols
