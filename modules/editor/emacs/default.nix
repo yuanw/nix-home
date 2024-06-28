@@ -59,10 +59,6 @@ with lib; {
       type = types.bool;
       default = false;
     };
-    enableDoomConfig = mkOption {
-      type = types.bool;
-      default = false;
-    };
   };
 
   config = mkIf cfg.enable (mkMerge [
@@ -136,7 +132,11 @@ with lib; {
               (set-face-background 'mouse "#ffffff")
 
               ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
-              (defalias 'yes-or-no-p 'y-or-n-p)
+              ;; (defalias 'yes-or-no-p 'y-or-n-p)
+              (setq use-short-answers t)
+
+              (setq use-dialog-box nil)
+
 
               ;; Don't want to move based on visual line.
               (setq line-move-visual nil)
@@ -169,7 +169,7 @@ with lib; {
               ;; Use one space to end sentences.
               (setq sentence-end-double-space nil)
 
-              ;; I typically want to use UTF-8.
+              ;;use UTF-8.
               (prefer-coding-system 'utf-8)
 
               ;; Nicer handling of regions.
@@ -198,14 +198,6 @@ with lib; {
               ;; `completion-at-point' is often bound to M-TAB.
               (setq tab-always-indent 'complete)
 
-              ;; Improved handling of clipboard in GNU/Linux and otherwise.
-              (setq select-enable-clipboard t
-                    select-enable-primary t
-                    save-interprogram-paste-before-kill t)
-
-              ;; Pasting with middle click should insert at point, not where the
-              ;; click happened.
-              (setq mouse-yank-at-point t)
 
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
@@ -213,39 +205,6 @@ with lib; {
               ;; Enable a few useful commands that are initially disabled.
               (put 'upcase-region 'disabled nil)
               (put 'downcase-region 'disabled nil)
-
-
-              ;; When finding file in non-existing directory, offer to create the
-              ;; parent directory.
-              (defun with-buffer-name-prompt-and-make-subdirs ()
-                (let ((parent-directory (file-name-directory buffer-file-name)))
-                  (when (and (not (file-exists-p parent-directory))
-                             (y-or-n-p (format "Directory `%s' does not exist! Create it? " parent-directory)))
-                    (make-directory parent-directory t))))
-
-              (add-to-list 'find-file-not-found-functions #'with-buffer-name-prompt-and-make-subdirs)
-
-
-              ;; Try out some tree-sitter modes.
-              (setq major-mode-remap-alist
-               '((bash-mode . bash-ts-mode)))
-
-              (defun rah-disable-trailing-whitespace-mode ()
-                (setq show-trailing-whitespace nil))
-
-              ;; Shouldn't highlight trailing spaces in terminal mode.
-              (add-hook 'term-mode #'rah-disable-trailing-whitespace-mode)
-              (add-hook 'term-mode-hook #'rah-disable-trailing-whitespace-mode)
-
-              ;; Ignore trailing white space in compilation mode.
-              (add-hook 'compilation-mode-hook #'rah-disable-trailing-whitespace-mode)
-
-              (defun my-prog-mode-setup ()
-                ;; Use a bit wider fill column width in programming modes
-                ;; since we often work with indentation to start with.
-                (setq fill-column 80))
-
-              (add-hook 'prog-mode-hook #'my-prog-mode-setup)
             '';
 
             postlude = ''
@@ -273,17 +232,19 @@ with lib; {
                   (gcmh-mode)
                 '';
               };
+              browse-kill-ring = {
+                enable = true;
+                command = [ "browse-kill-ring" ];
+              };
               my-meow = {
                 enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/my-meow {
-
                     inherit (epkgs) trivialBuild meow dot-mode;
                   }
                 );
                 demand = true;
               };
-
               autorevert = {
                 enable = true;
                 hook = [ "(dired-mode . auto-revert-mode)" ];
@@ -424,6 +385,7 @@ with lib; {
 
               keycast = {
                 enable = true;
+                defer = 1;
                 command = [
                   "keycast-mode-line-mode"
                   "keycast-tab-bar-mode"
@@ -434,6 +396,7 @@ with lib; {
               dot-mode = {
                 enable = true;
                 command = [ "dot-mode" "dot-mode-execute" ];
+                diminish = [ "dot-mode" ];
                 config = ''
                   (global-dot-mode)
                   (require 'dot-mode)
@@ -443,6 +406,7 @@ with lib; {
 
               free-keys = {
                 enable = true;
+                defer = 1;
                 command = [ "free-keys" ];
               };
 
@@ -803,10 +767,6 @@ with lib; {
                 '';
               };
 
-              envrc = {
-                enable = true;
-                command = [ "envrc-mode" ];
-              };
 
               denote = {
                 enable = true;
@@ -964,6 +924,10 @@ with lib; {
                   (direnv-mode)
                 '';
               };
+              envrc = {
+                enable = false;
+                hook = [ "(after-init . envrc-global-mode)" ];
+              };
               just-mode.enable = true;
               justl = {
                 enable = true;
@@ -1014,7 +978,7 @@ with lib; {
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
                                     )
-                   (add-hook 'java-mode-hook #'eglot-ensure)
+                  (add-hook 'java-mode-hook #'eglot-ensure)
                   (add-hook 'java-ts-mode-hook #'eglot-ensure)
                 '';
               };
@@ -1052,7 +1016,6 @@ with lib; {
                 after = [ "flycheck" "eglot" ];
                 config = "(global-flycheck-eglot-mode 1)";
               };
-
 
               ## there is also browes-at-remote
               git-link = {
@@ -1123,7 +1086,7 @@ with lib; {
                   }
 
                 );
-                hook = [ "(prog-mode . copilot-mode)" ];
+                hook = [ "(java-mode . copilot-mode)" ];
                 bindLocal = {
                   copilot-completion-map = {
                     "<tab>" = "copilot-accept-completion";
@@ -1164,7 +1127,7 @@ with lib; {
             (setq lspce-server-programs `(
                                           ("python" "pylsp" "" )
                                           ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
-                                          ("java" "${pkgs.jdt-language-server}/bin/jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                                          ("java" "jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                                           ))
             )
 
@@ -1203,6 +1166,10 @@ with lib; {
                   (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, 'frappe or 'mocha
                   (load-theme 'catppuccin :no-confirm)
                 '';
+              };
+
+              all-the-icons = {
+                enable = true;
               };
 
               yasnippet = {

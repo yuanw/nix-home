@@ -70,7 +70,7 @@ with pkgs; [
   dig
   just
   pkg-config
-
+  protobuf
   # racket
   # open-interpreter
   # reiryoku-firmware
