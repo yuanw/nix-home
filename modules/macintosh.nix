@@ -87,7 +87,6 @@ with lib; {
   home-manager.users.${config.my.username} =
     import ./home.nix { inherit inputs pkgs lib config; };
 
-  fonts.fontDir.enable = true;
   fonts.fonts = with pkgs; [
     fira-code
     font-awesome
