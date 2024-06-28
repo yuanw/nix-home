@@ -8,11 +8,10 @@ Current Choices
 
 * Bigger picture
 
-Tiling Window Manager + tmux + Doom Emacs
+Tiling Window Manager + tmux + Emacs
 
 most of yabai commands start with ~Alt~
 most of tmux commands start with ~Ctr+Space~
-most of Doom Emacs commands start with ~Space~
 
 * Goals
 - tmux window navigation and doom emacs window navigation should have the similar combination

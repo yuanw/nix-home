@@ -77,7 +77,6 @@
     };
     editors.emacs = {
       enable = true;
-      enableDoomConfig = true;
       pkg = pkgs.emacs-unstable;
     };
     qmk.enable = true;

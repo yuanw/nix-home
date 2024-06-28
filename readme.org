@@ -15,13 +15,13 @@ feel free to take what you like.
 | Shell    | zsh + starship                 |
 | WM       | yabai + skhd + sketchybar      |
 | Terminal | Alacritty + tmux               |
-| Editor   | Doom Emacs + astronvim + helix |
+| Editor   | Emacs + astronvim + helix      |
 
 * Current NixOs setup
 | Shell    | zsh + starship                 |
 | WM       | xmonad + xmobar                |
 | Terminal | Alacritty + tmux               |
-| Editor   | Doom Emacs + astronvim + helix |
+| Editor   | Emacs + astronvim + helix      |
 * Inspirations
 
 https://github.com/stars/yuanw/lists/nix-home/
