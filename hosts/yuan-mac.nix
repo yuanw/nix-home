@@ -25,7 +25,6 @@
     editors.emacs = {
       enable = true;
       enableService = true;
-      enableDoomConfig = true;
     };
 
     terminal.enable = true;

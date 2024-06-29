@@ -16,7 +16,7 @@ with lib; {
     gc = {
       user = "${config.my.username}";
       automatic = true;
-      interval = { Hour = 168; };
+      interval = { Hour = 22; };
 
       options = "--delete-older-than 7d";
     };
@@ -87,8 +87,7 @@ with lib; {
   home-manager.users.${config.my.username} =
     import ./home.nix { inherit inputs pkgs lib config; };
 
-  fonts.fontDir.enable = true;
-  fonts.fonts = with pkgs; [
+  fonts.packages = with pkgs; [
     fira-code
     font-awesome
     #iosevka
