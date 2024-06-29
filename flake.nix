@@ -2,7 +2,7 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-23.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     emacs-lsp-booster.url = "github:slotThe/emacs-lsp-booster-flake";
@@ -33,7 +33,10 @@
     };
     haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
-    emacs.url = "github:nix-community/emacs-overlay";
+    emacs = {
+      url = "github:nix-community/emacs-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     emacs-plus = {
       url = "github:d12frosted/homebrew-emacs-plus";
       flake = false;
