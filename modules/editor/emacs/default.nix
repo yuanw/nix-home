@@ -1313,6 +1313,17 @@ with lib; {
                         vterm-max-scrollback 10000)
                 '';
               };
+              eat = {
+                enable = true;
+              };
+              multi-vterm = {
+                enable = true;
+                command = [
+                  "multi-vterm"
+                  "multi-vterm-project"
+                ];
+                defer = true;
+              };
               wm = {
                 enable = true;
                 package = epkgs:
@@ -1327,14 +1338,7 @@ with lib; {
                     buildInputs = propagatedUserEnvPkgs;
                   };
               };
-              multi-vterm = {
-                enable = true;
-                command = [
-                  "multi-vterm"
-                  "multi-vterm-project"
-                ];
-                defer = true;
-              };
+
 
               toggle-term = {
                 enable = true;
