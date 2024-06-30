@@ -800,6 +800,23 @@ with lib; {
                                      :jump-to-captured t)))
                 '';
               };
+              consult-denote = {
+                enable = true;
+                package = epkgs:
+                  epkgs.trivialBuild {
+                    pname = "consult-denote";
+                    version = "0.0.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "protesilaos";
+                      repo = "consult-denote";
+                      rev = "b477a6ec64a148c186e7114135873e975b05074f";
+                      sha256 = lib.fakeSha256;
+                      # sha256 = "sha256-MCa28kGMBKLA/WqcDgJVtbul//R80nwWuI757wc12KI=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+              };
 
               smartparens = {
                 enable = true;
