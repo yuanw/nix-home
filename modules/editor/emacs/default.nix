@@ -810,8 +810,8 @@ with lib; {
                       owner = "protesilaos";
                       repo = "consult-denote";
                       rev = "b477a6ec64a148c186e7114135873e975b05074f";
-                      sha256 = lib.fakeSha256;
-                      # sha256 = "sha256-MCa28kGMBKLA/WqcDgJVtbul//R80nwWuI757wc12KI=";
+                      # sha256 = lib.fakeSha256;
+                      sha256 = "sha256-34xSYhCO10riTGBWr2LDCznHdNVoIQtZOtiIkzdJVEc=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;
