@@ -813,6 +813,10 @@ with lib; {
                       # sha256 = lib.fakeSha256;
                       sha256 = "sha256-34xSYhCO10riTGBWr2LDCznHdNVoIQtZOtiIkzdJVEc=";
                     };
+                    # elisp dependencies
+                    propagatedUserEnvPkgs = [
+                      epkgs.denote
+                    ];
                     preferLocalBuild = true;
                     allowSubstitutes = false;
                   };
