@@ -816,6 +816,7 @@ with lib; {
                     # elisp dependencies
                     propagatedUserEnvPkgs = [
                       epkgs.denote
+                      epkgs.consult
                     ];
                     preferLocalBuild = true;
                     allowSubstitutes = false;
