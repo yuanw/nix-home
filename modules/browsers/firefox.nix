@@ -48,6 +48,7 @@ in
           search = {
             default = "Kagi";
             engines = {
+              "google".metaData.hidden = true;
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
