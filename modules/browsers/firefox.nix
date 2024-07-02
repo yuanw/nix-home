@@ -26,6 +26,11 @@ in
       };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
+      # https://mozilla.github.io/policy-templates/
+      programs.firefox.policies = { };
+      # programs.firefox.nativeMessagingHosts = [
+      #   pkgs.tridactyl-native
+      # ];
       programs.firefox.profiles = {
         home = {
           name = "home";
@@ -41,6 +46,7 @@ in
           ];
 
           search = {
+            default = "Kagi";
             engines = {
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
