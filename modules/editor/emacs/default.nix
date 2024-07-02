@@ -814,7 +814,7 @@ with lib; {
                       sha256 = "sha256-34xSYhCO10riTGBWr2LDCznHdNVoIQtZOtiIkzdJVEc=";
                     };
                     # elisp dependencies
-                    propagatedUserEnvPkgs = [
+                    packageRequires = [
                       epkgs.denote
                       epkgs.consult
                     ];
