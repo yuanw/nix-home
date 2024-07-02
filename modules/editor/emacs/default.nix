@@ -241,13 +241,21 @@ with lib; {
                 command = [ "browse-kill-ring" ];
               };
               my-meow = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/my-meow {
                     inherit (epkgs) trivialBuild meow dot-mode;
                   }
                 );
                 demand = true;
+              };
+              # TODO checkout modalka
+              god-mode = {
+                enable = true;
+                config = ''
+                  (global-set-key (kbd "<escape>") #'god-local-mode)
+                  (define-key god-local-mode-map (kbd "i") 'god-local-mode)
+                '';
               };
               autorevert = {
                 enable = true;
