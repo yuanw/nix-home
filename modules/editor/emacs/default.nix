@@ -273,8 +273,9 @@ with lib; {
                             'box
                             'bar)))
 
-                  (global-set-key (kbd ";") #'god-local-mode)
-                  (define-key god-local-mode-map (kbd "i") 'god-local-mode)
+                  (global-set-key (kbd ";") #'god-mode-all)
+                  (define-key god-local-mode-map (kbd "i") 'god-mode-all)
+                  (god-mode-all)
                   (add-hook 'god-mode-enabled-hook 'god-update-cursor)
                   (add-hook 'god-mode-disabled-hook 'god-update-cursor)
                 '';
