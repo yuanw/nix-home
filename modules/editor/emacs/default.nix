@@ -262,7 +262,7 @@ with lib; {
                 config = ''
                   (require 'god-mode-isearch)
                   (setq-default cursor-type 'bar)
-                  (setq which-key--god-mode-support-enabled t)
+
                   (blink-cursor-mode -1)
 
                   ;; Functions
@@ -323,8 +323,11 @@ with lib; {
                                     prot-modeline-notmuch-indicator
                                     "  "
                                     prot-modeline-misc-info))
+                                    (with-eval-after-load 'which-key
+                                    (which-key-enable-god-mode-support)
+                                    )
                                     (with-eval-after-load 'god-mode
-                                    (defun my-god-mode-update-mode-line ()
+                   (defun my-god-mode-update-mode-line ()
                     (cond
                      (god-local-mode
                       (set-face-attribute 'mode-line nil
@@ -744,6 +747,7 @@ with lib; {
                   	  which-key-side-window-slot -10
                   	  which-key-side-window-max-height 0.25
                   	  which-key-idle-delay 0.8
+                      which-key--god-mode-support-enabled t
                   	  which-key-max-description-length 25
                   	  which-key-allow-imprecise-window-fit t
                   	  which-key-separator " → " )
