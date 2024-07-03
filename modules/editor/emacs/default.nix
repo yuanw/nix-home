@@ -254,6 +254,7 @@ with lib; {
                 config = ''
                   (require 'god-mode-isearch)
                   (setq-default cursor-type 'bar)
+                  (setq-default whick-key--god-mode-support-enabled t)
                   (blink-cursor-mode -1)
 
                   ;; Functions
@@ -262,8 +263,9 @@ with lib; {
                   (setq cursor-type
                         (if god-local-mode
                             'box
-                          'bar)))
-                  (global-set-key (kbd "<escape>") #'god-local-mode)
+                            'bar)))
+
+                  (global-set-key (kbd ";") #'god-local-mode)
                   (define-key god-local-mode-map (kbd "i") 'god-local-mode)
                   (add-hook 'god-mode-enabled-hook 'god-update-cursor)
                   (add-hook 'god-mode-disabled-hook 'god-update-cursor)
