@@ -287,7 +287,14 @@ with lib; {
                     version = "0.0.1";
                     src = ./packages/prot-modeline.el;
                     packageRequires = [
-                      epkgs.prot-common
+                      (
+                        epkgs.trivialBuild {
+                          pname = "prot-common";
+                          version = "0.0.1";
+                          src = ./packages/prot-common.el;
+                        }
+                      )
+
                     ];
                   };
                 config = ''  (setq mode-line-compact nil) ; Emacs 28
