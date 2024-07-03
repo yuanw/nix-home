@@ -153,11 +153,12 @@ with lib; {
               (column-number-mode)
 
               ;; Enable CUA mode.
-              (cua-mode 1)
+              ;;(cua-mode 1)
 
               ;; Enable some features that are disabled by default.
               (put 'narrow-to-region 'disabled nil)
-
+              (put 'upcase-region 'disabled nil)
+              (put 'downcase-region 'disabled nil)
               ;; Typically, I only want spaces when pressing the TAB key. I also
               ;; want 4 of them.
               (setq-default indent-tabs-mode nil
@@ -202,9 +203,7 @@ with lib; {
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
 
-              ;; Enable a few useful commands that are initially disabled.
-              (put 'upcase-region 'disabled nil)
-              (put 'downcase-region 'disabled nil)
+
             '';
 
             postlude = ''
@@ -253,8 +252,21 @@ with lib; {
               god-mode = {
                 enable = true;
                 config = ''
+                  (require 'god-mode-isearch)
+                  (setq-default cursor-type 'bar)
+                  (blink-cursor-mode -1)
+
+                  ;; Functions
+                  (defun god-update-cursor ()
+                  "Update my cursor."
+                  (setq cursor-type
+                        (if god-local-mode
+                            'box
+                          'bar)))
                   (global-set-key (kbd "<escape>") #'god-local-mode)
                   (define-key god-local-mode-map (kbd "i") 'god-local-mode)
+                  (add-hook 'god-mode-enabled-hook 'god-update-cursor)
+                  (add-hook 'god-mode-disabled-hook 'god-update-cursor)
                 '';
               };
               autorevert = {
