@@ -254,7 +254,7 @@ with lib; {
                 config = ''
                   (require 'god-mode-isearch)
                   (setq-default cursor-type 'bar)
-                  (setq whick-key--god-mode-support-enabled t)
+                  (setq which-key--god-mode-support-enabled t)
                   (blink-cursor-mode -1)
 
                   ;; Functions
