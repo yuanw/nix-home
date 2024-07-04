@@ -561,6 +561,28 @@ Specific to the current window's mode line.")
   "Mode line construct displaying Eglot information.
 Specific to the current window's mode line.")
 
+   (defun god-mode-indicator ()
+          "Return appropriate propertized mode line indicator for god-mode."
+
+                (propertize     (if god-local-mode "god"
+                             "unholy") 'face 'bold
+                             ))
+
+
+      (defun show-god-mode-indictor ()
+        "wft"
+        (interactive)
+        (message (god-mode-indicator))
+        )
+
+
+      (defvar-local my-god-mode-name
+          '(:eval
+            (when (and (featurep 'god-mode)
+                       (mode-line-window-selected-p))
+              '(god-mode-indicator)
+            ))
+          "")
 ;;;; Miscellaneous
 
 (defvar-local prot-modeline-notmuch-indicator
@@ -583,6 +605,7 @@ Specific to the current window's mode line.")
 ;; NOTE 2023-04-28: The `risky-local-variable' is critical, as those
 ;; variables will not work without it.
 (dolist (construct '(prot-modeline-kbd-macro
+                     my-god-mode-name
                      prot-modeline-narrow
                      prot-modeline-input-method
                      prot-modeline-buffer-status
