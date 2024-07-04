@@ -247,16 +247,8 @@ with lib; {
                 enable = true;
                 command = [ "browse-kill-ring" ];
               };
-              my-meow = {
-                enable = false;
-                package = epkgs: (
-                  pkgs.callPackage ./packages/my-meow {
-                    inherit (epkgs) trivialBuild meow dot-mode;
-                  }
-                );
-                demand = true;
-              };
-              # TODO checkout modalka
+
+
               god-mode = {
                 enable = true;
                 config = ''
@@ -303,9 +295,9 @@ with lib; {
                     (setq mode-line-right-align-edge 'right-margin) ; Emacs 30
                     (setq-default mode-line-format
                          '("%e"
-                         prot-modeline-kbd-macro
-                         my-god-mode-name
-                                    prot-modeline-narrow
+                           prot-modeline-kbd-macro
+                           my-god-mode-name
+                           prot-modeline-narrow
                                     prot-modeline-buffer-status
                                     prot-modeline-window-dedicated-status
                                     prot-modeline-input-method
@@ -396,6 +388,21 @@ with lib; {
                         "gpg"
                         (file-name-extension (buffer-name)) t))))
                 '';
+              };
+              expand-region = {
+                enable = true;
+                bind = {
+                  "C-=" = "er/expand-region";
+                };
+
+
+              };
+              change-inner = {
+                enable = true;
+                bind = {
+                  "M-i" = "change-inner";
+                  "M-o M-o" = "change-outer";
+                };
               };
               ## Remember where we where in a previously visited file. Built-in.
               saveplace = {
