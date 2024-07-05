@@ -218,11 +218,10 @@ with lib; {
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-z")
               (global-unset-key "\C-x\C-c")
-
               ;; effective-emacs Item 3
-              (global-set-key "\C-w" 'backward-kill-word)
-              (global-set-key "\C-x\C-k" 'kill-region)
-              (global-set-key "\C-c\C-k" 'kill-region)
+              ;;(global-set-key "\C-w" 'backward-kill-word)
+              ;;(global-set-key "\C-x\C-k" 'kill-region)
+              ;;(global-set-key "\C-c\C-k" 'kill-region)
             '';
 
             usePackage = {
@@ -251,28 +250,34 @@ with lib; {
               god-mode = {
                 enable = true;
                 config = ''
-                   (require 'god-mode-isearch)
-                   (setq-default cursor-type 'bar)
+                     (require 'god-mode-isearch)
+                     (setq-default cursor-type 'bar)
 
-                   (blink-cursor-mode -1)
+                     (blink-cursor-mode -1)
 
-                   ;; Functions
-                   (defun god-update-cursor ()
-                       "Update my cursor."
-                       (setq cursor-type
-                             (if god-local-mode
-                                 'box
-                                 'bar)))
+                     ;; Functions
+                     (defun god-update-cursor ()
+                         "Update my cursor."
+                         (setq cursor-type
+                               (if god-local-mode
+                                   'box
+                                   'bar)))
 
-                  (global-set-key (kbd ";") #'god-mode-all)
-                  (define-key god-local-mode-map (kbd "i") 'god-mode-all)
-                  (god-mode-all)
-                  (add-hook 'god-mode-enabled-hook 'god-update-cursor)
-                  (add-hook 'god-mode-disabled-hook 'god-update-cursor)
-                  (global-set-key "\C-x\C-b" #'switch-to-buffer) ;; list-buffer with meow is little odd
-                  (global-set-key "\C-x\C-d" #'dired) ;; list-directory with meow is little odd
+                    (global-set-key (kbd "z") #'god-mode-all)
+                    (define-key god-local-mode-map (kbd "i") 'god-mode-all)
+                    (define-key god-local-mode-map (kbd ".") 'repeat)
+                    (god-mode-all)
+                    (add-hook 'god-mode-enabled-hook 'god-update-cursor)
+                    (add-hook 'god-mode-disabled-hook 'god-update-cursor)
+                    ;;(global-set-key "\C-x\ b" #'list-buffer)
+                  ;;  (global-set-key "\C-x\ d" #'list-directory)
+                  ;;  (global-set-key "\C-x\C-u" #'undo)
+                  ;;  (global-set-key "\C-x\ u" #'upcase-region)
+                  ;;  (global-set-key "\C-x\C-b" #'switch-to-buffer) ;; list-buffer with meow is little odd
+                  ;;  (global-set-key "\C-x\C-d" #'dired) ;; list-directory with meow is little odd
                 '';
               };
+
               prot-modeline = {
                 enable = true;
                 package = epkgs:
@@ -772,6 +777,7 @@ with lib; {
                     "Run magit-status in the current project's root."
                     (interactive)
                     (magit-status-setup-buffer (project-root (project-current t))))
+
                   (setq project-switch-commands
                    '((?f "Find file" project-find-file)
                           (?g "Find regexp" project-find-regexp)
