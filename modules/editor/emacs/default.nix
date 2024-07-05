@@ -218,8 +218,7 @@ with lib; {
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-z")
               (global-unset-key "\C-x\C-c")
-              (global-unset-key "\C-x\C-b") ;; list-buffer with meow is little odd
-              (global-unset-key "\C-x\C-d") ;; list-directory with meow is little odd
+
               ;; effective-emacs Item 3
               (global-set-key "\C-w" 'backward-kill-word)
               (global-set-key "\C-x\C-k" 'kill-region)
@@ -252,24 +251,26 @@ with lib; {
               god-mode = {
                 enable = true;
                 config = ''
-                  (require 'god-mode-isearch)
-                  (setq-default cursor-type 'bar)
+                   (require 'god-mode-isearch)
+                   (setq-default cursor-type 'bar)
 
-                  (blink-cursor-mode -1)
+                   (blink-cursor-mode -1)
 
-                  ;; Functions
-                  (defun god-update-cursor ()
-                  "Update my cursor."
-                  (setq cursor-type
-                        (if god-local-mode
-                            'box
-                            'bar)))
+                   ;; Functions
+                   (defun god-update-cursor ()
+                       "Update my cursor."
+                       (setq cursor-type
+                             (if god-local-mode
+                                 'box
+                                 'bar)))
 
                   (global-set-key (kbd ";") #'god-mode-all)
                   (define-key god-local-mode-map (kbd "i") 'god-mode-all)
                   (god-mode-all)
                   (add-hook 'god-mode-enabled-hook 'god-update-cursor)
                   (add-hook 'god-mode-disabled-hook 'god-update-cursor)
+                  (global-set-key "\C-x\C-b" #'switch-to-buffer) ;; list-buffer with meow is little odd
+                  (global-set-key "\C-x\C-d" #'dired) ;; list-directory with meow is little odd
                 '';
               };
               prot-modeline = {
@@ -903,9 +904,8 @@ with lib; {
               easy-kill = {
                 enable = true;
                 extraConfig = ''
-                  :bind ([remap kill-ring-save] . easy-kill
-                         [remap mark-sexp]      . easy-mark
-                   )
+                  :bind ([remap kill-ring-save] . easy-kill)
+                  :bind ([remap mark-sexp] . easy-mark)
                 '';
               };
 
