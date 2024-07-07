@@ -395,6 +395,11 @@ with lib; {
                         (file-name-extension (buffer-name)) t))))
                 '';
               };
+              # operate on whole line, when no region is active
+              # https://github.com/purcell/whole-line-or-region/tree/master
+              whole-line-or-region = {
+                enable = true;
+              };
               expand-region = {
                 enable = true;
                 bind = {
