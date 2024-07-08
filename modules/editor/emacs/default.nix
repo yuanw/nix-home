@@ -225,6 +225,13 @@ with lib; {
             '';
 
             usePackage = {
+              # pratice emacs-fu
+              disable-mouse = {
+                enable = true;
+                config = ''
+                  (global-disable-mouse-mode)
+                '';
+              };
               exec-path-from-shell = {
                 enable = false;
                 extraConfig = ":when (daemonp)";
