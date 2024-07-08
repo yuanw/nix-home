@@ -410,7 +410,7 @@ with lib; {
               expand-region = {
                 enable = true;
                 bind = {
-                  "C-=" = "er/expand-region";
+                  "C-m" = "er/expand-region";
                 };
 
 
@@ -419,7 +419,7 @@ with lib; {
                 enable = true;
                 bind = {
                   "M-i" = "change-inner";
-                  "M-o M-o" = "change-outer";
+                  "M-o" = "change-outer";
                 };
               };
               ## Remember where we where in a previously visited file. Built-in.
@@ -1519,7 +1519,7 @@ with lib; {
 
 
               toggle-term = {
-                enable = true;
+                enable = false;
                 package = epkgs:
                   epkgs.trivialBuild {
                     pname = "toggle-term";
