@@ -108,7 +108,7 @@ with lib; {
               (push '(tool-bar-lines . nil) default-frame-alist)
               (push '(vertical-scroll-bars . nil) default-frame-alist)
               ;; no title bar
-              ;;(add-to-list 'default-frame-alist '(undecorated-round . t))
+              (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
 
