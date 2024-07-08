@@ -270,10 +270,10 @@ with lib; {
                                    'box
                                    'bar)))
 
-                    (global-set-key (kbd "z") #'god-mode-all)
+                    ;;(global-set-key (kbd "z") #'god-mode-all)
                     (define-key god-local-mode-map (kbd "i") 'god-mode-all)
                     (define-key god-local-mode-map (kbd ".") 'repeat)
-                    (god-mode-all)
+                   ;; (god-mode-all)
                     (add-hook 'god-mode-enabled-hook 'god-update-cursor)
                     (add-hook 'god-mode-disabled-hook 'god-update-cursor)
                     ;;(global-set-key "\C-x\ b" #'list-buffer)
@@ -413,7 +413,7 @@ with lib; {
               expand-region = {
                 enable = true;
                 bind = {
-                  "C-=" = "er/expand-region";
+                  "C-z" = "er/expand-region";
                 };
 
 
