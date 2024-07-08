@@ -318,6 +318,9 @@ with lib; {
                                        prot-modeline-buffer-identification
                                        "  "
                                        prot-modeline-major-mode
+                                       "  "
+                                       mode-line-position
+                                       "  "
                                        prot-modeline-process
                                        "  "
                                        prot-modeline-vc-branch
