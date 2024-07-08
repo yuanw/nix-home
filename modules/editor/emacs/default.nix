@@ -413,7 +413,7 @@ with lib; {
               expand-region = {
                 enable = true;
                 bind = {
-                  "C-m" = "er/expand-region";
+                  "C-=" = "er/expand-region";
                 };
 
 
