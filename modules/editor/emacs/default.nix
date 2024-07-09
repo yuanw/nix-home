@@ -216,7 +216,6 @@ with lib; {
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
-              ;;(global-unset-key "\C-z") rebind to expand-region
               (global-unset-key "\C-x\C-c")
               ;; effective-emacs Item 3
               ;;(global-set-key "\C-w" 'backward-kill-word)
@@ -309,7 +308,7 @@ with lib; {
                        (setq-default mode-line-format
                             '("%e"
                               prot-modeline-kbd-macro
-                              my-god-mode-name
+
                               prot-modeline-narrow
                                        prot-modeline-buffer-status
                                        prot-modeline-window-dedicated-status
