@@ -217,6 +217,7 @@ with lib; {
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-x\C-c")
+              (keycast-mode-line-mode)
               ;; effective-emacs Item 3
               ;;(global-set-key "\C-w" 'backward-kill-word)
               ;;(global-set-key "\C-x\C-k" 'kill-region)
@@ -548,7 +549,7 @@ with lib; {
                   (dolist (event '( mouse-event-p mouse-movement-p mwheel-scroll handle-select-window
                                     mouse-set-point mouse-drag-region))
                                     (add-to-list 'keycast-substitute-alist `(,event nil)))
-                                    (keycast-mode-line-mode)
+
                 '';
 
               };
