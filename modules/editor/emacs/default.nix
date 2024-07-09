@@ -633,12 +633,18 @@ with lib; {
                 config = "(marginalia-mode)";
               };
 
+              avy = {
+                enable = true;
+                bind = {
+                  "C-." = "avy-goto-char-timer";
+                };
+              };
               embark = {
                 enable = true;
                 command = [ "embark-prefix-help-command" ];
                 bind = {
-                  "C-." = "embark-act";
-                  "M-." = "embark-dwim";
+                  "M-." = "embark-act";
+                  #"M-." = "embark-dwim";
                   "C-h B" = "embark-bindings";
                 };
                 init = ''
