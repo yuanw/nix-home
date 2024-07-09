@@ -547,7 +547,8 @@ with lib; {
 
                   (dolist (event '( mouse-event-p mouse-movement-p mwheel-scroll handle-select-window
                                     mouse-set-point mouse-drag-region))
-                    (add-to-list 'keycast-substitute-alist `(,event nil)))
+                                    (add-to-list 'keycast-substitute-alist `(,event nil)))
+                                    (keycast-mode-line-mode)
                 '';
 
               };
