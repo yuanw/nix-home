@@ -218,10 +218,6 @@ with lib; {
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-x\C-c")
               (keycast-mode-line-mode)
-              ;; effective-emacs Item 3
-              ;;(global-set-key "\C-w" 'backward-kill-word)
-              ;;(global-set-key "\C-x\C-k" 'kill-region)
-              ;;(global-set-key "\C-c\C-k" 'kill-region)
             '';
 
             usePackage = {
@@ -640,6 +636,11 @@ with lib; {
                 bind = {
                   "C-." = "avy-goto-char-timer";
                 };
+                config = ''
+                  (setq avy-keys '(?e ?h ?a ?i ?o ?v ?r
+                    ?s ?n ?t ?g ?w ?m ?p
+                    ?c ?f ?d))
+                '';
               };
               embark = {
                 enable = true;
@@ -817,11 +818,10 @@ with lib; {
               ace-window = {
                 enable = true;
                 command = [ "ace-window" ];
-                config = ''
-                  (setq aw-keys '(?h ?a ?i ?o ?l ?u ?y ?')
-                        aw-dispatch-always t)
+                bind = {
+                  "C-x o" = "ace-window";
+                };
 
-                '';
               };
 
               winner = {
