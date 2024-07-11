@@ -630,7 +630,8 @@ with lib; {
                 enable = true;
                 demand = true;
                 config = ''
-                                    (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+                  (require 'vertico-grid)
+                  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
                   (vertico-multiform-mode)
                 '';
               };
