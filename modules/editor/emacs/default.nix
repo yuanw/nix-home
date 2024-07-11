@@ -641,6 +641,15 @@ with lib; {
                 config = "(marginalia-mode)";
               };
 
+              goggles = {
+                enable = true;
+
+                hook = [ "((prog-mode text-mode) . goggles-mode)" ];
+                config = ''
+                  (setq-default goggles-pulse t)) ;; set to nil to disable pulsing
+                '';
+              };
+
               avy = {
                 enable = true;
                 bind = {
