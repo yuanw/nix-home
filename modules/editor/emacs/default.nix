@@ -619,11 +619,20 @@ with lib; {
 
               vertico-repeat = {
                 enable = true;
-                after = [ "vertico" ];
+                demand = true;
                 bind = {
-                  "C-S-r" = "vertico-repeat";
+                  "C-c . ." = "vertico-repeat";
                 };
                 config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
+              };
+
+              vertico-multiform = {
+                enable = true;
+                demand = true;
+                config = ''
+                                    (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+                  (vertico-multiform-mode)
+                '';
               };
 
               marginalia = {
@@ -651,6 +660,7 @@ with lib; {
                   "C-h B" = "embark-bindings";
                 };
                 init = ''
+                  (setq embark-help-key "?")
                   (setq prefix-help-command #'embark-prefix-help-command)
                 '';
                 config = ''
@@ -762,7 +772,6 @@ with lib; {
 
               consult-xref = {
                 enable = true;
-                after = [ "consult" "xref" ];
                 command = [ "consult-xref" ];
                 init = ''
                   (setq xref-show-definitions-function #'consult-xref
@@ -771,7 +780,7 @@ with lib; {
               };
               embark-consult = {
                 enable = true;
-                after = [ "embark" "consult" ];
+                hook = [ "(embark-collect-mode . consult-preview-at-point-mode)" ];
               };
 
               which-key = {
@@ -833,25 +842,6 @@ with lib; {
 
               hydra = {
                 enable = true;
-                config = ''
-                  (defhydra hydra-main-menu (:color blue)
-                  "main menu"
-                                                    ("p" project-switch-project "switch projects")
-                                                    ("g" magit "magit")
-                                                    ("n" org-roam-node-find "find note")
-                                                    ("t" org-roam-dailies-goto-today "today note")
-                                                    ("k" save-buffers-kill-emacs "quit emacs")
-                                                    ("q" nil "cancel"))
-                               (defhydra hydra-search-menu (:color teal)
-                                   "search menu"
-                                  ("l" consult-line "search line")
-                                  ("r" consult-ripgrep "search word")
-                                  ("f" consult-fd "searc file")
-                                  ("q" nil "cancel"))
-
-                                (global-set-key (kbd "C-c s") 'hydra-search-menu/body)
-                                (global-set-key (kbd "C-c i") 'hydra-main-menu/body)
-                '';
               };
               org = {
                 enable = true;
