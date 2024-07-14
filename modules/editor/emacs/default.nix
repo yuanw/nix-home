@@ -149,6 +149,7 @@ with lib; {
               ;; Don't want to move based on visual line.
               (setq line-move-visual nil)
 
+              ;; TODO maybe should re-configure this
               ;; Stop creating backup and autosave files.
               (setq make-backup-files nil
                     auto-save-default nil)
@@ -159,9 +160,6 @@ with lib; {
               ;; Always show line and column number in the mode line.
               (line-number-mode)
               (column-number-mode)
-
-              ;; Enable CUA mode.
-              ;;(cua-mode 1)
 
               ;; Enable some features that are disabled by default.
               (put 'narrow-to-region 'disabled nil)
@@ -217,6 +215,7 @@ with lib; {
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
               (global-unset-key "\C-x\C-c")
+              ;; add here seems actully does the trick
               (keycast-mode-line-mode)
             '';
 
@@ -249,7 +248,6 @@ with lib; {
                 command = [ "browse-kill-ring" ];
               };
 
-
               god-mode = {
                 enable = true;
                 config = ''
@@ -280,7 +278,7 @@ with lib; {
                   ;;  (global-set-key "\C-x\C-d" #'dired) ;; list-directory with meow is little odd
                 '';
               };
-
+              # steal modeline from prot
               prot-modeline = {
                 enable = true;
                 package = epkgs:
@@ -411,9 +409,8 @@ with lib; {
                 bind = {
                   "C-z" = "er/expand-region";
                 };
-
-
               };
+              # vim like
               change-inner = {
                 enable = true;
                 bind = {
@@ -421,7 +418,7 @@ with lib; {
                   "M-o" = "change-outer";
                 };
               };
-              ## Remember where we where in a previously visited file. Built-in.
+              ## Remember where we where in a previously visited file. Built-in package.
               saveplace = {
                 enable = true;
                 defer = 1;
@@ -539,12 +536,14 @@ with lib; {
                   (setq keycast-mode-line-remove-tail-elements nil)
                 '';
                 config = ''
-                                  (dolist (input '(self-insert-command org-self-insert-command))
-                    (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
+                  (dolist (input '(self-insert-command org-self-insert-command))
+                  (add-to-list 'keycast-substitute-alist `(,input "." "Typing…")))
 
-                  (dolist (event '( mouse-event-p mouse-movement-p mwheel-scroll handle-select-window
-                                    mouse-set-point mouse-drag-region))
-                                    (add-to-list 'keycast-substitute-alist `(,event nil)))
+                  (dolist (event '(mouse-event-p
+                                   mouse-movement-p
+                                   mwheel-scroll handle-select-window
+                                   mouse-set-point mouse-drag-region))
+                                   (add-to-list 'keycast-substitute-alist `(,event nil)))
 
                 '';
 
@@ -643,7 +642,6 @@ with lib; {
 
               goggles = {
                 enable = true;
-
                 hook = [ "((prog-mode text-mode) . goggles-mode)" ];
                 config = ''
                   (setq-default goggles-pulse t) ;; set to nil to disable pulsing
@@ -654,6 +652,12 @@ with lib; {
                 enable = true;
                 bind = {
                   "C-." = "avy-goto-char-timer";
+                  "M-g y" = "avy-copy-line";
+                  "M-g M-y" = "avy-copy-region";
+                  "M-g M-p" = "avy-goto-line-above";
+                  "M-g M-n" = "avy-goto-line-below";
+                  "M-g C-w" = "avy-kill-region";
+                  "M-g M-w" = "avy-kill-save-region";
                 };
                 config = ''
                   (setq avy-keys '(?e ?h ?a ?i ?o ?v ?r
@@ -739,58 +743,58 @@ with lib; {
                 enable = true;
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
                 extraConfig = ''
-                            :bind (;; C-c bindings in `mode-specific-map'
-                  ("C-c M-x" . consult-mode-command)
-                  ("C-c h" . consult-history)
-                  ("C-c k" . consult-kmacro)
-                  ("C-c m" . consult-man)
-                  ("C-c i" . consult-info)
-                  ([remap Info-search] . consult-info)
-                  ;; C-x bindings in `ctl-x-map'
-                  ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-                  ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-                  ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-                  ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-                  ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
-                  ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-                  ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-                  ;; Custom M-# bindings for fast register access
-                  ("M-#" . consult-register-load)
-                  ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-                  ("C-M-#" . consult-register)
-                  ;; Other custom bindings
-                  ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-                  ;; M-g bindings in `goto-map'
-                  ("M-g e" . consult-compile-error)
-                  ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-                  ("M-g g" . consult-goto-line)             ;; orig. goto-line
-                  ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-                  ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-                  ("M-g m" . consult-mark)
-                  ("M-g k" . consult-global-mark)
-                  ("M-g i" . consult-imenu)
-                  ("M-g I" . consult-imenu-multi)
-                  ;; M-s bindings in `search-map'
-                  ("M-s d" . consult-find)                  ;; Alternative: consult-fd
-                  ("M-s c" . consult-locate)
-                  ("M-s g" . consult-grep)
-                  ("M-s G" . consult-git-grep)
-                  ("M-s r" . consult-ripgrep)
-                  ("M-s l" . consult-line)
-                  ("M-s L" . consult-line-multi)
-                  ("M-s k" . consult-keep-lines)
-                  ("M-s u" . consult-focus-lines)
-                  ;; Isearch integration
-                  ("M-s e" . consult-isearch-history)
-                  :map isearch-mode-map
-                  ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-                  ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-                  ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-                  ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-                  ;; Minibuffer history
-                  :map minibuffer-local-map
-                  ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-                  ("M-r" . consult-history))
+                             :bind (;; C-c bindings in `mode-specific-map'
+                   ("C-c M-x" . consult-mode-command)
+                   ("C-c h" . consult-history)
+                   ("C-c k" . consult-kmacro)
+                   ("C-c m" . consult-man)
+                   ("C-c i" . consult-info)
+                   ([remap Info-search] . consult-info)
+                   ;; C-x bindings in `ctl-x-map'
+                   ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+                   ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+                   ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+                   ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+                   ("C-x t b" . consult-buffer-other-tab)    ;; orig. switch-to-buffer-other-tab
+                   ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+                   ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+                   ;; Custom M-# bindings for fast register access
+                   ("M-#" . consult-register-load)
+                   ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+                   ("C-M-#" . consult-register)
+                   ;; Other custom bindings
+                   ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+                   ;; M-g bindings in `goto-map'
+                   ("M-g e" . consult-compile-error)
+                   ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+                   ("M-g g" . consult-goto-line)             ;; orig. goto-line
+                   ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+                   ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+                   ("M-g m" . consult-mark)
+                   ("M-g k" . consult-global-mark)
+                   ("M-g i" . consult-imenu)
+                   ("M-g I" . consult-imenu-multi)
+                   ;; M-s bindings in `search-map'
+                   ("M-s f" . consult-find)                  ;; Alternative: consult-fd
+                  ;; ("M-s c" . consult-locate)
+                  ;; ("M-s g" . consult-grep)
+                  ;; ("M-s G" . consult-git-grep)
+                   ("M-s r" . consult-ripgrep)
+                   ("M-s l" . consult-line)
+                   ("M-s L" . consult-line-multi)
+                   ("M-s k" . consult-keep-lines)
+                   ("M-s u" . consult-focus-lines)
+                   ;; Isearch integration
+                   ("M-s e" . consult-isearch-history)
+                   :map isearch-mode-map
+                   ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+                   ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+                   ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+                   ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+                   ;; Minibuffer history
+                   :map minibuffer-local-map
+                   ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+                   ("M-r" . consult-history))
                 '';
 
                 config = ''
