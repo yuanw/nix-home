@@ -1105,12 +1105,17 @@ with lib; {
                 config = ''
                   (setq nix-indent-function 'nix-indent-line) '';
               };
+
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
               haskell-mode = {
                 enable = true;
                 mode = [
-                  ''"\\.hs'"''
-                  ''"\\.lhs'"''
+                  ''("\\.hs\\'" . haskell-mode)''
+                  ''("\\.hsc\\'" . haskell-mode)''
+                  ''("\\.c2hs\\'" . haskell-mode)''
+                  ''("\\.cpphs\\'" . haskell-mode)''
+                  ''("\\.lhs\\'" . haskell-literate-mode)''
+
                 ];
               };
 
