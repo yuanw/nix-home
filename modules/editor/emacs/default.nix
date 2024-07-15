@@ -1108,6 +1108,10 @@ with lib; {
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
               haskell-mode = {
                 enable = true;
+                mode = [
+                  ''"\\.hs'"''
+                  ''"\\.lhs'"''
+                ];
               };
 
               kotlin-mode = {
