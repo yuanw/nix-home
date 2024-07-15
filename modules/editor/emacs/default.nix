@@ -1109,6 +1109,7 @@ with lib; {
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
               haskell-mode = {
                 enable = true;
+                hook = [ "(haskell-mode . subword-mode)" ];
                 mode = [
                   ''("\\.hs\\'" . haskell-mode)''
                   ''("\\.hsc\\'" . haskell-mode)''
