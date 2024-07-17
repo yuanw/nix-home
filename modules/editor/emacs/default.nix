@@ -651,7 +651,7 @@ with lib; {
               avy = {
                 enable = true;
                 bind = {
-                  "C-." = "avy-goto-char-timer";
+                  "C-j" = "avy-goto-char-timer";
                   "M-g y" = "avy-copy-line";
                   "M-g M-y" = "avy-copy-region";
                   "M-g M-p" = "avy-goto-line-above";
@@ -1308,6 +1308,7 @@ with lib; {
                 '';
               };
 
+              # https://github.com/casouri/vundo
               vundo = {
                 enable = true;
                 defer = 1;
