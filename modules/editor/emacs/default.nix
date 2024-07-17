@@ -1116,10 +1116,8 @@ with lib; {
                   ''("\\.c2hs\\'" . haskell-mode)''
                   ''("\\.cpphs\\'" . haskell-mode)''
                   ''("\\.lhs\\'" . haskell-literate-mode)''
-
                 ];
               };
-
               kotlin-mode = {
                 enable = true;
                 config = "(require 'kotlin-mode)";
@@ -1409,6 +1407,10 @@ with lib; {
                 '';
               };
 
+              ef-themes = {
+                enable = true;
+                defer = true;
+              };
               all-the-icons = {
                 enable = true;
               };
