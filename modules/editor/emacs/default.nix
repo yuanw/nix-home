@@ -553,10 +553,11 @@ with lib; {
                 enable = true;
                 command = [ "dot-mode" "dot-mode-execute" ];
                 diminish = [ "dot-mode" ];
+                bind = {
+                  "C-." = "dot-mode-execute";
+                };
                 config = ''
                   (global-dot-mode)
-                  (require 'dot-mode)
-                  (add-hook 'find-file-hooks 'dot-mode-on)
                 '';
               };
 
@@ -1396,23 +1397,14 @@ with lib; {
                   (global-lsp-bridge-mode)
                 '';
               };
-
-              catppuccin-theme = {
-                enable = true;
-                defer = true;
-                earlyInit = ''
-                  ;; Set color theme in early init to avoid flashing during start.
-                  (require 'catppuccin-theme)
-                  (setq catppuccin-flavor 'mocha) ;; or 'latte, 'macchiato, 'frappe or 'mocha
-                  (load-theme 'catppuccin :no-confirm)
-                '';
-              };
-
+              # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
                 enable = true;
                 defer = true;
                 earlyInit = ''
+                  ;; Set color theme in early init to avoid flashing during start.
                   (require 'ef-themes)
+                  (load-theme 'ef-summer :no-confirm)
                   (setq ef-themes-to-toggle '(ef-summer ef-winter))
                 '';
               };
