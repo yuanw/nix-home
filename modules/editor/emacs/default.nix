@@ -1411,6 +1411,10 @@ with lib; {
               ef-themes = {
                 enable = true;
                 defer = true;
+                earlyInit = ''
+                  (require 'ef-themes)
+                  (setq ef-themes-to-toggle '(ef-summer ef-winter))
+                '';
               };
               all-the-icons = {
                 enable = true;
