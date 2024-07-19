@@ -658,11 +658,11 @@ with lib; {
                   "M-g M-p" = "avy-goto-line-above";
                   "M-g M-n" = "avy-goto-line-below";
                   "M-g C-w" = "avy-kill-region";
-                  "M-g M-w" = "avy-kill-save-region";
+                  "M-g M-w" = "avy-kill-ring-save-region";
                 };
                 config = ''
-                  (setq avy-keys '(?e ?h ?a ?i ?o ?v ?r
-                    ?s ?n ?t ?g ?w ?m ?p
+                  (setq avy-keys '(?e ?h ?a ?o ?v ?r
+                    ?s ?g ?w ?p
                     ?c ?f ?d))
                 '';
               };
