@@ -1203,16 +1203,10 @@ with lib; {
 
                                     ("jdtls"
                                     "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
-                                    :initializationOptions
-                                        (:settings
-                                              (:java
-                                              (:autoBuild (:enabled t)
-                                               :import  (:maven (:enabled t))
-                                               :configuration
-                                               (:updateBuildConfiguration "automatic"
 
-                                               )
-                                               )))
+
+
+
                                       ))
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
