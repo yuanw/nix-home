@@ -738,7 +738,6 @@ with lib; {
                   (global-corfu-mode)
                 '';
               };
-
               consult = {
                 enable = true;
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
@@ -829,7 +828,7 @@ with lib; {
               };
               embark-consult = {
                 enable = true;
-                hook = [ "(embark-collect-mode . consult-preview-at-point-mode)" ];
+                after = [ "consult" "embark" ];
               };
 
               which-key = {
