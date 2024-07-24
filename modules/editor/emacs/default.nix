@@ -826,9 +826,10 @@ with lib; {
                         xref-show-xrefs-function #'consult-xref)
                 '';
               };
+              # embark act then press C
               embark-consult = {
                 enable = true;
-                after = [ "consult" "embark" ];
+                hook = [ "(embark-collect-mode . consult-preview-at-point-mode)" ];
               };
 
               which-key = {
