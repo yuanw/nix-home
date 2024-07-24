@@ -720,7 +720,6 @@ with lib; {
                 '';
               };
 
-
               corfu = {
                 enable = cfg.lspStyle != "lsp-bridge";
                 extraConfig = ''
@@ -823,7 +822,7 @@ with lib; {
               consult-xref = {
                 enable = true;
                 command = [ "consult-xref" ];
-                init = ''
+                config = ''
                   (setq xref-show-definitions-function #'consult-xref
                         xref-show-xrefs-function #'consult-xref)
                 '';
