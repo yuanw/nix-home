@@ -49,6 +49,7 @@
         "mysql-shell"
         "viscosity"
         "vial"
+        "brave-browser"
       ];
       brews = [
         "redis"
