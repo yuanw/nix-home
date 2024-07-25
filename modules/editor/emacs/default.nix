@@ -64,11 +64,10 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [
     {
 
-      # services.emacs = {
-      #   enable = cfg.enableService;
-      #   additionalPath = [ "${config.my.homeDirectory}" ];
-      #   package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-      # };
+      services.emacs = {
+        enable = cfg.enableService;
+        package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+      };
 
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
@@ -208,8 +207,6 @@ with lib; {
 
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
-
-
             '';
 
             postlude = ''
@@ -228,7 +225,7 @@ with lib; {
                 '';
               };
               exec-path-from-shell = {
-                enable = false;
+                enable = true;
                 extraConfig = ":when (daemonp)";
                 config = "(exec-path-from-shell-initialize)";
               };
@@ -1083,15 +1080,18 @@ with lib; {
                   (add-to-list 'flycheck-checkers 'vale 'append)
                 '';
               };
+
               jinx = {
                 enable = true;
                 diminish = [ "jinx-mode" ];
-                defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
                   "M-$" = "jinx-correct";
                   "C-M-$" = "jinx-languages ";
                 };
+                config = ''
+                  (setq jinx-languages "en_CA")
+                '';
               };
 
               yaml-ts-mode = {
