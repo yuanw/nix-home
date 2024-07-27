@@ -225,8 +225,7 @@ with lib; {
                 '';
               };
               exec-path-from-shell = {
-                enable = true;
-                # extraConfig = ":when (daemonp)";
+                enable = cfg.enableService;
                 config = "(exec-path-from-shell-initialize)";
               };
 
