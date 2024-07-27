@@ -152,7 +152,8 @@ with lib; {
               ;; Stop creating backup and autosave files.
               (setq make-backup-files nil
                     auto-save-default nil)
-
+                    (when (string= system-type "darwin")
+                    (setp dired-use-ls-dired nil))
               ;; Default is 4k, which is too low for LSP.
               (setq read-process-output-max (* 1024 1024))
 
