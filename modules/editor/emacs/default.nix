@@ -67,8 +67,10 @@ with lib; {
       services.emacs = {
         enable = cfg.enableService;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+        additionalPath = [
+          config.my.homeDirectory
+        ];
       };
-
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -152,8 +154,8 @@ with lib; {
               ;; Stop creating backup and autosave files.
               (setq make-backup-files nil
                     auto-save-default nil)
-                    (when (string= system-type "darwin")
-                    (setp dired-use-ls-dired nil))
+                   
+                   
               ;; Default is 4k, which is too low for LSP.
               (setq read-process-output-max (* 1024 1024))
 
@@ -479,7 +481,7 @@ with lib; {
                 command = [ "dired" "dired-jump" ];
                 config = ''
                   (put 'dired-find-alternate-file 'disabled nil)
-
+                  (setq dire-use-ls-dired nil)
                   ;; Be smart about choosing file targets.
                   (setq dired-dwim-target t)
 
