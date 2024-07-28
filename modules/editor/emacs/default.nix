@@ -68,7 +68,7 @@ with lib; {
         enable = cfg.enableService;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
         additionalPath = [
-          config.my.homeDirectory
+          "${config.my.homeDirectory}./nix-profile/bin"
         ];
       };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
