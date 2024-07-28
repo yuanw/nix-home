@@ -226,7 +226,17 @@ with lib; {
               };
               exec-path-from-shell = {
                 enable = cfg.enableService;
-                config = "(exec-path-from-shell-initialize)";
+                demand = true;
+                config = ''
+                             (setq exec-path-from-shell-variables "PATH" "SHELL"
+                             "NIX_PATH"
+                                    "NIX_PROFILES"
+                  "NIX_REMOTE"
+                  "NIX_SSL_CERT_FILE"
+                  "NIX_USER_PROFILE_DIR"
+                             )
+                           (exec-path-from-shell-initialize)
+                '';
               };
 
               gcmh = {
