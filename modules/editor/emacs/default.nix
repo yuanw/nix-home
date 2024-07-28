@@ -236,6 +236,7 @@ with lib; {
                   "NIX_SSL_CERT_FILE"
                   "NIX_USER_PROFILE_DIR"
                   ))
+                  (setq exec-path-from-shell-shell-name "/bin/zsh")
                   (setq exec-path-from-shell-debug t)
                   (exec-path-from-shell-initialize)
                 '';
