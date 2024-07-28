@@ -481,7 +481,7 @@ with lib; {
                 command = [ "dired" "dired-jump" ];
                 config = ''
                   (put 'dired-find-alternate-file 'disabled nil)
-                  (setq dire-use-ls-dired nil)
+                  (setq dired-use-ls-dired nil)
                   ;; Be smart about choosing file targets.
                   (setq dired-dwim-target t)
 
@@ -1160,13 +1160,16 @@ with lib; {
               };
 
               direnv = {
-                enable = true;
+                enable = false;
                 config = ''
                   (direnv-mode)
                 '';
               };
               envrc = {
-                enable = false;
+                enable = true;
+                config = ''
+
+                '';
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
