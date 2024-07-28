@@ -228,14 +228,16 @@ with lib; {
                 enable = cfg.enableService;
                 demand = true;
                 config = ''
-                             (setq exec-path-from-shell-variables "PATH" "SHELL"
+                  (setq exec-path-from-shell-variables
+                  '("PATH" "SHELL"
                              "NIX_PATH"
                                     "NIX_PROFILES"
                   "NIX_REMOTE"
                   "NIX_SSL_CERT_FILE"
                   "NIX_USER_PROFILE_DIR"
-                             )
-                           (exec-path-from-shell-initialize)
+                  ))
+                  (setq exec-path-from-shell-debug t)
+                  (exec-path-from-shell-initialize)
                 '';
               };
 
