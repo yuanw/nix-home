@@ -68,6 +68,7 @@ with lib; {
         enable = cfg.enableService;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
         additionalPath = [
+          "${config.my.homeDirectory}"
           "${config.my.homeDirectory}./nix-profile/bin"
         ];
       };
@@ -1160,15 +1161,14 @@ with lib; {
               };
 
               direnv = {
-                enable = false;
+                enable = true;
                 config = ''
                   (direnv-mode)
                 '';
               };
               envrc = {
-                enable = true;
+                enable = false;
                 config = ''
-
                 '';
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
