@@ -1700,7 +1700,7 @@ with lib; {
           ProgramArguments =
             [
               "${pkgs.alacritty}/bin/alacritty"
-              "-e ${services.emacs.package}/bin/emacs"
+              "-e ${config.services.emacs.package}/bin/emacs"
               "--fg-daemon"
             ];
           StandardOutPath = "/tmp/emacs.log";
