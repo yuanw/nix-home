@@ -65,7 +65,7 @@ with lib; {
     {
 
       services.emacs = {
-        enable = true;
+        enable = false;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
@@ -1695,7 +1695,8 @@ with lib; {
 
 
     (if (isDarwin) then {
-      launchd.user.agents.emacs = {
+      launchd.user.agents.my-emacs = {
+        path = [ config.environment.systemPath ];
         serviceConfig = {
           ProgramArguments =
             [
@@ -1703,6 +1704,7 @@ with lib; {
               "-e ${config.services.emacs.package}/bin/emacs"
               "--fg-daemon"
             ];
+          RunAtLoad = true;
           StandardOutPath = "/tmp/emacs.log";
           StandardErrorPath = "/tmp/emacs.log";
         };
