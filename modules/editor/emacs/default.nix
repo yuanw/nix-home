@@ -1704,6 +1704,8 @@ with lib; {
         serviceConfig = {
           ProgramArguments =
             [
+              "${config.programs.alacritty.package}/bin/alacritty"
+              "-e"
               "${config.services.emacs.package}/bin/emacs"
               "--fg-daemon"
             ];
