@@ -1704,7 +1704,7 @@ with lib; {
         serviceConfig = {
           ProgramArguments =
             [
-              "emacs"
+              "${config.services.emacs.package}/bin/emacs"
               "--fg-daemon"
             ];
           RunAtLoad = true;
