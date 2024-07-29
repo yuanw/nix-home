@@ -214,6 +214,7 @@ with lib; {
               (global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
               (keycast-mode-line-mode)
+              (server-start)
             '';
 
             usePackage = {
