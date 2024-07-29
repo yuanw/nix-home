@@ -1696,9 +1696,17 @@ with lib; {
 
     (if (builtins.hasAttr "launchd" options) then {
 
-      launchd.user.agents.emacs.serviceConfig = {
-        StandardOutPath = "/tmp/emacs.log";
-        StandardErrorPath = "/tmp/emacs.log";
+      launchd.user.agents.emacs = {
+        serviceConfig = {
+          ProgramArguments =
+            [
+              "${pkgs.alcritty}/bin/alcritty"
+              "-e ${config.home-manager.users.config.my.username.programs.emacs.finalPackage}/bin/emacs"
+              "--fg-daemon"
+            ];
+          StandardOutPath = "/tmp/emacs.log";
+          StandardErrorPath = "/tmp/emacs.log";
+        };
       };
     } else
       { })
