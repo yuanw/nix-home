@@ -1692,29 +1692,5 @@ with lib; {
     {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
     }
-
-
-    (if (isDarwin) then {
-      launchd.user.agents.my-emacs = {
-        path = [
-          config.environment.systemPath
-          pkgs.alacritty
-          config.services.emacs.package
-        ];
-        serviceConfig = {
-          ProgramArguments =
-            [
-              "${pkgs.alacritty}/bin/alacritty"
-              "-e"
-              "${config.services.emacs.package}/bin/emacs"
-              "--fg-daemon"
-            ];
-          RunAtLoad = true;
-          StandardOutPath = "/tmp/emacs.log";
-          StandardErrorPath = "/tmp/emacs.log";
-        };
-      };
-    } else
-      { })
   ]);
 }
