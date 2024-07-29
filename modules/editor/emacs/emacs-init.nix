@@ -128,6 +128,15 @@ let
         '';
       };
 
+      custom = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = ''
+          The entries to use for <option>:custom</option>.
+        '';
+
+      };
+
       command = mkOption {
         type = types.listOf types.str;
         default = [ ];
@@ -205,6 +214,7 @@ let
               ++ mapAttrsToList (n: v: "  (${quoted n} . ${v})") bs ++ [ ")" ]);
 
           mkAfter = vs: optional (vs != [ ]) ":after (${toString vs})";
+          mkCustom = vs: optional (vs != [ ]) ":custom (${toString vs})";
           mkCommand = vs: optional (vs != [ ]) ":commands (${toString vs})";
           mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
           mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
@@ -228,7 +238,9 @@ let
           ([ "(use-package ${name}" ]
           ++ mkAfter config.after ++ mkBind config.bind
           ++ mkBindKeyMap config.bindKeyMap ++ mkBindLocal config.bindLocal
-          ++ mkChords config.chords ++ mkCommand config.command
+          ++ mkChords config.chords
+          ++ mkCustom config.custom
+          ++ mkCommand config.command
           ++ mkDefer config.defer ++ mkDefines config.defines
           ++ mkFunctions config.functions ++ mkDemand config.demand
           ++ mkDiminish config.diminish ++ mkHook config.hook
