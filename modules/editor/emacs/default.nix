@@ -1706,7 +1706,8 @@ with lib; {
             [
               "alacritty"
               "-e"
-              "emacs --fg-daemon"
+              "emacs"
+              "--fg-daemon"
             ];
           RunAtLoad = true;
           StandardOutPath = "/tmp/emacs.log";
