@@ -197,49 +197,47 @@ let
     };
 
     config = mkIf config.enable {
-      assembly = let
-        quoted = v: ''"${escape [ ''"'' ] v}"'';
-        mkBindHelper = cmd: prefix: bs:
-          optionals (bs != { }) ([ ":${cmd} (${prefix}" ]
-            ++ mapAttrsToList (n: v: "  (${quoted n} . ${v})") bs ++ [ ")" ]);
+      assembly =
+        let
+          quoted = v: ''"${escape [ ''"'' ] v}"'';
+          mkBindHelper = cmd: prefix: bs:
+            optionals (bs != { }) ([ ":${cmd} (${prefix}" ]
+              ++ mapAttrsToList (n: v: "  (${quoted n} . ${v})") bs ++ [ ")" ]);
 
-        mkAfter = vs: optional (vs != [ ]) ":after (${toString vs})";
-        mkCommand = vs: optional (vs != [ ]) ":commands (${toString vs})";
-        mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
-        mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
-        mkMode = map (v: ":mode ${v}");
-        mkFunctions = vs: optional (vs != [ ]) ":functions (${toString vs})";
-        mkBind = mkBindHelper "bind" "";
-        mkBindLocal = bs:
-          let mkMap = n: v: mkBindHelper "bind" ":map ${n}" v;
-          in flatten (mapAttrsToList mkMap bs);
-        mkBindKeyMap = mkBindHelper "bind-keymap" "";
-        mkChords = mkBindHelper "chords" "";
-        mkHook = map (v: ":hook ${v}");
-        mkDefer = v:
-          if isBool v then
-            optional v ":defer t"
-          else
-            [ ":defer ${toString v}" ];
-        mkDemand = v: optional v ":demand t";
-      in concatStringsSep "\n  " ([ "(use-package ${name}" ]
-        ++ mkAfter config.after ++ mkBind config.bind
-        ++ mkBindKeyMap config.bindKeyMap ++ mkBindLocal config.bindLocal
-        ++ mkChords config.chords ++ mkCommand config.command
-        ++ mkDefer config.defer ++ mkDefines config.defines
-        ++ mkFunctions config.functions ++ mkDemand config.demand
-        ++ mkDiminish config.diminish ++ mkHook config.hook
-        ++ mkMode config.mode
-        ++ optionals (config.init != "") [ ":init" config.init ]
-        ++ optionals (config.config != "") [ ":config" config.config ]
-        ++ optional (config.extraConfig != "") config.extraConfig) + ")";
+          mkAfter = vs: optional (vs != [ ]) ":after (${toString vs})";
+          mkCommand = vs: optional (vs != [ ]) ":commands (${toString vs})";
+          mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
+          mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
+          mkMode = map (v: ":mode ${v}");
+          mkFunctions = vs: optional (vs != [ ]) ":functions (${toString vs})";
+          mkBind = mkBindHelper "bind" "";
+          mkBindLocal = bs:
+            let mkMap = n: v: mkBindHelper "bind" ":map ${n}" v;
+            in flatten (mapAttrsToList mkMap bs);
+          mkBindKeyMap = mkBindHelper "bind-keymap" "";
+          mkChords = mkBindHelper "chords" "";
+          mkHook = map (v: ":hook ${v}");
+          mkDefer = v:
+            if isBool v then
+              optional v ":defer t"
+            else
+              [ ":defer ${toString v}" ];
+          mkDemand = v: optional v ":demand t";
+        in
+        concatStringsSep "\n  "
+          ([ "(use-package ${name}" ]
+          ++ mkAfter config.after ++ mkBind config.bind
+          ++ mkBindKeyMap config.bindKeyMap ++ mkBindLocal config.bindLocal
+          ++ mkChords config.chords ++ mkCommand config.command
+          ++ mkDefer config.defer ++ mkDefines config.defines
+          ++ mkFunctions config.functions ++ mkDemand config.demand
+          ++ mkDiminish config.diminish ++ mkHook config.hook
+          ++ mkMode config.mode
+          ++ optionals (config.init != "") [ ":init" config.init ]
+          ++ optionals (config.config != "") [ ":config" config.config ]
+          ++ optional (config.extraConfig != "") config.extraConfig) + ")";
     };
   });
-
-  usePackageStr = name: pkgConfStr: ''
-    (use-package ${name}
-      ${pkgConfStr})
-  '';
 
   mkRecommendedOption = type: extraDescription:
     mkOption {
@@ -368,7 +366,8 @@ let
       ;; hm-init.el ends here
     '';
 
-in {
+in
+{
   imports = [ ./emacs-init-defaults.nix ];
 
   options.programs.emacs.init = {
@@ -449,27 +448,29 @@ in {
     home.packages = concatMap (v: v.extraPackages)
       (filter (getAttr "enable") (builtins.attrValues cfg.usePackage));
 
-    programs.emacs.init.earlyInit = let
+    programs.emacs.init.earlyInit =
+      let
 
-      standardEarlyInit = mkBefore ''
-        ${optionalString cfg.recommendedGcSettings gcSettings}
+        standardEarlyInit = mkBefore ''
+          ${optionalString cfg.recommendedGcSettings gcSettings}
 
-        ${if cfg.packageQuickstart then ''
-          (setq package-quickstart t
-                package-quickstart-file "hm-package-quickstart.el")
-        '' else ''
-          (setq package-enable-at-startup nil)
-        ''}
+          ${if cfg.packageQuickstart then ''
+            (setq package-quickstart t
+                  package-quickstart-file "hm-package-quickstart.el")
+          '' else ''
+            (setq package-enable-at-startup nil)
+          ''}
 
-        ;; Avoid expensive frame resizing. Inspired by Doom Emacs.
-        (setq frame-inhibit-implied-resize t)
-      '';
+          ;; Avoid expensive frame resizing. Inspired by Doom Emacs.
+          (setq frame-inhibit-implied-resize t)
+        '';
 
-      # Collect the early initialization strings for each package.
-      packageEarlyInits = map (p: p.earlyInit)
-        (filter (p: p.earlyInit != "") (builtins.attrValues cfg.usePackage));
+        # Collect the early initialization strings for each package.
+        packageEarlyInits = map (p: p.earlyInit)
+          (filter (p: p.earlyInit != "") (builtins.attrValues cfg.usePackage));
 
-    in mkMerge ([ standardEarlyInit ] ++ packageEarlyInits);
+      in
+      mkMerge ([ standardEarlyInit ] ++ packageEarlyInits);
 
     programs.emacs.extraPackages = epkgs:
       let
@@ -481,7 +482,8 @@ in {
 
         packages = concatMap (v: getPkg (v.package))
           (filter (getAttr "enable") (builtins.attrValues cfg.usePackage));
-      in [
+      in
+      [
         (epkgs.trivialBuild {
           pname = "hm-early-init";
           src = pkgs.writeText "hm-early-init.el" earlyInitFile;
