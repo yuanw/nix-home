@@ -1694,8 +1694,7 @@ with lib; {
     }
 
 
-    (if (builtins.hasAttr "launchd" options) then {
-
+    (if (isDarwin) then {
       launchd.user.agents.emacs = {
         serviceConfig = {
           ProgramArguments =
