@@ -1696,11 +1696,15 @@ with lib; {
 
     (if (isDarwin) then {
       launchd.user.agents.my-emacs = {
-        path = [ config.environment.systemPath ];
+        path = [
+          config.environment.systemPath
+          pkgs.alacritty
+          config.services.emacs.package
+        ];
         serviceConfig = {
           ProgramArguments =
             [
-              "${pkgs.alacritty}/bin/alacritty -e ${config.services.emacs.package}/bin/emacs --fg-daemon"
+              "alacritty -e emacs --fg-daemon"
             ];
           RunAtLoad = true;
           StandardOutPath = "/tmp/emacs.log";
