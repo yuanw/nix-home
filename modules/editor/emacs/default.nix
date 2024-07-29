@@ -4,7 +4,7 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{ config, lib, pkgs, inputs, isDarwin, nurNoPkg, ... }:
+{ config, lib, pkgs, inputs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
   # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
@@ -75,7 +75,7 @@ with lib; {
       home-manager.users.${config.my.username} = { pkgs, ... }:
         {
           imports = [
-            nurNoPkg.repos.rycee.hmModules.emacs-init
+            ./emacs-init.nix
           ];
 
           programs.emacs.extraPackages = epkgs:
@@ -86,10 +86,7 @@ with lib; {
                 pname = "prot-common";
                 version = "0.0.1";
                 src = ./packages/prot-common.el;
-
-              }
-              )
-
+              })
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
