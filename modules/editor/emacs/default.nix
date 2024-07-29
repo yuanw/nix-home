@@ -1699,7 +1699,7 @@ with lib; {
         serviceConfig = {
           ProgramArguments =
             [
-              "${pkgs.alcritty}/bin/alcritty"
+              "${pkgs.alacritty}/bin/alacritty"
               "-e ${config.home-manager.users.config.my.username.programs.emacs.finalPackage}/bin/emacs"
               "--fg-daemon"
             ];
