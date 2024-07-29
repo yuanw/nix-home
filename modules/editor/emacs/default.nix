@@ -1704,7 +1704,9 @@ with lib; {
         serviceConfig = {
           ProgramArguments =
             [
-              "alacritty -e emacs --fg-daemon"
+              "alacritty"
+              "-e"
+              "emacs --fg-daemon"
             ];
           RunAtLoad = true;
           StandardOutPath = "/tmp/emacs.log";
