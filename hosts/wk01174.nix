@@ -50,6 +50,7 @@
         "viscosity"
         "vial"
         "brave-browser"
+        "launchcontrol"
       ];
       brews = [
         "redis"
