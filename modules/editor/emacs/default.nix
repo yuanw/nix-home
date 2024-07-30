@@ -63,19 +63,8 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-      launchd.agents = {
-        # derived from https://www.emacswiki.org/emacs/EmacsAsDaemon#h5o-8
-        emacs = {
-          config = {
-            Label = "gnu.emacs.daemon";
-            ProgramArguments = [ "emacs" "--daemon" ];
-            RunAtLoad = true;
-          };
-          enable = true;
-        };
-      };
       services.emacs = {
-        enable = false;
+        enable = true;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
