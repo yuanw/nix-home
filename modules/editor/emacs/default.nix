@@ -63,7 +63,17 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-
+      launchd.agents = {
+        # derived from https://www.emacswiki.org/emacs/EmacsAsDaemon#h5o-8
+        "gnu.emacs.daemon" = {
+          config = {
+            Label = "gnu.emacs.daemon";
+            ProgramArguments = [ "emacs" "--daemon" ];
+            RunAtLoad = true;
+          };
+          enable = true;
+        };
+      };
       services.emacs = {
         enable = false;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
