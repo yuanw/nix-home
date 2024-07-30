@@ -499,7 +499,7 @@ in
         (epkgs.trivialBuild {
           pname = "hm-early-init";
           src = pkgs.writeText "hm-early-init.el" earlyInitFile;
-          version = "0.1.0";
+          version = "0.1.1";
           packageRequires = packages;
           preferLocalBuild = true;
           allowSubstitutes = false;
@@ -508,7 +508,7 @@ in
         (epkgs.trivialBuild {
           pname = "hm-init";
           src = pkgs.writeText "hm-init.el" initFile;
-          version = "0.1.0";
+          version = "0.1.1";
           packageRequires = [ epkgs.use-package ] ++ packages
             ++ optional hasBind epkgs.bind-key
             ++ optional hasDiminish epkgs.diminish
