@@ -64,10 +64,7 @@ with lib; {
   config = mkIf cfg.enable (mkMerge [
     {
       services.emacs = {
-        enable = true;
-        additionalPath = [
-          "${pkgs.direnv}/bin"
-        ];
+        enable = cfg.enableServices;
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
