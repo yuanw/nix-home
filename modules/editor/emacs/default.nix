@@ -383,7 +383,7 @@ with lib; {
               autorevert = {
                 enable = true;
                 custom = ''
-                  (auto-revert-use-notfiy nil)
+                  (auto-revert-use-notify nil)
                 '';
                 config = ''
                   (global-auto-revert-mode t)
