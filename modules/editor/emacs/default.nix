@@ -234,8 +234,7 @@ with lib; {
                 '';
               };
               exec-path-from-shell = {
-                enable = cfg.enableService;
-                demand = false;
+                enable = false;
                 config = ''
                   (setq exec-path-from-shell-variables
                   '("PATH" "SHELL"
@@ -384,8 +383,10 @@ with lib; {
               autorevert = {
                 enable = true;
                 hook = [ "(dired-mode . auto-revert-mode)" ];
+                custom = ''
+                  (auto-revert-use-notfiy nil)
+                '';
                 config = ''
-                  (setq auto-revert-use-notfiy nil)
                   (global-auto-revert-mode t)
                 '';
               };
@@ -449,6 +450,10 @@ with lib; {
 
               recentf = {
                 enable = true;
+                demand = true;
+                custom = ''
+                  (recentf-auto-cleanup 60)
+                '';
                 command = [
                   "recentf-mode"
                   "recentf-add-file"
