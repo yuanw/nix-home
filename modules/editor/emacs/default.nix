@@ -65,7 +65,7 @@ with lib; {
     {
       launchd.agents = {
         # derived from https://www.emacswiki.org/emacs/EmacsAsDaemon#h5o-8
-        "gnu.emacs.daemon" = {
+        emacs = {
           config = {
             Label = "gnu.emacs.daemon";
             ProgramArguments = [ "emacs" "--daemon" ];
