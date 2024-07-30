@@ -129,7 +129,7 @@ let
       };
 
       custom = mkOption {
-        type = types.listOf types.str;
+        type = types.either types.str (types.listOf types.str);
         default = [ ];
         description = ''
           The entries to use for <option>:custom</option>.
