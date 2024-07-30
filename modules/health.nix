@@ -9,7 +9,7 @@ in
 
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
-      path = [ inputs'.mono-strecthly-darwin.packages.default ];
+      path = [ inputs'.mono-stretchly-darwin.packages.default ];
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
         StandardErrorPath = "/tmp/strecthly.log";
