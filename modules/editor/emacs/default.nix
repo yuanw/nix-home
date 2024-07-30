@@ -382,7 +382,6 @@ with lib; {
               };
               autorevert = {
                 enable = true;
-                hook = [ "(dired-mode . auto-revert-mode)" ];
                 custom = ''
                   (auto-revert-use-notfiy nil)
                 '';
