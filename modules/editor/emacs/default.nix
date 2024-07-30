@@ -65,6 +65,9 @@ with lib; {
     {
       services.emacs = {
         enable = true;
+        additionalPath = [
+          "${pkgs.direnv}/bin"
+        ];
         package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
       };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
@@ -219,7 +222,7 @@ with lib; {
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
-              (global-unset-key "\C-x\C-c")
+              ;;(global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
               (keycast-mode-line-mode)
               (server-start)
