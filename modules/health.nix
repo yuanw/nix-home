@@ -2,7 +2,6 @@
 
 with lib;
 let
-  homeDir = config.my.homeDirectory;
   cfg = config.modules.health;
 in
 {
@@ -10,7 +9,7 @@ in
 
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
-      # path = [ config.environment.systemPath ];
+      path = [ inputs'.mono-strecthly-darwin.packages.default ];
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
         StandardErrorPath = "/tmp/strecthly.log";
@@ -19,9 +18,6 @@ in
             "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
           ];
         RunAtLoad = true;
-        EnvironmentVariables = {
-          PATH = "${config.environment.systemPath}:${homeDir}/.nix-profile/bin";
-        };
         # in secs
         StartInterval = 900;
       };

@@ -212,11 +212,9 @@ in
       launchd.user.agents.jankyborders = {
         path = [
           pkgs.janky-borders
-
         ];
         serviceConfig = {
           ProgramArguments = [ "${pkgs.janky-borders}/bin/borders" ];
-
           KeepAlive = true;
           RunAtLoad = true;
           StandardOutPath = "/tmp/borders.log";
