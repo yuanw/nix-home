@@ -129,8 +129,8 @@ let
       };
 
       custom = mkOption {
-        type = types.either types.str (types.listOf types.str);
-        default = [ ];
+        type = types.lines;
+        default = "";
         description = ''
           The entries to use for <option>:custom</option>.
         '';
@@ -214,7 +214,7 @@ let
               ++ mapAttrsToList (n: v: "  (${quoted n} . ${v})") bs ++ [ ")" ]);
 
           mkAfter = vs: optional (vs != [ ]) ":after (${toString vs})";
-          mkCustom = vs: optional (vs != [ ]) ":custom (${toString vs})";
+          mkCustom = vs: optional (vs != "") ":custom ${toString vs}";
           mkCommand = vs: optional (vs != [ ]) ":commands (${toString vs})";
           mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
           mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
