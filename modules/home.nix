@@ -13,7 +13,11 @@
     (import ./macos_packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isLinux
     (import ./linux_packages.nix { inherit pkgs; });
-
+    home.sessionPath = [
+      "/usr/local/bin"
+      "/usr/local/sbin"
+      "${config.my.homeDirectory}/.local/bin"
+    ];
   xdg = {
     enable = true;
     configFile = {
@@ -213,7 +217,7 @@
             setopt HIST_NO_STORE         # Don't store history commands
             setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.i
 
-              export PATH=$PATH:/usr/local/bin:/usr/local/sbin/:$HOME/.local/bin
+
 
           ''
         else

@@ -21,10 +21,12 @@ in {
         pkgs.terraform-ls
         # pkgs.podman
       ];
+      home.sessionPath = [
+        "${homeDir}/go/bin"
+      ];
       programs.zsh = {
         profileExtra = mkAfter ''
                     [[ -s "${homeDir}/.wk/profile" ]] && source "${homeDir}/.wk/profile"
-                    export PATH=$PATH:$HOME/go/bin
 
                     function scan-image {
                        trivy image $1 --scanners vuln
