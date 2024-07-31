@@ -34,7 +34,6 @@ let
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib; {
-
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -64,10 +63,7 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-
-
-
-      launchd.user.agents.emacs.path = [ config.environment.systemPath ];
+      launchd.user.agents.emacs.path = [ config.environment.systemPath "${config.my.homeDirectory}/.nix-profile/bin" ];
       launchd.user.agents.emacs.serviceConfig = {
         KeepAlive = true;
         ProgramArguments = [
