@@ -67,7 +67,7 @@ with lib; {
       launchd.user.agents.emacs.serviceConfig = {
         KeepAlive = true;
         ProgramArguments = [
-          "/bin/sh"
+          "/bin/zsh"
           "-c"
           "{ osascript -e 'display notification \"Attempting to start Emacs...\" with title \"Emacs Launch\"'; /bin/wait4path ${emacsPackage}/bin/emacs && { ${emacsPackage}/bin/emacs --fg-daemon; if [ $? -eq 0 ]; then osascript -e 'display notification \"Emacs has started.\" with title \"Emacs Launch\"'; else osascript -e 'display notification \"Failed to start Emacs.\" with title \"Emacs Launch\"' >&2; fi; } } &> /tmp/emacs_launch.log"
         ];
