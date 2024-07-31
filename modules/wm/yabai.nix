@@ -220,8 +220,6 @@ in
           StandardOutPath = "/tmp/borders.log";
           StandardErrorPath = "/tmp/borders.log";
         };
-
-
       };
     }
     )

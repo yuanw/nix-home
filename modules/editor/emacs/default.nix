@@ -62,8 +62,12 @@ with lib; {
   };
 
   config = mkIf cfg.enable (mkMerge [
-    {
-      launchd.user.agents.emacs.path = [ config.environment.systemPath "${config.my.homeDirectory}/.nix-profile/bin" ];
+    (mkIf (isDarwin && cfg.enableService) {
+      launchd.user.agents.emacs.path = [
+        config.environment.systemPath
+        "${config.my.homeDirectory}/.nix-profile/bin"
+      ];
+
       launchd.user.agents.emacs.serviceConfig = {
         KeepAlive = true;
         ProgramArguments = [
@@ -74,7 +78,11 @@ with lib; {
         StandardErrorPath = "/tmp/emacs.err.log";
         StandardOutPath = "/tmp/emacs.out.log";
       };
+    })
 
+
+    {
+      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
       # services.emacs = {
       #   enable = cfg.enableService;
       #   package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
@@ -222,11 +230,11 @@ with lib; {
               ;;        try moving it up to see where it’s disappearing and fix that issue
               ;;        (and hopefully not have to explicitly set the PATH at all at some
               ;;        point …).
-              (setenv
-               "PATH"
-               (string-trim-right
-                (shell-command-to-string
-                 "source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh && echo $PATH")))
+              ;;   (setenv
+              ;; "PATH"
+              ;; (string-trim-right
+              ;;  (shell-command-to-string
+              ;;   "source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh && echo $PATH")))
             '';
 
             postlude = ''
@@ -234,7 +242,7 @@ with lib; {
               ;;(global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
               (keycast-mode-line-mode)
-              (server-start)
+              ;;(server-start)
             '';
 
             usePackage = {
@@ -246,7 +254,7 @@ with lib; {
                 '';
               };
               exec-path-from-shell = {
-                enable = false;
+                enable = true;
                 config = ''
                   (setq exec-path-from-shell-variables
                   '("PATH" "SHELL"
@@ -1709,9 +1717,6 @@ with lib; {
 
           };
         };
-    }
-    {
-      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
     }
   ]);
 }
