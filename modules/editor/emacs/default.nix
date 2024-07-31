@@ -31,6 +31,7 @@ let
     { name = "proselint"; path = "${inputs.vale-proselint}/proselint"; }
     { name = "write-good"; path = "${inputs.vale-write-good}/write-good"; }
   ];
+  emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib; {
 
@@ -63,10 +64,25 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     {
-      services.emacs = {
-        enable = cfg.enableService;
-        package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+
+
+
+      launchd.user.agents.emacs.path = [ config.environment.systemPath ];
+      launchd.user.agents.emacs.serviceConfig = {
+        KeepAlive = true;
+        ProgramArguments = [
+          "/bin/sh"
+          "-c"
+          "{ osascript -e 'display notification \"Attempting to start Emacs...\" with title \"Emacs Launch\"'; /bin/wait4path ${emacsPackage}/bin/emacs && { ${emacsPackage}/bin/emacs --fg-daemon; if [ $? -eq 0 ]; then osascript -e 'display notification \"Emacs has started.\" with title \"Emacs Launch\"'; else osascript -e 'display notification \"Failed to start Emacs.\" with title \"Emacs Launch\"' >&2; fi; } } &> /tmp/emacs_launch.log"
+        ];
+        StandardErrorPath = "/tmp/emacs.err.log";
+        StandardOutPath = "/tmp/emacs.out.log";
       };
+
+      # services.emacs = {
+      #   enable = cfg.enableService;
+      #   package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+      # };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -1697,9 +1713,6 @@ with lib; {
 
           };
         };
-
-
-
     }
     {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
