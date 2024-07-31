@@ -255,7 +255,7 @@ with lib; {
                 '';
               };
               exec-path-from-shell = {
-                enable = true;
+                enable = false;
                 config = ''
                   (setq exec-path-from-shell-variables
                   '("PATH" "SHELL"
