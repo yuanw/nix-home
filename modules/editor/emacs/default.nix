@@ -63,6 +63,7 @@ with lib; {
 
   config = mkIf cfg.enable (mkMerge [
     (mkIf (isDarwin && cfg.enableService) {
+      ## https://github.com/dustinlyons/nixos-config/blob/2bb69193da51364040495bc2aaffef8334001d0c/hosts/darwin/default.nix#L40
       launchd.user.agents.emacs.path = [
         config.environment.systemPath
         "${config.my.homeDirectory}/.nix-profile/bin"
