@@ -263,6 +263,11 @@ with lib; {
 
               emacs-everywhere = {
                 enable = true;
+                custom = ''
+                  (emacs-everywhere--dir
+                           (locate-user-emacs-file "everywhere")
+                  )
+                '';
               };
 
               god-mode = {
