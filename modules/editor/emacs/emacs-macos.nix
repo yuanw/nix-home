@@ -3,7 +3,7 @@ let
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib; {
-  config = mkIf config.modules.editor.emacs.enableService {
+  config = mkIf config.modules.editors.emacs.enableService {
     launchd.user.agents.emacs.path = [
       config.environment.systemPath
       "${config.my.homeDirectory}/.nix-profile/bin"
