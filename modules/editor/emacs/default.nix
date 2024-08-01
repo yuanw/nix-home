@@ -4,7 +4,7 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{ config, lib, pkgs, inputs, isDarwin, nurNoPkg, ... }:
+{ config, lib, pkgs, inputs, isDarwin, ... }:
 let
   cfg = config.modules.editors.emacs;
   # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
@@ -31,9 +31,9 @@ let
     { name = "proselint"; path = "${inputs.vale-proselint}/proselint"; }
     { name = "write-good"; path = "${inputs.vale-write-good}/write-good"; }
   ];
+  emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib; {
-
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -62,14 +62,36 @@ with lib; {
   };
 
   config = mkIf cfg.enable (mkMerge [
+    (mkIf (isDarwin && cfg.enableService) {
+      ## https://github.com/dustinlyons/nixos-config/blob/2bb69193da51364040495bc2aaffef8334001d0c/hosts/darwin/default.nix#L40
+      launchd.user.agents.emacs.path = [
+        config.environment.systemPath
+        "${config.my.homeDirectory}/.nix-profile/bin"
+      ];
+
+      launchd.user.agents.emacs.serviceConfig = {
+        KeepAlive = true;
+        ProgramArguments = [
+          "/bin/zsh"
+          "-c"
+          "{ osascript -e 'display notification \"Attempting to start Emacs...\" with title \"Emacs Launch\"'; /bin/wait4path ${emacsPackage}/bin/emacs && { ${emacsPackage}/bin/emacs --fg-daemon; if [ $? -eq 0 ]; then osascript -e 'display notification \"Emacs has started.\" with title \"Emacs Launch\"'; else osascript -e 'display notification \"Failed to start Emacs.\" with title \"Emacs Launch\"' >&2; fi; } } &> /tmp/emacs.log"
+        ];
+        StandardErrorPath = "/tmp/emacs.log";
+        StandardOutPath = "/tmp/emacs.log";
+      };
+    })
+
+    (mkIf (!isDarwin) {
+      services.emacs = {
+        enable = cfg.enableService;
+        package = emacsPackage;
+      };
+
+    })
+
+
     {
-
-      # services.emacs = {
-      #   enable = cfg.enableService;
-      #   additionalPath = [ "${config.my.homeDirectory}" ];
-      #   package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-      # };
-
+      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -77,7 +99,7 @@ with lib; {
       home-manager.users.${config.my.username} = { pkgs, ... }:
         {
           imports = [
-            nurNoPkg.repos.rycee.hmModules.emacs-init
+            ./emacs-init.nix
           ];
 
           programs.emacs.extraPackages = epkgs:
@@ -88,10 +110,7 @@ with lib; {
                 pname = "prot-common";
                 version = "0.0.1";
                 src = ./packages/prot-common.el;
-
-              }
-              )
-
+              })
             ];
           programs.emacs.package = emacsPatched;
           programs.emacs.enable = true;
@@ -153,7 +172,8 @@ with lib; {
               ;; Stop creating backup and autosave files.
               (setq make-backup-files nil
                     auto-save-default nil)
-
+                   
+                   
               ;; Default is 4k, which is too low for LSP.
               (setq read-process-output-max (* 1024 1024))
 
@@ -208,15 +228,14 @@ with lib; {
 
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
-
-
             '';
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
-              (global-unset-key "\C-x\C-c")
+              ;;(global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
               (keycast-mode-line-mode)
+              ;;(server-start)
             '';
 
             usePackage = {
@@ -227,12 +246,6 @@ with lib; {
                   (global-disable-mouse-mode)
                 '';
               };
-              exec-path-from-shell = {
-                enable = false;
-                extraConfig = ":when (daemonp)";
-                config = "(exec-path-from-shell-initialize)";
-              };
-
               gcmh = {
                 enable = true;
                 defer = 1;
@@ -246,6 +259,31 @@ with lib; {
               browse-kill-ring = {
                 enable = true;
                 command = [ "browse-kill-ring" ];
+              };
+
+              emacs-everywhere = {
+                enable = true;
+                config = ''
+                  (setq emacs-everywhere--dir
+                           (locate-user-emacs-file "everywhere")
+                  )
+                '';
+              };
+
+              yequake = {
+                enable = true;
+                config = ''
+                  (add-to-list 'yequake-frames '("consult-omni-demo"
+                               (buffer-fns . #'consult-omni-multi)
+                               (width . 0.8)
+                               (height . 0.8)
+                               (top . 0)
+                               (frame-parameters . ((name . "yequake-demo")
+                                                    (minibuffer . t)
+                                                    (autoraise . t)
+                                                    (window-system . ns) ;;change accordingly
+                                                    ))))
+                '';
               };
 
               god-mode = {
@@ -365,9 +403,10 @@ with lib; {
               };
               autorevert = {
                 enable = true;
-                hook = [ "(dired-mode . auto-revert-mode)" ];
+                custom = ''
+                  (auto-revert-use-notify nil)
+                '';
                 config = ''
-                  (setq auto-revert-use-notfiy nil)
                   (global-auto-revert-mode t)
                 '';
               };
@@ -431,6 +470,10 @@ with lib; {
 
               recentf = {
                 enable = true;
+                demand = true;
+                custom = ''
+                  (recentf-auto-cleanup 60)
+                '';
                 command = [
                   "recentf-mode"
                   "recentf-add-file"
@@ -482,7 +525,7 @@ with lib; {
                 command = [ "dired" "dired-jump" ];
                 config = ''
                   (put 'dired-find-alternate-file 'disabled nil)
-
+                  (setq dired-use-ls-dired nil)
                   ;; Be smart about choosing file targets.
                   (setq dired-dwim-target t)
 
@@ -658,11 +701,11 @@ with lib; {
                   "M-g M-p" = "avy-goto-line-above";
                   "M-g M-n" = "avy-goto-line-below";
                   "M-g C-w" = "avy-kill-region";
-                  "M-g M-w" = "avy-kill-save-region";
+                  "M-g M-w" = "avy-kill-ring-save-region";
                 };
                 config = ''
-                  (setq avy-keys '(?e ?h ?a ?i ?o ?v ?r
-                    ?s ?n ?t ?g ?w ?m ?p
+                  (setq avy-keys '(?e ?h ?a ?o ?v ?r
+                    ?s ?g ?w ?p
                     ?c ?f ?d))
                 '';
               };
@@ -720,7 +763,6 @@ with lib; {
                 '';
               };
 
-
               corfu = {
                 enable = cfg.lspStyle != "lsp-bridge";
                 extraConfig = ''
@@ -739,7 +781,6 @@ with lib; {
                   (global-corfu-mode)
                 '';
               };
-
               consult = {
                 enable = true;
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
@@ -823,11 +864,12 @@ with lib; {
               consult-xref = {
                 enable = true;
                 command = [ "consult-xref" ];
-                init = ''
+                config = ''
                   (setq xref-show-definitions-function #'consult-xref
                         xref-show-xrefs-function #'consult-xref)
                 '';
               };
+              # embark act then press C
               embark-consult = {
                 enable = true;
                 hook = [ "(embark-collect-mode . consult-preview-at-point-mode)" ];
@@ -1084,15 +1126,18 @@ with lib; {
                   (add-to-list 'flycheck-checkers 'vale 'append)
                 '';
               };
+
               jinx = {
                 enable = true;
                 diminish = [ "jinx-mode" ];
-                defer = true;
                 hook = [ "(emacs-startup . global-jinx-mode)" ];
                 bind = {
                   "M-$" = "jinx-correct";
                   "C-M-$" = "jinx-languages ";
                 };
+                config = ''
+                  (setq jinx-languages "en_CA")
+                '';
               };
 
               yaml-ts-mode = {
@@ -1166,6 +1211,8 @@ with lib; {
               };
               envrc = {
                 enable = false;
+                config = ''
+                '';
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
@@ -1203,17 +1250,10 @@ with lib; {
 
                                     ("jdtls"
                                     "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
-                                    :initializationOptions
-                                        (:settings
-                                              (:java
-                                              (:autoBuild (:enabled t)
-                                               :import  (:maven (:enabled t))
-                                               :configuration
-                                               (:updateBuildConfiguration "automatic"
-                                                :runtimes [(:name "JavaSE-17" :path "${pkgs.jdk17}/zulu-17.jdk/Contents/Home")
-                                               (:name "JavaSE-21" :path "${pkgs.jdk21}/zulu-21.jdk/Contents/Home" :default t)
-                                               ])
-                                               )))
+
+
+
+
                                       ))
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
@@ -1678,22 +1718,6 @@ with lib; {
 
           };
         };
-
-
-
     }
-    {
-      fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
-    }
-
-
-    (if (builtins.hasAttr "launchd" options) then {
-
-      launchd.user.agents.emacs.serviceConfig = {
-        StandardOutPath = "/tmp/emacs.log";
-        StandardErrorPath = "/tmp/emacs.log";
-      };
-    } else
-      { })
   ]);
 }

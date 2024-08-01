@@ -27,6 +27,10 @@ in {
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [ cfg.package ];
+      home.sessionPath = [
+        "${config.my.homeDirectory}/.local/bin"
+        "${config.my.homeDirectory}/.pub-cache/bin"
+      ];
       programs.zsh = mkIf cfg.enableZshIntegration {
         sessionVariables = { DART_SDK = "${cfg.package}"; };
         shellAliases = {
@@ -38,7 +42,6 @@ in {
           repub = "pubclean; pub get";
         };
         initExtra = ''
-          export PATH=$PATH:$HOME/.local/bin:$HOME/.pub-cache/bin
 
           function dartUpgrade() {
                 pub cache repair

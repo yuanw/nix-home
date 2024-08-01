@@ -23,13 +23,12 @@ in {
       programs = {
         java = {
           package = cfg.pkg;
-          enable = true;
+          enable = false;
         };
         # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/development/libraries/java/lombok/default.nix#L26
         zsh = {
           sessionVariables = {
             LOMBOK_DIR = "${pkgs.lombok}/share/java";
-            GRADLE_USER_HOME = "${config.my.homeDirectory}/.gradle";
           };
         };
       };

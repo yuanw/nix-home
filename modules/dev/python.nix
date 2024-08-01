@@ -18,7 +18,6 @@ in {
           setuptools
           pylint
           matplotlib
-          nose
           # poetry
           pytest
           pyflakes
