@@ -8,22 +8,13 @@
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsclient =
-    if config.modules.editors.emacs.enableService then
-      "${pkgs.emacs}/bin/emacsclient -c -a 'emacs'"
-    else
-      "doom run";
   emacsEveryWhere =
-    if config.modules.editors.emacs.enableService then
-      ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"''
-    else
-      "doom +everywhere";
+      ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"'';
 
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - d: ${emacsclient}
     shift + ctrl + alt - e: ${emacsEveryWhere}
     shift + ctrl + alt - x: org-capture -k n
     shift + ctrl + alt - f : open -n -a ~/.nix-profile/Applications/Firefox.app
