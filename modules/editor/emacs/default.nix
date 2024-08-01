@@ -246,7 +246,6 @@ with lib; {
                   (global-disable-mouse-mode)
                 '';
               };
-
               gcmh = {
                 enable = true;
                 defer = 1;
@@ -260,6 +259,10 @@ with lib; {
               browse-kill-ring = {
                 enable = true;
                 command = [ "browse-kill-ring" ];
+              };
+
+              emacs-everywhere = {
+                enable = true;
               };
 
               god-mode = {
