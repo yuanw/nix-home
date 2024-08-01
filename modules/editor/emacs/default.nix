@@ -81,13 +81,17 @@ with lib; {
       };
     })
 
+    (mkIf (!isDarwin) {
+      services.emacs = {
+        enable = cfg.enableService;
+        package = emacsPackage;
+      };
+
+    })
+
 
     {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
-      # services.emacs = {
-      #   enable = cfg.enableService;
-      #   package = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-      # };
       # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
@@ -134,108 +138,96 @@ with lib; {
             '';
 
             prelude = ''
-                            ;; Disable startup message.
-                            (setq inhibit-startup-screen t
-                                  inhibit-startup-echo-area-message (user-login-name))
+              ;; Disable startup message.
+              (setq inhibit-startup-screen t
+                    inhibit-startup-echo-area-message (user-login-name))
 
-                            (setq initial-major-mode 'fundamental-mode
-                                  initial-scratch-message nil)
+              (setq initial-major-mode 'fundamental-mode
+                    initial-scratch-message nil)
 
-                            ;; Don't blink the cursor.
-                            (setq blink-cursor-mode nil)
+              ;; Don't blink the cursor.
+              (setq blink-cursor-mode nil)
 
-                            ;; Set frame title.
-                            (setq frame-title-format
-                                  '("" invocation-name ": "(:eval
-                                                            (if (buffer-file-name)
-                                                                (abbreviate-file-name (buffer-file-name))
-                                                              "%b"))))
+              ;; Set frame title.
+              (setq frame-title-format
+                    '("" invocation-name ": "(:eval
+                                              (if (buffer-file-name)
+                                                  (abbreviate-file-name (buffer-file-name))
+                                                "%b"))))
 
-                            ;; Make sure the mouse cursor is visible at all times.
-                            (set-face-background 'mouse "#ffffff")
+              ;; Make sure the mouse cursor is visible at all times.
+              (set-face-background 'mouse "#ffffff")
 
-                            ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
-                            ;; (defalias 'yes-or-no-p 'y-or-n-p)
-                            (setq use-short-answers t)
+              ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
+              ;; (defalias 'yes-or-no-p 'y-or-n-p)
+              (setq use-short-answers t)
 
-                            (setq use-dialog-box nil)
+              (setq use-dialog-box nil)
 
 
-                            ;; Don't want to move based on visual line.
-                            (setq line-move-visual nil)
+              ;; Don't want to move based on visual line.
+              (setq line-move-visual nil)
 
-                            ;; TODO maybe should re-configure this
-                            ;; Stop creating backup and autosave files.
-                            (setq make-backup-files nil
-                                  auto-save-default nil)
+              ;; TODO maybe should re-configure this
+              ;; Stop creating backup and autosave files.
+              (setq make-backup-files nil
+                    auto-save-default nil)
                    
                    
-                            ;; Default is 4k, which is too low for LSP.
-                            (setq read-process-output-max (* 1024 1024))
+              ;; Default is 4k, which is too low for LSP.
+              (setq read-process-output-max (* 1024 1024))
 
-                            ;; Always show line and column number in the mode line.
-                            (line-number-mode)
-                            (column-number-mode)
+              ;; Always show line and column number in the mode line.
+              (line-number-mode)
+              (column-number-mode)
 
-                            ;; Enable some features that are disabled by default.
-                            (put 'narrow-to-region 'disabled nil)
-                            (put 'upcase-region 'disabled nil)
-                            (put 'downcase-region 'disabled nil)
-                            ;; Typically, I only want spaces when pressing the TAB key. I also
-                            ;; want 4 of them.
-                            (setq-default indent-tabs-mode nil
-                                          tab-width 4
-                                          c-basic-offset 4)
-                            ;; Trailing white space are banned!
-                            ;;(setq-default show-trailing-whitespace t)
+              ;; Enable some features that are disabled by default.
+              (put 'narrow-to-region 'disabled nil)
+              (put 'upcase-region 'disabled nil)
+              (put 'downcase-region 'disabled nil)
+              ;; Typically, I only want spaces when pressing the TAB key. I also
+              ;; want 4 of them.
+              (setq-default indent-tabs-mode nil
+                            tab-width 4
+                            c-basic-offset 4)
+              ;; Trailing white space are banned!
+              ;;(setq-default show-trailing-whitespace t)
 
-                            ;; Use one space to end sentences.
-                            (setq sentence-end-double-space nil)
+              ;; Use one space to end sentences.
+              (setq sentence-end-double-space nil)
 
-                            ;;use UTF-8.
-                            (prefer-coding-system 'utf-8)
+              ;;use UTF-8.
+              (prefer-coding-system 'utf-8)
 
-                            ;; Nicer handling of regions.
-                            (transient-mark-mode 1)
+              ;; Nicer handling of regions.
+              (transient-mark-mode 1)
 
-                            ;; Make moving cursor past bottom only scroll a single line rather
-                            ;; than half a page.
-                            (setq scroll-step 1
-                                  scroll-conservatively 5)
+              ;; Make moving cursor past bottom only scroll a single line rather
+              ;; than half a page.
+              (setq scroll-step 1
+                    scroll-conservatively 5)
 
-                            ;; Enable highlighting of current line.
-                            (global-hl-line-mode 1)
+              ;; Enable highlighting of current line.
+              (global-hl-line-mode 1)
 
-                            ;; Avoid noisy bell.
-                            (setq visible-bell t)
+              ;; Avoid noisy bell.
+              (setq visible-bell t)
 
-                            ;; https://www.emacswiki.org/emacs/RecursiveEdit
-                            ;;(setq enable-recursive-minibuffer t)
-                            (defun stop-using-minibuffer ()
-                            "kill the minibuffer"
-                            (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-                            (abort-recursive-edit)))
+              ;; https://www.emacswiki.org/emacs/RecursiveEdit
+              ;;(setq enable-recursive-minibuffer t)
+              (defun stop-using-minibuffer ()
+              "kill the minibuffer"
+              (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+              (abort-recursive-edit)))
 
-                            (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
-                            ;; Enable indentation+completion using the TAB key.
-                            ;; `completion-at-point' is often bound to M-TAB.
-                            (setq tab-always-indent 'complete)
+              (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
+              ;; Enable indentation+completion using the TAB key.
+              ;; `completion-at-point' is often bound to M-TAB.
+              (setq tab-always-indent 'complete)
 
 
-                            ;; Only do candidate cycling if there are very few candidates.
-                            (setq completion-cycle-threshold 3)
-              ;;https://github.com/sellout/dotfiles/blob/b725062cf1ec83f029c9c6fa136345d114ab9b1c/nix/modules/emacs/default.el#L39C1-L50C81
-              ;; FIXME: This is ridiculous. We shouldn’t have to set up the path, but
-              ;;        otherwise it doesn’t have anything useful. We also can’t do it in
-              ;;        default.el currently because something there is trampling it. Should
-              ;;        try moving it up to see where it’s disappearing and fix that issue
-              ;;        (and hopefully not have to explicitly set the PATH at all at some
-              ;;        point …).
-              ;;   (setenv
-              ;; "PATH"
-              ;; (string-trim-right
-              ;;  (shell-command-to-string
-              ;;   "source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh && echo $PATH")))
+              ;; Only do candidate cycling if there are very few candidates.
+              (setq completion-cycle-threshold 3)
             '';
 
             postlude = ''
@@ -252,22 +244,6 @@ with lib; {
                 enable = true;
                 config = ''
                   (global-disable-mouse-mode)
-                '';
-              };
-              exec-path-from-shell = {
-                enable = false;
-                config = ''
-                  (setq exec-path-from-shell-variables
-                  '("PATH" "SHELL"
-                             "NIX_PATH"
-                                    "NIX_PROFILES"
-                  "NIX_REMOTE"
-                  "NIX_SSL_CERT_FILE"
-                  "NIX_USER_PROFILE_DIR"
-                  ))
-                  (setq exec-path-from-shell-shell-name "/bin/zsh")
-                  (setq exec-path-from-shell-debug t)
-                  (exec-path-from-shell-initialize)
                 '';
               };
 
