@@ -263,10 +263,26 @@ with lib; {
 
               emacs-everywhere = {
                 enable = true;
-                custom = ''
-                  (emacs-everywhere--dir
+                config = ''
+                  (setq emacs-everywhere--dir
                            (locate-user-emacs-file "everywhere")
                   )
+                '';
+              };
+
+              yequake = {
+                enable = true;
+                config = ''
+                  (add-to-list 'yequake-frames '("consult-omni-demo"
+                               (buffer-fns . #'consult-omni-multi)
+                               (width . 0.8)
+                               (height . 0.8)
+                               (top . 0)
+                               (frame-parameters . ((name . "yequake-demo")
+                                                    (minibuffer . t)
+                                                    (autoraise . t)
+                                                    (window-system . ns) ;;change accordingly
+                                                    ))))
                 '';
               };
 
