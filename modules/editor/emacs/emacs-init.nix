@@ -5,7 +5,6 @@ with lib;
 let
 
   cfg = config.programs.emacs.init;
-
   packageFunctionType = mkOptionType {
     name = "packageFunction";
     description = "function from epkgs to package";

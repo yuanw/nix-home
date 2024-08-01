@@ -62,25 +62,6 @@ with lib; {
   };
 
   config = mkIf cfg.enable (mkMerge [
-    (mkIf (isDarwin && cfg.enableService) {
-      ## https://github.com/dustinlyons/nixos-config/blob/2bb69193da51364040495bc2aaffef8334001d0c/hosts/darwin/default.nix#L40
-      launchd.user.agents.emacs.path = [
-        config.environment.systemPath
-        "${config.my.homeDirectory}/.nix-profile/bin"
-      ];
-
-      launchd.user.agents.emacs.serviceConfig = {
-        KeepAlive = true;
-        ProgramArguments = [
-          "/bin/zsh"
-          "-c"
-          "{ osascript -e 'display notification \"Attempting to start Emacs...\" with title \"Emacs Launch\"'; /bin/wait4path ${emacsPackage}/bin/emacs && { ${emacsPackage}/bin/emacs --fg-daemon; if [ $? -eq 0 ]; then osascript -e 'display notification \"Emacs has started.\" with title \"Emacs Launch\"'; else osascript -e 'display notification \"Failed to start Emacs.\" with title \"Emacs Launch\"' >&2; fi; } } &> /tmp/emacs.log"
-        ];
-        StandardErrorPath = "/tmp/emacs.log";
-        StandardOutPath = "/tmp/emacs.log";
-      };
-    })
-
     (mkIf (!isDarwin) {
       services.emacs = {
         enable = cfg.enableService;
@@ -88,7 +69,6 @@ with lib; {
       };
 
     })
-
 
     {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];

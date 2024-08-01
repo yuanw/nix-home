@@ -38,6 +38,7 @@
     darwin.imports = [
       ./brew.nix
       ./health.nix
+      ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
       ./macintosh.nix
     ];
