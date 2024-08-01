@@ -9,7 +9,7 @@ with lib;
 let
   cfg = config.modules.wm.yabai;
   emacsEveryWhere =
-      ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"'';
+    ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"'';
 
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;

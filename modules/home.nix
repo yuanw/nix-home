@@ -13,11 +13,11 @@
     (import ./macos_packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isLinux
     (import ./linux_packages.nix { inherit pkgs; });
-    home.sessionPath = [
-      "/usr/local/bin"
-      "/usr/local/sbin"
-      "${config.my.homeDirectory}/.local/bin"
-    ];
+  home.sessionPath = [
+    "/usr/local/bin"
+    "/usr/local/sbin"
+    "${config.my.homeDirectory}/.local/bin"
+  ];
   xdg = {
     enable = true;
     configFile = {
