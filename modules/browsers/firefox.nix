@@ -42,7 +42,7 @@ in
             privacy-badger
             leechblock-ng
             kagi-search
-
+            userchrome-toggle-extended
           ];
 
           search = {
