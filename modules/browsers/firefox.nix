@@ -43,6 +43,7 @@ in
             leechblock-ng
             kagi-search
             userchrome-toggle-extended
+            sidebery
           ];
 
           search = {
