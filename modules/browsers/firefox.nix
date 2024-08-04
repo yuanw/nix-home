@@ -6,6 +6,9 @@
 with lib;
 let
   cfg = config.modules.browsers.firefox;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin;
+  profilesPath =
+    if isDarwin then "Library/Application Support/Firefox/Profiles" else ".mozilla/firefox";
 in
 {
   options.modules.browsers.firefox = {
@@ -23,11 +26,16 @@ in
         packages = [
           pkgs.tridactyl-native
         ];
+        file."${profilesPath}/home/chrome".source = ./chrome;
       };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
-      programs.firefox.policies = { };
+      programs.firefox.policies = {
+        DontCheckDefaultBrowser = true;
+        DisablePocket = true;
+        DisableAppUpdate = true;
+      };
       # programs.firefox.nativeMessagingHosts = [
       #   pkgs.tridactyl-native
       # ];
@@ -284,6 +292,11 @@ in
             "extensions.formautofill.creditCards.available" = false;
             "extensions.formautofill.creditCards.enabled" = false;
             "extensions.formautofill.heuristics.enabled" = false;
+            # shyfox
+            ## Fill SVG Color
+            "svg.context-properties.content.enabled" = true;
+            ## CSS's `:has()` selector
+            "layout.css.has-selector.enabled" = true;
           };
 
         };
