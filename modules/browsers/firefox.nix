@@ -57,7 +57,7 @@ in
           search = {
             default = "Kagi";
             engines = {
-              "google".metaData.hidden = true;
+              "Google".metaData.hidden = true;
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
@@ -97,7 +97,7 @@ in
           # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
-            "layout.css.devPixelsPerPx" = "2.0";
+            # "layout.css.devPixelsPerPx" = "2.0";
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";
             "app.update.auto" = false;
