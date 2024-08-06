@@ -55,9 +55,9 @@ in
             (buildFirefoxXpiAddon {
               pname = "mtab";
               version = "1.3.5";
-              #addonId = "alfredfirefox@deanishe.net";
+              addonId = "contact@maxhu.dev";
               url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.5.xpi";
-              sha256 = "73e620f6c01dd61c7f1a9b17aae54cdcfded46214dc0b685296f9594a221f639";
+              sha256 = "cd2d440e7cae56e09ae6ef9250e8ddcb1550dd9f4055cc8fd84cbd387694a07f";
               meta = with lib;
                 {
                   homepage = "https://github.com/maxhu08/mtab";
