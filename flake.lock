@@ -1345,6 +1345,7 @@
         "nur": "nur",
         "pre-commit": "pre-commit_2",
         "roc": "roc",
+        "shy-fox": "shy-fox",
         "treefmt-nix": "treefmt-nix_2",
         "vale-Google": "vale-Google",
         "vale-Joblint": "vale-Joblint",
@@ -1376,6 +1377,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "shy-fox": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1722946587,
+        "narHash": "sha256-lVE0NbModRylA8s2SlBI85pMMob9dvwv0MgnKrXGqHo=",
+        "owner": "Naezr",
+        "repo": "ShyFox",
+        "rev": "73a25ebd70f5c02fe61dc96467550b8b8f146d3b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Naezr",
+        "repo": "ShyFox",
         "type": "github"
       }
     },
