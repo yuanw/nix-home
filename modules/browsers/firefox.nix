@@ -1,7 +1,7 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
 # should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
 # https://github.com/mozilla/policy-templates
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 with lib;
 let
