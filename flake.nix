@@ -65,7 +65,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     shy-fox = {
-      url = "github.com/Naezr/ShyFox";
+      url = "github:Naezr/ShyFox";
       flake = false;
     };
 
