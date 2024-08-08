@@ -25,6 +25,8 @@
     editors.emacs = {
       enable = true;
       enableService = true;
+      # TODO fix this
+      enableLatex = false;
     };
 
     terminal.enable = true;
