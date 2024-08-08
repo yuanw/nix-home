@@ -26,7 +26,7 @@ in
         packages = [
           pkgs.tridactyl-native
         ];
-        file."${profilesPath}/home/chrome".source = ./chrome;
+        file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
