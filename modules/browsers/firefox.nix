@@ -1,11 +1,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
 # should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
 # https://github.com/mozilla/policy-templates
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 
 with lib;
 let
   cfg = config.modules.browsers.firefox;
+  inherit (pkgs.stdenv.hostPlatform) isDarwin;
+  profilesPath =
+    if isDarwin then "Library/Application Support/Firefox/Profiles" else ".mozilla/firefox";
 in
 {
   options.modules.browsers.firefox = {
@@ -23,11 +26,16 @@ in
         packages = [
           pkgs.tridactyl-native
         ];
+        file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };
       programs.firefox.enable = true;
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
-      programs.firefox.policies = { };
+      programs.firefox.policies = {
+        DontCheckDefaultBrowser = true;
+        DisablePocket = true;
+        DisableAppUpdate = true;
+      };
       # programs.firefox.nativeMessagingHosts = [
       #   pkgs.tridactyl-native
       # ];
@@ -42,13 +50,32 @@ in
             privacy-badger
             leechblock-ng
             kagi-search
+            userchrome-toggle-extended
+            sidebery
+            (buildFirefoxXpiAddon {
+              pname = "mtab";
+              version = "1.3.5";
+              addonId = "contact@maxhu.dev";
+              url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.5.xpi";
+              sha256 = "cd2d440e7cae56e09ae6ef9250e8ddcb1550dd9f4055cc8fd84cbd387694a07f";
+              meta = with lib;
+                {
+                  homepage = "https://github.com/maxhu08/mtab";
+                  description = "a simple configurable new tab extension";
+                  license = licenses.mit;
+                  mozPermissions = [
+                    "bookmarks"
+                  ];
+                  platforms = platforms.all;
+                };
 
+            })
           ];
 
           search = {
             default = "Kagi";
             engines = {
-              "google".metaData.hidden = true;
+              "Google".metaData.hidden = true;
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
@@ -88,7 +115,7 @@ in
           # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
-            "layout.css.devPixelsPerPx" = "2.0";
+            # "layout.css.devPixelsPerPx" = "2.0";
             # Default to dark theme in DevTools panel
             "devtools.theme" = "dark";
             "app.update.auto" = false;
@@ -283,6 +310,11 @@ in
             "extensions.formautofill.creditCards.available" = false;
             "extensions.formautofill.creditCards.enabled" = false;
             "extensions.formautofill.heuristics.enabled" = false;
+            # shyfox
+            ## Fill SVG Color
+            "svg.context-properties.content.enabled" = true;
+            ## CSS's `:has()` selector
+            "layout.css.has-selector.enabled" = true;
           };
 
         };

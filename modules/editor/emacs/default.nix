@@ -49,6 +49,10 @@ with lib; {
       type = types.enum [ "eglot" "lsp-bridge" "lspce" ];
       default = "eglot";
     };
+    enableLatex = mkOption {
+      type = types.bool;
+      default = true;
+    };
 
     enableService = mkOption {
       type = types.bool;
@@ -68,6 +72,14 @@ with lib; {
         package = emacsPackage;
       };
 
+    })
+
+    (mkIf cfg.enableLatex {
+      home-manager.users.${config.my.username} = { pkgs, ... }: {
+        home.packages = with pkgs; [
+          texlive.combined.scheme-medium
+        ];
+      };
     })
 
     {
@@ -1654,7 +1666,7 @@ with lib; {
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-              texlive.combined.scheme-medium
+
               #: js
               # nodePackages.eslint
               #: markdown

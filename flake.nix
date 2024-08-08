@@ -64,6 +64,10 @@
       url = "github:bandithedoge/nixpkgs-firefox-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    shy-fox = {
+      url = "github:Naezr/ShyFox";
+      flake = false;
+    };
 
     # Vale styles.
     vale-Google.flake = false;
