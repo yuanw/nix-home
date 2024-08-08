@@ -74,10 +74,10 @@ with lib; {
 
     })
 
-    (mkIf cfg.enableLatext {
-      home-manager.users.${config.my.username} = {pkgs, ...}: {
+    (mkIf cfg.enableLatex {
+      home-manager.users.${config.my.username} = { pkgs, ... }: {
         home.packages = with pkgs; [
-           texlive.combined.scheme-medium
+          texlive.combined.scheme-medium
         ];
       };
     })
