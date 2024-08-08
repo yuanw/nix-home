@@ -63,10 +63,12 @@ with pkgs; [
   # vhs
   # csvkit
   # dmenu
-  gum
-  inkscape-with-extensions
-  ghostscript
-  djvu2pdf
+  #gum
+
+  # TODO move to a modules
+  # inkscape-with-extensions
+  # ghostscript
+  # djvu2pdf
   dig
   just
   pkg-config
