@@ -2,7 +2,7 @@
 
 with pkgs; [
   # alerter
-  neofetch
+  fastfetch
   pinentry_mac
   calibre_mac
 ]

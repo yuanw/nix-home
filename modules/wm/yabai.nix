@@ -9,13 +9,14 @@ with lib;
 let
   cfg = config.modules.wm.yabai;
   emacsEveryWhere =
-    ''${pkgs.emacs}/bin/emacsclient --eval "(emacs-everywhere)"'';
-
+    ''emacsclient --eval "(emacs-everywhere)"'';
+  emacsClient = "emacsclient -c -a 'emacs'";
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   # it is nice to reference pkgs full path
   laucherConfig = ''
-    shift + ctrl + alt - e: ${emacsEveryWhere}
+    shift + ctrl + alt - e: ${emacsClient}
+    shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - x: org-capture -k n
     shift + ctrl + alt - f : open -n -a ~/.nix-profile/Applications/Firefox.app
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app

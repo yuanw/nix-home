@@ -40,7 +40,6 @@
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
-
       casks = [
         "docker"
         "google-chrome"
@@ -48,16 +47,10 @@
         "sloth"
         "mysql-shell"
         "viscosity"
-        "vial"
         "brave-browser"
-        "launchcontrol"
       ];
       brews = [
         "redis"
-        #"frugal"
-        "picat"
-        # "mit-scheme"
-        # https://formulae.brew.sh/formula/docker-compose
         # mkdir -p ~/.docker/cli-plugins
         # ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
         "docker-compose"
@@ -65,7 +58,8 @@
     };
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.firefox-bin;
+      # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+      pkg = pkgs.firefox-beta-bin;
     };
     editors.emacs = {
       enable = true;
