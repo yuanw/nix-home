@@ -22,8 +22,9 @@
     nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
     flake-utils.url = "github:numtide/flake-utils";
+    # https://github.com/nix-community/home-manager/issues/5717
     home-manager = {
-      url = "github:nix-community/home-manager/master";
+      url = "github:yuanwang-wf/home-manager/fix-darwin-firefox";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     astro-nvim = {

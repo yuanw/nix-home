@@ -22,10 +22,6 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home = {
-        file."startpage".source = ./startpage;
-        packages = [
-          pkgs.tridactyl-native
-        ];
         file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };
       programs.firefox.enable = true;
@@ -57,8 +53,9 @@ in
               pname = "mtab";
               version = "1.3.7";
               addonId = "contact@maxhu.dev";
-              url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.7.xpi";
-              sha256 = "sha256-zS1EDnyuVuCa5u+SUOjdyxVQ3Z9AVcyP2Ey9OHaUoH8=";
+              url = "https://addons.mozilla.org/firefox/downloads/file/4333689/mtab-1.3.7.xpi";
+              #sha256 = lib.fakeSha256;
+              sha256 = "sha256-kKh6VBoqB4ODmKowyRaWjsazm4GQpk5gyzZdrLTi+mc=";
               meta = with lib;
                 {
                   homepage = "https://github.com/maxhu08/mtab";
@@ -69,7 +66,6 @@ in
                   ];
                   platforms = platforms.all;
                 };
-
             })
           ];
 
@@ -109,11 +105,7 @@ in
               # };
             };
           };
-          # userChrome = ''
-          #   *{font-size: 18px !important;
-          #                     }
-          # '';
-          # https://github.com/arkenfox/user.js/blob/master/user.js
+          # # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
             # "layout.css.devPixelsPerPx" = "2.0";
@@ -127,7 +119,7 @@ in
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
-            "browser.startup.homepage" = "https://yuanwang.dev/";
+            #"browser.startup.homepage" = "https://yuanwang.dev/";
             "browser.search.region" = "CA";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
@@ -167,9 +159,9 @@ in
             # Disable the "new tab page" feature and show a blank tab instead
             # https://wiki.mozilla.org/Privacy/Reviews/New_Tab
             # https://support.mozilla.org/en-US/kb/new-tab-page-show-hide-and-customize-top-sites#w_how-do-i-turn-the-new-tab-page-off
-            "browser.newtabpage.enabled" = false;
+            # "browser.newtabpage.enabled" = false;
             # "browser.newtab.url" = "about:blank";
-            "browser.newtab.url" = "yuanwang.dev";
+            # "browser.newtab.url" = "yuanwang.dev";
             # Disable Activity Stream
             # https://wiki.mozilla.org/Firefox/Activity_Stream
             # Disable new tab tile ads & preload
@@ -213,8 +205,8 @@ in
             # Show whole URL in address bar
             "browser.urlbar.trimURLs" = false;
             # Disable some not so useful functionality.
-            "browser.disableResetPrompt" =
-              true; # "Looks like you haven't started Firefox in a while."
+            "browser.disableResetPrompt" = true;
+            # "Looks like you haven't started Firefox in a while."
             "browser.onboarding.enabled" =
               false; # "New to Firefox? Let's get started!" tour
             "browser.aboutConfig.showWarning" =
@@ -314,10 +306,9 @@ in
             # shyfox
             ## Fill SVG Color
             "svg.context-properties.content.enabled" = true;
-            ## CSS's `:has()` selector
+            #   ## CSS's `:has()` selector
             "layout.css.has-selector.enabled" = true;
           };
-
         };
       };
     };

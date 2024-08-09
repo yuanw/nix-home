@@ -58,7 +58,8 @@
     };
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.firefox-bin;
+      # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
+      pkg = pkgs.firefox-beta-bin;
     };
     editors.emacs = {
       enable = true;

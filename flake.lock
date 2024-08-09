@@ -636,16 +636,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1723015306,
-        "narHash": "sha256-jQnFEtH20/OsDPpx71ntZzGdRlpXhUENSQCGTjn//NA=",
-        "owner": "nix-community",
+        "lastModified": 1723229525,
+        "narHash": "sha256-L563623XEXEBeqwMnptOx/Hq26Gy8vS7CjGsmI+meVc=",
+        "owner": "yuanwang-wf",
         "repo": "home-manager",
-        "rev": "b3d5ea65d88d67d4ec578ed11d4d2d51e3de525e",
+        "rev": "7c9cadd389167acaf1fa1887d3486a09f25a0e2b",
         "type": "github"
       },
       "original": {
-        "owner": "nix-community",
-        "ref": "master",
+        "owner": "yuanwang-wf",
+        "ref": "fix-darwin-firefox",
         "repo": "home-manager",
         "type": "github"
       }
