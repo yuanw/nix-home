@@ -58,7 +58,7 @@ in
               version = "1.3.7";
               addonId = "contact@maxhu.dev";
               url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.7.xpi";
-              sha256 = "90a87a541a2a07838398aa30c916968ec6b39b8190a64e60cb365dacb4e2fa67";
+              sha256 = "sha256-zS1EDnyuVuCa5u+SUOjdyxVQ3Z9AVcyP2Ey9OHaUoH8=";
               meta = with lib;
                 {
                   homepage = "https://github.com/maxhu08/mtab";
