@@ -32,7 +32,7 @@ in
           snippets = [
             {
               description = "update a flake source";
-              command = " ix flake lock --update-input <input=nixpkgs>";
+              command = "nix flake lock --update-input <input=nixpkgs>";
               tag = [ "nix" ];
             }
             {
@@ -67,6 +67,8 @@ in
               command = "checkin content-management-service";
               tag = [ "slack" ];
             }
+
+
 
           ];
         };
