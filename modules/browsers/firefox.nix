@@ -52,12 +52,13 @@ in
             kagi-search
             userchrome-toggle-extended
             sidebery
+            # https://addons.mozilla.org/api/v5/addons/search/?q=mtab
             (buildFirefoxXpiAddon {
               pname = "mtab";
-              version = "1.3.5";
+              version = "1.3.7";
               addonId = "contact@maxhu.dev";
-              url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.5.xpi";
-              sha256 = "cd2d440e7cae56e09ae6ef9250e8ddcb1550dd9f4055cc8fd84cbd387694a07f";
+              url = "https://addons.mozilla.org/firefox/downloads/file/4330262/mtab-1.3.7.xpi";
+              sha256 = "90a87a541a2a07838398aa30c916968ec6b39b8190a64e60cb365dacb4e2fa67";
               meta = with lib;
                 {
                   homepage = "https://github.com/maxhu08/mtab";
