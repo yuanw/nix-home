@@ -8,6 +8,7 @@ result
 
 nohup.out
 search.json.mozlz4
+search.json.mozlz4.backup
 id_ed25519
 # Local .terraform directories
 **/.terraform/*
