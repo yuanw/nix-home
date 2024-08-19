@@ -81,7 +81,15 @@ _final: prev: {
       substituteInPlace bin/jdtls.py \
         --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
     '';
-
+  });
+  delta = prev.delta.overrideAttrs (_finalAttrs: _previousAttrs: {
+    src = prev.fetchFromGitHub {
+      owner = "dandavison";
+      repo = _previousAttrs.pname;
+      rev = "0.18.0";
+      hash = prev.lib.fakeHash;
+    };
+    cargoHash = prev.lib.fakeHash;
   });
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
