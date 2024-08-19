@@ -35,7 +35,6 @@ in
       # programs.firefox.nativeMessagingHosts = [
       #   pkgs.tridactyl-native
       # ];
-      programs.firefox.profileVersion = null;
       programs.firefox.profiles = {
         home = {
           name = "home";
