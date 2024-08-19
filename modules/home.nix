@@ -37,7 +37,12 @@
     bat = {
       enable = true;
       catppuccin.enable = true;
-      extraPackages = with pkgs.bat-extras; [ batdiff batman batgrep batwatch ];
+      extraPackages = with pkgs.bat-extras; [
+        # batdiff
+        batman
+        batgrep
+        batwatch
+      ];
     };
     dircolors = {
       enable = true;

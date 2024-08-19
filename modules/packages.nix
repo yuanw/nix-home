@@ -28,7 +28,7 @@ with pkgs; [
   pigz
   shellcheck
   gitAndTools.pre-commit
-  gitAndTools.delta
+  # gitAndTools.delta
   gitAndTools.pass-git-helper
   gitAndTools.gh
   git-crypt

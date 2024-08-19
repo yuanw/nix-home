@@ -81,8 +81,26 @@ _final: prev: {
       substituteInPlace bin/jdtls.py \
         --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
     '';
-
   });
+  delta =
+    let
+      deltaSrc = _final.fetchFromGitHub {
+        owner = "dandavison";
+        repo = "delta";
+        rev = "0.18.0";
+        hash = "sha256-1UOVRAceZ4QlwrHWqN7YI2bMyuhwLnxJWpfyaHNNLYg=";
+      };
+    in
+    prev.delta.overrideAttrs (_finalAttrs: _previousAttrs: {
+      name = "delta-0.18.0";
+      version = "0.18.0";
+      src = deltaSrc;
+      cargoDeps = _previousAttrs.cargoDeps.overrideAttrs (_final.lib.const {
+        src = deltaSrc;
+        outputHash = "sha256-d1Cdir07JZ4zrfq9cZmgQP4TVrWWUHfSJl/FlM7bDzM=";
+      });
+    });
+
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
