@@ -38,7 +38,7 @@
       enable = true;
       catppuccin.enable = true;
       extraPackages = with pkgs.bat-extras; [
-        #batdiff
+        # batdiff
         batman
         batgrep
         batwatch
@@ -142,7 +142,7 @@
       userEmail = config.my.email;
 
       # difftastic = { enable = true; };
-      # delta = { enable = true; };
+      delta = { enable = true; };
 
       signing = {
         key = config.my.gpgKey;
