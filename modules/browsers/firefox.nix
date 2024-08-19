@@ -35,10 +35,10 @@ in
       # programs.firefox.nativeMessagingHosts = [
       #   pkgs.tridactyl-native
       # ];
+      programs.firefox.profileVersion = null;
       programs.firefox.profiles = {
         home = {
           name = "home";
-          version = null;
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
           extensions = with pkgs.nur.repos.rycee.firefox-addons; [
             tridactyl
