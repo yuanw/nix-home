@@ -32,7 +32,6 @@ melpaBuild {
   passthru.updateScript = unstableGitUpdater { };
 
   installPhase = ''
-    rm -r test
     mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
     cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
   '';
