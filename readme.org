@@ -1,7 +1,7 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 Welcome to my nix-home.
-
+[[https://garnix.io][https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fyuanw%2Fnix-home]]
 [[https://github.com/yuanw/nix-home/workflows/build/badge.svg]]
 [[https://builtwithnix.org/badge.svg]]
 
