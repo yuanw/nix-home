@@ -1410,7 +1410,7 @@ with lib; {
                 enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/consult-omni {
-                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
                     inherit lib;
                     inherit (epkgs) melpaBuild consult embark;
                   }
