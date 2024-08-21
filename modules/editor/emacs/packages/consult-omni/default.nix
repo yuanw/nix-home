@@ -1,7 +1,6 @@
 { melpaBuild
 , fetchFromGitHub
 , writeText
-, substituteAll
 , unstableGitUpdater
 , lib
   # Elisp dependencies
@@ -24,8 +23,8 @@ melpaBuild {
     owner = "armindarvish";
     repo = "consult-omni";
     rev = "6e214cb29cf98a23230bf3633a07d46a328d0245";
-    sha256 = lib.fakeSha256;
-    # sha256 = "sha256-ZG3ZhhqDtL7M7x5XRr8Qb6mFlFndMWq5QPbtYLblXcs=";
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-vAis6/U70PWuyl4NNg6uC5RfOFZYVy1g+nlvmi2f1jo=";
   };
 
   dontConfigure = true;
