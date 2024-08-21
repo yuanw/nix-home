@@ -1194,11 +1194,16 @@ with lib; {
                   (popper-mode)
                 '';
               };
-
               direnv = {
                 enable = true;
                 config = ''
                   (direnv-mode)
+                '';
+              };
+              editorconfig = {
+                enable = true;
+                config = ''
+                  (editorconfig-mode 1)
                 '';
               };
               envrc = {
@@ -1407,7 +1412,7 @@ with lib; {
                 '';
               };
               consult-omni = {
-                enable = true;
+                enable = false;
                 package = epkgs: (
                   pkgs.callPackage ./packages/consult-omni {
                     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
