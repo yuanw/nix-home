@@ -1,10 +1,9 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
-Welcome to my nix-home.
 
 [[https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fyuanw%2Fnix-home]]
 
-[[https://github.com/yuanw/nix-home/workflows/build/badge.svg]]
+[[https://github.com/yuanw/nix-home/workflows/ci.yml/badge.svg]]
 
 [[https://builtwithnix.org/badge.svg]]
 
@@ -15,16 +14,19 @@ The goal for this repo is to declaratively configure MacOS and Linux system usin
 feel free to take what you like.
 
 * Current MacOS setup
-| Shell    | zsh + starship                 |
-| WM       | yabai + skhd + sketchybar      |
-| Terminal | Alacritty + tmux               |
-| Editor   | Emacs + astronvim + helix      |
+| Shell    | zsh + starship            |
+| WM       | yabai + skhd + sketchybar |
+| Terminal | Alacritty + tmux          |
+| Editor   | Emacs + helix             |
+| Browser  | Firefox (shyfox)          |
 
-* Current NixOs setup
-| Shell    | zsh + starship                 |
-| WM       | xmonad + xmobar                |
-| Terminal | Alacritty + tmux               |
-| Editor   | Emacs + astronvim + helix      |
+* Current Nixos setup
+| Shell    | zsh + starship   |
+| WM       | xmonad + xmobar  |
+| Terminal | Alacritty + tmux |
+| Editor   | Emacs + helix    |
+| Browser  | Firefox (shyfox) |
+
 * Inspirations
 
 https://github.com/stars/yuanw/lists/nix-home/
@@ -74,9 +76,10 @@ sub   4096R/DEF67890 2020-01-01 [expires: 2025-12-31]
 ID of your key (second column e.g "ABC12345")
 
 ~gpg --export-secret-keys YOUR_ID_HERE > private.key~
+**** install font
 
 font
-font book
+
 ** Import
 
 ~gpg --import private.key~
@@ -103,8 +106,11 @@ nix flake update --recreate-lock-file
 ~nix build .#yuan-mac~
 *** switch ?
 ~./result/sw/bin/darwin-rebuild switch --flake .~
-** How to rollback
-darwin-rebuild --rollback
+** How to rollback (require sudo)
+~darwin-rebuild --rollback~
+or
+~darwin-rebuild --list-generations~
+~darwin-rebuild --switch-generation XX~
 
 
 * Nixos
@@ -114,6 +120,3 @@ darwin-rebuild --rollback
 ** Exclude Nix directory from Spotlight index
 ** nix-darwin permission issue
 ~sudo chown -R whoami:staff /nix/store~
-** sometime yabai cannot manage emacsclient window
-just do ~pkill yabai~ to restart yabai, that always fix the issue for me. I bind skhd key for ~pkill yabai~ and reload skhd
-sometime I found I have to ~sudo yabai --install-sa~ ~sudo yabai --load-sa~
