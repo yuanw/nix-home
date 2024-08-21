@@ -5,7 +5,6 @@ builds:
  - 'packages.x86_64-linux.ci'
  - 'packages.aarch64-darwin.ci'
  - 'packages.aarch64-darwin.yuanw'
- - 'packages.aarch64-darwin.wk01174'
  - 'packages.x86_64-linux.wk01174'
  include:
  - '*.x86_64-linux.*'
