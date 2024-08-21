@@ -47,6 +47,24 @@
           });
     };
     darwinConfigurations = {
+      ci = withSystem "aarch64-darwin" ({ config, inputs', system, ... }:
+        inputs.nix-darwin.lib.darwinSystem {
+          specialArgs = {
+            isDarwin = true;
+            isNixOS = false;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { system = system; };
+            };
+            packages = config.packages;
+            inherit inputs inputs';
+          };
+          modules = [
+            {
+              nixpkgs.hostPlatform = system;
+            }
+            ./yuan-mac.nix
+          ];
+        });
       yuanw =
         withSystem "x86_64-darwin" ({ config, inputs', system, ... }:
           inputs.nix-darwin.lib.darwinSystem {
@@ -90,7 +108,7 @@
   perSystem = { system, ... }: {
     packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
     packages.yuanw = self.darwinConfigurations.yuanw.system;
-    packages.ci = self.darwinConfigurations.yuanw.system;
+    packages.ci = self.darwinConfigurations.ci.system;
     packages.wk01174 = self.darwinConfigurations.WK01174.system;
     # packages.activate = pkgs.writeShellApplication
     #   {
