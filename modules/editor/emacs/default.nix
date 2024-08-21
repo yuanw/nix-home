@@ -930,7 +930,7 @@ with lib; {
               org = {
                 enable = true;
                 config = ''
-                                   (setq org-directory  "~/org/")
+                  (setq org-directory  "~/org/")
                   (setq org-agenda-files (append
                                            (file-expand-wildcards (concat org-directory "*.org"))
                                            (file-expand-wildcards (concat org-directory "agenda/*.org"))

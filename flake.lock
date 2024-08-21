@@ -636,11 +636,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1723297104,
-        "narHash": "sha256-BwYImlNrBBwRxfWeVvKnVKi/rYM5lvqoSxqbnITXTyI=",
+        "lastModified": 1724099877,
+        "narHash": "sha256-liygJiycX7/+/lw3lvbxDLL9072pSex2+Cj2UANYy2o=",
         "owner": "yuanwang-wf",
         "repo": "home-manager",
-        "rev": "aa8c91d216e642d9c49d3125ef83a653ff588899",
+        "rev": "58a6abcd2e0dc95ce17670ce90e2ea155f2d2abc",
         "type": "github"
       },
       "original": {

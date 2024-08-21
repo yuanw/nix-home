@@ -13,7 +13,7 @@ with pkgs; [
   htop
   nix-prefetch-git
   cachix
-
+  mpv-unwrapped
   # sass
   tree
   # broot
@@ -28,7 +28,6 @@ with pkgs; [
   pigz
   shellcheck
   gitAndTools.pre-commit
-  # gitAndTools.delta
   gitAndTools.pass-git-helper
   gitAndTools.gh
   git-crypt
