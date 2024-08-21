@@ -1406,6 +1406,24 @@ with lib; {
 
                 '';
               };
+              consult-omni = {
+                enable = true;
+                package = epkgs: (
+                  pkgs.callPackage ./packages/consult-omni {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild consult embark;
+                  }
+                );
+
+                config = ''
+                  ;; Load Sources Core code
+                  (require 'consult-omni-sources)
+                  ;; Load Embark Actions
+                  (require 'consult-omni-embark)
+                '';
+
+              };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
                 package = epkgs: (
