@@ -49,6 +49,7 @@ melpaBuild {
   packageRequires = [
     consult
     consult-notes
+    elfeed
     embark
     browser-hist
   ];
