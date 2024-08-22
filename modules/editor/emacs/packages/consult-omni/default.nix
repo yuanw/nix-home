@@ -10,7 +10,6 @@
 , embark
 , browser-hist
 , consult-notes
-, consult-gh
 , ...
 
 }:
@@ -49,7 +48,6 @@ melpaBuild {
 
   packageRequires = [
     consult
-    consult-gh
     consult-notes
     elfeed
     embark

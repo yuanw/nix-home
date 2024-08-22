@@ -1417,13 +1417,15 @@ with lib; {
                   pkgs.callPackage ./packages/consult-omni {
                     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
                     inherit lib;
-                    inherit (epkgs) melpaBuild consult elfeed embark browser-hist consult-notes consult-gh;
+                    inherit (epkgs) melpaBuild consult elfeed embark browser-hist consult-notes;
                   }
                 );
 
                 config = ''
                                     ;; Load Sources Core code
                                     (require 'consult-omni-sources)
+
+                                    (setq consult-omni-sources-modules-to-load (list 'consult-omni-apps 'consult-omni-notes))
                                     (consult-omni-sources-load-modules)
                                     ;; Load Embark Actions
                                     (require 'consult-omni-embark)
