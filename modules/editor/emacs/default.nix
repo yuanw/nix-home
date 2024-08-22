@@ -1417,7 +1417,7 @@ with lib; {
                   pkgs.callPackage ./packages/consult-omni {
                     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
                     inherit lib;
-                    inherit (epkgs) melpaBuild consult embark browser-hist consult-notes;
+                    inherit (epkgs) melpaBuild consult elfeed embark browser-hist consult-notes;
                   }
                 );
 

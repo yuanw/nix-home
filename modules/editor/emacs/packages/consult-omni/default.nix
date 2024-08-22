@@ -6,6 +6,7 @@
   # Elisp dependencies
 
 , consult
+, elfeed
 , embark
 , browser-hist
 , consult-notes
