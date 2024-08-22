@@ -1422,11 +1422,32 @@ with lib; {
                 );
 
                 config = ''
-                  ;; Load Sources Core code
-                  (require 'consult-omni-sources)
-                  (consult-omni-sources-load-modules)
-                  ;; Load Embark Actions
-                  (require 'consult-omni-embark)
+                                  ;; Load Sources Core code
+                                  (require 'consult-omni-sources)
+                                  (consult-omni-sources-load-modules)
+                                  ;; Load Embark Actions
+                                  (require 'consult-omni-embark)
+                                    ;;; set multiple sources for consult-omni-multi command. Change these lists as needed for different interactive commands. Keep in mind that each source has to be a key in `consult-omni-sources-alist'.
+                  (setq consult-omni-multi-sources '("calc"
+                                                     ;; "File"
+                                                     ;; "Buffer"
+                                                     ;; "Bookmark"
+                                                     "Apps"
+                                                     ;; "gptel"
+                                                     "Brave"
+                                                     "Dictionary"
+                                                     ;; "Google"
+                                                     "Wikipedia"
+                                                     "elfeed"
+                                                     ;; "mu4e"
+                                                     ;; "buffers text search"
+                                                     "Notes Search"
+                                                     "Org Agenda"
+                                                     "GitHub"
+                                                     ;; "YouTube"
+                                                     "Invidious"))
+                                                     ;;; Set your shorthand favorite interactive command
+                  (setq consult-omni-default-interactive-command #'consult-omni-multi)
                 '';
 
               };
