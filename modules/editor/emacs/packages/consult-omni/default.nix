@@ -8,6 +8,7 @@
 , consult
 , embark
 , browser-hist
+, consult-notes
 , ...
 
 }:
@@ -46,6 +47,7 @@ melpaBuild {
 
   packageRequires = [
     consult
+    consult-notes
     embark
     browser-hist
   ];
