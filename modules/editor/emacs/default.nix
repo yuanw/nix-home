@@ -1443,18 +1443,18 @@ with lib; {
                                                                        ;; "Bookmark"
                                                                        "Apps"
                                                                        ;; "gptel"
-                                                                       "Brave"
+                                                                       ;; "Brave"
                                                                        "Dictionary"
                                                                        ;; "Google"
                                                                        "Wikipedia"
-                                                                       "elfeed"
+                                                                       ;; "elfeed"
                                                                        ;; "mu4e"
                                                                        ;; "buffers text search"
                                                                        "Notes Search"
                                                                        "Org Agenda"
-                                                                       "GitHub"
+                                                                       ;;"GitHub"
                                                                        ;; "YouTube"
-                                                                       "Invidious"))
+                                                                       ;; "Invidious"))
                                                                        ;;; Set your shorthand favorite interactive command
                                                                        (setq consult-omni-default-interactive-command #'consult-omni-multi)
                                  (defun consult-omni-demo-launcher ()
