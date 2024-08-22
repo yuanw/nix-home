@@ -46,7 +46,9 @@ melpaBuild {
     :files ("*.el" "sources"  )
     :fetcher github
   '';
-
+  propagatedUserEnvPkgs = [
+    yequake
+  ];
   packageRequires = [
     consult
     consult-notes
