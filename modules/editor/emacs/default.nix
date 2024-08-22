@@ -1410,6 +1410,7 @@ with lib; {
                            (skip-taskbar . t)
                            (sticky . t))))
                   (\"consult-omni-demo\"
+
                                  (buffer-fns . #'consult-omni-apps)
                                  (width . 0.8)
                                  (height . 0.8)
@@ -1491,7 +1492,7 @@ with lib; {
                           (with-selected-frame frame
                             (select-frame-set-input-focus (selected-frame))
                             (unwind-protect
-                            (progn (consult-omni-apps)
+                                (progn (consult-omni-apps-static ".*" (propertize "  " 'face 'consult-omni-path-face))
                                        nil)
                               (progn
                                 (when (frame-live-p frame) (delete-frame frame))
