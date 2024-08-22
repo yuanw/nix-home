@@ -1454,7 +1454,8 @@ with lib; {
                                                                        "Org Agenda"
                                                                        ;;"GitHub"
                                                                        ;; "YouTube"
-                                                                       ;; "Invidious"))
+                                                                       ;; "Invidious"
+                                                                       ))
                                                                        ;;; Set your shorthand favorite interactive command
                                                                        (setq consult-omni-default-interactive-command #'consult-omni-multi)
                                  (defun consult-omni-demo-launcher ()
