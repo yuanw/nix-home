@@ -262,20 +262,7 @@ with lib; {
                 '';
               };
 
-              yequake = {
-                enable = true;
-                custom = "
-                   (yequake-frames
-   '((\"org-capture\"
-      (buffer-fns . (yequake-org-capture))
-      (width . 0.75)
-      (height . 0.5)
-      (alpha . 0.95)
-      (frame-parameters . ((undecorated . t)
-                           (skip-taskbar . t)
-                           (sticky . t))))))
-                ";
-              };
+
 
               god-mode = {
                 enable = true;
@@ -1410,6 +1397,21 @@ with lib; {
 
                 '';
               };
+              yequake = {
+                enable = true;
+                custom = "
+                (yequake-frames
+                '((\"org-capture\"
+                (buffer-fns . (yequake-org-capture))
+                (width . 0.75)
+                (height . 0.5)
+                (alpha . 0.95)
+                (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (sticky . t)))))
+                           )
+                ";
+              };
               consult-omni = {
                 enable = true;
                 package = epkgs: (
@@ -1421,68 +1423,78 @@ with lib; {
                 );
 
                 config = ''
-                                      ;; Load Sources Core code
-                                      (require 'consult-omni-sources)
+                                        ;; Load Sources Core code
+                                        (require 'consult-omni-sources)
 
-                                      (setq consult-omni-sources-modules-to-load (list 'consult-omni-apps 'consult-omni-notes))
-                                      (consult-omni-sources-load-modules)
-                                      ;; Load Embark Actions
-                                      (require 'consult-omni-embark)
-                                      (setq consult-omni-apps-paths (append (file-expand-wildcards "/Applications/Adobe*")
-                                      (list "/Applications"
-                                            "/Applications/Utilities/"
-                                            "/System/Applications/"
-                                            "/System/Applications/Utilities/"
-                                            "~/Applications/"
-                                            "~/.nix-profile/Applications/"
-                                            )))
+                                        (setq consult-omni-sources-modules-to-load (list 'consult-omni-apps 'consult-omni-notes))
+                                        (consult-omni-sources-load-modules)
+                                        ;; Load Embark Actions
+                                        (require 'consult-omni-embark)
+                                        (setq consult-omni-apps-paths (append (file-expand-wildcards "/Applications/Adobe*")
+                                        (list "/Applications"
+                                              "/Applications/Utilities/"
+                                              "/System/Applications/"
+                                              "/System/Applications/Utilities/"
+                                              "~/Applications/"
+                                              "~/.nix-profile/Applications/"
+                                              )))
 
-                                      ;;; set multiple sources for consult-omni-multi command. Change these lists as needed for different interactive commands. Keep in mind that each source has to be a key in `consult-omni-sources-alist'.
-                                      (setq consult-omni-multi-sources '("calc"
-                                                                         ;; "File"
-                                                                         ;; "Buffer"
-                                                                         ;; "Bookmark"
-                                                                         "Apps"
-                                                                         ;; "gptel"
-                                                                         ;; "Brave"
-                                                                         "Dictionary"
-                                                                         ;; "Google"
-                                                                         "Wikipedia"
-                                                                         ;; "elfeed"
-                                                                         ;; "mu4e"
-                                                                         ;; "buffers text search"
-                                                                         "Notes Search"
-                                                                         "Org Agenda"
-                                                                         ;;"GitHub"
-                                                                         ;; "YouTube"
-                                                                         ;; "Invidious"
-                                                                         ))
-                                                                         ;;; Set your shorthand favorite interactive command
-                                                                         (setq consult-omni-default-interactive-command #'consult-omni-multi)
-                  (defun consult-omni-demo-launcher ()
-                    (interactive)
-                    (let* ((resize-mini-frames #'yequake-fit-frame-vertically)
-                           (vertico-count 30)
-                           (width (floor (* 0.8 (display-pixel-width))))
-                           (height (floor (* 0.8 (display-pixel-height))))
-                           (left  (floor (* 0.1 (display-pixel-width))))
-                           (top (floor (* 0.1 (display-pixel-height))))
-                           (params `((name . "demo-omni")
-                                    (width . ,(cons 'text-pixels width))
-                                    (height . ,(cons 'text-pixels height))
-                                    (left . ,left)
-                                    (top . ,top)
-                                    (minibuffer . only)))
-                            (frame (make-frame params)))
-                          (with-selected-frame frame
-                            (select-frame-set-input-focus (selected-frame))
-                            (unwind-protect
-                                (progn (consult-omni-apps-static ".*" (propertize "  " 'face 'consult-omni-path-face))
-                                       nil)
-                              (progn
-                                (when (frame-live-p frame) (delete-frame frame))
-                                nil))
-                                )))
+                                        ;;; set multiple sources for consult-omni-multi command. Change these lists as needed for different interactive commands. Keep in mind that each source has to be a key in `consult-omni-sources-alist'.
+                                        (setq consult-omni-multi-sources '("calc"
+                                                                           ;; "File"
+                                                                           ;; "Buffer"
+                                                                           ;; "Bookmark"
+                                                                           "Apps"
+                                                                           ;; "gptel"
+                                                                           ;; "Brave"
+                                                                           "Dictionary"
+                                                                           ;; "Google"
+                                                                           "Wikipedia"
+                                                                           ;; "elfeed"
+                                                                           ;; "mu4e"
+                                                                           ;; "buffers text search"
+                                                                           "Notes Search"
+                                                                           "Org Agenda"
+                                                                           ;;"GitHub"
+                                                                           ;; "YouTube"
+                                                                           ;; "Invidious"
+                                                                           ))
+                                                                           ;;; Set your shorthand favorite interactive command
+                                                                           (setq consult-omni-default-interactive-command #'consult-omni-multi)
+                  (add-to-list 'yequake-frames '("consult-omni-demo"
+                                 (buffer-fns . #'consult-omni-apps)
+                                 (width . 0.8)
+                                 (height . 0.8)
+                                 (top . 0)
+                                 (frame-parameters . ((name . "yequake-demo")
+                                                      (minibuffer . t)
+                                                      (autoraise . t)
+                                                      (window-system . ns) ;;change accordingly
+                                                      ))))
+                    (defun consult-omni-demo-launcher ()
+                      (interactive)
+                      (let* ((resize-mini-frames #'yequake-fit-frame-vertically)
+                             (vertico-count 30)
+                             (width (floor (* 0.8 (display-pixel-width))))
+                             (height (floor (* 0.8 (display-pixel-height))))
+                             (left  (floor (* 0.1 (display-pixel-width))))
+                             (top (floor (* 0.1 (display-pixel-height))))
+                             (params `((name . "demo-omni")
+                                      (width . ,(cons 'text-pixels width))
+                                      (height . ,(cons 'text-pixels height))
+                                      (left . ,left)
+                                      (top . ,top)
+                                      (minibuffer . only)))
+                              (frame (make-frame params)))
+                            (with-selected-frame frame
+                              (select-frame-set-input-focus (selected-frame))
+                              (unwind-protect
+                                  (progn (consult-omni-apps-static ".*" (propertize "  " 'face 'consult-omni-path-face))
+                                         nil)
+                                (progn
+                                  (when (frame-live-p frame) (delete-frame frame))
+                                  nil))
+                                  )))
                 '';
 
               };
