@@ -264,7 +264,17 @@ with lib; {
 
               yequake = {
                 enable = true;
-                config = "";
+                custom = "
+                   (yequake-frames
+   '((\"org-capture\"
+      (buffer-fns . (yequake-org-capture))
+      (width . 0.75)
+      (height . 0.5)
+      (alpha . 0.95)
+      (frame-parameters . ((undecorated . t)
+                           (skip-taskbar . t)
+                           (sticky . t))))))
+                ";
               };
 
               god-mode = {
