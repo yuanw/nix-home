@@ -1474,7 +1474,7 @@ with lib; {
                                                                          ))
                                                                          ;;; Set your shorthand favorite interactive command
                                                                          (setq consult-omni-default-interactive-command #'consult-omni-multi)
-                  (defun consult-omni-demo-launcher ()
+                  (defun consult-omni-app-launcher ()
                     (interactive)
                     (let* (
                            (vertico-count 30)
@@ -1486,6 +1486,7 @@ with lib; {
                                     (width . ,(cons 'text-pixels width))
                                     (height . ,(cons 'text-pixels height))
                                     (left . ,left)
+                                    ;; only work for macos, also kind of needed
                                     (window-system . ns)
                                     (top . ,top)
                                     (minibuffer . only)))
