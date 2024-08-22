@@ -10,6 +10,7 @@
 , embark
 , browser-hist
 , consult-notes
+, yequake
 , ...
 
 }:
@@ -52,5 +53,6 @@ melpaBuild {
     elfeed
     embark
     browser-hist
+    yequake
   ];
 }
