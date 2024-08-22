@@ -1412,7 +1412,7 @@ with lib; {
                 '';
               };
               consult-omni = {
-                enable = false;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/consult-omni {
                     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
