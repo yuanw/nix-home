@@ -1401,15 +1401,16 @@ with lib; {
                 enable = true;
                 custom = "
                 (yequake-frames
-                '((\"org-capture\"
-                (buffer-fns . (yequake-org-capture))
+                 '((\"org-capture\"
+                   (buffer-fns . (yequake-org-capture))
                 (width . 0.75)
                 (height . 0.5)
                 (alpha . 0.95)
                 (frame-parameters . ((undecorated . t)
                            (skip-taskbar . t)
                            (sticky . t))))
-                 (\"consult-omni-demo\"
+                  (\"consult-omni-demo\"
+
                                  (buffer-fns . #'consult-omni-apps)
                                  (width . 0.8)
                                  (height . 0.8)
@@ -1417,9 +1418,11 @@ with lib; {
                                  (frame-parameters . ((name . \"yequake-demo\")
                                                       (minibuffer . t)
                                                       (autoraise . t)
-                                                      (window-system . ns) ;;change accordingly
-                                                      ))))
-                           ))
+                                                      (window-system . ns))))
+                                                      ))
+
+
+
                 ";
               };
               consult-omni = {
