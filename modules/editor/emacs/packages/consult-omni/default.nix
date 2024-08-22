@@ -49,6 +49,7 @@ melpaBuild {
   propagatedUserEnvPkgs = [
     yequake
   ];
+  buildInputs = [ yequake ];
   packageRequires = [
     consult
     consult-notes
