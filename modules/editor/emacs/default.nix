@@ -1476,7 +1476,7 @@ with lib; {
                                                                          (setq consult-omni-default-interactive-command #'consult-omni-multi)
                   (defun consult-omni-demo-launcher ()
                     (interactive)
-                    (let* ((resize-mini-frames #'yequake-fit-frame-vertically)
+                    (let* (
                            (vertico-count 30)
                            (width (floor (* 0.8 (display-pixel-width))))
                            (height (floor (* 0.8 (display-pixel-height))))
@@ -1486,6 +1486,7 @@ with lib; {
                                     (width . ,(cons 'text-pixels width))
                                     (height . ,(cons 'text-pixels height))
                                     (left . ,left)
+                                    (window-system . ns)
                                     (top . ,top)
                                     (minibuffer . only)))
                             (frame (make-frame params)))
