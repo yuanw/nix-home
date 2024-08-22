@@ -1,7 +1,7 @@
 #+TITLE: Browser
 
 * Firefox
-** which package to use
+** Which package to use
 ** Shortcut
 Ctrl +/Ctrl - for zoom in and out
 Alt <- backforward

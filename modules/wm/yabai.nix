@@ -79,11 +79,7 @@ in
           pkgs.choose-mac
           (
             pkgs.writeShellScriptBin "app-launcher" ''
-              ls /Applications/ /Applications/Utilities/ /System/Applications/ /System/Applications/Utilities/ ~/.nix-profile/Applications/ | \
-              grep '\.app$' | \
-              sed 's/\.app$//g' | \
-              choose | \
-              xargs -I {} open -a "{}.app"
+              emacsclient --eval "(consult-omni-app-launcher)"
             ''
           )
           (

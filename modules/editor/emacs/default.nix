@@ -262,8 +262,6 @@ with lib; {
                 '';
               };
 
-
-
               god-mode = {
                 enable = true;
                 config = ''

@@ -3,7 +3,7 @@
 
 [[https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fyuanw%2Fnix-home]]
 
-[[https://github.com/yuanw/nix-home/workflows/ci.yml/badge.svg]]
+[[https://github.com/yuanw/nix-home/actions/workflows/ci.yml/badge.svg]]
 
 [[https://builtwithnix.org/badge.svg]]
 
