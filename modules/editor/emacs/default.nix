@@ -1424,6 +1424,7 @@ with lib; {
                 config = ''
                   ;; Load Sources Core code
                   (require 'consult-omni-sources)
+                  (consult-omni-sources-load-modules)
                   ;; Load Embark Actions
                   (require 'consult-omni-embark)
                 '';
