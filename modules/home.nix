@@ -175,6 +175,9 @@
     };
 
     gpg = { enable = true; };
+    fastfetch = {
+      enable = true;
+    };
 
     home-manager = { enable = true; };
     nnn = { enable = true; package = pkgs.nnn.override ({ withNerdIcons = true; }); };
