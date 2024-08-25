@@ -17,7 +17,7 @@ let
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
-    shift + ctrl + alt - x: org-capture -k n
+    shift + ctrl + alt - o: org-capture
     shift + ctrl + alt - f : open -n -a ~/.nix-profile/Applications/Firefox.app
     shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
@@ -77,11 +77,6 @@ in
         home.packages = [
           pkgs.ical-buddy
           pkgs.choose-mac
-          (
-            pkgs.writeShellScriptBin "app-launcher" ''
-              emacsclient --eval "(consult-omni-app-launcher)"
-            ''
-          )
           (
             pkgs.writeShellScriptBin "yabai-next-window" ''
               #

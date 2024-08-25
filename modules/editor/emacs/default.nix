@@ -71,7 +71,6 @@ with lib; {
         enable = cfg.enableService;
         package = emacsPackage;
       };
-
     })
 
     (mkIf cfg.enableLatex {
@@ -1725,6 +1724,16 @@ with lib; {
           home = {
             file.".emacs.d/snippets".source = ./snippets;
             packages = with pkgs; [
+              (
+                pkgs.writeShellScriptBin "app-launcher" ''
+                  ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
+                ''
+              )
+              (
+                pkgs.writeShellScriptBin "org-capture" ''
+                  ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
+                ''
+              )
               # git
               (ripgrep.override { withPCRE2 = true; })
               gnutls # for TLS connectivity
