@@ -224,14 +224,13 @@
             setopt HIST_NO_STORE         # Don't store history commands
             setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.i
 
-
-
           ''
         else
           lib.mkBefore ''
             setopt HIST_NO_STORE         # Don't store history commands
             setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.
           '';
+      profileExtra = "unalias gcp";
 
       oh-my-zsh = {
         enable = true;
