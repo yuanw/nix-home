@@ -234,7 +234,7 @@
 
       oh-my-zsh = {
         enable = true;
-        plugins = [ "history" "autojump" "history-substring-search" "git" ];
+        plugins = [ "history" "autojump" "history-substring-search" ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
