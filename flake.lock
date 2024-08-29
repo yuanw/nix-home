@@ -636,16 +636,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1724162275,
-        "narHash": "sha256-ntP59/S5Y5ptwZpKntoii+QT+/4Fp9Whp9Awvwd669Q=",
+        "lastModified": 1724959276,
+        "narHash": "sha256-rrdQfNQ+SIAKLm+Y2JFtDqFJ5E66AF+yZ504IGB5Vv0=",
         "owner": "yuanwang-wf",
         "repo": "home-manager",
-        "rev": "0ba5d56f58c8bff97b2adc6b981e02d395346aaf",
+        "rev": "137d50d22055f2f21a234fe40101360ff7c24446",
         "type": "github"
       },
       "original": {
         "owner": "yuanwang-wf",
-        "ref": "fix-darwin-firefox",
+        "ref": "upstream",
         "repo": "home-manager",
         "type": "github"
       }
