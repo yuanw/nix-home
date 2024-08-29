@@ -24,7 +24,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     # https://github.com/nix-community/home-manager/issues/5717
     home-manager = {
-      url = "github:yuanwang-wf/home-manager/fix-darwin-firefox";
+      url = "github:yuanwang-wf/home-manager/upstream";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     astro-nvim = {
