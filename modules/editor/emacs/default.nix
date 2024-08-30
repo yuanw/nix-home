@@ -913,12 +913,20 @@ with lib; {
               org = {
                 enable = true;
                 config = ''
-                  (setq org-directory  "~/org/")
-                  (setq org-agenda-files (append
-                                           (file-expand-wildcards (concat org-directory "*.org"))
-                                           (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                           (file-expand-wildcards (concat org-directory "projects/*.org"))))
-                  (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                                   (setq org-directory  "~/org/")
+                                   (setq org-agenda-files (append
+                                                            (file-expand-wildcards (concat org-directory "*.org"))
+                                                            (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                                                            (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                                            (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                                   (org-babel-do-load-languages
+                                                            'org-babel-load-languages
+                  '(
+                    (emacs-lisp . t)
+                    (python . t)
+                    (ipython . t)
+                    (dot . t )
+                    ))
                 '';
               };
 
