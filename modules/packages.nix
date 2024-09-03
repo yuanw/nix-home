@@ -27,6 +27,8 @@ with pkgs; [
   zlib
   pigz
   shellcheck
+  entr
+
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
   gitAndTools.gh
