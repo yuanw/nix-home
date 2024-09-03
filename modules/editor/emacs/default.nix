@@ -1156,6 +1156,12 @@ with lib; {
                   ''"Jenkinsfile\\'"'' # \
                 ];
               };
+              plantuml-mode = {
+                enable = true;
+              };
+              protobuf-mode = {
+                enable = true;
+              };
 
               popper = {
                 enable = true;

@@ -21,7 +21,7 @@ with pkgs; [
   #unrar
   unzip
   graphviz
-  plantuml
+  plantuml-c4
   xclip
   pass
   zlib
