@@ -14,4 +14,5 @@ with pkgs; [
   xdotool
   xorg.xwininfo
   wifish
+  mpv-unwrapped
 ]

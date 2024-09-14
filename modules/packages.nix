@@ -13,7 +13,6 @@ with pkgs; [
   htop
   nix-prefetch-git
   cachix
-  mpv-unwrapped
   # sass
   tree
   # broot
