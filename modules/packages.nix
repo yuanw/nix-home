@@ -13,7 +13,6 @@ with pkgs; [
   htop
   nix-prefetch-git
   cachix
-  mpv-unwrapped
   # sass
   tree
   # broot
@@ -21,12 +20,14 @@ with pkgs; [
   #unrar
   unzip
   graphviz
-  plantuml
+  plantuml-c4
   xclip
   pass
   zlib
   pigz
   shellcheck
+  entr
+
   gitAndTools.pre-commit
   gitAndTools.pass-git-helper
   gitAndTools.gh

@@ -214,7 +214,7 @@
       mode = [ ''"\\.puml\\'"'' ];
       config = ''
         (setq plantuml-default-exec-mode 'executable
-              plantuml-executable-path "${pkgs.plantuml}/bin/plantuml")
+              plantuml-executable-path "${pkgs.plantuml-c4}/bin/plantuml")
       '';
     };
 
