@@ -31,7 +31,7 @@ with lib; {
   # enable jackd seems mess up headphone jack
   # services.jack.jackd.enable = true;
   # sound.enable = true;
-  hardware.pulseaudio.enable = true;
+  # hardware.pulseaudio.enable = true;
   # hardware.pulseaudio.package = pkgs.pulseaudioFull;
   nix = {
     # auto-optimise-store = true;
