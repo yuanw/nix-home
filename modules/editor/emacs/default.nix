@@ -1627,6 +1627,7 @@ with lib; {
                   "(prog-mode . electric-indent-mode)"
 
                   # Disable for some modes.
+                  "(org-mode .        (lambda () (electric-indent-local-mode -1)))"
                   "(purescript-mode . (lambda () (electric-indent-local-mode -1)))"
                 ];
               };
