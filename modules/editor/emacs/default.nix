@@ -503,7 +503,7 @@ with lib; {
                   (setq dired-use-ls-dired nil)
                   ;; Be smart about choosing file targets.
                   (setq dired-dwim-target t)
-
+                  (setq dired-auto-revert-buffer t)
                   ;; Use the system trash can.
                   (setq delete-by-moving-to-trash t)
                   (setq dired-listing-switches "-alvh --group-directories-first")
