@@ -729,16 +729,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1724959276,
-        "narHash": "sha256-rrdQfNQ+SIAKLm+Y2JFtDqFJ5E66AF+yZ504IGB5Vv0=",
-        "owner": "yuanwang-wf",
+        "lastModified": 1726985855,
+        "narHash": "sha256-NJPGK030Y3qETpWBhj9oobDQRbXdXOPxtu+YgGvZ84o=",
+        "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "137d50d22055f2f21a234fe40101360ff7c24446",
+        "rev": "04213d1ce4221f5d9b40bcee30706ce9a91d148d",
         "type": "github"
       },
       "original": {
-        "owner": "yuanwang-wf",
-        "ref": "upstream",
+        "owner": "nix-community",
         "repo": "home-manager",
         "type": "github"
       }
