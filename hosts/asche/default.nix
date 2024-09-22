@@ -77,7 +77,7 @@
     };
     editors.emacs = {
       enable = true;
-      pkg = pkgs.emacs-unstable;
+      #pkg = pkgs.emacs-unstable;
     };
     qmk.enable = true;
     tmux.enable = true;
