@@ -171,11 +171,11 @@ with lib; {
               ;; Always show line and column number in the mode line.
               (line-number-mode)
               (column-number-mode)
-
+              (global-visual-line-mode t)
               ;; Enable some features that are disabled by default.
               (put 'narrow-to-region 'disabled nil)
-              (put 'upcase-region 'disabled nil)
-              (put 'downcase-region 'disabled nil)
+              ;;(put 'upcase-region 'disabled nil)
+              ;;(put 'downcase-region 'disabled nil)
               ;; Typically, I only want spaces when pressing the TAB key. I also
               ;; want 4 of them.
               (setq-default indent-tabs-mode nil
