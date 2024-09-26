@@ -382,6 +382,7 @@ with lib; {
                   (auto-revert-use-notify nil)
                 '';
                 config = ''
+                  ;;; this actually make dired buffer refresh
                   (add-hook 'dired-mode-hook 'auto-revert-mode)
                   (global-auto-revert-mode t)
                 '';
