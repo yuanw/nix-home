@@ -966,10 +966,18 @@ with lib; {
 
               org-download = {
                 enable = true;
+                command = [ "org-download-yank" "org-download-clipboard" ];
                 after = [ "org" ];
-                hook = [
-                  "(dired-mode-hook .org-download-enable)"
+                custom = ''
+                  (org-download-method 'attach)
+                '';
+                config =
+                  "(add-hook 'dired-mode-hook  'org-download-enable)";
+                # if macos
+                extraPackages = [
+                  pkgs.pngpaste
                 ];
+
               };
               org-re-reveal = {
                 enable = false;
