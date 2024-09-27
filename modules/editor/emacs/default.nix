@@ -973,6 +973,7 @@ with lib; {
                 '';
                 config =
                   "(add-hook 'dired-mode-hook  'org-download-enable)";
+                # if macos
                 extraPackages = [
                   pkgs.pngpaste
                 ];
