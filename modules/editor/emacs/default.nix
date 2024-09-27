@@ -966,9 +966,13 @@ with lib; {
 
               org-download = {
                 enable = true;
+                command = [ "org-download-yank" "org-download-clipboard" ];
                 after = [ "org" ];
+                custom = ''
+                  (org-download-method 'attach)
+                '';
                 hook = [
-                  "(dired-mode-hook .org-download-enable)"
+                  "(dired-mode-hook . org-download-enable)"
                 ];
               };
               org-re-reveal = {
