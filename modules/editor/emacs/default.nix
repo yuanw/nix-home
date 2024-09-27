@@ -971,9 +971,12 @@ with lib; {
                 custom = ''
                   (org-download-method 'attach)
                 '';
-                hook = [
-                  "(dired-mode-hook . org-download-enable)"
+                config =
+                  "(add-hook 'dired-mode-hook  'org-download-enable)";
+                extraPackages = [
+                  pkgs.pngpaste
                 ];
+
               };
               org-re-reveal = {
                 enable = false;
