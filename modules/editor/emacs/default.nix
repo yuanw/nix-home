@@ -1631,7 +1631,7 @@ with lib; {
 
               # Enable Electric Indent mode to do automatic indentation on RET.
               electric = {
-                enable = true;
+                enable = false;
                 command = [ "electric-indent-local-mode" ];
                 hook = [
                   "(prog-mode . electric-indent-mode)"
