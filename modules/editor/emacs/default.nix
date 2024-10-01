@@ -1629,6 +1629,13 @@ with lib; {
                 command = [ "deadgrep" ];
               };
 
+              aggressive-indent = {
+                enable = true;
+                hook = [
+                  #                  :diminish
+                  "(emacs-lisp-mode . aggressive-indent-mode)"
+                ];
+              };
               # Enable Electric Indent mode to do automatic indentation on RET.
               electric = {
                 enable = false;
