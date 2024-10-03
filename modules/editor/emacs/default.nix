@@ -926,8 +926,8 @@ with lib; {
                   '(
                     (emacs-lisp . t)
                     (python . t)
-                    (ipython . t)
-                    (racket . t)
+                    ;;(ipython . t)
+                    ;;(racket . t)
                     (dot . t)
                     ))
                 '';
@@ -951,7 +951,7 @@ with lib; {
                 enable = true;
               };
               ob-racket = {
-                enable = true;
+                enable = false;
 
                 package = epkgs: (
                   pkgs.callPackage ./packages/ob-racket.nix {
