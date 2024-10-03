@@ -961,10 +961,6 @@ with lib; {
                   }
                 );
                 after = [ "org" ];
-                config = ''
-                                     (add-hook 'ob-racket-pre-runtime-library-load-hook
-                  	      #'ob-racket-raco-make-runtime-library)
-                '';
               };
               org-modern = {
                 enable = true;
