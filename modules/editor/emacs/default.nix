@@ -828,7 +828,7 @@ with lib; {
                   consult-grep
                   consult-bookmark
                   consult-recent-file
-                  consult-xref
+
                   consult--source-bookmark
                   consult--source-file-register
                   consult--source-recent-file
@@ -839,7 +839,7 @@ with lib; {
               };
 
               consult-xref = {
-                enable = true;
+                enable = false;
                 command = [ "consult-xref" ];
                 config = ''
                   (setq xref-show-definitions-function #'consult-xref
@@ -926,8 +926,6 @@ with lib; {
                   '(
                     (emacs-lisp . t)
                     (python . t)
-                    ;;(ipython . t)
-                    ;;(racket . t)
                     (dot . t)
                     ))
                 '';
@@ -948,11 +946,10 @@ with lib; {
                 '';
               };
               ob-ipython = {
-                enable = true;
+                enable = false;
               };
               ob-racket = {
                 enable = false;
-
                 package = epkgs: (
                   pkgs.callPackage ./packages/ob-racket.nix {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
