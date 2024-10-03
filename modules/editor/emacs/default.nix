@@ -927,6 +927,7 @@ with lib; {
                     (emacs-lisp . t)
                     (python . t)
                     (ipython . t)
+                    (racket . t)
                     (dot . t)
                     ))
                 '';
