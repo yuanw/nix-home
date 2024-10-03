@@ -915,18 +915,18 @@ with lib; {
               org = {
                 enable = true;
                 config = ''
-                                   (setq org-directory  "~/org/")
-                                   (setq org-agenda-files (append
-                                                            (file-expand-wildcards (concat org-directory "*.org"))
-                                                            (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                                            (file-expand-wildcards (concat org-directory "projects/*.org"))))
-                                                            (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
-                                   (org-babel-do-load-languages
-                                                            'org-babel-load-languages
+                  (setq org-directory  "~/org/")
+                  (setq org-agenda-files (append
+                                   (file-expand-wildcards (concat org-directory "*.org"))
+                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                                   (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                   (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                  (org-babel-do-load-languages 'org-babel-load-languages
                   '(
                     (emacs-lisp . t)
                     (python . t)
                     (dot . t)
+                    (racket . t)
                     ))
                 '';
               };
@@ -949,7 +949,7 @@ with lib; {
                 enable = false;
               };
               ob-racket = {
-                enable = false;
+                enable = true;
                 package = epkgs: (
                   pkgs.callPackage ./packages/ob-racket.nix {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
