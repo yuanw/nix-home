@@ -927,7 +927,7 @@ with lib; {
                     (emacs-lisp . t)
                     (python . t)
                     (ipython . t)
-                    (dot . t )
+                    (dot . t)
                     ))
                 '';
               };
@@ -946,7 +946,25 @@ with lib; {
                         org-agenda-start-on-weekday nil)
                 '';
               };
+              ob-ipython = {
+                enable = true;
+              };
+              ob-racket = {
+                enable = true;
 
+                package = epkgs: (
+                  pkgs.callPackage ./packages/ob-racket.nix {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  }
+                );
+                after = [ "org" ];
+                config = ''
+                                     (add-hook 'ob-racket-pre-runtime-library-load-hook
+                  	      #'ob-racket-raco-make-runtime-library)
+                '';
+              };
               org-modern = {
                 enable = true;
                 after = [ "org" ];
