@@ -215,6 +215,7 @@ with lib; {
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
               (setq tab-always-indent 'complete)
+              (setq xref-search-program 'ripgrep)
 
 
               ;; Only do candidate cycling if there are very few candidates.
@@ -828,7 +829,7 @@ with lib; {
                   consult-grep
                   consult-bookmark
                   consult-recent-file
-                  consult-xref
+
                   consult--source-bookmark
                   consult--source-file-register
                   consult--source-recent-file
@@ -839,7 +840,7 @@ with lib; {
               };
 
               consult-xref = {
-                enable = true;
+                enable = false;
                 command = [ "consult-xref" ];
                 config = ''
                   (setq xref-show-definitions-function #'consult-xref
@@ -915,19 +916,18 @@ with lib; {
               org = {
                 enable = true;
                 config = ''
-                                   (setq org-directory  "~/org/")
-                                   (setq org-agenda-files (append
-                                                            (file-expand-wildcards (concat org-directory "*.org"))
-                                                            (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                                            (file-expand-wildcards (concat org-directory "projects/*.org"))))
-                                                            (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
-                                   (org-babel-do-load-languages
-                                                            'org-babel-load-languages
+                  (setq org-directory  "~/org/")
+                  (setq org-agenda-files (append
+                                   (file-expand-wildcards (concat org-directory "*.org"))
+                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                                   (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                   (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                  (org-babel-do-load-languages 'org-babel-load-languages
                   '(
                     (emacs-lisp . t)
                     (python . t)
-                    (ipython . t)
-                    (dot . t )
+                    (dot . t)
+                    (racket . t)
                     ))
                 '';
               };
@@ -946,7 +946,20 @@ with lib; {
                         org-agenda-start-on-weekday nil)
                 '';
               };
-
+              ob-ipython = {
+                enable = false;
+              };
+              ob-racket = {
+                enable = true;
+                package = epkgs: (
+                  pkgs.callPackage ./packages/ob-racket.nix {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  }
+                );
+                after = [ "org" ];
+              };
               org-modern = {
                 enable = true;
                 after = [ "org" ];
@@ -1629,9 +1642,16 @@ with lib; {
                 command = [ "deadgrep" ];
               };
 
+              aggressive-indent = {
+                enable = true;
+                hook = [
+                  #                  :diminish
+                  "(emacs-lisp-mode . aggressive-indent-mode)"
+                ];
+              };
               # Enable Electric Indent mode to do automatic indentation on RET.
               electric = {
-                enable = true;
+                enable = false;
                 command = [ "electric-indent-local-mode" ];
                 hook = [
                   "(prog-mode . electric-indent-mode)"

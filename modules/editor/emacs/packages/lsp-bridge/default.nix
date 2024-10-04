@@ -67,7 +67,7 @@ melpaBuild {
     (lsp-bridge
     :repo "manateelazycat/lsp-bridge"
     :files ("*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-    :fetcher github
+    :fetcher github)
   '';
 
   packageRequires = [
