@@ -1018,6 +1018,7 @@ with lib; {
 
               };
               casual-editkit = {
+                enable = true;
                 bind = { "C-o" = "casual-editkit-main-tmenu"; };
               };
               easy-kill = {
