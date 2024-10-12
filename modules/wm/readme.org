@@ -1,5 +1,7 @@
-#+TITLE: Title Window Manager
+#+TITLE: Tailing Window Manager and bars
 * MacOS
+** bar
+gh requires ~gh auth login~
 ** Hotkey
 *** lock screen shortcut
 ~Meh + L~
@@ -10,6 +12,8 @@ System Preference -> Security & Privacy -> General
 ** Hide Window
 ~Command + H~ default MacOS shortcut
 ~Command + Shift + .~ show hidden files
+
+
 ** Commands screen capture
 ~screencapture -i -c /tmp/$(date +%s).png~
 ** Resources
