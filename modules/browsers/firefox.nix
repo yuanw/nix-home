@@ -70,12 +70,24 @@ in
           ];
 
           search = {
+            force = true;
             default = "Kagi";
             engines = {
               "Google".metaData.hidden = true;
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
+              "Kagi" = {
+                urls = [{
+                  template = "https://kagi.com/search?";
+                  params = [
+                    {
+                      name = "q";
+                      value = "{searchTerms}";
+                    }
+                  ];
+                }];
+              };
               "Nix Packages" = {
                 urls = [{
                   template = "https://search.nixos.org/packages";
