@@ -32,6 +32,17 @@ in
         DisablePocket = true;
         DisableAppUpdate = true;
       };
+      # https://github.com/llakala/nixos/blob/ffc71bb84cb95dd813795d4cb0beb99cebf8a4e0/base/software/home/firefox.nix
+      programs.firefox.policies.Preferences = {
+
+        "browser.in-content.dark-mode" = true; # Use dark mode
+        "ui.systemUsesDarkTheme" = true;
+
+        "extensions.autoDisableScopes" = 0; # Automatically enable extensions
+        "extensions.update.enabled" = false;
+
+        "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
+      };
       # programs.firefox.nativeMessagingHosts = [
       #   pkgs.tridactyl-native
       # ];
@@ -73,6 +84,8 @@ in
             force = true;
             default = "Kagi";
             engines = {
+              # Mozill, have mecry upon our souls and eyeball, do not suggest search with ebay or bezo
+              # every time I type on address bar
               "Google".metaData.hidden = true;
               "Bing".metaData.hidden = true;
               "eBay".metaData.hidden = true;
