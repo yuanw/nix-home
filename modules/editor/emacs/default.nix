@@ -1025,6 +1025,12 @@ with lib; {
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
               };
+              org-pdftools = {
+                enable = true;
+                hook = [
+                  "(org-mode . org-pdftools-setup-link)"
+                ];
+              };
               dslide = {
                 enable = true;
                 package = epkgs:
