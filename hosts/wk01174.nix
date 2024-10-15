@@ -48,7 +48,7 @@
         "mysql-shell"
         "viscosity"
         "brave-browser"
-        "zoom"
+        "microsoft-teams"
       ];
       brews = [
         "redis"
