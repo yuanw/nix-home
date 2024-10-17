@@ -34,13 +34,10 @@ in
       };
       # https://github.com/llakala/nixos/blob/ffc71bb84cb95dd813795d4cb0beb99cebf8a4e0/base/software/home/firefox.nix
       programs.firefox.policies.Preferences = {
-
         "browser.in-content.dark-mode" = true; # Use dark mode
         "ui.systemUsesDarkTheme" = true;
-
         "extensions.autoDisableScopes" = 0; # Automatically enable extensions
         "extensions.update.enabled" = false;
-
         "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
       };
       # programs.firefox.nativeMessagingHosts = [
@@ -59,6 +56,7 @@ in
             kagi-search
             userchrome-toggle-extended
             sidebery
+            darkreader
             # curl -sS https://addons.mozilla.org/api/v5/addons/search/\?q\=mtab | jq -r '.results[0].current_version.file'
             (buildFirefoxXpiAddon {
               pname = "mtab";
