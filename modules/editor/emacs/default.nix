@@ -1235,6 +1235,9 @@ with lib; {
               protobuf-mode = {
                 enable = true;
               };
+              racket-mode = {
+                enable = true;
+              };
 
               popper = {
                 enable = true;
