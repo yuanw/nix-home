@@ -16,6 +16,8 @@ in {
           pandas
           numpy
           isort
+          #jupyter
+          sortedcontainers
           setuptools
           pylint
           matplotlib

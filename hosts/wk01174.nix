@@ -77,7 +77,7 @@
         idris2.enable = false;
         python.enable = true;
         zig.enable = false;
-        scheme.enable = true;
+        racket.enable = true;
         kotlin.enable = true;
       };
     zellij.enable = false;

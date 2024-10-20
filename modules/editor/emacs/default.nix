@@ -171,11 +171,11 @@ with lib; {
               ;; Always show line and column number in the mode line.
               (line-number-mode)
               (column-number-mode)
-
+              (global-visual-line-mode t)
               ;; Enable some features that are disabled by default.
               (put 'narrow-to-region 'disabled nil)
-              (put 'upcase-region 'disabled nil)
-              (put 'downcase-region 'disabled nil)
+              ;;(put 'upcase-region 'disabled nil)
+              ;;(put 'downcase-region 'disabled nil)
               ;; Typically, I only want spaces when pressing the TAB key. I also
               ;; want 4 of them.
               (setq-default indent-tabs-mode nil
@@ -215,8 +215,34 @@ with lib; {
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
               (setq tab-always-indent 'complete)
+              (setq xref-search-program 'ripgrep)
+
+              ;;https://dougie.io/emacs/indentation/
+              ; START TABS CONFIG
+              ;; Create a variable for our preferred tab width
+              (setq custom-tab-width 2)
+
+              ;; Language-Specific Tweaks
+              (setq-default python-indent-offset custom-tab-width) ;; Python
+              (setq-default js-indent-level custom-tab-width)      ;; Javascript
+
+              ;; Making electric-indent behave sanely
+              (setq-default electric-indent-inhibit t)
+
+              ;; Make the backspace properly erase the tab instead of
+              ;; removing 1 space at a time.
+              (setq backward-delete-char-untabify-method 'hungry)
 
 
+              ;; WARNING: This will change your life
+              ;; (OPTIONAL) Visualize tabs as a pipe character - "|"
+              ;; This will also show trailing characters as they are useful to spot.
+              (setq whitespace-style '(face tabs tab-mark trailing))
+              (custom-set-faces '(whitespace-tab ((t (:foreground "#636363")))))
+              (setq whitespace-display-mappings   '((tab-mark 9 [124 9] [92 9])))
+              ; 124 is the ascii ID for '\|'
+              ; (global-whitespace-mode) ; Enable whitespace mode everywhere
+              ; END TABS CONFIG
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
             '';
@@ -382,6 +408,8 @@ with lib; {
                   (auto-revert-use-notify nil)
                 '';
                 config = ''
+                  ;;; this actually make dired buffer refresh
+                  (add-hook 'dired-mode-hook 'auto-revert-mode)
                   (global-auto-revert-mode t)
                 '';
               };
@@ -503,7 +531,7 @@ with lib; {
                   (setq dired-use-ls-dired nil)
                   ;; Be smart about choosing file targets.
                   (setq dired-dwim-target t)
-
+                  (setq dired-auto-revert-buffer t)
                   ;; Use the system trash can.
                   (setq delete-by-moving-to-trash t)
                   (setq dired-listing-switches "-alvh --group-directories-first")
@@ -826,7 +854,7 @@ with lib; {
                   consult-grep
                   consult-bookmark
                   consult-recent-file
-                  consult-xref
+
                   consult--source-bookmark
                   consult--source-file-register
                   consult--source-recent-file
@@ -837,7 +865,7 @@ with lib; {
               };
 
               consult-xref = {
-                enable = true;
+                enable = false;
                 command = [ "consult-xref" ];
                 config = ''
                   (setq xref-show-definitions-function #'consult-xref
@@ -913,19 +941,18 @@ with lib; {
               org = {
                 enable = true;
                 config = ''
-                                   (setq org-directory  "~/org/")
-                                   (setq org-agenda-files (append
-                                                            (file-expand-wildcards (concat org-directory "*.org"))
-                                                            (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                                            (file-expand-wildcards (concat org-directory "projects/*.org"))))
-                                                            (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
-                                   (org-babel-do-load-languages
-                                                            'org-babel-load-languages
+                  (setq org-directory  "~/org/")
+                  (setq org-agenda-files (append
+                                   (file-expand-wildcards (concat org-directory "*.org"))
+                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))
+                                   (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                   (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                  (org-babel-do-load-languages 'org-babel-load-languages
                   '(
                     (emacs-lisp . t)
                     (python . t)
-                    (ipython . t)
-                    (dot . t )
+                    (dot . t)
+                    (racket . t)
                     ))
                 '';
               };
@@ -944,7 +971,20 @@ with lib; {
                         org-agenda-start-on-weekday nil)
                 '';
               };
-
+              ob-ipython = {
+                enable = false;
+              };
+              ob-racket = {
+                enable = true;
+                package = epkgs: (
+                  pkgs.callPackage ./packages/ob-racket.nix {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  }
+                );
+                after = [ "org" ];
+              };
               org-modern = {
                 enable = true;
                 after = [ "org" ];
@@ -964,10 +1004,19 @@ with lib; {
 
               org-download = {
                 enable = true;
+                command = [ "org-download-yank" "org-download-clipboard" ];
                 after = [ "org" ];
-                hook = [
-                  "(dired-mode-hook .org-download-enable)"
-                ];
+                custom = ''
+                  (org-download-method 'attach)
+                '';
+                config =
+                  "(add-hook 'dired-mode-hook  'org-download-enable)";
+                # if macos
+                extraPackages =
+                  if isDarwin then [
+                    pkgs.pngpaste
+                  ] else [ ];
+
               };
               org-re-reveal = {
                 enable = false;
@@ -975,6 +1024,12 @@ with lib; {
                 config = ''
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
+              };
+              org-pdftools = {
+                enable = true;
+                hook = [
+                  "(org-mode . org-pdftools-setup-link)"
+                ];
               };
               dslide = {
                 enable = true;
@@ -993,7 +1048,10 @@ with lib; {
                   };
 
               };
-
+              casual-editkit = {
+                enable = true;
+                bind = { "C-o" = "casual-editkit-main-tmenu"; };
+              };
               easy-kill = {
                 enable = true;
                 extraConfig = ''
@@ -1117,6 +1175,21 @@ with lib; {
                 };
                 config = ''
                   (setq jinx-languages "en_CA")
+                '';
+              };
+              pdf-tools = {
+                enable = true;
+                custom = ''
+                  (pdf-tools-handle-upgrades nil)
+                '';
+                config = ''
+                  (dolist
+                  (pkg
+                  '(pdf-annot pdf-cache pdf-dev pdf-history pdf-info pdf-isearch
+                   pdf-links pdf-misc pdf-occur pdf-outline pdf-sync
+                   pdf-util pdf-view pdf-virtual))
+                  (require pkg))
+                  (pdf-tools-install)
                 '';
               };
 
@@ -1619,14 +1692,23 @@ with lib; {
                 command = [ "deadgrep" ];
               };
 
+              aggressive-indent = {
+                enable = true;
+                diminish = [ "aggressive-ident-mode" ];
+                hook = [
+                  #                  :diminish
+                  "(emacs-lisp-mode . aggressive-indent-mode)"
+                ];
+              };
               # Enable Electric Indent mode to do automatic indentation on RET.
               electric = {
-                enable = true;
+                enable = false;
                 command = [ "electric-indent-local-mode" ];
                 hook = [
                   "(prog-mode . electric-indent-mode)"
 
                   # Disable for some modes.
+                  "(org-mode .        (lambda () (electric-indent-local-mode -1)))"
                   "(purescript-mode . (lambda () (electric-indent-local-mode -1)))"
                 ];
               };

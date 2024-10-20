@@ -23,7 +23,6 @@ with lib; {
   };
 
   config = mkIf cfg.enable {
-
     home-manager.users.${config.my.username} = {
       home = {
         file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
@@ -54,6 +53,8 @@ with lib; {
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
+            set-option -g default-shell /bin/zsh
+            set -g default-command /bin/zsh
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style none
