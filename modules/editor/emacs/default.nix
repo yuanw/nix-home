@@ -1239,7 +1239,7 @@ with lib; {
                 enable = true;
               };
               terraform-mode = {
-
+                enable = true;
                 custom = "(terraform-indent-level 4)";
                 config = ''
                   (defun my-terraform-mode-init ()
