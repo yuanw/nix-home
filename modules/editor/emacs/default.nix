@@ -1247,7 +1247,7 @@ with lib; {
                        (outline-minor-mode 1)
                     )
 
-                  (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
+                  (add-hook 'terraform-mode-hook 'my-terraform-mode-init)
                 '';
               };
               popper = {
