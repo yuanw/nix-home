@@ -79,7 +79,7 @@ with lib; {
   time.timeZone = "America/Regina";
 
   users.users.${config.my.username} = {
-    shell = pgs.zsh;
+    shell = pkgs.zsh;
     home = config.my.homeDirectory;
   };
   home-manager.backupFileExtension = "backup";
