@@ -1235,7 +1235,21 @@ with lib; {
               protobuf-mode = {
                 enable = true;
               };
+              racket-mode = {
+                enable = true;
+              };
+              terraform-mode = {
+                enable = true;
+                custom = "(terraform-indent-level 4)";
+                config = ''
+                  (defun my-terraform-mode-init ()
+                    ;; if you want to use outline-minor-mode
+                       (outline-minor-mode 1)
+                    )
 
+                  (add-hook 'terraform-mode-hook 'my-terraform-mode-init)
+                '';
+              };
               popper = {
                 enable = true;
                 bind = {
