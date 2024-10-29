@@ -78,7 +78,7 @@
         python.enable = true;
         zig.enable = false;
         racket.enable = true;
-        kotlin.enable = true;
+        #kotlin.enable = true;
       };
     zellij.enable = false;
     tmux = {
