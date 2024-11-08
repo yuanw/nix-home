@@ -15,7 +15,6 @@ let
       patches =
         (lib.optionals pkgs.stdenv.isDarwin [
           "${inputs.emacs-plus}/patches/emacs-30/fix-window-role.patch"
-          "${inputs.emacs-plus}/patches/emacs-30/poll.patch"
           "${inputs.emacs-plus}/patches/emacs-30/round-undecorated-frame.patch"
           "${inputs.emacs-plus}/patches/emacs-30/system-appearance.patch"
         ])
@@ -1336,7 +1335,8 @@ with lib; {
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
                                     )
-                  (add-hook 'java-mode-hook #'eglot-ensure)
+                  (add-hook 'java-mode-hook #'
+                  eglot-ensure)
                   (add-hook 'java-ts-mode-hook #'eglot-ensure)
                 '';
               };
