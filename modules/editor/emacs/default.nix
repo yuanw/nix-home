@@ -955,7 +955,6 @@ with lib; {
                     ))
                 '';
               };
-
               org-agenda = {
                 enable = true;
                 after = [ "org" ];
@@ -1029,6 +1028,9 @@ with lib; {
                 hook = [
                   "(org-mode . org-pdftools-setup-link)"
                 ];
+              };
+              org-review = {
+                enable = true;
               };
               dslide = {
                 enable = true;
