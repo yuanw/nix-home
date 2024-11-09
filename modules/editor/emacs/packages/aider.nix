@@ -10,17 +10,17 @@
 }:
 
 let
-  pname = "ob-racket";
-  version = "1.3.1";
+  pname = "aider";
+  version = "0.0.1";
 in
 melpaBuild {
   inherit pname version;
   src = fetchFromGitHub {
-    owner = "hasu";
-    repo = "emacs-ob-racket";
-    rev = "c7b7eee58fcde2ad515b72288742e555e7ec7915";
+    owner = "tninja";
+    repo = "aider.el";
+    rev = "515f5cbb505e614f400c21f99bdbebd47609c659";
     #sha256 = lib.fakeSha256;
-    sha256 = "sha256-yv+PP1JyEvMxEToNbgDbgWih/GHdauwfYLzPaEPsEC8=";
+    sha256 = "sha256-NTkpiG0w/Bmo2CjlCLIA/6+feWcDQ/+IGPNy3Ml/AbA=";
   };
 
   dontConfigure = true;
@@ -33,10 +33,10 @@ melpaBuild {
   '';
 
   recipe = writeText "recipe" ''
-    (ob-racket
-    :repo "hasu/emacs-ob-racket"
-    :files ("*.el" "*.rkt")
-    :fetcher github)
+    (aider
+     :repo "tninja/aider.el"
+     :files ("*.el")
+     :fetcher github)
   '';
 
   packageRequires = [

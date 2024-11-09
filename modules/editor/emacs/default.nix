@@ -983,6 +983,25 @@ with lib; {
                 );
                 after = [ "org" ];
               };
+              aider = {
+                enable = true;
+                package = epkgs: (
+                  pkgs.callPackage ./packages/aider.nix {
+                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  }
+                );
+                extraPackages = [
+                  pkgs.aider-chat
+                ];
+                config = ''
+                  (setq aider-args '("--no-auto-commits" "--model" "openrouter/deepseek/deepseek-coder"))
+                  (setenv "OPENROUTER_API_KEY" (with-temp-buffer
+                               (insert-file-contents "~/.config/openrouter/key.txt")
+                               (string-trim (buffer-string))))
+                '';
+              };
               org-modern = {
                 enable = true;
                 after = [ "org" ];
@@ -991,7 +1010,6 @@ with lib; {
                   "(org-agenda-finalize . org-modern-agenda)"
                 ];
               };
-
               org-appear = {
                 enable = true;
                 after = [ "org" ];
@@ -999,7 +1017,6 @@ with lib; {
                   "(org-mode . org-appear-mode)"
                 ];
               };
-
               org-download = {
                 enable = true;
                 command = [ "org-download-yank" "org-download-clipboard" ];
