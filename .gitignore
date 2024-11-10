@@ -47,3 +47,5 @@ AdGuardHome.yaml
 
 ssh_host_ed25519_key.pub
 diff.json
+.aider*
+.env
