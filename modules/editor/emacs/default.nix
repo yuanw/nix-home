@@ -1358,9 +1358,9 @@ with lib; {
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gopls"))
                                     )
-                  (add-hook 'kotlin-mode-hook #'eglot-ensure)
-                  (add-hook 'java-mode-hook #'eglot-ensure)
-                  (add-hook 'java-ts-mode-hook #'eglot-ensure)
+                  ;;(add-hook 'kotlin-mode-hook #'eglot-ensure)
+                  ;;(add-hook 'java-mode-hook #'eglot-ensure)
+                  ;;(add-hook 'java-ts-mode-hook #'eglot-ensure)
                 '';
               };
 
