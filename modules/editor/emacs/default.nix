@@ -1190,15 +1190,14 @@ with lib; {
               jinx = {
                 enable = true;
                 diminish = [ "jinx-mode" ];
-                #hook = [ "(emacs-startup . global-jinx-mode)" ];
-                bind = {
-                  "M-$" = "jinx-correct";
-                  "C-M-$" = "jinx-languages ";
-                };
+                command = [ "jinx-mode" ];
+                hook = [ "(org-mode . jinx-mode)" ];
+                #bind = {
+                #  "M-$" = "jinx-correct";
+                #  "C-M-$" = "jinx-languages ";
+                #};
                 config = ''
                   (setq jinx-languages "en_CA")
-                  (dolist (hook '(text-mode-hook conf-mode-hook))
-                              (add-hook hook #'jinx-mode))
                 '';
               };
               pdf-tools = {
