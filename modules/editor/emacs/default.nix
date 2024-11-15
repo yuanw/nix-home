@@ -58,6 +58,10 @@ with lib; {
       default = false;
     };
 
+    enableAider = mkOption {
+      type = types.bool;
+      default = false;
+    };
     enableCopilot = mkOption {
       type = types.bool;
       default = false;
@@ -984,7 +988,7 @@ with lib; {
                 after = [ "org" ];
               };
               aider = {
-                enable = true;
+                enable = cfg.enableAider;
                 package = epkgs: (
                   pkgs.callPackage ./packages/aider.nix {
                     inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
