@@ -96,6 +96,6 @@
     };
 
 
-    workShell.enable = true;
+    work.enable = true;
   };
 }

@@ -1,4 +1,4 @@
-{ ... }:
+{ loadPrivate ? false, ... }:
 {
   flake.nixosModules = {
     common.imports = [
@@ -29,8 +29,10 @@
       ./settings.nix
       ./terminal
       ./typing
-      ./workShell.nix
-    ];
+    ] + (if loadPrivate then [
+      ./private/work.nix
+    ] else [ ]);
+
     linux.imports = [
       ./qmk.nix
       ./nixos_system.nix

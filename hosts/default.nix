@@ -90,6 +90,7 @@
           specialArgs = {
             isDarwin = true;
             isNixOS = false;
+            loadPrivate = true;
             nurNoPkg = import inputs.nur {
               nurpkgs = import inputs.nixpkgs { system = system; };
             };
