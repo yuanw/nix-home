@@ -95,6 +95,9 @@ Host *
 
 #+end_src
 
+** git-crypt
+git-crypt unlock to load private files if needed
+
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
@@ -115,7 +118,8 @@ or
 
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
-
+* See the diff between build and current system
+~nix-diff /run/current-system ./result~
 * Caveats
 ** Exclude Nix directory from Spotlight index
 ** nix-darwin permission issue
