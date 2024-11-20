@@ -1,7 +1,7 @@
 { loadPrivate ? false, ... }:
 {
   flake.nixosModules = {
-    common.imports = [
+    common.imports = ([
       ./agenix.nix
       ./ai.nix
       ./catppuccin.nix
@@ -31,7 +31,7 @@
       ./typing
     ] + (if loadPrivate then [
       ./private/work.nix
-    ] else [ ]);
+    ] else [ ]));
 
     linux.imports = [
       ./qmk.nix
