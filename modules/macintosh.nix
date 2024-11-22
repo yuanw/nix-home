@@ -7,7 +7,11 @@ with lib; {
     inputs.home-manager.darwinModules.home-manager
   ];
   networking.hostName = config.my.hostname;
+  # https://nixos.wiki/wiki/Enterprise
   nix = {
+    extraOptions = ''
+      netrc-file = /etc/nix/netrc
+    '';
     daemonProcessType = "Adaptive";
     # package = pkgs.nixVersions.git;
     #  sysctl -n hw.ncpu
