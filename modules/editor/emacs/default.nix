@@ -946,9 +946,9 @@ with lib; {
                 config = ''
                   (setq org-directory  "~/org/")
                   (setq org-agenda-files (append
-                                   (file-expand-wildcards (concat org-directory "*.org"))
-                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                   (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                  
+                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))))
+
                                    (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
                   (org-babel-do-load-languages 'org-babel-load-languages
                   '(
