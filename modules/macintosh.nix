@@ -99,6 +99,4 @@ with lib; {
     roboto
     roboto-mono
   ];
-  # Recreate /run/current-system symlink after boot
-  services.activate-system.enable = true;
 }
