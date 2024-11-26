@@ -148,7 +148,13 @@
         key = config.my.gpgKey;
         signByDefault = true;
       };
-      ignores = [ ".direnv" ".DS_Store" ".envrc" ];
+      ignores = [
+        ".direnv"
+        ".DS_Store"
+        ".envrc"
+        ".aider.chat.history.md"
+        ".aider.input.history"
+      ];
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
       extraConfig = {
         core = { editor = "emacsclient -c"; };
