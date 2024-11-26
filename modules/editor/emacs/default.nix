@@ -1722,6 +1722,9 @@ with lib; {
               };
 
               css-ts-mode.enable = true;
+              grep = {
+                enable = true;
+              };
               wgrep = {
                 enable = true;
                 custom = ''
