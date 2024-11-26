@@ -823,7 +823,7 @@ with lib; {
                    ("M-g i" . consult-imenu)
                    ("M-g I" . consult-imenu-multi)
                    ;; M-s bindings in `search-map'
-                   ("M-s f" . consult-find)                  ;; Alternative: consult-fd
+                   ("M-s f" . consult-fd)                  ;; Alternative: consult-find
                   ;; ("M-s c" . consult-locate)
                   ;; ("M-s g" . consult-grep)
                   ;; ("M-s G" . consult-git-grep)
