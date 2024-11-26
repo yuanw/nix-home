@@ -823,7 +823,7 @@ with lib; {
                    ("M-g i" . consult-imenu)
                    ("M-g I" . consult-imenu-multi)
                    ;; M-s bindings in `search-map'
-                   ("M-s f" . consult-find)                  ;; Alternative: consult-fd
+                   ("M-s f" . consult-fd)                  ;; Alternative: consult-find
                   ;; ("M-s c" . consult-locate)
                   ;; ("M-s g" . consult-grep)
                   ;; ("M-s G" . consult-git-grep)
@@ -946,9 +946,9 @@ with lib; {
                 config = ''
                   (setq org-directory  "~/org/")
                   (setq org-agenda-files (append
-                                   (file-expand-wildcards (concat org-directory "*.org"))
-                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))
-                                   (file-expand-wildcards (concat org-directory "projects/*.org"))))
+                                  
+                                   (file-expand-wildcards (concat org-directory "agenda/*.org"))))
+
                                    (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
                   (org-babel-do-load-languages 'org-babel-load-languages
                   '(
