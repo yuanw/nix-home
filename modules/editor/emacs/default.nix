@@ -1724,6 +1724,9 @@ with lib; {
               css-ts-mode.enable = true;
               wgrep = {
                 enable = true;
+                custom = ''
+                  (wgrep-auto-save-buffer t)
+                '';
               };
               deadgrep = {
                 enable = true;
