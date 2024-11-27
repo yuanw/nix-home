@@ -47,7 +47,7 @@ myBorderWidth = 1
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask = mod1Mask
+myModMask = mod3Mask
 
 commandMask = mod4Mask
 
@@ -167,7 +167,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((modm, xK_comma), sendMessage (IncMasterN 1)),
       -- Deincrement the number of windows in the master area
       ((modm, xK_period), sendMessage (IncMasterN (-1))),
-      ((modm, xK_x), orgPrompt def "TODO" "/home/yuanw/org/agenda/inbox.org"),
+      -- ((modm, xK_x), orgPrompt def "TODO" "/home/yuanw/org/agenda/inbox.org"),
       -- Toggle the status bar gap
       -- Use this binding with avoidStruts from Hooks.ManageDocks.
       -- See also the statusBar function from Hooks.DynamicLog.
