@@ -26,14 +26,14 @@ in
       enableContribAndExtras = true;
     };
 
-    services.xserver.libinput = {
+    services.libinput = {
       enable = true;
       touchpad.disableWhileTyping = true;
     };
 
     services.udisks2.enable = true;
     services.blueman.enable = true;
-    services.xserver.displayManager = {
+    services.displayManager = {
       defaultSession = "none+xmonad";
       lightdm.greeters.mini = {
         enable = false;
