@@ -620,19 +620,18 @@ with lib; {
                 enable = true;
               };
 
-
               nerd-icons-completion = {
                 enable = true;
                 after = [ "marginalia" ];
                 config = ''
-                  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+                  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup)
                 '';
               };
               nerd-icons-corfu = {
                 enable = true;
                 after = [ "corfu" ];
                 config = ''
-                  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+                  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
                 '';
               };
               nerd-icons-dired = {
