@@ -616,6 +616,32 @@ with lib; {
                 command = [ "free-keys" ];
               };
 
+              nerd-icons = {
+                enable = true;
+              };
+
+
+              nerd-icons-completion = {
+                enable = true;
+                after = [ "marginalia" ];
+                config = ''
+                  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+                '';
+              };
+              nerd-icons-corfu = {
+                enable = true;
+                after = [ "corfu" ];
+                config = ''
+                  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter))
+                '';
+              };
+              nerd-icons-dired = {
+                ensure = true;
+                hook = [
+                  "(dired-mode . nerd-icons-dired-mode)"
+                ];
+              };
+
               orderless = {
                 enable = true;
                 config = ''
