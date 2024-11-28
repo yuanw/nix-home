@@ -1731,6 +1731,12 @@ with lib; {
                   (wgrep-auto-save-buffer t)
                 '';
               };
+              delsel = {
+                enable = true;
+                hook = [
+                  "(after-init . delete-selection-mode)"
+                ];
+              };
               deadgrep = {
                 enable = true;
                 command = [ "deadgrep" ];
