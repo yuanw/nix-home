@@ -628,7 +628,7 @@ with lib; {
                 '';
               };
               nerd-icons-corfu = {
-                enable = true;
+                enable = false;
                 after = [ "corfu" ];
                 config = ''
                   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
