@@ -636,7 +636,7 @@ with lib; {
                 '';
               };
               nerd-icons-dired = {
-                ensure = true;
+                enable = true;
                 hook = [
                   "(dired-mode . nerd-icons-dired-mode)"
                 ];
