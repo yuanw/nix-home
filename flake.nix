@@ -5,7 +5,6 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    emacs-lsp-booster.url = "github:slotThe/emacs-lsp-booster-flake";
     nix-darwin = {
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
