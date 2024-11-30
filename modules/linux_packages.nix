@@ -3,7 +3,7 @@
 with pkgs; [
   gnumake
   _1password-gui
-  protonvpn-gui
+  protonvpn-cli_2
   pinentry
   stalonetray
   killall
