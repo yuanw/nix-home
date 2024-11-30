@@ -16,5 +16,5 @@ with pkgs; [
   xorg.xwininfo
   wifish
   mpv-unwrapped
-  xflux
+  brightnessctl
 ]
