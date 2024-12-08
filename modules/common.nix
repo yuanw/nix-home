@@ -58,7 +58,7 @@
     };
     overlays = [
       inputs.emacs.overlay
-      inputs.nur.overlay
+      inputs.nur.overlays.default
       inputs.firefox-darwin.overlay
       inputs.agenix.overlays.default
       (_final: _prev: {
