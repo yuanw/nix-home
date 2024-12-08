@@ -14,9 +14,9 @@ let
     prev: {
       patches =
         (lib.optionals pkgs.stdenv.isDarwin [
-          "${inputs.emacs-plus}/patches/emacs-30/fix-window-role.patch"
-          "${inputs.emacs-plus}/patches/emacs-30/round-undecorated-frame.patch"
-          "${inputs.emacs-plus}/patches/emacs-30/system-appearance.patch"
+          "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
+          "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
+          "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
         ])
         ++ prev.patches;
     }
