@@ -4,7 +4,7 @@
   programs.nixfmt.enable = true;
   #programs.nixfmt.excludes = [ "/modules/private/*" "/hosts/wk01174.nix" ];
   settings.formatter.nixfmt = {
-    excludes = [ "work.nix" ];
+    excludes = [ "modules/private/work.nix" ];
   };
   programs.ormolu.enable = true;
   programs.cabal-fmt.enable = true;
