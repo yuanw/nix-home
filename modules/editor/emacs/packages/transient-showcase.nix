@@ -1,7 +1,7 @@
-{ trivialBuild
-, fetchFromGitHub
-, transient
-,
+{
+  trivialBuild,
+  fetchFromGitHub,
+  transient,
 }:
 trivialBuild rec {
   pname = "transient-showcase";

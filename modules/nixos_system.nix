@@ -1,7 +1,14 @@
-{ inputs, config, lib, pkgs, ... }:
+{
+  inputs,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with pkgs.stdenv;
-with lib; {
+with lib;
+{
   imports = [
     inputs.agenix.nixosModules.age
     inputs.home-manager.nixosModules.home-manager
@@ -42,8 +49,14 @@ with lib; {
       options = "--delete-older-than 10d";
     };
     settings = {
-      allowed-users = [ "root" config.my.username ];
-      trusted-users = [ "root" config.my.username ];
+      allowed-users = [
+        "root"
+        config.my.username
+      ];
+      trusted-users = [
+        "root"
+        config.my.username
+      ];
     };
   };
 
@@ -52,15 +65,24 @@ with lib; {
     isNormalUser = true;
     uid = 1000;
     home = config.my.homeDirectory;
-    extraGroups =
-      [ "audio" "jackaudio" "wheel" "docker" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "audio"
+      "jackaudio"
+      "wheel"
+      "docker"
+    ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment = {
-    systemPackages = with pkgs; [ wget vim git firefox ];
+    systemPackages = with pkgs; [
+      wget
+      vim
+      git
+      firefox
+    ];
     shells = [ pkgs.zsh ];
   };
   programs.zsh.enable = true;
@@ -70,8 +92,14 @@ with lib; {
   home-manager.backupFileExtension = "backup";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} =
-    import ./home.nix { inherit inputs pkgs lib config; };
+  home-manager.users.${config.my.username} = import ./home.nix {
+    inherit
+      inputs
+      pkgs
+      lib
+      config
+      ;
+  };
 
   fonts.fontDir.enable = true;
   fonts.packages = with pkgs; [

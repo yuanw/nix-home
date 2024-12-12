@@ -1,9 +1,13 @@
 {
   projectRootFile = "flake.lock";
   programs.deadnix.enable = true;
-  programs.nixpkgs-fmt.enable = true;
-  programs.nixpkgs-fmt.excludes = [ "/modules/private/*" "/hosts/wk01174.nix" ];
+  programs.nixfmt.enable = true;
+  #programs.nixfmt.excludes = [ "/modules/private/*" "/hosts/wk01174.nix" ];
+  settings.formatter.nixfmt = {
 
+    excludes = [ "/modules/private/work.nix" ];
+
+  };
   programs.ormolu.enable = true;
   programs.cabal-fmt.enable = true;
   programs.hlint.enable = true;

@@ -1,11 +1,19 @@
-{ pkgs, config, inputs, ... }: {
+{
+  pkgs,
+  config,
+  inputs,
+  ...
+}:
+{
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
   ];
 
   home-manager.users.${config.my.username}.programs.git = {
-    extraConfig = { github.user = "yuanw"; };
+    extraConfig = {
+      github.user = "yuanw";
+    };
   };
 
   my = {

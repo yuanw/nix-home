@@ -1,13 +1,26 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.moonlander;
-in {
-  options.modules.moonlander = { enable = mkEnableOption "moonlander"; };
+let
+  cfg = config.modules.moonlander;
+in
+{
+  options.modules.moonlander = {
+    enable = mkEnableOption "moonlander";
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ pkgs.wally-cli pkgs.libusb1 pkgs.hid-listen ];
+      home.packages = [
+        pkgs.wally-cli
+        pkgs.libusb1
+        pkgs.hid-listen
+      ];
       # Usage of wally-cli: [flags] <firmware file>
       # wally-cli .build/moonlander_yuanw.bin
       # Press the reset button of your keyboard.2022/09/11 12:07:42 handle_events: error: libusb: interrupted [code -10]

@@ -1,10 +1,11 @@
-{ lib
-, f
-, fetchFromGitHub
-, markdown-mode
-, rustPlatform
-, trivialBuild
-, yasnippet
+{
+  lib,
+  f,
+  fetchFromGitHub,
+  markdown-mode,
+  rustPlatform,
+  trivialBuild,
+  yasnippet,
 }:
 
 let

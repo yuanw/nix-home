@@ -4,35 +4,65 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{ config, lib, pkgs, inputs, isDarwin, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  isDarwin,
+  ...
+}:
 let
   cfg = config.modules.editors.emacs;
   # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
-  aspell = (pkgs.aspellWithDicts (ds: [ ds.en ds.en-computers ds.en-science ]));
-  emacsclient = "emacsclient -c -a 'emacs'";
-  emacsPatched = cfg.pkg.overrideAttrs (
-    prev: {
-      patches =
-        (lib.optionals pkgs.stdenv.isDarwin [
-          "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
-          "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
-          "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
-        ])
-        ++ prev.patches;
-    }
+  aspell = (
+    pkgs.aspellWithDicts (ds: [
+      ds.en
+      ds.en-computers
+      ds.en-science
+    ])
   );
+  emacsclient = "emacsclient -c -a 'emacs'";
+  emacsPatched = cfg.pkg.overrideAttrs (prev: {
+    patches =
+      (lib.optionals pkgs.stdenv.isDarwin [
+        "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
+        "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
+        "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
+      ])
+      ++ prev.patches;
+  });
 
   valeStyles = [
-    { name = "alex"; path = "${inputs.vale-alex}/alex"; }
-    { name = "Google"; path = "${inputs.vale-Google}/Google"; }
-    { name = "Microsoft"; path = "${inputs.vale-Microsoft}/Microsoft"; }
-    { name = "Joblint"; path = "${inputs.vale-Joblint}/Joblint"; }
-    { name = "proselint"; path = "${inputs.vale-proselint}/proselint"; }
-    { name = "write-good"; path = "${inputs.vale-write-good}/write-good"; }
+    {
+      name = "alex";
+      path = "${inputs.vale-alex}/alex";
+    }
+    {
+      name = "Google";
+      path = "${inputs.vale-Google}/Google";
+    }
+    {
+      name = "Microsoft";
+      path = "${inputs.vale-Microsoft}/Microsoft";
+    }
+    {
+      name = "Joblint";
+      path = "${inputs.vale-Joblint}/Joblint";
+    }
+    {
+      name = "proselint";
+      path = "${inputs.vale-proselint}/proselint";
+    }
+    {
+      name = "write-good";
+      path = "${inputs.vale-write-good}/write-good";
+    }
   ];
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
-with lib; {
+with lib;
+{
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -45,7 +75,11 @@ with lib; {
     };
 
     lspStyle = mkOption {
-      type = types.enum [ "eglot" "lsp-bridge" "lspce" ];
+      type = types.enum [
+        "eglot"
+        "lsp-bridge"
+        "lspce"
+      ];
       default = "eglot";
     };
     enableLatex = mkOption {
@@ -77,11 +111,13 @@ with lib; {
     })
 
     (mkIf cfg.enableLatex {
-      home-manager.users.${config.my.username} = { pkgs, ... }: {
-        home.packages = with pkgs; [
-          texlive.combined.scheme-medium
-        ];
-      };
+      home-manager.users.${config.my.username} =
+        { pkgs, ... }:
+        {
+          home.packages = with pkgs; [
+            texlive.combined.scheme-medium
+          ];
+        };
     })
 
     {
@@ -90,15 +126,15 @@ with lib; {
       # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
       # the context of home-manager
-      home-manager.users.${config.my.username} = { pkgs, ... }:
+      home-manager.users.${config.my.username} =
+        { pkgs, ... }:
         {
           imports = [
             ./emacs-init.nix
           ];
 
-          programs.emacs.extraPackages = epkgs:
-            with epkgs;
-            [
+          programs.emacs.extraPackages =
+            epkgs: with epkgs; [
               epkgs.treesit-grammars.with-all-grammars
               (epkgs.trivialBuild {
                 pname = "prot-common";
@@ -323,19 +359,18 @@ with lib; {
               # steal modeline from prot
               prot-modeline = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "prot-modeline";
                     version = "0.0.1";
                     src = ./packages/prot-modeline.el;
                     packageRequires = [
-                      (
-                        epkgs.trivialBuild {
-                          pname = "prot-common";
-                          version = "0.0.1";
-                          src = ./packages/prot-common.el;
-                        }
-                      )
+                      (epkgs.trivialBuild {
+                        pname = "prot-common";
+                        version = "0.0.1";
+                        src = ./packages/prot-common.el;
+                      })
 
                     ];
                   };
@@ -419,7 +454,8 @@ with lib; {
 
               auto-save = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "auto-save";
                     version = "0.0.1";
@@ -528,7 +564,10 @@ with lib; {
 
               dired = {
                 enable = true;
-                command = [ "dired" "dired-jump" ];
+                command = [
+                  "dired"
+                  "dired-jump"
+                ];
                 config = ''
                   (put 'dired-find-alternate-file 'disabled nil)
                   (setq dired-use-ls-dired nil)
@@ -544,7 +583,9 @@ with lib; {
               wdired = {
                 enable = true;
                 bindLocal = {
-                  dired-mode-map = { "C-c C-w" = "wdired-change-to-wdired-mode"; };
+                  dired-mode-map = {
+                    "C-c C-w" = "wdired-change-to-wdired-mode";
+                  };
                 };
                 config = ''
                   ;; I use wdired quite often and this setting allows editing file
@@ -558,7 +599,9 @@ with lib; {
               dired-x = {
                 enable = true;
                 hook = [ "(dired-mode . dired-omit-mode)" ];
-                bindLocal.dired-mode-map = { "." = "dired-omit-mode"; };
+                bindLocal.dired-mode-map = {
+                  "." = "dired-omit-mode";
+                };
                 config = ''
                   (setq dired-omit-verbose nil
                         dired-omit-files (concat dired-omit-files "\\|^\\..+$"))
@@ -600,7 +643,10 @@ with lib; {
               # https://melpa.org/#/dot-mode
               dot-mode = {
                 enable = true;
-                command = [ "dot-mode" "dot-mode-execute" ];
+                command = [
+                  "dot-mode"
+                  "dot-mode-execute"
+                ];
                 diminish = [ "dot-mode" ];
                 bind = {
                   "C-." = "dot-mode-execute";
@@ -1004,24 +1050,34 @@ with lib; {
               };
               ob-racket = {
                 enable = true;
-                package = epkgs: (
-                  pkgs.callPackage ./packages/ob-racket.nix {
-                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/ob-racket.nix {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      substituteAll
+                      writeText
+                      unstableGitUpdater
+                      ;
                     inherit lib;
                     inherit (epkgs) melpaBuild;
-                  }
-                );
+                  });
                 after = [ "org" ];
               };
               aider = {
                 enable = cfg.enableAider;
-                package = epkgs: (
-                  pkgs.callPackage ./packages/aider.nix {
-                    inherit (pkgs) fetchFromGitHub substituteAll writeText unstableGitUpdater;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/aider.nix {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      substituteAll
+                      writeText
+                      unstableGitUpdater
+                      ;
                     inherit lib;
                     inherit (epkgs) melpaBuild;
-                  }
-                );
+                  });
                 extraPackages = [
                   pkgs.aider-chat
                 ];
@@ -1049,18 +1105,23 @@ with lib; {
               };
               org-download = {
                 enable = true;
-                command = [ "org-download-yank" "org-download-clipboard" ];
+                command = [
+                  "org-download-yank"
+                  "org-download-clipboard"
+                ];
                 after = [ "org" ];
                 custom = ''
                   (org-download-method 'attach)
                 '';
-                config =
-                  "(add-hook 'dired-mode-hook  'org-download-enable)";
+                config = "(add-hook 'dired-mode-hook  'org-download-enable)";
                 # if macos
                 extraPackages =
-                  if isDarwin then [
-                    pkgs.pngpaste
-                  ] else [ ];
+                  if isDarwin then
+                    [
+                      pkgs.pngpaste
+                    ]
+                  else
+                    [ ];
 
               };
               org-re-reveal = {
@@ -1081,7 +1142,8 @@ with lib; {
               };
               dslide = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "dslide";
                     version = "0.5.1";
@@ -1098,7 +1160,9 @@ with lib; {
               };
               casual-editkit = {
                 enable = true;
-                bind = { "C-o" = "casual-editkit-main-tmenu"; };
+                bind = {
+                  "C-o" = "casual-editkit-main-tmenu";
+                };
               };
               easy-kill = {
                 enable = true;
@@ -1107,7 +1171,6 @@ with lib; {
                   :bind ([remap mark-sexp] . easy-mark)
                 '';
               };
-
 
               denote = {
                 enable = true;
@@ -1136,7 +1199,8 @@ with lib; {
               };
               consult-denote = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "consult-denote";
                     version = "0.0.1";
@@ -1180,7 +1244,9 @@ with lib; {
               # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
               magit = {
                 enable = true;
-                bind = { "C-x g" = "magit-status"; };
+                bind = {
+                  "C-x g" = "magit-status";
+                };
                 bindLocal = {
                   magit-mode-map = {
                     "U" = "magit-unstage-all";
@@ -1250,8 +1316,7 @@ with lib; {
                 hook = [
                   "(nix-mode . subword-mode) "
                 ];
-                config = ''
-                  (setq nix-indent-function 'nix-indent-line) '';
+                config = ''(setq nix-indent-function 'nix-indent-line) '';
               };
 
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
@@ -1338,8 +1403,7 @@ with lib; {
               };
               envrc = {
                 enable = false;
-                config = ''
-                '';
+                config = '''';
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
@@ -1393,7 +1457,8 @@ with lib; {
 
               eglot-booster = {
                 enable = cfg.lspStyle == "eglot";
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
                     version = "0.1.0";
@@ -1417,12 +1482,14 @@ with lib; {
               };
               go-mode = {
                 enable = true;
-                config = ''
-                '';
+                config = '''';
               };
               flycheck-eglot = {
                 enable = true;
-                after = [ "flycheck" "eglot" ];
+                after = [
+                  "flycheck"
+                  "eglot"
+                ];
                 config = "(global-flycheck-eglot-mode 1)";
               };
 
@@ -1463,7 +1530,8 @@ with lib; {
               };
               transient-showcase = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   (pkgs.callPackage ./packages/transient-showcase.nix {
                     inherit (pkgs) fetchFromGitHub;
                     inherit (epkgs) trivialBuild transient;
@@ -1488,14 +1556,22 @@ with lib; {
               };
               copilot = {
                 enable = cfg.lspStyle != "lsp-bridge" && cfg.enableCopilot;
-                package = epkgs: (
-                  pkgs.callPackage ./packages/copilot-emacs {
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/copilot-emacs {
                     inherit (pkgs) fetchFromGitHub nodejs;
                     inherit lib;
-                    inherit (epkgs) trivialBuild dash editorconfig s f jsonrpc;
+                    inherit (epkgs)
+                      trivialBuild
+                      dash
+                      editorconfig
+                      s
+                      f
+                      jsonrpc
+                      ;
                   }
 
-                );
+                  );
                 hook = [ "(java-mode . copilot-mode)" ];
                 bindLocal = {
                   copilot-completion-map = {
@@ -1507,39 +1583,44 @@ with lib; {
               };
               lspce = {
                 enable = cfg.lspStyle == "lspce";
-                package = epkgs:
+                package =
+                  epkgs:
                   (pkgs.callPackage ./packages/lspce.nix {
                     inherit lib;
                     inherit (pkgs) fetchFromGitHub rustPlatform;
-                    inherit (epkgs) trivialBuild f yasnippet markdown-mode
+                    inherit (epkgs)
+                      trivialBuild
+                      f
+                      yasnippet
+                      markdown-mode
                       ;
                   });
                 config = ''
 
-                  (progn
-            (setq lspce-send-changes-idle-time 1)
-            (setq lspce-show-log-level-in-modeline t) ;; show log level in mode line
+                        (progn
+                  (setq lspce-send-changes-idle-time 1)
+                  (setq lspce-show-log-level-in-modeline t) ;; show log level in mode line
 
-            ;; You should call this first if you want lspce to write logs
-            (lspce-set-log-file "/tmp/lspce.log")
+                  ;; You should call this first if you want lspce to write logs
+                  (lspce-set-log-file "/tmp/lspce.log")
 
-            ;; By default, lspce will not write log out to anywhere.
-            ;; To enable logging, you can add the following line
-            ;; (lspce-enable-logging)
-            ;; You can enable/disable logging on the fly by calling `lspce-enable-logging' or `lspce-disable-logging'.
+                  ;; By default, lspce will not write log out to anywhere.
+                  ;; To enable logging, you can add the following line
+                  ;; (lspce-enable-logging)
+                  ;; You can enable/disable logging on the fly by calling `lspce-enable-logging' or `lspce-disable-logging'.
 
-            ;; enable lspce in particular buffers
-            ;; (add-hook 'rust-mode-hook 'lspce-mode)
+                  ;; enable lspce in particular buffers
+                  ;; (add-hook 'rust-mode-hook 'lspce-mode)
 
-            ;; modify `lspce-server-programs' to add or change a lsp server, see document
-            ;; of `lspce-lsp-type-function' to understand how to get buffer's lsp type.
-            ;; Bellow is what I use
-            (setq lspce-server-programs `(
-                                          ("python" "pylsp" "" )
-                                          ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
-                                          ("java" "jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
-                                          ))
-            )
+                  ;; modify `lspce-server-programs' to add or change a lsp server, see document
+                  ;; of `lspce-lsp-type-function' to understand how to get buffer's lsp type.
+                  ;; Bellow is what I use
+                  (setq lspce-server-programs `(
+                                                ("python" "pylsp" "" )
+                                                ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
+                                                ("java" "jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                                                ))
+                  )
 
                 '';
               };
@@ -1562,13 +1643,21 @@ with lib; {
               };
               consult-omni = {
                 enable = true;
-                package = epkgs: (
-                  pkgs.callPackage ./packages/consult-omni {
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/consult-omni {
                     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
                     inherit lib;
-                    inherit (epkgs) melpaBuild consult yequake elfeed embark browser-hist consult-notes;
-                  }
-                );
+                    inherit (epkgs)
+                      melpaBuild
+                      consult
+                      yequake
+                      elfeed
+                      embark
+                      browser-hist
+                      consult-notes
+                      ;
+                  });
 
                 config = ''
                                       ;; Load Sources Core code
@@ -1640,13 +1729,19 @@ with lib; {
               };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
-                package = epkgs: (
-                  pkgs.callPackage ./packages/lsp-bridge {
-                    inherit (pkgs) fetchFromGitHub substituteAll writeText python3 unstableGitUpdater;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/lsp-bridge {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      substituteAll
+                      writeText
+                      python3
+                      unstableGitUpdater
+                      ;
                     inherit lib;
                     inherit (epkgs) melpaBuild markdown-mode yasnippet;
-                  }
-                );
+                  });
                 hook = [ "(java-mode . lsp-bridge-mode)" ];
                 init = ''
                   (require 'lsp-bridge-jdtls)
@@ -1679,7 +1774,11 @@ with lib; {
               yasnippet = {
                 enable = true;
                 diminish = [ "yas-minor-mode" ];
-                command = [ "yas-global-mode" "yas-minor-mode" "yas-expand-snippet" ];
+                command = [
+                  "yas-global-mode"
+                  "yas-minor-mode"
+                  "yas-expand-snippet"
+                ];
                 hook = [
                   # Yasnippet interferes with tab completion in ansi-term.
                   "(term-mode . (lambda () (yas-minor-mode -1)))"
@@ -1847,7 +1946,8 @@ with lib; {
               };
               wm = {
                 enable = true;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild rec {
                     pname = "wm";
                     version = "0.0.1";
@@ -1860,10 +1960,10 @@ with lib; {
                   };
               };
 
-
               toggle-term = {
                 enable = false;
-                package = epkgs:
+                package =
+                  epkgs:
                   epkgs.trivialBuild {
                     pname = "toggle-term";
                     version = "0.0.2";
@@ -1897,16 +1997,12 @@ with lib; {
           home = {
             file.".emacs.d/snippets".source = ./snippets;
             packages = with pkgs; [
-              (
-                pkgs.writeShellScriptBin "app-launcher" ''
-                  ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
-                ''
-              )
-              (
-                pkgs.writeShellScriptBin "org-capture" ''
-                  ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
-                ''
-              )
+              (pkgs.writeShellScriptBin "app-launcher" ''
+                ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
+              '')
+              (pkgs.writeShellScriptBin "org-capture" ''
+                ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
+              '')
               # git
               (ripgrep.override { withPCRE2 = true; })
               gnutls # for TLS connectivity
@@ -1951,10 +2047,8 @@ with lib; {
             file.".vale.ini".text =
               let
                 stylesPath = pkgs.linkFarm "
-            vale-styles "
-                  valeStyles;
-                basedOnStyles = concatStringsSep ", "
-                  (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
+            vale-styles " valeStyles;
+                basedOnStyles = concatStringsSep ", " (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
               in
               ''
                 StylesPath = ${stylesPath}

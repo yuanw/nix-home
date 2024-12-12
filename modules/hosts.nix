@@ -1,8 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.programs.stevenBlackHosts;
-in {
+let
+  cfg = config.programs.stevenBlackHosts;
+in
+{
   options.programs.stevenBlackHosts = {
     enable = mkEnableOption "stevenBlackHosts";
     # possible values

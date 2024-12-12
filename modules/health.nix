@@ -1,11 +1,18 @@
-{ config, lib, inputs', ... }:
+{
+  config,
+  lib,
+  inputs',
+  ...
+}:
 
 with lib;
 let
   cfg = config.modules.health;
 in
 {
-  options.modules.health = { enable = mkEnableOption "health"; };
+  options.modules.health = {
+    enable = mkEnableOption "health";
+  };
 
   config = mkIf cfg.enable {
     launchd.user.agents.stretchly = {
@@ -13,10 +20,9 @@ in
       serviceConfig = {
         StandardOutPath = "/tmp/strecthly.log";
         StandardErrorPath = "/tmp/strecthly.log";
-        ProgramArguments =
-          [
-            "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
-          ];
+        ProgramArguments = [
+          "${inputs'.mono-stretchly-darwin.packages.default}/bin/mono-stretchly"
+        ];
         RunAtLoad = true;
         # in secs
         StartInterval = 900;

@@ -12,9 +12,15 @@
     # 53 for dns
     # 443 for https
     # 853 for DNS-over-TLS, DNS-over-QUIC port
-    allowedTCPPorts = [ 53 443 ];
+    allowedTCPPorts = [
+      53
+      443
+    ];
     # 51820 for wireguard
-    allowedUDPPorts = [ 53 51820 ];
+    allowedUDPPorts = [
+      53
+      51820
+    ];
     # allowedUDPPortRanges = [
     #   {
     #     from = 53;
@@ -52,7 +58,10 @@
     # "wg0" is the network interface name. You can name the interface arbitrarily.
     wg0 = {
       # Determines the IP/IPv6 address and subnet of the client's end of the tunnel interface
-      address = [ "10.0.0.1/24" "fdc9:281f:04d7:9ee9::1/64" ];
+      address = [
+        "10.0.0.1/24"
+        "fdc9:281f:04d7:9ee9::1/64"
+      ];
       # The port that WireGuard listens to - recommended that this be changed from default
       listenPort = 51820;
       # Path to the server's private key
@@ -78,7 +87,10 @@
           # peer0
           publicKey = "HVyTUtl0/JpL7jewFimxhb97Aku8uWLBblX9B2/VChs=";
           # presharedKeyFile = "/root/wireguard-keys/preshared_from_peer0_key";
-          allowedIPs = [ "10.0.0.2/32" "fdc9:281f:04d7:9ee9::2/128" ];
+          allowedIPs = [
+            "10.0.0.2/32"
+            "fdc9:281f:04d7:9ee9::2/128"
+          ];
         }
         # More peers can be added here.
       ];
@@ -168,7 +180,6 @@
   #   };
   # };
 
-
   age = {
     secrets = {
       adguard = {
@@ -195,7 +206,11 @@
     };
   };
 
-  modules = { secrets.agenix = { enable = true; }; };
+  modules = {
+    secrets.agenix = {
+      enable = true;
+    };
+  };
   services.adguardhome-with-user = {
     # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/nixos/modules/services/networking/adguardhome.nix#L135
     enable = true;

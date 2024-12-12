@@ -1,6 +1,7 @@
-{ trivialBuild
-, fetchFromGitLab
-, lib
+{
+  trivialBuild,
+  fetchFromGitLab,
+  lib,
 
 }:
 trivialBuild rec {

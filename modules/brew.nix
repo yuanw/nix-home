@@ -3,8 +3,10 @@
 # Homebrew #
 ############
 with lib;
-let cfg = config.modules.brew;
-in {
+let
+  cfg = config.modules.brew;
+in
+{
   options.modules.brew = {
     enable = mkEnableOption "brew";
     # taps = mkOption {

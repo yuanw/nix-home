@@ -1,17 +1,17 @@
-{ melpaBuild
-, fetchFromGitHub
-, writeText
-, unstableGitUpdater
-, lib
+{
+  melpaBuild,
+  fetchFromGitHub,
+  writeText,
+  unstableGitUpdater,
   # Elisp dependencies
 
-, consult
-, elfeed
-, embark
-, browser-hist
-, consult-notes
-, yequake
-, ...
+  consult,
+  elfeed,
+  embark,
+  browser-hist,
+  consult-notes,
+  yequake,
+  ...
 
 }:
 

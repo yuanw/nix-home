@@ -1,14 +1,14 @@
-{ fetchFromGitHub
-, # Elisp dependencies
-  dash
-, editorconfig
-, s
-, f
-, jsonrpc
-, # Native dependencies
-  nodejs
-, trivialBuild
-, lib
+{
+  fetchFromGitHub,
+  # Elisp dependencies
+  dash,
+  editorconfig,
+  s,
+  f,
+  jsonrpc,
+  # Native dependencies
+  nodejs,
+  trivialBuild,
 }:
 trivialBuild {
   pname = "copilot";

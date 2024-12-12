@@ -1,12 +1,12 @@
-{ melpaBuild
-, fetchFromGitHub
-, writeText
-, unstableGitUpdater
-, lib
+{
+  melpaBuild,
+  fetchFromGitHub,
+  writeText,
+  unstableGitUpdater,
   # Elisp dependencies
 
   # Native dependencies
-, ...
+  ...
 }:
 
 let

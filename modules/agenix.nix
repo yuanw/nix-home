@@ -1,4 +1,10 @@
-{ config, lib, options, pkgs, ... }:
+{
+  config,
+  lib,
+  options,
+  pkgs,
+  ...
+}:
 let
 
   cfg = config.modules.secrets.agenix;
@@ -31,16 +37,17 @@ let
   #     cache_ttl_min = 1800; # 30 min
   #     cache_optimistic = true; # return stale and then refresh
 
-  #   };
-  # };
-  # user = "test";
-  # configFile = pkgs.writeTextFile {
-  #   name = "AdGuardHome.yaml";
-  #   text = builtins.toJSON settings;
-  # };
 in
+#   };
+# };
+# user = "test";
+# configFile = pkgs.writeTextFile {
+#   name = "AdGuardHome.yaml";
+#   text = builtins.toJSON settings;
+# };
 with lib;
-with builtins; {
+with builtins;
+{
 
   options = {
     modules.secrets.agenix = {
@@ -48,17 +55,26 @@ with builtins; {
     };
   };
   config = mkIf cfg.enable (mkMerge [
-    { environment.systemPackages = with pkgs; [ agenix rage ]; }
+    {
+      environment.systemPackages = with pkgs; [
+        agenix
+        rage
+      ];
+    }
 
-    (if (builtins.hasAttr "launchd" options) then {
-      launchd.daemons.activate-agenix.serviceConfig = {
-        StandardOutPath = "/tmp/agenix.log";
-        StandardErrorPath = "/tmp/agenix.log";
-      };
-    } else
-      {
-        # systemd
-      })
+    (
+      if (builtins.hasAttr "launchd" options) then
+        {
+          launchd.daemons.activate-agenix.serviceConfig = {
+            StandardOutPath = "/tmp/agenix.log";
+            StandardErrorPath = "/tmp/agenix.log";
+          };
+        }
+      else
+        {
+          # systemd
+        }
+    )
 
     {
       age = {
