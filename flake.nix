@@ -113,7 +113,7 @@
             projectRoot = ./packages;
             settings = { };
             # overrides = self: super: { };
-            autoWire = [ "packages" "apps" "checks" ]; # Wire all but the devShell
+            autoWire = [ "packages" "apps" ]; # Wire all but the devShell
             devShell = {
               hlsCheck.enable = false;
             };
