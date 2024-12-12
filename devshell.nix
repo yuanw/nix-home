@@ -5,6 +5,7 @@
         (python3.withPackages (ps: [ ps.invoke ps.pyyaml ]))
         nix-diff
         nix-tree
+        treefmt
         #awscli
         #lego
         #terraform
