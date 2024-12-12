@@ -1,15 +1,19 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
   cfg = config.modules.tmux;
   tmuxMenuSeperator = "''";
   tat = pkgs.writeShellScriptBin "tat" (builtins.readFile ./tat);
   td = pkgs.writeShellScriptBin "td" (builtins.readFile ./ta);
-  temacs = pkgs.writeShellScriptBin "temacs" ''
-    (tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacsclient -c -a 'emacs'" "C-m" )'';
-  tkill = pkgs.writeShellScriptBin "tkill"
-    "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
+  temacs = pkgs.writeShellScriptBin "temacs" ''(tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacsclient -c -a 'emacs'" "C-m" )'';
+  tkill = pkgs.writeShellScriptBin "tkill" "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 in
-with lib; {
+with lib;
+{
   options.modules.tmux = {
     enable = mkOption {
       type = types.bool;
@@ -41,12 +45,11 @@ with lib; {
           enable = true;
           terminal = "screen-256color";
           clock24 = true;
-          plugins = with pkgs;
-            [
-              # bind is u
-              # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
-              tmuxPlugins.fzf-tmux-url
-            ];
+          plugins = with pkgs; [
+            # bind is u
+            # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
+            tmuxPlugins.fzf-tmux-url
+          ];
           customPaneNavigationAndResize = true;
           escapeTime = 0;
           historyLimit = 50000;
@@ -116,7 +119,9 @@ with lib; {
                z $1 && tat
             }
           '';
-          oh-my-zsh = { plugins = [ "tmux" ]; };
+          oh-my-zsh = {
+            plugins = [ "tmux" ];
+          };
         };
       };
     };

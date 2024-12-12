@@ -1,6 +1,7 @@
 _: super: {
 
-  emojify = with super;
+  emojify =
+    with super;
     stdenv.mkDerivation rec {
 
       pname = "emojify";

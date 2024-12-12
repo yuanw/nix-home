@@ -1,18 +1,19 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, installShellFiles
-, testers
-, yabai
-, xxd
-, xcodebuild
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  installShellFiles,
+  testers,
+  yabai,
+  xxd,
+  xcodebuild,
   # These all need to be from SDK 11.0 or later starting with yabai 5.0.0
-, Carbon
-, Cocoa
-, ScriptingBridge
-, SkyLight
-, Kernel
-, OSAKit
+  Carbon,
+  Cocoa,
+  ScriptingBridge,
+  SkyLight,
+  Kernel,
+  OSAKit,
 }:
 
 let
@@ -45,139 +46,138 @@ let
     ];
   };
 in
-  {
+{
 
-    aarch64-darwin = stdenv.mkDerivation {
-      inherit pname version;
+  aarch64-darwin = stdenv.mkDerivation {
+    inherit pname version;
 
-      src = fetchFromGitHub {
-        owner = "koekeishiya";
-        repo = "yabai";
-        rev = "v${version}";
-        hash = "sha256-buX6FRIXdM5VmYpA80eESDMPf+xeMfJJj0ulyx2g94M=";
-      };
-
-      nativeBuildInputs = [
-        installShellFiles
-        xcodebuild
-        xxd
-      ];
-
-      buildInputs = [
-        Carbon
-        Cocoa
-        ScriptingBridge
-        SkyLight
-        Kernel
-        OSAKit
-      ];
-
-      dontConfigure = true;
-      enableParallelBuilding = true;
-
-      env = {
-        # silence service.h error
-        NIX_CFLAGS_COMPILE =
-          "-I${Kernel}/Library/Frameworks/Kernel.framework/Headers/ -I${OSAKit}/Library/Frameworks/Kernel.framework/Headers/ -Wno-implicit-function-declaration";
-
-
-      };
-
-      postPatch = ''
-          substituteInPlace makefile \
-          --replace "-arch x86_64" "" \
-          --replace "clang" "${stdenv.cc.targetPrefix}clang"
-        # `NSScreen::safeAreaInsets` is only available on macOS 12.0 and above, which frameworks arent packaged.
-        # When a lower OS version is detected upstream just returns 0, so we can hardcode that at compiletime.
-        # https://github.com/koekeishiya/yabai/blob/v4.0.2/src/workspace.m#L109
-        substituteInPlace src/workspace.m \
-          --replace 'return screen.safeAreaInsets.top;' 'return 0;'
-      '';
-
-      installPhase = ''
-        runHook preInstall
-
-        mkdir -p $out/{bin,share/icons/hicolor/scalable/apps}
-
-        cp ./bin/yabai $out/bin/yabai
-        cp ./assets/icon/icon.svg $out/share/icons/hicolor/scalable/apps/yabai.svg
-        installManPage ./doc/yabai.1
-
-        runHook postInstall
-      '';
-
-      passthru.tests.version = test-version;
-
-      meta = _meta // {
-        sourceProvenance = with lib.sourceTypes; [
-          fromSource
-        ];
-      };
+    src = fetchFromGitHub {
+      owner = "koekeishiya";
+      repo = "yabai";
+      rev = "v${version}";
+      hash = "sha256-buX6FRIXdM5VmYpA80eESDMPf+xeMfJJj0ulyx2g94M=";
     };
-    x86_64-darwin = stdenv.mkDerivation {
-      inherit pname version;
 
-      src = fetchFromGitHub {
-        owner = "koekeishiya";
-        repo = "yabai";
-        rev = "v${version}";
-        hash = "sha256-buX6FRIXdM5VmYpA80eESDMPf+xeMfJJj0ulyx2g94M=";
-      };
+    nativeBuildInputs = [
+      installShellFiles
+      xcodebuild
+      xxd
+    ];
 
-      nativeBuildInputs = [
-        installShellFiles
-        xcodebuild
-        xxd
-      ];
+    buildInputs = [
+      Carbon
+      Cocoa
+      ScriptingBridge
+      SkyLight
+      Kernel
+      OSAKit
+    ];
 
-      buildInputs = [
-        Carbon
-        Cocoa
-        ScriptingBridge
-        SkyLight
-      ];
+    dontConfigure = true;
+    enableParallelBuilding = true;
 
-      dontConfigure = true;
-      enableParallelBuilding = true;
+    env = {
+      # silence service.h error
+      NIX_CFLAGS_COMPILE = "-I${Kernel}/Library/Frameworks/Kernel.framework/Headers/ -I${OSAKit}/Library/Frameworks/Kernel.framework/Headers/ -Wno-implicit-function-declaration";
 
-      env = {
-        # silence service.h error
-        NIX_CFLAGS_COMPILE = "-Wno-implicit-function-declaration";
-      };
+    };
 
-      postPatch = ''
-        # aarch64 code is compiled on all targets, which causes our Apple SDK headers to error out.
-        # Since multilib doesnt work on darwin i dont know of a better way of handling this.
+    postPatch = ''
         substituteInPlace makefile \
-          --replace "-arch arm64e" "" \
-          --replace "-arch arm64" "" \
-          --replace "clang" "${stdenv.cc.targetPrefix}clang"
+        --replace "-arch x86_64" "" \
+        --replace "clang" "${stdenv.cc.targetPrefix}clang"
+      # `NSScreen::safeAreaInsets` is only available on macOS 12.0 and above, which frameworks arent packaged.
+      # When a lower OS version is detected upstream just returns 0, so we can hardcode that at compiletime.
+      # https://github.com/koekeishiya/yabai/blob/v4.0.2/src/workspace.m#L109
+      substituteInPlace src/workspace.m \
+        --replace 'return screen.safeAreaInsets.top;' 'return 0;'
+    '';
 
-        # `NSScreen::safeAreaInsets` is only available on macOS 12.0 and above, which frameworks arent packaged.
-        # When a lower OS version is detected upstream just returns 0, so we can hardcode that at compiletime.
-        # https://github.com/koekeishiya/yabai/blob/v4.0.2/src/workspace.m#L109
-        substituteInPlace src/workspace.m \
-          --replace 'return screen.safeAreaInsets.top;' 'return 0;'
-      '';
+    installPhase = ''
+      runHook preInstall
 
-      installPhase = ''
-        runHook preInstall
+      mkdir -p $out/{bin,share/icons/hicolor/scalable/apps}
 
-        mkdir -p $out/{bin,share/icons/hicolor/scalable/apps}
+      cp ./bin/yabai $out/bin/yabai
+      cp ./assets/icon/icon.svg $out/share/icons/hicolor/scalable/apps/yabai.svg
+      installManPage ./doc/yabai.1
 
-        cp ./bin/yabai $out/bin/yabai
-        cp ./assets/icon/icon.svg $out/share/icons/hicolor/scalable/apps/yabai.svg
-        installManPage ./doc/yabai.1
+      runHook postInstall
+    '';
 
-        runHook postInstall
-      '';
+    passthru.tests.version = test-version;
 
-      passthru.tests.version = test-version;
-
-      meta = _meta // {
-        sourceProvenance = with lib.sourceTypes; [
-          fromSource
-        ];
-      };
+    meta = _meta // {
+      sourceProvenance = with lib.sourceTypes; [
+        fromSource
+      ];
     };
-  }.${stdenv.hostPlatform.system} or (throw "Unsupported platform ${stdenv.hostPlatform.system}")
+  };
+  x86_64-darwin = stdenv.mkDerivation {
+    inherit pname version;
+
+    src = fetchFromGitHub {
+      owner = "koekeishiya";
+      repo = "yabai";
+      rev = "v${version}";
+      hash = "sha256-buX6FRIXdM5VmYpA80eESDMPf+xeMfJJj0ulyx2g94M=";
+    };
+
+    nativeBuildInputs = [
+      installShellFiles
+      xcodebuild
+      xxd
+    ];
+
+    buildInputs = [
+      Carbon
+      Cocoa
+      ScriptingBridge
+      SkyLight
+    ];
+
+    dontConfigure = true;
+    enableParallelBuilding = true;
+
+    env = {
+      # silence service.h error
+      NIX_CFLAGS_COMPILE = "-Wno-implicit-function-declaration";
+    };
+
+    postPatch = ''
+      # aarch64 code is compiled on all targets, which causes our Apple SDK headers to error out.
+      # Since multilib doesnt work on darwin i dont know of a better way of handling this.
+      substituteInPlace makefile \
+        --replace "-arch arm64e" "" \
+        --replace "-arch arm64" "" \
+        --replace "clang" "${stdenv.cc.targetPrefix}clang"
+
+      # `NSScreen::safeAreaInsets` is only available on macOS 12.0 and above, which frameworks arent packaged.
+      # When a lower OS version is detected upstream just returns 0, so we can hardcode that at compiletime.
+      # https://github.com/koekeishiya/yabai/blob/v4.0.2/src/workspace.m#L109
+      substituteInPlace src/workspace.m \
+        --replace 'return screen.safeAreaInsets.top;' 'return 0;'
+    '';
+
+    installPhase = ''
+      runHook preInstall
+
+      mkdir -p $out/{bin,share/icons/hicolor/scalable/apps}
+
+      cp ./bin/yabai $out/bin/yabai
+      cp ./assets/icon/icon.svg $out/share/icons/hicolor/scalable/apps/yabai.svg
+      installManPage ./doc/yabai.1
+
+      runHook postInstall
+    '';
+
+    passthru.tests.version = test-version;
+
+    meta = _meta // {
+      sourceProvenance = with lib.sourceTypes; [
+        fromSource
+      ];
+    };
+  };
+}
+.${stdenv.hostPlatform.system} or (throw "Unsupported platform ${stdenv.hostPlatform.system}")

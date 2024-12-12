@@ -1,6 +1,11 @@
 # https://github.com/ahmedelgabri/dotfiles/blob/main/nix/pkgs/pragmatapro.nix
 # requireFile https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/trivial-builders.nix
-{ lib, stdenv, requireFile, unzip }:
+{
+  lib,
+  stdenv,
+  requireFile,
+  unzip,
+}:
 
 stdenv.mkDerivation rec {
 
@@ -9,8 +14,7 @@ stdenv.mkDerivation rec {
 
   src = requireFile rec {
     name = "PragmataPro${version}.zip";
-    url =
-      "file:///Users/yuanwang/workspace/nix-home/private/PragmataPro0.829.zip";
+    url = "file:///Users/yuanwang/workspace/nix-home/private/PragmataPro0.829.zip";
     # nix-hash --flat --base32 --type sha256 /path/to/file
     sha256 = "187skl3ac8rp4k0jd8dcgdn4kwksdd12044isccxnwq3cajhlay1";
     message = ''
@@ -27,7 +31,10 @@ stdenv.mkDerivation rec {
       $ nix-hash --flat --base32 --type sha256 /path/to/${name}'';
   };
   buildInputs = [ unzip ];
-  phases = [ "unpackPhase" "installPhase" ];
+  phases = [
+    "unpackPhase"
+    "installPhase"
+  ];
   pathsToLink = [ "/share/fonts/truetype/" ];
   sourceRoot = ".";
   installPhase = ''

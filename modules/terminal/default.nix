@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -55,7 +60,10 @@ in
             {
               description = "restart emacs user agent service in macos";
               command = "sudo launchctl kickstart -k gui/$UID/org.nixos.emacs";
-              tag = [ "emacs" "macos" ];
+              tag = [
+                "emacs"
+                "macos"
+              ];
             }
             {
               description = "check all services";
@@ -68,8 +76,6 @@ in
               tag = [ "slack" ];
             }
 
-
-
           ];
         };
         starship = {
@@ -79,8 +85,12 @@ in
           enableZshIntegration = true;
           # https://starship.rs/config/#prompt
           settings = {
-            aws = { disabled = true; };
-            gcloud = { disabled = true; };
+            aws = {
+              disabled = true;
+            };
+            gcloud = {
+              disabled = true;
+            };
             git_status = {
               ahead = "⇡($count)";
               diverged = "⇕⇡($ahead_count)⇣($behind_count)";
@@ -90,8 +100,6 @@ in
             };
           };
         };
-
-
 
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {

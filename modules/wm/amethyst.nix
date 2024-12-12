@@ -1,10 +1,14 @@
 { config, lib, ... }:
 
 with lib;
-let cfg = config.modules.wm.amethyst;
-in {
+let
+  cfg = config.modules.wm.amethyst;
+in
+{
 
-  options.modules.wm.amethyst = { enable = mkEnableOption "amethyst"; };
+  options.modules.wm.amethyst = {
+    enable = mkEnableOption "amethyst";
+  };
   config = mkIf cfg.enable {
     assertions = [
       {
@@ -17,7 +21,9 @@ in {
 
       }
     ];
-    homebrew = { casks = [ "amethyst" ]; };
+    homebrew = {
+      casks = [ "amethyst" ];
+    };
 
   };
 }

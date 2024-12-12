@@ -1,17 +1,18 @@
-{ mkDerivation
-, aeson
-, base
-, bytestring
-, containers
-, cryptonite
-, dhall
-, hedgehog
-, jwt
-, lib
-, req
-, text
-, time
-, vector
+{
+  mkDerivation,
+  aeson,
+  base,
+  bytestring,
+  containers,
+  cryptonite,
+  dhall,
+  hedgehog,
+  jwt,
+  lib,
+  req,
+  text,
+  time,
+  vector,
 }:
 mkDerivation {
   pname = "ws-access-token";
@@ -33,7 +34,10 @@ mkDerivation {
     vector
   ];
   executableHaskellDepends = [ base ];
-  testHaskellDepends = [ base hedgehog ];
+  testHaskellDepends = [
+    base
+    hedgehog
+  ];
   homepage = "https://github.com/yuanwang-wf/ws-access-token";
   description = "Project synopsis";
   license = lib.licenses.bsd3;

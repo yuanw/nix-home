@@ -1,16 +1,17 @@
-{ lib
-, mkDerivation
-, base
-, brick
-, cmdargs
-, directory
-, file-embed
-, random
-, split
-, text
-, time
-, vty
-, word-wrap
+{
+  lib,
+  mkDerivation,
+  base,
+  brick,
+  cmdargs,
+  directory,
+  file-embed,
+  random,
+  split,
+  text,
+  time,
+  vty,
+  word-wrap,
 }:
 mkDerivation {
   pname = "gotta-go-fast";

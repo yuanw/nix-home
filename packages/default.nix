@@ -1,42 +1,47 @@
 _final: prev: {
   installApplication =
-    { name
-    , version
-    , src
-    , description
-    , homepage
-    , sourceRoot ? "."
-    , ...
+    {
+      name,
+      version,
+      src,
+      description,
+      homepage,
+      sourceRoot ? ".",
+      ...
     }:
-      with _final; stdenv.mkDerivation {
-        name = "${name}-${version}";
-        version = "${version}";
-        src = src;
-        buildInputs = [ prev.pkgs._7zz ];
-        sourceRoot = ".";
-        phases = [ "unpackPhase" "installPhase" ];
-        unpackCmd = ''
-          7zz x $src -snld
-        '';
-        installPhase = ''
-          runHook preInstall
-          mkdir -p $out/Applications
-          cp -r calibre*.app "$out/Applications/"
+    with _final;
+    stdenv.mkDerivation {
+      name = "${name}-${version}";
+      version = "${version}";
+      src = src;
+      buildInputs = [ prev.pkgs._7zz ];
+      sourceRoot = ".";
+      phases = [
+        "unpackPhase"
+        "installPhase"
+      ];
+      unpackCmd = ''
+        7zz x $src -snld
+      '';
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out/Applications
+        cp -r calibre*.app "$out/Applications/"
 
-          mkdir -p $out/bin
+        mkdir -p $out/bin
 
-          ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
+        ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
 
 
-          runHook postInstall
-        '';
+        runHook postInstall
+      '';
 
-        meta = with super.lib; {
-          description = description;
-          homepage = homepage;
-          platforms = platforms.darwin;
-        };
+      meta = with super.lib; {
+        description = description;
+        homepage = homepage;
+        platforms = platforms.darwin;
       };
+    };
   # https://github.com/Homebrew/homebrew-cask/blob/f144ade7bcc8884fdf2a57b114cf11e7d98b2c93/Casks/c/calibre.rb
   calibre_mac = _final.installApplication rec {
     name = "calibre";
@@ -73,15 +78,17 @@ _final: prev: {
   #         hash = "sha256-FeNiJJM5vdzFT9s7N9cTjLYxKEfzZnKE9br13lkQhJo=";
   #       });
   # });
-  jdt-language-server = prev.jdt-language-server.overrideAttrs (_finalAttrs: _previousAttrs: {
-    postPatch = ''
-      # We store the plugins, config, and features folder in different locations
-      # than in the original package. In addition, hard-code the path to the jdk
-      # in the wrapper, instead of searching for it in PATH at runtime.
-      substituteInPlace bin/jdtls.py \
-        --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
-    '';
-  });
+  jdt-language-server = prev.jdt-language-server.overrideAttrs (
+    _finalAttrs: _previousAttrs: {
+      postPatch = ''
+        # We store the plugins, config, and features folder in different locations
+        # than in the original package. In addition, hard-code the path to the jdk
+        # in the wrapper, instead of searching for it in PATH at runtime.
+        substituteInPlace bin/jdtls.py \
+          --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
+      '';
+    }
+  );
   delta =
     let
       deltaSrc = _final.fetchFromGitHub {
@@ -91,15 +98,19 @@ _final: prev: {
         hash = "sha256-1UOVRAceZ4QlwrHWqN7YI2bMyuhwLnxJWpfyaHNNLYg=";
       };
     in
-    prev.delta.overrideAttrs (_finalAttrs: _previousAttrs: {
-      name = "delta-0.18.0";
-      version = "0.18.0";
-      src = deltaSrc;
-      cargoDeps = _previousAttrs.cargoDeps.overrideAttrs (_final.lib.const {
+    prev.delta.overrideAttrs (
+      _finalAttrs: _previousAttrs: {
+        name = "delta-0.18.0";
+        version = "0.18.0";
         src = deltaSrc;
-        outputHash = "sha256-d1Cdir07JZ4zrfq9cZmgQP4TVrWWUHfSJl/FlM7bDzM=";
-      });
-    });
+        cargoDeps = _previousAttrs.cargoDeps.overrideAttrs (
+          _final.lib.const {
+            src = deltaSrc;
+            outputHash = "sha256-d1Cdir07JZ4zrfq9cZmgQP4TVrWWUHfSJl/FlM7bDzM=";
+          }
+        );
+      }
+    );
 
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
@@ -107,7 +118,12 @@ _final: prev: {
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   janky-borders = prev.callPackage ./JankyBorders.nix {
-    inherit (_final.darwin.apple_sdk_11_0.frameworks) AppKit CoreVideo Carbon SkyLight;
+    inherit (_final.darwin.apple_sdk_11_0.frameworks)
+      AppKit
+      CoreVideo
+      Carbon
+      SkyLight
+      ;
 
   };
 }
