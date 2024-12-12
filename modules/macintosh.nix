@@ -1,7 +1,14 @@
-{ inputs, config, lib, pkgs, ... }:
+{
+  inputs,
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with pkgs.stdenv;
-with lib; {
+with lib;
+{
   imports = [
     inputs.agenix.darwinModules.age
     inputs.home-manager.darwinModules.home-manager
@@ -20,7 +27,9 @@ with lib; {
     gc = {
       user = "${config.my.username}";
       automatic = true;
-      interval = { Hour = 22; };
+      interval = {
+        Hour = 22;
+      };
 
       options = "--delete-older-than 7d";
     };
@@ -70,7 +79,10 @@ with lib; {
   };
 
   environment.shells = [ pkgs.zsh ];
-  environment.systemPackages = [ pkgs.zsh pkgs.gcc ];
+  environment.systemPackages = [
+    pkgs.zsh
+    pkgs.gcc
+  ];
   programs.bash.enable = false;
   programs.zsh = {
     enableCompletion = true;
@@ -89,8 +101,14 @@ with lib; {
   home-manager.backupFileExtension = "backup";
   home-manager.useGlobalPkgs = true;
   home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} =
-    import ./home.nix { inherit inputs pkgs lib config; };
+  home-manager.users.${config.my.username} = import ./home.nix {
+    inherit
+      inputs
+      pkgs
+      lib
+      config
+      ;
+  };
 
   fonts.packages = with pkgs; [
     fira-code

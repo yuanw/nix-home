@@ -1,4 +1,10 @@
-{ pkgs, inputs, config, ... }: {
+{
+  pkgs,
+  inputs,
+  config,
+  ...
+}:
+{
 
   imports = [
     inputs.self.nixosModules.common
@@ -37,7 +43,9 @@
     #   supportLocalVirtualBuilder = true;
     # };
     ai.enable = true;
-    secrets.agenix = { enable = true; };
+    secrets.agenix = {
+      enable = true;
+    };
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
@@ -71,18 +79,17 @@
     };
     health.enable = true;
     typing.enable = true;
-    dev =
-      {
-        agda.enable = false;
-        dart.enable = true;
-        java.enable = true;
-        haskell.enable = false;
-        idris2.enable = false;
-        python.enable = true;
-        zig.enable = false;
-        racket.enable = true;
-        kotlin.enable = true;
-      };
+    dev = {
+      agda.enable = false;
+      dart.enable = true;
+      java.enable = true;
+      haskell.enable = false;
+      idris2.enable = false;
+      python.enable = true;
+      zig.enable = false;
+      racket.enable = true;
+      kotlin.enable = true;
+    };
     zellij.enable = false;
     tmux = {
       enable = true;
@@ -95,7 +102,6 @@
       yabai.enable = true;
       yabai.enableJankyborders = true;
     };
-
 
     work.enable = true;
   };

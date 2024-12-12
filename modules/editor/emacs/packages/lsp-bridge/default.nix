@@ -1,32 +1,33 @@
-{ melpaBuild
-, fetchFromGitHub
-, writeText
-, substituteAll
-, unstableGitUpdater
-, lib
+{
+  melpaBuild,
+  fetchFromGitHub,
+  writeText,
+  substituteAll,
+  unstableGitUpdater,
   # Elisp dependencies
 
-, markdown-mode
-, yasnippet
+  markdown-mode,
+  yasnippet,
 
   # Native dependencies
-, python3
+  python3,
 
 }:
 
 let
   # epc orjson sexpdata six setuptools paramiko rapidfuzz
 
-  pythonEnv = ((python3.withPackages (ps: [
-    ps.epc
-    ps.orjson
-    ps.paramiko
-    ps.rapidfuzz
-    ps.sexpdata
+  pythonEnv = (
+    (python3.withPackages (ps: [
+      ps.epc
+      ps.orjson
+      ps.paramiko
+      ps.rapidfuzz
+      ps.sexpdata
 
-
-  ])).override { ignoreCollisions = true; });
-
+    ])).override
+      { ignoreCollisions = true; }
+  );
 
   pname = "lsp-bridge";
   version = "20240416.0";
@@ -55,7 +56,6 @@ melpaBuild {
       python = pythonEnv.interpreter;
     })
   ];
-
 
   installPhase = ''
     rm -r test

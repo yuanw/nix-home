@@ -1,8 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.dev.java;
-in {
+let
+  cfg = config.modules.dev.java;
+in
+{
   options.modules.dev.java = {
     enable = mkEnableOption "java";
     pkg = mkOption {

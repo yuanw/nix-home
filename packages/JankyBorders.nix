@@ -1,10 +1,11 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, AppKit
-, Carbon
-, CoreVideo
-, SkyLight
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  AppKit,
+  Carbon,
+  CoreVideo,
+  SkyLight,
 }:
 
 stdenv.mkDerivation (finalAttrs: {
@@ -38,7 +39,6 @@ stdenv.mkDerivation (finalAttrs: {
     cp ./docs/borders.1 $out/share/man/man1/borders.1
     runHook postInstall
   '';
-
 
   meta = {
     description = "A lightweight tool designed to add colored borders to user windows on macOS 14.0+";

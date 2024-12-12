@@ -1,4 +1,9 @@
-{ stdenv, fetchurl, unzip, lib }:
+{
+  stdenv,
+  fetchurl,
+  unzip,
+  lib,
+}:
 stdenv.mkDerivation rec {
 
   pname = "dart";
@@ -8,8 +13,7 @@ stdenv.mkDerivation rec {
   src = fetchurl {
     # https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.6/sdk/dartsdk-macos-arm64-release.zip
     # https://storage.googleapis.com/dart-archive/channels/stable/release/2.19.6/sdk/dartsdk-macos-x64-release.zip
-    url =
-      "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-arm64-release.zip";
+    url = "https://storage.googleapis.com/dart-archive/channels/stable/release/${version}/sdk/dartsdk-macos-arm64-release.zip";
     sha256 = "PGtUtvRLyji9x4WOpFc08peVHrpfsQyPp7hrSj9D7bY=";
     # sha256 = lib.fakeSha256;
   };
@@ -33,8 +37,7 @@ stdenv.mkDerivation rec {
 
   meta = {
     homepage = "https://www.dartlang.org/";
-    description =
-      "Scalable programming language, with robust libraries and runtimes, for building web, server, and mobile apps";
+    description = "Scalable programming language, with robust libraries and runtimes, for building web, server, and mobile apps";
     longDescription = ''
       Dart is a class-based, single inheritance, object-oriented language
       with C-style syntax. It offers compilation to JavaScript, interfaces,

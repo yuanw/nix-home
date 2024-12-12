@@ -1,8 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.dev.kotlin;
-in {
+let
+  cfg = config.modules.dev.kotlin;
+in
+{
   options.modules.dev.kotlin = {
     enable = mkEnableOption "kotlin";
 

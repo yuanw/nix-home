@@ -2,7 +2,8 @@
 let
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
-with lib; {
+with lib;
+{
   config = mkIf config.modules.editors.emacs.enableService {
     launchd.user.agents.emacs.path = [
       config.environment.systemPath

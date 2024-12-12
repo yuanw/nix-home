@@ -1,19 +1,27 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.dev.haskell;
-in {
-  options.modules.dev.haskell = { enable = mkEnableOption "haskell"; };
+let
+  cfg = config.modules.dev.haskell;
+in
+{
+  options.modules.dev.haskell = {
+    enable = mkEnableOption "haskell";
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages =
-        [
-          pkgs.cabal2nix
-          (pkgs.ghc.withPackages (p: [
-            p.attoparsec
-          ]))
-        ];
+      home.packages = [
+        pkgs.cabal2nix
+        (pkgs.ghc.withPackages (p: [
+          p.attoparsec
+        ]))
+      ];
       home.file = {
         ".ghci".text = ''
           :set prompt "λ> "

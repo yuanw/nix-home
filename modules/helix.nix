@@ -1,5 +1,6 @@
 # https://github.com/maaslalani/_/blob/main/modules/helix.nix
-{ config, ... }: {
+{ config, ... }:
+{
 
   home-manager.users.${config.my.username} = {
 
@@ -7,40 +8,65 @@
       enable = true;
       settings = {
         editor = {
-          gutters = [ "diff" "line-numbers" "spacer" "diagnostics" ];
+          gutters = [
+            "diff"
+            "line-numbers"
+            "spacer"
+            "diagnostics"
+          ];
           cursorline = true;
           cursor-shape.insert = "bar";
           true-color = true;
           lsp.display-messages = true;
         };
         theme = "charm";
-        keys.insert.esc = [ "collapse_selection" "normal_mode" ];
-        keys.normal.esc = [ "collapse_selection" "normal_mode" ];
-        keys.select.esc =
-          [ "collapse_selection" "keep_primary_selection" "normal_mode" ];
+        keys.insert.esc = [
+          "collapse_selection"
+          "normal_mode"
+        ];
+        keys.normal.esc = [
+          "collapse_selection"
+          "normal_mode"
+        ];
+        keys.select.esc = [
+          "collapse_selection"
+          "keep_primary_selection"
+          "normal_mode"
+        ];
         keys.normal = {
           X = "extend_line_above";
-          a = [ "append_mode" "collapse_selection" ];
+          a = [
+            "append_mode"
+            "collapse_selection"
+          ];
           g.q = ":reflow";
-          i = [ "insert_mode" "collapse_selection" ];
-          ret = [ "move_line_down" "goto_line_start" ];
+          i = [
+            "insert_mode"
+            "collapse_selection"
+          ];
+          ret = [
+            "move_line_down"
+            "goto_line_start"
+          ];
           space = {
             w = ":write";
             q = ":quit";
           };
         };
       };
-      languages =
-        {
-          nix =
-            {
-              name = "nix";
-              auto-format = true;
-              formatter = { command = "alejandra"; };
-              language-server = { command = "nil"; };
-            };
-
+      languages = {
+        nix = {
+          name = "nix";
+          auto-format = true;
+          formatter = {
+            command = "alejandra";
+          };
+          language-server = {
+            command = "nil";
+          };
         };
+
+      };
     };
   };
 }

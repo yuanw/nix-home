@@ -1,10 +1,11 @@
 # most of this is stealed from Mic92 module
 # https://github.com/Mic92/dotfiles/blob/main/home-manager/modules/neovim/default.nix
-{ config
-, pkgs
-, lib
-, inputs
-, ...
+{
+  config,
+  pkgs,
+  lib,
+  inputs,
+  ...
 }:
 with lib;
 let
@@ -60,49 +61,55 @@ let
   cfg = config.modules.editors.neovim;
 in
 {
-  options.modules.editors.neovim = { enable = mkEnableOption "neovim"; };
+  options.modules.editors.neovim = {
+    enable = mkEnableOption "neovim";
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = with pkgs; [
-        neovim
-        # nvim-open
+      home.packages =
+        with pkgs;
+        [
+          neovim
+          # nvim-open
 
-        nodejs # copilot
-        vale
-        terraform-ls
-        nodePackages.pyright
-        sumneko-lua-language-server
+          nodejs # copilot
+          vale
+          terraform-ls
+          nodePackages.pyright
+          sumneko-lua-language-server
 
-        # based on ./suggested-pkgs.json
-        delve
-        # gopls
-        # golangci-lint
-        nodePackages.bash-language-server
-        taplo-lsp
-        marksman
-        rust-analyzer
-        yaml-language-server
-        nil
-        # gomodifytags
-        # gofumpt
-        iferr
-        impl
-        # gotools
-        shellcheck
-        shfmt
-        # isort
-        # black
-        ruff
-        nixpkgs-fmt
-        terraform-ls
-        clang-tools
-        nodePackages.prettier
-        stylua
-        # does not build yet on aarch64
-      ] ++ lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-linux") pkgs.deno; # lsp
+          # based on ./suggested-pkgs.json
+          delve
+          # gopls
+          # golangci-lint
+          nodePackages.bash-language-server
+          taplo-lsp
+          marksman
+          rust-analyzer
+          yaml-language-server
+          nil
+          # gomodifytags
+          # gofumpt
+          iferr
+          impl
+          # gotools
+          shellcheck
+          shfmt
+          # isort
+          # black
+          ruff
+          nixpkgs-fmt
+          terraform-ls
+          clang-tools
+          nodePackages.prettier
+          stylua
+          # does not build yet on aarch64
+        ]
+        ++ lib.optional (pkgs.stdenv.hostPlatform.system == "x86_64-linux") pkgs.deno; # lsp
       xdg.dataHome = "${config.my.homeDirectory}/.data";
-      xdg.dataFile."nvim/lazy/telescope-fzf-native.nvim/build/libfzf.so".source = "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so";
+      xdg.dataFile."nvim/lazy/telescope-fzf-native.nvim/build/libfzf.so".source =
+        "${pkgs.vimPlugins.telescope-fzf-native-nvim}/build/libfzf.so";
       xdg.configFile."nvim".source = pkgs.runCommand "nvim" { } ''
         mkdir -p $out/parser
 

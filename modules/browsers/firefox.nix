@@ -1,7 +1,13 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
 # should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
 # https://github.com/mozilla/policy-templates
-{ config, lib, pkgs, inputs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 with lib;
 let
@@ -65,16 +71,15 @@ in
               url = "https://addons.mozilla.org/firefox/downloads/file/4364715/mtab-1.5.9.xpi";
               #sha256 = lib.fakeSha256;
               sha256 = "sha256-Tbp/LD13PGmBBzWWNHx/qaZwnACZUrBvsHem8zsuh+Y=";
-              meta = with lib;
-                {
-                  homepage = "https://github.com/maxhu08/mtab";
-                  description = "a simple configurable new tab extension";
-                  license = licenses.mit;
-                  mozPermissions = [
-                    "bookmarks"
-                  ];
-                  platforms = platforms.all;
-                };
+              meta = with lib; {
+                homepage = "https://github.com/maxhu08/mtab";
+                description = "a simple configurable new tab extension";
+                license = licenses.mit;
+                mozPermissions = [
+                  "bookmarks"
+                ];
+                platforms = platforms.all;
+              };
             })
           ];
 
@@ -89,32 +94,35 @@ in
               "eBay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
               "Kagi" = {
-                urls = [{
-                  template = "https://kagi.com/search?";
-                  params = [
-                    {
-                      name = "q";
-                      value = "{searchTerms}";
-                    }
-                  ];
-                }];
+                urls = [
+                  {
+                    template = "https://kagi.com/search?";
+                    params = [
+                      {
+                        name = "q";
+                        value = "{searchTerms}";
+                      }
+                    ];
+                  }
+                ];
               };
               "Nix Packages" = {
-                urls = [{
-                  template = "https://search.nixos.org/packages";
-                  params = [
-                    {
-                      name = "type";
-                      value = "packages";
-                    }
-                    {
-                      name = "query";
-                      value = "{searchTerms}";
-                    }
-                  ];
-                }];
-                icon =
-                  "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                urls = [
+                  {
+                    template = "https://search.nixos.org/packages";
+                    params = [
+                      {
+                        name = "type";
+                        value = "packages";
+                      }
+                      {
+                        name = "query";
+                        value = "{searchTerms}";
+                      }
+                    ];
+                  }
+                ];
+                icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                 definedAliases = [ "@np" ];
               };
               # "NixOS Wiki" = {
@@ -153,8 +161,7 @@ in
             "browser.urlbar.update1" = true;
             "distribution.searchplugins.defaultLocale" = "en-CA";
             "general.useragent.locale" = "en-CA";
-            "identity.fxaccounts.account.device.name" =
-              config.networking.hostName;
+            "identity.fxaccounts.account.device.name" = config.networking.hostName;
             "privacy.trackingprotection.enabled" = true;
             "privacy.trackingprotection.socialtracking.enabled" = true;
             "privacy.trackingprotection.socialtracking.annotate.enabled" = true;
@@ -230,12 +237,9 @@ in
             # Disable some not so useful functionality.
             "browser.disableResetPrompt" = true;
             # "Looks like you haven't started Firefox in a while."
-            "browser.onboarding.enabled" =
-              false; # "New to Firefox? Let's get started!" tour
-            "browser.aboutConfig.showWarning" =
-              false; # Warning when opening about:config
-            "media.videocontrols.picture-in-picture.video-toggle.enabled" =
-              false;
+            "browser.onboarding.enabled" = false; # "New to Firefox? Let's get started!" tour
+            "browser.aboutConfig.showWarning" = false; # Warning when opening about:config
+            "media.videocontrols.picture-in-picture.video-toggle.enabled" = false;
             "extensions.pocket.enabled" = false;
             "extensions.shield-recipe-client.enabled" = false;
             "reader.parse-on-load.enabled" = false; # "reader view"
@@ -252,10 +256,8 @@ in
             "geo.provider.use_gpsd" = false;
             # https://support.mozilla.org/en-US/kb/extension-recommendations
             "browser.newtabpage.activity-stream.asrouter.userprefs.cfr" = false;
-            "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons" =
-              false;
-            "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" =
-              false;
+            "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.addons" = false;
+            "browser.newtabpage.activity-stream.asrouter.userprefs.cfr.features" = false;
             "extensions.htmlaboutaddons.recommendations.enabled" = false;
             "extensions.htmlaboutaddons.discover.enabled" = false;
             "extensions.getAddons.showPane" = false; # uses Google Analytics
@@ -315,8 +317,7 @@ in
             # Disable crash reports
             "breakpad.reportURL" = "";
             "browser.tabs.crashReporting.sendReport" = false;
-            "browser.crashReports.unsubmittedCheck.autoSubmit2" =
-              false; # don't submit backlogged reports
+            "browser.crashReports.unsubmittedCheck.autoSubmit2" = false; # don't submit backlogged reports
 
             # Disable Form autofill
             # https://wiki.mozilla.org/Firefox/Features/Form_Autofill

@@ -1,16 +1,24 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
 let
   cfg = config.services.adguardhome-with-user;
 
-  args = concatStringsSep " " ([
-    "--no-check-update"
-    "--pidfile /run/AdGuardHome/AdGuardHome.pid"
-    "--work-dir /var/lib/AdGuardHome/"
-    "--config /var/lib/AdGuardHome/AdGuardHome.yaml"
-  ] ++ cfg.extraArgs);
+  args = concatStringsSep " " (
+    [
+      "--no-check-update"
+      "--pidfile /run/AdGuardHome/AdGuardHome.pid"
+      "--work-dir /var/lib/AdGuardHome/"
+      "--config /var/lib/AdGuardHome/AdGuardHome.yaml"
+    ]
+    ++ cfg.extraArgs
+  );
 
   configFile = pkgs.writeTextFile {
     name = "AdGuardHome.yaml";
@@ -22,17 +30,28 @@ in
 {
 
   imports =
-    let cfgPath = [ "services" "adguardhome-with-user" ];
-    in [
+    let
+      cfgPath = [
+        "services"
+        "adguardhome-with-user"
+      ];
+    in
+    [
       (mkRenamedOptionModuleWith {
         sinceRelease = 2211;
         from = cfgPath ++ [ "host" ];
-        to = cfgPath ++ [ "settings" "bind_host" ];
+        to = cfgPath ++ [
+          "settings"
+          "bind_host"
+        ];
       })
       (mkRenamedOptionModuleWith {
         sinceRelease = 2211;
         from = cfgPath ++ [ "port" ];
-        to = cfgPath ++ [ "settings" "bind_port" ];
+        to = cfgPath ++ [
+          "settings"
+          "bind_port"
+        ];
       })
     ];
 
@@ -41,14 +60,12 @@ in
     user = mkOption {
       type = types.str;
       example = "nss-user";
-      description =
-        "The username to use when connecting to the database";
+      description = "The username to use when connecting to the database";
     };
     passwordFile = mkOption {
       type = types.path;
       example = "/run/secrets/mysql-auth-db-passwd";
-      description =
-        "The path to the file containing the password for the user";
+      description = "The path to the file containing the password for the user";
     };
     openFirewall = mkOption {
       default = false;
@@ -127,17 +144,18 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = cfg.settings != null -> cfg.mutableSettings
-          || (hasAttrByPath [ "dns" "bind_host" ] cfg.settings)
-          || (hasAttrByPath [ "dns" "bind_hosts" ] cfg.settings);
-        message =
-          "AdGuard setting dns.bind_host or dns.bind_hosts needs to be configured for a minimal working configuration";
+        assertion =
+          cfg.settings != null
+          ->
+            cfg.mutableSettings
+            || (hasAttrByPath [ "dns" "bind_host" ] cfg.settings)
+            || (hasAttrByPath [ "dns" "bind_hosts" ] cfg.settings);
+        message = "AdGuard setting dns.bind_host or dns.bind_hosts needs to be configured for a minimal working configuration";
       }
       {
-        assertion = cfg.settings != null -> cfg.mutableSettings
-          || hasAttrByPath [ "dns" "bootstrap_dns" ] cfg.settings;
-        message =
-          "AdGuard setting dns.bootstrap_dns needs to be configured for a minimal working configuration";
+        assertion =
+          cfg.settings != null -> cfg.mutableSettings || hasAttrByPath [ "dns" "bootstrap_dns" ] cfg.settings;
+        message = "AdGuard setting dns.bootstrap_dns needs to be configured for a minimal working configuration";
       }
     ];
 
@@ -192,7 +210,6 @@ in
     };
     users.groups.adguard = { };
 
-    networking.firewall.allowedTCPPorts =
-      mkIf cfg.openFirewall [ cfg.settings.bind_port ];
+    networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall [ cfg.settings.bind_port ];
   };
 }

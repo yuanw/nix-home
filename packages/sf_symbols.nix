@@ -1,4 +1,10 @@
-{ stdenv, fetchurl, lib, pkgs, ... }:
+{
+  stdenv,
+  fetchurl,
+  lib,
+  pkgs,
+  ...
+}:
 # https://github.com/Homebrew/homebrew-cask/blob/d5acc87dd9ebf3cc1a38f2e4f99c1c2872f5ceb6/Casks/sf-symbols.rb
 stdenv.mkDerivation rec {
   pname = "sf-symbols";
@@ -14,7 +20,10 @@ stdenv.mkDerivation rec {
     7z x 'SF Symbols.pkg'
     7z x 'Payload~'
   '';
-  buildInputs = [ pkgs.p7zip pkgs.undmg ];
+  buildInputs = [
+    pkgs.p7zip
+    pkgs.undmg
+  ];
   installPhase = ''
     mkdir -p $out/share/fonts
     mkdir -p $out/share/fonts/opentype

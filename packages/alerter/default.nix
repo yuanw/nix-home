@@ -20,7 +20,6 @@ stdenv.mkDerivation rec {
   #    unzip $src
   # '';
 
-
   installPhase = ''
     mkdir -p $out
     cp ${./alerter} $out/alerter-bin
@@ -35,7 +34,10 @@ stdenv.mkDerivation rec {
       writing a the activated value to output (stdout), or a json object to describe the alert event.
     '';
     license = lib.licenses.mit;
-    platforms = [ "x86_64-darwin" "aarch64-darwin" ];
+    platforms = [
+      "x86_64-darwin"
+      "aarch64-darwin"
+    ];
   };
 
   dontUnpack = true;

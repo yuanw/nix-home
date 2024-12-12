@@ -1,4 +1,9 @@
-{ lib, stdenv, fetchFromGitHub, pkgs }:
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  pkgs,
+}:
 # https://github.com/Homebrew/homebrew-core/blob/a187304f3f6471f13717893439a39ab152a44a5d/Formula/i/ical-buddy.rb
 let
 
@@ -16,7 +21,14 @@ stdenv.mkDerivation rec {
     hash = "sha256-ID3U7lAve3DHTHx2kCunwg1LWkIEIIpQrXkvmkvn/Mg=";
   };
 
-  buildInputs = [ pkgs.perl frameworks.AppKit frameworks.Carbon frameworks.Cocoa frameworks.AddressBook frameworks.CalendarStore ];
+  buildInputs = [
+    pkgs.perl
+    frameworks.AppKit
+    frameworks.Carbon
+    frameworks.Cocoa
+    frameworks.AddressBook
+    frameworks.CalendarStore
+  ];
   # https://github.com/Homebrew/homebrew-core/blob/2f089a6f55a7496248be39f4d883094fd79cbdc4/Formula/ical-buddy.rb#L24
   buildPhase = ''
     # Allow native builds rather than only x86_64

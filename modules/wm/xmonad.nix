@@ -1,15 +1,28 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 with lib;
 let
   cfg = config.modules.wm.xmonad;
-  xmonad-env = pkgs.haskellPackages.ghcWithHoogle
-    (hp: with hp; [ xmobar xmonad xmonad-contrib xmonad-extras ]);
+  xmonad-env = pkgs.haskellPackages.ghcWithHoogle (
+    hp: with hp; [
+      xmobar
+      xmonad
+      xmonad-contrib
+      xmonad-extras
+    ]
+  );
   extra = ''
     ${pkgs.feh}/bin/feh --bg-fill --no-fehbg ~/.config/wallpapers/haskell-red-noise.png
   '';
 in
 {
-  options.modules.wm.xmonad = { enable = mkEnableOption "xmonad"; };
+  options.modules.wm.xmonad = {
+    enable = mkEnableOption "xmonad";
+  };
 
   config = mkIf cfg.enable {
 
@@ -18,7 +31,9 @@ in
       packages = [ pkgs.dconf ];
     };
 
-    networking.networkmanager = { enable = true; };
+    networking.networkmanager = {
+      enable = true;
+    };
     programs.dconf.enable = true;
     services.upower.enable = true;
     services.xserver.windowManager.xmonad = {
@@ -93,7 +108,9 @@ in
       };
       services.picom = {
         enable = true;
-        settings = { detect-client-opacity = true; };
+        settings = {
+          detect-client-opacity = true;
+        };
       };
       services.gnome-keyring.enable = true;
       services.trayer = {

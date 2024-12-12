@@ -1,8 +1,15 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
-let cfg = config.modules.dev.dart;
-in {
+let
+  cfg = config.modules.dev.dart;
+in
+{
   options.modules.dev.dart = {
     enable = mkEnableOption "dart";
     package = mkOption {
@@ -32,13 +39,13 @@ in {
         "${config.my.homeDirectory}/.pub-cache/bin"
       ];
       programs.zsh = mkIf cfg.enableZshIntegration {
-        sessionVariables = { DART_SDK = "${cfg.package}"; };
+        sessionVariables = {
+          DART_SDK = "${cfg.package}";
+        };
         shellAliases = {
           ddev = "pub run dart_dev";
-          pubcleanlock = ''
-            git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
-          pubclean = ''
-            rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
+          pubcleanlock = ''git ls-files pubspec.lock --error-unmatch &>/dev/null && echo "Not removing pubspec.lock - it is tracked" || (rm pubspec.lock && echo "Removed pubspec.lock")'';
+          pubclean = ''rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
           repub = "pubclean; pub get";
         };
         initExtra = ''

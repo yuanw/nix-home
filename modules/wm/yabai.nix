@@ -3,13 +3,17 @@
 # this module aims to encapsulate all configurations
 # to have a functional tiling window manager environment on MacOS
 # yabai/skhd
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsEveryWhere =
-    ''emacsclient --eval "(emacs-everywhere)"'';
+  emacsEveryWhere = ''emacsclient --eval "(emacs-everywhere)"'';
   emacsClient = "emacsclient -c -a 'emacs'";
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
@@ -75,27 +79,25 @@ in
         home.packages = [
           pkgs.ical-buddy
           pkgs.choose-mac
-          (
-            pkgs.writeShellScriptBin "yabai-next-window" ''
-              #
-              # yabai-next-window
-              #
-              # move to next window
-              #
-              WINDOW=$(yabai -m query --windows --window)
-              STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
-              if [[ $STACK_INDEX -gt 0 ]]; then
-                 LAST_STACK_INDEX=$(yabai -m query --windows --window stack.last | jq '.["stack-index"]')
-                 if [[ "$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
-                   yabai -m window --focus stack.first
-                 else
-                   yabai -m window --focus stack.next
-                 fi
-              else
-                 yabai - window --focus west
-              fi
-            ''
-          )
+          (pkgs.writeShellScriptBin "yabai-next-window" ''
+            #
+            # yabai-next-window
+            #
+            # move to next window
+            #
+            WINDOW=$(yabai -m query --windows --window)
+            STACK_INDEX=$(echo "$WINDOW" | jq '.["stack-index"]')
+            if [[ $STACK_INDEX -gt 0 ]]; then
+               LAST_STACK_INDEX=$(yabai -m query --windows --window stack.last | jq '.["stack-index"]')
+               if [[ "$STACK_INDEX" == "$LAST_STACK_INDEX" ]]; then
+                 yabai -m window --focus stack.first
+               else
+                 yabai -m window --focus stack.next
+               fi
+            else
+               yabai - window --focus west
+            fi
+          '')
 
         ];
 
@@ -110,7 +112,6 @@ in
           ${moveConfig}
         '';
       };
-
 
       launchd.user.agents.skhd.serviceConfig = {
         StandardOutPath = "/tmp/skhd.log";
@@ -202,7 +203,6 @@ in
           StandardErrorPath = "/tmp/borders.log";
         };
       };
-    }
-    )
+    })
   ];
 }

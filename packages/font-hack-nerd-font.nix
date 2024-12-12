@@ -1,4 +1,9 @@
-{ stdenv, unzip, fetchurl, lib }:
+{
+  stdenv,
+  unzip,
+  fetchurl,
+  lib,
+}:
 
 stdenv.mkDerivation rec {
   pname = "font-hack-nerd-font";

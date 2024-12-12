@@ -1,43 +1,52 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
-  inherit (lib) mkEnableOption mkIf mkPackageOptionMD mkOption types;
+  inherit (lib)
+    mkEnableOption
+    mkIf
+    mkPackageOptionMD
+    mkOption
+    types
+    ;
 
   cfg = config.services.janky-borders;
 in
 
 {
 
-  options.services.sketchybar =
-    {
-      enable = mkEnableOption ("jankyBorders");
+  options.services.sketchybar = {
+    enable = mkEnableOption ("jankyBorders");
 
-      package = mkPackageOptionMD pkgs "jankyBorders" { };
+    package = mkPackageOptionMD pkgs "jankyBorders" { };
 
+    config = mkOption {
+      type = types.lines;
+      default = "";
+      example = ''
+        #!/bin/bash
 
-      config = mkOption {
-        type = types.lines;
-        default = "";
-        example = ''
-          #!/bin/bash
+        options=(
+        style=round
+        width=6.0
+        hidpi=off
+        active_color=0xc0e2e2e3
+        inactive_color=0xc02c2e34
+        background_color=0x302c2e34
+        )
+      '';
+      description = ''
+        Contents of sketchybar's configuration file. If empty (the default), the configuration file won't be managed.
 
-          options=(
-          style=round
-          width=6.0
-          hidpi=off
-          active_color=0xc0e2e2e3
-          inactive_color=0xc02c2e34
-          background_color=0x302c2e34
-          )
-        '';
-        description = ''
-          Contents of sketchybar's configuration file. If empty (the default), the configuration file won't be managed.
-
-          See [documentation](https://felixkratz.github.io/SketchyBar/)
-          and [example](https://github.com/FelixKratz/SketchyBar/blob/master/sketchybarrc).
-        '';
-      };
+        See [documentation](https://felixkratz.github.io/SketchyBar/)
+        and [example](https://github.com/FelixKratz/SketchyBar/blob/master/sketchybarrc).
+      '';
     };
+  };
   # https://github.com/FelixKratz/homebrew-formulae/blob/master/borders.rb#L35
   config = mkIf cfg.enable {
     environment.systemPackages = [ cfg.package ];

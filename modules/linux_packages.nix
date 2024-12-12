@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
-with pkgs; [
+with pkgs;
+[
   gnumake
   _1password-gui
   protonvpn-cli_2

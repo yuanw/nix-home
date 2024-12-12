@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
@@ -15,7 +20,9 @@ let
   '';
 in
 {
-  options.modules.typing = { enable = mkEnableOption "typing"; };
+  options.modules.typing = {
+    enable = mkEnableOption "typing";
+  };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
@@ -26,7 +33,9 @@ in
       ];
       programs = {
         zsh = {
-          sessionVariables = { TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper"; };
+          sessionVariables = {
+            TTYPER_CONFIG_DIR = "$XDG_CONFIG_HOME/ttyper";
+          };
         };
       };
       xdg.configFile = {

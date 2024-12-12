@@ -1,4 +1,10 @@
-{ pkgs, lib, config, inputs, ... }:
+{
+  pkgs,
+  lib,
+  config,
+  inputs,
+  ...
+}:
 
 {
   imports = [
@@ -8,11 +14,10 @@
   home.homeDirectory = config.my.homeDirectory;
   # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
   home.stateVersion = "22.11";
-  home.packages = (import ./packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isDarwin
-    (import ./macos_packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isLinux
-    (import ./linux_packages.nix { inherit pkgs; });
+  home.packages =
+    (import ./packages.nix { inherit pkgs; })
+    ++ lib.optionals pkgs.stdenvNoCC.isDarwin (import ./macos_packages.nix { inherit pkgs; })
+    ++ lib.optionals pkgs.stdenvNoCC.isLinux (import ./linux_packages.nix { inherit pkgs; });
   home.sessionPath = [
     "/usr/local/bin"
     "/usr/local/sbin"
@@ -22,10 +27,8 @@
     enable = true;
     configFile = {
       # "startpage".source = ./startpage;
-      "wallpapers/haskell-red-noise.png".source =
-        ../pictures/haskell-red-noise.png;
-      "wallpapers/nix-wallpaper-dracula.png".source =
-        ../pictures/nix-wallpaper-dracula.png;
+      "wallpapers/haskell-red-noise.png".source = ../pictures/haskell-red-noise.png;
+      "wallpapers/nix-wallpaper-dracula.png".source = ../pictures/nix-wallpaper-dracula.png;
     };
   };
   catppuccin.flavor = "mocha";
@@ -116,7 +119,9 @@
     direnv = {
       enable = true;
       enableZshIntegration = true;
-      nix-direnv = { enable = true; };
+      nix-direnv = {
+        enable = true;
+      };
     };
 
     eza = {
@@ -135,7 +140,8 @@
       aliases = {
         co = "checkout";
         w = "status -sb";
-        l = "log --graph --pretty=format:'%Cred%h%Creset"
+        l =
+          "log --graph --pretty=format:'%Cred%h%Creset"
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
       };
@@ -157,7 +163,9 @@
       ];
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
       extraConfig = {
-        core = { editor = "emacsclient -c"; };
+        core = {
+          editor = "emacsclient -c";
+        };
         init.defaultBranch = "main";
         pull.rebase = true;
         rebase.autosquash = true;
@@ -180,14 +188,23 @@
       };
     };
 
-    gpg = { enable = true; };
+    gpg = {
+      enable = true;
+    };
     fastfetch = {
       enable = true;
     };
 
-    home-manager = { enable = true; };
-    nnn = { enable = true; package = pkgs.nnn.override ({ withNerdIcons = true; }); };
-    jq = { enable = true; };
+    home-manager = {
+      enable = true;
+    };
+    nnn = {
+      enable = true;
+      package = pkgs.nnn.override ({ withNerdIcons = true; });
+    };
+    jq = {
+      enable = true;
+    };
     zoxide = {
       enable = true;
       enableZshIntegration = true;
@@ -221,7 +238,11 @@
         ignoreSpace = true;
         extended = true;
         expireDuplicatesFirst = true;
-        ignorePatterns = [ "rm *" "pkill *" "ls" ];
+        ignorePatterns = [
+          "rm *"
+          "pkill *"
+          "ls"
+        ];
       };
 
       initExtra =
@@ -239,7 +260,11 @@
 
       oh-my-zsh = {
         enable = true;
-        plugins = [ "history" "autojump" "history-substring-search" ];
+        plugins = [
+          "history"
+          "autojump"
+          "history-substring-search"
+        ];
         custom = "$HOME/.config/zsh/custom";
       };
     };
