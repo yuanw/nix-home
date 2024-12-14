@@ -19,12 +19,14 @@
         "https://cachix.org/api/v1/cache/yuanwang-wf"
         "https://cachix.org/api/v1/cache/devenv"
         "https://cache.garnix.io"
+        "https://cache.iog.io"
       ];
       trusted-substituters = [
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
         "https://yuanw-nix-home-macos.cachix.org"
         "https://cache.garnix.io"
+        "https://cache.iog.io"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -33,6 +35,7 @@
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ="
         "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+        "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
       ];
       # https://github.com/NixOS/nix/issues/7273
       # auto-optimise-store = true;
