@@ -10,9 +10,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     catppuccin.url = "github:Stonks3141/ctp-nix";
-    roc = {
-      url = "github:roc-lang/roc";
-    };
     devenv.url = "github:cachix/devenv";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -44,9 +41,6 @@
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
-    };
-    agda = {
-      url = "github:agda/agda";
     };
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";

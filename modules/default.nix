@@ -18,7 +18,6 @@
       ./dev/node.nix
       ./dev/python.nix
       ./dev/racket.nix
-      ./dev/roc.nix
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix

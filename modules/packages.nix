@@ -34,8 +34,8 @@ with pkgs;
   gitAndTools.gh
   git-crypt
 
-  hledger
-  ranger
+  #hledger
+  #ranger
   du-dust
   nixpkgs-fmt
   nix-tree
