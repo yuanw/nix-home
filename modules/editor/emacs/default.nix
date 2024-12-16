@@ -160,11 +160,11 @@ with lib;
               (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
-
-              (set-face-attribute 'default nil
-               :font "PragmataPro"
-              :height 160
-              )
+              (let ((mono-spaced-font "PragmataPro Mono Liga")
+                    (proportionately-spaced-font "PragmataPro Liga"))
+               (set-face-attribute 'default nil :family mono-spaced-font :height 180)
+               (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
+               (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
             '';
 
             prelude = ''
@@ -290,7 +290,8 @@ with lib;
               ;; Minimising & quitting Emacs way too many times without wanting to.
               ;;(global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
-              (keycast-mode-line-mode)
+              ;;(keycast-mode-line-mode)
+              (keycast-header-line-mode)
               ;;(server-start)
             '';
 
@@ -664,6 +665,9 @@ with lib;
 
               nerd-icons = {
                 enable = true;
+                custom = ''
+                  (nerd-icons-font-family "PragmataPro Mono Liga")
+                '';
               };
 
               nerd-icons-completion = {
