@@ -1767,8 +1767,8 @@ with lib;
                 earlyInit = ''
                   ;; Set color theme in early init to avoid flashing during start.
                   (require 'ef-themes)
-                  (load-theme 'ef-summer :no-confirm)
-                  (setq ef-themes-to-toggle '(ef-summer ef-winter))
+                  (load-theme 'ef-dream :no-confirm)
+                  (setq ef-themes-to-toggle '(ef-spring ef-dream))
                 '';
               };
               all-the-icons = {
