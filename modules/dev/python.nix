@@ -36,6 +36,7 @@ in
           # pylsp-mypy
           virtualenv
           virtualenvwrapper
+          opentype-feature-freezer
           #litellm
           #tokenizers
         ]
