@@ -109,6 +109,33 @@
           ];
         }
       );
+      mist = withSystem "aarch64-darwin" (
+        {
+          config,
+          inputs',
+          system,
+          ...
+        }:
+        inputs.nix-darwin.lib.darwinSystem {
+          specialArgs = {
+            isDarwin = true;
+            isNixOS = false;
+            loadPrivate = true;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { system = system; };
+            };
+            packages = config.packages;
+            inherit inputs inputs';
+          };
+          modules = [
+            {
+              nixpkgs.hostPlatform = system;
+            }
+            ./mist.nix
+          ];
+        }
+      );
+
       WK01174 = withSystem "aarch64-darwin" (
         {
           config,
