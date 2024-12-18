@@ -1044,6 +1044,36 @@ with lib;
               };
               org = {
                 enable = true;
+                custom = ''
+                                   (org-todo-keywords
+                   '((sequence "TODO(t@/!)" "DOING(s!/!)"
+                               "WAIT(w@/!)" "DEFER(r!/!)"
+                               "TASK(g@/!)" "HABIT(h@/!)"
+                               "|" "DONE(d@/!)" "CANCELED(x@/!)")
+                     (sequence "|" "NOTE(n)" "LINK(l)" "FEEDBACK(f)")))
+                  (org-todo-keyword-faces
+                   `(
+                     ("TODO"     :foreground ,palette-slate-blue      :weight bold)
+                     ("DOING"    :foreground ,palette-yellow          :weight bold)
+                     ("WAIT"     :foreground ,palette-red             :weight bold)
+                     ("TASK"     :foreground ,palette-blue            :weight bold)
+                     ("DEFER"    :foreground ,palette-slate-blue-dark :weight bold)
+                     ("DONE"     :foreground ,palette-green-dark      :weight bold)
+                     ("CANCELED" :foreground "grey50"                 :weight bold :strike-through t)
+                     ("HABIT"    :foreground ,palette-orange          :weight bold)
+                     ("LINK"     :foreground ,palette-orange-dark     :weight bold)
+                     ("NOTE"     :foreground ,palette-red-dark        :weight bold)
+                     ("FEEDBACK" :foreground ,palette-purple-dark     :weight bold)
+                     ))
+                  (org-tag-faces
+                   `(("Call"     :foreground "grey50")
+                     ("Errand"   :foreground "grey50")
+                     ("Home"     :foreground "grey50")
+                     ("FILE"     :foreground ,palette-purple          :weight bold)
+                     ("LINK"     :foreground ,palette-purple          :weight bold)))
+                  (org-todo-repeat-to-state "TODO")
+
+                '';
                 config = ''
                   (setq org-directory  "~/org/")
                   (setq org-agenda-files (append    
