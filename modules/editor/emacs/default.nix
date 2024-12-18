@@ -1074,12 +1074,14 @@ with lib;
                         org-agenda-start-on-weekday nil)
                 '';
               };
+              org-extra = {
+                enable = true;
+                functions = "org-extra-refile-heading-p";
+              };
               org-refile = {
                 enable = true;
                 after = [ "org" ];
                 custom = ''
-                  (use-package org-extra
-                    :functions (org-extra-refile-heading-p))
                   (org-refile-target-verify-function #'org-extra-refile-heading-p)
                   (org-refile-targets '((org-agenda-files :maxlevel . 4)))
                   (org-refile-use-cache nil)
