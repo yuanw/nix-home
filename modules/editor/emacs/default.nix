@@ -1044,8 +1044,9 @@ with lib;
               };
               org = {
                 enable = true;
+                demand = true;
                 custom = ''
-                                   (org-todo-keywords
+                  (org-todo-keywords
                    '((sequence "TODO(t@/!)" "DOING(s!/!)"
                                "WAIT(w@/!)" "DEFER(r!/!)"
                                "TASK(g@/!)" "HABIT(h@/!)"
