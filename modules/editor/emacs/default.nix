@@ -1076,12 +1076,30 @@ with lib;
               };
               org-extra = {
                 enable = true;
-                functions = [ "org-extra-refile-heading-p" ];
+                after = [ "org" ];
+                demand = true;
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "org-extra";
+                    version = "0.0.1";
+                    src = ./packages/org-extra.el;
+                    # elisp dependencies
+                    packageRequires = [
+                      epkgs.org
+                      epkgs.org-ql
+                      epkgs.dash
+                    ];
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
               };
               org-refile = {
                 enable = true;
                 after = [ "org" ];
                 custom = ''
+                  (use-package org-extra
+                      :functions (org-extra-refile-heading-p))
                   (org-refile-target-verify-function #'org-extra-refile-heading-p)
                   (org-refile-targets '((org-agenda-files :maxlevel . 4)))
                   (org-refile-use-cache nil)
