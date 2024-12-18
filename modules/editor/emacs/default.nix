@@ -1046,11 +1046,16 @@ with lib;
                 enable = true;
                 config = ''
                   (setq org-directory  "~/org/")
-                  (setq org-agenda-files (append
-                                  
+                  (setq org-agenda-files (append    
                                    (file-expand-wildcards (concat org-directory "agenda/*.org"))))
-
-                                   (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                  (setq  org-default-notes-file (concat org-directory "agenda/inbox.org"))
+                  (defun my/org-entry-get-immediate (property)
+                     (save-excursion
+                     (let ((local (org--property-local-values property nil)))
+                     (and local (mapconcat #'identity
+                              (delq nil local)
+                              (org--property-get-separator property))))))
+                              
                   (org-babel-do-load-languages 'org-babel-load-languages
                   '(
                     (emacs-lisp . t)
