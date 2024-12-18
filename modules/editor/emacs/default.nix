@@ -1076,7 +1076,7 @@ with lib;
               };
               org-extra = {
                 enable = true;
-                functions = "org-extra-refile-heading-p";
+                functions = [ "org-extra-refile-heading-p" ];
               };
               org-refile = {
                 enable = true;
