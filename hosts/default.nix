@@ -171,6 +171,8 @@
       packages.yuanw = self.darwinConfigurations.yuanw.system;
       packages.ci = self.darwinConfigurations.ci.system;
       packages.wk01174 = self.darwinConfigurations.WK01174.system;
+      packages.mist = self.darwinConfigurations.mist.system;
+
       # packages.activate = pkgs.writeShellApplication
       #   {
       #     name = "activate";
