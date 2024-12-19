@@ -12,7 +12,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-${version}.dmg";
-    hash = "sha256-WXnmgGaoIn0IFSw457wvLtAKLnTBl5L/Rq5zMCPijnU=";
+    hash = "sha256-6dtcrwRY1qEHquZPbwnEo2CmcuNN9ZkFo8rn/8S+ctM=";
   };
   unpackPhase = ''
     undmg $src

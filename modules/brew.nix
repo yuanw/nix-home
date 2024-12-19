@@ -19,7 +19,7 @@ in
     };
     casks = mkOption {
       type = types.listOf types.str;
-      default = [ "firefox" ];
+      default = [  ];
     };
     masApps = mkOption {
       type = with types; attrsOf ints.positive;

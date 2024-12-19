@@ -37,7 +37,7 @@ with lib;
 
   launchd.daemons.nix-daemon.serviceConfig.SoftResourceLimits.NumberOfFiles = 10240;
   #    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
-  ids.uids.nixbld = 300;
+  #ids.uids.nixbld = 300;
   system.stateVersion = 5;
   services.nix-daemon = {
     enable = true;

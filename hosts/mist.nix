@@ -15,6 +15,8 @@
   my = {
     username = "yuanw";
     name = "Yuan Wang";
+    hostname = "mist";
+    homeDirectory = "/Users/yuanw";
   };
 
   environment.systemPath = [
@@ -43,6 +45,7 @@
     };
     brew = {
       enable = true;
+      casks = [ "1password" ];
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     browsers.firefox = {
@@ -52,7 +55,7 @@
     editors.emacs = {
       enable = true;
       enableService = true;
-      enableAider = true;
+      # enableAider = true;
       # enableCopilot = true;
       # lspStyle = "lsp-bridge";
     };
