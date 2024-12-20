@@ -32,14 +32,10 @@
     };
   };
   catppuccin.flavor = "mocha";
-  # programs.bat.catppuccin.enable = true;
-  # programs.starship.catppuccin.enable = true;
-  # programs.alacritty.catppuccin.enable = true;
   manual.manpages.enable = false;
   programs = {
     bat = {
       enable = true;
-      catppuccin.enable = true;
       extraPackages = with pkgs.bat-extras; [
         # batdiff
         batman
