@@ -31,6 +31,11 @@ in
           '')
         ];
       };
+      catppuccin = {
+        starship.enable = true;
+        bat.enable = true;
+        alacritty.enable = true;
+      };
       programs = {
         pet = {
           enable = true;
