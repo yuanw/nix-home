@@ -85,8 +85,6 @@ in
         };
         starship = {
           enable = true;
-          catppuccin.enable = true;
-
           enableZshIntegration = true;
           # https://starship.rs/config/#prompt
           settings = {
@@ -109,7 +107,6 @@ in
         # https://github.com/alacritty/alacritty/blob/master/alacritty.yml#L1
         alacritty = {
           enable = true;
-          catppuccin.enable = true;
           settings = {
             font = {
               normal = {
