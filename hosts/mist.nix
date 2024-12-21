@@ -45,7 +45,8 @@
     };
     brew = {
       enable = true;
-      casks = [ "1password" ];
+      casks
+      = [ "1password" "betterdisplay" ];
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     browsers.firefox = {
