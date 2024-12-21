@@ -143,14 +143,7 @@ let
           description = ''
             The entries to use for <option>:custom</option>.
           '';
-        };
 
-        customFace = mkOption {
-          type = types.listOf types.str;
-          default = [ ];
-          description = ''
-            The entries to use for <option>:customFace</option>.
-          '';
         };
 
         command = mkOption {
@@ -234,7 +227,6 @@ let
             mkAfter = vs: optional (vs != [ ]) ":after (${toString vs})";
             mkCustom = vs: optional (vs != "") ":custom ${toString vs}";
             mkCommand = vs: optional (vs != [ ]) ":commands (${toString vs})";
-            mkCustomFace = vs: optional (vs != [ ]) ":custom-face (${toString vs})";
             mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
             mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
             mkMode = map (v: ":mode ${v}");
@@ -260,7 +252,6 @@ let
             ++ mkBindLocal config.bindLocal
             ++ mkChords config.chords
             ++ mkCustom config.custom
-            ++ mkCustom config.customFace
             ++ mkCommand config.command
             ++ mkDefer config.defer
             ++ mkDefines config.defines
