@@ -27,7 +27,7 @@ let
     patches =
       (lib.optionals pkgs.stdenv.isDarwin [
         "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
-        #"${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
+        ./patches/round-undecorated-frame.patch
         "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
       ])
       ++ prev.patches;
@@ -316,7 +316,7 @@ with lib;
               ;;(global-unset-key "\C-x\C-c")
               ;; add here seems actully does the trick
               ;;(keycast-mode-line-mode)
-              (keycast-header-line-mode)
+              ;; (keycast-header-line-mode)
               ;;(server-start)
             '';
 
