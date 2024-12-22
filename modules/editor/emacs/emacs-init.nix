@@ -98,7 +98,7 @@ let
           default = [ ];
           description = ''
 
-          The entries to use for <option>:after</option>.
+            The entries to use for <option>:after</option>.
           '';
         };
 
