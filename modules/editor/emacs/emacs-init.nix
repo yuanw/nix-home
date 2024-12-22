@@ -97,7 +97,8 @@ let
           type = types.listOf types.str;
           default = [ ];
           description = ''
-            The entries to use for <option>:after</option>.
+
+          The entries to use for <option>:after</option>.
           '';
         };
 
@@ -144,6 +145,16 @@ let
             The entries to use for <option>:custom</option>.
           '';
 
+        };
+        customFace = mkOption {
+          type = types.attrsOf types.str;
+          default = { };
+          example = {
+            "org-habit-alert-face" = "(((background light)) (:background \"#f5f946\"))";
+          };
+          description = ''
+            The entries to use for <option>:custom-face</option>.
+          '';
         };
 
         command = mkOption {
@@ -240,6 +251,7 @@ let
               flatten (mapAttrsToList mkMap bs);
             mkBindKeyMap = mkBindHelper "bind-keymap" "";
             mkChords = mkBindHelper "chords" "";
+            mkCustomFace = mkBindHelper "custom-face" "";
             mkHook = map (v: ":hook ${v}");
             mkDefer = v: if isBool v then optional v ":defer t" else [ ":defer ${toString v}" ];
             mkDemand = v: optional v ":demand t";
@@ -252,6 +264,7 @@ let
             ++ mkBindLocal config.bindLocal
             ++ mkChords config.chords
             ++ mkCustom config.custom
+            ++ mkCustomFace config.customFace
             ++ mkCommand config.command
             ++ mkDefer config.defer
             ++ mkDefines config.defines
