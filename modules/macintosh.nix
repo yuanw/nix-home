@@ -39,6 +39,12 @@ with lib;
   #    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
   #ids.uids.nixbld = 300;
   system.stateVersion = 5;
+  system.activationScripts.postActivation.text = ''
+    printf "disabling spotlight indexing... "
+    mdutil -i off -d / &> /dev/null
+    mdutil -E / &> /dev/null
+    echo "ok"
+  '';
   services.nix-daemon = {
     enable = true;
     logFile = "/var/log/nix-daemon.log";
