@@ -2074,22 +2074,22 @@ with lib;
                     buildInputs = propagatedUserEnvPkgs;
                   };
               };
-             alert = {
+              alert = {
                 enable = true;
                 extraConfig = ''
-  :autoload (alert alert-add-rule)
-  '';
-  custom = ''
-  ;; (alert-default-style 'fringe)
-  (alert-default-style 'osx-notifier)
-  (alert-notifier-command
-   "${pkgs.terminal-notifier}/bin/terminal-notifier")
-   '';
-    extraPackages = [
+                  :autoload (alert alert-add-rule)
+                '';
+                custom = ''
+                  ;; (alert-default-style 'fringe)
+                  (alert-default-style 'osx-notifier)
+                  (alert-notifier-command
+                   "${pkgs.terminal-notifier}/bin/terminal-notifier")
+                '';
+                extraPackages = [
                   pkgs.terminal-notifier
                 ];
 
-};
+              };
               toggle-term = {
                 enable = false;
                 package =
