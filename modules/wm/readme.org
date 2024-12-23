@@ -8,7 +8,7 @@ gh requires ~gh auth login~
 ~pmset displaysleepnow~
 
 require a password immediately after sleep
-System Preference -> Security & Privacy -> General
+System Preference -> Lock Screen ->
 ** Hide Window
 ~Command + H~ default MacOS shortcut
 ~Command + Shift + .~ show hidden files
