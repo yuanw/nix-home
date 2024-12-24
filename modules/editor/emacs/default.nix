@@ -1047,9 +1047,13 @@ with lib;
                 demand = true;
                 custom = ''
                   (org-todo-keywords
-                   '((sequence "TODO(t@/!)" "DOING(s!/!)"
-                               "WAIT(w@/!)" "DEFER(r!/!)"
-                               "TASK(g@/!)" "HABIT(h@/!)"
+                   '((sequence "TODO(t@/!)"
+                               "PROJ(p)"
+                               "DOING(s!/!)"
+                               "WAIT(w@/!)"
+                               "DEFER(r!/!)"
+                               "TASK(g@/!)"
+                               "HABIT(h@/!)"
                                "|" "DONE(d@/!)" "CANCELED(x@/!)")
                      (sequence "|" "NOTE(n)" "LINK(l)" "FEEDBACK(f)")))
                   (org-todo-keyword-faces
