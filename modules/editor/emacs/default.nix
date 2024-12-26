@@ -1159,7 +1159,7 @@ with lib;
                   (use-package org-extra
                       :functions (org-extra-refile-heading-p))
                   ;;(org-refile-target-verify-function #'org-extra-refile-heading-p)
-                  (org-refile-targets '((org-agenda-files :maxlevel . 4)))
+                  (org-refile-targets '((org-agenda-files :maxlevel . 3)))
                   (org-refile-use-cache nil)
                   (org-refile-use-outline-path t)
                 '';
@@ -1230,7 +1230,7 @@ with lib;
                 ];
                 after = [ "org" ];
                 custom = ''
-                  (org-download-method 'attach)
+                  (org-download-method 'directory)
                 '';
                 config = "(add-hook 'dired-mode-hook  'org-download-enable)";
                 # if macos
