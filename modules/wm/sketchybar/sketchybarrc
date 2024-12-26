@@ -70,16 +70,15 @@ source "$ITEM_DIR/yabai.sh"
 source "$ITEM_DIR/front_app.sh"
 source "$ITEM_DIR/mail.sh"
 # Center
-# source "$ITEM_DIR/spotify.sh"
+
 
 # Right
-#source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/brew.sh"
 source "$ITEM_DIR/github.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/cpu.sh"
 source "$ITEM_DIR/battery.sh"
-source "$ITEM_DIR/ical.sh"
 source "$ITEM_DIR/mic.sh"
 
 
