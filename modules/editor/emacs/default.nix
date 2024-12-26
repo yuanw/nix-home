@@ -1160,8 +1160,9 @@ with lib;
                       :functions (org-extra-refile-heading-p))
                   ;;(org-refile-target-verify-function #'org-extra-refile-heading-p)
                   (org-refile-targets '((org-agenda-files :maxlevel . 3)))
-                  (org-refile-use-cache nil)
-                  (org-refile-use-outline-path t)
+                  (org-refile-use-cache nil)                  
+                  (org-refile-use-outline-path 'file)
+                  (org-outline-path-complete-in-steps nil)
                 '';
               };
               ob-ipython = {
