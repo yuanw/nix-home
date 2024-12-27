@@ -57,7 +57,8 @@ _final: prev: {
     version = "1.0.0";
     src = prev.fetchurl {
       url = "https://release.files.ghostty.org/1.0.0/Ghostty.dmg";
-      # hash = prev.lib.fakeHash;
+      hash = prev.lib.fakeHash;
+      };
   };
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
