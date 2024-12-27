@@ -110,15 +110,15 @@ in
           settings = {
             font = {
               normal = {
-                family = config.my.font;
+                family = config.my.monoFont;
                 style = "Regular";
               };
               bold = {
-                family = config.my.font;
+                family = config.my.monoFont;
                 style = "Bold";
               };
               italic = {
-                family = config.my.font;
+                family = config.my.monoFont;
                 style = "Italic";
               };
               size = 18;
