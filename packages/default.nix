@@ -26,12 +26,9 @@ _final: prev: {
       installPhase = ''
         runHook preInstall
         mkdir -p $out/Applications
-        cp -r calibre*.app "$out/Applications/"
+        cp -r *.app "$out/Applications/"
 
         mkdir -p $out/bin
-
-        ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
-
 
         runHook postInstall
       '';
@@ -50,12 +47,18 @@ _final: prev: {
       url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
       # hash = prev.lib.fakeHash;
       hash = "sha256-1gdTsAdYUKBgltlarblZ/6fPwe+CGGVeFT0b9LOatw0=";
-
     };
     description = "e-book library management";
     homepage = "https://calibre-ebook.com/";
+    # postInsall ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
   };
-
+  ghostty-mac = _final.installApplication rec {
+    name = "ghostty";
+    version = "1.0.0";
+    src = prev.fetchurl {
+      url = "https://release.files.ghostty.org/1.0.0/Ghostty.dmg";
+      # hash = prev.lib.fakeHash;
+  };
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
