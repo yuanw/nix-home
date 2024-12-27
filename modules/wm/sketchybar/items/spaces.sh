@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SPACE_ICONS=("丹" "赤" "蘭" "馨" "玉" "白" "金" "刚" "9" "10" "11" "12" "13" "14" "15")
+SPACE_ICONS=("敬" "天" "爱" "人" "向" "死" "而" "生9" "10" "11" "12" "13" "14" "15")
 
 # Destroy space on right click, focus space on left click.
 # New space by left clicking separator (>)
