@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs',
   ...
 }:
 
@@ -26,7 +25,6 @@ in
       home = {
         file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
         packages = [
-          inputs'.ghostty.packages.default
           pkgs.jo
           (pkgs.writeShellScriptBin "jsonify" ''
             cat $1 | jq | sponge $1

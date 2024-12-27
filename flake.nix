@@ -62,11 +62,7 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
-    #https://github.com/NixOS/nixpkgs/pull/368404/files
-    ghostty = {
-      url = "github:ghostty-org/ghostty";
-      inputs.nixpkgs-unstable.follows = "nixpkgs";
-    };
+
     # Vale styles.
     vale-Google.flake = false;
     vale-Google.url = "github:errata-ai/Google";
