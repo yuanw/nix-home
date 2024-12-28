@@ -2095,6 +2095,20 @@ with lib;
                 ];
 
               };
+
+             spacious-padding = {
+  enable = true;
+  custom = ''
+  (spacious-padding-widths
+   '( :internal-border-width 15
+      :header-line-width 4
+      :mode-line-width 3                ; half the default
+      :tab-width 4
+      :right-divider-width 15           ; half the default
+      :scroll-bar-width 8))
+      '';
+  init="(spacious-padding-mode)";
+             };
               toggle-term = {
                 enable = false;
                 package =
