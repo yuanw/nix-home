@@ -297,7 +297,6 @@ with lib;
                (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
 
 
-
               ;; WARNING: This will change your life
               ;; (OPTIONAL) Visualize tabs as a pipe character - "|"
               ;; This will also show trailing characters as they are useful to spot.
@@ -309,6 +308,33 @@ with lib;
               ; END TABS CONFIG
               ;; Only do candidate cycling if there are very few candidates.
               (setq completion-cycle-threshold 3)
+              (bind-keys
+               ("M-e" . execute-extended-command))
+
+               (bind-keys :prefix-map toggle-map
+           :prefix "C-e x"
+           :prefix-docstring "Keymap for commands that toggle settings."
+           ("c" . column-number-mode)
+           ("d" . toggle-debug-on-error)
+           ("l" . toggle-truncate-lines)
+           ("t" . toggle-frame-tab-bar)
+           ("f" . follow-mode)
+           ("v" . visual-line-mode)
+           ("a" . auto-fill-mode)
+           ("w" . whitespace-mode)
+           ("p" . variable-pitch-mode)
+           ("r" . visible-mode))
+
+(bind-keys :prefix-map time-map
+           :prefix "C-e t"
+           :prefix-docstring "Keymap for commands that deal with time."
+           ("w" . world-clock)
+           ("t" . display-time-mode)
+           ("c" . calendar)
+           ("o" . org-timer-set-timer)
+           ("p" . org-timer-pause-or-continue)
+           ("s" . org-timer-stop))
+
             '';
 
             postlude = ''
