@@ -310,7 +310,8 @@ with lib;
               (setq completion-cycle-threshold 3)
               (bind-keys
                ("M-e" . execute-extended-command))
-
+               
+               ;;https://github.com/oantolin/emacs-config/blob/master/init.el#L178C1-L201C1
                (bind-keys :prefix-map toggle-map
            :prefix "C-e x"
            :prefix-docstring "Keymap for commands that toggle settings."
@@ -325,7 +326,7 @@ with lib;
            ("p" . variable-pitch-mode)
            ("r" . visible-mode))
 
-(bind-keys :prefix-map time-map
+               (bind-keys :prefix-map time-map
            :prefix "C-e t"
            :prefix-docstring "Keymap for commands that deal with time."
            ("w" . world-clock)
@@ -334,7 +335,6 @@ with lib;
            ("o" . org-timer-set-timer)
            ("p" . org-timer-pause-or-continue)
            ("s" . org-timer-stop))
-
             '';
 
             postlude = ''
