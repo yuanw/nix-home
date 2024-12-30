@@ -456,7 +456,7 @@ with lib;
                               "  "
                               mode-line-format-right-align ; Emacs 30
                               prot-modeline-notmuch-indicator
-                                       "  "
+                              "  "
                               prot-modeline-misc-info))
                                        
                        (with-eval-after-load 'spacious-padding
