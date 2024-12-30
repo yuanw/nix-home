@@ -243,13 +243,6 @@ with lib;
               ;; Avoid noisy bell.
               (setq visible-bell t)
 
-              ;; https://www.emacswiki.org/emacs/RecursiveEdit
-              ;;(setq enable-recursive-minibuffer t)
-              (defun stop-using-minibuffer ()
-              "kill the minibuffer"
-              (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-              (abort-recursive-edit)))
-
               (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
@@ -265,12 +258,6 @@ with lib;
               (setq-default python-indent-offset custom-tab-width) ;; Python
               (setq-default js-indent-level custom-tab-width)      ;; Javascript
 
-              ;; Making electric-indent behave sanely
-              (setq-default electric-indent-inhibit t)
-
-              ;; Make the backspace properly erase the tab instead of
-              ;; removing 1 space at a time.
-              (setq backward-delete-char-untabify-method 'hungry)
 
               (defun prot/keyboard-quit-dwim ()
                    "Do-What-I-Mean behaviour for a general `keyboard-quit'.
@@ -295,20 +282,6 @@ with lib;
                 (keyboard-quit))))
 
                (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
-
-
-
-              ;; WARNING: This will change your life
-              ;; (OPTIONAL) Visualize tabs as a pipe character - "|"
-              ;; This will also show trailing characters as they are useful to spot.
-              (setq whitespace-style '(face tabs tab-mark trailing))
-              (custom-set-faces '(whitespace-tab ((t (:foreground "#636363")))))
-              (setq whitespace-display-mappings   '((tab-mark 9 [124 9] [92 9])))
-              ; 124 is the ascii ID for '\|'
-              ; (global-whitespace-mode) ; Enable whitespace mode everywhere
-              ; END TABS CONFIG
-              ;; Only do candidate cycling if there are very few candidates.
-              (setq completion-cycle-threshold 3)
             '';
 
             postlude = ''
@@ -406,36 +379,36 @@ with lib;
                        (setq-default mode-line-format
                             '("%e"
                               prot-modeline-kbd-macro
-
                               prot-modeline-narrow
-                                       prot-modeline-buffer-status
-                                       prot-modeline-window-dedicated-status
-                                       prot-modeline-input-method
+                              prot-modeline-buffer-status
+                              prot-modeline-window-dedicated-status
+                              prot-modeline-input-method
+                              "  "
+                              prot-modeline-buffer-identification
+                              "  "
+                              prot-modeline-major-mode
+                              "  "
+                              mode-line-position
+                              "  "
+                              prot-modeline-process
+                              "  "
+                              prot-modeline-vc-branch
+                              "  "
+                              prot-modeline-eglot
+                              "  "
+                              prot-modeline-flymake
+                              "  "
+                              mode-line-format-right-align ; Emacs 30
+                              prot-modeline-notmuch-indicator
                                        "  "
-                                       prot-modeline-buffer-identification
-                                       "  "
-                                       prot-modeline-major-mode
-                                       "  "
-                                       mode-line-position
-                                       "  "
-                                       prot-modeline-process
-                                       "  "
-                                       prot-modeline-vc-branch
-                                       "  "
-                                       prot-modeline-eglot
-                                       "  "
-                                       prot-modeline-flymake
-                                       "  "
-                                       mode-line-format-right-align ; Emacs 30
-                                       prot-modeline-notmuch-indicator
-                                       "  "
-                                       prot-modeline-misc-info))
+                              prot-modeline-misc-info))
+                                       
                                        (with-eval-after-load 'which-key
                                        (which-key-enable-god-mode-support)
                                        )
-                  (with-eval-after-load 'god-mode
-                      (defun my-god-mode-update-mode-line ()
-                       (cond
+                       (with-eval-after-load 'god-mode
+                         (defun my-god-mode-update-mode-line ()
+                         (cond
                         (god-local-mode
                          (set-face-attribute 'mode-line nil
                                              :foreground "#604000"
