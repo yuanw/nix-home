@@ -675,7 +675,7 @@ with lib;
 
               evil = {
                 enable = true;
-                commands = ["evil-mode"];
+                command = ["evil-mode"];
               };
 
               vertico = {
