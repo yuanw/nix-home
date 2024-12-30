@@ -1234,7 +1234,7 @@ with lib;
                   (org-download-method 'directory)
                 '';
                 config = "(add-hook 'dired-mode-hook  'org-download-enable)";
-                # if macos
+
                 extraPackages =
                   if isDarwin then
                     [
@@ -2094,6 +2094,18 @@ with lib;
                   pkgs.terminal-notifier
                 ];
 
+              };
+
+              viper = {
+                enable = true;
+                custom =''
+                (viper-inhibit-startup-message 't)
+                (viper-expert-level '5)
+                (viper-want-ctl-h-help t)
+                (viper-ex-style-motion nil)'';
+  config = ''
+(define-key viper-minibuffer-map (kbd "RET") nil)
+(viper-buffer-search-enable)'';
               };
               toggle-term = {
                 enable = false;
