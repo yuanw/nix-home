@@ -160,7 +160,7 @@ with lib;
               (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
-              (let ((mono-spaced-font "PragmataPro Mono Liga Serif")
+              (let ((mono-spaced-font "PragmataPro Mono Liga")
                     (proportionately-spaced-font "PragmataPro Liga"))
                (set-face-attribute 'default nil :family mono-spaced-font :height 180)
                (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)

@@ -45,8 +45,8 @@ in
         default = [ ];
         description = "The set of packages to appear in the user environment.";
       };
-      monoFont = mkOptStr "PragmataPro Mono Liga Serif";
-      font = mkOptStr "PragmataPro Liga";
+      monoFont = mkOptStr "PragmataPro Mono Liga";
+      font = mkOptStr "PragmataPro";
       hm = {
         file = mkOpt' attrs { } "Files to place directly in $HOME";
         cacheHome = mkOpt' path "${home}/.cache" "Absolute path to directory holding application caches.";
