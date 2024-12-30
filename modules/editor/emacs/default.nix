@@ -297,7 +297,6 @@ with lib;
               ;; Avoid noisy bell.
               (setq visible-bell t)
 
-              (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
               ;; Enable indentation+completion using the TAB key.
               ;; `completion-at-point' is often bound to M-TAB.
               (setq tab-always-indent 'complete)
