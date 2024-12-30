@@ -165,6 +165,62 @@ with lib;
                (set-face-attribute 'default nil :family mono-spaced-font :height 180)
                (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
                (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+
+              ;; Luminosity 50
+              (defconst palette-red               "#FF0000")
+              (defconst palette-orange            "#FF8000")
+              (defconst palette-yellow            "#FFFF00")
+              (defconst palette-yellow-green      "#80FF00")
+              (defconst palette-green             "#00FF00")
+              (defconst palette-teal              "#00FF80")
+              (defconst palette-cyan              "#00FFFF")
+              (defconst palette-slate-blue        "#007FFF")
+              (defconst palette-blue              "#0000FF")
+              (defconst palette-indigo            "#7F00FF")
+              (defconst palette-purple            "#FF00FF")
+              (defconst palette-fuschia           "#FF0080")
+
+              ;; Luminosity 20
+              (defconst palette-red-dark          "#660000")
+              (defconst palette-orange-dark       "#663300")
+              (defconst palette-yellow-dark       "#666600")
+              (defconst palette-yellow-green-dark "#336600")
+              (defconst palette-green-dark        "#006600")
+              (defconst palette-teal-dark         "#006633")
+              (defconst palette-cyan-dark         "#006666")
+              (defconst palette-slate-blue-dark   "#003366")
+              (defconst palette-blue-dark         "#000066")
+              (defconst palette-indigo-dark       "#330066")
+              (defconst palette-purple-dark       "#660066")
+              (defconst palette-fuschia-dark      "#660033")
+
+              ;; Luminosity 15
+              (defconst palette-red-darker          "#4D0000")
+              (defconst palette-orange-darker       "#4D2600")
+              (defconst palette-yellow-darker       "#4D4D00")
+              (defconst palette-yellow-green-darker "#264D00")
+              (defconst palette-green-darker        "#004D00")
+              (defconst palette-teal-darker         "#004D26")
+              (defconst palette-cyan-darker         "#004D4D")
+              (defconst palette-slate-blue-darker   "#00264D")
+              (defconst palette-blue-darker         "#00004D")
+              (defconst palette-indigo-darker       "#26004D")
+              (defconst palette-purple-darker       "#4D004D")
+              (defconst palette-fuschia-darker      "#4D0026")
+
+              ;; Luminosity 10
+              (defconst palette-red-darkest          "#330000")
+              (defconst palette-orange-darkest       "#331A00")
+              (defconst palette-yellow-darkest       "#333300")
+              (defconst palette-yellow-green-darkest "#1A3300")
+              (defconst palette-green-darkest        "#003300")
+              (defconst palette-teal-darkest         "#00331A")
+              (defconst palette-cyan-darkest         "#003333")
+              (defconst palette-slate-blue-darkest   "#001A33")
+              (defconst palentte-blue-darkest         "#000033")
+              (defconst palette-indigo-darkest       "#1A0033")
+              (defconst palette-purple-darkest       "#330033")
+              (defconst palette-fuschia-darkest      "#33001A")
             '';
 
             prelude = ''
@@ -1828,7 +1884,7 @@ with lib;
                 earlyInit = ''
                   ;; Set color theme in early init to avoid flashing during start.
                   (require 'ef-themes)
-                  (load-theme 'ef-dream :no-confirm)
+                  (load-theme 'ef-spring :no-confirm)
                   (setq ef-themes-to-toggle '(ef-spring ef-dream))
                 '';
               };
@@ -1953,8 +2009,10 @@ with lib;
                   "(purescript-mode . (lambda () (electric-indent-local-mode -1)))"
                 ];
               };
+
               cape = {
                 enable = true;
+                demand = true;
                 # Alternative prefix keys: C-c p, M-p, M-+, ...
                 bind = {
                   "C-c p p" = "completion-at-point";
@@ -1962,23 +2020,11 @@ with lib;
                   "C-c p h" = "cape-history";
                 };
                 init = ''
-                  ;; Add to the global default value of `completion-at-point-functions' which is
-                  ;; used by `completion-at-point'.  The order of the functions matters, the
-                  ;; first function returning a result wins.  Note that the list of buffer-local
-                  ;; completion functions takes precedence over the global list.
-                  ;;(add-to-list 'completion-at-point-functions #'cape-dabbrev)
-                  (add-to-list 'completion-at-point-functions #'cape-file)
-                  (add-to-list 'completion-at-point-functions #'cape-abbrev)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-block)
-                  (add-to-list 'completion-at-point-functions #'cape-history)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-                  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+                ;; Add `completion-at-point-functions', used by `completion-at-point'.
+                (add-all-to-list 'completion-at-point-functions
+                   #'cape-dabbrev
+                   #'cape-file
+                   #'cape-abbrev)
                 '';
               };
 
@@ -2040,7 +2086,6 @@ with lib;
                 ];
               };
 
-
               spacious-padding = {
                 enable = true;
                 custom = ''
@@ -2054,6 +2099,7 @@ with lib;
                 '';
                 config = "(spacious-padding-mode 1)";
               };
+              
               toggle-term = {
                 enable = false;
                 package =
