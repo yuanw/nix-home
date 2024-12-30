@@ -281,7 +281,9 @@ with lib;
                 (t
                 (keyboard-quit))))
 
-               (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
+                (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
+                (setq viper-inhibit-startup-message 't)
+                (setq viper-expert-level '5)
             '';
 
             postlude = ''
@@ -2068,15 +2070,6 @@ with lib;
                 ];
               };
 
-              viper = {
-                enable = true;
-                custom = ''
-                  (viper-inhibit-startup-message 't)
-                  (viper-expert-level '5)
-                  (viper-want-ctl-h-help t)
-                  (viper-ex-style-motion nil)
-                '';
-              };
 
               spacious-padding = {
                 enable = true;
