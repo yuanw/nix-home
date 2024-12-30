@@ -2074,9 +2074,7 @@ with lib;
                   (viper-inhibit-startup-message 't)
                   (viper-expert-level '5)
                   (viper-want-ctl-h-help t)
-                  (viper-ex-style-motion nil)'';
-                config = ''
-                  (define-key viper-minibuffer-map (kbd "RET") nil)
+                  (viper-ex-style-motion nil)
                 '';
               };
 
@@ -2091,7 +2089,7 @@ with lib;
                       :right-divider-width 15           ; half the default
                       :scroll-bar-width 8))
                 '';
-                init = "(spacious-padding-mode)";
+                init = "(spacious-padding-mode 1)";
               };
               toggle-term = {
                 enable = false;
