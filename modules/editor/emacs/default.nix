@@ -673,6 +673,11 @@ with lib;
                 '';
               };
 
+              evil = {
+                enable = true;
+                commands = ["evil-mode"];
+              };
+
               vertico = {
                 enable = true;
                 config = ''
