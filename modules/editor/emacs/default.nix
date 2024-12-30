@@ -487,7 +487,7 @@ with lib;
               expand-region = {
                 enable = true;
                 bind = {
-                  "C-z" = "er/expand-region";
+                  "C-=" = "er/expand-region";
                 };
               };
               # vim like
@@ -2066,7 +2066,6 @@ with lib;
                 extraPackages = [
                   pkgs.terminal-notifier
                 ];
-
               };
 
               viper = {
@@ -2078,7 +2077,7 @@ with lib;
                   (viper-ex-style-motion nil)'';
                 config = ''
                   (define-key viper-minibuffer-map (kbd "RET") nil)
-                  (viper-buffer-search-enable)'';
+                '';
               };
 
               spacious-padding = {
