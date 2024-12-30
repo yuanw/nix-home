@@ -191,9 +191,7 @@ with lib;
               ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
               ;; (defalias 'yes-or-no-p 'y-or-n-p)
               (setq use-short-answers t)
-
               (setq use-dialog-box nil)
-
 
               ;; Don't want to move based on visual line.
               (setq line-move-visual nil)
@@ -405,29 +403,6 @@ with lib;
                                        "  "
                               prot-modeline-misc-info))
                                        
-                                       (with-eval-after-load 'which-key
-                                       (which-key-enable-god-mode-support)
-                                       )
-                       (with-eval-after-load 'god-mode
-                         (defun my-god-mode-update-mode-line ()
-                         (cond
-                        (god-local-mode
-                         (set-face-attribute 'mode-line nil
-                                             :foreground "#604000"
-                                             :background "#fff29a")
-                         (set-face-attribute 'mode-line-inactive nil
-                                             :foreground "#3f3000"
-                                             :background "#fff3da"))
-                        (t
-                         (set-face-attribute 'mode-line nil
-                     			:foreground "#0a0a0a"
-                     			:background "#d7d7d7")
-                         (set-face-attribute 'mode-line-inactive nil
-                     			:foreground "#404148"
-                     			:background "#efefef"))))
-                           (my-god-mode-update-mode-line)
-                           (add-hook 'post-command-hook #'my-god-mode-update-mode-line))
-
                        (with-eval-after-load 'spacious-padding
                          (defun prot/modeline-spacious-indicators ()
                            "Set box attribute to `'prot-modeline-indicator-button' if spacious-padding is enabled."
@@ -481,11 +456,7 @@ with lib;
                         (file-name-extension (buffer-name)) t))))
                 '';
               };
-              # operate on whole line, when no region is active
-              # https://github.com/purcell/whole-line-or-region/tree/master
-              whole-line-or-region = {
-                enable = true;
-              };
+
               expand-region = {
                 enable = true;
                 bind = {
@@ -1045,14 +1016,7 @@ with lib;
                      ("NOTE"     :foreground ,palette-red-dark        :weight bold)
                      ("FEEDBACK" :foreground ,palette-purple-dark     :weight bold)
                      ))
-                  (org-tag-faces
-                   `(("Call"     :foreground "grey50")
-                     ("Errand"   :foreground "grey50")
-                     ("Home"     :foreground "grey50")
-                     ("FILE"     :foreground ,palette-purple          :weight bold)
-                     ("LINK"     :foreground ,palette-purple          :weight bold)))
                   (org-todo-repeat-to-state "TODO")
-
                 '';
                 config = ''
                   (setq org-directory  "~/org/")
