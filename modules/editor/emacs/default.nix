@@ -664,6 +664,7 @@ with lib;
 
               orderless = {
                 enable = true;
+                demand = true;
                 config = ''
                   (setq completion-styles '( basic substring orderless))
                   (setq read-file-name-completion-ignore-case t)
@@ -2046,7 +2047,7 @@ with lib;
                       :right-divider-width 15           ; half the default
                       :scroll-bar-width 8))
                 '';
-                init = "(spacious-padding-mode 1)";
+                config = "(spacious-padding-mode 1)";
               };
               toggle-term = {
                 enable = false;
