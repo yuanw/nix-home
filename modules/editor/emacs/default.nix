@@ -168,173 +168,173 @@ with lib;
             '';
 
             prelude = ''
-              ;; Disable startup message.
-              (setq inhibit-startup-screen t
-                    inhibit-startup-echo-area-message (user-login-name))
+                 ;; Disable startup message.
+                 (setq inhibit-startup-screen t
+                       inhibit-startup-echo-area-message (user-login-name))
 
-              (setq initial-major-mode 'fundamental-mode
-                    initial-scratch-message nil)
+                 (setq initial-major-mode 'fundamental-mode
+                       initial-scratch-message nil)
 
-              ;; Don't blink the cursor.
-              (setq blink-cursor-mode nil)
+                 ;; Don't blink the cursor.
+                 (setq blink-cursor-mode nil)
 
-              ;; Set frame title.
-              (setq frame-title-format
-                    '("" invocation-name ": "(:eval
-                                              (if (buffer-file-name)
-                                                  (abbreviate-file-name (buffer-file-name))
-                                                "%b"))))
+                 ;; Set frame title.
+                 (setq frame-title-format
+                       '("" invocation-name ": "(:eval
+                                                 (if (buffer-file-name)
+                                                     (abbreviate-file-name (buffer-file-name))
+                                                   "%b"))))
 
-              ;; Make sure the mouse cursor is visible at all times.
-              (set-face-background 'mouse "#ffffff")
+                 ;; Make sure the mouse cursor is visible at all times.
+                 (set-face-background 'mouse "#ffffff")
 
-              ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
-              ;; (defalias 'yes-or-no-p 'y-or-n-p)
-              (setq use-short-answers t)
+                 ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
+                 ;; (defalias 'yes-or-no-p 'y-or-n-p)
+                 (setq use-short-answers t)
 
-              (setq use-dialog-box nil)
-
-
-              ;; Don't want to move based on visual line.
-              (setq line-move-visual nil)
-
-              ;; TODO maybe should re-configure this
-              ;; Stop creating backup and autosave files.
-              (setq make-backup-files nil
-                    auto-save-default nil)
-                   
-                   
-              ;; Default is 4k, which is too low for LSP.
-              (setq read-process-output-max (* 1024 1024))
-
-              ;; Always show line and column number in the mode line.
-              (line-number-mode)
-              (column-number-mode)
-              (global-visual-line-mode t)
-              ;; Enable some features that are disabled by default.
-              (put 'narrow-to-region 'disabled nil)
-              ;;(put 'upcase-region 'disabled nil)
-              ;;(put 'downcase-region 'disabled nil)
-              ;; Typically, I only want spaces when pressing the TAB key. I also
-              ;; want 4 of them.
-              (setq-default indent-tabs-mode nil
-                            tab-width 4
-                            c-basic-offset 4)
-              ;; Trailing white space are banned!
-              ;;(setq-default show-trailing-whitespace t)
-
-              ;; Use one space to end sentences.
-              (setq sentence-end-double-space nil)
-
-              ;;use UTF-8.
-              (prefer-coding-system 'utf-8)
-
-              ;; Nicer handling of regions.
-              (transient-mark-mode 1)
-
-              ;; Make moving cursor past bottom only scroll a single line rather
-              ;; than half a page.
-              (setq scroll-step 1
-                    scroll-conservatively 5)
-
-              ;; Enable highlighting of current line.
-              (global-hl-line-mode 1)
-
-              ;; Avoid noisy bell.
-              (setq visible-bell t)
-
-              ;; https://www.emacswiki.org/emacs/RecursiveEdit
-              ;;(setq enable-recursive-minibuffer t)
-              (defun stop-using-minibuffer ()
-              "kill the minibuffer"
-              (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
-              (abort-recursive-edit)))
-
-              (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
-              ;; Enable indentation+completion using the TAB key.
-              ;; `completion-at-point' is often bound to M-TAB.
-              (setq tab-always-indent 'complete)
-              (setq xref-search-program 'ripgrep)
-
-              ;;https://dougie.io/emacs/indentation/
-              ; START TABS CONFIG
-              ;; Create a variable for our preferred tab width
-              (setq custom-tab-width 2)
-
-              ;; Language-Specific Tweaks
-              (setq-default python-indent-offset custom-tab-width) ;; Python
-              (setq-default js-indent-level custom-tab-width)      ;; Javascript
-
-              ;; Making electric-indent behave sanely
-              (setq-default electric-indent-inhibit t)
-
-              ;; Make the backspace properly erase the tab instead of
-              ;; removing 1 space at a time.
-              (setq backward-delete-char-untabify-method 'hungry)
-
-              (defun prot/keyboard-quit-dwim ()
-                   "Do-What-I-Mean behaviour for a general `keyboard-quit'.
-                   The generic `keyboard-quit' does not do the expected thing when
-                   the minibuffer is open.  Whereas we want it to close the
-                   minibuffer, even without explicitly focusing it.
-                   The DWIM behaviour of this command is as follows:
-
-                   - When the region is active, disable it.
-                   - When a minibuffer is open, but not focused, close the minibuffer.
-                   - When the Completions buffer is selected, close it.
-                   - In every other case use the regular `keyboard-quit'."
-               (interactive)
-               (cond
-                ((region-active-p)
-                 (keyboard-quit))
-                 ((derived-mode-p 'completion-list-mode)
-                 (delete-completion-window))
-                ((> (minibuffer-depth) 0)
-                (abort-recursive-edit))
-                (t
-                (keyboard-quit))))
-
-               (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
+                 (setq use-dialog-box nil)
 
 
-              ;; WARNING: This will change your life
-              ;; (OPTIONAL) Visualize tabs as a pipe character - "|"
-              ;; This will also show trailing characters as they are useful to spot.
-              (setq whitespace-style '(face tabs tab-mark trailing))
-              (custom-set-faces '(whitespace-tab ((t (:foreground "#636363")))))
-              (setq whitespace-display-mappings   '((tab-mark 9 [124 9] [92 9])))
-              ; 124 is the ascii ID for '\|'
-              ; (global-whitespace-mode) ; Enable whitespace mode everywhere
-              ; END TABS CONFIG
-              ;; Only do candidate cycling if there are very few candidates.
-              (setq completion-cycle-threshold 3)
-              (bind-keys
-               ("M-e" . execute-extended-command))
-               
-               ;;https://github.com/oantolin/emacs-config/blob/master/init.el#L178C1-L201C1
-               (bind-keys :prefix-map toggle-map
-           :prefix "C-e x"
-           :prefix-docstring "Keymap for commands that toggle settings."
-           ("c" . column-number-mode)
-           ("d" . toggle-debug-on-error)
-           ("l" . toggle-truncate-lines)
-           ("t" . toggle-frame-tab-bar)
-           ("f" . follow-mode)
-           ("v" . visual-line-mode)
-           ("a" . auto-fill-mode)
-           ("w" . whitespace-mode)
-           ("p" . variable-pitch-mode)
-           ("r" . visible-mode))
+                 ;; Don't want to move based on visual line.
+                 (setq line-move-visual nil)
 
-               (bind-keys :prefix-map time-map
-           :prefix "C-e t"
-           :prefix-docstring "Keymap for commands that deal with time."
-           ("w" . world-clock)
-           ("t" . display-time-mode)
-           ("c" . calendar)
-           ("o" . org-timer-set-timer)
-           ("p" . org-timer-pause-or-continue)
-           ("s" . org-timer-stop))
+                 ;; TODO maybe should re-configure this
+                 ;; Stop creating backup and autosave files.
+                 (setq make-backup-files nil
+                       auto-save-default nil)
+                      
+                      
+                 ;; Default is 4k, which is too low for LSP.
+                 (setq read-process-output-max (* 1024 1024))
+
+                 ;; Always show line and column number in the mode line.
+                 (line-number-mode)
+                 (column-number-mode)
+                 (global-visual-line-mode t)
+                 ;; Enable some features that are disabled by default.
+                 (put 'narrow-to-region 'disabled nil)
+                 ;;(put 'upcase-region 'disabled nil)
+                 ;;(put 'downcase-region 'disabled nil)
+                 ;; Typically, I only want spaces when pressing the TAB key. I also
+                 ;; want 4 of them.
+                 (setq-default indent-tabs-mode nil
+                               tab-width 4
+                               c-basic-offset 4)
+                 ;; Trailing white space are banned!
+                 ;;(setq-default show-trailing-whitespace t)
+
+                 ;; Use one space to end sentences.
+                 (setq sentence-end-double-space nil)
+
+                 ;;use UTF-8.
+                 (prefer-coding-system 'utf-8)
+
+                 ;; Nicer handling of regions.
+                 (transient-mark-mode 1)
+
+                 ;; Make moving cursor past bottom only scroll a single line rather
+                 ;; than half a page.
+                 (setq scroll-step 1
+                       scroll-conservatively 5)
+
+                 ;; Enable highlighting of current line.
+                 (global-hl-line-mode 1)
+
+                 ;; Avoid noisy bell.
+                 (setq visible-bell t)
+
+                 ;; https://www.emacswiki.org/emacs/RecursiveEdit
+                 ;;(setq enable-recursive-minibuffer t)
+                 (defun stop-using-minibuffer ()
+                 "kill the minibuffer"
+                 (when (and (>= (recursion-depth) 1) (active-minibuffer-window))
+                 (abort-recursive-edit)))
+
+                 (add-hook 'mouse-leave-buffer-hook 'stop-using-minibuffer)
+                 ;; Enable indentation+completion using the TAB key.
+                 ;; `completion-at-point' is often bound to M-TAB.
+                 (setq tab-always-indent 'complete)
+                 (setq xref-search-program 'ripgrep)
+
+                 ;;https://dougie.io/emacs/indentation/
+                 ; START TABS CONFIG
+                 ;; Create a variable for our preferred tab width
+                 (setq custom-tab-width 2)
+
+                 ;; Language-Specific Tweaks
+                 (setq-default python-indent-offset custom-tab-width) ;; Python
+                 (setq-default js-indent-level custom-tab-width)      ;; Javascript
+
+                 ;; Making electric-indent behave sanely
+                 (setq-default electric-indent-inhibit t)
+
+                 ;; Make the backspace properly erase the tab instead of
+                 ;; removing 1 space at a time.
+                 (setq backward-delete-char-untabify-method 'hungry)
+
+                 (defun prot/keyboard-quit-dwim ()
+                      "Do-What-I-Mean behaviour for a general `keyboard-quit'.
+                      The generic `keyboard-quit' does not do the expected thing when
+                      the minibuffer is open.  Whereas we want it to close the
+                      minibuffer, even without explicitly focusing it.
+                      The DWIM behaviour of this command is as follows:
+
+                      - When the region is active, disable it.
+                      - When a minibuffer is open, but not focused, close the minibuffer.
+                      - When the Completions buffer is selected, close it.
+                      - In every other case use the regular `keyboard-quit'."
+                  (interactive)
+                  (cond
+                   ((region-active-p)
+                    (keyboard-quit))
+                    ((derived-mode-p 'completion-list-mode)
+                    (delete-completion-window))
+                   ((> (minibuffer-depth) 0)
+                   (abort-recursive-edit))
+                   (t
+                   (keyboard-quit))))
+
+                  (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
+
+
+                 ;; WARNING: This will change your life
+                 ;; (OPTIONAL) Visualize tabs as a pipe character - "|"
+                 ;; This will also show trailing characters as they are useful to spot.
+                 (setq whitespace-style '(face tabs tab-mark trailing))
+                 (custom-set-faces '(whitespace-tab ((t (:foreground "#636363")))))
+                 (setq whitespace-display-mappings   '((tab-mark 9 [124 9] [92 9])))
+                 ; 124 is the ascii ID for '\|'
+                 ; (global-whitespace-mode) ; Enable whitespace mode everywhere
+                 ; END TABS CONFIG
+                 ;; Only do candidate cycling if there are very few candidates.
+                 (setq completion-cycle-threshold 3)
+                 (bind-keys
+                  ("M-e" . execute-extended-command))
+                  
+                  ;;https://github.com/oantolin/emacs-config/blob/master/init.el#L178C1-L201C1
+                  (bind-keys :prefix-map toggle-map
+              :prefix "C-c x"
+              :prefix-docstring "Keymap for commands that toggle settings."
+              ("c" . column-number-mode)
+              ("d" . toggle-debug-on-error)
+              ("l" . toggle-truncate-lines)
+              ("t" . toggle-frame-tab-bar)
+              ("f" . follow-mode)
+              ("v" . visual-line-mode)
+              ("a" . auto-fill-mode)
+              ("w" . whitespace-mode)
+              ("p" . variable-pitch-mode)
+              ("r" . visible-mode))
+
+                  (bind-keys :prefix-map time-map
+              :prefix "C-c t"
+              :prefix-docstring "Keymap for commands that deal with time."
+              ("w" . world-clock)
+              ("t" . display-time-mode)
+              ("c" . calendar)
+              ("o" . org-timer-set-timer)
+              ("p" . org-timer-pause-or-continue)
+              ("s" . org-timer-stop))
             '';
 
             postlude = ''
