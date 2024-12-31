@@ -637,6 +637,19 @@ with lib;
 
               dired-subtree = {
                 enable = true;
+                after = [ "dired" ];
+
+              };
+
+              trashed = {
+                enable = true;
+                command = [ "trashed" ];
+                custom = ''
+                  (trashed-action-confirmer 'y-or-n-p)
+                  (trashed-use-header-line t)
+                  (trashed-sort-key '("Date deleted" . t))
+                  (trashed-date-format "%Y-%m-%d %H:%M:%S")
+                '';
               };
 
               keycast = {
@@ -879,6 +892,7 @@ with lib;
 
               corfu = {
                 enable = cfg.lspStyle != "lsp-bridge";
+                hook = [ "(after-init . global-corfu-mode)" ];
                 extraConfig = ''
                     :custom
                   (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
@@ -892,7 +906,16 @@ with lib;
                   (corfu-scroll-margin 5)        ;; Use scroll margin
                 '';
                 config = ''
-                  (global-corfu-mode)
+                  (setq tab-always-indent 'complete)
+                  (setq corfu-preview-current nil)
+                  (setq corfu-min-width 20)
+                  (setq corfu-popupinfo-delay '(1.25 . 0.5))
+                  (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+
+                  ;; Sort by input history (no need to modify `corfu-sort-function').
+                  (with-eval-after-load 'savehist
+                    (corfu-history-mode 1)
+                    (add-to-list 'savehist-additional-variables 'corfu-history))
                 '';
               };
               consult = {
