@@ -24,7 +24,6 @@
       ./terminal-multiplexer/zellij.nix
       ./terminal-multiplexer/tmux.nix
       ./editor/emacs
-      ./editor/neovim
       ./settings.nix
       ./terminal
       ./typing
