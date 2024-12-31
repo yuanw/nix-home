@@ -2001,8 +2001,9 @@ with lib;
                   (wgrep-auto-save-buffer t)
                 '';
               };
+              # seems mess with kill-ring
               delsel = {
-                enable = true;
+                enable = false;
                 hook = [
                   "(after-init . delete-selection-mode)"
                 ];
