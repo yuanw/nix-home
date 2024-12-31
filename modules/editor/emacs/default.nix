@@ -353,7 +353,7 @@ with lib;
               disable-mouse = {
                 enable = true;
                 config = ''
-                  (global-disable-mouse-mode)
+                  ;;(global-disable-mouse-mode)
                 '';
               };
               gcmh = {
