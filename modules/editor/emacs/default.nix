@@ -489,25 +489,7 @@ with lib;
                   (global-auto-revert-mode t)
                 '';
               };
-              pragmatapro-lig = {
-                enable = true;
-                package =
-                  epkgs:
-                  epkgs.trivialBuild {
-                    pname = "pragmatapro-lig";
-                    version = "0.830";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "lumiknit";
-                      repo = "emacs-pragmatapro-ligatures";
-                      rev = "0.830";
-                      sha256 = "sha256-MTKRDm2zaNjfdNpa4fAYsw4FmLMy8iYPxoQpOFKpYqU=";
-                      #sha256 = lib.fakeSha256;
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
-                hook = [ "(prog-mode-hook . 'pragmatapro-lig-mode)" ];
-              };
+
               auto-save = {
                 enable = true;
                 package =
