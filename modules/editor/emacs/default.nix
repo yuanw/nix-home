@@ -266,10 +266,22 @@ with lib;
                  (line-number-mode)
                  (column-number-mode)
                  (global-visual-line-mode t)
+                 
                  ;; Enable some features that are disabled by default.
-                 (put 'narrow-to-region 'disabled nil)
-                 ;;(put 'upcase-region 'disabled nil)
-                 ;;(put 'downcase-region 'disabled nil)
+                 (dolist (cmd '(narrow-to-region
+                                upcase-region
+                                downcase-region
+                                dired-find-alternate-file
+                                LaTeX-narrow-to-environment
+                                TeX-narrow-to-group
+                                narrow-to-page
+                                set-goal-column
+                                scroll-left
+                                scroll-right))
+                                (put cmd 'disabled nil))
+                 ;; Minimising & quitting Emacs way too many times without wanting to.
+                 (put 'suspend-frame 'disabled t)
+                 
                  ;; Typically, I only want spaces when pressing the TAB key. I also
                  ;; want 4 of them.
                  (setq-default indent-tabs-mode nil
@@ -301,7 +313,7 @@ with lib;
                  ;; Enable indentation+completion using the TAB key.
                  ;; `completion-at-point' is often bound to M-TAB.
                  (setq tab-always-indent 'complete)
-                (setq xref-search-program 'ripgrep)
+                 (setq xref-search-program 'ripgrep)
 
                  ;;https://dougie.io/emacs/indentation/
                  ; START TABS CONFIG
@@ -311,7 +323,6 @@ with lib;
                  ;; Language-Specific Tweaks
                  (setq-default python-indent-offset custom-tab-width) ;; Python
                  (setq-default js-indent-level custom-tab-width)      ;; Javascript
-
 
                  (defun prot/keyboard-quit-dwim ()
                       "Do-What-I-Mean behaviour for a general `keyboard-quit'.
@@ -336,15 +347,10 @@ with lib;
                    (keyboard-quit))))
 
                 (define-key global-map (kbd "C-g") #'prot/keyboard-quit-dwim)
-                (setq viper-inhibit-startup-message 't)
-                (setq viper-expert-level '5)
             '';
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
-              ;;(global-unset-key "\C-x\C-c")
-              ;; add here seems actully does the trick
-              ;;(keycast-mode-line-mode)
                 (keycast-header-line-mode)
               ;;(server-start)
             '';
@@ -483,7 +489,25 @@ with lib;
                   (global-auto-revert-mode t)
                 '';
               };
-
+              pragmatapro-lig = {
+                enable = true;
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "pragmatapro-lig";
+                    version = "0.830";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "lumiknit";
+                      repo = "emacs-pragmatapro-ligatures";
+                      rev = "0.830";
+                      sha256 = "sha256-MTKRDm2zaNjfdNpa4fAYsw4FmLMy8iYPxoQpOFKpYqU=";
+                      #sha256 = lib.fakeSha256;
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+                hook = [ "(prog-mode-hook . 'pragmatapro-lig-mode)" ];
+              };
               auto-save = {
                 enable = true;
                 package =
