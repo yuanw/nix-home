@@ -43,7 +43,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {
-      url = "github:numtide/treefmt-nix";
+      url = "github:numtide/treefmt-nix/?rev=9e09d30a644c57257715902efbb3adc56c79cf28";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     pre-commit = {
