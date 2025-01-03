@@ -26,7 +26,6 @@
   xdg = {
     enable = true;
     configFile = {
-      # "startpage".source = ./startpage;
       "wallpapers/haskell-red-noise.png".source = ../pictures/haskell-red-noise.png;
       "wallpapers/nix-wallpaper-dracula.png".source = ../pictures/nix-wallpaper-dracula.png;
     };
