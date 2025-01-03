@@ -194,10 +194,7 @@
     home-manager = {
       enable = true;
     };
-    nnn = {
-      enable = true;
-      package = pkgs.nnn.override ({ withNerdIcons = true; });
-    };
+
     jq = {
       enable = true;
     };
