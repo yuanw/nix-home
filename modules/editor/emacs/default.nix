@@ -1329,7 +1329,7 @@ with lib;
                   epkgs:
                   epkgs.trivialBuild {
                     pname = "denote";
-                    version = "3.1.0";
+                    version = "3.1.1";
                     src = pkgs.fetchFromGitHub {
                       owner = "protesilaos";
                       repo = "denote";
@@ -1364,7 +1364,7 @@ with lib;
                 '';
               };
               consult-denote = {
-                enable = true;
+                enable = false;
                 package =
                   epkgs:
                   epkgs.trivialBuild {
