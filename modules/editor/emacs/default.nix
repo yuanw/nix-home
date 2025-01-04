@@ -1334,7 +1334,7 @@ with lib;
                       owner = "protesilaos";
                       repo = "denote";
                       rev = "145b06df68b3d584c491e76a300aead662c8271e";
-                      sha256 = lib.fake256;
+                      sha256 = lib.fakeSha256;
                       #sha256 = "sha256-NUxIaWcwmASxpHh7XlAahQLpwtYBj67jzeaeT5gkOLs=";
                     };
                     preferLocalBuild = true;
