@@ -1329,7 +1329,7 @@ with lib;
                   epkgs:
                   epkgs.trivialBuild {
                     pname = "denote";
-                    version = "3.1.1";
+                    version = "3.2.0-dev";
                     src = pkgs.fetchFromGitHub {
                       owner = "protesilaos";
                       repo = "denote";
@@ -1349,7 +1349,7 @@ with lib;
                                                      "\n\n"
                                                      "* TIL"
                                                      "\n\n"))))
-
+                            (use-package denote-sequence)
                             (use-package denote-org-extras)
                             (use-package denote-rename-buffer)
                             (use-package denote-journal-extras)
