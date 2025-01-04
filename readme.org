@@ -32,9 +32,13 @@ feel free to take what you like.
 https://github.com/stars/yuanw/lists/nix-home/
 
 
-* MacOS
-** Install
-
+* Bootstrap on macOS (last test on mac mini 2024 Dec)
+** Install git via xcode
+~sudo xcode-select --install~
+** Setup workspace directory
+~mkdir workspaces~
+** clone the repo
+~cd workspaces && git clone https://github.com/yuanw/nix-home.git ~
 **** Install Nix (with daemon)
 with official script
 ~sh <(curl -L https://nixos.org/nix/install)~
@@ -42,19 +46,11 @@ or using
 https://github.com/DeterminateSystems/nix-installer
 
 ~curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- install~
-**** Turn on flake
-edit ~/etc/nix/nix.conf~
-~experimental-features = nix-command flakes~
 
-**** Install nix-darwin
+** Change hostname
+On your Mac, choose Apple menu > System Settings, click General in the sidebar, then click Sharing. (You may need to scroll down.) Click Edit in the “Local hostname” section at the bottom of the window, then enter a new local hostname. If needed, turn on the “Use dynamic global hostname” option.
 
-https://github.com/LnL7/nix-darwin#install
-#+begin_src shell
-nix-build https://github.com/LnL7/nix-darwin/archive/master.tar.gz -A installer
-./result/bin/darwin-installer
-#+end_src
 
-**** install xcode
 **** Install brew
 there are lots of GUI programs, we cannot install nicely using pure nix. There is brew-module in nix-darwin.
 ~/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)~
@@ -63,8 +59,11 @@ we can install/uninstall applications using nix
 don't forget to do
 ~brew analytics off~
 
+Please enable Full Disk Access for your terminal under System Settings → Privacy & Security → Full Disk Access.
 
-**** import gpg keys (airdrop)
+
+
+**** import gpg keys (airdrop or 1password-like apps)
 ~gpg --list-secret-keys~ or ~gpg --list-secret-keys user@example.com~
 
 #+begin_src shell
@@ -76,9 +75,8 @@ sub   4096R/DEF67890 2020-01-01 [expires: 2025-12-31]
 ID of your key (second column e.g "ABC12345")
 
 ~gpg --export-secret-keys YOUR_ID_HERE > private.key~
-**** install font
+**** install font (airdrop on 1password)
 
-font
 
 ** Import
 
@@ -98,6 +96,18 @@ Host *
 ** git-crypt
 git-crypt unlock to load private files if needed
 
+
+** Set firefox as default browers
+
+    Make sure that the other web browser you want to use is already installed.
+
+    From the Apple menu  in the corner of your screen, choose System Settings.
+
+    Click Desktop & Dock in the sidebar.
+
+    Scroll down on the right and choose a web browser from the “Default web browser” menu.
+
+** Disable spotlight
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
