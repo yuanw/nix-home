@@ -1333,7 +1333,7 @@ with lib;
                     src = pkgs.fetchFromGitHub {
                       owner = "protesilaos";
                       repo = "denote";
-                      rev = "145b06df68b3d584c491e76a300aead662c8271e";
+                      rev = "5651dc77374bddf4b0aca241599fc15f994aa18c";
                       sha256 = lib.fakeSha256;
                       #sha256 = "sha256-NUxIaWcwmASxpHh7XlAahQLpwtYBj67jzeaeT5gkOLs=";
                     };
