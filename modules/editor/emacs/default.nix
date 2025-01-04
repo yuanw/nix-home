@@ -1325,6 +1325,22 @@ with lib;
               denote = {
                 enable = true;
                 after = [ "org" ];
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "denote";
+                    version = "3.1.0";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "protesilaos";
+                      repo = "denote";
+                      rev = "145b06df68b3d584c491e76a300aead662c8271e";
+                      sha256 = lib.fake256;
+                      #sha256 = "sha256-NUxIaWcwmASxpHh7XlAahQLpwtYBj67jzeaeT5gkOLs=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+
                 config = ''
                             (setq denote-directory "~/org/denote/")
                             (setq denote-templates
