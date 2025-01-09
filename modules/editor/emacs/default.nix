@@ -282,16 +282,6 @@ with lib;
                  ;; Minimising & quitting Emacs way too many times without wanting to.
                  (put 'suspend-frame 'disabled t)
                  
-                 ;; Typically, I only want spaces when pressing the TAB key. I also
-                 ;; want 4 of them.
-                 (setq-default indent-tabs-mode nil
-                               tab-width 4
-                               c-basic-offset 4)
-                 ;; Trailing white space are banned!
-                 ;;(setq-default show-trailing-whitespace t)
-
-                 ;; Use one space to end sentences.
-                 (setq sentence-end-double-space nil)
 
                  ;;use UTF-8.
                  (prefer-coding-system 'utf-8)
@@ -299,10 +289,6 @@ with lib;
                  ;; Nicer handling of regions.
                  (transient-mark-mode 1)
 
-                 ;; Make moving cursor past bottom only scroll a single line rather
-                 ;; than half a page.
-                 (setq scroll-step 1
-                       scroll-conservatively 5)
 
                  ;; Enable highlighting of current line.
                  (global-hl-line-mode 1)
@@ -315,14 +301,6 @@ with lib;
                  (setq tab-always-indent 'complete)
                  (setq xref-search-program 'ripgrep)
 
-                 ;;https://dougie.io/emacs/indentation/
-                 ; START TABS CONFIG
-                 ;; Create a variable for our preferred tab width
-                 (setq custom-tab-width 2)
-
-                 ;; Language-Specific Tweaks
-                 (setq-default python-indent-offset custom-tab-width) ;; Python
-                 (setq-default js-indent-level custom-tab-width)      ;; Javascript
 
                  (defun prot/keyboard-quit-dwim ()
                       "Do-What-I-Mean behaviour for a general `keyboard-quit'.
@@ -351,8 +329,8 @@ with lib;
 
             postlude = ''
               ;; Minimising & quitting Emacs way too many times without wanting to.
-                (keycast-header-line-mode)
-              ;;(server-start)
+              (keycast-header-line-mode)
+
             '';
 
             usePackage = {
@@ -388,7 +366,7 @@ with lib;
               };
 
               god-mode = {
-                enable = true;
+                enable = false;
                 config = ''
                      (require 'god-mode-isearch)
                      (setq-default cursor-type 'bar)
@@ -689,7 +667,7 @@ with lib;
               };
               # https://melpa.org/#/dot-mode
               dot-mode = {
-                enable = true;
+                enable = false;
                 command = [
                   "dot-mode"
                   "dot-mode-execute"
@@ -704,7 +682,7 @@ with lib;
               };
 
               free-keys = {
-                enable = true;
+                enable = false;
                 defer = 1;
                 command = [ "free-keys" ];
               };
@@ -724,7 +702,7 @@ with lib;
                 '';
               };
               nerd-icons-corfu = {
-                enable = false;
+                enable = true;
                 after = [ "corfu" ];
                 config = ''
                   (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
@@ -1077,7 +1055,7 @@ with lib;
               };
 
               hydra = {
-                enable = true;
+                enable = false;
               };
               org = {
                 enable = true;
@@ -1977,7 +1955,7 @@ with lib;
               };
 
               copy-as-format = {
-                enable = true;
+                enable = false;
                 command = [
                   "copy-as-format"
                   "copy-as-format-asciidoc"
@@ -2007,9 +1985,9 @@ with lib;
                   (wgrep-auto-save-buffer t)
                 '';
               };
-              # seems mess with kill-ring
+
               delsel = {
-                enable = false;
+                enable = true;
                 hook = [
                   "(after-init . delete-selection-mode)"
                 ];
@@ -2020,7 +1998,7 @@ with lib;
               };
 
               aggressive-indent = {
-                enable = true;
+                enable = false;
                 diminish = [ "aggressive-ident-mode" ];
                 hook = [
                   #                  :diminish
@@ -2059,7 +2037,7 @@ with lib;
               };
 
               ws-butler = {
-                enable = true;
+                enable = false;
                 config = "(ws-butler-global-mode)";
               };
               vterm = {
