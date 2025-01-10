@@ -30,14 +30,11 @@ with lib;
       interval = {
         Hour = 22;
       };
-
       options = "--delete-older-than 7d";
     };
   };
 
   launchd.daemons.nix-daemon.serviceConfig.SoftResourceLimits.NumberOfFiles = 10240;
-  #    curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
-  #ids.uids.nixbld = 300;
   system.stateVersion = 5;
   system.activationScripts.postActivation.text = ''
     printf "disabling spotlight indexing... "
