@@ -166,6 +166,16 @@ with lib;
                (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
                (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
 
+              ;; auto-save might handle this already 
+              (setq make-backup-files nil)
+              (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
+              (setq create-lockfiles nil)
+
+              ;; Make native compilation silent and prune its cache.
+              (when (native-comp-available-p)
+                (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation
+                (setq native-compile-prune-cache t)) ; Emacs 29
+
               ;; Luminosity 50
               (defconst palette-red               "#FF0000")
               (defconst palette-orange            "#FF8000")
