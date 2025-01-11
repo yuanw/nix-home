@@ -138,6 +138,70 @@ in
           };
           # # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
+
+            # PREF: notification interval (in microseconds) to avoid layout thrashing
+            #  When Firefox is loading a page, it periodically reformats
+            #  or "reflows" the page as it loads. The page displays new elements
+            #  every 0.12 seconds by default. These redraws increase the total page load time.
+            #  The default value provides good incremental display of content
+            #  without causing an increase in page load time.
+            #  [NOTE] Lowering the interval will increase responsiveness
+            #  but also increase the total load time.
+            #  [WARNING] If this value is set below 1/10 of a second, it starts
+            #  to impact page load performance.
+            #  [EXAMPLE] 100000 = .10s = 100 reflows/second
+            #  [1] https://searchfox.org/mozilla-central/rev/c1180ea13e73eb985a49b15c0d90e977a1aa919c/modules/libpref/init/StaticPrefList.yaml#1824-1834
+            #  [2] https://web.archive.org/web/20240115073722/https://dev.opera.com/articles/efficient-javascript/?page=3#reflow
+            #  [3] https://web.archive.org/web/20240115073722/https://dev.opera.com/articles/efficient-javascript/?page=3#smoothspeed
+            "content.notify.interval" = 100000; # (.10s); default=120000 (.12s)
+            /**
+              GFX **
+            */
+            "gfx.canvas.accelerated.cache-items" = 4096;
+            "gfx.canvas.accelerated.cache-size" = 512;
+            "gfx.content.skia-font-cache-size" = 20;
+
+            /**
+              DISK CACHE **
+            */
+            "browser.cache.disk.enable" = true;
+
+            /**
+              MEDIA CACHE **
+            */
+            "media.memory_cache_max_size" = 65536;
+            "media.cache_readahead_limit" = 7200;
+            "media.cache_resume_threshold" = 3600;
+
+            /**
+              IMAGE CACHE **
+            */
+            "image.mem.decode_bytes_at_a_time" = 32768;
+
+            /**
+              NETWORK **
+            */
+            "network.http.max-connections" = 1800;
+            "network.http.max-persistent-connections-per-server" = 10;
+            "network.http.max-urgent-start-excessive-connections-per-host" = 5;
+            "network.http.pacing.requests.enabled" = false;
+            "network.dnsCacheExpiration" = 3600;
+            "network.ssl_tokens_cache_capacity" = 10240;
+
+            /**
+              SPECULATIVE LOADING **
+            */
+            "network.dns.disablePrefetch" = true;
+            "network.dns.disablePrefetchFromHTTPS" = true;
+            "network.prefetch-next" = false;
+            "network.predictor.enabled" = false;
+            "network.predictor.enable-prefetch" = false;
+
+            /**
+              EXPERIMENTAL **
+            */
+            "layout.css.grid-template-masonry-value.enabled" = true;
+            "dom.enable_web_task_scheduling" = true;
             # ratio to enlarge default 96 pixes per inch 1.5 gives 50% enlargement
             # "layout.css.devPixelsPerPx" = "2.0";
             # Default to dark theme in DevTools panel
@@ -150,8 +214,8 @@ in
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
-            #"browser.startup.homepage" = "https://yuanwang.dev/";
             "browser.search.region" = "CA";
+            "browser.privatebrowsing.vpnpromourl" = "";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
             "browser.ctrlTab.recentlyUsedOrder" = false;
