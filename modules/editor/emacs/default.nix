@@ -468,6 +468,26 @@ with lib;
                 '';
               };
 
+              ultra-scroll = {
+                enable = true;
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "ultra-scroll";
+                    version = "0.0.1";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "jdtsmith";
+                      repo = "ultra-scroll";
+                      rev = "f5a6e8e8c411d58860f0dec2dccefc689924a8cb";
+                      sha256 = lib.fakeSha256;
+                    };
+                  };
+                init = ''
+                  (setq scroll-conservatively 101
+                  scroll-margin 0 )
+                '';
+                config = "(ultra-scroll-mode 1)";
+              };
               auto-save = {
                 enable = true;
                 package =
