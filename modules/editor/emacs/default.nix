@@ -479,7 +479,8 @@ with lib;
                       owner = "jdtsmith";
                       repo = "ultra-scroll";
                       rev = "f5a6e8e8c411d58860f0dec2dccefc689924a8cb";
-                      sha256 = lib.fakeSha256;
+                      # sha256 = lib.fakeSha256;
+                      sha256 = "sha256-32jXz4ek3CsW8JKZ5W1xOv6+UufAMcfZenjoqWc9U4g=";
                     };
                   };
                 init = ''
