@@ -1968,7 +1968,7 @@ with lib;
                   ;; Or `setopt' on Emacs 29: (setopt lin-face 'lin-yellow)
                   ;;
                   ;; I still prefer `setq' for consistency.
-                  (setq lin-face 'lin-cyan)'';
+                  (setq lin-face 'lin-green)'';
               };
               # Display current time
               time = {
@@ -1998,7 +1998,8 @@ with lib;
                            (format-time-string display-time-format now)
                            'face 'display-time-date-and-time
                            'help-echo (format-time-string "%a %b %e, %Y" now))
-                           " ")))'';
+                           " "))
+                '';
               };
               all-the-icons = {
                 enable = true;
