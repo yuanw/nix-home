@@ -468,14 +468,19 @@ with lib;
               };
               autorevert = {
                 enable = true;
+                hook = [
+                  "(after-init . global-auto-revert-mode)"
+                  "(dire-mode . auto-revert-mode)"
+                ];
                 custom = ''
                   (auto-revert-use-notify nil)
+                  (auto-revert-verbose t)
                 '';
-                config = ''
-                  ;;; this actually make dired buffer refresh
-                  (add-hook 'dired-mode-hook 'auto-revert-mode)
-                  (global-auto-revert-mode t)
-                '';
+                #   config = ''
+                #     ;;; this actually make dired buffer refresh
+                #     (add-hook 'dired-mode-hook 'auto-revert-mode)
+                #     (global-auto-revert-mode t)
+                #   '';
               };
 
               ultra-scroll = {
@@ -555,25 +560,18 @@ with lib;
 
               recentf = {
                 enable = true;
-                demand = true;
+                hook = [ "(after-init . recentf-mode)" ];
                 custom = ''
-                  (recentf-auto-cleanup 60)
+                  (recentf-auto-cleanup nil)
+                  (recentf-max-saved-items 100)
+                  (recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
+
                 '';
                 command = [
                   "recentf-mode"
                   "recentf-add-file"
                   "recentf-apply-filename-handlers"
                 ];
-                config = ''
-                  (setq recentf-save-file (locate-user-emacs-file "recentf")
-                        recentf-max-menu-items 20
-                        recentf-max-saved-items 500
-                        recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
-
-                  ;; Save the file list every 10 minutes.
-                  (run-at-time nil (* 10 60) 'recentf-save-list)
-                  (recentf-mode)
-                '';
               };
 
               savehist = {
@@ -1961,7 +1959,6 @@ with lib;
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
               lin = {
                 enable = true;
-
                 hook = [ " (after-init . lin-global-mode) " ];
                 config = ''
                   ;; You can use this to live update the face:
@@ -2063,7 +2060,6 @@ with lib;
                   (wgrep-auto-save-buffer t)
                 '';
               };
-
               delsel = {
                 enable = true;
                 hook = [
