@@ -1970,6 +1970,36 @@ with lib;
                   ;; I still prefer `setq' for consistency.
                   (setq lin-face 'lin-cyan)'';
               };
+              # Display current time
+              time = {
+                enable = true;
+
+                hook = [ "(after-init . display-time-mode)" ];
+                config = ''
+                  (setq display-time-format " %a %e %b, %H:%M ")
+                  ;;;; Covered by `display-time-format'
+                  ;; (setq display-time-24hr-format t)
+                  ;; (setq display-time-day-and-date t)
+                  (setq display-time-interval 60)
+                  (setq display-time-default-load-average nil)
+                  ;; NOTE 2022-09-21: For all those, I have implemented my own solution
+                  ;; that also shows the number of new items, although it depends on
+                  ;; notmuch: the `notmuch-indicator' package.
+                  (setq display-time-mail-directory nil)
+                  (setq display-time-mail-function nil)
+                  (setq display-time-use-mail-icon nil)
+                  (setq display-time-mail-string nil)
+                  (setq display-time-mail-face nil)
+
+                  ;; I don't need the load average and the mail indicator, so let this
+                  ;; be simple:
+                  (setq display-time-string-forms
+                        '((propertize
+                           (format-time-string display-time-format now)
+                           'face 'display-time-date-and-time
+                           'help-echo (format-time-string "%a %b %e, %Y" now))
+                           " ")))'';
+              };
               all-the-icons = {
                 enable = true;
               };
