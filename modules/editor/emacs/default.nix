@@ -695,8 +695,12 @@ with lib;
 
               };
               # https://melpa.org/#/dot-mode
+              #`C-.’ is bound to dot-mode-execute, which executes the buffer of stored commands as a keyboard macro.
+              #`C-M-.’ is bound to dot-mode-override, which will cause dot-mode to remember the next keystroke regardless of whether it changes the buffer and regardless of the value of the dot-mode-ignore-undo variable.
+
+              #`C-c-.’ is bound to dot-mode-copy-to-last-kbd-macro, which will copy the current dot mode keyboard macro to the last-kbd-macro variable. It can then be executed via call-last-kbd-macro (normally bound to `C-x-e’), named via name-last-kbd-macro, and then inserted into your .emacs via insert-kbd-macro.
               dot-mode = {
-                enable = false;
+                enable = true;
                 command = [
                   "dot-mode"
                   "dot-mode-execute"
@@ -704,9 +708,11 @@ with lib;
                 diminish = [ "dot-mode" ];
                 bind = {
                   "C-." = "dot-mode-execute";
+                  "C-M-." = "dot-mode-override";
+                  "C-c-." = "dot-mode-copy-to-last-kbd-macro";
                 };
                 config = ''
-                  (global-dot-mode)
+                  (global-dot-mode t)
                 '';
               };
 
