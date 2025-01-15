@@ -709,7 +709,7 @@ with lib;
                 bind = {
                   "C-." = "dot-mode-execute";
                   #"C-M-." = "dot-mode-override";
-                  "C-c-. ," = "dot-mode-copy-to-last-kbd-macro";
+                  #"C-c-. ," = "dot-mode-copy-to-last-kbd-macro";
                 };
                 config = ''
                   (global-dot-mode t)
