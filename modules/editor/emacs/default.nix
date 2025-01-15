@@ -708,7 +708,7 @@ with lib;
                 diminish = [ "dot-mode" ];
                 bind = {
                   "C-." = "dot-mode-execute";
-                  "C-M-." = "dot-mode-override";
+                  #"C-M-." = "dot-mode-override";
                   "C-c-. ," = "dot-mode-copy-to-last-kbd-macro";
                 };
                 config = ''
