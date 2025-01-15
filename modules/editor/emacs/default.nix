@@ -161,7 +161,7 @@ with lib;
               ;; Set up fonts early.
               ;;--------------------
               (let ((mono-spaced-font "PragmataPro Mono Liga")
-                    (proportionately-spaced-font "PragmataPro Mono Liga Fraktur"))
+                    (proportionately-spaced-font "PragmataPro"))
                (set-face-attribute 'default nil :family mono-spaced-font :height 180)
                (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
                (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
