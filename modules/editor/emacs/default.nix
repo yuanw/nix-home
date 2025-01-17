@@ -161,7 +161,7 @@ with lib;
               ;; Set up fonts early.
               ;;--------------------
               (let ((mono-spaced-font "PragmataPro Mono Liga")
-                    (proportionately-spaced-font "PragmataPro Mono Liga Fraktur"))
+                    (proportionately-spaced-font "PragmataPro"))
                (set-face-attribute 'default nil :family mono-spaced-font :height 180)
                (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
                (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
@@ -708,8 +708,8 @@ with lib;
                 diminish = [ "dot-mode" ];
                 bind = {
                   "C-." = "dot-mode-execute";
-                  "C-M-." = "dot-mode-override";
-                  "C-c-." = "dot-mode-copy-to-last-kbd-macro";
+                  #"C-M-." = "dot-mode-override";
+                  #"C-c-. ," = "dot-mode-copy-to-last-kbd-macro";
                 };
                 config = ''
                   (global-dot-mode t)
