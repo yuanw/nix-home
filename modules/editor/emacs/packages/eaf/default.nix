@@ -12,7 +12,7 @@
 
   # Native dependencies
   nodejs,
-  python313,
+  python3,
   wmctrl,
 
 }:
@@ -21,8 +21,12 @@ let
   # TODO: Package nodejs environment
 
   pythonEnv = (
-    (python313.withPackages (ps: [
+    (python3.withPackages (ps: [
       # ps.pyqtwebengine
+      ps.pandas
+      ps.requests
+      ps.sexpdata
+      ps.tld
       ps.pyqt6
       ps.pyqt6-sip
       ps.pyqt6-webengine
@@ -30,7 +34,7 @@ let
       ps.qtconsole
       ps.retry
       ps.pymupdf
-      ps.sexpdata
+      ps.markdown
       ps.epc
       # Wrap native dependencies in python env $PATH
       pkgs.aria2
