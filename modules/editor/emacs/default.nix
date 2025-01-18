@@ -1917,10 +1917,10 @@ with lib;
                   (require 'yasnippet)
                   (yas-global-mode 1)
 
-                  (setq acm-enable-copilot true)
+                  (setq acm-enable-copilot 't)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
-                  (global-lsp-bridge-mode)
+                  ;;(global-lsp-bridge-mode)
                 '';
               };
               # https://protesilaos.com/emacs/ef-themes-pictures
