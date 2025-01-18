@@ -1928,7 +1928,7 @@ with lib;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf {
-                    inherit (epkgs) melpaBuild;
+                    inherit (epkgs) melpaBuild melpaPackages;
                     inherit (melpaPackages)
                       ctable
                       deferred
