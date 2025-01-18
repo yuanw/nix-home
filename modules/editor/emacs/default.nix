@@ -1923,6 +1923,21 @@ with lib;
                   ;;(global-lsp-bridge-mode)
                 '';
               };
+              eaf = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/eaf.nix {
+                    inherit (epkgs) melpaBuild;
+                    inherit (melpaPackages)
+                      ctable
+                      deferred
+                      epc
+                      s
+                      ;
+                  });
+
+              };
               # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
                 enable = true;
