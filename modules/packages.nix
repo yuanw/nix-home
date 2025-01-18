@@ -7,7 +7,7 @@ with pkgs;
   coreutils-prefixed
   moreutils
 
-  ffmpeg
+  #ffmpeg
   less
   gifsicle
   graphviz
