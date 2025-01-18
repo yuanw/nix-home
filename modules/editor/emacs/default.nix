@@ -1927,7 +1927,7 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/eaf.nix {
+                  (pkgs.callPackage ./packages/eaf {
                     inherit (epkgs) melpaBuild;
                     inherit (melpaPackages)
                       ctable
