@@ -12,7 +12,7 @@
 
   # Native dependencies
   nodejs,
-  python3,
+  python313,
   wmctrl,
 
 }:
@@ -21,7 +21,7 @@ let
   # TODO: Package nodejs environment
 
   pythonEnv = (
-    (python3.withPackages (ps: [
+    (python313.withPackages (ps: [
       # ps.pyqtwebengine
       ps.pandas
       ps.requests
