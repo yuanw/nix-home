@@ -24,6 +24,7 @@ let
     (python313.withPackages (ps: [
       # ps.pyqtwebengine
       ps.pyqt6
+      ps.pyqt6-sip
       ps.pyqt6-webengine
       ps.qrcode
       ps.qtconsole
