@@ -1928,8 +1928,8 @@ with lib;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf {
-                    inherit (epkgs) melpaBuild melpaPackages;
-                    inherit (melpaPackages)
+                    inherit (epkgs) melpaBuild;
+                    inherit (epkgs.melpaPackages)
                       ctable
                       deferred
                       epc
