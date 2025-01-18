@@ -1908,19 +1908,7 @@ with lib;
               };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
-                package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/lsp-bridge {
-                    inherit (pkgs)
-                      fetchFromGitHub
-                      substituteAll
-                      writeText
-                      python3
-                      unstableGitUpdater
-                      ;
-                    inherit lib;
-                    inherit (epkgs) melpaBuild markdown-mode yasnippet;
-                  });
+
                 hook = [ "(java-mode . lsp-bridge-mode)" ];
                 init = ''
                   (require 'lsp-bridge-jdtls)
