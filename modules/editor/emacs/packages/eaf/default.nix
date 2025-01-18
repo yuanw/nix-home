@@ -27,9 +27,9 @@ let
       ps.requests
       ps.sexpdata
       ps.tld
-      ps.pyqt6
-      ps.pyqt6-sip
-      ps.pyqt6-webengine
+      ps.pyqt5
+      ps.pyqt5-sip
+      ps.pyqtwebengine
       ps.qrcode
       ps.qtconsole
       ps.retry
