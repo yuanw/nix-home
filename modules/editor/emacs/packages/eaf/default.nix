@@ -14,7 +14,7 @@
   nodejs,
   python3,
   wmctrl,
-  xdotool,
+
 }:
 
 let
@@ -80,7 +80,6 @@ melpaBuild {
 
   postPatch = ''
     substituteInPlace eaf.el \
-      --replace '"xdotool' '"${xdotool}/bin/xdotool' \
       --replace '"wmctrl' '"${wmctrl}'
     sed -i s#'defcustom eaf-python-command .*'#'defcustom eaf-python-command "${pythonEnv.interpreter}"'# eaf.el
     mkdir app
