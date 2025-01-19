@@ -15,7 +15,7 @@
   nodejs,
   python3,
   wmctrl,
-
+  pyqt6,
 }:
 
 let
@@ -34,6 +34,15 @@ let
           qtwebengine
           qtwebchannel
         ];
+        postPatch = ''
+          sed -i \
+            '/\[tool.sip.project\]/a\
+            verbose = true\
+            sip-include-dirs = [\"${pyqt6}/${python.sitePackages}/PyQt6/bindings\"]' \
+            pyproject.toml
+
+            cat pyproject.toml
+        '';
       });
 
     };
@@ -41,7 +50,6 @@ let
 
   pythonEnv = (
     (python.withPackages (ps: [
-
       ps.pandas
       ps.requests
       ps.sexpdata
