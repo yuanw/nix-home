@@ -3,7 +3,7 @@
   fetchFromGitHub,
   writeText,
   pkgs,
-
+  qt6Packages,
   # Elisp dependencies
   ctable,
   deferred,
@@ -12,17 +12,35 @@
 
   # Native dependencies
   nodejs,
-  python313,
+  python3,
   wmctrl,
 
 }:
 
 let
   # TODO: Package nodejs environment
+  python = python3.override {
+    packageOverrides = _final: prev: {
+      pyqt6-webengine = prev.pyqt6-webengine.overridePythonAttrs (_oldAttrs: rec {
+        nativeBuildInputs = with qt6Packages; [
+          pkg-config
+          lndir
+          qtwebengine
+          qmake
+          qtwebchannel
+        ];
+        buildInputs = with qt6Packages; [
+          qtwebengine
+          qtwebchannel
+        ];
+      });
+
+    };
+  };
 
   pythonEnv = (
-    (python313.withPackages (ps: [
-      # ps.pyqtwebengine
+    (python.withPackages (ps: [
+
       ps.pandas
       ps.requests
       ps.sexpdata
