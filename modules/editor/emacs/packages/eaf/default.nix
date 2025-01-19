@@ -14,6 +14,7 @@
   # Native dependencies
   python3,
   wmctrl,
+  lib,
 }:
 
 let
@@ -59,6 +60,7 @@ let
       ps.pymupdf
       ps.markdown
       ps.epc
+      ps.packaging
       # needs for eaf-browserxx
       ps.pysocks
       # Wrap native dependencies in python env $PATH
@@ -76,6 +78,24 @@ let
     rev = "9761f7bd22aa69f144a0a032643b0834dde6cb60";
     #hash = lib.fakeHash;
     hash = "sha256-jcCn16lXqcq1UcekekJiTfRBjjgaY0Hkz69ycElSzuA=";
+  };
+
+  pdfviewer = pkgs.stdenvNoCC.mkDerivation rec {
+    version = "ea467c";
+    name = "eaf-pdf-viewer-${version}";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "emacs-eaf";
+      repo = "eaf-pdf-viewer";
+      rev = "87d4952a26525837424576d1df85ee8c61c99554";
+      sha256 = lib.fakeSha256;
+      #sha256 = "sha256-jcZgW0faOqEB2xejeT5fkpMaUVHYyZPKQ45Fs3K2kgc=";
+    };
+    buildPhase = "true";
+    installPhase = ''
+      mkdir $out
+      cp -r * $out/
+    '';
   };
 
 in
@@ -100,6 +120,7 @@ melpaBuild {
     sed -i s#'defcustom eaf-python-command .*'#'defcustom eaf-python-command "${pythonEnv.interpreter}"'# eaf.el
     mkdir app
     cp -r ${eaf-browser} app/browser
+    cp -r ${pdfviewer} app/pdf-viewer/
 
   '';
 
