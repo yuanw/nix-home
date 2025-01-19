@@ -9,7 +9,7 @@
   deferred,
   epc,
   s,
-
+  pkg-config,
   # Native dependencies
   nodejs,
   python3,
