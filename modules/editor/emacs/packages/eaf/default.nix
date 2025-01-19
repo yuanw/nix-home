@@ -75,8 +75,8 @@ let
     owner = "emacs-eaf";
     repo = "eaf-browser";
     rev = "9761f7bd22aa69f144a0a032643b0834dde6cb60";
-    #hash = lib.fakeHash;
-    hash = "sha256-7epTvu9f4Fn7XrEZOVZEieG/Qkt3Vs2M939jJE4EwaA=";
+    hash = lib.fakeHash;
+    #hash = "sha256-7epTvu9f4Fn7XrEZOVZEieG/Qkt3Vs2M939jJE4EwaA=";
   };
 
 in
@@ -88,8 +88,8 @@ melpaBuild {
     owner = "emacs-eaf";
     repo = "emacs-application-framework";
     rev = "73f85b24914227a140e40c5c8bb7eb6efa7a41b2";
-    sha256 = lib.fakeSha256;
-    #sha256 = "sha256-4CPhEO4d66GzD3vOcNyRl6DmRDYiiIeRhX/9RUPZ+PM=";
+    #sha256 = lib.fakeSha256;
+    sha256 = "sha256-7epTvu9f4Fn7XrEZOVZEieG/Qkt3Vs2M939jJE4EwaA=";
   };
 
   dontConfigure = true;
