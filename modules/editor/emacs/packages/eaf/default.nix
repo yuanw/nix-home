@@ -14,7 +14,7 @@
   # Native dependencies
   python3,
   wmctrl,
-
+  lib,
 }:
 
 let
@@ -60,7 +60,7 @@ let
       ps.pymupdf
       ps.markdown
       ps.epc
-      # needs for eaf-browser
+      # needs for eaf-browserxx
       ps.pysocks
       # Wrap native dependencies in python env $PATH
       pkgs.aria2
@@ -75,7 +75,8 @@ let
     owner = "emacs-eaf";
     repo = "eaf-browser";
     rev = "9761f7bd22aa69f144a0a032643b0834dde6cb60";
-    hash = "sha256-jcCn16lXqcq1UcekekJiTfRBjjgaY0Hkz69ycElSzuA=";
+    hash = lib.fakeHash;
+    #hash = "sha256-jcCn16lXqcq1UcekekJiTfRBjjgaY0Hkz69ycElSzuA=";
   };
 
 in
@@ -86,8 +87,9 @@ melpaBuild {
   src = fetchFromGitHub {
     owner = "emacs-eaf";
     repo = "emacs-application-framework";
-    rev = "9bf8caba36e27fafcef5d8e68969a1a8eb5432ed";
-    sha256 = "sha256-4CPhEO4d66GzD3vOcNyRl6DmRDYiiIeRhX/9RUPZ+PM=";
+    rev = "73f85b24914227a140e40c5c8bb7eb6efa7a41b2";
+    sha256 = lib.fakeSha256;
+    #sha256 = "sha256-4CPhEO4d66GzD3vOcNyRl6DmRDYiiIeRhX/9RUPZ+PM=";
   };
 
   dontConfigure = true;
