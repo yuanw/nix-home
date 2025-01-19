@@ -75,8 +75,8 @@ let
     owner = "emacs-eaf";
     repo = "eaf-browser";
     rev = "9761f7bd22aa69f144a0a032643b0834dde6cb60";
-    hash = lib.fakeHash;
-    #hash = "sha256-jcCn16lXqcq1UcekekJiTfRBjjgaY0Hkz69ycElSzuA=";
+    #hash = lib.fakeHash;
+    hash = "sha256-7epTvu9f4Fn7XrEZOVZEieG/Qkt3Vs2M939jJE4EwaA=";
   };
 
 in
