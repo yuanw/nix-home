@@ -9,6 +9,7 @@
   deferred,
   epc,
   s,
+  lndir,
   pkg-config,
   # Native dependencies
   nodejs,
