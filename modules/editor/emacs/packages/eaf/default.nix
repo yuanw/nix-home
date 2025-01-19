@@ -15,7 +15,7 @@
   nodejs,
   python3,
   wmctrl,
-  pyqt6,
+
 }:
 
 let
@@ -38,7 +38,7 @@ let
           sed -i \
             '/\[tool.sip.project\]/a\
             verbose = true\
-            sip-include-dirs = [\"${pyqt6}/${python.sitePackages}/PyQt6/bindings\"]' \
+            sip-include-dirs = [\"${pkgs.pyqt6}/${python.sitePackages}/PyQt6/bindings\"]' \
             pyproject.toml
 
             cat pyproject.toml
