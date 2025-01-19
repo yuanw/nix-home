@@ -2276,6 +2276,8 @@ with lib;
               zstd
               html-tidy
               shfmt
+
+              gdb
               ## Module dependencies
               # :checkers spell
               aspell
