@@ -1098,7 +1098,6 @@ with lib;
                 custom = ''
                   (org-todo-keywords
                    '((sequence "TODO(t@/!)"
-                               "PROJ(p)"
                                "DOING(s!/!)"
                                "WAIT(w@/!)"
                                "DEFER(r!/!)"
