@@ -14,7 +14,6 @@
   # Native dependencies
   python3,
   wmctrl,
-  lib,
 }:
 
 let
@@ -88,8 +87,9 @@ let
       owner = "emacs-eaf";
       repo = "eaf-pdf-viewer";
       rev = "87d4952a26525837424576d1df85ee8c61c99554";
-      sha256 = lib.fakeSha256;
-      #sha256 = "sha256-jcZgW0faOqEB2xejeT5fkpMaUVHYyZPKQ45Fs3K2kgc=";
+      #sha256 = lib.fakeSha256;
+      sha256 = "sha256-pT5njTfI2Om1faYnsjFEBnjX8Iw24+mQtVAcdIqiz5E=";
+
     };
     buildPhase = "true";
     installPhase = ''
