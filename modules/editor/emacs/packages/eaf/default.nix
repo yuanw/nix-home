@@ -115,6 +115,8 @@ melpaBuild {
     :files ("*")
   '';
 
+  __darwinAllowLocalNetworking = true;
+
   packageRequires = [
     ctable
     deferred
