@@ -1908,19 +1908,7 @@ with lib;
               };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
-                package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/lsp-bridge {
-                    inherit (pkgs)
-                      fetchFromGitHub
-                      substituteAll
-                      writeText
-                      python3
-                      unstableGitUpdater
-                      ;
-                    inherit lib;
-                    inherit (epkgs) melpaBuild markdown-mode yasnippet;
-                  });
+
                 hook = [ "(java-mode . lsp-bridge-mode)" ];
                 init = ''
                   (require 'lsp-bridge-jdtls)
@@ -1929,11 +1917,26 @@ with lib;
                   (require 'yasnippet)
                   (yas-global-mode 1)
 
-                  (setq acm-enable-copilot true)
+                  (setq acm-enable-copilot 't)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
                   (setq lsp-bridge-enable-auto-import t)
-                  (global-lsp-bridge-mode)
+                  ;;(global-lsp-bridge-mode)
                 '';
+              };
+              eaf = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/eaf {
+                    inherit (epkgs) melpaBuild;
+                    inherit (epkgs.melpaPackages)
+                      ctable
+                      deferred
+                      epc
+                      s
+                      ;
+                  });
+
               };
               # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
@@ -2273,6 +2276,8 @@ with lib;
               zstd
               html-tidy
               shfmt
+
+              #gdb
               ## Module dependencies
               # :checkers spell
               aspell

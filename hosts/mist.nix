@@ -58,9 +58,11 @@
     editors.emacs = {
       enable = true;
       enableService = true;
+      enableLatex = false;
+
       # enableAider = true;
       # enableCopilot = true;
-      # lspStyle = "lsp-bridge";
+      lspStyle = "lsp-bridge";
     };
     health.enable = true;
     typing.enable = true;
