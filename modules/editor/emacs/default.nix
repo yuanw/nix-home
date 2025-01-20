@@ -2277,7 +2277,7 @@ with lib;
               html-tidy
               shfmt
 
-              gdb
+              #gdb
               ## Module dependencies
               # :checkers spell
               aspell
