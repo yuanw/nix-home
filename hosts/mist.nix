@@ -45,7 +45,6 @@
     };
     brew = {
       enable = true;
-      brews = [ "gdb" ];
       casks = [
         "1password"
         "betterdisplay"
