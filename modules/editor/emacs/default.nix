@@ -1907,19 +1907,13 @@ with lib;
               };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
-
                 hook = [ "(java-mode . lsp-bridge-mode)" ];
-                init = ''
-                  (require 'lsp-bridge-jdtls)
-                '';
                 config = ''
+                  (require 'lsp-bridge-jdtls)
                   (require 'yasnippet)
                   (yas-global-mode 1)
-
-                  (setq acm-enable-copilot true)
                   (setq lsp-bridge-jdtls-jvm-args  (list (concat "-javaagent:" (getenv "LOMBOK_DIR") "/lombok.jar")))
-                  (setq lsp-bridge-enable-auto-import t)
-                  (global-lsp-bridge-mode)
+                  (setq lsp-bridge-enable-auto-import 't)
                 '';
               };
               # https://protesilaos.com/emacs/ef-themes-pictures
