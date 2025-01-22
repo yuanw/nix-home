@@ -1912,7 +1912,7 @@ with lib;
                   (require 'lsp-bridge-jdtls)
                   (require 'yasnippet)
                   (yas-global-mode 1)
-                  (setq lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                  ;;(setq lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                   (setq lsp-bridge-enable-auto-import 't)
                 '';
               };
