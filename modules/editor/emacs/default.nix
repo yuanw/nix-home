@@ -1907,12 +1907,12 @@ with lib;
               };
               lsp-bridge = {
                 enable = cfg.lspStyle == "lsp-bridge";
-                hook = [ "( after-init . global-lsp-bridge-mode)" ];
+                # hook = [ "( after-init . global-lsp-bridge-mode)" ];
                 config = ''
                   (require 'lsp-bridge-jdtls)
                   (require 'yasnippet)
                   (yas-global-mode 1)
-                  ;;(setq lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                  (setq lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                   (setq lsp-bridge-enable-auto-import 't)
                 '';
               };
