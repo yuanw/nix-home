@@ -1078,6 +1078,7 @@ with lib;
                 custom = ''
                   (projectile-cache-file  (locate-user-emacs-file "projectile.cache"))
                   (projectile-enable-caching t)
+                  (projectile-create-missing-test-files t)
                   (projectile-file-exists-local-cache-expire 300)
                 '';
               };
