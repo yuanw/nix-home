@@ -1075,7 +1075,7 @@ with lib;
 
               projectile = {
                 enable = true;
-                bindKeymap = {
+                bindKeyMap = {
                   "C-c p" = "projectile-command-map";
                 };
                 custom = ''
