@@ -1075,12 +1075,19 @@ with lib;
 
               projectile = {
                 enable = true;
+                bindKeymap = {
+                  "C-c p" = "projectile-command-map";
+                };
                 custom = ''
                   (projectile-cache-file  (locate-user-emacs-file "projectile.cache"))
                   (projectile-enable-caching t)
                   (projectile-create-missing-test-files t)
                   (projectile-file-exists-local-cache-expire 300)
                 '';
+              };
+
+              consult-projectile = {
+                enable = true;
               };
 
               ace-window = {
