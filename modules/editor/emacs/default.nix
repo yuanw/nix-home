@@ -1073,6 +1073,15 @@ with lib;
                 after = [ "magit" ];
               };
 
+              projectile = {
+                enable = true;
+                custom = ''
+                  (projectile-cache-file  (locate-user-emacs-file "projectile.cache"))
+                  (projectile-enable-caching t)
+                  (projectile-file-exists-local-cache-expire 300)
+                '';
+              };
+
               ace-window = {
                 enable = true;
                 command = [ "ace-window" ];
