@@ -57,6 +57,7 @@
     };
     editors.emacs = {
       enable = true;
+      enableLatex = false;
       enableService = true;
       # enableAider = true;
       # enableCopilot = true;
