@@ -6,6 +6,7 @@ with pkgs;
   fastfetch
   pinentry_mac
   yt-dlp
+  ffmpeg
   #ghostty-mac
   #calibre_mac
 ]
