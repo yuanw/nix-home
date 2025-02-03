@@ -1595,7 +1595,7 @@ with lib;
               };
               envrc = {
                 enable = false;
-                config = '''';
+
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
               just-mode.enable = true;
@@ -1627,18 +1627,11 @@ with lib;
               eglot = {
                 enable = cfg.lspStyle == "eglot";
                 config = ''
-                                    (setq eglot-autoshutdown t)
-                                    (add-to-list 'eglot-server-programs
-                                    '((java-mode java-ts-mode) .
-
-                                    ("jdtls"
-                                    "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"
-
-
-
-
-                                      ))
-                                    ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
+                  (setq eglot-autoshutdown t)
+                  (add-to-list 'eglot-server-programs
+                            '((java-mode java-ts-mode) . ("jdtls"
+                                 "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"))
+                             ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
                                     . ("${pkgs.gopls}/bin/gop
                                     ls"))
                                     )
@@ -1675,7 +1668,7 @@ with lib;
               };
               go-mode = {
                 enable = true;
-                config = '''';
+
               };
               flycheck-eglot = {
                 enable = true;
