@@ -79,6 +79,7 @@ with lib;
         "eglot"
         "lsp-bridge"
         "lspce"
+        "lsp-mode"
       ];
       default = "eglot";
     };
@@ -1105,10 +1106,6 @@ with lib;
                   (winner-mode 1)
                 '';
               };
-
-              hydra = {
-                enable = false;
-              };
               org = {
                 enable = true;
                 demand = true;
@@ -1642,7 +1639,8 @@ with lib;
 
                                       ))
                                     ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
-                                    . ("${pkgs.gopls}/bin/gopls"))
+                                    . ("${pkgs.gopls}/bin/gop
+                                    ls"))
                                     )
                   ;;(add-hook 'kotlin-mode-hook #'eglot-ensure)
                   ;;(add-hook 'java-mode-hook #'eglot-ensure)
@@ -2116,15 +2114,17 @@ with lib;
               };
               # Enable Electric Indent mode to do automatic indentation on RET.
               electric = {
-                enable = false;
+                enable = true;
                 command = [ "electric-indent-local-mode" ];
                 hook = [
                   "(prog-mode . electric-indent-mode)"
-
-                  # Disable for some modes.
-                  "(org-mode .        (lambda () (electric-indent-local-mode -1)))"
-                  "(purescript-mode . (lambda () (electric-indent-local-mode -1)))"
                 ];
+                config = ''
+                                      (electric-pair-mode -1)
+                  (electric-quote-mode -1)
+                  (electric-indent-mode -1)
+                                 (electric-indent-local-mode -1)
+                '';
               };
 
               cape = {
