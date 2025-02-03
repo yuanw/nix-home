@@ -25,7 +25,18 @@ in
         # maven
         lombok
         google-java-format
-        # jdt-language-server
+        (pkgs.jdt-language-server.overrideAttrs (
+          _finalAttrs: _previousAttrs: {
+            postPatch = ''
+              # We store the plugins, config, and features folder in different locations
+              # than in the original package. In addition, hard-code the path to the jdk
+              # in the wrapper, instead of searching for it in PATH at runtime.
+              substituteInPlace bin/jdtls.py \
+                --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
+            '';
+          }
+        ))
+
       ];
       programs = {
         java = {
