@@ -1666,6 +1666,15 @@ with lib;
                   	     (eglot-booster-mode)
                 '';
               };
+
+              dap-mode = {
+                enable = true;
+
+              };
+              dap-java = {
+                enable = true;
+              };
+
               go-mode = {
                 enable = true;
 
