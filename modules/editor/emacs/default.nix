@@ -1667,14 +1667,105 @@ with lib;
                 '';
               };
 
+              lsp-ui = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                command = [ "lsp-ui-mode" ];
+                bindLocal = {
+                  lsp-mode-map = {
+                    "C-c r d" = "lsp-ui-doc-toggle";
+                    "C-c r i" = "lsp-ui-doc-focus-frame";
+                    "C-c f s" = "lsp-ui-find-workspace-symbol";
+                  };
+                };
+                config = ''
+                  (setq lsp-ui-sideline-enable t
+                        lsp-ui-sideline-show-symbol nil
+                        lsp-ui-sideline-show-hover nil
+                        lsp-ui-sideline-show-code-actions nil
+                        lsp-ui-sideline-update-mode 'point)
+                  (setq lsp-ui-doc-enable nil
+                        lsp-ui-doc-position 'at-point
+                        lsp-ui-doc-max-width 125
+                        lsp-ui-doc-max-height 18)
+                '';
+              };
+
+              lsp-ui-flycheck = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                after = [
+                  "flycheck"
+                  "lsp-ui"
+                ];
+              };
+
+              lsp-completion = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                after = [ "lsp-mode" ];
+                config = ''
+                  (setq lsp-completion-enable-additional-text-edit nil)
+                '';
+              };
+
+              lsp-diagnostics = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                after = [ "lsp-mode" ];
+              };
+
+              lsp-lens = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                command = [ "lsp-lens--enable" ];
+                after = [ "lsp-mode" ];
+              };
+
+              lsp-mode = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                command = [ "lsp" ];
+                after = [
+                  "flycheck"
+                ];
+                bindLocal = {
+                  lsp-mode-map = {
+                    "C-c f r" = "lsp-find-references";
+                    "C-r a" = "lsp-execute-code-action";
+                    "C-r f" = "lsp-format-buffer";
+                    "C-r g" = "lsp-format-region";
+                    "C-r l" = "lsp-avy-lens";
+                    "C-r r" = "lsp-rename";
+                  };
+                };
+                init = ''
+                  (setq lsp-keymap-prefix "C-r l")
+                '';
+                config = ''
+                  (setq lsp-diagnostics-provider :flycheck
+                        lsp-eldoc-render-all nil
+                        lsp-enable-on-type-formatting nil
+                        lsp-enable-suggest-server-download nil
+                        lsp-headerline-breadcrumb-enable nil
+                        lsp-lens-enable t
+                        lsp-modeline-code-actions-enable nil
+                        lsp-modeline-diagnostics-enable nil
+                        lsp-modeline-workspace-status-enable nil)
+                '';
+              };
+
               dap-mode = {
-                enable = true;
+                enable = cfg.lspStyle == "lsp-mode";
 
-              };
-              dap-java = {
-                enable = true;
+                after = [ "lsp-mode" ];
               };
 
+              dap-ui = {
+                enable = cfg.lspStyle == "lsp-mode";
+
+                hook = [ "(dap-mode . dap-ui-mode)" ];
+              };
               go-mode = {
                 enable = true;
 
