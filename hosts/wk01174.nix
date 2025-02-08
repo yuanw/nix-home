@@ -78,7 +78,7 @@
 
       #enableAider = true;
       # enableCopilot = true;
-      lspStyle = "lsp-mode";
+      # lspStyle = "lsp-bridge";
     };
     health.enable = true;
     typing.enable = true;
