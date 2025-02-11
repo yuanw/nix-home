@@ -377,27 +377,6 @@ with lib;
               };
               eyebrowse = {
                 enable = true;
-                command = [
-                  "eyebrowse-last-window-config"
-                  "eyebrowse-switch-to-window-config"
-                ];
-                bindKeyMap = {
-                  "C-c C-w" = "eyebrowse-mode-map";
-                };
-                bindLocal = {
-                  eyebrowse-mode-map = {
-                    "<" = "eyebrowse-last-window-config";
-                    "1" = "eyebrowse-switch-to-window-config-1";
-                    "2" = "eyebrowse-switch-to-window-config-2";
-                    "3" = "eyebrowse-switch-to-window-config-3";
-                    "4" = "eyebrowse-switch-to-window-config-4";
-                  };
-                };
-                custom = ''
-                  (eyebrowse-keymap-prefix "�")
-                  (eyebrowse-mode-line-separator " ")
-                  (eyebrowse-new-workspace t)
-                '';
                 config = "(eyebrowse-mode t)";
               };
               god-mode = {
