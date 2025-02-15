@@ -20,7 +20,9 @@
     gpgKey = "19AD3F6B1A5BF3BF";
     homeDirectory = "/Users/yuanwang";
   };
-
+  #curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
+  #ids.uids.nixbld = 300;
+  ids.gids.nixbld = 30000;
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
