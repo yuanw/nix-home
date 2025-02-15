@@ -25,7 +25,6 @@ with lib;
     settings.cores = 12;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      user = "${config.my.username}";
       automatic = true;
       interval = {
         Hour = 22;
@@ -43,7 +42,6 @@ with lib;
     echo "ok"
   '';
   services.nix-daemon = {
-    enable = true;
     logFile = "/var/log/nix-daemon.log";
   };
   system.defaults = {
