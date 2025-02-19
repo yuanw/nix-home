@@ -78,6 +78,7 @@
     };
     dev = {
       agda.enable = true;
+      racket.enable = true;
       haskell.enable = false;
       python.enable = true;
     };
