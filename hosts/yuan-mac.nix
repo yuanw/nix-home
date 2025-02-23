@@ -15,7 +15,8 @@
       github.user = "yuanw";
     };
   };
-
+  # determinate system
+  nix.enable = false;
   my = {
     username = "yuanw";
     name = "Yuan Wang";
