@@ -1651,9 +1651,6 @@ with lib;
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
 
-              agda2-mode = {
-                enable = config.modules.dev.agda.enable;
-              };
               just-mode.enable = true;
               justl = {
                 enable = true;

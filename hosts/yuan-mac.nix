@@ -31,8 +31,8 @@
       pkg = pkgs.firefox-bin;
     };
     editors.emacs = {
-      enable = true;
-      enableService = true;
+      enable = false;
+      enableService = false;
 
       # TODO fix this
       enableAider = false;
