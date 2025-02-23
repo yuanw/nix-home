@@ -1572,6 +1572,9 @@ with lib;
                   ''("\\.lhs\\'" . haskell-literate-mode)''
                 ];
               };
+              agda2-mode = {
+                enable = config.modules.dev.agda.enable;
+              };
               kotlin-mode = {
                 enable = true;
                 config = "(require 'kotlin-mode)";

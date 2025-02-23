@@ -48,6 +48,7 @@
       casks = [
         "1password"
         "betterdisplay"
+        "racket"
       ];
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
@@ -66,13 +67,15 @@
     health.enable = true;
     typing.enable = true;
     dev = {
-      agda.enable = false;
+      agda.enable = true;
+      scheme.enable = true;
+      #racket.enable = false;
       haskell.enable = false;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;
     };
-    zellij.enable = false;
+
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
