@@ -16,7 +16,7 @@
         github.user = "yuanw";
       };
     };
-    packages = [ pkgs.qbittorrent ];
+    home.packages = [ pkgs.qbittorrent ];
   };
   # determinate system
   nix.enable = false;
