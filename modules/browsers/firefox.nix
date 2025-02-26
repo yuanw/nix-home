@@ -53,7 +53,7 @@ in
         home = {
           name = "home";
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
-          extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+          extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
             tridactyl
             ublock-origin
             ghosttext
