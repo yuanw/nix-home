@@ -508,6 +508,18 @@ with lib;
                 '';
                 config = "(ultra-scroll-mode 1)";
               };
+              ask-mode = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/ask-mode.nix {
+                    inherit (pkgs) haskellPackages;
+                    inherit (epkgs)
+                      melpaBuild
+
+                      ;
+                  });
+              };
               auto-save = {
                 enable = true;
                 package =
