@@ -19,9 +19,9 @@ in
       home.packages = [
         pkgs.cabal-install
         pkgs.cabal2nix
+        pkgs.haskellPackages.ask
         (pkgs.ghc.withPackages (p: [
           p.attoparsec
-          p.ask
         ]))
       ];
       home.file = {

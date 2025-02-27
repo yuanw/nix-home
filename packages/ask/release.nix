@@ -10,10 +10,11 @@ mkDerivation {
   pname = "ask";
   version = "0.1.0.0";
   src = fetchFromGitHub {
-    owner = "msp-strath";
+    owner = "yuanwang-wf";
     repo = "ask";
-    rev = "3cf318b5c486debfa3c22123284ab06cf95c8891";
-    sha256 = "sha256-jAwl5H8ti0rzYXqn3nbjyqNugHKNic5WmU2xnxNzHCg=";
+    rev = "799552ae72ec796815f835c669f8822d40eecd80";
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-A+lwpzEiPoiu54ZFy7Pgyl/fKS3IwoSQwmKsSm71w3s=";
   };
   isLibrary = true;
   isExecutable = true;
