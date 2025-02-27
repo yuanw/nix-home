@@ -119,6 +119,12 @@ _final: prev: {
       }
     );
 
+  haskellPackages = prev.haskellPackages.override {
+    overrides = haskellPackagesNew: _haskellPackagesOld: rec {
+      ask = haskellPackagesNew.callPackage ./ask/release.nix { };
+    };
+  };
+
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
