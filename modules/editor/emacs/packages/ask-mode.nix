@@ -3,7 +3,7 @@ let
   Ask = haskellPackages.ask;
 in
 melpaBuild {
-  pname = "ask";
+  pname = "ask-mode";
   inherit (Ask) src version;
 
   files = ''("emacs/*.el")'';

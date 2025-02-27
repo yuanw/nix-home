@@ -4,7 +4,6 @@
   containers,
   mtl,
   fetchFromGitHub,
-
 }:
 mkDerivation {
   pname = "ask";
@@ -12,9 +11,10 @@ mkDerivation {
   src = fetchFromGitHub {
     owner = "yuanwang-wf";
     repo = "ask";
-    rev = "799552ae72ec796815f835c669f8822d40eecd80";
+    rev = "7bbaae72b497183d7aaa91fa215e6ca9e3c90ea8";
     # sha256 = lib.fakeSha256;
-    sha256 = "sha256-A+lwpzEiPoiu54ZFy7Pgyl/fKS3IwoSQwmKsSm71w3s=";
+    sha256 = "sha256-Uhz5fJctlV1NSFUkA/MidX/K1YYql3tVzTtA+aFcgvY=";
+
   };
   isLibrary = true;
   isExecutable = true;

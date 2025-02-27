@@ -519,6 +519,10 @@ with lib;
 
                       ;
                   });
+                mode = [
+                  ''"\\.ask\\'"'' # \
+                ];
+                config = "(require 'ask-mode)";
               };
               auto-save = {
                 enable = true;
