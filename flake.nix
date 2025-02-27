@@ -15,7 +15,6 @@
       url = "github:hercules-ci/flake-parts";
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
-    nix-colors.url = "github:misterio77/nix-colors";
     hosts.url = "github:StevenBlack/hosts";
     flake-utils.url = "github:numtide/flake-utils";
     # https://github.com/nix-community/home-manager/issues/5717
@@ -23,10 +22,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    astro-nvim = {
-      url = "github:AstroNvim/AstroNvim";
-      flake = false;
-    };
+
     haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs = {
@@ -60,6 +56,10 @@
     };
     shy-fox = {
       url = "github:Naezr/ShyFox";
+      flake = false;
+    };
+    ask = {
+      url = "github:msp-strath/ask";
       flake = false;
     };
 
