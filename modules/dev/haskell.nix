@@ -21,6 +21,7 @@ in
         pkgs.cabal2nix
         (pkgs.ghc.withPackages (p: [
           p.attoparsec
+          p.ask
         ]))
       ];
       home.file = {

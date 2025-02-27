@@ -2,7 +2,6 @@
   mkDerivation,
   base,
   containers,
-  lib,
   mtl,
   fetchFromGitHub,
 
@@ -13,8 +12,8 @@ mkDerivation {
   src = fetchFromGitHub {
     owner = "msp-strath";
     repo = "ask";
-    # rev = "515f5cbb505e614f400c21f99bdbebd47609c659";
-    sha256 = lib.fakeSha256;
+    rev = "3cf318b5c486debfa3c22123284ab06cf95c8891";
+    sha256 = "sha256-jAwl5H8ti0rzYXqn3nbjyqNugHKNic5WmU2xnxNzHCg=";
   };
   isLibrary = true;
   isExecutable = true;
