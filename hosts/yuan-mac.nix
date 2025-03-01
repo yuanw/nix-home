@@ -51,7 +51,7 @@
       #   "homebrew/core"
       #   "homebrew/cask"
       # ];
-      casks = [ "protonvpn" ];
+
     };
   };
 }
