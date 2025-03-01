@@ -10,12 +10,16 @@
     inputs.self.nixosModules.darwin
   ];
 
-  home-manager.users.${config.my.username}.programs.git = {
-    extraConfig = {
-      github.user = "yuanw";
+  home-manager.users.${config.my.username} = {
+    programs.git = {
+      extraConfig = {
+        github.user = "yuanw";
+      };
     };
+    home.packages = [ pkgs.qbittorrent ];
   };
-
+  # determinate system
+  nix.enable = false;
   my = {
     username = "yuanw";
     name = "Yuan Wang";
@@ -47,7 +51,10 @@
       #   "homebrew/core"
       #   "homebrew/cask"
       # ];
-      casks = [ "brave-browser" ];
+      casks = [
+        "folx"
+        "1password"
+      ];
     };
   };
 }
