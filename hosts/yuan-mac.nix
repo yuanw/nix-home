@@ -51,7 +51,10 @@
       #   "homebrew/core"
       #   "homebrew/cask"
       # ];
-
+      casks = [
+        "folx"
+        "1password"
+      ];
     };
   };
 }
