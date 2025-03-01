@@ -25,22 +25,6 @@
         "type": "github"
       }
     },
-    "ask": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1740086075,
-        "narHash": "sha256-jAwl5H8ti0rzYXqn3nbjyqNugHKNic5WmU2xnxNzHCg=",
-        "owner": "msp-strath",
-        "repo": "ask",
-        "rev": "3cf318b5c486debfa3c22123284ab06cf95c8891",
-        "type": "github"
-      },
-      "original": {
-        "owner": "msp-strath",
-        "repo": "ask",
-        "type": "github"
-      }
-    },
     "cachix": {
       "inputs": {
         "devenv": [
@@ -977,7 +961,6 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
-        "ask": "ask",
         "catppuccin": "catppuccin",
         "devenv": "devenv",
         "emacs": "emacs",

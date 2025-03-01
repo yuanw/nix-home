@@ -509,7 +509,8 @@ with lib;
                 config = "(ultra-scroll-mode 1)";
               };
               ask-mode = {
-                enable = true;
+                enable = config.modules.dev.ask.enable;
+
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/ask-mode.nix {

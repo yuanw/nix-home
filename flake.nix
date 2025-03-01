@@ -58,10 +58,6 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
-    ask = {
-      url = "github:msp-strath/ask";
-      flake = false;
-    };
 
     # Vale styles.
     vale-Google.flake = false;
