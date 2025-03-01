@@ -87,7 +87,7 @@
       #pkg = pkgs.emacs-unstable;
     };
     qmk.enable = true;
-    #tmux.enable = true;
+    tmux.enable = true;
     terminal.enable = true;
     typing.enable = true;
     wm.xmonad.enable = true;

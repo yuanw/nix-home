@@ -508,6 +508,23 @@ with lib;
                 '';
                 config = "(ultra-scroll-mode 1)";
               };
+              ask-mode = {
+                enable = config.modules.dev.ask.enable;
+
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/ask-mode.nix {
+                    inherit (pkgs) haskellPackages;
+                    inherit (epkgs)
+                      melpaBuild
+
+                      ;
+                  });
+                mode = [
+                  ''"\\.ask\\'"'' # \
+                ];
+                config = "(require 'ask-mode)";
+              };
               auto-save = {
                 enable = true;
                 package =

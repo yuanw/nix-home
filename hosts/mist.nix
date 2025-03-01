@@ -68,6 +68,7 @@
     typing.enable = true;
     dev = {
       agda.enable = true;
+      ask.enable = true;
       scheme.enable = true;
       #racket.enable = false;
       haskell.enable = false;

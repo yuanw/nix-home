@@ -8,6 +8,7 @@
       ./common.nix
       ./browsers/firefox.nix
       ./dev/agda.nix
+      ./dev/ask.nix
       ./dev/dart.nix
       ./dev/haskell.nix
       ./dev/haxe.nix
