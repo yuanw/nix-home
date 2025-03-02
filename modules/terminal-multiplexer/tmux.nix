@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 let
   cfg = config.modules.tmux;
@@ -20,7 +19,7 @@ with lib;
       default = false;
     };
     mainWorkspaceDir = mkOption {
-      default = "$HOME/workspace";
+      default = "$HOME/workspaces";
       type = types.str;
       description = "directory for prefix+m to point to";
     };
@@ -43,7 +42,7 @@ with lib;
           aggressiveResize = true;
           baseIndex = 1;
           enable = true;
-          terminal = "screen-256color";
+          #terminal = "screen-256color";
           clock24 = true;
           plugins = with pkgs; [
             # bind is u
@@ -56,8 +55,8 @@ with lib;
           keyMode = "vi";
           shortcut = "Space";
           extraConfig = ''
-            set-option -g default-shell /bin/zsh
-            set -g default-command /bin/zsh
+            #set-option -g default-shell /bin/zsh
+            #set -g default-command /bin/zsh
             set -g status-justify "left"
             set -g status "on"
             set -g status-left-style none
@@ -104,7 +103,7 @@ with lib;
           sessionVariables = {
             # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
             # automatically start tmux
-            ZSH_TMUX_AUTOSTART = "true";
+            #ZSH_TMUX_AUTOSTART = "true";
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
           };
           shellAliases = {
