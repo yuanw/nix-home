@@ -19,7 +19,7 @@ with lib;
       default = false;
     };
     mainWorkspaceDir = mkOption {
-      default = "$HOME/workspaces";
+      default = "$HOME/workspace";
       type = types.str;
       description = "directory for prefix+m to point to";
     };
@@ -42,7 +42,7 @@ with lib;
           aggressiveResize = true;
           baseIndex = 1;
           enable = true;
-          #terminal = "screen-256color";
+          terminal = "screen-256color";
           clock24 = true;
           plugins = with pkgs; [
             # bind is u
