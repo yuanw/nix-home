@@ -4,7 +4,6 @@
   containers,
   mtl,
   fetchFromGitHub,
-  lib,
 }:
 mkDerivation {
   pname = "ask";
@@ -13,8 +12,8 @@ mkDerivation {
     owner = "msp-strath";
     repo = "ask";
     rev = "51ee4b6b377685e6ec4bb7bd4b90d3c54b58598f";
-    sha256 = lib.fakeSha256;
-    #sha256 = "sha256-Uhz5fJctlV1NSFUkA/MidX/K1YYql3tVzTtA+aFcgvY=";
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-ydr/AKbaiphSl19oLsWt7QL9T0jBOdCnaX+aL3MkU/A=";
 
   };
   isLibrary = true;
