@@ -103,7 +103,7 @@ with lib;
           sessionVariables = {
             # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
             # automatically start tmux
-            #ZSH_TMUX_AUTOSTART = "true";
+            ZSH_TMUX_AUTOSTART = "true";
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
           };
           shellAliases = {
