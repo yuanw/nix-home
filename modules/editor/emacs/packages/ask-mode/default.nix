@@ -5,6 +5,7 @@ in
 melpaBuild {
   pname = "ask-mode";
   inherit (Ask) src version;
+  patches = [ ./ask-mode.patch ];
 
   files = ''("emacs/*.el")'';
 

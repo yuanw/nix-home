@@ -4,16 +4,17 @@
   containers,
   mtl,
   fetchFromGitHub,
+  lib,
 }:
 mkDerivation {
   pname = "ask";
   version = "0.1.0.0";
   src = fetchFromGitHub {
-    owner = "yuanwang-wf";
+    owner = "msp-stratch";
     repo = "ask";
-    rev = "7bbaae72b497183d7aaa91fa215e6ca9e3c90ea8";
-    # sha256 = lib.fakeSha256;
-    sha256 = "sha256-Uhz5fJctlV1NSFUkA/MidX/K1YYql3tVzTtA+aFcgvY=";
+    rev = "51ee4b6b377685e6ec4bb7bd4b90d3c54b58598f";
+    sha256 = lib.fakeSha256;
+    #sha256 = "sha256-Uhz5fJctlV1NSFUkA/MidX/K1YYql3tVzTtA+aFcgvY=";
 
   };
   isLibrary = true;

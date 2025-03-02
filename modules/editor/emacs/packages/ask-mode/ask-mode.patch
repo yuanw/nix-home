@@ -1,0 +1,25 @@
+From cf2770cdae7f73c651cd907c36fb7fbff760d9f6 Mon Sep 17 00:00:00 2001
+From: yuanw <me@yuanwang.ca>
+Date: Sat, 1 Mar 2025 18:07:55 -0600
+Subject: [PATCH] rename ask-mode
+
+---
+ emacs/{ask.el => ask-mode.el} | 1 +
+ 1 file changed, 1 insertion(+)
+ rename emacs/{ask.el => ask-mode.el} (98%)
+
+diff --git a/emacs/ask.el b/emacs/ask-mode.el
+similarity index 98%
+rename from emacs/ask.el
+rename to emacs/ask-mode.el
+index 72e5506..df0ec16 100755
+--- a/emacs/ask.el
++++ b/emacs/ask-mode.el
+@@ -1,3 +1,4 @@
++;;; ask-mode.el --- Major mode for Ask
+ ;;(require 'compile)
+ 
+ ;; based on: http://ergoemacs.org/emacs/elisp_syntax_coloring.html
+-- 
+2.48.1
+
