@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib;
 let
@@ -40,10 +39,9 @@ in
       enable = true;
       enableContribAndExtras = true;
     };
-
-    services.xserver.libinput = {
+    services.libinput.touchpad.disableWhileTyping = true;
+    services.libinput = {
       enable = true;
-      touchpad.disableWhileTyping = true;
     };
 
     services.udisks2.enable = true;
