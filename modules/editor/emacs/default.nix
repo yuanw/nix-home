@@ -513,7 +513,7 @@ with lib;
 
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/ask-mode.nix {
+                  (pkgs.callPackage ./packages/ask-mode {
                     inherit (pkgs) haskellPackages;
                     inherit (epkgs)
                       melpaBuild
