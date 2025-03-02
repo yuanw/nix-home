@@ -46,8 +46,9 @@ in
 
     services.udisks2.enable = true;
     services.blueman.enable = true;
+    services.displayManager.defaultSession = "none+xmonad";
     services.xserver.displayManager = {
-      defaultSession = "none+xmonad";
+      # defaultSession = "none+xmonad";
       lightdm.greeters.mini = {
         enable = false;
         user = "${config.my.username}";
