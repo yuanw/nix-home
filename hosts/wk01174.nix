@@ -90,7 +90,7 @@
       dart.enable = true;
       java.enable = true;
       scheme.enable = true;
-      haskell.enable = false;
+      haskell.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;

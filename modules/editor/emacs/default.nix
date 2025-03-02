@@ -116,7 +116,7 @@ with lib;
         { pkgs, ... }:
         {
           home.packages = with pkgs; [
-            texlive.combined.scheme-small
+            texlive.combined.scheme-medium
           ];
         };
     })
@@ -507,6 +507,23 @@ with lib;
                   scroll-margin 0 )
                 '';
                 config = "(ultra-scroll-mode 1)";
+              };
+              ask-mode = {
+                enable = config.modules.dev.ask.enable;
+
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/ask-mode.nix {
+                    inherit (pkgs) haskellPackages;
+                    inherit (epkgs)
+                      melpaBuild
+
+                      ;
+                  });
+                mode = [
+                  ''"\\.ask\\'"'' # \
+                ];
+                config = "(require 'ask-mode)";
               };
               auto-save = {
                 enable = true;
@@ -1572,6 +1589,9 @@ with lib;
                   ''("\\.lhs\\'" . haskell-literate-mode)''
                 ];
               };
+              agda2-mode = {
+                enable = config.modules.dev.agda.enable;
+              };
               kotlin-mode = {
                 enable = true;
                 config = "(require 'kotlin-mode)";
@@ -1648,9 +1668,6 @@ with lib;
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
 
-              agda2-mode = {
-                enable = config.modules.dev.agda.enable;
-              };
               just-mode.enable = true;
               justl = {
                 enable = true;

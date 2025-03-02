@@ -17,6 +17,7 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [
+        pkgs.cabal-install
         pkgs.cabal2nix
         (pkgs.ghc.withPackages (p: [
           p.attoparsec
