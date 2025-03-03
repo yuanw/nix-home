@@ -87,7 +87,8 @@
     typing.enable = true;
     dev = {
       agda.enable = true;
-      dart.enable = true;
+      ask.enable = true;
+      # dart.enable = true;
       java.enable = true;
       scheme.enable = true;
       haskell.enable = true;
@@ -97,7 +98,6 @@
       racket.enable = false;
       kotlin.enable = true;
     };
-    zellij.enable = false;
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
