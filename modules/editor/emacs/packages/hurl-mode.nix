@@ -3,7 +3,6 @@
   fetchFromGitHub,
   writeText,
   unstableGitUpdater,
-  lib,
   # Elisp dependencies
 
   # Native dependencies
@@ -20,8 +19,8 @@ melpaBuild {
     owner = "JasZhe";
     repo = "hurl-mode";
     rev = "df03471e48fb1ca39050d23d61c79ae901e8d68f";
-    sha256 = lib.fakeSha256;
-    #sha256 = "sha256-yv+PP1JyEvMxEToNbgDbgWih/GHdauwfYLzPaEPsEC8=";
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-EauCBuqIFhvY5e0lPn9sFFo4K918Rc6Xx9myZTaAXxc=";
   };
 
   dontConfigure = true;
