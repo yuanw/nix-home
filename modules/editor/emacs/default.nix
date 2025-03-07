@@ -517,13 +517,31 @@ with lib;
                     inherit (pkgs) haskellPackages;
                     inherit (epkgs)
                       melpaBuild
-
                       ;
                   });
                 mode = [
                   ''"\\.ask\\'"'' # \
                 ];
                 config = "(require 'ask-mode)";
+              };
+              hurl-mode = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/hurl-mode.nix {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      substituteAll
+                      writeText
+                      unstableGitUpdater
+                      ;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  });
+                extraPackages = [
+                  pkgs.hurl
+                ];
+
               };
               auto-save = {
                 enable = true;
