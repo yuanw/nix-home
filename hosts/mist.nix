@@ -50,6 +50,9 @@
         "betterdisplay"
         "racket"
       ];
+      masApps = {
+        "Fresh Eyes" = 6480411697;
+      };
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     browsers.firefox = {
