@@ -69,6 +69,7 @@
     };
     health.enable = true;
     typing.enable = true;
+    jellyfin.enable = true;
     dev = {
       agda.enable = true;
       ask.enable = true;
