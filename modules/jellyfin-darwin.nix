@@ -17,6 +17,8 @@ in
     home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.jellyfin
+        pkgs.jellyfin-web
+
       ];
     };
     launchd.user.agents.jellyfin = {
