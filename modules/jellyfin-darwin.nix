@@ -14,6 +14,11 @@ in
     enable = mkEnableOption "jellyfin";
   };
   config = mkIf cfg.enable {
+    home-manager.users.${config.my.username} = {
+      home.packages = [
+        pkgs.jellyfin
+      ];
+    };
     launchd.user.agents.jellyfin = {
       path = [ pkgs.jellyfin ];
       serviceConfig = {
