@@ -18,6 +18,7 @@ in
       home.packages = [
         pkgs.jellyfin
         pkgs.qbittorrent
+        pkgs.sonarr
       ];
     };
     launchd.daemons.jellyfin = {
