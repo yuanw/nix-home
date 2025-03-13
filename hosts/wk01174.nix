@@ -91,7 +91,7 @@
     dev = {
       agda.enable = true;
       ask.enable = true;
-      # dart.enable = true;
+      dart.enable = true;
       java.enable = true;
       scheme.enable = true;
       haskell.enable = true;

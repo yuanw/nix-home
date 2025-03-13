@@ -1610,6 +1610,12 @@ with lib;
               agda2-mode = {
                 enable = config.modules.dev.agda.enable;
               };
+              dart-mode = {
+                enable = config.modules.dev.dart.enable;
+                mode = [
+                  ''"\\.dart\\'"''
+                ];
+              };
               kotlin-mode = {
                 enable = true;
                 config = "(require 'kotlin-mode)";
