@@ -17,15 +17,14 @@ in
     home-manager.users.${config.my.username} = {
       home.packages = [
         pkgs.jellyfin
-        pkgs.jellyfin-web
-
+        pkgs.qbittorrent
       ];
     };
-    launchd.user.agents.jellyfin = {
+    launchd.daemons.jellyfin = {
       path = [ pkgs.jellyfin ];
       serviceConfig = {
         ProgramArguments = [
-          "${pkgs.lib.getExe pkgs.jellyfin} -d $HOME/.local/share/jellyfin -c $HOME/.config/jellyfin -C $HOME/.cache/jellyfin"
+          "${pkgs.lib.getExe pkgs.jellyfin}"
         ];
         StandardErrorPath = "/tmp/jellyfin.log";
         StandardOutPath = "/tmp/jellyfin.log";
