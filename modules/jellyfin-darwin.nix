@@ -21,7 +21,7 @@ in
         pkgs.sonarr
       ];
     };
-    launchd.daemons.jellyfin = {
+    launchd.user.agents.jellyfin = {
       path = [ pkgs.jellyfin ];
       serviceConfig = {
         ProgramArguments = [
