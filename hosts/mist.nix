@@ -49,6 +49,7 @@
         "1password"
         "betterdisplay"
         "racket"
+        "protonvpn"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
