@@ -19,6 +19,7 @@ in
         pkgs.jellyfin
         pkgs.qbittorrent
         pkgs.sonarr
+        pkgs.lego
       ];
     };
     launchd.user.agents.jellyfin = {
