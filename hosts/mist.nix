@@ -50,7 +50,6 @@
         "betterdisplay"
         "racket"
         "protonvpn"
-        "google-chrome"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
