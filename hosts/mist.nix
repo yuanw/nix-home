@@ -69,7 +69,7 @@
       # enableCopilot = true;
       lspStyle = "lsp-bridge";
     };
-    health.enable = true;
+    # health.enable = true;
     typing.enable = true;
     jellyfin.enable = true;
     dev = {
