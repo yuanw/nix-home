@@ -78,7 +78,7 @@
       scheme.enable = true;
       #racket.enable = false;
       haskell.enable = false;
-      idris2.enable = false;
+      idris2.enable = true;
       python.enable = true;
       zig.enable = false;
     };
