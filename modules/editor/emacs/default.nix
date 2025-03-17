@@ -1649,6 +1649,9 @@ with lib;
                   (add-hook 'terraform-mode-hook 'my-terraform-mode-init)
                 '';
               };
+              idris2-mode = {
+                enable = config.modules.dev.idris2.enable;
+              };
               popper = {
                 enable = true;
                 bind = {
