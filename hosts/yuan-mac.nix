@@ -8,6 +8,8 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
+    ../modules/private/jellyfin-darwin.nix
+
   ];
 
   home-manager.users.${config.my.username} = {
