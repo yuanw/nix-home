@@ -89,9 +89,9 @@ in
             engines = {
               # Mozill, have mecry upon our souls and eyeball, do not suggest search with ebay or bezo
               # every time I type on address bar
-              "Google".metaData.hidden = true;
-              "Bing".metaData.hidden = true;
-              "eBay".metaData.hidden = true;
+              "google".metaData.hidden = true;
+              "bing".metaData.hidden = true;
+              "ebay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
               "Kagi" = {
                 urls = [
