@@ -41,7 +41,6 @@
       ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
       ./macintosh.nix
-      ./jellyfin-darwin.nix
     ];
   };
 }

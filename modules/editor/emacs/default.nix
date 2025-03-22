@@ -302,7 +302,7 @@ with lib;
 
 
                  ;; Enable highlighting of current line.
-                 (global-hl-line-mode 1)
+                 ;;(global-hl-line-mode 1)
 
                  ;; Avoid noisy bell.
                  (setq visible-bell t)
