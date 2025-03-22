@@ -9,6 +9,7 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
+    ../modules/private/jellyfin-darwin.nix
 
   ];
 
@@ -50,7 +51,6 @@
         "betterdisplay"
         "racket"
         "protonvpn"
-        "brave-browser"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;

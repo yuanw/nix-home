@@ -8,7 +8,6 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
-    ../modules/private/jellyfin-darwin.nix
 
   ];
 
@@ -54,7 +53,7 @@
       #   "homebrew/cask"
       # ];
       casks = [
-        "folx"
+
         "1password"
       ];
     };
