@@ -9,6 +9,7 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
+    ../modules/private/jellyfin-darwin.nix
 
   ];
 
@@ -49,6 +50,7 @@
         "1password"
         "betterdisplay"
         "racket"
+        "protonvpn"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
@@ -67,15 +69,16 @@
       # enableCopilot = true;
       lspStyle = "lsp-bridge";
     };
-    health.enable = true;
+    # health.enable = true;
     typing.enable = true;
+    jellyfin.enable = true;
     dev = {
       agda.enable = true;
       ask.enable = true;
       scheme.enable = true;
       #racket.enable = false;
       haskell.enable = false;
-      idris2.enable = false;
+      idris2.enable = true;
       python.enable = true;
       zig.enable = false;
     };

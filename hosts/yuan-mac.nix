@@ -8,6 +8,7 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
+
   ];
 
   home-manager.users.${config.my.username} = {
@@ -52,7 +53,7 @@
       #   "homebrew/cask"
       # ];
       casks = [
-        "folx"
+
         "1password"
       ];
     };

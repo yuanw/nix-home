@@ -302,7 +302,7 @@ with lib;
 
 
                  ;; Enable highlighting of current line.
-                 (global-hl-line-mode 1)
+                 ;;(global-hl-line-mode 1)
 
                  ;; Avoid noisy bell.
                  (setq visible-bell t)
@@ -1648,6 +1648,9 @@ with lib;
 
                   (add-hook 'terraform-mode-hook 'my-terraform-mode-init)
                 '';
+              };
+              idris2-mode = {
+                enable = config.modules.dev.idris2.enable;
               };
               popper = {
                 enable = true;
