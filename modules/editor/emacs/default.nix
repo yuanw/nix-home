@@ -1191,8 +1191,8 @@ with lib;
                     (python . t)
                     (dot . t)
                     (scheme . t)
-                    (agda . t)
                     (racket . t)
+                    (hurl .)
                     ))
                 '';
               };
