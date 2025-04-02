@@ -53,7 +53,7 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "racket"
-        # "docker"
+        "docker"
         "google-chrome"
         "slack"
         "sloth"
