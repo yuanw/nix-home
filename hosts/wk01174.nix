@@ -53,7 +53,7 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "racket"
-        "docker"
+        # "docker"
         "google-chrome"
         "slack"
         "sloth"
@@ -64,7 +64,10 @@
       ];
       brews = [
         "redis"
-        # mkdir -p ~/.docker/cli-plugins
+        # Compose is a Docker plugin. For Docker to find the plugin, add "cliPluginsExtraDirs" to ~/.docker/config.json:
+        # "cliPluginsExtraDirs": [
+        #  "$HOMEBREW_PREFIX/lib/docker/cli-plugins"
+        # ]
         # ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
         "docker-compose"
       ];
