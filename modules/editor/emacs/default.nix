@@ -27,7 +27,7 @@ let
     patches =
       (lib.optionals pkgs.stdenv.isDarwin [
         "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
-        ./patches/round-undecorated-frame.patch
+        "${inputs.emacs-plus}/patches/round-undecorated-frame.patch"
         "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
       ])
       ++ prev.patches;
