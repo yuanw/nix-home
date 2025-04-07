@@ -426,25 +426,11 @@
     },
     "haskell-flake": {
       "locked": {
-<<<<<<< HEAD
         "lastModified": 1742743292,
         "narHash": "sha256-5V+6MXBnWgLQZCdYEeyZqpAg+DRLEQsSofJsNHSVIow=",
-||||||| a2fbacdc
-        "lastModified": 1742132891,
-        "narHash": "sha256-XAlCptQcbRnVchIKw0x+RybjKJTkIqjOGURN98irF/A=",
-=======
-        "lastModified": 1743342175,
-        "narHash": "sha256-WDlsavKgrTi2ryWD28ustS9NE8s4CI17EW6hE/QKRKE=",
->>>>>>> origin/update_flake_lock_action
         "owner": "srid",
         "repo": "haskell-flake",
-<<<<<<< HEAD
         "rev": "94edd6d3124f97727e6b146f7c862f636e0fd4af",
-||||||| a2fbacdc
-        "rev": "55a66589a74cfee4eb2bafa8937ef5656631cafb",
-=======
-        "rev": "f2fffebd1bac6b6d64d6eaf1227a27808ef05736",
->>>>>>> origin/update_flake_lock_action
         "type": "github"
       },
       "original": {
