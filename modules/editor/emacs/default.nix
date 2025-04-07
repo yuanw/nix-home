@@ -1864,8 +1864,7 @@ with lib;
                 hook = [ "(dap-mode . dap-ui-mode)" ];
               };
               go-mode = {
-                enable = true;
-
+                enable = false;
               };
               flycheck-eglot = {
                 enable = true;
