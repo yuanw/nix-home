@@ -474,7 +474,7 @@
           "agenix",
           "nixpkgs"
         ]
-x      },
+      },
       "locked": {
         "lastModified": 1703113217,
         "narHash": "sha256-7ulcXOk63TIT2lVDSExj7XzFx09LpdSAPtvgtM7yQPE=",
