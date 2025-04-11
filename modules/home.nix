@@ -8,7 +8,7 @@
 
 {
   imports = [
-    inputs.catppuccin.homeManagerModules.catppuccin
+    inputs.catppuccin.homeModules.catppuccin
   ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
