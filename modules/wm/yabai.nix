@@ -28,7 +28,8 @@ let
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
-                            osascript -e 'display notification  "restart yabai and reload skhd"'
+                            ${pkgs.sketchybar}/bin/sketchybar --reload && \ 
+                            osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration

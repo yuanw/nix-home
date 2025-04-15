@@ -27,7 +27,7 @@ let
     patches =
       (lib.optionals pkgs.stdenv.isDarwin [
         "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
-        ./patches/round-undecorated-frame.patch
+        "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
         "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
       ])
       ++ prev.patches;
@@ -1728,9 +1728,6 @@ with lib;
                   (add-to-list 'eglot-server-programs
                             '((java-mode java-ts-mode) . ("jdtls"
                                  "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar"))
-                             ((go-mode go-dot-mod-mode go-dot-work-mode go-ts-mode go-mod-ts-mode)
-                                    . ("${pkgs.gopls}/bin/gop
-                                    ls"))
                                     )
                   ;;(add-hook 'kotlin-mode-hook #'eglot-ensure)
                   ;;(add-hook 'java-mode-hook #'eglot-ensure)
@@ -1864,8 +1861,7 @@ with lib;
                 hook = [ "(dap-mode . dap-ui-mode)" ];
               };
               go-mode = {
-                enable = true;
-
+                enable = false;
               };
               flycheck-eglot = {
                 enable = true;
