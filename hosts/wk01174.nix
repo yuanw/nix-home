@@ -60,7 +60,7 @@
         "mysql-shell"
         "viscosity"
         "brave-browser"
-        "zoom"
+        # "zoom"
       ];
       brews = [
         "redis"
