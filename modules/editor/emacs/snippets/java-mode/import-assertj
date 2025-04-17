@@ -1,1 +1,4 @@
+# -*- mode: snippet -*-
+# name: import assertj
+# --
 import org.assertj.core.api.Assertions;

@@ -1,1 +1,4 @@
+# -*- mode: snippet -*-
+# name: assertj assertThat
+# --
 Assertions.assertThat(
