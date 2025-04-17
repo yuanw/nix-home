@@ -1392,7 +1392,7 @@ with lib;
               };
 
               org-pdftools = {
-                enable = true;
+                enable = (!isDarwin);
                 hook = [
                   "(org-mode . org-pdftools-setup-link)"
                 ];
@@ -2196,6 +2196,10 @@ with lib;
               yasnippet = {
                 enable = true;
                 diminish = [ "yas-minor-mode" ];
+                bind = {
+                  "C-c C-s" = "yas-insert-snippet";
+                };
+
                 command = [
                   "yas-global-mode"
                   "yas-minor-mode"
