@@ -37,6 +37,7 @@ in
           virtualenv
           virtualenvwrapper
           opentype-feature-freezer
+          fonttools
           #litellm
           #tokenizers
         ]
