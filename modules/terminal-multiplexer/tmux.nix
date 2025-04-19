@@ -58,6 +58,7 @@ with lib;
           shortcut = "e";
           extraConfig = ''
             set -g mouse on
+            set -g @prefix_highlight_fg 'white' # default is 'colour231'
             set -g status-left '#{prefix_highlight}'
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
