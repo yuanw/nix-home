@@ -49,6 +49,7 @@ with lib;
             # bind is u
             # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
             tmuxPlugins.fzf-tmux-url
+            tmuxPlugins.prefix-highlight
           ];
           customPaneNavigationAndResize = true;
           escapeTime = 0;
@@ -57,6 +58,8 @@ with lib;
           shortcut = "e";
           extraConfig = ''
             set -g mouse on
+            set -g @prefix_highlight_fg 'white' # default is 'colour231'
+            set -g @prefix_highlight_bg 'blue'  # default is 'colour04'
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
