@@ -28,8 +28,7 @@ let
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
-                            ${pkgs.sketchybar}/bin/sketchybar --reload && \ 
-                            osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
+                            ${pkgs.sketchybar}/bin/sketchybar --reload && osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
@@ -44,6 +43,7 @@ let
 in
 {
   options.modules.wm.yabai = {
+
     enable = mkEnableOption "yabai";
     overideAppLanucher = mkOption {
       type = types.bool;
