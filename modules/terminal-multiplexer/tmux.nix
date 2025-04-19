@@ -54,7 +54,7 @@ with lib;
           escapeTime = 0;
           historyLimit = 50000;
           keyMode = "vi";
-          shortcut = "Space";
+          shortcut = "e";
           extraConfig = ''
             set -g mouse on
             bind v split-window -h -c '#{pane_current_path}'
