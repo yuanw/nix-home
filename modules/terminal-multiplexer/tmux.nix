@@ -58,7 +58,7 @@ with lib;
           shortcut = "e";
           extraConfig = ''
             set -g mouse on
-            set -g status-right '#{prefix_highlight} | %a %Y-%m-%d %H:%M'
+            set -g status-left '#{prefix_highlight}'
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
