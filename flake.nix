@@ -9,7 +9,7 @@
       url = "github:LnL7/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    catppuccin.url = "github:Stonks3141/ctp-nix";
+    catppuccin.url = "github:catppuccin/nix";
     devenv.url = "github:cachix/devenv";
     flake-parts = {
       url = "github:hercules-ci/flake-parts";
@@ -22,7 +22,6 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
     haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs = {
