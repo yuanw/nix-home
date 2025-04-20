@@ -54,7 +54,7 @@ with lib;
           escapeTime = 0;
           historyLimit = 50000;
           keyMode = "emacs";
-          shortcut = "Space";
+          shortcut = "e";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
             #set -g default-command /bin/zsh
