@@ -35,7 +35,6 @@ with lib;
           td
           tkill
           temacs
-
         ];
       };
       programs = {
@@ -48,18 +47,39 @@ with lib;
           plugins = with pkgs; [
             # bind is u
             # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
-            tmuxPlugins.fzf-tmux-url
-            tmuxPlugins.prefix-highlight
+            #tmuxPlugins.fzf-tmux-url
+            # tmuxPlugins.prefix-highlight
           ];
           customPaneNavigationAndResize = true;
           escapeTime = 0;
           historyLimit = 50000;
-          keyMode = "vi";
+          keyMode = "emacs";
+          # keyMode = "vi";
+          #shortcut = "Space";
           shortcut = "e";
+          #prefix = "C-Space";
           extraConfig = ''
+            #set-option -g default-shell /bin/zsh
+            #set -g default-command /bin/zsh
+            set -g status-justify "left"
+            set -g status "on"
+            set -g status-left-style none
+            set -g message-command-style "fg=colour146,bg=colour60"
+            set -g status-right-style "none"
+            set -g pane-active-border-style "fg=colour117"
+            set -g status-style bg=colour60
+            set -g message-style "fg=colour146,bg=colour60"
+            set -g pane-border-style "fg=colour60"
+            set -g status-right-length "100"
+            set -g status-left-length "100"
+            setw -g window-status-activity-style "none"
+            setw -g window-status-separator ""
+            setw -g window-status-style "none,fg=colour60,bg=colour60"
+            set -g status-left "#[fg=colour232,bg=colour117] #{?client_prefix,#[fg=white],} #S #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]"
+            set -g status-right "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] %Y-%m-%d  %H:%M #[fg=colour117,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour232,bg=colour117] #h "
+            setw -g window-status-format "#[fg=colour60,bg=colour60] #I #[fg=colour60,bg=colour60] #W "
+            setw -g window-status-current-format "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] #I #[fg=colour146,bg=colour60] #W #[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]"
             set -g mouse on
-            set -g @prefix_highlight_fg 'white' # default is 'colour231'
-            set -g status-left '#{prefix_highlight}'
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
