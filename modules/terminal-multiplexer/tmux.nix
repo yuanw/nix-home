@@ -48,12 +48,15 @@ with lib;
             # bind is u
             # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
             tmuxPlugins.fzf-tmux-url
+            # tmuxPlugins.prefix-highlight
           ];
           customPaneNavigationAndResize = true;
           escapeTime = 0;
           historyLimit = 50000;
           keyMode = "emacs";
-          shortcut = "e";
+          # keyMode = "vi";
+          # shortcut = "Space";
+          qshortcut = "e";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
             #set -g default-command /bin/zsh
