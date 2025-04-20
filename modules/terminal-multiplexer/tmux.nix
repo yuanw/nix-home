@@ -53,8 +53,8 @@ with lib;
           customPaneNavigationAndResize = true;
           escapeTime = 0;
           historyLimit = 50000;
-          keyMode = "vi";
-          # shortcut = "Space";
+          keyMode = "emacs";
+          shortcut = "Space";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
             #set -g default-command /bin/zsh
