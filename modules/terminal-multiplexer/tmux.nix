@@ -35,7 +35,6 @@ with lib;
           td
           tkill
           temacs
-
         ];
       };
       programs = {
