@@ -34,8 +34,8 @@ in
       catppuccin = {
         starship.enable = true;
         bat.enable = true;
-        alacritty.enable = true;
-        tmux.enable = true;
+        # alacritty.enable = true;
+        # tmux.enable = true;
       };
       programs = {
         pet = {
