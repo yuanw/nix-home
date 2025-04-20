@@ -47,7 +47,7 @@ with lib;
           plugins = with pkgs; [
             # bind is u
             # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
-            tmuxPlugins.fzf-tmux-url
+            #tmuxPlugins.fzf-tmux-url
             # tmuxPlugins.prefix-highlight
           ];
           customPaneNavigationAndResize = true;
@@ -55,8 +55,8 @@ with lib;
           historyLimit = 50000;
           keyMode = "emacs";
           # keyMode = "vi";
-          # shortcut = "Space";
-          shortcut = "e";
+          shortcut = "Space";
+          #shortcut = "e";
           #prefix = "C-Space";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
