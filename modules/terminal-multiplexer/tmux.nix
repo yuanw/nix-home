@@ -56,7 +56,8 @@ with lib;
           keyMode = "emacs";
           # keyMode = "vi";
           # shortcut = "Space";
-          shortcut = "e";
+          #shortcut = "e";
+          prefix = "C-Space";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
             #set -g default-command /bin/zsh
