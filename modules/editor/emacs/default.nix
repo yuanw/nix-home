@@ -2462,15 +2462,14 @@ with lib;
               nodePackages.yaml-language-server
               tree-sitter
               # emacsWithDeps
-              vale.withStyles
-              (s: [
+              (vale.withStyles (s: [
                 s.alex
                 s.google
                 s.microsoft
                 s.joblint
                 s.proselint
                 s.write-good
-              ])
+              ]))
             ];
             # file.".emacs.d".source = emacsConfigPath;
           };
