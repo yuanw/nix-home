@@ -33,7 +33,7 @@
   modules = {
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.firefox-bin;
+      pkg = pkgs.firefox;
     };
     editors.emacs = {
       enable = true;

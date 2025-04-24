@@ -48,11 +48,6 @@
     mono-stretchly-darwin = {
       url = "github:yuanw/mono-stretchly";
     };
-    # Firefox Darwin overlay.
-    firefox-darwin = {
-      url = "github:bandithedoge/nixpkgs-firefox-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     shy-fox = {
       url = "github:Naezr/ShyFox";
       flake = false;

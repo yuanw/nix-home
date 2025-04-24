@@ -1,5 +1,4 @@
 {
-  pkgs,
   inputs,
   config,
   ...
@@ -59,7 +58,6 @@
     };
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.firefox-beta-bin;
     };
     editors.emacs = {
       enable = true;

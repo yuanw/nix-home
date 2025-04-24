@@ -1,5 +1,4 @@
 {
-  pkgs,
   inputs,
   config,
   ...
@@ -78,7 +77,6 @@
     browsers.firefox = {
       enable = true;
       # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
-      pkg = pkgs.firefox;
     };
     editors.emacs = {
       enable = true;

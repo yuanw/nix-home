@@ -149,26 +149,6 @@
         "type": "github"
       }
     },
-    "firefox-darwin": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1744851745,
-        "narHash": "sha256-ajKmsSTIQ4fPSN6S5gbd6Q2DyUF6uacxbRd3qpiDxjQ=",
-        "owner": "bandithedoge",
-        "repo": "nixpkgs-firefox-darwin",
-        "rev": "15af0f840ee472125a4dfc81944122f3545eb5ef",
-        "type": "github"
-      },
-      "original": {
-        "owner": "bandithedoge",
-        "repo": "nixpkgs-firefox-darwin",
-        "type": "github"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -965,7 +945,6 @@
         "devenv": "devenv",
         "emacs": "emacs",
         "emacs-plus": "emacs-plus",
-        "firefox-darwin": "firefox-darwin",
         "flake-parts": "flake-parts_2",
         "flake-utils": "flake-utils",
         "haskell-flake": "haskell-flake",
