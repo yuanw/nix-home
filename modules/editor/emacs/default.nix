@@ -232,15 +232,15 @@ with lib;
 
               ;; Accept 'y' and 'n' rather than 'yes' and 'no'.
               ;; (defalias 'yes-or-no-p 'y-or-n-p)
-              (setq use-short-answers t)
-              (setq use-dialog-box nil)
+              (setopt use-short-answers t)
+              (setopt use-dialog-box nil)
 
               ;; Don't want to move based on visual line.
               (setq line-move-visual nil)
 
                  ;; TODO maybe should re-configure this
                  ;; Stop creating backup and autosave files.
-                 (setq make-backup-files nil
+                 (setopt make-backup-files nil
                        auto-save-default nil)
                       
                       
@@ -296,7 +296,7 @@ with lib;
 
                       - When the region is active, disable it.
                       - When a minibuffer is open, but not focused, close the minibuffer.
-                      - When the Completions buffer is selected, close it.
+                      - When theCompletions buffer is selected, close it.
                       - In every other case use the regular `keyboard-quit'."
                   (interactive)
                   (cond
@@ -349,10 +349,7 @@ with lib;
                   )
                 '';
               };
-              eyebrowse = {
-                enable = true;
-                config = "(eyebrowse-mode t)";
-              };
+
               god-mode = {
                 enable = false;
                 config = ''
@@ -398,7 +395,6 @@ with lib;
                         version = "0.0.1";
                         src = ./packages/prot-common.el;
                       })
-
                     ];
                   };
                 config = ''
@@ -467,13 +463,13 @@ with lib;
                   epkgs:
                   epkgs.trivialBuild {
                     pname = "ultra-scroll";
-                    version = "0.0.1";
+                    version = "0-unstable-2025-04-17";
                     src = pkgs.fetchFromGitHub {
                       owner = "jdtsmith";
                       repo = "ultra-scroll";
-                      rev = "f5a6e8e8c411d58860f0dec2dccefc689924a8cb";
-                      # sha256 = lib.fakeSha256;
-                      sha256 = "sha256-32jXz4ek3CsW8JKZ5W1xOv6+UufAMcfZenjoqWc9U4g=";
+                      rev = "f2e4fba601b6116f6f0bcb73cadf897bd8f7b764";
+                      sha256 = lib.fakeSha256;
+                      # sha256 = "sha256-32jXz4ek3CsW8JKZ5W1xOv6+UufAMcfZenjoqWc9U4g=";
                     };
                   };
                 init = ''
