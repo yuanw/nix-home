@@ -47,7 +47,7 @@ with lib;
       type = types.package;
       # https://github.com/NixOS/nixpkgs/issues/395169
       default =
-        if isDarwin then pkgs.emacs-git-nox.override { withNativeCompilation = false; } else pkgs.emacs-git;
+        if isDarwin then pkgs.emacs-git.override { withNativeCompilation = false; } else pkgs.emacs-git;
     };
 
     lspStyle = mkOption {
