@@ -2468,6 +2468,10 @@ with lib;
                 s.write-good
               ]))
             ];
+            file.".vale.ini".text = ''
+              [*]
+              BasedOnStyles = alex google Microsoft Joblint proselint write-good
+            '';
             # file.".emacs.d".source = emacsConfigPath;
           };
           # not use home-manager programs.emacs due to it wraps
