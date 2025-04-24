@@ -33,32 +33,6 @@ let
       ++ prev.patches;
   });
 
-  valeStyles = [
-    {
-      name = "alex";
-      path = "${inputs.vale-alex}/alex";
-    }
-    {
-      name = "Google";
-      path = "${inputs.vale-Google}/Google";
-    }
-    {
-      name = "Microsoft";
-      path = "${inputs.vale-Microsoft}/Microsoft";
-    }
-    {
-      name = "Joblint";
-      path = "${inputs.vale-Joblint}/Joblint";
-    }
-    {
-      name = "proselint";
-      path = "${inputs.vale-proselint}/proselint";
-    }
-    {
-      name = "write-good";
-      path = "${inputs.vale-write-good}/write-good";
-    }
-  ];
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib;
@@ -2488,21 +2462,17 @@ with lib;
               nodePackages.yaml-language-server
               tree-sitter
               # emacsWithDeps
-              vale
+              vale.withStyles
+              (s: [
+                s.alex
+                s.google
+                s.microsoft
+                s.joblint
+                s.proselint
+                s.write-good
+              ])
             ];
             # file.".emacs.d".source = emacsConfigPath;
-            file.".vale.ini".text =
-              let
-                stylesPath = pkgs.linkFarm "
-            vale-styles " valeStyles;
-                basedOnStyles = concatStringsSep ", " (zipAttrsWithNames [ "name" ] (_: v: v) valeStyles).name;
-              in
-              ''
-                StylesPath = ${stylesPath}
-                [*]
-                BasedOnStyles = ${basedOnStyles}
-              '';
-
           };
           # not use home-manager programs.emacs due to it wraps
           # emacsWithPackages again

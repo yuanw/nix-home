@@ -57,20 +57,6 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
-
-    # Vale styles.
-    vale-Google.flake = false;
-    vale-Google.url = "github:errata-ai/Google";
-    vale-Microsoft.flake = false;
-    vale-Microsoft.url = "github:errata-ai/Microsoft";
-    vale-Joblint.flake = false;
-    vale-Joblint.url = "github:errata-ai/Joblint";
-    vale-alex.flake = false;
-    vale-alex.url = "github:errata-ai/alex";
-    vale-proselint.flake = false;
-    vale-proselint.url = "github:errata-ai/proselint";
-    vale-write-good.flake = false;
-    vale-write-good.url = "github:errata-ai/write-good";
   };
 
   outputs =

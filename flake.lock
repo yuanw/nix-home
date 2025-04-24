@@ -979,13 +979,7 @@
         "nur": "nur",
         "pre-commit": "pre-commit_2",
         "shy-fox": "shy-fox",
-        "treefmt-nix": "treefmt-nix_3",
-        "vale-Google": "vale-Google",
-        "vale-Joblint": "vale-Joblint",
-        "vale-Microsoft": "vale-Microsoft",
-        "vale-alex": "vale-alex",
-        "vale-proselint": "vale-proselint",
-        "vale-write-good": "vale-write-good"
+        "treefmt-nix": "treefmt-nix_3"
       }
     },
     "shy-fox": {
@@ -1121,102 +1115,6 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "rev": "9e09d30a644c57257715902efbb3adc56c79cf28",
-        "type": "github"
-      }
-    },
-    "vale-Google": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1744017492,
-        "narHash": "sha256-1aN7wCdShhMsBN83u7l+5Ffm2WKC8ltZyT3hPZCNWYo=",
-        "owner": "errata-ai",
-        "repo": "Google",
-        "rev": "6084433be646263c9eb3f3868ceb81d76ea2f313",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "Google",
-        "type": "github"
-      }
-    },
-    "vale-Joblint": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1732168056,
-        "narHash": "sha256-q0wKokQQaQ6eW+vxBffVZievGfnirRtP8Amm5R3Qrqk=",
-        "owner": "errata-ai",
-        "repo": "Joblint",
-        "rev": "4543f55f33addef59a217ccbd7b4ff643789fafd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "Joblint",
-        "type": "github"
-      }
-    },
-    "vale-Microsoft": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1744346880,
-        "narHash": "sha256-Sie4bBeKPOFOJhgd+mLbiz4vG+xpKL0LnwnRQHzOw+Q=",
-        "owner": "errata-ai",
-        "repo": "Microsoft",
-        "rev": "9bcade31af59fcfd0e7a5e839aecf6d6752fedff",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "Microsoft",
-        "type": "github"
-      }
-    },
-    "vale-alex": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1732168201,
-        "narHash": "sha256-epzGMXbqdT5eUmcJtf78HaWsokh7OCSdYDP9WtEFGTs=",
-        "owner": "errata-ai",
-        "repo": "alex",
-        "rev": "21c1e9bdaf8df231ce1eb689dea9deb6680ba196",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "alex",
-        "type": "github"
-      }
-    },
-    "vale-proselint": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1743674210,
-        "narHash": "sha256-QWWvmn5NaxxMB5ECEaBSG6TCeTmAgiROidOxXVzWlqg=",
-        "owner": "errata-ai",
-        "repo": "proselint",
-        "rev": "be188a3a85e891ce5149c2829a8c4f0fd50bf821",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "proselint",
-        "type": "github"
-      }
-    },
-    "vale-write-good": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1732168114,
-        "narHash": "sha256-JPlCqYXWO5gROVBMaJTFWb0weSKOPxBwqwZ3u53Gpd8=",
-        "owner": "errata-ai",
-        "repo": "write-good",
-        "rev": "f0bcf92d9870bce0be6316c24378592d3a11edb8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "errata-ai",
-        "repo": "write-good",
         "type": "github"
       }
     }
