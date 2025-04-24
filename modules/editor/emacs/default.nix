@@ -480,7 +480,6 @@ with lib;
               };
               ask-mode = {
                 enable = config.modules.dev.ask.enable;
-
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/ask-mode {
