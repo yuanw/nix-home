@@ -1351,7 +1351,7 @@ with lib;
                 '';
               };
               org-noter = {
-                enable = true;
+                enable = !(isDarwin);
                 config = ''
                   (require 'org-noter-pdftools)
                 '';
