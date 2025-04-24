@@ -45,7 +45,7 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-git;
+      default = pkgs.emacs-git.override { withNavtiveCompilation = false; };
     };
 
     lspStyle = mkOption {
