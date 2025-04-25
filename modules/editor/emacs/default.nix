@@ -2470,7 +2470,7 @@ with lib;
             ];
             file.".vale.ini".text = ''
               [*]
-              BasedOnStyles = alex google Microsoft Joblint proselint write-good
+              BasedOnStyles = alex, google, Microsoft, Joblint, proselint, write-good
             '';
             # file.".emacs.d".source = emacsConfigPath;
           };
