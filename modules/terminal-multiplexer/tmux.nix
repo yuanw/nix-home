@@ -45,7 +45,7 @@ with lib;
           terminal = "screen-256color";
           clock24 = true;
           plugins = with pkgs; [
-            # bind is u
+            # bind is
             # https://github.com/NixOS/nixpkgs/blob/nixos-unstable/pkgs/misc/tmux-plugins/default.nix#L269
             #tmuxPlugins.fzf-tmux-url
             # tmuxPlugins.prefix-highlight
