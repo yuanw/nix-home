@@ -117,7 +117,7 @@ with lib;
             # tkill =
             #   "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
           };
-          initExtra = mkAfter ''
+          initContent = mkAfter ''
             function zt {
                z $1 && tat
             }

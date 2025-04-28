@@ -30,7 +30,7 @@ in
         };
 
         # https://github.om/zellij-org/zellij/issues/1933
-        zsh.initExtra = mkOrder 199 ''
+        zsh.initContent = mkOrder 199 ''
           eval "$(${zellijCmd} setup --generate-completion zsh | grep "^function")"
         '';
 
