@@ -70,9 +70,6 @@
         # ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
         "docker-compose"
       ];
-      # masApps = {
-      #   "Fresh Eyes" = 6480411697;
-      # };
     };
     browsers.firefox = {
       enable = true;
@@ -85,7 +82,7 @@
 
       #enableAider = true;
       # enableCopilot = true;
-      lspStyle = "lsp-bridge";
+      #lspStyle = "lsp-bridge";
     };
     # health.enable = true;
     typing.enable = true;
