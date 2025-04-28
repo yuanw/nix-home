@@ -48,7 +48,7 @@ in
           pubclean = ''rm -r .pub .dart_tool/pub && echo "Removed .pub/"; find . -name packages | xargs rm -rf && echo "Removed packages/"; rm .packages && echo "Removed .packages"; pubcleanlock'';
           repub = "pubclean; pub get";
         };
-        initExtra = ''
+        initContent = ''
 
           function dartUpgrade() {
                 pub cache repair

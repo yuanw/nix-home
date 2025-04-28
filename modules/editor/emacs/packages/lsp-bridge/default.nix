@@ -2,7 +2,7 @@
   melpaBuild,
   fetchFromGitHub,
   writeText,
-  substituteAll,
+  replaceVars,
   unstableGitUpdater,
   # Elisp dependencies
 
@@ -51,8 +51,7 @@ melpaBuild {
   patches = [
     # Hardcode the python dependencies needed for lsp-bridge, so users
     # don't have to modify their global environment
-    (substituteAll {
-      src = ./hardcode-dependencies.patch;
+    (replaceVars ./hardcode-dependencies.patch {
       python = pythonEnv.interpreter;
     })
   ];

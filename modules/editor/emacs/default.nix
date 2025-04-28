@@ -502,7 +502,7 @@ with lib;
                   (pkgs.callPackage ./packages/hurl-mode.nix {
                     inherit (pkgs)
                       fetchFromGitHub
-                      substituteAll
+                      replaceVars
                       writeText
                       unstableGitUpdater
                       ;
@@ -1245,7 +1245,7 @@ with lib;
                   (pkgs.callPackage ./packages/ob-racket.nix {
                     inherit (pkgs)
                       fetchFromGitHub
-                      substituteAll
+                      replaceVars
                       writeText
                       unstableGitUpdater
                       ;
@@ -1261,7 +1261,7 @@ with lib;
                   (pkgs.callPackage ./packages/aider.nix {
                     inherit (pkgs)
                       fetchFromGitHub
-                      substituteAll
+                      replaceVars
                       writeText
                       unstableGitUpdater
                       ;

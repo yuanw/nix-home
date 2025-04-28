@@ -237,7 +237,7 @@
         ];
       };
 
-      initExtra =
+      initContent =
         if pkgs.stdenvNoCC.isDarwin then
           lib.mkBefore ''
             setopt HIST_NO_STORE         # Don't store history commands
