@@ -1972,7 +1972,7 @@ with lib;
                   (setq lspce-server-programs `(
                                                 ("python" "pylsp" "" )
                                                 ("C" "clangd" "--all-scopes-completion --clang-tidy --enable-config --header-insertion-decorators=0")
-                                                ("java" "jdtls" "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                                              
                                                 ))
                   )
 
@@ -2088,7 +2088,7 @@ with lib;
                   (require 'lsp-bridge-jdtls)
                   (require 'yasnippet)
                   (yas-global-mode 1)
-                  (setq lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
+                  ;;(setopt lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                   (setq lsp-bridge-enable-auto-import 't)
                 '';
               };
