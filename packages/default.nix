@@ -85,17 +85,17 @@ _final: prev: {
   #         hash = "sha256-FeNiJJM5vdzFT9s7N9cTjLYxKEfzZnKE9br13lkQhJo=";
   #       });
   # });
-  jdt-language-server = prev.jdt-language-server.overrideAttrs (
-    _finalAttrs: _previousAttrs: {
-      postPatch = ''
-        # We store the plugins, config, and features folder in different locations
-        # than in the original package. In addition, hard-code the path to the jdk
-        # in the wrapper, instead of searching for it in PATH at runtime.
-        substituteInPlace bin/jdtls.py \
-          --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
-      '';
-    }
-  );
+  # jdt-language-server = prev.jdt-language-server.overrideAttrs (
+  #   _finalAttrs: _previousAttrs: {
+  #     postPatch = ''
+  #       # We store the plugins, config, and features folder in different locations
+  #       # than in the original package. In addition, hard-code the path to the jdk
+  #       # in the wrapper, instead of searching for it in PATH at runtime.
+  #       substituteInPlace bin/jdtls.py \
+  #         --replace "jdtls_base_path = Path(__file__).parent.parent" "jdtls_base_path = Path(\"$out/share/java/jdtls/\")"
+  #     '';
+  #   }
+  # );
   delta =
     let
       deltaSrc = _final.fetchFromGitHub {
