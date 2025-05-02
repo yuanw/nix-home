@@ -2273,7 +2273,7 @@ with lib;
                 enable = false;
                 diminish = [ "aggressive-ident-mode" ];
                 hook = [
-                  #                  :diminish
+                  # :diminish
                   "(emacs-lisp-mode . aggressive-indent-mode)"
                 ];
               };
@@ -2285,10 +2285,10 @@ with lib;
                   "(prog-mode . electric-indent-mode)"
                 ];
                 config = ''
-                                      (electric-pair-mode -1)
+                  (electric-pair-mode -1)
                   (electric-quote-mode -1)
                   (electric-indent-mode -1)
-                                 (electric-indent-local-mode -1)
+                  (electric-indent-local-mode -1)
                 '';
               };
 
