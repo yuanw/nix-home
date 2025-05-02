@@ -1,6 +1,6 @@
 ;;; prot-modeline.el --- Code for my custom mode line -*- lexical-binding: t -*-
 
-;; Copyright (C) 2023-2024  Protesilaos Stavrou
+;; Copyright (C) 2023-2025  Protesilaos Stavrou
 
 ;; Author: Protesilaos Stavrou <info@protesilaos.com>
 ;; URL: https://protesilaos.com/emacs/dotemacs
@@ -192,11 +192,14 @@ package).")
 
 (defun prot-modeline--string-truncate-p (str)
   "Return non-nil if STR should be truncated."
-  (if (string-empty-p str)
-      str
-    (and (prot-common-window-narrow-p)
+  (cond
+   ((or (not (stringp str))
+        (string-empty-p str)
+        (string-blank-p str))
+    nil)
+   ((and (prot-common-window-narrow-p)
          (> (length str) prot-modeline-string-truncate-length)
-         (not (one-window-p :no-minibuffer)))))
+         (not (one-window-p :no-minibuffer))))))
 
 (defun prot-modeline--truncate-p ()
   "Return non-nil if truncation should happen.
@@ -475,17 +478,18 @@ than `split-width-threshold'."
 
 (defun prot-modeline--vc-get-face (key)
   "Get face from KEY in `prot-modeline--vc-faces'."
-  (alist-get key prot-modeline--vc-faces 'up-to-date))
+  (alist-get key prot-modeline--vc-faces 'vc-up-to-date-state))
 
 (defun prot-modeline--vc-face (file backend)
   "Return VC state face for FILE with BACKEND."
-  (prot-modeline--vc-get-face (vc-state file backend)))
+  (when-let* ((key (vc-state file backend)))
+    (prot-modeline--vc-get-face key)))
 
 (defvar-local prot-modeline-vc-branch
     '(:eval
       (when-let* (((mode-line-window-selected-p))
-                  (file (buffer-file-name))
-                  (backend (vc-backend file))
+                  (file (or buffer-file-name default-directory))
+                  (backend (or (vc-backend file) 'Git))
                   ;; ((vc-git-registered file))
                   (branch (prot-modeline--vc-branch-name file backend))
                   (face (prot-modeline--vc-face file backend)))
