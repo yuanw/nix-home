@@ -149,7 +149,7 @@ in
       };
       xsession = {
         enable = true;
-        initContent = extra;
+        initExtra = extra;
         windowManager.xmonad = {
           enable = true;
           enableContribAndExtras = true;
