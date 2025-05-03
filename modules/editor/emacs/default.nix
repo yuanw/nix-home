@@ -680,6 +680,33 @@ with lib;
                 '';
               };
 
+              eyebrowse = {
+                enable = true;
+                custom = ''
+                  (eyebrowse-keymap-prefix "�")
+                  (eyebrowse-mode-line-separator " ")
+                  (eyebrowse-new-workspace t)
+                '';
+                config = ''
+                  (eyebrowse-mode t)
+                '';
+              };
+
+              #             (use-package eyebrowse
+              # :bind-keymap ("C-\\" . eyebrowse-mode-map)
+              # :bind (:map eyebrowse-mode-map
+              #             ("C-\\ C-\\" . eyebrowse-last-window-config)
+              #             ("A-1" . eyebrowse-switch-to-window-config-1)
+              #             ("A-2" . eyebrowse-switch-to-window-config-2)
+              #             ("A-3" . eyebrowse-switch-to-window-config-3)
+              #             ("A-4" . eyebrowse-switch-to-window-config-4))
+              # :custom
+              # (eyebrowse-keymap-prefix "�")
+              # (eyebrowse-mode-line-separator " ")
+              # (eyebrowse-new-workspace t)
+              # :config
+              # (eyebrowse-mode t))
+
               keycast = {
                 enable = true;
                 after = [ "prot-modeline" ];
