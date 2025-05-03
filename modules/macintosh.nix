@@ -25,15 +25,11 @@ with lib;
     settings.cores = 12;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      automatic = false;
-      interval = {
-        Hour = 22;
-      };
-      options = "--delete-older-than 7d";
+      automatic = true;
+      options = "--delete-older-than 3d";
     };
   };
 
-  launchd.daemons.nix-daemon.serviceConfig.SoftResourceLimits.NumberOfFiles = 10240;
   system.stateVersion = 5;
   system.activationScripts.postActivation.text = ''
     printf "disabling spotlight indexing... "
