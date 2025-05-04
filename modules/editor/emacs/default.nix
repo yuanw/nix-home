@@ -1070,35 +1070,35 @@ with lib;
                    ("M-r" . consult-history))
                 '';
 
-                config = ''
-                               (setq consult-narrow-key "<")
-                               (require 'consult-xref)
-                               (require 'consult-register)
-                                (consult-customize
-                  consult-theme
-                  :preview-key '(:debounce 0.2 any)
-                  consult-ripgrep
-                  consult-git-grep
-                  consult-grep
-                  consult-bookmark
-                  consult-recent-file
+                custom = ''
+                  (consult-narrow-key "<")
 
-                  consult--source-bookmark
-                  consult--source-file-register
-                  consult--source-recent-file
-                  consult--source-project-recent-file
-                  :preview-key '(:debounce 0.4 any))
+                '';
+
+                config = ''
+                                      (use-package consult-xref)
+                                           
+                                           
+                                                (consult-customize
+                                  consult-theme
+                                  :preview-key '(:debounce 0.2 any)
+                                  consult-ripgrep
+                                  consult-git-grep
+                                  consult-grep
+                                  consult-bookmark
+                                  consult-recent-file
+                  consult-xref
+                                  consult--source-bookmark
+                                  consult--source-file-register
+                                  consult--source-recent-file
+                                  consult--source-project-recent-file
+                                  :preview-key '(:debounce 0.4 any))
 
                 '';
               };
 
               consult-xref = {
-                enable = false;
-                command = [ "consult-xref" ];
-                config = ''
-                  (setq xref-show-definitions-function #'consult-xref
-                        xref-show-xrefs-function #'consult-xref)
-                '';
+                enable = true;
               };
               # embark act then press C
               embark-consult = {
