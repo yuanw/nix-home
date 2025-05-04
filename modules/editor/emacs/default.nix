@@ -2257,6 +2257,16 @@ with lib;
                 command = [ "consult-yasnippet" ];
               };
 
+              auto-yasnippet = {
+                enable = true;
+                after = [ "yasnippet" ];
+                bind = {
+                  "C-c y a" = "aya-create";
+                  "C-c y e" = "aya-expand";
+                  "C-c y o" = "aya-open-line";
+                };
+              };
+
               consult-dir = {
                 enable = true;
                 bind = {
