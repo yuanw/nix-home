@@ -33,6 +33,14 @@ let
           '';
         };
 
+        noRequire = mkOption {
+          type = types.bool;
+          default = false;
+          description = ''
+            The <option>:no-require</option> setting.
+          '';
+        };
+
         defer = mkOption {
           type = types.either types.bool types.ints.positive;
           default = false;
@@ -261,11 +269,13 @@ let
             mkChords = mkBindHelper "chords" "";
             mkCustomFace = mkBindHelper "custom-face" "";
             mkHook = map (v: ":hook ${v}");
+            mkNoRequire = v: optionl v ":no-require t";
             mkDefer = v: if isBool v then optional v ":defer t" else [ ":defer ${toString v}" ];
             mkDemand = v: optional v ":demand t";
           in
           concatStringsSep "\n  " (
             [ "(use-package ${name}" ]
+            ++ mkNoRequire config.noRequire
             ++ mkAfter config.after
             ++ mkBind config.bind
             ++ mkBindKeyMap config.bindKeyMap
