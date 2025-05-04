@@ -635,6 +635,39 @@ with lib;
                 '';
               };
 
+              auth-source-pass = {
+                enable = true;
+
+                # :preface
+                # (defvar auth-source-pass--cache (make-hash-table :test #'equal))
+
+                # (defun auth-source-pass--reset-cache ()
+                #   (setq auth-source-pass--cache (make-hash-table :test #'equal)))
+
+                # (defun auth-source-pass--read-entry (entry)
+                #   "Return a string with the file content of ENTRY."
+                #   (run-at-time 45 nil #'auth-source-pass--reset-cache)
+                #   (let ((cached (gethash entry auth-source-pass--cache)))
+                #     (or cached
+                #         (puthash
+                #          entry
+                #          (with-temp-buffer
+                #            (insert-file-contents (expand-file-name
+                #                                   (format "%s.gpg" entry)
+                #                                   (getenv "PASSWORD_STORE_DIR")))
+                #            (buffer-substring-no-properties (point-min) (point-max)))
+                #          auth-source-pass--cache))))
+
+                # (defun auth-source-pass-entries ()
+                #   "Return a list of all password store entries."
+                #   (let ((store-dir (getenv "PASSWORD_STORE_DIR")))
+                #     (mapcar
+                #      (lambda (file) (file-name-sans-extension (file-relative-name file store-dir)))
+                #      (directory-files-recursively store-dir "\.gpg$"))))
+                # :config
+                # (auth-source-pass-enable))
+              };
+
               wdired = {
                 enable = true;
                 bindLocal = {
@@ -791,6 +824,16 @@ with lib;
                 ];
               };
 
+              evil = {
+                enable = true;
+                command = [ "evil-mode" ];
+              };
+
+              marginalia = {
+                enable = true;
+                config = "(marginalia-mode)";
+              };
+
               orderless = {
                 enable = true;
                 demand = true;
@@ -800,11 +843,6 @@ with lib;
                   (setq completion-category-overrides
                    '((file (styles basic partial-completion))))
                 '';
-              };
-
-              evil = {
-                enable = true;
-                command = [ "evil-mode" ];
               };
 
               vertico = {
@@ -864,11 +902,6 @@ with lib;
                   (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
                   (vertico-multiform-mode)
                 '';
-              };
-
-              marginalia = {
-                enable = true;
-                config = "(marginalia-mode)";
               };
 
               goggles = {
@@ -2217,6 +2250,10 @@ with lib;
 
               consult-yasnippet = {
                 enable = true;
+                after = [
+                  "consult"
+                  "yasnippet"
+                ];
                 command = [ "consult-yasnippet" ];
               };
 

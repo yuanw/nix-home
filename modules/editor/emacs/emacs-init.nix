@@ -165,6 +165,14 @@ let
           '';
         };
 
+        preface = mkOption {
+          type = types.lines;
+          default = "";
+          description = ''
+            Code to place in the <option>:preface</option> section.
+          '';
+        };
+
         config = mkOption {
           type = types.lines;
           default = "";
@@ -280,6 +288,10 @@ let
             ++ optionals (config.config != "") [
               ":config"
               config.config
+            ]
+            ++ optionals (config.preface != "") [
+              ":preface"
+              config.preface
             ]
             ++ optional (config.extraConfig != "") config.extraConfig
           )
