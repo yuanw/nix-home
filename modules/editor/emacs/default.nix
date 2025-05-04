@@ -590,10 +590,27 @@ with lib;
 
               savehist = {
                 enable = true;
-                init = "(savehist-mode)";
+                custom = ''
+                  (history-delete-duplicates t)
+                  (savehist-additional-variables
+                   '(file-name-history
+                     kmacro-ring
+                     compile-history
+                     compile-command))
+                  (savehist-autosave-interval 60)
+                  (savehist-file (user-data "history"))
+                  (savehist-ignored-variables
+                   '(load-history
+                     flyspell-auto-correct-ring
+                     org-roam-node-history
+                     magit-revision-history
+                     org-read-date-history
+                     query-replace-history
+                     yes-or-no-p-history
+                     kill-ring)
+                '';
                 config = ''
-                  (setq history-delete-duplicates t
-                        history-length 1000)
+                  (savehist-mode 1)
                 '';
               };
               # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
@@ -943,7 +960,7 @@ with lib;
                   (setq prefix-help-command #'embark-prefix-help-command)
                 '';
                 config = ''
-                                    (defun embark-which-key-indicator ()
+                  (defun embark-which-key-indicator ()
                     "An embark indicator that displays keymaps using which-key.
                   The which-key help message will show the type and value of the
                   current target followed by an ellipsis if there are further
