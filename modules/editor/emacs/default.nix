@@ -2269,16 +2269,6 @@ with lib;
                     "M-s f" = "consult-dir-jump-file";
                   };
                 };
-                init = ''
-                  (use-package vertico
-                    :bind (:map vertico-map
-                           ("M-g d" . consult-dir)
-                           ("M-s f" . consult-dir-jump-file)
-                           ))
-                   :config
-                  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
-                  (setq consult-dir-shadow-filenames nil)
-                '';
               };
 
               kind-icon = {
