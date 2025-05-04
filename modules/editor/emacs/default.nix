@@ -2271,6 +2271,19 @@ with lib;
                 };
               };
 
+              consult-dir-vertico = {
+                enable = true;
+                noRequire = true;
+                after = [
+                  "consult-dir"
+                  "vertico"
+                ];
+                # :defines (vertico-map)
+                # :bind (:map vertico-map
+                #             ("C-x C-j" . consult-dir)
+                #             ("M-g d"   . consult-dir)
+                #             ("M-s f"   . consult-dir-jump-file)))
+              };
               kind-icon = {
                 enable = true;
                 after = [ "corfu" ];
