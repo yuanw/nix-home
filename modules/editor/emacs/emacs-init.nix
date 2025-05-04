@@ -567,7 +567,7 @@ in
           v: if isFunction v then [ (v epkgs) ] else optional (isString v && hasAttr v epkgs) epkgs.${v};
 
         packages = concatMap (v: getPkg (v.package)) (
-          filter (getAttr "enable" || (!getAttr "noRequire")) (builtins.attrValues cfg.usePackage)
+          filter ((getAttr "enable") || (!getAttr "noRequire")) (builtins.attrValues cfg.usePackage)
         );
       in
       [
