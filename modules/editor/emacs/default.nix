@@ -2404,6 +2404,7 @@ with lib;
                 ];
                 defer = true;
               };
+
               wm = {
                 enable = false;
                 package =
@@ -2419,6 +2420,7 @@ with lib;
                     buildInputs = propagatedUserEnvPkgs;
                   };
               };
+
               alert = {
                 enable = true;
                 extraConfig = ''
