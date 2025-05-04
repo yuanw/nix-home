@@ -269,7 +269,7 @@ let
             mkChords = mkBindHelper "chords" "";
             mkCustomFace = mkBindHelper "custom-face" "";
             mkHook = map (v: ":hook ${v}");
-            mkNoRequire = v: optionl v ":no-require t";
+            mkNoRequire = v: optional v ":no-require t";
             mkDefer = v: if isBool v then optional v ":defer t" else [ ":defer ${toString v}" ];
             mkDemand = v: optional v ":demand t";
           in
@@ -567,7 +567,9 @@ in
           v: if isFunction v then [ (v epkgs) ] else optional (isString v && hasAttr v epkgs) epkgs.${v};
 
         packages = concatMap (v: getPkg (v.package)) (
-          filter (!getAttr "noRequire") (filter (getAttr "enable") (builtins.attrValues cfg.usePackage))
+          filter (s: !(getAttr "noRequire" s)) (
+            filter (getAttr "enable") (builtins.attrValues cfg.usePackage)
+          )
         );
       in
       [
