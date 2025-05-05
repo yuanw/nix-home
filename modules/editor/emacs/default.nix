@@ -598,7 +598,7 @@ with lib;
                      compile-history
                      compile-command))
                   (savehist-autosave-interval 60)
-                  (savehist-file (user-data "history"))
+                  ;(savehist-file (user-data "history"))
                   (savehist-ignored-variables
                    '(load-history
                      flyspell-auto-correct-ring
