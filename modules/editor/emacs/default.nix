@@ -607,7 +607,7 @@ with lib;
                      org-read-date-history
                      query-replace-history
                      yes-or-no-p-history
-                     kill-ring)
+                     kill-ring))
                 '';
                 config = ''
                   (savehist-mode 1)
