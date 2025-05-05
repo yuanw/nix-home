@@ -864,19 +864,38 @@ with lib;
 
               vertico = {
                 enable = true;
+                after = [ "cape" ];
+                demand = true;
+                custom = ''
+                  (vertico-count 10)
+                  (vertico-resize nil)
+                  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+                  (vertico-cycle t)
+                '';
+                hook = [
+
+                ];
+                preface = ''
+                                  (defun crm-indicator (args)
+                    (cons (format "[CRM%s] %s"
+                                  (replace-regexp-in-string
+                                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                                   crm-separator)
+                                  (car args))
+                          (cdr args)))
+
+                  (defsubst time-greater-p (a b)
+                    (time-less-p b a))
+
+                  (defun my/sort-by-mtime (files)
+                    "Sort FILES by modification time (newest first)."
+                    (sort-on files
+                             #'time-greater-p
+                             #'(lambda (a) (file-attribute-modification-time (file-attributes a)))))
+                '';
                 config = ''
                    (vertico-mode)
                    ;; Different scroll margin
-                   (setq vertico-scroll-margin 0)
-
-                   ;; Show more candidates
-                   ;; (setq vertico-count 20)
-
-                   ;; Grow and shrink the Vertico minibuffer
-                   (setq vertico-resize t)
-
-                   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-                   (setq vertico-cycle t)
 
                    (use-package vertico-directory
                    :bind (:map vertico-map
@@ -902,24 +921,25 @@ with lib;
                 '';
               };
 
-              vertico-repeat = {
-                enable = true;
-                demand = true;
-                bind = {
-                  "C-c . ." = "vertico-repeat";
-                };
-                config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
-              };
+              # try nested in vertico for use
+              # vertico-repeat = {
+              #   enable = true;
+              #   demand = true;
+              #   bind = {
+              #     "C-c . ." = "vertico-repeat";
+              #   };
+              #   config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
+              # };
 
-              vertico-multiform = {
-                enable = true;
-                demand = true;
-                config = ''
-                  (require 'vertico-grid)
-                  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
-                  (vertico-multiform-mode)
-                '';
-              };
+              # vertico-multiform = {
+              #   enable = true;
+              #   demand = true;
+              #   config = ''
+              #     (require 'vertico-grid)
+              #     (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+              #     (vertico-multiform-mode)
+              #   '';
+              # };
 
               goggles = {
                 enable = true;
@@ -1033,7 +1053,7 @@ with lib;
                 enable = true;
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
                 extraConfig = ''
-                             :bind (;; C-c bindings in `mode-specific-map'
+                   :bind (;; C-c bindings in `mode-specific-map'
                    ("C-c M-x" . consult-mode-command)
                    ("C-c h" . consult-history)
                    ("C-c k" . consult-kmacro)
