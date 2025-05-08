@@ -950,7 +950,7 @@ with lib;
                     :demand t
                     :bind (:map vertico-map
                                 ("C-i"   . vertico-multiform-vertical)
-                                ("<tab>" . vertico-insert))
+                                ("<tab>" . vertico-insert)))
                         
 
                 '';
