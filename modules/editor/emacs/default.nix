@@ -872,8 +872,18 @@ with lib;
                   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
                   (vertico-cycle t)
                 '';
-                hook = [
+                bind = {
+                  "C-c . ." = "vertico-repeat";
+                };
+                bindLocal.vertico-map = {
+                  "C-j" = "vertico-exit-input";
+                  "C-M-n" = "vertico-next-group";
+                  "C-M-p" = "vertic-previous-group";
 
+                };
+                hook = [
+                  "(minibuffer-setup . vertico-repeat-save)"
+                  "(rfn-eshadow-update-overlay . vertico-directory-tidy)"
                 ];
                 preface = ''
                                   (defun crm-indicator (args)
@@ -894,30 +904,55 @@ with lib;
                              #'(lambda (a) (file-attribute-modification-time (file-attributes a)))))
                 '';
                 config = ''
-                   (vertico-mode)
-                   ;; Different scroll margin
+                                   (vertico-mode)
+                                   ;; Different scroll margin
 
-                   (use-package vertico-directory
-                   :bind (:map vertico-map
-                               ("RET" . vertico-directory-enter)
-                               ("DEL" . vertico-directory-delete-char)
-                               ("M-DEL" . vertico-directory-delete-word))
-                   ;; Tidy shadowed file names
-                   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
+                                     ;; Add prompt indicator to `completing-read-multiple'.
+                  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+                  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
 
-                   )
+                    ;; Do not allow the cursor in the minibuffer prompt
+                  (setq minibuffer-prompt-properties
+                        '(read-only t cursor-intangible t face minibuffer-prompt))
+
+                  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+                  ;; Hide commands in M-x which do not work in the current mode. Vertico
+                  ;; commands are hidden in normal buffers.
+                  (setq read-extended-command-predicate
+                        #'command-completion-default-include-p)
+
+                          (use-package vertico-repeat
+                    :demand t)
+
+                  (use-package vertico-directory
+                    :demand t
+                    :bind (:map vertico-map
+                                ("<backspace>"   . vertico-directory-delete-char)
+                                ("C-w"           . vertico-directory-delete-word)
+                                ("C-<backspace>" . vertico-directory-delete-word)
+                                ;; ("RET" .           vertico-directory-enter)
+                                ))
 
                   (use-package vertico-quick
                     :demand t
-                   :after vertico
-                   :bind (
-                           :map vertico-map
-                           ("M-q" . vertico-quick-insert)
-                           ("C-q" . vertico-quick-exit))
-                    :init
-                    (progn
-                      (setq vertico-quick1 "haio")
-                      (setq vertico-quick2 "luy")))
+                    :bind (:map vertico-map
+                                ("C-."   . vertico-quick-exit)
+                                ("C-M-." . vertico-quick-embark))
+                    :preface
+                    (defun vertico-quick-embark (&optional arg)
+                      "Embark on candidate using quick keys."
+                      (interactive)
+                      (when (vertico-quick-jump)
+                        (embark-act arg))))
+
+                  (use-package vertico-multiform
+                    :demand t
+                    :bind (:map vertico-map
+                                ("C-i"   . vertico-multiform-vertical)
+                                ("<tab>" . vertico-insert))
+                        
+
                 '';
               };
 
