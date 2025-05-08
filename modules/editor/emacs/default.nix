@@ -438,7 +438,9 @@ with lib;
                       "Set box attribute to `'prot-modeline-indicator-button' if spacious-padding is enabled."
                       (if (bound-and-true-p spacious-padding-mode)
                           (set-face-attribute 'prot-modeline-indicator-button nil :box t)
-                        (set-face-attribute 'prot-modeline-indicator-button nil :box 'unspecified)))
+                          
+                          )
+                          )
 
                     ;; Run it at startup and then afterwards whenever
                     ;; `spacious-padding-mode' is toggled on/off.
@@ -811,10 +813,6 @@ with lib;
                 enable = false;
                 defer = 1;
                 command = [ "free-keys" ];
-              };
-
-              color-theme-modern = {
-                enable = true;
               };
 
               nerd-icons = {
