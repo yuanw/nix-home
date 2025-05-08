@@ -472,11 +472,13 @@ with lib;
                       sha256 = "sha256-Dgt7eE4a1gi7iYAxLhfPbmo3Jglq97DJopf2i+Ft7vI=";
                     };
                   };
+                hook = [
+                  "(after-init . ultra-scroll-mode)"
+                ];
                 custom = ''
                   (scroll-conservatively 101)
                   (scroll-margin 0)
                 '';
-                config = "(ultra-scroll-mode 1)";
               };
               ask-mode = {
                 enable = config.modules.dev.ask.enable;
