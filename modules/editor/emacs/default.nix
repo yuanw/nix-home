@@ -437,10 +437,7 @@ with lib;
                     (defun prot/modeline-spacious-indicators ()
                       "Set box attribute to `'prot-modeline-indicator-button' if spacious-padding is enabled."
                       (if (bound-and-true-p spacious-padding-mode)
-                          (set-face-attribute 'prot-modeline-indicator-button nil :box t)
-                          
-                          )
-                          )
+                          (set-face-attribute 'prot-modeline-indicator-button nil :box t)))
 
                     ;; Run it at startup and then afterwards whenever
                     ;; `spacious-padding-mode' is toggled on/off.
@@ -458,11 +455,6 @@ with lib;
                   (auto-revert-use-notify nil)
                   (auto-revert-verbose t)
                 '';
-                #   config = ''
-                #     ;;; this actually make dired buffer refresh
-                #     (add-hook 'dired-mode-hook 'auto-revert-mode)
-                #     (global-auto-revert-mode t)
-                #   '';
               };
 
               ultra-scroll = {
@@ -480,9 +472,9 @@ with lib;
                       sha256 = "sha256-Dgt7eE4a1gi7iYAxLhfPbmo3Jglq97DJopf2i+Ft7vI=";
                     };
                   };
-                init = ''
-                  (setq scroll-conservatively 101
-                  scroll-margin 0 )
+                custom = ''
+                  (scroll-conservatively 101)
+                  (scroll-margin 0)
                 '';
                 config = "(ultra-scroll-mode 1)";
               };
