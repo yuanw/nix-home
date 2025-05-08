@@ -7,6 +7,7 @@ with pkgs;
   pinentry_mac
   yt-dlp
   ffmpeg
+  ladybird
   #ghostty-mac
   #calibre_mac
 ]
