@@ -813,6 +813,10 @@ with lib;
                 command = [ "free-keys" ];
               };
 
+              color-theme-modern = {
+                enable = true;
+              };
+
               nerd-icons = {
                 enable = true;
                 custom = ''
