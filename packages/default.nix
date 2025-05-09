@@ -130,13 +130,4 @@ _final: prev: {
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
-  janky-borders = prev.callPackage ./JankyBorders.nix {
-    inherit (_final.darwin.apple_sdk_11_0.frameworks)
-      AppKit
-      CoreVideo
-      Carbon
-      SkyLight
-      ;
-
-  };
 }

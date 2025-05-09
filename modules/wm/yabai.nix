@@ -140,9 +140,14 @@ in
         };
       };
 
+      services.jankyborders = {
+        enable = cfg.enableJankyborders;
+        width = 6.0;
+        hidpi = true;
+      };
+
       services.yabai = {
         enable = true;
-        package = pkgs.yabai;
         enableScriptingAddition = true;
         config = {
           window_border = "off";
@@ -186,24 +191,6 @@ in
         '';
       };
     })
-    (mkIf cfg.enableJankyborders {
-      home-manager.users.${config.my.username} = {
-        xdg.configFile = {
-          "borders/bordersrc".source = ./bordersrc;
-        };
-      };
-      launchd.user.agents.jankyborders = {
-        path = [
-          pkgs.janky-borders
-        ];
-        serviceConfig = {
-          ProgramArguments = [ "${pkgs.janky-borders}/bin/borders" ];
-          KeepAlive = true;
-          RunAtLoad = true;
-          StandardOutPath = "/tmp/borders.log";
-          StandardErrorPath = "/tmp/borders.log";
-        };
-      };
-    })
+
   ];
 }

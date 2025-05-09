@@ -33,6 +33,14 @@ let
           '';
         };
 
+        noRequire = mkOption {
+          type = types.bool;
+          default = false;
+          description = ''
+            The <option>:no-require</option> setting.
+          '';
+        };
+
         defer = mkOption {
           type = types.either types.bool types.ints.positive;
           default = false;
@@ -165,6 +173,14 @@ let
           '';
         };
 
+        preface = mkOption {
+          type = types.lines;
+          default = "";
+          description = ''
+            Code to place in the <option>:preface</option> section.
+          '';
+        };
+
         config = mkOption {
           type = types.lines;
           default = "";
@@ -253,11 +269,13 @@ let
             mkChords = mkBindHelper "chords" "";
             mkCustomFace = mkBindHelper "custom-face" "";
             mkHook = map (v: ":hook ${v}");
+            mkNoRequire = v: optional v ":no-require t";
             mkDefer = v: if isBool v then optional v ":defer t" else [ ":defer ${toString v}" ];
             mkDemand = v: optional v ":demand t";
           in
           concatStringsSep "\n  " (
             [ "(use-package ${name}" ]
+            ++ mkNoRequire config.noRequire
             ++ mkAfter config.after
             ++ mkBind config.bind
             ++ mkBindKeyMap config.bindKeyMap
@@ -280,6 +298,10 @@ let
             ++ optionals (config.config != "") [
               ":config"
               config.config
+            ]
+            ++ optionals (config.preface != "") [
+              ":preface"
+              config.preface
             ]
             ++ optional (config.extraConfig != "") config.extraConfig
           )
@@ -545,7 +567,9 @@ in
           v: if isFunction v then [ (v epkgs) ] else optional (isString v && hasAttr v epkgs) epkgs.${v};
 
         packages = concatMap (v: getPkg (v.package)) (
-          filter (getAttr "enable") (builtins.attrValues cfg.usePackage)
+          filter (s: !(getAttr "noRequire" s)) (
+            filter (getAttr "enable") (builtins.attrValues cfg.usePackage)
+          )
         );
       in
       [

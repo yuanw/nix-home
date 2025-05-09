@@ -437,8 +437,7 @@ with lib;
                     (defun prot/modeline-spacious-indicators ()
                       "Set box attribute to `'prot-modeline-indicator-button' if spacious-padding is enabled."
                       (if (bound-and-true-p spacious-padding-mode)
-                          (set-face-attribute 'prot-modeline-indicator-button nil :box t)
-                        (set-face-attribute 'prot-modeline-indicator-button nil :box 'unspecified)))
+                          (set-face-attribute 'prot-modeline-indicator-button nil :box t)))
 
                     ;; Run it at startup and then afterwards whenever
                     ;; `spacious-padding-mode' is toggled on/off.
@@ -456,11 +455,6 @@ with lib;
                   (auto-revert-use-notify nil)
                   (auto-revert-verbose t)
                 '';
-                #   config = ''
-                #     ;;; this actually make dired buffer refresh
-                #     (add-hook 'dired-mode-hook 'auto-revert-mode)
-                #     (global-auto-revert-mode t)
-                #   '';
               };
 
               ultra-scroll = {
@@ -478,11 +472,13 @@ with lib;
                       sha256 = "sha256-Dgt7eE4a1gi7iYAxLhfPbmo3Jglq97DJopf2i+Ft7vI=";
                     };
                   };
-                init = ''
-                  (setq scroll-conservatively 101
-                  scroll-margin 0 )
+                hook = [
+                  "(after-init . ultra-scroll-mode)"
+                ];
+                custom = ''
+                  (scroll-conservatively 101)
+                  (scroll-margin 0)
                 '';
-                config = "(ultra-scroll-mode 1)";
               };
               ask-mode = {
                 enable = config.modules.dev.ask.enable;
@@ -590,10 +586,27 @@ with lib;
 
               savehist = {
                 enable = true;
-                init = "(savehist-mode)";
+                custom = ''
+                  (history-delete-duplicates t)
+                  (savehist-additional-variables
+                   '(file-name-history
+                     kmacro-ring
+                     compile-history
+                     compile-command))
+                  (savehist-autosave-interval 60)
+                  ;(savehist-file (user-data "history"))
+                  (savehist-ignored-variables
+                   '(load-history
+                     flyspell-auto-correct-ring
+                     org-roam-node-history
+                     magit-revision-history
+                     org-read-date-history
+                     query-replace-history
+                     yes-or-no-p-history
+                     kill-ring))
+                '';
                 config = ''
-                  (setq history-delete-duplicates t
-                        history-length 1000)
+                  (savehist-mode 1)
                 '';
               };
               # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
@@ -633,6 +646,39 @@ with lib;
                   (setq delete-by-moving-to-trash t)
                   (setq dired-listing-switches "-alvh --group-directories-first")
                 '';
+              };
+
+              auth-source-pass = {
+                enable = true;
+
+                # :preface
+                # (defvar auth-source-pass--cache (make-hash-table :test #'equal))
+
+                # (defun auth-source-pass--reset-cache ()
+                #   (setq auth-source-pass--cache (make-hash-table :test #'equal)))
+
+                # (defun auth-source-pass--read-entry (entry)
+                #   "Return a string with the file content of ENTRY."
+                #   (run-at-time 45 nil #'auth-source-pass--reset-cache)
+                #   (let ((cached (gethash entry auth-source-pass--cache)))
+                #     (or cached
+                #         (puthash
+                #          entry
+                #          (with-temp-buffer
+                #            (insert-file-contents (expand-file-name
+                #                                   (format "%s.gpg" entry)
+                #                                   (getenv "PASSWORD_STORE_DIR")))
+                #            (buffer-substring-no-properties (point-min) (point-max)))
+                #          auth-source-pass--cache))))
+
+                # (defun auth-source-pass-entries ()
+                #   "Return a list of all password store entries."
+                #   (let ((store-dir (getenv "PASSWORD_STORE_DIR")))
+                #     (mapcar
+                #      (lambda (file) (file-name-sans-extension (file-relative-name file store-dir)))
+                #      (directory-files-recursively store-dir "\.gpg$"))))
+                # :config
+                # (auth-source-pass-enable))
               };
 
               wdired = {
@@ -679,6 +725,33 @@ with lib;
                   (trashed-date-format "%Y-%m-%d %H:%M:%S")
                 '';
               };
+
+              eyebrowse = {
+                enable = true;
+                custom = ''
+                  (eyebrowse-keymap-prefix "�")
+                  (eyebrowse-mode-line-separator " ")
+                  (eyebrowse-new-workspace t)
+                '';
+                config = ''
+                  (eyebrowse-mode t)
+                '';
+              };
+
+              #             (use-package eyebrowse
+              # :bind-keymap ("C-\\" . eyebrowse-mode-map)
+              # :bind (:map eyebrowse-mode-map
+              #             ("C-\\ C-\\" . eyebrowse-last-window-config)
+              #             ("A-1" . eyebrowse-switch-to-window-config-1)
+              #             ("A-2" . eyebrowse-switch-to-window-config-2)
+              #             ("A-3" . eyebrowse-switch-to-window-config-3)
+              #             ("A-4" . eyebrowse-switch-to-window-config-4))
+              # :custom
+              # (eyebrowse-keymap-prefix "�")
+              # (eyebrowse-mode-line-separator " ")
+              # (eyebrowse-new-workspace t)
+              # :config
+              # (eyebrowse-mode t))
 
               keycast = {
                 enable = true;
@@ -764,6 +837,16 @@ with lib;
                 ];
               };
 
+              evil = {
+                enable = true;
+                command = [ "evil-mode" ];
+              };
+
+              marginalia = {
+                enable = true;
+                config = "(marginalia-mode)";
+              };
+
               orderless = {
                 enable = true;
                 demand = true;
@@ -775,74 +858,119 @@ with lib;
                 '';
               };
 
-              evil = {
-                enable = true;
-                command = [ "evil-mode" ];
-              };
-
               vertico = {
                 enable = true;
-                config = ''
-                   (vertico-mode)
-                   ;; Different scroll margin
-                   (setq vertico-scroll-margin 0)
-
-                   ;; Show more candidates
-                   ;; (setq vertico-count 20)
-
-                   ;; Grow and shrink the Vertico minibuffer
-                   (setq vertico-resize t)
-
-                   ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
-                   (setq vertico-cycle t)
-
-                   (use-package vertico-directory
-                   :bind (:map vertico-map
-                               ("RET" . vertico-directory-enter)
-                               ("DEL" . vertico-directory-delete-char)
-                               ("M-DEL" . vertico-directory-delete-word))
-                   ;; Tidy shadowed file names
-                   :hook (rfn-eshadow-update-overlay . vertico-directory-tidy)
-
-                   )
-
-                  (use-package vertico-quick
-                    :demand t
-                   :after vertico
-                   :bind (
-                           :map vertico-map
-                           ("M-q" . vertico-quick-insert)
-                           ("C-q" . vertico-quick-exit))
-                    :init
-                    (progn
-                      (setq vertico-quick1 "haio")
-                      (setq vertico-quick2 "luy")))
-                '';
-              };
-
-              vertico-repeat = {
-                enable = true;
+                after = [ "cape" ];
                 demand = true;
+                custom = ''
+                  (vertico-count 10)
+                  (vertico-resize nil)
+                  ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
+                  (vertico-cycle t)
+                '';
                 bind = {
                   "C-c . ." = "vertico-repeat";
                 };
-                config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
-              };
+                bindLocal.vertico-map = {
+                  "C-j" = "vertico-exit-input";
+                  "C-M-n" = "vertico-next-group";
+                  "C-M-p" = "vertic-previous-group";
 
-              vertico-multiform = {
-                enable = true;
-                demand = true;
+                };
+                hook = [
+                  "(minibuffer-setup . vertico-repeat-save)"
+                  "(rfn-eshadow-update-overlay . vertico-directory-tidy)"
+                ];
+                preface = ''
+                                  (defun crm-indicator (args)
+                    (cons (format "[CRM%s] %s"
+                                  (replace-regexp-in-string
+                                   "\\`\\[.*?]\\*\\|\\[.*?]\\*\\'" ""
+                                   crm-separator)
+                                  (car args))
+                          (cdr args)))
+
+                  (defsubst time-greater-p (a b)
+                    (time-less-p b a))
+
+                  (defun my/sort-by-mtime (files)
+                    "Sort FILES by modification time (newest first)."
+                    (sort-on files
+                             #'time-greater-p
+                             #'(lambda (a) (file-attribute-modification-time (file-attributes a)))))
+                '';
                 config = ''
-                  (require 'vertico-grid)
-                  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
-                  (vertico-multiform-mode)
+                                   (vertico-mode)
+                                   ;; Different scroll margin
+
+                                     ;; Add prompt indicator to `completing-read-multiple'.
+                  ;; We display [CRM<separator>], e.g., [CRM,] if the separator is a comma.
+                  (advice-add #'completing-read-multiple :filter-args #'crm-indicator)
+
+                    ;; Do not allow the cursor in the minibuffer prompt
+                  (setq minibuffer-prompt-properties
+                        '(read-only t cursor-intangible t face minibuffer-prompt))
+
+                  (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+
+                  ;; Hide commands in M-x which do not work in the current mode. Vertico
+                  ;; commands are hidden in normal buffers.
+                  (setq read-extended-command-predicate
+                        #'command-completion-default-include-p)
+
+                          (use-package vertico-repeat
+                    :demand t)
+
+                  (use-package vertico-directory
+                    :demand t
+                    :bind (:map vertico-map
+                                ("<backspace>"   . vertico-directory-delete-char)
+                                ("C-w"           . vertico-directory-delete-word)
+                                ("C-<backspace>" . vertico-directory-delete-word)
+                                ;; ("RET" .           vertico-directory-enter)
+                                ))
+
+                  (use-package vertico-quick
+                    :demand t
+                    :bind (:map vertico-map
+                                ("C-."   . vertico-quick-exit)
+                                ("C-M-." . vertico-quick-embark))
+                    :preface
+                    (defun vertico-quick-embark (&optional arg)
+                      "Embark on candidate using quick keys."
+                      (interactive)
+                      (when (vertico-quick-jump)
+                        (embark-act arg))))
+
+                  (use-package vertico-multiform
+                    :demand t
+                    :bind (:map vertico-map
+                                ("C-i"   . vertico-multiform-vertical)
+                                ("<tab>" . vertico-insert)))
+                        
+
                 '';
               };
 
-              marginalia = {
-                enable = true;
-                config = "(marginalia-mode)";
-              };
+              # try nested in vertico for use
+              # vertico-repeat = {
+              #   enable = true;
+              #   demand = true;
+              #   bind = {
+              #     "C-c . ." = "vertico-repeat";
+              #   };
+              #   config = "(add-hook 'minibuffer-setup-hook #'vertico-repeat-save)";
+              # };
+
+              # vertico-multiform = {
+              #   enable = true;
+              #   demand = true;
+              #   config = ''
+              #     (require 'vertico-grid)
+              #     (add-to-list 'vertico-multiform-categories '(embark-keybinding grid))
+              #     (vertico-multiform-mode)
+              #   '';
+              # };
 
               goggles = {
                 enable = true;
@@ -883,7 +1011,7 @@ with lib;
                   (setq prefix-help-command #'embark-prefix-help-command)
                 '';
                 config = ''
-                                    (defun embark-which-key-indicator ()
+                  (defun embark-which-key-indicator ()
                     "An embark indicator that displays keymaps using which-key.
                   The which-key help message will show the type and value of the
                   current target followed by an ellipsis if there are further
@@ -956,7 +1084,7 @@ with lib;
                 enable = true;
                 hook = [ "(completion-list-mode . consult-preview-at-point-mode)" ];
                 extraConfig = ''
-                             :bind (;; C-c bindings in `mode-specific-map'
+                   :bind (;; C-c bindings in `mode-specific-map'
                    ("C-c M-x" . consult-mode-command)
                    ("C-c h" . consult-history)
                    ("C-c k" . consult-kmacro)
@@ -1010,35 +1138,35 @@ with lib;
                    ("M-r" . consult-history))
                 '';
 
-                config = ''
-                               (setq consult-narrow-key "<")
-                               (require 'consult-xref)
-                               (require 'consult-register)
-                                (consult-customize
-                  consult-theme
-                  :preview-key '(:debounce 0.2 any)
-                  consult-ripgrep
-                  consult-git-grep
-                  consult-grep
-                  consult-bookmark
-                  consult-recent-file
+                custom = ''
+                  (consult-narrow-key "<")
 
-                  consult--source-bookmark
-                  consult--source-file-register
-                  consult--source-recent-file
-                  consult--source-project-recent-file
-                  :preview-key '(:debounce 0.4 any))
+                '';
+
+                config = ''
+                                      (use-package consult-xref)
+                                           
+                                           
+                                                (consult-customize
+                                  consult-theme
+                                  :preview-key '(:debounce 0.2 any)
+                                  consult-ripgrep
+                                  consult-git-grep
+                                  consult-grep
+                                  consult-bookmark
+                                  consult-recent-file
+                  consult-xref
+                                  consult--source-bookmark
+                                  consult--source-file-register
+                                  consult--source-recent-file
+                                  consult--source-project-recent-file
+                                  :preview-key '(:debounce 0.4 any))
 
                 '';
               };
 
               consult-xref = {
-                enable = false;
-                command = [ "consult-xref" ];
-                config = ''
-                  (setq xref-show-definitions-function #'consult-xref
-                        xref-show-xrefs-function #'consult-xref)
-                '';
+                enable = true;
               };
               # embark act then press C
               embark-consult = {
@@ -2190,7 +2318,21 @@ with lib;
 
               consult-yasnippet = {
                 enable = true;
+                after = [
+                  "consult"
+                  "yasnippet"
+                ];
                 command = [ "consult-yasnippet" ];
+              };
+
+              auto-yasnippet = {
+                enable = true;
+                after = [ "yasnippet" ];
+                bind = {
+                  "C-c y a" = "aya-create";
+                  "C-c y e" = "aya-expand";
+                  "C-c y o" = "aya-open-line";
+                };
               };
 
               consult-dir = {
@@ -2205,18 +2347,21 @@ with lib;
                     "M-s f" = "consult-dir-jump-file";
                   };
                 };
-                init = ''
-                  (use-package vertico
-                    :bind (:map vertico-map
-                           ("M-g d" . consult-dir)
-                           ("M-s f" . consult-dir-jump-file)
-                           ))
-                   :config
-                  (add-to-list 'consult-dir-sources 'consult-dir--source-tramp-ssh t)
-                  (setq consult-dir-shadow-filenames nil)
-                '';
               };
 
+              consult-dir-vertico = {
+                enable = true;
+                noRequire = true;
+                after = [
+                  "consult-dir"
+                  "vertico"
+                ];
+                # :defines (vertico-map)
+                # :bind (:map vertico-map
+                #             ("C-x C-j" . consult-dir)
+                #             ("M-g d"   . consult-dir)
+                #             ("M-s f"   . consult-dir-jump-file)))
+              };
               kind-icon = {
                 enable = true;
                 after = [ "corfu" ];
@@ -2337,6 +2482,7 @@ with lib;
                 ];
                 defer = true;
               };
+
               wm = {
                 enable = false;
                 package =
@@ -2352,6 +2498,7 @@ with lib;
                     buildInputs = propagatedUserEnvPkgs;
                   };
               };
+
               alert = {
                 enable = true;
                 extraConfig = ''
