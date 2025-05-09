@@ -651,17 +651,17 @@ with lib;
               reveal-in-osx-finder = {
                 enable = isDarwin;
                 noRequire = true;
+
                 bind = {
-                  "C-c M-v" =
-                    "" "
-         (lambda () (interactive)
-           (call-process " /usr/bin/open
-                      " nil nil nil
-                         "
-                    - R " (expand-file-name
-                               (or (buffer-file-name)
-                               default-directory))))
-                               " "";
+                  "C-c M-v" = ''
+                    (lambda () (interactive)
+                      (call-process " /usr/bin/open
+                                 " nil nil nil
+                                    "
+                               - R " (expand-file-name
+                                          (or (buffer-file-name)
+                                          default-directory))))
+                  '';
                 };
               };
               auth-source-pass = {
