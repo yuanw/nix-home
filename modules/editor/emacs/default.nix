@@ -619,7 +619,7 @@ with lib;
                 bindLocal.compilation-mode-map = {
                   "z" = "delete-window";
                 };
-                hooks = [
+                hook = [
                   "(compilation-filter . compilation-ansi-color-process-output)"
                 ];
                 custom = ''
