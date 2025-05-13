@@ -609,6 +609,46 @@ with lib;
                   (savehist-mode 1)
                 '';
               };
+
+              compile = {
+                enable = true;
+                bind = {
+                  "C-c c" = "compile";
+                  "M-O" = "show-compilation";
+                };
+                bindLocal.compilation-mode-map = {
+                  "z" = "delete-window";
+                };
+                hooks = [
+                  "(compilation-filter . compilation-ansi-color-process-output)"
+                ];
+                custom = ''
+                  (compilation-always-kill t)
+                  (compilation-ask-about-save nil)
+                  (compilation-context-lines 10)
+                  (compilation-scroll-output 'first-error)
+                  (compilation-skip-threshold 2)
+                  (compilation-window-height 100)
+                '';
+                preface = ''
+                                  (defun show-compilation ()
+                    (interactive)
+                    (let ((it
+                           (catch 'found
+                             (dolist (buf (buffer-list))
+                               (when (string-match "\\*compilation\\*" (buffer-name buf))
+                                 (throw 'found buf))))))
+                      (if it
+                          (display-buffer it)
+                        (call-interactively 'compile))))
+
+                  (defun compilation-ansi-color-process-output ()
+                    (ansi-color-process-output nil)
+                    (set (make-local-variable 'comint-last-output-start)
+                         (point-marker)))
+                '';
+              };
+
               # stealed from https://www2.lib.uchicago.edu/keith/emacs/init.el
               ediff = {
                 enable = true;
