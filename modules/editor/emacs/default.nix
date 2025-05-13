@@ -1859,13 +1859,14 @@ with lib;
                   epkgs:
                   epkgs.trivialBuild {
                     pname = "eglot-booster";
-                    version = "0.1.0";
+                    version = "0-unstable-2025-04-28";
+
                     src = pkgs.fetchFromGitHub {
                       owner = "jdtsmith";
                       repo = "eglot-booster";
-                      rev = "e6daa6bcaf4aceee29c8a5a949b43eb1b89900ed";
-                      #sha256 = lib.fakeSha256;
-                      sha256 = "sha256-PLfaXELkdX5NZcSmR1s/kgmU16ODF8bn56nfTh9g6bs=";
+                      rev = "1260d2f7dd18619b42359aa3e1ba6871aa52fd26";
+                      sha256 = lib.fakeSha256;
+                      #sha256 = "sha256-PLfaXELkdX5NZcSmR1s/kgmU16ODF8bn56nfTh9g6bs=";
                     };
                     preferLocalBuild = true;
                     allowSubstitutes = false;
