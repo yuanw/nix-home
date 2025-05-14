@@ -1774,6 +1774,26 @@ with lib;
                   ''"\\.dart\\'"''
                 ];
               };
+              java-mode = {
+                enable = true;
+                preface = ''
+                  (defun my/format-java ()
+                      (interactive)
+                      (call-process "${pkgs.google-java-format}/bin/google-java-format" nil nil nil
+                                    "-r" (expand-file-name
+                                          buffer-file-name
+                                           )))
+                '';
+
+                bindLocal = {
+                  java-mode-map = {
+                    "C-c C-f" = "my/format-java";
+                  };
+                };
+                mode = [
+                  ''"\\.java\\'"'' # \
+                ];
+              };
               kotlin-mode = {
                 enable = true;
                 config = "(require 'kotlin-mode)";
@@ -2053,7 +2073,7 @@ with lib;
                   '((yaml-mode . yaml-ts-mode)
                   (bash-mode . bash-ts-mode)
                     (js2-mode . js-ts-mode)
-                    (java-mode . java-ts-mode)
+                  ;;  (java-mode . java-ts-mode)
                     (json-mode . json-ts-mode)
                     ;;(kotlin-mode . kotlin-ts-mode)
                     (css-mode . css-ts-mode)
