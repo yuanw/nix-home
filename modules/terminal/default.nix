@@ -34,7 +34,8 @@ in
       catppuccin = {
         starship.enable = true;
         bat.enable = true;
-        alacritty.enable = true;
+        # this messed up keybind
+        # alacritty.enable = true;
         tmux.enable = true;
       };
       programs = {
