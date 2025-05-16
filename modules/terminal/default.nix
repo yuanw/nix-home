@@ -34,7 +34,8 @@ in
       catppuccin = {
         starship.enable = true;
         bat.enable = true;
-        alacritty.enable = true;
+        # this messed up keybind
+        # alacritty.enable = true;
         tmux.enable = true;
       };
       programs = {
@@ -125,9 +126,9 @@ in
               size = 18;
             };
             cursor.style = "Beam";
-            keyboard.bindings = [
-              # { key = "Space";  mods= "Control";                 action= "ToggleViMode";            }
-            ];
+            # keyboard.bindings = [
+            #   # { key = "Space";  mods= "Control";                 action= "ToggleViMode";            }
+            # ];
             window.padding = {
               x = 12;
               y = 0;
