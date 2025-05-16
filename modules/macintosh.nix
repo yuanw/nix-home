@@ -25,7 +25,7 @@ with lib;
     settings.cores = 12;
     # extra-trusted-users = [ config.my.username ];
     gc = {
-      automatic = true;
+      #automatic = true;
       options = "--delete-older-than 3d";
     };
   };
