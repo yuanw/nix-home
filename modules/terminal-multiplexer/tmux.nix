@@ -55,8 +55,8 @@ with lib;
           historyLimit = 50000;
           keyMode = "emacs";
           # keyMode = "vi";
-          shortcut = "Space";
-          #shortcut = "e";
+          #shortcut = "Space";
+          shortcut = "n";
           #prefix = "C-Space";
           extraConfig = ''
             #set-option -g default-shell /bin/zsh
