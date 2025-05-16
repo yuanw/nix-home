@@ -1,8 +1,14 @@
 {
   inputs,
   config,
+  pkgs,
   ...
 }:
+let
+  nixCustomConf = pkgs.writeText "nix.custom.conf" ''
+    lazy-trees = true
+  '';
+in
 {
 
   imports = [
@@ -20,6 +26,7 @@
     homeDirectory = "/Users/yuanw";
   };
 
+  environment.etc."nix/nix.custom.conf".source = nixCustomConf;
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
