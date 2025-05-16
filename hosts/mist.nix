@@ -11,7 +11,8 @@
     ../modules/private/jellyfin-darwin.nix
 
   ];
-
+  # determinate system
+  nix.enable = false;
   my = {
     username = "yuanw";
     name = "Yuan Wang";
