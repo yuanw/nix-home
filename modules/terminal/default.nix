@@ -36,7 +36,7 @@ in
         bat.enable = true;
         # this messed up keybind
         # alacritty.enable = true;
-        tmux.enable = true;
+        # tmux.enable = true;
       };
       programs = {
         pet = {
