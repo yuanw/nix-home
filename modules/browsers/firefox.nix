@@ -378,7 +378,13 @@ in
             # Don't try to guess domain names when entering an invalid domain name in URL bar
             # http://www-archive.mozilla.org/docs/end-user/domain-guessing.html
             "browser.fixup.alternate.enabled" = false;
-            # Disable telemetry
+
+            # PREF: disable telemetry
+            # - If "unified" is false then "enabled" controls the telemetry module
+            # - If "unified" is true then "enabled" only controls whether to record extended data
+            # [NOTE] "toolkit.telemetry.enabled" is now LOCKED to reflect prerelease (true) or release builds (false) [2]
+            # [1] https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/telemetry/internals/preferences.html
+            # [2] https://medium.com/georg-fritzsche/data-preference-changes-in-firefox-58-2d5df9c428b5
             # https://wiki.mozilla.org/Platform/Features/Telemetry
             # https://wiki.mozilla.org/Privacy/Reviews/Telemetry
             # https://wiki.mozilla.org/Telemetry
@@ -392,6 +398,19 @@ in
             "toolkit.telemetry.enabled" = false;
             "toolkit.telemetry.unified" = false;
             "toolkit.telemetry.archive.enabled" = false;
+            "toolkit.telemetry.server" = "data:,";
+            "toolkit.telemetry.newProfilePing.enabled" = false;
+            "toolkit.telemetry.shutdownPingSender.enabled" = false;
+            "toolkit.telemetry.updatePing.enabled" = false;
+            "toolkit.telemetry.bhrPing.enabled" = false; # [FF57+] Background Hang Reporter
+            "toolkit.telemetry.firstShutdownPing.enabled" = false;
+            "toolkit.telemetry.dap_enabled" = false; # DEFAULT [FF108]
+
+            # // PREF: disable Telemetry Coverage
+            # // [1] https://blog.mozilla.org/data/2018/08/20/effectively-measuring-search-in-firefox/
+            "toolkit.telemetry.coverage.opt-out" = true; # [HIDDEN PREF]
+            "toolkit.coverage.opt-out" = true; # [FF64+] [HIDDEN PREF]
+            "toolkit.coverage.endpoint.base" = "";
             "experiments.supported" = false;
             "experiments.enabled" = false;
             "experiments.manifest.uri" = "";
