@@ -277,6 +277,12 @@ in
             # https://wiki.mozilla.org/Privacy/Reviews/New_Tab
             # https://support.mozilla.org/en-US/kb/new-tab-page-show-hide-and-customize-top-sites#w_how-do-i-turn-the-new-tab-page-off
             # "browser.newtabpage.enabled" = false;
+            # Disable Activity Stream
+            # https://wiki.mozilla.org/Firefox/Activity_Stream
+            # PREF: disable Firefox Home (Activity Stream) telemetry
+            "browser.newtabpage.activity-stream.enabled" = false;
+            "browser.newtabpage.activity-stream.feeds.telemetry" = false;
+            "browser.newtabpage.activity-stream.telemetry" = false;
             # "browser.newtab.url" = "about:blank";
             # "browser.newtab.url" = "yuanwang.dev";
             # Disable Activity Stream
@@ -296,10 +302,6 @@ in
             "browser.urlbar.shortcuts.history" = false;
             "browser.urlbar.shortcuts.tabs" = false;
             "browser.urlbar.showSearchSuggestionsFirst" = false;
-            # Disable Activity Stream
-            # https://wiki.mozilla.org/Firefox/Activity_Stream
-            "browser.newtabpage.activity-stream.enabled" = false;
-            "browser.newtabpage.activity-stream.telemetry" = false;
             # Disable new tab tile ads & preload
             # http://www.thewindowsclub.com/disable-remove-ad-tiles-from-firefox
             # http://forums.mozillazine.org/viewtopic.php?p=13876331#p13876331
@@ -423,6 +425,23 @@ in
             "datareporting.healthreport.uploadEnabled" = false;
             "datareporting.healthreport.service.enabled" = false;
             "datareporting.policy.dataSubmissionEnabled" = false;
+
+            /**
+              ****************************************************************************
+              * SECTION: DETECTION                                                        *
+              *****************************************************************************
+            */
+
+            # PREF: disable Captive Portal detection
+            # [1] https://www.eff.org/deeplinks/2017/08/how-captive-portals-interfere-wireless-security-and-privacy
+            # [2] https://wiki.mozilla.org/Necko/CaptivePortal
+            "captivedetect.canonicalURL" = "";
+            "network.captive-portal-service.enabled" = false;
+
+            # PREF: disable Network Connectivity checks
+            # [WARNING] Do NOT use for mobile devices. May NOT be able to use Firefox on public wifi (hotels, coffee shops, etc).
+            # [1] https://bugzilla.mozilla.org/1460537
+            "network.connectivity-service.enabled" = false;
 
             # Disable crash reports
             "breakpad.reportURL" = "";
