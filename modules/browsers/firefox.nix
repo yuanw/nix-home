@@ -214,7 +214,26 @@ in
             "privacy.donottrackheader.enabled" = true;
             "privacy.donottrackheader.value" = 1;
             "privacy.purge_trackers.enabled" = true;
+            # PREF: Global Privacy Control (GPC) [FF118+]
+            # A privacy signal that tells the websites that the user
+            # doesn’t want to be tracked and doesn’t want their data to be sold.
+            # Honored by many highly ranked sites [3].
+            # [SETTING] Privacy & Security > Website Privacy Preferences > Tell websites not to sell or share my data
+            # [TEST] https://global-privacy-control.glitch.me/
+            # [1] https://bugzilla.mozilla.org/show_bug.cgi?id=1830623
+            # [2] https://globalprivacycontrol.org/press-release/20201007.html
+            # [3] https://github.com/arkenfox/user.js/issues/1542#issuecomment-1279823954
+            # [4] https://blog.mozilla.org/netpolicy/2021/10/28/implementing-global-privacy-control/
+            # [5] https://help.duckduckgo.com/duckduckgo-help-pages/privacy/gpc/
+            # [6] https://brave.com/web-standards-at-brave/4-global-privacy-control/
+            # [7] https://www.eff.org/gpc-privacy-badger
+            # [8] https://www.eff.org/issues/do-not-track
+            "privacy.globalprivacycontrol.enabled" = true;
             "browser.search.region" = "CA";
+
+            # PREF: disable UITour backend
+            # This way, there is no chance that a remote page can use it.
+            "browser.uitour.enabled" = false;
             "browser.privatebrowsing.vpnpromourl" = "";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
