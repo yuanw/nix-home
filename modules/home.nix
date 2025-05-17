@@ -139,6 +139,9 @@
           "log --graph --pretty=format:'%Cred%h%Creset"
           + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
           + " --abbrev-commit --date=relative --show-notes=*";
+        lg = ''
+          log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+        '';
       };
       userEmail = config.my.email;
 
