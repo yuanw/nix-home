@@ -218,6 +218,10 @@ in
             "browser.privatebrowsing.vpnpromourl" = "";
             "browser.search.countryCode" = "CA";
             "browser.search.isUS" = false;
+            # PREF: disable search engine updates (e.g. OpenSearch)
+            # Prevent Firefox from adding back search engines after you removed them.
+            # [NOTE] This does not affect Mozilla's built-in or Web Extension search engines.
+            "browser.search.update" = false;
             "browser.ctrlTab.recentlyUsedOrder" = false;
             "browser.bookmarks.showMobileBookmarks" = true;
             "browser.uidensity" = 1;
@@ -326,9 +330,13 @@ in
             "extensions.htmlaboutaddons.discover.enabled" = false;
             "extensions.getAddons.showPane" = false; # uses Google Analytics
             "browser.discovery.enabled" = false;
-            # Disable some not so useful functionality.
+            # PREF: disable Normandy/Shield [FF60+]
+            # Shield is an telemetry system (including Heartbeat) that can also push and test "recipes".
+            # [1] https://mozilla.github.io/normandy/
             "app.normandy.enabled" = false;
             "app.normandy.api_url" = "";
+            # PREF: disable Studies
+            # [SETTING] Privacy & Security>Firefox Data Collection & Use>Allow Firefox to install and run studies
             "app.shield.optoutstudies.enabled" = false;
             # Reduce File IO / SSD abuse
             # Otherwise, Firefox bombards the HD with writes. Not so nice for SSDs.
@@ -391,6 +399,13 @@ in
             "extensions.formautofill.creditCards.available" = false;
             "extensions.formautofill.creditCards.enabled" = false;
             "extensions.formautofill.heuristics.enabled" = false;
+
+            # PREF: remove special permissions for certain mozilla domains [FF35+]
+            # default = resource://app/defaults/permissions
+            "permissions.manager.defaultsUrl" = "";
+            #PREF: default permission for Location Requests
+            #0=always ask (default), 1=allow, 2=block
+            "permissions.default.geo" = 2;
             # shyfox
             ## Fill SVG Color
             "svg.context-properties.content.enabled" = true;
