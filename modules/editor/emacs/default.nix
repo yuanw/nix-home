@@ -1794,7 +1794,9 @@ with lib;
                       (call-process "${pkgs.google-java-format}/bin/google-java-format" nil nil nil
                                     "-r" (expand-file-name
                                           buffer-file-name
-                                           )))
+                                          ))
+                       (revert-buffer-quick)
+                                          )
                 '';
 
                 bindLocal = {
