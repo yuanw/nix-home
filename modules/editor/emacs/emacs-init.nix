@@ -576,7 +576,7 @@ in
         (epkgs.trivialBuild {
           pname = "hm-early-init";
           src = pkgs.writeText "hm-early-init.el" earlyInitFile;
-          version = "0.1.1";
+          version = "0.1.2";
           packageRequires = packages;
           preferLocalBuild = true;
           allowSubstitutes = false;
@@ -585,7 +585,7 @@ in
         (epkgs.trivialBuild {
           pname = "hm-init";
           src = pkgs.writeText "hm-init.el" initFile;
-          version = "0.1.1";
+          version = "0.1.2";
           packageRequires =
             [ epkgs.use-package ]
             ++ packages
@@ -618,11 +618,13 @@ in
 
     home.file = {
       ".emacs.d/early-init.el".text = ''
+        ;; -*- lexical-binding: t -*-
         (require 'hm-early-init)
         (provide 'early-init)
       '';
 
       ".emacs.d/init.el".text = ''
+        ;; -*- lexical-binding: t -*-
         (require 'hm-init)
         (provide 'init)
       '';
