@@ -104,7 +104,7 @@ with lib;
       # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
       # the context of home-manager
       home-manager.users.${config.my.username} =
-        { pkgs, ... }:
+        { pkgs, config, ... }:
         {
           imports = [
             ./emacs-init.nix
