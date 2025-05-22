@@ -2655,7 +2655,7 @@ with lib;
 
           home = {
             file.".emacs.d/snippets".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/workspaces/nix-home/modules/editors/emacs/snippets";
+              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/workspaces/nix-home/modules/editor/emacs/snippets";
             packages = with pkgs; [
               (pkgs.writeShellScriptBin "app-launcher" ''
                 ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
