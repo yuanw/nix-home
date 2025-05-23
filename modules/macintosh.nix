@@ -90,7 +90,7 @@ with lib;
     enableSSHSupport = true;
   };
   time.timeZone = "America/Regina";
-
+  system.primaryUser = config.my.username;
   users.users.${config.my.username} = {
     shell = pkgs.zsh;
     home = config.my.homeDirectory;
