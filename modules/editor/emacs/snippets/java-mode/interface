@@ -3,7 +3,7 @@
 # key: interface
 # uuid: interface
 # --
-interface ${1:`(file-name-base (or (buffer-file-name)
+public interface ${1:`(file-name-base (or (buffer-file-name)
                                    (buffer-name)))`} {
           $0
 }
