@@ -1848,9 +1848,9 @@ with lib;
               popper = {
                 enable = true;
                 bind = {
-                  "C-;" = "popper-toggle";
-                  "M-;" = "popper-cycle";
-                  "C-M-;" = "popper-toggle-type";
+                  "C-`" = "popper-toggle";
+                  "M-`" = "popper-cycle";
+                  "C-M-`" = "popper-toggle-type";
                 };
                 command = [
                   "popper-mode"
@@ -1865,7 +1865,8 @@ with lib;
                             "\\ * Flycheck errors\\ * "
                             "\\ * Messages\\ * "
                             compilation-mode
-                            help-mode)
+                            help-mode
+                            vterm-mode)
                         popper-group-function #'popper-group-by-project)
                   (popper-mode)
                 '';
