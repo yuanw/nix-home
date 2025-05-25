@@ -1844,12 +1844,13 @@ with lib;
               idris2-mode = {
                 enable = config.modules.dev.idris2.enable;
               };
+
               popper = {
                 enable = true;
                 bind = {
-                  "C-`" = "popper-toggle";
-                  "M-`" = "popper-cycle";
-                  "C-M-`" = "popper-toggle-type";
+                  "C-;" = "popper-toggle";
+                  "M-;" = "popper-cycle";
+                  "C-M-;" = "popper-toggle-type";
                 };
                 command = [
                   "popper-mode"
