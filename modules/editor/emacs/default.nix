@@ -1873,7 +1873,7 @@ with lib;
                 enable = true;
                 functions = [ "direnv--maybe-update-environment" ];
                 preface = ''
-                                    (defconst emacs-binary-path (directory-file-name
+                   (defconst emacs-binary-path (directory-file-name
                                                (file-name-directory
                                                 (executable-find "emacsclient"))))
 
@@ -1891,9 +1891,8 @@ with lib;
                       (direnv--maybe-update-environment)))
                 '';
                 init = ''
-                                     (advice-add 'direnv-update-directory-environment
+                  (advice-add 'direnv-update-directory-environment
                               :after #'patch-direnv-environment)
-
                   (add-hook 'change-major-mode-hook #'my-direnv-maybe-update)
                   ;; (add-hook 'buffer-list-update-hook #'my-direnv-maybe-update)
                   (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
