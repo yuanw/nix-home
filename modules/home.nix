@@ -12,8 +12,9 @@
   ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
-  # https://rycee.gitlab.io/home-manager/release-notes.html#sec-release-22.11
-  home.stateVersion = "22.11";
+  # https://github.com/nix-community/home-manager/blob/c1e671036224089937e111e32ea899f59181c383/modules/misc/version.nix#L14
+
+  home.stateVersion = "25.11";
   home.packages =
     (import ./packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin (import ./macos_packages.nix { inherit pkgs; })
@@ -174,7 +175,6 @@
           renames = "copies";
           mnemonicprefix = true;
         };
-
         merge = {
           conflictstyle = "zdiff3";
           stat = true;
