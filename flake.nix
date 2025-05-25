@@ -16,8 +16,6 @@
       inputs.nixpkgs-lib.follows = "nixpkgs";
     };
     hosts.url = "github:StevenBlack/hosts";
-    flake-utils.url = "github:numtide/flake-utils";
-    # https://github.com/nix-community/home-manager/issues/5717
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";

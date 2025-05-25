@@ -1871,8 +1871,32 @@ with lib;
               };
               direnv = {
                 enable = true;
-                config = ''
-                  (direnv-mode)
+                functions = [ "direnv--maybe-update-environment" ];
+                preface = ''
+                                    (defconst emacs-binary-path (directory-file-name
+                                               (file-name-directory
+                                                (executable-find "emacsclient"))))
+
+                  (defun patch-direnv-environment (&rest _args)
+                    (let ((dir (file-name-as-directory emacs-binary-path)))
+                      (unless (member dir exec-path)
+                        (setenv "PATH" (concat emacs-binary-path ":" (getenv "PATH")))
+                        (setq exec-path (cons dir exec-path)))))
+
+                  (defvar my-direnv-last-buffer nil)
+
+                  (defun my-direnv-maybe-update (&rest _ignore)
+                    (unless (eq (current-buffer) my-direnv-last-buffer)
+                      (setq my-direnv-last-buffer (current-buffer))
+                      (direnv--maybe-update-environment)))
+                '';
+                init = ''
+                                     (advice-add 'direnv-update-directory-environment
+                              :after #'patch-direnv-environment)
+
+                  (add-hook 'change-major-mode-hook #'my-direnv-maybe-update)
+                  ;; (add-hook 'buffer-list-update-hook #'my-direnv-maybe-update)
+                  (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
                 '';
               };
               editorconfig = {
