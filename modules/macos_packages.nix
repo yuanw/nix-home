@@ -3,10 +3,10 @@
 with pkgs;
 [
   # alerter
-  fastfetch
   pinentry_mac
   yt-dlp
   ffmpeg
+  duti
   #ghostty-mac
   #calibre_mac
 ]
