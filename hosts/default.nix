@@ -17,17 +17,17 @@
         ];
       };
 
-      adguard = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
-          inputs.agenix.nixosModules.age
-          ../modules/aws.nix
-          ../modules/adguradhome-with-user.nix
-          ../modules/adguard.nix
-          ../modules/agenix.nix
-        ];
-      };
+      # adguard = inputs.nixpkgs.lib.nixosSystem {
+      #   system = "x86_64-linux";
+      #   modules = [
+      #     { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
+      #     inputs.agenix.nixosModules.age
+      #     ../modules/aws.nix
+      #     ../modules/adguradhome-with-user.nix
+      #     ../modules/adguard.nix
+      #     ../modules/agenix.nix
+      #   ];
+      # };
 
       asche = withSystem "x86_64-linux" (
         {
