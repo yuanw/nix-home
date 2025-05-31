@@ -135,7 +135,7 @@ with lib;
               (push '(tool-bar-lines . nil) default-frame-alist)
               (push '(vertical-scroll-bars . nil) default-frame-alist)
               ;; no title bar
-              ;;(add-to-list 'default-frame-alist '(undecorated-round . t))
+              (add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
               (let ((mono-spaced-font "PragmataPro VF Mono Liga")
@@ -2363,6 +2363,7 @@ with lib;
 
                   (load-theme 'ef-spring :no-confirm)
                   (setq ef-themes-to-toggle '(ef-spring ef-dream))
+                  (ef-themes-to-toggle)
                 '';
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
