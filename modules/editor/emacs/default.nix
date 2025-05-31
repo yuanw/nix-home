@@ -2363,7 +2363,7 @@ with lib;
 
                   (load-theme 'ef-spring :no-confirm)
                   (setq ef-themes-to-toggle '(ef-spring ef-dream))
-                  (ef-themes-to-toggle)
+                  (ef-themes-toggle)
                 '';
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
