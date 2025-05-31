@@ -130,12 +130,12 @@ with lib;
             earlyInit = ''
               ;; Disable some GUI distractions. We set these manually to avoid starting
               ;; the corresponding minor modes.
-              (add-to-list 'default-frame-alist '(background-color . "#212121"))
+
               (push '(menu-bar-lines . 0) default-frame-alist)
               (push '(tool-bar-lines . nil) default-frame-alist)
               (push '(vertical-scroll-bars . nil) default-frame-alist)
               ;; no title bar
-              (add-to-list 'default-frame-alist '(undecorated-round . t))
+              ;;(add-to-list 'default-frame-alist '(undecorated-round . t))
               ;; Set up fonts early.
               ;;--------------------
               (let ((mono-spaced-font "PragmataPro VF Mono Liga")
