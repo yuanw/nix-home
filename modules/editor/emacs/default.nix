@@ -130,6 +130,7 @@ with lib;
             earlyInit = ''
               ;; Disable some GUI distractions. We set these manually to avoid starting
               ;; the corresponding minor modes.
+              (add-to-list 'default-frame-alist '(background-color . "#212121"))
               (push '(menu-bar-lines . 0) default-frame-alist)
               (push '(tool-bar-lines . nil) default-frame-alist)
               (push '(vertical-scroll-bars . nil) default-frame-alist)
@@ -208,6 +209,8 @@ with lib;
               (defconst palette-indigo-darkest       "#1A0033")
               (defconst palette-purple-darkest       "#330033")
               (defconst palette-fuschia-darkest      "#33001A")
+
+
             '';
 
             prelude = ''
