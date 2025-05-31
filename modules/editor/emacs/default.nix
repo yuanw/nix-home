@@ -2341,7 +2341,9 @@ with lib;
               # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
                 enable = true;
-                demand = true;
+                # demand = true;
+                hook = [ "( after-init . ef-themes-toggle)" ];
+
                 custom = ''
                   (ef-themes-variable-pitch-ui t)
                   (ef-themes-mixed-fonts t)
