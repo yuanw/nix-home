@@ -2373,31 +2373,20 @@ with lib;
               # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
                 enable = true;
-
-                extraConfig = ":disabled";
-                custom = ''
-                  (ef-themes-variable-pitch-ui t)
-                  (ef-themes-mixed-fonts t)
-                  (ef-themes-headings ; read the manual's entry of the doc string
-                   '((0 . (variable-pitch light 1.9))
-                     (1 . (variable-pitch light 1.8))
-                     (2 . (variable-pitch regular 1.7))
-                     (3 . (variable-pitch regular 1.6))
-                     (4 . (variable-pitch regular 1.5))
-                     (5 . (variable-pitch 1.4)) ; absence of weight means `bold'
-                     (6 . (variable-pitch 1.3))
-                     (7 . (variable-pitch 1.2))
-                     (agenda-date . (semilight 1.5))
-                     (agenda-structure . (variable-pitch light 1.9))
-                    (t . (variable-pitch 1.1))))
+                preface = ''
+                   (defun my/select-light-theme ()
+                       (interactive)
+                       (ef-themes-select 'ef-day)
+                       )
+                  (defun my/select-dark-theme ()
+                         (interactive)
+                   (ef-themes-select 'ef-dream))
                 '';
-                config = ''
-                  ;; Set color theme in early init to avoid flashing during start.
-
-                  (load-theme 'ef-spring :no-confirm)
-                  (setq ef-themes-to-toggle '(ef-spring ef-dream))
-                  (ef-themes-toggle)
-                '';
+                bind = {
+                  "C-c t l" = "my/select-light-theme";
+                  "C-c t d" = "my/select-dark-theme";
+                  "C-c t t" = "ef-themes-toggle";
+                };
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
               lin = {
