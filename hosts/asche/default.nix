@@ -9,6 +9,7 @@
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.linux
+    inputs.nixos-hardware.nixosModules.dell-xps-13-9300
     ./configuration.nix
   ];
 
