@@ -1972,6 +1972,29 @@ with lib;
 
               eglot = {
                 enable = cfg.lspStyle == "eglot";
+                # https://emacs-china.org/t/eglot-lsp-server-command/29566
+                preface = ''
+                                    (defun my/eglot-enable-command-provider (orig-fn server)
+                      "Unconditionally add :executeCommandProvider to Eglot client capabilities."
+                      (let ((original-capabilities (funcall orig-fn server)))
+                        ;; Add or update :executeCommandProvider at the top level
+                        (plist-put original-capabilities
+                                   :executeCommandProvider '(:commands (:dynamicRegistration :json-false)))))
+                    (advice-add 'eglot-client-capabilities :around #'my/eglot-enable-command-provider)
+
+                    (defun my/eglot-execute-command (command)
+                      "Interactively execute a COMMAND supported by the current Eglot LSP server.
+                  COMMAND is a string as advertised by the server. No arguments are passed."
+                      (interactive
+                       (let* ((server (eglot-current-server))
+                              (caps (eglot--capabilities server))
+                              (provider (plist-get caps :executeCommandProvider))
+                              (commands (and provider (plist-get provider :commands))))
+                         (list (completing-read "LSP Command: "
+                                                (or (cl-coerce commands 'list) '())
+                                                nil nil))))
+                      (eglot-execute (eglot-current-server) (list :command command)))
+                '';
                 config = ''
                   (setq eglot-autoshutdown t)
                   (add-to-list 'eglot-server-programs
