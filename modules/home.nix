@@ -216,7 +216,7 @@
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         # EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
         LANG = "en_US.UTF-8";
-        GITSTATUS_LOG_LEVEL = "DEBUG";
+        #GITSTATUS_LOG_LEVEL = "DEBUG";
         HIST_STAMPS = "yyyy-mm-dd";
       };
 
