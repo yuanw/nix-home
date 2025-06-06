@@ -92,7 +92,7 @@ with lib;
         { pkgs, ... }:
         {
           home.packages = with pkgs; [
-            texlive.combined.scheme-medium
+            stable.texlive.combined.scheme-medium
           ];
         };
     })
