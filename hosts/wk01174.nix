@@ -58,7 +58,7 @@
         "sloth"
         "mysql-shell"
         "viscosity"
-        "brave-browser"
+        #"brave-browser"
         # "zoom"
       ];
       brews = [
@@ -71,6 +71,7 @@
         "docker-compose"
       ];
     };
+    browsers.chromium.enable = true;
     browsers.firefox = {
       enable = true;
       # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
