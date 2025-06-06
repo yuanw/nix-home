@@ -1,8 +1,7 @@
-{
-  config,
-  inputs,
-  pkgs,
-  ...
+{ config
+, inputs
+, pkgs
+, ...
 }:
 
 {
@@ -20,6 +19,8 @@
     hostname = "asche";
     gpgKey = "BF2ADAA2A98F45E7";
     homeDirectory = "/home/yuanw";
+    font = "PragmataPro Liga";
+    monoFont = "PragmataPro Mono Liga";
   };
   home-manager.users.${config.my.username} = {
     home.file = {
