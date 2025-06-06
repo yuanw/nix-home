@@ -53,10 +53,10 @@
       casks = [
         # "racket"
         "docker"
-        "google-chrome"
+        # "google-chrome"
         "slack"
         "sloth"
-        "mysql-shell"
+        # "mysql-shell"
         "viscosity"
         #"brave-browser"
         # "zoom"
@@ -112,6 +112,9 @@
       yabai.enableJankyborders = true;
     };
 
-    work.enable = true;
+    work = {
+      enable = true;
+      includeTrio = true;
+    };
   };
 }
