@@ -51,7 +51,7 @@
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
-        "racket"
+        # "racket"
         "docker"
         "google-chrome"
         "slack"
@@ -87,12 +87,12 @@
     # health.enable = true;
     typing.enable = true;
     dev = {
-      agda.enable = true;
-      ask.enable = true;
+      # agda.enable = true;
+      # ask.enable = true;
       dart.enable = true;
       java.enable = true;
       scheme.enable = true;
-      haskell.enable = true;
+      #haskell.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;

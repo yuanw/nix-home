@@ -2,7 +2,7 @@
   description = "Yuan Nix-darwin/NixOS Home";
 
   inputs = {
-    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-24.05";
+    nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-25.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
