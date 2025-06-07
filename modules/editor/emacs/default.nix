@@ -2324,6 +2324,7 @@ with lib;
                                             "/Applications/Utilities/"
                                             "/System/Applications/"
                                             "/System/Applications/Utilities/"
+                                            "/System/Library/CoreServices/Applications/"
                                             "~/Applications/"
                                             "~/.nix-profile/Applications/"
                                             )))
