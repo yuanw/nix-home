@@ -17,7 +17,7 @@ let
     if isDarwin then "Library/Application Support/Firefox/Profiles" else ".mozilla/firefox";
 in
 {
-  imports = [ inputs.betterfox.homeManagerModules.betterfox ];
+  # imports = [ inputs.betterfox.homeManagerModules.betterfox ];
 
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
