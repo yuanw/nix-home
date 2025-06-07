@@ -103,84 +103,9 @@
           );
       in
       {
-        ci = withSystem "aarch64-darwin" (
-          {
-            config,
-            inputs',
-            system,
-            ...
-          }:
-          inputs.nix-darwin.lib.darwinSystem {
-            specialArgs = {
-              isDarwin = true;
-              isNixOS = false;
-              nurNoPkg = import inputs.nur {
-                nurpkgs = import inputs.nixpkgs { system = system; };
-              };
-              packages = config.packages;
-              inherit inputs inputs';
-            };
-            modules = [
-              {
-                nixpkgs.hostPlatform = system;
-              }
-              ./yuan-mac.nix
-            ];
-          }
-        );
-        yuanw = withSystem "x86_64-darwin" (
-          {
-            config,
-            inputs',
-            system,
-            ...
-          }:
-          inputs.nix-darwin.lib.darwinSystem {
-            specialArgs = {
-              isDarwin = true;
-              isNixOS = false;
-              nurNoPkg = import inputs.nur {
-                nurpkgs = import inputs.nixpkgs { system = system; };
-              };
-              packages = config.packages;
-              inherit inputs inputs';
-            };
-
-            modules = [
-              {
-                nixpkgs.hostPlatform = system;
-              }
-              ./yuan-mac.nix
-            ];
-          }
-        );
-        mist = withSystem "aarch64-darwin" (
-          {
-            config,
-            inputs',
-            system,
-            ...
-          }:
-          inputs.nix-darwin.lib.darwinSystem {
-            specialArgs = {
-              isDarwin = true;
-              isNixOS = false;
-              loadPrivate = true;
-              nurNoPkg = import inputs.nur {
-                nurpkgs = import inputs.nixpkgs { system = system; };
-              };
-              packages = config.packages;
-              inherit inputs inputs';
-            };
-            modules = [
-              {
-                nixpkgs.hostPlatform = system;
-              }
-              ./mist.nix
-            ];
-          }
-        );
-
+        ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
+        yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
+        mist = configure "mist" "aarch64-darwin" true ./mist.nix;
         WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
       };
   };
