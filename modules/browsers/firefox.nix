@@ -17,6 +17,8 @@ let
     if isDarwin then "Library/Application Support/Firefox/Profiles" else ".mozilla/firefox";
 in
 {
+  imports = [ inputs.betterfox.homeManagerModules.betterfox ];
+
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
     pkg = mkOption {
@@ -30,7 +32,13 @@ in
       home = {
         file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };
-      programs.firefox.enable = true;
+      programs.firefox = {
+        enable = true;
+        betterfox = {
+          enable = true;
+          #version = "128.0"; # Set version here, defaults to main branch
+        };
+      };
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
       programs.firefox.policies = {
