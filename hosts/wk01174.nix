@@ -53,7 +53,8 @@
       casks = [
         # "racket"
         "docker"
-        "google-chrome"
+        "eloston-chromium"
+        #"google-chrome"
         "slack"
         "sloth"
         # "mysql-shell"
