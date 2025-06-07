@@ -11,7 +11,7 @@ with lib;
 {
   imports = [
     inputs.agenix.darwinModules.age
-    inputs.home-manager.darwinModules.home-manager
+    # inputs.home-manager.darwinModules.home-manager
   ];
   networking.hostName = config.my.hostname;
   # https://nixos.wiki/wiki/Enterprise
@@ -95,9 +95,9 @@ with lib;
     shell = pkgs.zsh;
     home = config.my.homeDirectory;
   };
-  home-manager.backupFileExtension = "backup";
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = false;
+  #home-manager.backupFileExtension = "backup";
+  # home-manager.useGlobalPkgs = true;
+  # home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} = import ./home.nix {
     inherit
       inputs

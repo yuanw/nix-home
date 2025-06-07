@@ -158,6 +158,20 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.home-manager.darwinModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = false;
+                sharedModules = [
+                  inputs.betterfox.homeManagerModules.betterfox
+                ];
+                # users.johnw = import ./config/home.nix;
+
+                backupFileExtension = "hm-bak";
+                extraSpecialArgs = { inherit inputs; };
+              };
+            }
             ./wk01174.nix
           ];
         }
