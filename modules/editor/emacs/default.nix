@@ -102,7 +102,7 @@ with lib;
         { pkgs, ... }:
         {
           home.packages = with pkgs; [
-            texlive.combined.scheme-medium
+            stable.texlive.combined.scheme-medium
           ];
         };
     })
@@ -1613,7 +1613,7 @@ with lib;
                 enable = true;
               };
               dslide = {
-                enable = true;
+                enable = false;
                 package =
                   epkgs:
                   epkgs.trivialBuild {
@@ -2101,7 +2101,6 @@ with lib;
 
               lsp-mode = {
                 enable = cfg.lspStyle == "lsp-mode";
-
                 command = [ "lsp" ];
                 after = [
                   "flycheck"
@@ -2134,7 +2133,6 @@ with lib;
 
               dap-mode = {
                 enable = cfg.lspStyle == "lsp-mode";
-
                 after = [ "lsp-mode" ];
               };
 
@@ -2334,6 +2332,7 @@ with lib;
                                             "/Applications/Utilities/"
                                             "/System/Applications/"
                                             "/System/Applications/Utilities/"
+                                            "/System/Library/CoreServices/Applications/"
                                             "~/Applications/"
                                             "~/.nix-profile/Applications/"
                                             )))

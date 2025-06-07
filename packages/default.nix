@@ -124,7 +124,7 @@ _final: prev: {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
     };
   };
-
+  bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };

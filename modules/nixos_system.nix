@@ -11,7 +11,7 @@ with lib;
 {
   imports = [
     inputs.agenix.nixosModules.age
-    inputs.home-manager.nixosModules.home-manager
+    # inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = config.my.hostname;
@@ -89,9 +89,9 @@ with lib;
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
   virtualisation.docker.enable = true;
-  home-manager.backupFileExtension = "backup";
-  home-manager.useGlobalPkgs = true;
-  home-manager.useUserPackages = false;
+  #home-manager.backupFileExtension = "backup";
+  #home-manager.useGlobalPkgs = true;
+  #home-manager.useUserPackages = false;
   home-manager.users.${config.my.username} = import ./home.nix {
     inherit
       inputs

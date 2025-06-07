@@ -51,14 +51,15 @@
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
-        "racket"
+        # "racket"
         "docker"
-        "google-chrome"
+        "eloston-chromium"
+        #"google-chrome"
         "slack"
         "sloth"
-        "mysql-shell"
+        # "mysql-shell"
         "viscosity"
-        "brave-browser"
+        #"brave-browser"
         # "zoom"
       ];
       brews = [
@@ -71,6 +72,7 @@
         "docker-compose"
       ];
     };
+    #browsers.chromium.enable = true;
     browsers.firefox = {
       enable = true;
       # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
@@ -87,12 +89,12 @@
     # health.enable = true;
     typing.enable = true;
     dev = {
-      agda.enable = true;
-      ask.enable = true;
+      # agda.enable = true;
+      # ask.enable = true;
       dart.enable = true;
       java.enable = true;
       scheme.enable = true;
-      haskell.enable = true;
+      #haskell.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;
@@ -111,6 +113,9 @@
       yabai.enableJankyborders = true;
     };
 
-    work.enable = true;
+    work = {
+      enable = true;
+      includeTrio = true;
+    };
   };
 }

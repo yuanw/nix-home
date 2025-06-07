@@ -6,6 +6,7 @@
       ./ai.nix
       ./catppuccin.nix
       ./common.nix
+      ./browsers/chromium.nix
       ./browsers/firefox.nix
       ./dev/agda.nix
       ./dev/ask.nix

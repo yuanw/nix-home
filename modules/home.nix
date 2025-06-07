@@ -2,14 +2,10 @@
   pkgs,
   lib,
   config,
-  inputs,
   ...
 }:
 
 {
-  imports = [
-    inputs.catppuccin.homeModules.catppuccin
-  ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
   # https://github.com/nix-community/home-manager/blob/c1e671036224089937e111e32ea899f59181c383/modules/misc/version.nix#L14

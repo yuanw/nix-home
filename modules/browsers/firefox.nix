@@ -30,7 +30,13 @@ in
       home = {
         file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };
-      programs.firefox.enable = true;
+      programs.firefox = {
+        enable = true;
+        betterfox = {
+          enable = true;
+          #version = "128.0"; # Set version here, defaults to main branch
+        };
+      };
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
       programs.firefox.policies = {
@@ -51,6 +57,7 @@ in
       # ];
       programs.firefox.profiles = {
         home = {
+          betterfox.enable = true;
           name = "home";
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
           extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
