@@ -59,6 +59,7 @@ in
       # ];
       programs.firefox.profiles = {
         home = {
+          betterfox.enable = true;
           name = "home";
           #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
           extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
