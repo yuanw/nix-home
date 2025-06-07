@@ -40,6 +40,9 @@ let
       ld64 = prev.ld64.overrideAttrs (old: {
         patches = old.patches ++ [ ./Dedupe-RPATH-entries.patch ];
       });
+      libarchive = prev.libarchive.overrideAttrs (_old: {
+        doCheck = false;
+      });
     }
   );
 in
