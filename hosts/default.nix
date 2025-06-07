@@ -90,6 +90,7 @@
                     useUserPackages = false;
                     sharedModules = [
                       inputs.betterfox.homeManagerModules.betterfox
+                      inputs.catppuccin.homeModules.catppuccin
                     ];
                     # users.johnw = import ./config/home.nix;
 
