@@ -73,6 +73,24 @@
       inputs.emacs.overlay
       inputs.nur.overlays.default
       inputs.agenix.overlays.default
+      (
+        _final: prev:
+        let
+          pkgs = (import inputs.nixpkgs { system = prev.system; }).extend (
+            _final: prev: {
+              ld64 = prev.ld64.overrideAttrs (o: {
+                patches = o.patches ++ [ ./editor/emacs/Dedupe-RPATH-entries.patch ];
+              });
+              libarchive = prev.libarchive.overrideAttrs (_old: {
+                doCheck = false;
+              });
+            }
+          );
+        in
+        {
+          emacs-git = pkgs.emacs-git;
+        }
+      )
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
 
