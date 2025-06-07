@@ -53,7 +53,7 @@
       casks = [
         # "racket"
         "docker"
-        # "google-chrome"
+        "google-chrome"
         "slack"
         "sloth"
         # "mysql-shell"
@@ -71,7 +71,7 @@
         "docker-compose"
       ];
     };
-    browsers.chromium.enable = true;
+    #browsers.chromium.enable = true;
     browsers.firefox = {
       enable = true;
       # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
