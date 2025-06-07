@@ -1603,7 +1603,7 @@ with lib;
                 enable = true;
               };
               dslide = {
-                enable = true;
+                enable = false;
                 package =
                   epkgs:
                   epkgs.trivialBuild {
@@ -2091,7 +2091,6 @@ with lib;
 
               lsp-mode = {
                 enable = cfg.lspStyle == "lsp-mode";
-
                 command = [ "lsp" ];
                 after = [
                   "flycheck"
@@ -2124,7 +2123,6 @@ with lib;
 
               dap-mode = {
                 enable = cfg.lspStyle == "lsp-mode";
-
                 after = [ "lsp-mode" ];
               };
 
