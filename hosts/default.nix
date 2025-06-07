@@ -51,6 +51,21 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = false;
+                sharedModules = [
+                  inputs.betterfox.homeManagerModules.betterfox
+                  inputs.catppuccin.homeModules.catppuccin
+                ];
+                # users.johnw = import ./config/home.nix;
+
+                backupFileExtension = "hm-bak";
+                extraSpecialArgs = { inherit inputs; };
+              };
+            }
 
             ./asche
           ];
