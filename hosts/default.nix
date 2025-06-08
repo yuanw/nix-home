@@ -55,7 +55,7 @@
             {
               home-manager = {
                 useGlobalPkgs = true;
-                useUserPackages = true;
+                useUserPackages = false;
                 sharedModules = [
                   inputs.betterfox.homeManagerModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
@@ -102,7 +102,7 @@
                 {
                   home-manager = {
                     useGlobalPkgs = true;
-                    useUserPackages = true;
+                    useUserPackages = false;
                     sharedModules = [
                       inputs.betterfox.homeManagerModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
