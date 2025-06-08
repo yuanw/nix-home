@@ -2335,6 +2335,7 @@ with lib;
                                             "/System/Applications/Utilities/"
                                             "/System/Library/CoreServices/Applications/"
                                             "~/Applications/"
+                                            "/etc/profiles/per-user/${config.my.username}/Applications"
                                             "~/.nix-profile/Applications/"
                                             )))
 
