@@ -36,13 +36,8 @@ let
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 
   pkgs' = pkgs.extend (
-    _final: prev: {
-      ld64 = prev.ld64.overrideAttrs (old: {
-        patches = old.patches ++ [ ./Dedupe-RPATH-entries.patch ];
-      });
-      libarchive = prev.libarchive.overrideAttrs (_old: {
-        doCheck = false;
-      });
+    _final: _prev: {
+      libarchive = pkgs.staging.libarchive;
     }
   );
 in

@@ -674,22 +674,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-master": {
-      "locked": {
-        "lastModified": 1749168594,
-        "narHash": "sha256-rqbuIstN3VknYQsKFPG+PqdYycCfpHGwbUIhJVf1shI=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "0bc340c1f6137a9cff27d3c64e1deda328304906",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1748995628,
@@ -734,6 +718,21 @@
       "original": {
         "owner": "nixos",
         "ref": "nixos-25.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-staging": {
+      "locked": {
+        "lastModified": 1749412893,
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "01269b4503d77bcfab9fdc2dc3c0fafdf3547283",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "staging",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -960,8 +959,8 @@
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_9",
-        "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable_3",
+        "nixpkgs-staging": "nixpkgs-staging",
         "nur": "nur",
         "pre-commit": "pre-commit_2",
         "shy-fox": "shy-fox",
