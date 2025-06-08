@@ -2335,7 +2335,7 @@ with lib;
                                             "/System/Applications/Utilities/"
                                             "/System/Library/CoreServices/Applications/"
                                             "~/Applications/"
-                                            "~/Applications//Home Manager Apps"
+                                            "~/Applications/Home Manager Apps"
                                             )))
 
                                       ;;; set multiple sources for consult-omni-multi command. Change these lists as needed for different interactive commands. Keep in mind that each source has to be a key in `consult-omni-sources-alist'.
