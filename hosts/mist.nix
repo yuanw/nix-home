@@ -82,7 +82,7 @@ in
     typing.enable = true;
     jellyfin.enable = true;
     dev = {
-      agda.enable = true;
+      #agda.enable = true;
       ask.enable = true;
       scheme.enable = true;
       #racket.enable = false;

@@ -22,8 +22,8 @@ let
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
-    shift + ctrl + alt - f : open -n -a ~/.nix-profile/Applications/Firefox.app
-    shift + ctrl + alt - return : open -n -a ~/.nix-profile/Applications/Alacritty.app
+    shift + ctrl + alt - f : open -n -a ~/Applications/Home\ Manager\ Apps/Firefox.app
+    shift + ctrl + alt - return : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
