@@ -1666,9 +1666,6 @@ with lib;
                                                      "\n\n"
                                                      "* TIL"
                                                      "\n\n"))))
-                            (use-package denote-sequence)
-                          
-                            (use-package denote-rename-buffer)
                           
                             (denote-rename-buffer-mode)
 
