@@ -331,6 +331,12 @@ with lib;
                              (setq tab-always-indent 'complete)
                              (setq xref-search-program 'ripgrep)
 
+                             (defun my/locate-hm-init ()
+                             "Locate hm-init file"
+                             (interactive)
+                             (let ((first-path (seq-find (lambda (s) (string-prefix-p "/nix/store/" s)) load-path)))
+                             (if first-path (find-alternate-file (concat (car (split-string first-path "/share/emacs/site-lisp")) "/share/emacs/site-lisp/hm-init.el"))
+                             (error "cannot find /nix/store in load-path"))))
 
                              (defun prot/keyboard-quit-dwim ()
                                   "Do-What-I-Mean behaviour for a general `keyboard-quit'.
