@@ -1654,22 +1654,10 @@ with lib;
               denote = {
                 enable = true;
                 after = [ "org" ];
-                package =
-                  epkgs:
-                  epkgs.trivialBuild {
-                    pname = "denote";
-                    version = "3.2.0-dev";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "protesilaos";
-                      repo = "denote";
-                      rev = "5651dc77374bddf4b0aca241599fc15f994aa18c";
-                      #sha256 = lib.fakeSha256;
-                      sha256 = "sha256-DUW50RSnevwB7zQvKIXjyDDnMX6h1+NmYwB1J/MpXbg=";
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
 
+                extraConfig = ''
+                  :bind (("C-c n o" . denote-open-or-create))
+                '';
                 config = ''
                             (setq denote-directory "~/org/denote/")
                             (setq denote-templates
@@ -1679,41 +1667,75 @@ with lib;
                                                      "* TIL"
                                                      "\n\n"))))
                             (use-package denote-sequence)
-                            (use-package denote-org-extras)
+                          
                             (use-package denote-rename-buffer)
-                            (use-package denote-journal-extras)
+                          
                             (denote-rename-buffer-mode)
 
                             (with-eval-after-load 'org-capture
                   (push '("n" "New note (With Denote)" plain (file denote-last-path) #'denote-org-capture :no-save t
                           :immediate-finish nil :kill-buffer t :jump-to-captured t ) org-capture-templates)
                   (
-                   push '("d" "daily note" item (function denote-journal-extras-new-or-existing-entry) "- %U %?" :prepend t) org-capture-templates)
+                   push '("d" "daily note" item (function denote-journal-new-or-existing-entry) "- %U %?" :prepend t) org-capture-templates)
                   )
                 '';
               };
+
+              denote-org = {
+                enable = true;
+                extraConfig = ''
+                  :ensure t
+                  :commands
+                  ;; I list the commands here so that you can discover them more
+                  ;; easily.  You might want to bind the most frequently used ones to
+                  ;; the `org-mode-map'.
+                  ( denote-org-link-to-heading
+                    denote-org-backlinks-for-heading
+
+                    denote-org-extract-org-subtree
+
+                    denote-org-convert-links-to-file-type
+                    denote-org-convert-links-to-denote-type
+
+                    denote-org-dblock-insert-files
+                    denote-org-dblock-insert-links
+                    denote-org-dblock-insert-backlinks
+                    denote-org-dblock-insert-missing-links
+                    denote-org-dblock-insert-files-as-headings)
+                '';
+              };
+
+              denote-journal = {
+                enable = true;
+                extraConfig = ''
+                  ;; Bind those to some key for your convenience.
+                  :commands ( denote-journal-new-entry
+                              denote-journal-new-or-existing-entry
+                              denote-journal-link-or-create-entry )
+                  :hook (calendar-mode . denote-journal-calendar-mode)
+                  :bind (("C-c n t" . denote-journal-new-or-existing-entry))
+                  :config
+                  ;; Use the "journal" subdirectory of the `denote-directory'.  Set this
+                  ;; to nil to use the `denote-directory' instead.
+                  (setq denote-journal-directory
+                        (expand-file-name "journal" denote-directory))
+                  ;; Default keyword for new journal entries. It can also be a list of
+                  ;; strings.
+                  (setq denote-journal-keyword "journal")
+                  ;; Read the doc string of `denote-journal-title-format'.
+                  ;;(setq denote-journal-title-format 'day-date-month-year)
+                '';
+              };
               consult-denote = {
-                enable = false;
-                package =
-                  epkgs:
-                  epkgs.trivialBuild {
-                    pname = "consult-denote";
-                    version = "0.0.1";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "protesilaos";
-                      repo = "consult-denote";
-                      rev = "b477a6ec64a148c186e7114135873e975b05074f";
-                      # sha256 = lib.fakeSha256;
-                      sha256 = "sha256-34xSYhCO10riTGBWr2LDCznHdNVoIQtZOtiIkzdJVEc=";
-                    };
-                    # elisp dependencies
-                    packageRequires = [
-                      epkgs.denote
-                      epkgs.consult
-                    ];
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
+                enable = true;
+                extraConfig = ''
+                                    :ensure t
+                  :bind
+                  (("C-c n f" . consult-denote-find)
+                   ("C-c n r" . consult-denote-grep))
+                  :config
+                  (consult-denote-mode 1)
+                '';
               };
 
               smartparens = {
