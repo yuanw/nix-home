@@ -2472,8 +2472,6 @@ with lib;
                   (auto-dark-themes '((ef-dream) (ef-day)))
                   (auto-dark-polling-interval-seconds 5)
                   (auto-dark-allow-osascript t)
-
-
                 '';
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
