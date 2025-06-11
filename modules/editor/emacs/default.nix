@@ -2466,7 +2466,7 @@ with lib;
                    . (lambda ()
                         ;; something to execute when light mode is detected
                         ))
-                        :init (auto-dark-mode))
+                        :init (auto-dark-mode)
                 '';
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
