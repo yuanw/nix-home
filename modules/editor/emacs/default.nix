@@ -2453,18 +2453,20 @@ with lib;
                 extraConfig = ''
                   :ensure t
                   :custom
-                  (auto-dark-themes '((ef-dream) (ef-day)))
+                  (custom-safe-themes '((ef-day) (ef-dream) (ef-winter)))
+                  ;;(auto-dark-themes '((ef-dream) (ef-day)))
                   (auto-dark-polling-interval-seconds 5)
                   (auto-dark-allow-osascript t)
                   ;; (auto-dark-detection-method nil) ;; dangerous to be set manually
                   :hook
                   (auto-dark-dark-mode
                    . (lambda ()
-                        ;; something to execute when dark mode is detected
+                          (ef-themes-select 'ef-dream))
                         ))
                   (auto-dark-light-mode
                    . (lambda ()
-                        ;; something to execute when light mode is detected
+                   ;; something to execute when light mode is detected
+                     (ef-themes-select 'ef-day))
                         ))
                         :init (auto-dark-mode)
                 '';
