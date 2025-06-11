@@ -2449,7 +2449,7 @@ with lib;
               };
 
               auto-dark = {
-                enable = true;
+                enable = isDarwin;
                 hook = [
                   " (after-init . auto-dark-mode) "
                   ''
@@ -2461,7 +2461,6 @@ with lib;
                   ''
                               (auto-dark-light-mode
                     . (lambda ()
-                    ;; something to execute when light mode is detected
                       (ef-themes-select 'ef-day)
                          ))
                   ''
