@@ -2461,12 +2461,12 @@ with lib;
                   :hook
                   (auto-dark-dark-mode
                    . (lambda ()
-                          (ef-themes-select 'ef-dream))
+                          (ef-themes-select 'ef-dream)
                         ))
                   (auto-dark-light-mode
                    . (lambda ()
                    ;; something to execute when light mode is detected
-                     (ef-themes-select 'ef-day))
+                     (ef-themes-select 'ef-day)
                         ))
                         :init (auto-dark-mode)
                 '';
