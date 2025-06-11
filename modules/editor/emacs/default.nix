@@ -2421,6 +2421,7 @@ with lib;
                   (require 'lsp-bridge-jdtls)
                   (require 'yasnippet)
                   (yas-global-mode 1)
+                  (add-hook 'direnv-envrc-mode-hook 'lsp-bridge-restart-process)
                   ;;(setopt lsp-bridge-jdtls-jvm-args  "-javaagent:${pkgs.lombok}/share/java/lombok.jar")
                   (setq lsp-bridge-enable-auto-import 't)
                 '';
@@ -2445,6 +2446,36 @@ with lib;
                   "C-c t d" = "my/select-dark-theme";
                   "C-c t t" = "ef-themes-toggle";
                 };
+              };
+
+              auto-dark = {
+                enable = true;
+                hook = [
+                  " (after-init . auto-dark-mode) "
+                  ''
+                     (auto-dark-dark-mode
+                    . (lambda ()
+                           (ef-themes-select 'ef-dream)
+                         ))
+                  ''
+                  ''
+                              (auto-dark-light-mode
+                    . (lambda ()
+                    ;; something to execute when light mode is detected
+                      (ef-themes-select 'ef-day)
+                         ))
+                  ''
+                ];
+                extraConfig = ''
+                  :ensure t
+                  :custom
+                  (custom-safe-themes '((ef-day) (ef-dream) (ef-winter)))
+                  (auto-dark-themes '((ef-dream) (ef-day)))
+                  (auto-dark-polling-interval-seconds 5)
+                  (auto-dark-allow-osascript t)
+
+
+                '';
               };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
               lin = {
