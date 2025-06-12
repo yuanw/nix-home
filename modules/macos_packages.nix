@@ -11,8 +11,7 @@ with pkgs;
   github-mcp-server
 
   mcp-server-fetch
-
-  mcp-server-slack
+  slackdump
   mcp-server-filesystem
   #ghostty-mac
   #calibre_mac
