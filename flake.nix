@@ -58,6 +58,10 @@
       url = "github:Naezr/ShyFox";
       flake = false;
     };
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
