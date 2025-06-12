@@ -365,19 +365,22 @@ with lib;
                                (defun add-all-to-list (var &rest elems)
               (dolist (elem (reverse elems))
               (add-to-list var elem)))
-              (repeat-mode 1)
-
             '';
 
             postlude = ''
                             ;; Minimising & quitting Emacs way too many times without wanting to.
                             (keycast-header-line-mode)
-              	                  ;; add smerge-basic-map to repeat-map
+
+                                          (repeat-mode 1)
+
+              	                          ;; add smerge-basic-map to repeat-map
+
+                           (with-eval-after-load 'smerge-mode               
                                         (map-keymap
                             (lambda (_key cmd)
                               (when (symbolp cmd)
                                 (put cmd 'repeat-map 'smerge-basic-map)))
-                            smerge-basic-map)  
+                                smerge-basic-map))  
 
             '';
 
@@ -762,35 +765,36 @@ with lib;
               };
               auth-source-pass = {
                 enable = true;
+                extraConfig = ''
+                  :preface
+                  (defvar auth-source-pass--cache (make-hash-table :test #'equal))
 
-                # :preface
-                # (defvar auth-source-pass--cache (make-hash-table :test #'equal))
+                  (defun auth-source-pass--reset-cache ()
+                    (setq auth-source-pass--cache (make-hash-table :test #'equal)))
 
-                # (defun auth-source-pass--reset-cache ()
-                #   (setq auth-source-pass--cache (make-hash-table :test #'equal)))
+                  (defun auth-source-pass--read-entry (entry)
+                    "Return a string with the file content of ENTRY."
+                    (run-at-time 45 nil #'auth-source-pass--reset-cache)
+                    (let ((cached (gethash entry auth-source-pass--cache)))
+                      (or cached
+                          (puthash
+                           entry
+                           (with-temp-buffer
+                             (insert-file-contents (expand-file-name
+                                                    (format "%s.gpg" entry)
+                                                    (getenv "PASSWORD_STORE_DIR")))
+                             (buffer-substring-no-properties (point-min) (point-max)))
+                           auth-source-pass--cache))))
 
-                # (defun auth-source-pass--read-entry (entry)
-                #   "Return a string with the file content of ENTRY."
-                #   (run-at-time 45 nil #'auth-source-pass--reset-cache)
-                #   (let ((cached (gethash entry auth-source-pass--cache)))
-                #     (or cached
-                #         (puthash
-                #          entry
-                #          (with-temp-buffer
-                #            (insert-file-contents (expand-file-name
-                #                                   (format "%s.gpg" entry)
-                #                                   (getenv "PASSWORD_STORE_DIR")))
-                #            (buffer-substring-no-properties (point-min) (point-max)))
-                #          auth-source-pass--cache))))
-
-                # (defun auth-source-pass-entries ()
-                #   "Return a list of all password store entries."
-                #   (let ((store-dir (getenv "PASSWORD_STORE_DIR")))
-                #     (mapcar
-                #      (lambda (file) (file-name-sans-extension (file-relative-name file store-dir)))
-                #      (directory-files-recursively store-dir "\.gpg$"))))
-                # :config
-                # (auth-source-pass-enable))
+                  (defun auth-source-pass-entries ()
+                    "Return a list of all password store entries."
+                    (let ((store-dir (getenv "PASSWORD_STORE_DIR")))
+                      (mapcar
+                       (lambda (file) (file-name-sans-extension (file-relative-name file store-dir)))
+                       (directory-files-recursively store-dir "\.gpg$"))))
+                  :config
+                  (auth-source-pass-enable)
+                '';
               };
 
               wdired = {
@@ -2794,6 +2798,15 @@ with lib;
                   "M-o v" = "toggle-term-vterm";
                   "M-o o" = "toggle-term-toggle";
                 };
+              };
+
+              gptel = {
+                enable = true;
+              };
+
+              mcp = {
+                enable = true;
+                after = [ "gptel" ];
               };
             };
           };
