@@ -1737,6 +1737,10 @@ with lib;
               };
               consult-denote = {
                 enable = true;
+                after = [ "consult" ];
+                custom = ''
+                  (consult-denote-find-command 'consult-fd)
+                '';
                 extraConfig = ''
                                     :ensure t
                   :bind
