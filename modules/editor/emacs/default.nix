@@ -2811,6 +2811,24 @@ with lib;
               mcp = {
                 enable = true;
                 after = [ "gptel" ];
+                extraConfig = ''
+                              
+                  :custom (mcp-hub-servers
+                           `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
+                             ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+                             ;;("qdrant" . (:url "http://localhost:8000/sse"))
+                             ;; ("graphlit" . (
+                             ;;                :command "npx"
+                             ;;                :args ("-y" "graphlit-mcp-server")
+                             ;;                :env (
+                             ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
+                             ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
+                             ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
+                                                  )
+                                                  )
+                  :config (require 'mcp-hub)
+                  :hook (after-init . mcp-hub-start-all-server)
+                '';
               };
             };
           };
