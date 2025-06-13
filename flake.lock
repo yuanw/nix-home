@@ -513,6 +513,26 @@
         "type": "github"
       }
     },
+    "mcp-servers-nix": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1749666917,
+        "narHash": "sha256-sVCBJdPlI6toJPuEl5BgvY19SC8etijAg34XoXEXjFo=",
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "rev": "cb23ffc59555ab227b37d1b8f3157d6799fe8c55",
+        "type": "github"
+      },
+      "original": {
+        "owner": "natsukium",
+        "repo": "mcp-servers-nix",
+        "type": "github"
+      }
+    },
     "mono-stretchly-darwin": {
       "inputs": {
         "devshell": "devshell",
@@ -956,6 +976,7 @@
         "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
         "hosts": "hosts",
+        "mcp-servers-nix": "mcp-servers-nix",
         "mono-stretchly-darwin": "mono-stretchly-darwin",
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
