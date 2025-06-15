@@ -112,20 +112,29 @@ in
   };
 
   launchd.daemons.nix-gc = {
-    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
+    serviceConfig.KeepAlive.SuccessfulExit = false;
+    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
     serviceConfig.RunAtLoad = true;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Weekday = 7;
-        Hour = 3;
-        Minute = 15;
-      }
-    ];
+    # serviceConfig.StartCalendarInterval = [
+    #   {
+    #     Weekday = 7;
+    #     Hour = 3;
+    #     Minute = 15;
+    #   }
+    # ];
     serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
     serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
   };
 
-  launchd.agents.nix-gc = {
+  #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
+  #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
+  #   SHASUM=$(sha256sum "$YABAI_BIN" | cut -d' ' -f1)
+  #   cat <<EOF >"$out"
+  #   %admin ALL=(root) NOPASSWD: sha256:$SHASUM $YABAI_BIN --delete-older-than 3d
+  #   EOF
+  # '';
+
+  launchd.user.agents.nix-gc = {
     command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
     serviceConfig.RunAtLoad = false;
     serviceConfig.StartCalendarInterval = [
