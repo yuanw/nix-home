@@ -8,6 +8,10 @@
 
 with pkgs.stdenv;
 with lib;
+let
+  nixPackage =
+    if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix;
+in
 {
   imports = [
     inputs.agenix.darwinModules.age
@@ -105,6 +109,43 @@ with lib;
       lib
       config
       ;
+  };
+
+  launchd.daemons.nix-gc = {
+    serviceConfig.KeepAlive.SuccessfulExit = false;
+    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
+    serviceConfig.RunAtLoad = true;
+    # serviceConfig.StartCalendarInterval = [
+    #   {
+    #     Weekday = 7;
+    #     Hour = 3;
+    #     Minute = 15;
+    #   }
+    # ];
+    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
+    serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
+  };
+
+  #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
+  #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
+  #   SHASUM=$(sha256sum "$YABAI_BIN" | cut -d' ' -f1)
+  #   cat <<EOF >"$out"
+  #   %admin ALL=(root) NOPASSWD: sha256:$SHASUM $YABAI_BIN --delete-older-than 3d
+  #   EOF
+  # '';
+
+  launchd.user.agents.nix-gc = {
+    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
+    serviceConfig.RunAtLoad = false;
+    serviceConfig.StartCalendarInterval = [
+      {
+        Weekday = 7;
+        Hour = 4;
+        Minute = 15;
+      }
+    ];
+    serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
+    serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
   };
 
   fonts.packages = with pkgs; [
