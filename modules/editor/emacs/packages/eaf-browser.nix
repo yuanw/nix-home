@@ -1,5 +1,4 @@
 {
-  lib,
   #, elispFileVersion
   melpaBuild,
   buildNpmPackage,
@@ -16,8 +15,8 @@ melpaBuild (
       owner = "emacs-eaf";
       repo = "eaf-browser";
       rev = "120967319132f361a2b27f89ee54d1984aa23eaf";
-      sha256 = lib.fakeSha256;
-      #sha256 = "sha256-J/98TamZYkugOezuh/e2EQdWxBPv+wWlXFAxkjxmVDY=";
+      #sha256 = lib.fakeSha256;
+      sha256 = "sha256-DsPrctB1bSGBPQLI2LsnSUtqnzWpZRrWrVZM8lS9fms=";
     };
     nodeModules = buildNpmPackage rec {
       pname = nodeName;
