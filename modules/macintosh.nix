@@ -114,7 +114,7 @@ in
   launchd.daemons.nix-gc = {
     serviceConfig.KeepAlive.SuccessfulExit = false;
     command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-    serviceConfig.RunAtLoad = true;
+    serviceConfig.RunAtLoad = false;
     serviceConfig.StartCalendarInterval = [
       {
         Weekday = 7;
@@ -137,13 +137,10 @@ in
   launchd.user.agents.user-nix-gc = {
     command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
     serviceConfig.RunAtLoad = true;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Weekday = 7;
-        Hour = 4;
-        Minute = 15;
-      }
-    ];
+    environment.NIX_REMOTE = optionalString config.services.activate-system.enable "daemon";
+    serviceConfig.KeepAlive = false;
+    serviceConfig.ProcessType = "Background";
+    serviceConfig.StartInterval = 3600;
     serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
     serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
   };
