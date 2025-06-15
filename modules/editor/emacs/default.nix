@@ -2852,7 +2852,11 @@ with lib;
 
               eaf-browser = {
                 enable = true;
-                package = _epkgs: (pkgs.callPackage ./packages/eaf-browser.nix { });
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/eaf-browser.nix {
+                    inherit (epkgs) melpaBuild;
+                  });
               };
 
             };
