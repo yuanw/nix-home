@@ -22,7 +22,7 @@ melpaBuild (
       pname = nodeName;
       inherit version src;
 
-      npmDepsHash = "sha256-MUf+fJdEfzU/0e4he7mVURE1osP+Jm28LduCEtcJAPg=";
+      npmDepsHash = "sha256-UfQL7rN47nI1FyhgBlzH4QtyVCn0wGV3Rv5Y+aidRNE=";
       prePatch = ''
         find . -mindepth 1 -maxdepth 1 ! -name "*.json" -exec rm -rf {} ';'
         ${jq}/bin/jq 'setpath(["name"]; "${pname}") | setpath(["version"]; "${version}")' package.json > package.json.tmp
