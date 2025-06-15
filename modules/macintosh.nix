@@ -8,6 +8,10 @@
 
 with pkgs.stdenv;
 with lib;
+let
+  nixPackage =
+    if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix;
+in
 {
   imports = [
     inputs.agenix.darwinModules.age
@@ -105,6 +109,34 @@ with lib;
       lib
       config
       ;
+  };
+
+  launchd.daemons.nix-gc = {
+    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
+    serviceConfig.RunAtLoad = true;
+    serviceConfig.StartCalendarInterval = [
+      {
+        Weekday = 7;
+        Hour = 3;
+        Minute = 15;
+      }
+    ];
+    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
+    serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
+  };
+
+  launchd.agents.nix-gc = {
+    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
+    serviceConfig.RunAtLoad = false;
+    serviceConfig.StartCalendarInterval = [
+      {
+        Weekday = 7;
+        Hour = 4;
+        Minute = 15;
+      }
+    ];
+    serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
+    serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
   };
 
   fonts.packages = with pkgs; [
