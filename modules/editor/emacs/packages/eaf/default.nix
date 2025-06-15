@@ -17,6 +17,7 @@
   xdotool ? null,
   withX11Support ? true,
   wmctrl ? null,
+  ...
 }:
 let
   inherit (lib) readFile;
