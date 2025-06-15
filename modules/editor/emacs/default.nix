@@ -2849,6 +2849,12 @@ with lib;
                   });
 
               };
+
+              eaf-browser = {
+                enable = true;
+                package = _epkgs: (pkgs.callPackage ./patches/eaf-browser.nix { });
+              };
+
             };
           };
 
