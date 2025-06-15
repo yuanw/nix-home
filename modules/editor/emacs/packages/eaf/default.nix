@@ -43,8 +43,8 @@ in
     owner = "emacs-eaf";
     repo = "emacs-application-framework";
     rev = "3f3a6862fc27919ccdc5cb9335222fae385c8a89";
-    sha256 = lib.fakeSha256;
-    #sha256 = "sha256-7epTvu9f4Fn7XrEZOVZEieG/Qkt3Vs2M939jJE4EwaA=";
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-J/98TamZYkugOezuh/e2EQdWxBPv+wWlXFAxkjxmVDY=";
   };
 
   patchPhase = ''
