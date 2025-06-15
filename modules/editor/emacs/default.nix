@@ -2836,6 +2836,9 @@ with lib;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf {
+                    elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
+                    melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
+
                     inherit (epkgs) melpaBuild;
                     inherit (epkgs.melpaPackages)
                       ctable
