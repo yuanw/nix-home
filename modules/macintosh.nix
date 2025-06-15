@@ -137,7 +137,7 @@ in
   launchd.user.agents.user-nix-gc = {
     command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
     serviceConfig.RunAtLoad = true;
-    environment.NIX_REMOTE = optionalString config.services.activate-system.enable "daemon";
+    environment.NIX_REMOTE = "daemon";
     serviceConfig.KeepAlive = false;
     serviceConfig.ProcessType = "Background";
     serviceConfig.StartInterval = 3600;
