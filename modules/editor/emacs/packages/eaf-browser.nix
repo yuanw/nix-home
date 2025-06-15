@@ -15,7 +15,7 @@ melpaBuild (
     src = fetchFromGitHub {
       owner = "emacs-eaf";
       repo = "emacs-browser";
-      rev = "120967319132f361a2b27f89ee54d1984aa23eaf 3f3a6862fc27919ccdc5cb9335222fae385c8a89";
+      rev = "120967319132f361a2b27f89ee54d1984aa23eaf";
       sha256 = lib.fakeSha256;
       #sha256 = "sha256-J/98TamZYkugOezuh/e2EQdWxBPv+wWlXFAxkjxmVDY=";
     };
