@@ -2830,6 +2830,22 @@ with lib;
                   :hook (after-init . mcp-hub-start-all-server)
                 '';
               };
+
+              eaf = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/eaf {
+                    inherit (epkgs) melpaBuild;
+                    inherit (epkgs.melpaPackages)
+                      ctable
+                      deferred
+                      epc
+                      s
+                      ;
+                  });
+
+              };
             };
           };
 
