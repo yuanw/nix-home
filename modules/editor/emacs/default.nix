@@ -1693,7 +1693,7 @@ with lib;
               denote-org = {
                 enable = true;
                 extraConfig = ''
-                  :ensure t
+
                   :commands
                   ;; I list the commands here so that you can discover them more
                   ;; easily.  You might want to bind the most frequently used ones to
@@ -1742,7 +1742,7 @@ with lib;
                   (consult-denote-find-command 'consult-fd)
                 '';
                 extraConfig = ''
-                                    :ensure t
+                                    
                   :bind
                   (("C-c n f" . consult-denote-find)
                    ("C-c n r" . consult-denote-grep))
@@ -2482,7 +2482,7 @@ with lib;
                   ''
                 ];
                 extraConfig = ''
-                  :ensure t
+
                   :custom
                   (custom-safe-themes '((ef-day) (ef-dream) (ef-winter)))
                   (auto-dark-themes '((ef-dream) (ef-day)))
@@ -2833,6 +2833,19 @@ with lib;
 
               eaf = {
                 enable = true;
+                extraConfig = ''
+                                    :custom
+                  ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
+                  (eaf-browser-continue-where-left-off t)
+                  (eaf-browser-enable-adblocker t)
+                  (browse-url-browser-function 'eaf-open-browser)
+                  :config
+                  (defalias 'browse-web #'eaf-open-browser)
+                  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
+                  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
+                  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
+                  (eaf-bind-key nil "M-q" eaf-browser-keybinding)
+                '';
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf {
