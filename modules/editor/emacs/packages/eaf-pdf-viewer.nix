@@ -1,7 +1,6 @@
 {
   melpaBuild,
   fetchFromGitHub,
-  lib,
   ...
 }:
 (melpaBuild (_finalAttrs: {
@@ -12,8 +11,8 @@
     owner = "emacs-eaf";
     repo = "eaf-pdf-viewer";
     rev = "96fa83176f17a33e516bdb4e0abaa832e3328248";
-    sha256 = lib.fakeSha256;
-    #sha256 = "sha256-DsPrctB1bSGBPQLI2LsnSUtqnzWpZRrWrVZM8lS9fms=";
+    #sha256 = lib.fakeSha256;
+    sha256 = "sha256-JEvIw9JL4P6+za9twhSBDlHLC3VABiR/Ovqjww8jU8E=";
   };
 })).overrideAttrs
   {
