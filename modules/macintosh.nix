@@ -140,7 +140,14 @@ in
     environment.NIX_REMOTE = "daemon";
     serviceConfig.KeepAlive = false;
     serviceConfig.ProcessType = "Background";
-    serviceConfig.StartInterval = 3600;
+    #serviceConfig.StartInterval = 3600;
+    serviceConfig.StartCalendarInterval = [
+      {
+        Weekday = 5;
+        Hour = 3;
+        Minute = 15;
+      }
+    ];
     serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
     serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
   };

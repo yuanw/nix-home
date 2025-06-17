@@ -2832,7 +2832,7 @@ with lib;
               };
 
               eaf = {
-                enable = true;
+                # enable = true;
                 extraConfig = ''
                                     :custom
                   ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
