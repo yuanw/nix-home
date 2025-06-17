@@ -1,4 +1,5 @@
 {
+  lib,
   melpaBuild,
   fetchFromGitHub,
   writeText,
