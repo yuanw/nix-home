@@ -1,5 +1,4 @@
 {
-  #, elispFileVersion
   melpaBuild,
   buildNpmPackage,
   jq,

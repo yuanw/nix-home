@@ -2864,10 +2864,19 @@ with lib;
               };
 
               eaf-browser = {
-                enable = true;
+                enable = !isDarwin;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf-browser.nix {
+                    inherit (epkgs) melpaBuild;
+                  });
+              };
+
+              eaf-pdf-viewer = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/eaf-pdf-viewer.nix {
                     inherit (epkgs) melpaBuild;
                   });
               };

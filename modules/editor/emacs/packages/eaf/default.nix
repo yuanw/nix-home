@@ -32,6 +32,8 @@ let
     pkgs.qrcode
     pkgs.requests
     pkgs.sexpdata
+    pkgs.packaging
+    pkgs.pymupdf
   ]);
 in
 (melpaBuild (_finalAttrs: {
