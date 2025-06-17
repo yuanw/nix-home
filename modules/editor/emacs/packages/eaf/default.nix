@@ -75,11 +75,11 @@ in
   {
     # Override genericBuild's postInstall, which tries to native-compile Elisp
     # files.
+    # TODO: mv only the needed files
     postInstall = ''
       DST=$out/share/emacs/site-lisp/elpa/$ename-$melpaVersion/
 
-      mv eaf.py $DST
-      mv applications.json $DST
-      mv core/* $DST
+      mv * $DST
+
     '';
   }
