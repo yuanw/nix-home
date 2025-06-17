@@ -4,7 +4,7 @@
   ...
 }:
 (melpaBuild (_finalAttrs: {
-  pname = "eaf-browser";
+  pname = "eaf-pdf-viewer";
   version = "0-unstable-2025-06-13";
 
   src = fetchFromGitHub {

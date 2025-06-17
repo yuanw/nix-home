@@ -2864,7 +2864,7 @@ with lib;
               };
 
               eaf-browser = {
-                enable = !isDarwin;
+                enable = false;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf-browser.nix {
