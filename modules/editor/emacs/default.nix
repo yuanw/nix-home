@@ -2809,7 +2809,7 @@ with lib;
               };
 
               mcp = {
-                enable = true;
+                enable = false;
                 after = [ "gptel" ];
                 extraConfig = ''
                               
