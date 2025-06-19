@@ -85,26 +85,10 @@ in
             leechblock-ng
             kagi-search
             userchrome-toggle-extended
+            history-cleaner
             sidebery
             darkreader
-            # curl -sS https://addons.mozilla.org/api/v5/addons/search/\?q\=mtab | jq -r '.results[0].current_version.file'
-            (buildFirefoxXpiAddon {
-              pname = "mtab";
-              version = "1.5.9";
-              addonId = "contact@maxhu.dev";
-              url = "https://addons.mozilla.org/firefox/downloads/file/4364715/mtab-1.5.9.xpi";
-              #sha256 = lib.fakeSha256;
-              sha256 = "sha256-Tbp/LD13PGmBBzWWNHx/qaZwnACZUrBvsHem8zsuh+Y=";
-              meta = with lib; {
-                homepage = "https://github.com/maxhu08/mtab";
-                description = "a simple configurable new tab extension";
-                license = licenses.mit;
-                mozPermissions = [
-                  "bookmarks"
-                ];
-                platforms = platforms.all;
-              };
-            })
+            mtab
           ];
 
           search = {
