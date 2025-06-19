@@ -56,13 +56,14 @@ in
               Description = "Kagi Search";
             }
 
-            # {
-            #   Name = "Nix Packages";
-            #   URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
-            #   Method = "GET";
-            #   IconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-            #   Alias = "np";
-            # }
+            {
+              Name = "Nix Packages";
+              Description = "Nix package Search";
+              URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
+              Method = "GET";
+              IconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              Alias = "np";
+            }
 
           ];
           Remove = [
@@ -84,6 +85,7 @@ in
       #   pkgs.tridactyl-native
       # ];
       programs.firefox.profiles = {
+        #~/Library/Application Support/Firefox
         home = {
           betterfox.enable = true;
           name = "home";
@@ -337,10 +339,10 @@ in
             engines = {
               # Mozill, have mecry upon our souls and eyeball, do not suggest search with ebay or bezo
               # every time I type on address bar
-              "google".metaData.hidden = true;
-              "bing".metaData.hidden = true;
-              "ebay".metaData.hidden = true;
-              "Amazon".metaData.hidden = true;
+              google.metaData.hidden = true;
+              bing.metaData.hidden = true;
+              ebay.metaData.hidden = true;
+              Amazon.metaData.hidden = true;
               # "Kagi" = {
               #   urls = [
               #     {
@@ -370,7 +372,7 @@ in
                     ];
                   }
                 ];
-                icon = "''${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
                 definedAliases = [ "@np" ];
               };
               # "NixOS Wiki" = {
