@@ -119,8 +119,8 @@ in
             settings = with pkgs.nur.repos.rycee.firefox-addons; {
               "${leechblock-ng.addonId}".settings = {
                 setName1 = "focus";
-                sites1 = "https://www.twitch.tv/ youtube.com";
-                blockRE1 = "^(https?|file):\\/+([\\w\\:]+@)?((www\\.)?https\\://www\\.twitch\\.tv/|(www\\.)?youtube\\.com)";
+                sites1 = "twitch.tv youtube.com";
+                blockRE1 = "^(https?|file):\\/+([\\w\\:]+@)?((www\\.)?twitch\\.tv|(www\\.)?youtube\\.com)";
                 times1 = "0600-1900";
               };
               "${ublock-origin.addonId}".settings = {
