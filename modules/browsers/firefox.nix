@@ -73,6 +73,7 @@ in
         };
         SearchSuggestEnabled = false;
       };
+      # TODO: does this work
       # https://github.com/llakala/nixos/blob/ffc71bb84cb95dd813795d4cb0beb99cebf8a4e0/base/software/home/firefox.nix
       programs.firefox.policies.Preferences = {
         "browser.in-content.dark-mode" = true; # Use dark mode
