@@ -43,6 +43,23 @@ in
         DontCheckDefaultBrowser = true;
         DisablePocket = true;
         DisableAppUpdate = true;
+        SearchEngines = {
+          PreventInstalls = true;
+          Add = [
+            {
+              Name = "Kagi";
+              URLTemplate = "https://kagi.com/search?q={searchTerms}";
+              Method = "GET";
+              IconURL = "https://kagi.com/asset/405c65f/favicon-32x32.png?v=49886a9a8f55fd41f83a89558e334f673f9e25cf";
+              Description = "Kagi Search";
+            }
+          ];
+          Remove = [
+            "Bing"
+          ];
+          Default = "Kagi";
+        };
+        SearchSuggestEnabled = false;
       };
       # https://github.com/llakala/nixos/blob/ffc71bb84cb95dd813795d4cb0beb99cebf8a4e0/base/software/home/firefox.nix
       programs.firefox.policies.Preferences = {
