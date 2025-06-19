@@ -117,7 +117,7 @@ in
             #   {"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["_7be2ba16-0f1e-4d93-9ebc-5164397477a9_-browser-action","_ea4204c0-3209-4116-afd2-2a208e21a779_-browser-action","_531906d3-e22f-4a6c-a102-8057b88a1a63_-browser-action"],"nav-bar":["back-button","forward-button","customizableui-special-spring1","urlbar-container","stop-reload-button","customizableui-special-spring2","save-to-pocket-button","downloads-button","unified-extensions-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","ublock0_raymondhill_net-browser-action","addon_darkreader_org-browser-action"],"toolbar-menubar":["menubar-items"],"TabsToolbar":["firefox-view-button","tabbrowser-tabs","new-tab-button","alltabs-button"],"PersonalToolbar":["import-button","personal-bookmarks"]},"seen":["save-to-pocket-button","developer-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","ublock0_raymondhill_net-browser-action","_7be2ba16-0f1e-4d93-9ebc-5164397477a9_-browser-action","_ea4204c0-3209-4116-afd2-2a208e21a779_-browser-action","addon_darkreader_org-browser-action","_531906d3-e22f-4a6c-a102-8057b88a1a63_-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","toolbar-menubar","TabsToolbar","unified-extensions-area"],"currentVersion":20,"newElementCount":3}
             #        '';
             settings = with pkgs.nur.repos.rycee.firefox-addons; {
-              "${leechblock-ng}".settings = {
+              "${leechblock-ng.addonId}".settings = {
                 setName1 = "focus";
                 sites1 = "https://www.twitch.tv/ youtube.com";
                 blockRE1 = "^(https?|file):\\/+([\\w\\:]+@)?((www\\.)?https\\://www\\.twitch\\.tv/|(www\\.)?youtube\\.com)";
