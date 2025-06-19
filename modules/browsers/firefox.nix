@@ -262,17 +262,7 @@ in
                   app.slack.com * 3p noop
                   app.slack.com * 3p-frame noop
                   app.slack.com * 3p-script noop
-                  kadena-io.slack.com * 3p-frame noop
-                  kadena-io.slack.com * 3p-script noop
-                  www.tripit.com * 3p noop
-                  www.tripit.com * 3p-frame noop
-                  www.tripit.com * 3p-script noop
-                  www.usaa.com * 3p-frame noop
-                  www.usaa.com * 3p-script noop
-                  secure.verizon.com * 3p-frame noop
-                  secure.verizon.com * 3p-script noop
-                  www.verizon.com * 3p-frame noop
-                  www.verizon.com * 3p-script noop
+
                   www.youtube.com * 3p-frame noop
                   www.youtube.com * 3p-script noop
                 '';
@@ -318,6 +308,8 @@ in
                   "moz-extension-scheme"
                 ];
               };
+              "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
+
               # "${vimium-c.addonId}".settings = {
               #   keyMappings = [
               #     "#!no-check"
@@ -338,53 +330,10 @@ in
             force = true;
             default = "Kagi";
             engines = {
-              # Mozill, have mecry upon our souls and eyeball, do not suggest search with ebay or bezo
-              # every time I type on address bar
               google.metaData.hidden = true;
               bing.metaData.hidden = true;
               ebay.metaData.hidden = true;
               Amazon.metaData.hidden = true;
-              # "Kagi" = {
-              #   urls = [
-              #     {
-              #       template = "https://kagi.com/search?";
-              #       params = [
-              #         {
-              #           name = "q";
-              #           value = "{searchTerms}";
-              #         }
-              #       ];
-              #     }
-              #   ];
-              # };
-              "Nix Packages" = {
-                urls = [
-                  {
-                    template = "https://search.nixos.org/packages";
-                    params = [
-                      {
-                        name = "type";
-                        value = "packages";
-                      }
-                      {
-                        name = "query";
-                        value = "{searchTerms}";
-                      }
-                    ];
-                  }
-                ];
-                icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
-                definedAliases = [ "@np" ];
-              };
-              # "NixOS Wiki" = {
-              #   urls = [{
-              #     template =
-              #       "https://nixos.wiki/index.php?search={searchTerms}";
-              #   }];
-              #   iconUpdateURL = "https://nixos.wiki/favicon.png";
-              #   updateInterval = 24 * 60 * 60 * 1000; # every day
-              #   definedAliases = [ "@nw" ];
-              # };
             };
           };
           # # https://github.com/arkenfox/user.js/blob/master/user.js
