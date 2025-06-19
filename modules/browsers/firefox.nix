@@ -339,7 +339,7 @@ in
               # every time I type on address bar
               "google".metaData.hidden = true;
               "bing".metaData.hidden = true;
-              "eBay".metaData.hidden = true;
+              "ebay".metaData.hidden = true;
               "Amazon".metaData.hidden = true;
               # "Kagi" = {
               #   urls = [
