@@ -79,20 +79,42 @@ in
         home = {
           betterfox.enable = true;
           name = "home";
-          #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
-          extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
-            tridactyl
-            ublock-origin
-            ghosttext
-            privacy-badger
-            leechblock-ng
-            kagi-search
-            userchrome-toggle-extended
-            history-cleaner
-            sidebery
-            darkreader
-            mtab
-          ];
+
+          extensions = {
+            force = true;
+            #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
+            packages = with pkgs.nur.repos.rycee.firefox-addons; [
+              #tridactyl
+              vimium-c
+              ublock-origin
+              ghosttext
+              privacy-badger
+              leechblock-ng
+              # kagi-search
+              userchrome-toggle-extended
+              history-cleaner
+              sidebery
+              darkreader
+              mtab
+            ];
+
+            # Addon IDs can be found in about:support#addons
+            settings = with pkgs.nur.repos.rycee.firefox-addons; {
+              "${vimium-c.addonId}".settings = {
+                keyMappings = [
+                  "#!no-check"
+                  "map s LinkHints.activateSelect"
+                  "map K previousTab"
+                  "map , previousTab"
+                  "map J nextTab"
+                  "map . nextTab"
+                  "map q LinkHints.activateWithQueue"
+                ];
+                notifyUpdate = false;
+                searchUrl = "https://kagi.com/search?q=$s Kagi";
+              };
+            };
+          };
 
           search = {
             force = true;
