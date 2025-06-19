@@ -224,6 +224,25 @@
         "bookmarksFolderId": -1,
         "newTabBtns": [],
         "srcPanelConfig": null
+      },
+      "O7yz3GpjHDUj": {
+        "type": 2,
+        "id": "O7yz3GpjHDUj",
+        "name": "Meeting",
+        "color": "toolbar",
+        "iconSVG": "icon_coffee",
+        "iconIMGSrc": "",
+        "iconIMG": "",
+        "lockedPanel": false,
+        "skipOnSwitching": false,
+        "noEmpty": false,
+        "newTabCtx": "none",
+        "dropTabCtx": "none",
+        "moveRules": [],
+        "moveExcludedTo": -1,
+        "bookmarksFolderId": -1,
+        "newTabBtns": [],
+        "srcPanelConfig": null
       }
     },
     "nav": [
