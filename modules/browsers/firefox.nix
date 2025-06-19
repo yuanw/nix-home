@@ -57,7 +57,7 @@ in
             }
 
             {
-              Namev = "Nix Packages";
+              Name = "Nix Packages";
               URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
               Method = "GET";
               IconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
