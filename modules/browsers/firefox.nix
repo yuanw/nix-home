@@ -39,7 +39,7 @@ in
       };
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
-
+      # ~/Applications/Home Manager Apps/Firefox.app/Contents/Resources/distribution/policies.json
       programs.firefox.policies = {
         DontCheckDefaultBrowser = true;
         DisablePocket = true;
