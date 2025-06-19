@@ -93,8 +93,8 @@ in
               sidebery
               ublock-origin
               userchrome-toggle-extended
-              #vimium-c
-              tridactyl
+              vimium-c
+              #tridactyl
             ];
 
             # Addon IDs can be found in about:support#addons
