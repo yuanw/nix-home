@@ -39,10 +39,12 @@ in
       };
       programs.firefox.package = cfg.pkg;
       # https://mozilla.github.io/policy-templates/
+
       programs.firefox.policies = {
         DontCheckDefaultBrowser = true;
         DisablePocket = true;
         DisableAppUpdate = true;
+        DisableTelemetry = true;
         SearchEngines = {
           PreventInstalls = true;
           Add = [
@@ -56,6 +58,7 @@ in
           ];
           Remove = [
             "Bing"
+            "eBay"
           ];
           Default = "Kagi";
         };
