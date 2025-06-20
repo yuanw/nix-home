@@ -64,8 +64,10 @@ in
               Alias = "np";
             }
           ];
+          # https://github.com/nix-community/home-manager/blob/master/modules/programs/firefox/profiles/search.nix#L212
           Remove = [
             "Bing"
+            "eBay"
           ];
           Default = "Kagi";
         };
