@@ -28,7 +28,7 @@
   ];
   home-manager.users.${config.my.username}.programs = {
     go = {
-      enable = true;
+      enable = false;
       goPath = "go";
     };
     git = {
@@ -63,6 +63,7 @@
       ];
       brews = [
         "redis"
+        "go"
         # Compose is a Docker plugin. For Docker to find the plugin, add "cliPluginsExtraDirs" to ~/.docker/config.json:
         # "cliPluginsExtraDirs": [
         #  "$HOMEBREW_PREFIX/lib/docker/cli-plugins"
