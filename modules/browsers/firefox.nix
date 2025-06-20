@@ -55,16 +55,14 @@ in
               IconURL = "https://kagi.com/asset/405c65f/favicon-32x32.png?v=49886a9a8f55fd41f83a89558e334f673f9e25cf";
               Description = "Kagi Search";
             }
-
             {
               Name = "Nix Packages";
               Description = "Nix package Search";
               URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
               Method = "GET";
-              IconURL = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              IconURL = "https://github.com/NixOS/nixos-artwork/blob/master/logo/nix-snowflake-colours.svg";
               Alias = "np";
             }
-
           ];
           Remove = [
             "Bing"
