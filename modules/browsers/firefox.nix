@@ -60,7 +60,7 @@ in
               Description = "Nix package Search";
               URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
               Method = "GET";
-              IconURL = "https://github.com/NixOS/nixos-artwork/blob/master/logo/nix-snowflake-colours.svg";
+              IconURL = "https://nixos.org/favicon.png";
               Alias = "np";
             }
           ];
