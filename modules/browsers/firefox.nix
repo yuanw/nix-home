@@ -68,6 +68,7 @@ in
           Remove = [
             "Bing"
             "eBay"
+            "DuckDuckGo"
           ];
           Default = "Kagi";
         };
