@@ -95,7 +95,6 @@ in
             force = true;
             #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
             packages = with pkgs.nur.repos.rycee.firefox-addons; [
-              # kagi-search
               darkreader
               ghosttext
               history-cleaner
@@ -105,7 +104,6 @@ in
               sidebery
               ublock-origin
               userchrome-toggle-extended
-              #vimium-c
               tridactyl
             ];
 
@@ -316,6 +314,7 @@ in
                 ];
               };
               # "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
+              "${mtab.addonId}".settings = builtins.fromJSON (builtins.readFile ./mtab.json);
 
               # "${vimium-c.addonId}".settings = {
               #   keyMappings = [
