@@ -29,7 +29,7 @@ appLauncher :: String
 appLauncher = "rofi -modi drun,ssh,window -show drun -show-icons"
 
 screenLocker :: String
-screenLocker = "betterlockscreen -l dim"
+screenLocker = "i3lock -n"
 
 -- Whether focus follows the mouse pointer.
 myFocusFollowsMouse :: Bool
