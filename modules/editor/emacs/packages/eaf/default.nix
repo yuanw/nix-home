@@ -1,12 +1,8 @@
 # based on https://codeberg.org/heraplem/nix-emacs-extra/src/branch/emacs-application-framework/packages/eaf/default.nix
 {
-  lib,
   fetchFromGitHub,
   stdenv,
-  writeText,
   melpaBuild,
-  elpa2nix,
-  melpa2nix,
 
   python3,
 
@@ -20,7 +16,6 @@
   ...
 }:
 let
-  inherit (lib) readFile;
   python = python3.withPackages (pkgs: [
     pkgs.easyocr
     pkgs.epc
@@ -59,19 +54,8 @@ in
     }
     ${if withX11Support then "substituteInPlace eaf.el --replace wmctrl ${wmctrl}/bin/wmctrl" else ""}
 
-    mv core/eaf-epc.el .
-    mv extension/* .
 
     runHook postPatch
-  '';
-
-  elpa2nix = writeText "elpa2nix.el" ''
-    ${readFile elpa2nix}
-    (defun byte-recompile-directory (&rest _))
-  '';
-  melpa2nix = writeText "melpa2nix.el" ''
-    ${readFile melpa2nix}
-    (defun byte-recompile-directory (&rest _))
   '';
 })).overrideAttrs
   {
