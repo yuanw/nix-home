@@ -35,6 +35,7 @@ in
       enable = true;
     };
     programs.dconf.enable = true;
+    programs.i3lock.enable = true;
     services.upower.enable = true;
     services.xserver.windowManager.xmonad = {
       enable = true;
