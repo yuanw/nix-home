@@ -32,7 +32,7 @@ let
     pkgs.pymupdf
   ]);
 in
-(melpaBuild (_finalAttrs: {
+melpaBuild {
 
   pname = "eaf";
   version = "0-unstable-2025-06-15";
@@ -57,21 +57,16 @@ in
       if withUnitySupport then "substituteInPlace eaf.el --replace xdotool ${xdotool}/bin/xdotool" else ""
     }
     ${if withX11Support then "substituteInPlace eaf.el --replace wmctrl ${wmctrl}/bin/wmctrl" else ""}
-    mv core/eaf-epc.el .
 
-    mv extension/* .
 
     runHook postPatch
   '';
-})).overrideAttrs
-  {
-    # Override genericBuild's postInstall, which tries to native-compile Elisp
-    # files.
-    # TODO: mv only the needed files
-    postInstall = ''
-      DST=$out/share/emacs/site-lisp/elpa/$ename-$melpaVersion/
 
-      mv * $DST
-
-    '';
-  }
+  files = ''
+    ("*.el"
+    "*.py"
+    "reinput"
+     "core"
+          "extension")
+  '';
+}

@@ -2854,10 +2854,7 @@ with lib;
 
                     inherit (epkgs) melpaBuild;
                     inherit (epkgs.melpaPackages)
-                      ctable
-                      deferred
-                      epc
-                      s
+
                       all-the-icons
                       ;
                   });
