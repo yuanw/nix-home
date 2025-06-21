@@ -53,7 +53,9 @@ in
       if withUnitySupport then "substituteInPlace eaf.el --replace xdotool ${xdotool}/bin/xdotool" else ""
     }
     ${if withX11Support then "substituteInPlace eaf.el --replace wmctrl ${wmctrl}/bin/wmctrl" else ""}
+    mv core/eaf-epc.el .
 
+    mv extension/* .
 
     runHook postPatch
   '';
