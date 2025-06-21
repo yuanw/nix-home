@@ -112,9 +112,7 @@ in
             # https://github.com/spl3g/nixfiles/blob/7824eb7aeff2c659f3cdf5306ed30c3dd770d75e/home-manager/homeModules/firefox.nix#L29
             # https://github.com/nuclearcodecat/shimmer/blob/main/sidebery.json
             # To change: Customize ui, copy it from about:config and paste here.
-            browser.uiCustomization.state = ''
-              {"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"nav-bar":["back-button","forward-button","stop-reload-button","vertical-spacer","customizableui-special-spring1","urlbar-container","customizableui-special-spring2","save-to-pocket-button","downloads-button","unified-extensions-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action"],"TabsToolbar":["firefox-view-button","tabbrowser-tabs","new-tab-button","alltabs-button"],"vertical-tabs":[],"PersonalToolbar":["import-button","personal-bookmarks"]},"seen":["developer-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","unified-extensions-area","TabsToolbar","vertical-tabs"],"currentVersion":22,"newElementCount":4}
-                      #        '';
+
             settings = with pkgs.nur.repos.rycee.firefox-addons; {
               "${leechblock-ng.addonId}".settings = {
                 setName1 = "focus";
@@ -344,6 +342,9 @@ in
           };
           # # https://github.com/arkenfox/user.js/blob/master/user.js
           settings = {
+            browser.uiCustomization.state = ''
+              {"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"nav-bar":["back-button","forward-button","stop-reload-button","vertical-spacer","customizableui-special-spring1","urlbar-container","customizableui-special-spring2","save-to-pocket-button","downloads-button","unified-extensions-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action"],"TabsToolbar":["firefox-view-button","tabbrowser-tabs","new-tab-button","alltabs-button"],"vertical-tabs":[],"PersonalToolbar":["import-button","personal-bookmarks"]},"seen":["developer-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","unified-extensions-area","TabsToolbar","vertical-tabs"],"currentVersion":22,"newElementCount":4}
+                      #        '';
 
             # PREF: notification interval (in microseconds) to avoid layout thrashing
             #  When Firefox is loading a page, it periodically reformats
