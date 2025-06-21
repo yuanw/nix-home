@@ -2858,6 +2858,7 @@ with lib;
                       deferred
                       epc
                       s
+                      all-the-icons
                       ;
                   });
 

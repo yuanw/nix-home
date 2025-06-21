@@ -13,6 +13,7 @@
   xdotool ? null,
   withX11Support ? true,
   wmctrl ? null,
+  all-the-icons,
   ...
 }:
 let
@@ -44,6 +45,9 @@ in
     sha256 = "sha256-J/98TamZYkugOezuh/e2EQdWxBPv+wWlXFAxkjxmVDY=";
   };
 
+  packageRequires = [
+    all-the-icons
+  ];
   patchPhase = ''
     runHook prePatch
 
