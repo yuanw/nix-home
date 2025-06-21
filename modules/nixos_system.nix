@@ -69,7 +69,7 @@ with lib;
       "audio"
       "jackaudio"
       "wheel"
-      "docker"
+      # "docker"
     ]; # Enable ‘sudo’ for the user.
     shell = pkgs.zsh;
   };
@@ -88,7 +88,7 @@ with lib;
   programs.zsh.enable = true;
   programs.gnupg.agent.enable = true;
   time.timeZone = "America/Regina";
-  virtualisation.docker.enable = true;
+  virtualisation.docker.enable = false;
   #home-manager.backupFileExtension = "backup";
   #home-manager.useGlobalPkgs = true;
   #home-manager.useUserPackages = false;
