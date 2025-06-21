@@ -114,7 +114,7 @@ in
           selected = "-1";
         };
       };
-      services.betterlockscreen.enable = true;
+      # services.betterlockscreen.enable = true;
       services.pasystray.enable = true;
       services.udiskie = {
         enable = true;
