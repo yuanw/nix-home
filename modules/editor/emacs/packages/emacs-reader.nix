@@ -1,5 +1,4 @@
 {
-  lib,
   melpaBuild,
   fetchFromGitea,
   writableTmpDirAsHomeHook,
@@ -16,7 +15,8 @@ melpaBuild {
     owner = "divyaranjan";
     repo = "emacs-reader";
     rev = "b81d08af119f50ac0032e0dc7df260c9e6212be7";
-    sha256 = lib.fakeSha256;
+    # sha256 = lib.fakeSha256;
+    sha256 = "sha256-r14/ZzGq/+R0xhw0AjfWMatlgC8S9s4RAqTrlhld1eM=";
 
   };
 
