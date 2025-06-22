@@ -2832,7 +2832,7 @@ with lib;
               };
 
               eaf = {
-                enable = !darwin;
+                enable = !isDarwin;
                 extraConfig = ''
                                     :custom
                   ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
