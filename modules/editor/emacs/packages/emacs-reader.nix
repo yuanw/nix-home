@@ -1,4 +1,5 @@
 {
+  lib,
   melpaBuild,
   fetchFromGitea,
   writableTmpDirAsHomeHook,
@@ -15,8 +16,8 @@ melpaBuild {
     owner = "divyaranjan";
     repo = "emacs-reader";
     rev = "b81d08af119f50ac0032e0dc7df260c9e6212be7";
-    #hash = lib.fakeSha256;
-    hash = "sha256-8wNq9a7yNbpkuOH7oMRO1kbdAQb87HXeMHvOamYSwyQ=";
+    sha256 = lib.fakeSha256;
+
   };
 
   nativeCheckInputs = [
