@@ -73,7 +73,10 @@ melpaBuild {
   ];
 
   __darwinAllowLocalNetworking = true;
-
+  installPhase = ''
+    mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
+    cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
+  '';
   recipe = writeText "recipe" ''
     (eaf
     :repo "    emacs-application-framework/eaf"
