@@ -2832,7 +2832,7 @@ with lib;
               };
 
               eaf = {
-                enable = true;
+                enable = !darwin;
                 extraConfig = ''
                                     :custom
                   ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
@@ -2871,10 +2871,21 @@ with lib;
               };
 
               eaf-pdf-viewer = {
-                enable = true;
+                enable = !isDarwin;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf-pdf-viewer.nix {
+                    elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
+                    melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
+                    inherit (epkgs) melpaBuild;
+                  });
+              };
+
+              holo-layer = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/holo-layer.nix {
                     elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
                     melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
                     inherit (epkgs) melpaBuild;
