@@ -2466,21 +2466,21 @@ with lib;
 
               auto-dark = {
                 enable = isDarwin;
-                hook = [
-                  " (after-init . auto-dark-mode) "
-                  ''
-                     (auto-dark-dark-mode
-                    . (lambda ()
-                           (ef-themes-select 'ef-dream)
-                         ))
-                  ''
-                  ''
-                              (auto-dark-light-mode
-                    . (lambda ()
-                      (ef-themes-select 'ef-day)
-                         ))
-                  ''
-                ];
+                # hook = [
+                #   " (after-init . auto-dark-mode) "
+                #   ''
+                #      (auto-dark-dark-mode
+                #     . (lambda ()
+                #            (ef-themes-select 'ef-dream)
+                #          ))
+                #   ''
+                #   ''
+                #               (auto-dark-light-mode
+                #     . (lambda ()
+                #       (ef-themes-select 'ef-day)
+                #          ))
+                #   ''
+                # ];
                 extraConfig = ''
 
                   :custom
@@ -2882,7 +2882,9 @@ with lib;
               };
 
               holo-layer = {
-                enable = true;
+
+                enable = !isDarwin;
+
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/holo-layer.nix {
