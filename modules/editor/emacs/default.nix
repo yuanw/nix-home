@@ -1592,11 +1592,14 @@ with lib;
               };
               org-noter = {
                 # enable = !(isDarwin);
+                enable = true;
                 config = ''
                   (require 'org-noter-pdftools)
                 '';
               };
               org-noter-pdftools = {
+                enable = true;
+
                 after = [ "org-noter" ];
                 config = ''
                     ;; Add a function to ensure precise note is inserted
@@ -1632,7 +1635,7 @@ with lib;
               };
 
               org-pdftools = {
-                enable = (!isDarwin);
+                enable = true;
                 hook = [
                   "(org-mode . org-pdftools-setup-link)"
                 ];
