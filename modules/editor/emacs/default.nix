@@ -1581,8 +1581,18 @@ with lib;
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
               };
+              emacs-reader = {
+                enable = true;
+
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/emacs-reader.nix {
+
+                    inherit (epkgs) melpaBuild;
+                  });
+              };
               org-noter = {
-                enable = !(isDarwin);
+                # enable = !(isDarwin);
                 config = ''
                   (require 'org-noter-pdftools)
                 '';
@@ -2482,9 +2492,8 @@ with lib;
                 #   ''
                 # ];
                 extraConfig = ''
-
                   :custom
-                  (custom-safe-themes '((ef-day) (ef-dream) (ef-winter)))
+                  (custom-safe-themes '(ef-day ef-dream ef-winter)))
                   (auto-dark-themes '((ef-dream) (ef-day)))
                   (auto-dark-polling-interval-seconds 5)
                   (auto-dark-allow-osascript t)
