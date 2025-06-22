@@ -50,6 +50,8 @@ melpaBuild {
   packageRequires = [
     all-the-icons
   ];
+  dontConfigure = true;
+  dontBuild = true;
   patchPhase = ''
     runHook prePatch
 
