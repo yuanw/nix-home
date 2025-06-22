@@ -14,6 +14,8 @@
   withX11Support ? true,
   wmctrl ? null,
   all-the-icons,
+
+  writableTmpDirAsHomeHook,
   ...
 }:
 let
@@ -61,6 +63,13 @@ melpaBuild {
 
     runHook postPatch
   '';
+
+  nativeCheckInputs = [
+
+    writableTmpDirAsHomeHook
+  ];
+
+  __darwinAllowLocalNetworking = true;
 
   files = ''
     ("*.el"
