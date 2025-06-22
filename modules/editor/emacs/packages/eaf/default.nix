@@ -73,6 +73,7 @@ melpaBuild {
 
   files = ''
     ("*.el"
+     "core/*.el"
     "*.py"
     "reinput"
      "core"
