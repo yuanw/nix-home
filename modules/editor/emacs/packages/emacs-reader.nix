@@ -8,7 +8,7 @@
 
 melpaBuild {
   version = "0.2.7";
-  pname = "emacs-reader";
+  pname = "reader";
 
   src = fetchFromGitea {
     domain = "codeberg.org";
