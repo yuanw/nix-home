@@ -14,6 +14,7 @@
   withX11Support ? true,
   wmctrl ? null,
   all-the-icons,
+  writeText,
 
   writableTmpDirAsHomeHook,
   ...
@@ -73,12 +74,24 @@ melpaBuild {
 
   __darwinAllowLocalNetworking = true;
 
-  files = ''
-    ("*.el"
-     "core/*.el"
+  recipe = writeText "recipe" ''
+    (eaf
+    :repo "    emacs-application-framework/eaf"
+    :files ("*.el"
+    "core/*.el"
     "*.py"
-    "reinput"
-     "core"
-          "extension")
+    "core"
+    "repinput"
+    "extension"
+    )
+    :fetcher github)
   '';
+  # files = ''
+  #   ("*.el"
+  #    "core/*.el"
+  #   "*.py"
+  #   "reinput"
+  #    "core"
+  #         "extension")
+  # '';
 }
