@@ -1581,7 +1581,8 @@ with lib;
                   (setq org-re-reveal-root "${pkgs.reveal-js}/share")
                 '';
               };
-              emacs-reader = {
+
+              reader = {
                 enable = true;
 
                 package =
