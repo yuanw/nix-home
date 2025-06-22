@@ -3,6 +3,7 @@
   fetchFromGitea,
   writableTmpDirAsHomeHook,
   mupdf,
+  writeText,
   ...
 }:
 
@@ -25,10 +26,19 @@ melpaBuild {
     mupdf
     writableTmpDirAsHomeHook
   ];
+  dontConfigure = true;
+  dontBuild = true;
 
-  files = ''
-    ("*.el"
-     "render")
+  installPhase = ''
+    mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
+    cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
+  '';
+
+  recipe = writeText "recipe" ''
+    (reader
+
+    :files ("*.el", "render")
+
   '';
 
 }
