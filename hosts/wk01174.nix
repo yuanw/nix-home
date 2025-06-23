@@ -52,7 +52,7 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         # "racket"
-        "docker"
+        "docker-desktop"
         "eloston-chromium"
         #"google-chrome"
         "slack"
