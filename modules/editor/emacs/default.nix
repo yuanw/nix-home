@@ -1583,7 +1583,7 @@ with lib;
               };
 
               reader = {
-                enable = true;
+                # enable = true;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/emacs-reader.nix {
