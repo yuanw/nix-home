@@ -2843,7 +2843,6 @@ with lib;
               };
 
               eaf = {
-                enable = !isDarwin;
                 extraConfig = ''
                                     :custom
                   ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
@@ -2873,7 +2872,6 @@ with lib;
               };
 
               eaf-browser = {
-                enable = false;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf-browser.nix {
@@ -2882,7 +2880,6 @@ with lib;
               };
 
               eaf-pdf-viewer = {
-                enable = !isDarwin;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/eaf-pdf-viewer.nix {
@@ -2893,9 +2890,6 @@ with lib;
               };
 
               holo-layer = {
-
-                enable = !isDarwin;
-
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/holo-layer.nix {
