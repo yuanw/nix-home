@@ -46,7 +46,7 @@ _final: prev: {
     src = prev.fetchurl {
       url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
       # hash = prev.lib.fakeHash;
-      hash = "sha256-1gdTsAdYUKBgltlarblZ/6fPwe+CGGVeFT0b9LOatw0=";
+      hash = "sha256-NngNwMrQ0bLhDYc/Gnf/cFisAC+fMR7JQeXBjH/+m68=";
     };
     description = "e-book library management";
     homepage = "https://calibre-ebook.com/";
