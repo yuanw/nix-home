@@ -51,15 +51,11 @@
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
-        # "racket"
         "docker-desktop"
         "eloston-chromium"
-        #"google-chrome"
         "slack"
         "sloth"
-        # "mysql-shell"
         "viscosity"
-        # "zoom"
       ];
       brews = [
         "redis"
