@@ -42,7 +42,7 @@ _final: prev: {
   # https://github.com/Homebrew/homebrew-cask/blob/f144ade7bcc8884fdf2a57b114cf11e7d98b2c93/Casks/c/calibre.rb
   calibre_mac = _final.installApplication rec {
     name = "calibre";
-    version = "7.9.0";
+    version = "8.4.0";
     src = prev.fetchurl {
       url = "https://download.calibre-ebook.com/${version}/calibre-${version}.dmg";
       # hash = prev.lib.fakeHash;
