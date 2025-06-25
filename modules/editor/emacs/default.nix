@@ -1582,6 +1582,10 @@ with lib;
                 '';
               };
 
+              nov = {
+                enable = true;
+              };
+
               reader = {
                 # enable = true;
                 package =
