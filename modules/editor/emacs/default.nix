@@ -1586,6 +1586,10 @@ with lib;
                 enable = true;
               };
 
+              djvu = {
+                enable = true;
+
+              };
               reader = {
                 # enable = true;
                 package =
