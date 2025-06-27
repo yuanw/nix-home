@@ -1,7 +1,6 @@
-{
-  inputs,
-  config,
-  ...
+{ inputs
+, config
+, ...
 }:
 {
 
@@ -17,6 +16,7 @@
     email = "yuan.wang@workiva.com";
     hostname = "WK01174";
     gpgKey = "19AD3F6B1A5BF3BF";
+    workspaceDirectory = "workpsaces";
     homeDirectory = "/Users/yuanwang";
   };
   #curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
