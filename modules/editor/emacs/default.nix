@@ -4,13 +4,12 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -1584,6 +1583,9 @@ with lib;
 
               nov = {
                 enable = true;
+                mode = [
+                  ''("\\.epub\\'" . nov-mode)''
+                ];
               };
 
               djvu = {
