@@ -249,7 +249,7 @@ with lib;
 
 
               ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-              (ef-themes-select 'ef-day)
+              (ef-themes-select 'ef-dream)
             '';
 
             prelude = ''
@@ -2988,3 +2988,5 @@ with lib;
     }
   ]);
 }
+
+
