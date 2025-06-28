@@ -1,7 +1,7 @@
 #+title: Dell XPS 9300 (2020 Developer Edition)
 
 * Before Install NixOS
-I got a developer edition ship with Ubuntb. When I boot up the machine for first time, it asked me whether want to back up the system into ISO on an USB.
+I got a developer edition ship with Ubuntu. When I boot up the machine for first time, it asked me whether want to back up the system into ISO on an USB.
 
 ** Praticle Install NixOS on VirtualBox
 - https://askubuntu.com/questions/64915/how-do-i-install-ubuntu-on-a-virtualbox-client-from-an-iso-image

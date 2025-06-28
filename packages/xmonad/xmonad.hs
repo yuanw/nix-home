@@ -36,7 +36,9 @@ myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
 myEditor :: String
-myEditor = "emacsclient -c -a 'emacs' " -- Sets emacs as editor
+myEditor = "emacs"
+
+-- myEditor = "emacsclient -c -a 'emacs' " -- Sets emacs as editor
 -- Width of the window border in pixels.
 --
 
