@@ -5,7 +5,7 @@ with pkgs;
   # alerter
   pinentry_mac
   yt-dlp
-  bandcamp-dl
+  #bandcamp-dl
   ffmpeg
   duti
   github-mcp-server
