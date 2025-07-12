@@ -10,7 +10,7 @@ with pkgs;
   duti
   github-mcp-server
   sioyek
-  mcp-server-fetch
+  #mcp-server-fetch
   slackdump
   mcp-server-filesystem
   #ghostty-mac
