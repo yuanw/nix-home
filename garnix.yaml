@@ -8,7 +8,7 @@ builds:
  - 'packages.aarch64-darwin.yuanw'
  - 'packages.aarch64-darwin.mist'
  # emacs native-comp issue
- - 'packages.aarch64-darwin.ci'
+ #- 'packages.aarch64-darwin.ci'
  - 'packages.x86_64-linux.wk01174'
  include:
  - '*.x86_64-linux.*'
