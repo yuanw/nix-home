@@ -1,9 +1,10 @@
-{ melpaBuild
-, fetchFromGitea
-, writableTmpDirAsHomeHook
-, mupdf
-, writeText
-, ...
+{
+  melpaBuild,
+  fetchFromGitea,
+  writableTmpDirAsHomeHook,
+  mupdf,
+  writeText,
+  ...
 }:
 
 melpaBuild {
