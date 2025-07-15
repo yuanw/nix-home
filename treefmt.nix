@@ -2,7 +2,6 @@
   projectRootFile = "flake.lock";
   programs.deadnix.enable = true;
   programs.nixfmt.enable = true;
-  #programs.nixfmt.excludes = [ "/modules/private/*" "/hosts/wk01174.nix" ];
   settings.formatter.nixfmt = {
     excludes = [ "modules/private/*" ];
   };
