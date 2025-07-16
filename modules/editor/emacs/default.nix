@@ -2191,11 +2191,10 @@ with lib;
 
               dap-ui = {
                 enable = cfg.lspStyle == "lsp-mode";
-
                 hook = [ "(dap-mode . dap-ui-mode)" ];
               };
               go-mode = {
-                enable = false;
+                enable = true;
               };
               flycheck-eglot = {
                 enable = true;
