@@ -2475,7 +2475,7 @@ with lib;
               # early init.
               # https://protesilaos.com/emacs/ef-themes-pictures
               ef-themes = {
-                enable = true;
+                enable = false;
                 preface = ''
                    (defun my/select-light-theme ()
                        (interactive)
