@@ -1860,6 +1860,24 @@ with lib;
                 ];
                 config = ''(setq nix-indent-function 'nix-indent-line) '';
               };
+              thrift-mode = {
+                enable = true;
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "thrift-mode";
+                    version = "1.0.0";
+                    src = pkgs.fetchFromGitHub {
+                      owner = "emacsmirror";
+                      repo = "thrift-mode";
+                      rev = "1293a54c6630297209d023c479712b539060d7f0";
+                      # sha256 = lib.fakeSha256;
+                      sha256 = "sha256-SQhmJ1QizEbJp7OTN/5CyQe65AwUnqwvgnzk+UaEkZs=";
+                    };
+                    preferLocalBuild = true;
+                    allowSubstitutes = false;
+                  };
+              };
 
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
               haskell-mode = {
