@@ -228,13 +228,13 @@ with lib;
 
                             ;; Make customisations that affect Emacs faces BEFORE loading a theme
               ;; (any change needs a theme re-load to take effect).
-              (require 'ef-themes)
+              ;;(require 'ef-themes)
 
               ;; If you like two specific themes and want to switch between them, you
               ;; can specify them in `ef-themes-to-toggle' and then invoke the command
               ;; `ef-themes-toggle'.  All the themes are included in the variable
               ;; `ef-themes-collection'.
-              (setq ef-themes-to-toggle '(ef-day ef-winter))
+              ;;(setq ef-themes-to-toggle '(ef-day ef-winter))
 
               (setq ef-themes-headings ; read the manual's entry or the doc string
                     '((0 variable-pitch light 1.9)
@@ -256,7 +256,7 @@ with lib;
 
 
               ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-              (ef-themes-select 'ef-dream)
+              ;;(ef-themes-select 'ef-dream)
             '';
 
             prelude = ''
