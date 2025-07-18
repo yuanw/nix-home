@@ -34,24 +34,6 @@ let
   });
 
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-  pkgs' = pkgs.extend (
-
-    _final: prev: {
-
-      ld64 = prev.ld64.overrideAttrs (old: {
-
-        patches = old.patches ++ [ ./Dedupe-RPATH-entries.patch ];
-
-      });
-
-      libarchive = prev.libarchive.overrideAttrs (_old: {
-
-        doCheck = false;
-
-      });
-
-    }
-  );
 in
 with lib;
 {
@@ -63,8 +45,9 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default =
-        if isDarwin then pkgs'.emacs-git.override { withNativeCompilation = true; } else pkgs.emacs-git;
+      default = pkgs.emacs-git;
+      # default =
+      #   if isDarwin then pkgs'.emacs-git.override { withNativeCompilation = true; } else pkgs.emacs-git;
     };
 
     lspStyle = mkOption {
