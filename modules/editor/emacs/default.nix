@@ -2493,7 +2493,7 @@ with lib;
               };
 
               auto-dark = {
-                enable = isDarwin;
+                enable = false;
                 # hook = [
                 #   " (after-init . auto-dark-mode) "
                 #   ''
