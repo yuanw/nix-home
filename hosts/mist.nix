@@ -26,6 +26,8 @@ in
     username = "yuanw";
     name = "Yuan Wang";
     hostname = "mist";
+    workspaceDirectory = "workspaces";
+
     homeDirectory = "/Users/yuanw";
   };
 
