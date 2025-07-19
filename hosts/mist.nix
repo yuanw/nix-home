@@ -66,6 +66,7 @@ in
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
+        "Keystroke Pro" = 1572206224;
       };
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
