@@ -13,6 +13,7 @@ with pkgs;
   #mcp-server-fetch
   slackdump
   mcp-server-filesystem
+  mas
   #ghostty-mac
   #calibre_mac
 ]
