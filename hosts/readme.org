@@ -1,0 +1,15 @@
+#+begin_src nix
+  services.openssh = {
+    enable = true;
+    # require public key authentication for better security
+    settings.PasswordAuthentication = false;
+    settings.KbdInteractiveAuthentication = false;
+    #settings.PermitRootLogin = "yes";
+  };
+
+  users.users."user".openssh.authorizedKeys.keys = [
+  "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca" # content of authorized_keys file
+  # note: ssh-copy-id will add user@your-machine after the public key
+  # but we can remove the "@your-machine" part
+];
+#+end_src
