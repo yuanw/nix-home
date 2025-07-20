@@ -83,16 +83,16 @@ in
     };
     # health.enable = true;
     typing.enable = true;
-    jellyfin.enable = true;
+    #jellyfin.enable = true;
     dev = {
       #agda.enable = true;
-      ask.enable = true;
+      #ask.enable = true;
       scheme.enable = true;
       #racket.enable = false;
       haskell.enable = false;
-      idris2.enable = true;
+      #idris2.enable = true;
       python.enable = true;
-      zig.enable = false;
+      #zig.enable = false;
     };
 
     tmux = {
