@@ -88,6 +88,7 @@ in
       #agda.enable = true;
       #ask.enable = true;
       scheme.enable = true;
+      lean.enable = true;
       #racket.enable = false;
       haskell.enable = false;
       #idris2.enable = true;
