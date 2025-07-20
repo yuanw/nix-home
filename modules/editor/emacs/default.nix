@@ -1959,6 +1959,39 @@ with lib;
                 enable = config.modules.dev.idris2.enable;
               };
 
+              lean4-mode = {
+                #https://github.com/leanprover-community/lean4-mode
+                enable = config.modules.dev.lean.enable;
+                command = [ "lean4-mode" ];
+                package =
+                  epkgs:
+                  epkgs.melpaBuild {
+                    pname = "lean4-mode";
+                    version = "0-unstable-2025-03-31";
+
+                    packageRequires = [
+                      epkgs.dash
+                      epkgs.lsp-mode
+                      epkgs.magit-section
+
+                    ];
+                    src = pkgs.fetchFromGitHub {
+                      owner = "leanprover-community";
+                      repo = "lean4-mode";
+                      rev = "1388f9d1429e38a39ab913c6daae55f6ce799479";
+                      #sha256 = lib.fakeSha256;
+                      sha256 = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk";
+                    };
+
+                    files = ''
+                      ("*.el"
+
+                       "data")
+                    '';
+
+                  };
+              };
+
               popper = {
                 enable = true;
                 bind = {
