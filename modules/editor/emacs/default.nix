@@ -1552,7 +1552,10 @@ with lib;
                 custom = ''
                   (org-download-method 'directory)
                 '';
-                config = "(add-hook 'dired-mode-hook  'org-download-enable)";
+                config = "
+                (add-hook 'dired-mode-hook  'org-download-enable)
+                (add-hook 'org-mode-hook 'org-display-inline-images)
+                ";
 
                 extraPackages =
                   if isDarwin then
