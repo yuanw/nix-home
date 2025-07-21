@@ -184,6 +184,20 @@
     };
     fastfetch = {
       enable = true;
+      # https://github.com/fastfetch-cli/fastfetch/wiki/Json-Schema
+      # https://github.com/caelestia-dots/caelestia/blob/main/fastfetch/config.jsonc
+      # settings = {
+      #   display = {
+      #     separator = "  ";
+      #     color = "white";
+      #     constants = [
+      #       "\u001b[37m"
+      #       "\u001b[38;5;16m"
+      #       "\u001b[38;5;17m"
+      #       "\u001b[38;5;18m"
+      #     ];
+      #   };
+      # };
     };
 
     home-manager = {
