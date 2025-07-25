@@ -53,10 +53,13 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "docker-desktop"
-        "ungoogled-chromium"
+
+        "mouselss"
         "slack"
         "sloth"
+        "ungoogled-chromium"
         "viscosity"
+
       ];
       brews = [
         "redis"
