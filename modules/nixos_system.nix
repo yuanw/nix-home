@@ -60,7 +60,7 @@ with lib;
     };
   };
 
-  system.stateVersion = "22.05";
+  system.stateVersion = "25.05";
   users.users.${config.my.username} = {
     isNormalUser = true;
     uid = 1000;
