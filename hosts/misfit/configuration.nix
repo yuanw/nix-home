@@ -126,6 +126,26 @@
   # accidentally delete configuration.nix.
   system.copySystemConfiguration = true;
 
+  nix = {
+    # auto-optimise-store = true;
+    # package = pkgs.nixVersions.git;
+    gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than 10d";
+    };
+    settings = {
+      allowed-users = [
+        "root"
+        "yuanw"
+      ];
+      trusted-users = [
+        "root"
+        "yuanw"
+      ];
+    };
+  };
+
   # This option defines the first version of NixOS you have installed on this particular machine,
   # and is used to maintain compatibility with application data (e.g. databases) created on older NixOS versions.
   #
