@@ -2,7 +2,7 @@
   ...
 }:
 {
-  import = [
+  imports = [
     ./configuration.nix
   ];
 }
