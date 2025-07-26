@@ -127,7 +127,6 @@
   system.copySystemConfiguration = true;
 
   nix = {
-    # auto-optimise-store = true;
     # package = pkgs.nixVersions.git;
     gc = {
       automatic = true;
@@ -135,6 +134,7 @@
       options = "--delete-older-than 10d";
     };
     settings = {
+      auto-optimise-store = true;
       allowed-users = [
         "root"
         "yuanw"
