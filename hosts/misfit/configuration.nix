@@ -133,6 +133,11 @@
       dates = "weekly";
       options = "--delete-older-than 10d";
     };
+    extraOptions = ''
+
+      experimental-features = nix-command flakes
+
+    '';
     settings = {
       auto-optimise-store = true;
       allowed-users = [
