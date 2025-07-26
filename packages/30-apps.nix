@@ -27,12 +27,11 @@ _self: super: {
         "unpackPhase"
         "installPhase"
       ];
-      installPhase =
-        ''
-          mkdir -p "$out/Applications/${appname}.app"
-          cp -pR * "$out/Applications/${appname}.app"
-        ''
-        + postInstall;
+      installPhase = ''
+        mkdir -p "$out/Applications/${appname}.app"
+        cp -pR * "$out/Applications/${appname}.app"
+      ''
+      + postInstall;
       meta = with stdenv.lib; {
         inherit description;
         inherit homepage;

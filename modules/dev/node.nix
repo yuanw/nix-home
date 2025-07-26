@@ -19,7 +19,8 @@ in
       home.packages = [
         pkgs.nodejs
         pkgs.yarn
-      ] ++ (with pkgs.nodePackages; [ prettier ]);
+      ]
+      ++ (with pkgs.nodePackages; [ prettier ]);
     };
   };
 }
