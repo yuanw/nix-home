@@ -7,15 +7,15 @@
 {
   flake = {
     nixosConfigurations = {
-      aws = inputs.nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
-          inputs.agenix.nixosModules.age
-          ../modules/aws.nix
-          ../modules/agenix.nix
-        ];
-      };
+      # aws = inputs.nixpkgs.lib.nixosSystem {
+      #   system = "x86_64-linux";
+      #   modules = [
+      #     { nixpkgs.overlays = [ inputs.agenix.overlays.default ]; }
+      #     inputs.agenix.nixosModules.age
+      #     ../modules/aws.nix
+      #     ../modules/agenix.nix
+      #   ];
+      # };
 
       # adguard = inputs.nixpkgs.lib.nixosSystem {
       #   system = "x86_64-linux";
@@ -146,16 +146,15 @@
         mist = configure "mist" "aarch64-darwin" true ./mist.nix;
         WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
       };
-
-    perSystem =
-      { system, ... }:
-      {
-        packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
-        packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
-        packages.yuanw = self.darwinConfigurations.yuanw.system;
-        packages.ci = self.darwinConfigurations.ci.system;
-        packages.wk01174 = self.darwinConfigurations.WK01174.system;
-        packages.mist = self.darwinConfigurations.mist.system;
-      };
   };
+  perSystem =
+    { system, ... }:
+    {
+      packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
+      packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
+      packages.yuanw = self.darwinConfigurations.yuanw.system;
+      packages.ci = self.darwinConfigurations.ci.system;
+      packages.wk01174 = self.darwinConfigurations.WK01174.system;
+      packages.mist = self.darwinConfigurations.mist.system;
+    };
 }
