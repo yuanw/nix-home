@@ -136,6 +136,25 @@
         "type": "github"
       }
     },
+    "disko": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1753140376,
+        "owner": "nix-community",
+        "repo": "disko",
+        "rev": "545aba02960caa78a31bd9a8709a0ad4b6320a5c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "disko",
+        "type": "github"
+      }
+    },
     "emacs": {
       "inputs": {
         "nixpkgs": [
@@ -930,6 +949,7 @@
         "betterfox": "betterfox",
         "catppuccin": "catppuccin",
         "devenv": "devenv",
+        "disko": "disko",
         "emacs": "emacs",
         "emacs-plus": "emacs-plus",
         "flake-parts": "flake-parts_2",
