@@ -129,7 +129,6 @@
                         inputs.betterfox.homeManagerModules.betterfox
                         inputs.catppuccin.homeModules.catppuccin
                       ];
-                      # users.johnw = import ./config/home.nix;
 
                       backupFileExtension = "hm-bak";
                       extraSpecialArgs = { inherit inputs; };
