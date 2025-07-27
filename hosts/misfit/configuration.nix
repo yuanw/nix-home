@@ -47,6 +47,9 @@
 
   services.home-assistant = {
     enable = true;
+    config = {
+      default_config = { };
+    };
   };
 
   services.jellyfin = {
