@@ -73,9 +73,9 @@
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "aarch64-darwin"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "x86_64-linux"
+        #"aarch64-linux"
+        #"x86_64-darwin"
+        #"x86_64-linux"
       ];
       imports = [
         ./devshell.nix
@@ -94,18 +94,18 @@
               allowUnfree = true;
             };
           };
-          haskellProjects.default = {
-            projectRoot = ./packages;
-            settings = { };
-            # overrides = self: super: { };
-            autoWire = [
-              "packages"
-              "apps"
-            ]; # Wire all but the devShell
-            devShell = {
-              hlsCheck.enable = false;
-            };
-          };
+          # haskellProjects.default = {
+          #   projectRoot = ./packages;
+          #   settings = { };
+          #   # overrides = self: super: { };
+          #   autoWire = [
+          #     "packages"
+          #     "apps"
+          #   ]; # Wire all but the devShell
+          #   devShell = {
+          #     hlsCheck.enable = false;
+          #   };
+          # };
 
           treefmt.imports = [ ./treefmt.nix ];
           # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix

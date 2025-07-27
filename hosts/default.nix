@@ -94,58 +94,59 @@
           ];
         }
       );
-      darwinConfigurations =
-        let
-          configure =
-            hostname: sys: loadPrivate: addtionsModule:
-            withSystem sys (
-              {
-                config,
-                inputs',
-                system,
-                ...
-              }:
-              inputs.nix-darwin.lib.darwinSystem {
-                specialArgs = {
-                  isDarwin = true;
-                  isNixOS = false;
-                  loadPrivate = loadPrivate;
-                  nurNoPkg = import inputs.nur {
-                    nurpkgs = import inputs.nixpkgs { system = system; };
-                  };
-                  packages = config.packages;
-                  inherit hostname inputs inputs';
-                };
-                modules = [
-                  {
-                    nixpkgs.hostPlatform = system;
-                  }
-                  inputs.home-manager.darwinModules.home-manager
-                  {
-                    home-manager = {
-                      useGlobalPkgs = true;
-                      useUserPackages = true;
-                      sharedModules = [
-                        inputs.betterfox.homeManagerModules.betterfox
-                        inputs.catppuccin.homeModules.catppuccin
-                      ];
-
-                      backupFileExtension = "hm-bak";
-                      extraSpecialArgs = { inherit inputs; };
-                    };
-                  }
-                  addtionsModule
-                ];
-              }
-            );
-        in
-        {
-          ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
-          yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
-          mist = configure "mist" "aarch64-darwin" true ./mist.nix;
-          WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
-        };
     };
+    darwinConfigurations =
+      let
+        configure =
+          hostname: sys: loadPrivate: addtionsModule:
+          withSystem sys (
+            {
+              config,
+              inputs',
+              system,
+              ...
+            }:
+            inputs.nix-darwin.lib.darwinSystem {
+              specialArgs = {
+                isDarwin = true;
+                isNixOS = false;
+                loadPrivate = loadPrivate;
+                nurNoPkg = import inputs.nur {
+                  nurpkgs = import inputs.nixpkgs { system = system; };
+                };
+                packages = config.packages;
+                inherit hostname inputs inputs';
+              };
+              modules = [
+                {
+                  nixpkgs.hostPlatform = system;
+                }
+                inputs.home-manager.darwinModules.home-manager
+                {
+                  home-manager = {
+                    useGlobalPkgs = true;
+                    useUserPackages = true;
+                    sharedModules = [
+                      inputs.betterfox.homeManagerModules.betterfox
+                      inputs.catppuccin.homeModules.catppuccin
+                    ];
+
+                    backupFileExtension = "hm-bak";
+                    extraSpecialArgs = { inherit inputs; };
+                  };
+                }
+                addtionsModule
+              ];
+            }
+          );
+      in
+      {
+        ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
+        yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
+        mist = configure "mist" "aarch64-darwin" true ./mist.nix;
+        WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
+      };
+
     perSystem =
       { system, ... }:
       {
