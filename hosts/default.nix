@@ -156,41 +156,6 @@
         packages.ci = self.darwinConfigurations.ci.system;
         packages.wk01174 = self.darwinConfigurations.WK01174.system;
         packages.mist = self.darwinConfigurations.mist.system;
-
-        # packages.activate = pkgs.writeShellApplication
-        #   {
-        #     name = "activate";
-        #     text =
-        #       # TODO: Replace with deploy-rs or (new) nixinate
-        #       if system == "aarch64-darwin" || system == "x86_64-darwin" then
-        #         let
-        #           # This is used just to pull out the `darwin-rebuild` script.
-        #           # See also: https://github.com/LnL7/nix-darwin/issues/613
-        #           emptyConfiguration = darwinSystem { nixpkgs.hostPlatform = system; };
-        #         in
-        #         ''
-        #           HOSTNAME=$(hostname -s)
-        #           set -x
-        #           ${emptyConfiguration.system}/sw/bin/darwin-rebuild \
-        #             switch \
-        #             --flake .#"''${HOSTNAME}" \
-        #             "$@"
-        #           doom sync
-        #         ''
-        #       else
-        #         ''
-        #           HOSTNAME=$(hostname -s)
-        #           set -x
-        #           ${lib.getExe pkgs.nixos-rebuild} \
-        #             switch \
-        #             --flake .#"''${HOSTNAME}" \
-        #             --use-remote-sudo \
-        #             "$@"
-        #         '';
-
-        #   };
-
       };
-
   };
 }
