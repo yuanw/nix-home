@@ -91,8 +91,9 @@
       # ask.enable = true;
       dart.enable = true;
       java.enable = true;
-      scheme.enable = true;
+      #scheme.enable = true;
       #haskell.enable = true;
+      lean.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;
