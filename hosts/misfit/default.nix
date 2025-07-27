@@ -1,10 +1,10 @@
 {
-  self,
+  inputs,
   ...
 }:
 {
   imports = [
-    self.inputs.disko.nixosModules.disko
+    inputs.disko.nixosModules.disko
     ./configuration.nix
   ];
 }
