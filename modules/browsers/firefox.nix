@@ -27,6 +27,15 @@ in
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
+
+      home.activation.setDefaultBrowser = lib.mkIf (cfg.enable && isDarwin) (
+        lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+          if ! ${lib.getExe pkgs.defaultbrowser} firefox; then
+            /usr/bin/open ${pkgs.firefox-bin}/Applications/Firefox.app
+            ${lib.getExe pkgs.defaultbrowser} firefox
+          fi
+        ''
+      );
       home = {
         file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
       };

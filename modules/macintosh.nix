@@ -39,10 +39,9 @@ in
     printf "disabling spotlight indexing... "
     mdutil -i off -d / &> /dev/null
     mdutil -E / &> /dev/null
-    ${pkgs.duti}/bin/duti -s org.nixos.firefox http all
-    ${pkgs.duti}/bin/duti -s org.nixos.firefox https all
     echo "ok"
   '';
+
   services.nix-daemon = {
     logFile = "/var/log/nix-daemon.log";
   };
