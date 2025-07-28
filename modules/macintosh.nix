@@ -68,6 +68,9 @@ in
       FXEnableExtensionChangeWarning = false;
     };
 
+    #am I sure about want to open an app downloaded from the internet
+    LaunchServices.LSQuarantine = false;
+
     #trackpad = {
     #  Clicking = true;
     #  TrackpadThreeFingerDrag = true;
