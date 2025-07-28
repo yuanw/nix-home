@@ -29,7 +29,7 @@ in
     home-manager.users.${config.my.username} =
       hm@{ pkgs, ... }:
       {
-
+        # https://github.com/Enzime/dotfiles-nix/blob/db460106448ff3d0924dbb89f450b31d539b7e92/modules/firefox.nix#L39
         home.activation.setDefaultBrowser = lib.mkIf (cfg.enable && isDarwin) (
           hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
             if ! ${lib.getExe pkgs.defaultbrowser} firefox; then
