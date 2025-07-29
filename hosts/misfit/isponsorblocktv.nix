@@ -10,7 +10,7 @@ let
 
   cfg = config.custom.services.isponsorblocktv;
 
-  ver = "v2.2.1";
+  ver = "v2.5.3";
 
   ctl = pkgs.writeScriptBin "isponsorblocktv-config" ''
 
@@ -22,10 +22,7 @@ let
 
 
 
-
     sudo systemctl stop podman-isponsorblocktv
-
-
 
 
 
