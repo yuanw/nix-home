@@ -51,6 +51,7 @@
       default_config = { };
     };
   };
+  custom.services.isponsorblocktv.enable = true;
 
   services.jellyfin = {
     enable = true;
