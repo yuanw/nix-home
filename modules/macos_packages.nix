@@ -13,6 +13,7 @@ with pkgs;
   #mcp-server-fetch
   slackdump
   mcp-server-filesystem
+  kanata-with-cmd
   #ghostty-mac
   #calibre_mac
 ]
