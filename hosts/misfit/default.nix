@@ -5,7 +5,6 @@
 {
   imports = [
     inputs.disko.nixosModules.disko
-    ./isponsorblocktv.nix
-    ./configuration.nix
+    ../../modules/isponsorblocktv.nix
   ];
 }

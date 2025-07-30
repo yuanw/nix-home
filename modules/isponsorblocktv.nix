@@ -13,21 +13,10 @@ let
   ver = "v2.5.3";
 
   ctl = pkgs.writeScriptBin "isponsorblocktv-config" ''
-
-
     #! ${pkgs.runtimeShell}
-
-
     set -e
-
-
-
     sudo systemctl stop podman-isponsorblocktv
-
-
-
     sudo ${pkgs.podman}/bin/podman run           \
-
 
         --rm -it                                 \
 
@@ -51,8 +40,6 @@ let
 
 
     sudo systemctl start podman-isponsorblocktv
-
-
   '';
 
 in

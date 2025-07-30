@@ -10,6 +10,8 @@
     inputs.self.nixosModules.common
     inputs.self.nixosModules.linux
     inputs.nixos-hardware.nixosModules.dell-xps-13-9300
+    ../../modules/isponsorblocktv.nix
+
     ./configuration.nix
   ];
 
@@ -45,6 +47,8 @@
       };
     };
   };
+  custom.services.isponsorblocktv.enable = true;
+
   services.openssh.enable = true;
   services.autorandr = {
     enable = true;
