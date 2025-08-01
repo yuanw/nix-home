@@ -35,3 +35,6 @@
      '';
    };  
 #+end_src
+
+
+nixos-rebuild build --flake '.#misfit'
