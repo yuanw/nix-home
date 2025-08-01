@@ -25,6 +25,10 @@ in
     yuanw_mist
     misfit
   ];
+  "namecheap.age".publicKeys = [
+    yuanw_mist
+    misfit
+  ];
   "adguard-encryption-key.age".publicKeys = users ++ systems;
   "adguard-encryption-certificate.age".publicKeys = users ++ systems;
   "wireguard-server-private.age".publicKeys = users ++ systems;
