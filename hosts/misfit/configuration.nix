@@ -2,7 +2,7 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
   imports = [
@@ -63,9 +63,24 @@
   services.jellyfin = {
     enable = true;
   };
+  age.secrets = {
+    namecheap.file = ../../secrets/namecheap.age;
+    isponsorblock-config.file = ../../secrets/isponsorblockvg.age;
+  };
 
-  age.secrets.isponsorblock-config = {
-    file = ../../secrets/isponsorblockvg.age;
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "me@yuanwang.ca";
+
+    certs."minilla.store" = {
+      group = config.services.caddy.group;
+
+      domain = "minilla.store";
+      extraDomainNames = [ "*.minilla.store" ];
+      dnsProvider = "namecheap";
+      dnsPropagationCheck = true;
+      environmentFile = config.age.secrets.namecheap.path;
+    };
   };
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
