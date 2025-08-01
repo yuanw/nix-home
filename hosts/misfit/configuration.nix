@@ -63,6 +63,10 @@
   services.jellyfin = {
     enable = true;
   };
+
+  age.secrets.isponsorblock-config = {
+    file = ../../secrets/isponsorblockvg.age;
+  };
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
