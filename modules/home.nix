@@ -221,7 +221,7 @@
       enable = true;
       # seems have collision with nix.24
       enableCompletion = false;
-      dotDir = ".config/zsh";
+      dotDir = config.xdg.configHome + "zsh";
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         # EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
