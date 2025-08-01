@@ -1,14 +1,13 @@
 builds:
  exclude:
  - 'packages.aarch64-darwin.asche'
+ - 'packages.aarch64-darwin.misfit'
  - 'packages.x86_64-linux.yuanw'
  - 'packages.x86_64-linux.ci'
  - 'packages.x86_64-linux.mist'
  - 'packages.aarch64-darwin.wk01174'
  - 'packages.aarch64-darwin.yuanw'
  - 'packages.aarch64-darwin.mist'
- # emacs native-comp issue
- #- 'packages.aarch64-darwin.ci'
  - 'packages.x86_64-linux.wk01174'
  include:
  - '*.x86_64-linux.*'
