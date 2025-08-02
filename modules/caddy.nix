@@ -1,6 +1,6 @@
 { ... }:
 let
-  certloc = "/var/lib/acme/minilla.store";
+  certloc = "/var/lib/acme/yuanw.me";
 in
 {
 
@@ -20,7 +20,7 @@ in
         '';
       };
 
-      "minilla.store" = {
+      "yuanw.me" = {
         extraConfig = ''
           reverse_proxy :8096
           tls ${certloc}/cert.pem ${certloc}/key.pem

@@ -72,9 +72,10 @@
     acceptTerms = true;
     defaults.email = "me@yuanwang.ca";
 
-    certs."minilla.store" = {
+    certs."yuanw.me" = {
       group = config.services.caddy.group;
-      domain = "minilla.store";
+      domain = "yuanw.me";
+      extraDomainNames = [ "*.yuanw.me" ];
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       dnsPropagationCheck = false;
