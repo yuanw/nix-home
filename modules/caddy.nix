@@ -8,7 +8,15 @@
 
   services.caddy = {
     enable = true;
+    globalConfig = ''
+      auto_https off
+    '';
     virtualHosts = {
+      "http://*.yuanw.me" = {
+        extraConfig = ''
+          redir https://{host}{uri}
+        '';
+      };
       "http://ha.home" = {
         serverAliases = [ "http://www.ha.home" ];
         extraConfig = ''
