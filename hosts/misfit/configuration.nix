@@ -75,10 +75,9 @@
     certs."yuanw.me" = {
       group = config.services.caddy.group;
       domain = "yuanw.me";
-      extraDomainNames = [ "*.yuanw.me" ];
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
-      dnsPropagationCheck = false;
+      #dnsPropagationCheck = false;
       #dnsPropagationCheck = true;
       #webroot = "/var/lib/acme";
       environmentFile = config.age.secrets.namecheap.path;
