@@ -1,7 +1,4 @@
 { ... }:
-let
-  certloc = "/var/lib/acme/yuanw.me";
-in
 {
 
   networking.firewall.allowedTCPPorts = [
@@ -21,9 +18,9 @@ in
       };
 
       "jellyfin.yuanw.me" = {
+        useACMEHost = "yuanw.me";
         extraConfig = ''
-          reverse_proxy :8096
-          tls ${certloc}/cert.pem ${certloc}/key.pem
+          reverse_proxy localhost:8096
         '';
       };
     };
