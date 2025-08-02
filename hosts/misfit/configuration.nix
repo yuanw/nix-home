@@ -75,6 +75,10 @@
     certs."yuanw.me" = {
       group = config.services.caddy.group;
       domain = "yuanw.me";
+      extraDomainNames = [
+        "ha.yuanw.me"
+        "jellyfin.yuanw.me"
+      ];
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       #dnsPropagationCheck = false;
