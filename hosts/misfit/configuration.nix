@@ -74,7 +74,7 @@
 
     certs."minilla.store" = {
       group = config.services.caddy.group;
-      domain = "*.minilla.store";
+      domain = "minilla.store";
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       #dnsPropagationCheck = true;
