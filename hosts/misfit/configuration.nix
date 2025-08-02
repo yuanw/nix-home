@@ -71,7 +71,7 @@
   security.acme = {
     acceptTerms = true;
     defaults.email = "me@yuanwang.ca";
-    reloadServices = [ "caddy.service" ];
+
     certs."yuanw.me" = {
       group = config.services.caddy.group;
       domain = "yuanw.me";
