@@ -12,16 +12,16 @@ in
   services.caddy = {
     enable = true;
     virtualHosts = {
-      "ha.minilla.store" = {
+
+      "http://ha.home" = {
+        serverAliases = [ "http://www.ha.home" ];
         extraConfig = ''
           reverse_proxy localhost:8123
-          tls ${certloc}/cert.pem ${certloc}/key.pem {
-             protocols tls1.3
-           }
+          # tls internal
         '';
       };
 
-      "jelly.minilla.store" = {
+      "minilla.store" = {
         extraConfig = ''
           reverse_proxy localhost:8096
           tls ${certloc}/cert.pem ${certloc}/key.pem {
