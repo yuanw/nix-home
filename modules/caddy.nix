@@ -20,7 +20,7 @@ in
         '';
       };
 
-      "yuanw.me" = {
+      "jellyfin.yuanw.me" = {
         extraConfig = ''
           reverse_proxy :8096
           tls ${certloc}/cert.pem ${certloc}/key.pem
