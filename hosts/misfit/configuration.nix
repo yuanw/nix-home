@@ -113,7 +113,7 @@
       tree
       git
       vim
-      emacs
+      nix-diff
       lego
     ];
   };
