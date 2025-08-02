@@ -1,4 +1,7 @@
 { ... }:
+let
+  certloc = "/var/lib/acme/minilla.store";
+in
 {
 
   networking.firewall.allowedTCPPorts = [
@@ -9,19 +12,21 @@
   services.caddy = {
     enable = true;
     virtualHosts = {
-      "http://ha.home" = {
-        serverAliases = [ "http://www.ha.home" ];
+      "ha.minilla.store" = {
         extraConfig = ''
           reverse_proxy localhost:8123
-          # tls internal
+          tls ${certloc}/cert.pem ${certloc}/key.pem {
+             protocols tls1.3
+           }
         '';
       };
 
-      "http://jelly.home" = {
-        serverAliases = [ "http://www.jelly.home" ];
+      "jelly.minilla.store" = {
         extraConfig = ''
           reverse_proxy localhost:8096
-          # tls internal
+          tls ${certloc}/cert.pem ${certloc}/key.pem {
+             protocols tls1.3
+          }
         '';
       };
     };
