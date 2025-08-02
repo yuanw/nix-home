@@ -8,7 +8,7 @@
           nix-tree
           treefmt
           #awscli
-          #lego
+          lego
           #terraform
         ];
         # See https://haskell.flake.page/devshell#composing-devshells
