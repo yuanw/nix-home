@@ -78,6 +78,7 @@
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
       #dnsPropagationCheck = true;
+      webroot = "/var/lib/acme";
       environmentFile = config.age.secrets.namecheap.path;
     };
   };
