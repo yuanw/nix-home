@@ -77,7 +77,7 @@
       domain = "minilla.store";
       # extraDomainNames = [ "*.minilla.store" ];
       dnsProvider = "cloudflare";
-      dnsResolver = "1.1.1.1:53";
+      #dnsResolver = "1.1.1.1:53";
       #dnsPropagationCheck = true;
       environmentFile = config.age.secrets.namecheap.path;
     };
@@ -112,6 +112,7 @@
       git
       vim
       emacs
+      lego
     ];
   };
   boot.initrd.kernelModules = [ "igb" ];
