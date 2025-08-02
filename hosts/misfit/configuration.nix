@@ -75,9 +75,12 @@
     certs."minilla.store" = {
       group = config.services.caddy.group;
       domain = "minilla.store";
-      extraDomainNames = [ "*.minilla.store" ];
+      extraDomainNames = [
+        "ha.minilla.store"
+        "jellyfin.minilla.store"
+      ];
       dnsProvider = "cloudflare";
-      #dnsResolver = "1.1.1.1:53";
+      dnsResolver = "1.1.1.1:53";
       #dnsPropagationCheck = true;
       environmentFile = config.age.secrets.namecheap.path;
     };
