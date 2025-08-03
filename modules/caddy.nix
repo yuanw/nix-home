@@ -17,11 +17,10 @@
           redir https://{host}{uri}
         '';
       };
-      "http://ha.home" = {
-        serverAliases = [ "http://www.ha.home" ];
+      "ha.yuanw.me" = {
+        useACMEHost = "yuanw.me";
         extraConfig = ''
           reverse_proxy localhost:8123
-          # tls internal
         '';
       };
 
