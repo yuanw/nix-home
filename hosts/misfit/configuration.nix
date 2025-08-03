@@ -132,8 +132,7 @@
     users = {
       yuanw = {
         mutable = false;
-        password = "123"; # WARNING: plain text!
-        # hashedPasswordFile = config.age.secrets.jellyfin-admin.age.path;
+        hashedPasswordFile = config.age.secrets.jellyfin-admin.path;
         permissions = {
           isAdministrator = true;
         };
