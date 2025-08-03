@@ -133,25 +133,14 @@
     users = {
       yuanw = {
         mutable = false;
-        hashedPasswordFile = config.age.secrets.jellyfin-admin.age.path;
+        password = "123"; # WARNING: plain text!
+        # hashedPasswordFile = config.age.secrets.jellyfin-admin.age.path;
         permissions = {
           isAdministrator = true;
         };
       };
     };
   };
-
-  # This is just for making sure the library paths exists, you dont need this
-  system.activationScripts.setupFolders =
-    # bash
-    ''
-      mkdir -p /data/Movies
-      mkdir -p /data/Shows
-      mkdir -p /data/Pictures
-      mkdir -p /data/Videos
-      mkdir -p /data/Books
-      mkdir -p /data/Music
-    '';
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
