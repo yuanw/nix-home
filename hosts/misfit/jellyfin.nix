@@ -1,4 +1,4 @@
-{ ... }:
+{ config, ... }:
 {
   services.declarative-jellyfin = {
     enable = true;
@@ -47,7 +47,7 @@
     users = {
       yuanw = {
         mutable = false;
-        password = "123";
+        hashedPasswordFile = config.age.secrets.jellyfin-admin.age.path;
         permissions = {
           isAdministrator = true;
         };
