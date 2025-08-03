@@ -181,6 +181,7 @@
     extraGroups = [
       "wheel"
       "data"
+      "docker"
     ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
