@@ -60,8 +60,12 @@
   };
   custom.services.isponsorblocktv.enable = true;
 
-  services.jellyfin = {
+  services.jellyfin = rec {
     enable = true;
+    dataDir = "/var/lib/jellyfin";
+    configDir = "${dataDir}/config";
+    logDir = "${dataDir}/log";
+    cacheDir = "${dataDir}/cache";
   };
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
