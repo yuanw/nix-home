@@ -159,17 +159,17 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
-  security.sudo.extraRules = [
-    {
-      users = [ "yuanw" ];
-      commands = [
-        {
-          command = "/run/current-system/sw/bin/rsync";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+  # security.sudo.extraRules = [
+  #   {
+  #     users = [ "yuanw" ];
+  #     commands = [
+  #       {
+  #         command = "/run/current-system/sw/bin/rsync";
+  #         options = [ "NOPASSWD" ];
+  #       }
+  #     ];
+  #   }
+  # ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.groups.data = { };
@@ -178,7 +178,10 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
     ];
-    extraGroups = [ "wheel" ]; # Enable ‘sudo’ for the user.
+    extraGroups = [
+      "wheel"
+      "data"
+    ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
       git
