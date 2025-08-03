@@ -96,6 +96,8 @@
     group = "data";
     system = {
       serverName = "My Declarative Jellyfin Server";
+
+      isStartupWizardCompleted = true;
       # use hardware acceleration for trickplay image generation
       trickplayOptions = {
         enableHwAcceleration = true;
