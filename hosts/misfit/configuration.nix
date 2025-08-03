@@ -115,6 +115,7 @@
       vim
       nix-diff
       lego
+      fastfetch
     ];
   };
   boot.initrd.kernelModules = [ "igb" ];
