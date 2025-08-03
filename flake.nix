@@ -66,6 +66,12 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    declarative-jellyfin = {
+      url = "github:Sveske-Juice/declarative-jellyfin";
+      # optional follow:
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+    };
   };
 
   outputs =
