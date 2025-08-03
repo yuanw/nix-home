@@ -86,9 +86,14 @@
     };
   };
 
+  users.users.${config.services.jellyfin.user}.extraGroups = [
+    "video"
+    "render"
+  ];
+
   services.declarative-jellyfin = {
     enable = true;
-
+    group = "data";
     system = {
       serverName = "My Declarative Jellyfin Server";
       # use hardware acceleration for trickplay image generation
@@ -153,6 +158,7 @@
   # services.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  users.groups.data = { };
   users.users.yuanw = {
     isNormalUser = true;
     openssh.authorizedKeys.keys = [
