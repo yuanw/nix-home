@@ -88,7 +88,16 @@
 
   services.declarative-jellyfin = {
     enable = true;
-    serverId = "f4655afd22f348e19089c6b474b24a75";
+
+    system = {
+      serverName = "My Declarative Jellyfin Server";
+      # use hardware acceleration for trickplay image generation
+      trickplayOptions = {
+        enableHwAcceleration = true;
+        enableHwEncoding = true;
+      };
+      UICulture = "en";
+    };
     libraries = {
       Movies = {
         enabled = true;
@@ -110,24 +119,7 @@
         contentType = "tvshows";
         pathInfos = [ "/data/Shows" ];
       };
-      "Photos and videos" = {
-        enabled = true;
-        contentType = "homevideos";
-        pathInfos = [
-          "/data/Pictures"
-          "/data/Videos"
-        ];
-      };
-      Books = {
-        enabled = true;
-        contentType = "books";
-        pathInfos = [ "/data/Books" ];
-      };
-      Music = {
-        enabled = true;
-        contentType = "music";
-        pathInfos = [ "/data/Music" ];
-      };
+
     };
 
     users = {
