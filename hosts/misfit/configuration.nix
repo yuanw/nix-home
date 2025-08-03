@@ -87,7 +87,7 @@
   };
 
   services.declarative-jellyfin = {
-    enable = true;
+    enable = false;
 
     system = {
       serverName = "My Declarative Jellyfin Server";
