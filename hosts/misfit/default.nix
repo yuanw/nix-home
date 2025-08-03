@@ -9,7 +9,6 @@
     inputs.declarative-jellyfin.nixosModules.default
     ../../modules/isponsorblocktv.nix
     ../../modules/caddy.nix
-    ./jellyfin.nix
     ./configuration.nix
   ];
 }
