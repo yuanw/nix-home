@@ -159,6 +159,18 @@
   # Enable touchpad support (enabled default in most desktopManager).
   # services.libinput.enable = true;
 
+  security.sudo.extraRules = [
+    {
+      users = [ "yuanw" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/rsync";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.groups.data = { };
   users.users.yuanw = {
