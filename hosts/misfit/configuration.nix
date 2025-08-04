@@ -59,8 +59,12 @@
     # ];
     extraComponents = [
       # Components required to complete the onboarding
+      "apple_tv"
+      "default_config"
       "analytics"
       "google_translate"
+      "esphome"
+      "my"
       "met"
       "radio_browser"
       "shopping_list"
@@ -69,6 +73,12 @@
       "isal"
     ];
     config = {
+      default_config = { };
+      homeassistant = {
+        unit_system = "metric";
+        external_url = "https://ha.yuanw.me";
+        internal_url = "https://ha.yuanw.me";
+      };
       http = {
         use_x_forwarded_for = true;
         trusted_proxies = [
@@ -89,7 +99,7 @@
           # };
         }
       ];
-      default_config = { };
+
     };
   };
   custom.services.isponsorblocktv.enable = true;
