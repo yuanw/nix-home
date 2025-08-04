@@ -58,6 +58,14 @@
           "::1"
         ];
       };
+      device_tracker = [
+        {
+          platform = "luci";
+          host = "192.168.1.1";
+          username = "root";
+          password = "!secret openwrt_amdin_password";
+        }
+      ];
       default_config = { };
     };
   };
