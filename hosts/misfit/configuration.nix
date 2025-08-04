@@ -189,7 +189,7 @@
       nix-diff
       lego
       fastfetch
-      busybox
+      pciutils
       bluez-experimental
 
     ];
