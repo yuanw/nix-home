@@ -62,8 +62,8 @@
         {
           platform = "luci";
           host = "192.168.1.1";
-          username = "root";
-          password = "!secret openwrt_amdin_password";
+          username = "!secret openwrt_admin_username";
+          password = "!secret openwrt_admin_password";
         }
       ];
       default_config = { };
