@@ -52,7 +52,7 @@
         gtts
 
       ];
-    configWritable = true;
+    #configWritable = true;
     # extraComponents = [
     #   "luci"
     #   "default_config"
