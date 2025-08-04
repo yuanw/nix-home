@@ -46,7 +46,7 @@
   };
 
   services.home-assistant = {
-    enable = true;
+    enable = false;
     config = null;
     # lovelaceConfig = null;
     # configure the path to your config directory
