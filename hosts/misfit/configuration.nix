@@ -75,6 +75,13 @@
     namecheap.file = ../../secrets/namecheap.age;
     isponsorblock-config.file = ../../secrets/isponsorblockvg.age;
     jellyfin-admin.file = ../../secrets/jellyfin-admin.age;
+    hass = {
+      file = ../../secrets/hass.age;
+      path = "${config.services.home-assistant.configDir}/secrets.yaml";
+      owner = "hass";
+      group = "hass";
+    };
+
   };
 
   security.acme = {
