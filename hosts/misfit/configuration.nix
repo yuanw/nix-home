@@ -50,7 +50,7 @@
     extraPackages =
       python3Packages: with python3Packages; [
         gtts
-
+        getmac
       ];
     #configWritable = true;
     # extraComponents = [
