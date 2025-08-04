@@ -20,9 +20,7 @@ in
 
   config = lib.mkIf cfg.enable {
     users.groups.ha = {
-
       gid = 200;
-
     };
 
     users.users.ha = {
@@ -49,7 +47,6 @@ in
       ];
       ports = [
         "127.0.0.1:8123:8123"
-        "127.0.0.1:8124:80"
       ];
       environment = {
         PUID = toString config.users.users.ha.uid;
