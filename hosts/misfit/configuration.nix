@@ -191,6 +191,12 @@
       fastfetch
     ];
   };
+  environment = {
+    systemPackages = with pkgs; [
+      bluez-experimental
+    ];
+    shells = [ pkgs.zsh ];
+  };
   boot.initrd.kernelModules = [ "igb" ];
   boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
   boot.initrd.network = {

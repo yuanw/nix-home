@@ -81,7 +81,7 @@ with lib;
       wget
       vim
       git
-      firefox
+      #firefox
     ];
     shells = [ pkgs.zsh ];
   };
