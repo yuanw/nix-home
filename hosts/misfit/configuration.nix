@@ -241,6 +241,15 @@
   # does not work with flake
   # system.copySystemConfiguration = true;
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Experimental = true; # Show battery charge of Bluetooth devices
+      };
+    };
+  };
   nix = {
     # package = pkgs.nixVersions.git;
     gc = {
