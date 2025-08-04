@@ -47,6 +47,7 @@
 
   services.home-assistant = {
     enable = true;
+    extraArgs = [ "--debug" ];
     extraPackages =
       python3Packages: with python3Packages; [
         gtts
