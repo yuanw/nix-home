@@ -195,8 +195,14 @@
     ];
   };
 
-  boot.initrd.kernelModules = [ "igb" ];
-  boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
+  # ethernet drivers to load: (run "lspci -v | grep -iA8 'network\|ethernet'")
+  boot.initrd.availableKernelModules = [
+    "igc"
+    "r8169"
+    "i40e"
+  ];
+  # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
+  boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
   boot.initrd.network = {
     enable = true;
     ssh = {
