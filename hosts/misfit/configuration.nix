@@ -47,7 +47,7 @@
 
   services.home-assistant = {
     enable = true;
-    extraComponets = [
+    extraComponents = [
       "luci"
     ];
     config = {
