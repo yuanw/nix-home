@@ -52,10 +52,10 @@
         gtts
 
       ];
-    extraComponents = [
-      "luci"
-      "default_config"
-    ];
+    # extraComponents = [
+    #   "luci"
+    #   "default_config"
+    # ];
     config = {
       http = {
         use_x_forwarded_for = true;
