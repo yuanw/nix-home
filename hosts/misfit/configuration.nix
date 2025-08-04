@@ -52,6 +52,7 @@
         gtts
 
       ];
+    configWritable = true;
     # extraComponents = [
     #   "luci"
     #   "default_config"
@@ -220,7 +221,7 @@
       fastfetch
       pciutils
       bluez-experimental
-
+      nmap
     ];
   };
 
