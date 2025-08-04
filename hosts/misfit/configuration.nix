@@ -47,8 +47,14 @@
 
   services.home-assistant = {
     enable = true;
+    extraPackages =
+      python3Packages: with python3Packages; [
+        gtts
+
+      ];
     extraComponents = [
       "luci"
+      "default_config"
     ];
     config = {
       http = {
