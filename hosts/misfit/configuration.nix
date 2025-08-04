@@ -77,12 +77,6 @@
           #   track_new_devices = true;
           # };
         }
-        {
-
-          platform = "nmap_tracker";
-          hosts = "192.168.1.0/24";
-
-        }
       ];
       default_config = { };
     };
