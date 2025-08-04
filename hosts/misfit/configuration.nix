@@ -46,24 +46,22 @@
   };
 
   services.home-assistant = {
-    enable = false;
-    config = null;
-    # lovelaceConfig = null;
-    # configure the path to your config directory
-    configDir = "/etc/home-assistant";
-    #  config = {
-    #    http = {
-    #      use_x_forwarded_for = true;
-    #      trusted_proxies = [
-    #        "127.0.0.1"
-    #        "::1"
-    #      ];
-    #    };
-    #    default_config = { };
-    #  };
+    enable = true;
+    extraComponets = [
+      "luci"
+    ];
+    config = {
+      http = {
+        use_x_forwarded_for = true;
+        trusted_proxies = [
+          "127.0.0.1"
+          "::1"
+        ];
+      };
+      default_config = { };
+    };
   };
   custom.services.isponsorblocktv.enable = true;
-  custom.services.ha.enable = true;
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
@@ -205,7 +203,6 @@
       wget
       vim
       git
-      #firefox
     ];
     shells = [ pkgs.zsh ];
   };
