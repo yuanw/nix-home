@@ -64,6 +64,11 @@
           host = "192.168.1.1";
           username = "!secret openwrt_admin_username";
           password = "!secret openwrt_admin_password";
+          interval_seconds = 30; # instead of 12seconds
+          consider_home = 300; # 5 minutes timeout
+          new_device_defaults = {
+            track_new_devices = true;
+          };
         }
       ];
       default_config = { };
