@@ -35,10 +35,6 @@ let
 
         --setup-cli
 
-
-
-
-
     sudo systemctl start podman-isponsorblocktv
   '';
 
