@@ -200,6 +200,16 @@
     ];
   };
 
+  environment = {
+    systemPackages = with pkgs; [
+      wget
+      vim
+      git
+      #firefox
+    ];
+    shells = [ pkgs.zsh ];
+  };
+
   # ethernet drivers to load: (run "lspci -v | grep -iA8 'network\|ethernet'")
   boot.initrd.availableKernelModules = [
     "igc"
