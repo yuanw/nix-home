@@ -17,12 +17,12 @@
           redir https://{host}{uri}
         '';
       };
-      "ha.yuanw.me" = {
-        useACMEHost = "yuanw.me";
-        extraConfig = ''
-          reverse_proxy localhost:8123
-        '';
-      };
+      # "ha.yuanw.me" = {
+      #   useACMEHost = "yuanw.me";
+      #   extraConfig = ''
+      #     reverse_proxy localhost:8123
+      #   '';
+      # };
 
       "jellyfin.yuanw.me" = {
         useACMEHost = "yuanw.me";
