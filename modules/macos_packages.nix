@@ -14,6 +14,7 @@ with pkgs;
   slackdump
   mcp-server-filesystem
   kanata-with-cmd
+  defaultbrowser-unstable
   #ghostty-mac
   #calibre_mac
 ]
