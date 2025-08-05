@@ -328,7 +328,7 @@ in
 
                 "${vimium-c.addonId}".settings = {
                   keyMappings = [
-                    # "#!no-check"
+                    "#!no-check"
                     # "map s LinkHints.activateSelect"
                     # "map K previousTab"
                     # "map , previousTab"
