@@ -56,13 +56,12 @@
         isal
         gtts
         getmac
+
+        aiohttp-fast-zlib
       ];
 
     extraComponents = [
       # Components required to complete the onboarding
-      "isal"
-      "api"
-      "analytics"
       "apple_tv"
       "application_credentials"
       "auth"
@@ -78,7 +77,7 @@
       "dsmr"
       "ebusd"
       "esphome"
-      "ffmpeg"
+
       "forecast_solar"
       "fritz"
       "google_translate"
@@ -93,10 +92,10 @@
       "ohme"
       "openweathermap"
       "ping"
-      "plex"
+
       "prometheus"
       "proximity"
-      "radio_browser"
+
       "scrape"
       "sensor"
       "shopping_list"
