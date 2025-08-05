@@ -60,9 +60,8 @@
     # ];
     extraComponents = [
       # Components required to complete the onboarding
-      "api"
-
       "isal"
+      "api"
       "analytics"
       "apple_tv"
       "apple_tv"
@@ -81,7 +80,6 @@
       "dsmr"
       "ebusd"
       "esphome"
-      "esphome"
       "ffmpeg"
       "forecast_solar"
       "fritz"
@@ -92,9 +90,7 @@
       "ibeacon"
       "lawn_mower"
       "met"
-      "met"
       "mqtt"
-      "my"
       "my"
       "ohme"
       "openweathermap"
@@ -102,7 +98,6 @@
       "plex"
       "prometheus"
       "proximity"
-      "radio_browser"
       "radio_browser"
       "scrape"
       "sensor"
