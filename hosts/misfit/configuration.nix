@@ -50,20 +50,16 @@
     extraArgs = [ "--debug" ];
     extraPackages =
       python3Packages: with python3Packages; [
+        isal
         gtts
         getmac
       ];
-    #configWritable = true;
-    # extraComponents = [
-    #   "luci"
-    #   "default_config"
-    # ];
+
     extraComponents = [
       # Components required to complete the onboarding
       "isal"
       "api"
       "analytics"
-      "apple_tv"
       "apple_tv"
       "application_credentials"
       "auth"
@@ -75,7 +71,6 @@
       "camera"
       "command_line"
       "conversation"
-      "default_config"
       "default_config"
       "dsmr"
       "ebusd"
