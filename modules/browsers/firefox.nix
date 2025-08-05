@@ -326,20 +326,12 @@ in
                 # "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
                 "${mtab.addonId}".settings = builtins.fromJSON (builtins.readFile ./mtab.json);
 
-                "${vimium-c.addonId}".settings = {
-                  keyMappings = [
-                    "#!no-check"
-                    # "map s LinkHints.activateSelect"
-                    # "map K previousTab"
-                    # "map , previousTab"
-                    # "map J nextTab"
-                    # "map . nextTab"
-                    # "map q LinkHints.activateWithQueue"
-                    "unmap x"
-                  ];
-                  notifyUpdate = false;
-                  searchUrl = "https://kagi.com/search?q=$s Kagi";
-                };
+                # "${vimium-c.addonId}".settings = {
+                #   keyMappings = [
+                #     "#!no-check"
+                #     "unmap x"
+                #   ];
+                # };
               };
             };
 
