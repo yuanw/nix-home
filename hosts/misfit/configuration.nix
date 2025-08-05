@@ -44,9 +44,8 @@
   services.openssh = {
     enable = true;
   };
-  networking.firewall.allowedTCPPorts = [
-    config.services.home-assistant.config.http.server_port
-  ];
+
+  networking.firewall.allowedTCPPorts = [ 1400 ];
 
   services.home-assistant = {
     enable = true;
