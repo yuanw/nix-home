@@ -45,7 +45,16 @@
     enable = true;
   };
 
-  networking.firewall.allowedTCPPorts = [ 1400 ];
+  services.avahi = {
+    enable = true;
+    # nssmdns = true;
+    openFirewall = true;
+  };
+
+  networking.firewall.allowedTCPPorts = [
+    1400
+    1900
+  ];
 
   services.home-assistant = {
     enable = true;
