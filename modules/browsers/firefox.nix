@@ -33,7 +33,7 @@ in
         home.activation.setDefaultBrowser = lib.mkIf (cfg.enable && isDarwin) (
           hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
             if ! ${lib.getExe pkgs.defaultbrowser} firefox; then
-              /usr/bin/open ${pkgs.firefox-bin}/Applications/Firefox.app
+              /usr/bin/open ~/Applications/Home\ Manager\ Apps/Firefox.app
               ${lib.getExe pkgs.defaultbrowser} firefox
             fi
           ''
