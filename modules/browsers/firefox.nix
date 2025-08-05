@@ -326,12 +326,9 @@ in
                 # "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
                 "${mtab.addonId}".settings = builtins.fromJSON (builtins.readFile ./mtab.json);
 
-                # "${vimium-c.addonId}".settings = {
-                #   keyMappings = [
-                #     "#!no-check"
-                #     "unmap x"
-                #   ];
-                # };
+                "${vimium-c.addonId}".settings = {
+                  keyMappings = "#!no-check\nunmap x";
+                };
               };
             };
 
