@@ -57,7 +57,7 @@
         "mouseless@preview"
         "slack"
         "sloth"
-        # "ungoogled-chromium"
+        "ungoogled-chromium"
         "viscosity"
       ];
       brews = [
