@@ -21,7 +21,7 @@ in
         #   with ps; [
         #     huggingface-hub
         #   ]))
-        pkgs.ollama
+        pkgs.stable.ollama
       ];
     };
   };
