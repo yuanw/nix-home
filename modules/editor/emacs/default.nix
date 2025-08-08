@@ -26,7 +26,6 @@ let
   emacsPatched = cfg.pkg.overrideAttrs (prev: {
     patches =
       (lib.optionals pkgs.stdenv.isDarwin [
-        "${inputs.emacs-plus}/patches/emacs-31/fix-window-role.patch"
         "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
         "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
       ])
