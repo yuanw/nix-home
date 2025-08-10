@@ -63,6 +63,9 @@ in
         "betterdisplay"
         "racket"
         "protonvpn"
+        "vlc"
+        "mouseless@preview"
+
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
