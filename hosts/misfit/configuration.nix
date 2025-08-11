@@ -64,7 +64,6 @@
         isal
         gtts
         getmac
-
         aiohttp-fast-zlib
       ];
 
@@ -154,7 +153,7 @@
 
     };
   };
-  custom.services.isponsorblocktv.enable = true;
+  #custom.services.isponsorblocktv.enable = true;
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
