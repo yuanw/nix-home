@@ -294,6 +294,7 @@
       pciutils
       bluez-experimental
       nmap
+      isponsorblocktv
     ];
   };
 
