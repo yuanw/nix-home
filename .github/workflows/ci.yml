@@ -6,7 +6,7 @@ jobs:
   mac:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install Nix
       uses: DeterminateSystems/nix-installer-action@main
     - uses: cachix/cachix-action@v16
