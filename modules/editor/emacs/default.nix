@@ -740,6 +740,11 @@ with lib;
                 enable = isDarwin;
                 noRequire = true;
                 preface = ''
+                  (defun my-browse-url-firefox-new-tab (url &optional _new-window)
+                      "Open URL in a new Firefox tab."
+                      (call-process "/usr/bin/open" nil 0 nil "-a" "Firefox" url))
+
+                  (setq browse-url-browser-function #'my-browse-url-firefox-new-tab)
                   (defun my/darwin-open ()
                       (interactive)
                       (call-process "/usr/bin/open" nil nil nil
