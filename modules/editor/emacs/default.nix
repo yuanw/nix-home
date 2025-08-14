@@ -1338,6 +1338,8 @@ with lib;
 
               projectile = {
                 enable = true;
+                hook = [ "(after-init . projectile-mode)" ];
+
                 bindKeyMap = {
                   "C-c p" = "projectile-command-map";
                   "C-x p" = "projectile-command-map";
@@ -1352,6 +1354,8 @@ with lib;
                   (projectile-create-missing-test-files t)
                   (projectile-file-exists-local-cache-expire 300)
                   (projectile-project-search-path '("${config.my.homeDirectory}/${config.my.workspaceDirectory}"))
+                  (projectile-remember-projects-between-sessions t)
+                  (projectile-auto-discover t)
                 '';
               };
 
@@ -2099,7 +2103,6 @@ with lib;
               };
               envrc = {
                 enable = false;
-
                 hook = [ "(after-init . envrc-global-mode)" ];
               };
 
