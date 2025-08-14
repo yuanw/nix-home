@@ -1351,6 +1351,7 @@ with lib;
                   (projectile-cleanup-known-projects t)
                   (projectile-create-missing-test-files t)
                   (projectile-file-exists-local-cache-expire 300)
+                  (projectile-project-search-path '("${config.my.homeDirectory}/${config.my.workspaceDirectory}"))
                 '';
               };
 
