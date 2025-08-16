@@ -303,7 +303,7 @@
     systemPackages = with pkgs; [
       wget
       vim
-      gitx
+      git
     ];
     shells = [ pkgs.zsh ];
   };
