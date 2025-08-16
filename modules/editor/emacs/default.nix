@@ -1340,11 +1340,12 @@ with lib;
                 enable = true;
                 bindKeyMap = {
                   "C-c p" = "projectile-command-map";
+                  "C-x p" = "projectile-command-map";
                 };
                 custom = ''
                   (projectile-cache-file  (locate-user-emacs-file "projectile.cache"))
                   (projectile-enable-caching t)
-                  (projectile-project-search-path '(
+                  (projectile-project-search-path '( "${config.my.homeDirectory}/org/"
                   ("${config.my.homeDirectory}/${config.my.workspaceDirectory}/" . 1 )
                   ))
                   (projectile-cleanup-known-projects t)
