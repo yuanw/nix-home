@@ -52,7 +52,7 @@ in
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    ai.enable = true;
+    ##ai.enable = true;
     secrets.agenix = {
       enable = true;
     };
