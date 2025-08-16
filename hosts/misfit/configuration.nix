@@ -302,7 +302,7 @@
     systemPackages = with pkgs; [
       wget
       vim
-      git
+      gitx
     ];
     shells = [ pkgs.zsh ];
   };
@@ -310,7 +310,7 @@
   # ethernet drivers to load: (run "lspci -v | grep -iA8 'network\|ethernet'")
   boot.initrd.availableKernelModules = [
     "igc"
-    "r8169"
+    #"r8169" cannot load this firmware as right now
     "i40e"
   ];
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
