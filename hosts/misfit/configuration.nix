@@ -317,7 +317,7 @@
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
   boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
   boot.initrd.network = {
-    enable = true;
+    enable = false;
     ssh = {
       enable = true;
       port = 2222;
