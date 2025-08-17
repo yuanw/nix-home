@@ -110,7 +110,7 @@
       "shopping_list"
       "smartthings"
 
-      # "skybell"
+      "skybell"
       "sun"
       "switchbot"
       "switchbot_cloud"
