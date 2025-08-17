@@ -65,7 +65,7 @@ in
           Type = "simple";
           User = cfg.user;
           Group = cfg.group;
-          # UMask = "0077";
+          UMask = "0077";
           #WorkingDirectory = cfg.dataDir;
           ExecStart = " ${pkgs.isponsorblocktv}/bin/iSponsorBlockTV --data '${cfg.dataDir}'";
           Restart = "on-failure";
