@@ -51,7 +51,7 @@ in
         file = ../secrets/isponsorblockvg.age;
         mode = "770";
         path = "/var/lib/isponsorblocktv/config.json";
-        # owner = "isponsorblocktv";
+        owner = "isponsorblocktv";
       };
     };
     systemd = {
@@ -63,9 +63,9 @@ in
 
         serviceConfig = {
           # Type = "simple";
-          # User = "isponsorblocktv";
+          User = "isponsorblocktv";
           # cfg.user;
-          # Group = cfg.group;
+          Group = "isponsorblocktv";
           UMask = "0077";
           #WorkingDirectory = cfg.dataDir;
           ExecStart = " ${pkgs.isponsorblocktv}/bin/iSponsorBlockTV --data '${cfg.dataDir}'";
@@ -83,12 +83,12 @@ in
       };
     };
 
-    # users.users.isponsorblocktv = {
-    #   group = "isponsorblocktv";
-    #   isSystemUser = true;
-    # };
+    users.users.isponsorblocktv = {
+      group = "isponsorblocktv";
+      isSystemUser = true;
+    };
 
-    # users.groups.isponsorblocktv = { };
+    users.groups.isponsorblocktv = { };
 
   };
 }
