@@ -49,9 +49,10 @@ in
     age.secrets = {
       isponsorblock-config = {
         file = ../secrets/isponsorblockvg.age;
-        mode = "770";
-        path = "/var/lib/isponsorblocktv/config.json";
+        # mode = "770";
+        path = "${cfg.dataDir}/config.json";
         owner = "isponsorblocktv";
+        group = "isponsorblocktv";
       };
     };
     systemd = {
