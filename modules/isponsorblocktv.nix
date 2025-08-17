@@ -49,7 +49,7 @@ in
   config = mkIf cfg.enable {
     age.secrets = {
       isponsorblock-config = {
-        file = /../secrets/isponsorblockvg.age;
+        file = ../secrets/isponsorblockvg.age;
         mode = "770";
         path = "/var/lib/isponsorblocktv/config.json";
         owner = "isponsorblocktv";
