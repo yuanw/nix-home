@@ -158,7 +158,6 @@
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
-    isponsorblock-config.file = ../../secrets/isponsorblockvg.age;
     jellyfin-admin.file = ../../secrets/jellyfin-admin.age;
     hass = {
       file = ../../secrets/hass.age;
