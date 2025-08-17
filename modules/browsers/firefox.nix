@@ -332,6 +332,25 @@ in
               };
             };
 
+            containers = {
+
+              "Banking" = {
+                id = 3;
+                color = "green";
+                icon = "dollar";
+              };
+              "Shopping" = {
+                id = 4;
+                color = "pink";
+                icon = "cart";
+              };
+              "Social Media" = {
+                id = 9;
+                color = "purple";
+                icon = "fingerprint";
+              };
+            };
+
             search = {
               force = true;
               default = "Kagi";
