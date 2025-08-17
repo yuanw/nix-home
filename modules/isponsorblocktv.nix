@@ -62,9 +62,10 @@ in
         wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
-          Type = "simple";
-          User = cfg.user;
-          Group = cfg.group;
+          # Type = "simple";
+          User = "isponsorblocktv";
+          # cfg.user;
+          # Group = cfg.group;
           UMask = "0077";
           #WorkingDirectory = cfg.dataDir;
           ExecStart = " ${pkgs.isponsorblocktv}/bin/iSponsorBlockTV --data '${cfg.dataDir}'";
@@ -82,16 +83,12 @@ in
       };
     };
 
-    users.users = mkIf (cfg.user == "isponsorblocktv ") {
-      isponsorblocktv = {
-        inherit (cfg) group;
-        isSystemUser = true;
-      };
+    users.users.isponsorblocktv = {
+      group = "isponsorblocktv";
+      isSystemUser = true;
     };
 
-    users.groups = mkIf (cfg.group == "isponsorblocktv ") {
-      isponsorblocktv = { };
-    };
+    users.groups.isponsorblocktv = { };
 
   };
 }
