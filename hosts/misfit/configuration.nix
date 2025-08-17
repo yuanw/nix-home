@@ -108,8 +108,8 @@
       "sensor"
       "shopping_list"
       "smartthings"
-      "sonos"
-      "spotify"
+
+      "skybell"
       "sun"
       "switchbot"
       "switchbot_cloud"
