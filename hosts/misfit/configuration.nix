@@ -154,7 +154,7 @@
 
     };
   };
-  #custom.services.isponsorblocktv.enable = true;
+  services.isponsorblocktv.enable = true;
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;

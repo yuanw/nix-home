@@ -51,7 +51,7 @@ in
     systemd = {
 
       services.isponsorblocktv = {
-        description = "Jellyfin Media Server";
+        description = "isponsorblock Server";
         after = [ "network-online.target" ];
         wants = [ "network-online.target" ];
         wantedBy = [ "multi-user.target" ];
@@ -60,7 +60,7 @@ in
           Type = "simple";
           User = cfg.user;
           Group = cfg.group;
-          UMask = "0077";
+          # UMask = "0077";
           WorkingDirectory = cfg.dataDir;
           ExecStart = "${getExe cfg.package} --data '${cfg.dataDir}'";
           Restart = "on-failure";
