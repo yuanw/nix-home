@@ -19,8 +19,6 @@ let
     sudo ${pkgs.podman}/bin/podman run           \
 
         --rm -it                                 \
-
-
         --uidmap=0:${toString config.users.users.isponsorblocktv.uid}:1 \
 
 
