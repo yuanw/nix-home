@@ -43,13 +43,19 @@ in
           passed with `--datadir`
         '';
       };
-
     };
   };
 
   config = mkIf cfg.enable {
+    age.secrets = {
+      isponsorblock-config = {
+        file = /../secrets/isponsorblockvg.age;
+        mode = "770";
+        path = "/var/lib/isponsorblocktv/config.json";
+        owner = "isponsorblocktv";
+      };
+    };
     systemd = {
-
       services.isponsorblocktv = {
         description = "isponsorblock Server";
         after = [ "network-online.target" ];
@@ -61,7 +67,7 @@ in
           User = cfg.user;
           Group = cfg.group;
           # UMask = "0077";
-          WorkingDirectory = cfg.dataDir;
+          #WorkingDirectory = cfg.dataDir;
           ExecStart = "${getExe cfg.package} --data '${cfg.dataDir}'";
           Restart = "on-failure";
           TimeoutSec = 15;

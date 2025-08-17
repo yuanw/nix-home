@@ -39,3 +39,6 @@
 
 nixos-rebuild build --flake '.#misfit'
 sudo nixos-rebuild switch --flake '.#misfit'
+
+systemctl list-units --type=service
+
