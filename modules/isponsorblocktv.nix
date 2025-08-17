@@ -8,7 +8,6 @@
 let
   inherit (lib)
     mkIf
-    getExe
     mkEnableOption
     mkOption
     mkPackageOption
@@ -68,7 +67,7 @@ in
           Group = cfg.group;
           # UMask = "0077";
           #WorkingDirectory = cfg.dataDir;
-          ExecStart = "${getExe cfg.package} --data '${cfg.dataDir}'";
+          ExecStart = " ${pkgs.isponsorblocktv}/bin/iSponsorBlockTV --data '${cfg.dataDir}'";
           Restart = "on-failure";
           TimeoutSec = 15;
           SuccessExitStatus = [
