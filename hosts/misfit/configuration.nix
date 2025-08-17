@@ -66,6 +66,7 @@
         gtts
         getmac
         aiohttp-fast-zlib
+        pychromecast
       ];
 
     extraComponents = [
