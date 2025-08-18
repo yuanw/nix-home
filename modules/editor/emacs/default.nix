@@ -2996,7 +2996,7 @@ with lib;
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-
+              claude-code
               #: js
               # nodePackages.eslint
               #: markdown
