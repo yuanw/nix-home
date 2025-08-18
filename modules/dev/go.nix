@@ -25,7 +25,7 @@ in
 
           enable = true;
           goPath = "go";
-          telemtry.mode = "off";
+          telemetry.mode = "off";
 
         };
 
