@@ -28,10 +28,7 @@
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username}.programs = {
-    go = {
-      enable = true;
-      goPath = "go";
-    };
+
     git = {
       extraConfig = {
         github.user = "yuanwang-wf";
@@ -91,6 +88,7 @@
       # ask.enable = true;
       dart.enable = true;
       java.enable = true;
+      go.enable = true;
       #scheme.enable = true;
       #haskell.enable = true;
       lean.enable = true;

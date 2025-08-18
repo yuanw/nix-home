@@ -14,6 +14,8 @@
       ./dev/haskell.nix
       ./dev/haxe.nix
       ./dev/idris2.nix
+      ./dev/go.nix
+
       ./dev/lean.nix
       ./dev/java.nix
       ./dev/julia.nix
