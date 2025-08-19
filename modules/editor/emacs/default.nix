@@ -1480,6 +1480,7 @@ with lib;
                     allowSubstitutes = false;
                   };
               };
+
               org-refile = {
                 enable = true;
                 after = [ "org" ];
@@ -1514,6 +1515,9 @@ with lib;
               };
               claude-code-ide = {
                 enable = true;
+                bind = {
+                  "C-c C-," = "claude-code-ide-menu";
+                };
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/aider.nix {
