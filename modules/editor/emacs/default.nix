@@ -1520,7 +1520,7 @@ with lib;
                 };
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/aider.nix {
+                  (pkgs.callPackage ./packages/claude-code-ide {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
