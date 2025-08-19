@@ -1512,6 +1512,21 @@ with lib;
                   });
                 after = [ "org" ];
               };
+              claude-code-ide = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/aider.nix {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      replaceVars
+                      writeText
+                      unstableGitUpdater
+                      ;
+                    inherit lib;
+                    inherit (epkgs) melpaBuild;
+                  });
+              };
               aider = {
                 enable = cfg.enableAider;
                 package =
