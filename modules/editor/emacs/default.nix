@@ -1530,6 +1530,9 @@ with lib;
                     inherit lib;
                     inherit (epkgs) melpaBuild;
                   });
+                config = ''
+                  (claude-code-ide-emacs-tools-setup)
+                '';
               };
               aider = {
                 enable = cfg.enableAider;
