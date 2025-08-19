@@ -1528,7 +1528,13 @@ with lib;
                       unstableGitUpdater
                       ;
                     inherit lib;
-                    inherit (epkgs) melpaBuild;
+                    inherit (epkgs)
+                      melpaBuild
+                      websocket
+                      transient
+                      web-server
+                      ;
+
                   });
                 config = ''
                   (claude-code-ide-emacs-tools-setup)

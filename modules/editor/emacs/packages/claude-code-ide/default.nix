@@ -3,6 +3,9 @@
   melpaBuild,
   writeText,
   lib,
+  websocket,
+  transient,
+  web-server,
   ...
 }:
 
@@ -17,7 +20,11 @@ melpaBuild {
     sha256 = "sha256-nRe3cCF3EtK8zyuqwguzUotDH/cqoNedIqEM5HXjC/4=";
   };
 
-  packageRequires = [ ];
+  packageRequires = [
+    websocket
+    transient
+    web-server
+  ];
 
   recipe = writeText "recipe" ''
     (claude-code-ide
