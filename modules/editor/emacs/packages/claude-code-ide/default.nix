@@ -6,6 +6,9 @@
   websocket,
   transient,
   web-server,
+  vterm,
+  eat,
+  flycheck,
   ...
 }:
 
@@ -24,6 +27,11 @@ melpaBuild {
     websocket
     transient
     web-server
+    vterm
+
+    flycheck
+
+    eat
   ];
 
   recipe = writeText "recipe" ''

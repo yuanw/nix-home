@@ -1533,6 +1533,9 @@ with lib;
                       websocket
                       transient
                       web-server
+                      vterm
+                      eat
+                      flycheck
                       ;
 
                   });
