@@ -2914,14 +2914,8 @@ with lib;
 
               gptel = {
                 enable = true;
-              };
-
-              mcp = {
-                enable = false;
-                after = [ "gptel" ];
-                extraConfig = ''
-
-                                  ;; OpenRouter offers an OpenAI compatible API
+                config = ''
+                                       ;; OpenRouter offers an OpenAI compatible API
                                   (gptel-make-openai "OpenRouter"               
                       :host "openrouter.ai"
                       :endpoint "/api/v1/chat/completions"
@@ -2940,23 +2934,32 @@ with lib;
                   	            qwen/qwq-32b:free)
                       )
 
+                '';
+              };
 
-                                                
-                                    :custom (mcp-hub-servers
-                                             `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
-                                               ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
-                                               ;;("qdrant" . (:url "http://localhost:8000/sse"))
-                                               ;; ("graphlit" . (
-                                               ;;                :command "npx"
-                                               ;;                :args ("-y" "graphlit-mcp-server")
-                                               ;;                :env (
-                                               ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
-                                               ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
-                                               ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
-                                                                    )
-                                                                    )
-                                    :config (require 'mcp-hub)
-                                    :hook (after-init . mcp-hub-start-all-server)
+              mcp = {
+                enable = false;
+                after = [ "gptel" ];
+                extraConfig = ''
+
+
+
+                              
+                  :custom (mcp-hub-servers
+                           `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
+                             ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+                             ;;("qdrant" . (:url "http://localhost:8000/sse"))
+                             ;; ("graphlit" . (
+                             ;;                :command "npx"
+                             ;;                :args ("-y" "graphlit-mcp-server")
+                             ;;                :env (
+                             ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
+                             ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
+                             ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
+                                                  )
+                                                  )
+                  :config (require 'mcp-hub)
+                  :hook (after-init . mcp-hub-start-all-server)
                 '';
               };
 
