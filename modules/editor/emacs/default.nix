@@ -757,7 +757,7 @@ with lib;
                 };
               };
               auth-source-pass = {
-                enable = true;
+                enable = false;
                 extraConfig = ''
                   :preface
                   (defvar auth-source-pass--cache (make-hash-table :test #'equal))
