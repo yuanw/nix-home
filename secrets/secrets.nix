@@ -19,6 +19,11 @@ let
   ];
 in
 {
+  "openrouter.age".publicKeys = [
+    yuanw_mist
+    yuanwang_wv
+    yuanwang_ca
+  ];
   "secret1.age".publicKeys = users ++ systems;
   "adguard.age".publicKeys = users ++ systems;
   "isponsorblockvg.age".publicKeys = [
