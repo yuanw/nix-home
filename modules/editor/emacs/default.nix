@@ -2920,22 +2920,43 @@ with lib;
                 enable = false;
                 after = [ "gptel" ];
                 extraConfig = ''
-                              
-                  :custom (mcp-hub-servers
-                           `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
-                             ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
-                             ;;("qdrant" . (:url "http://localhost:8000/sse"))
-                             ;; ("graphlit" . (
-                             ;;                :command "npx"
-                             ;;                :args ("-y" "graphlit-mcp-server")
-                             ;;                :env (
-                             ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
-                             ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
-                             ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
-                                                  )
-                                                  )
-                  :config (require 'mcp-hub)
-                  :hook (after-init . mcp-hub-start-all-server)
+
+                                  ;; OpenRouter offers an OpenAI compatible API
+                                  (gptel-make-openai "OpenRouter"               
+                      :host "openrouter.ai"
+                      :endpoint "/api/v1/chat/completions"
+                      :stream t
+                      :key (gptel-api-key-from-auth-source "api.openrouter.ai" "apikey")
+                      :models '(google/gemini-2.5-flash
+                  	            google/gemini-2.5-pro
+                                openrouter/auto
+                  	            anthropic/claude-sonnet-4
+                                deepseek/deepseek-r1-0528:free
+                                deepseek/deepseek-prover-v2:free
+                  	            open-r1/olympiccoder-32b:free
+                  	            mistralai/devstral-small:free
+                                google/gemma-3-27b-it:free
+                  	            deepseek/deepseek-r1-zero:free
+                  	            qwen/qwq-32b:free)
+                      )
+
+
+                                                
+                                    :custom (mcp-hub-servers
+                                             `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
+                                               ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
+                                               ;;("qdrant" . (:url "http://localhost:8000/sse"))
+                                               ;; ("graphlit" . (
+                                               ;;                :command "npx"
+                                               ;;                :args ("-y" "graphlit-mcp-server")
+                                               ;;                :env (
+                                               ;;                      :GRAPHLIT_ORGANIZATION_ID "your-organization-id"
+                                               ;;                      :GRAPHLIT_ENVIRONMENT_ID "your-environment-id"
+                                               ;;                      :GRAPHLIT_JWT_SECRET "your-jwt-secret")))
+                                                                    )
+                                                                    )
+                                    :config (require 'mcp-hub)
+                                    :hook (after-init . mcp-hub-start-all-server)
                 '';
               };
 
