@@ -58,7 +58,7 @@ in
   config = mkMerge [
     (mkIf cfg.enable {
       fonts.packages = with pkgs; [
-        sketchybar-app-font
+        #sketchybar-app-font
         font-hack-nerd-font
         # sf-symbols
         emacs-all-the-icons-fonts
