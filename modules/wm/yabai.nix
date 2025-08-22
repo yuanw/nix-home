@@ -128,7 +128,6 @@ in
           pkgs.jq
           pkgs.gh
           pkgs.ripgrep
-          pkgs.ical-buddy
           pkgs.sketchybar-cpu-helper
         ];
         enable = true;
