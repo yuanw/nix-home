@@ -78,7 +78,6 @@ in
           };
         };
         home.packages = [
-          pkgs.ical-buddy
           pkgs.choose-mac
           (pkgs.writeShellScriptBin "yabai-next-window" ''
             #
