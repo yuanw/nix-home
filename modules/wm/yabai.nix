@@ -58,7 +58,7 @@ in
   config = mkMerge [
     (mkIf cfg.enable {
       fonts.packages = with pkgs; [
-        sketchybar-app-font
+        #sketchybar-app-font
         font-hack-nerd-font
         # sf-symbols
         emacs-all-the-icons-fonts
@@ -78,7 +78,6 @@ in
           };
         };
         home.packages = [
-          pkgs.ical-buddy
           pkgs.choose-mac
           (pkgs.writeShellScriptBin "yabai-next-window" ''
             #
@@ -128,7 +127,6 @@ in
           pkgs.jq
           pkgs.gh
           pkgs.ripgrep
-          pkgs.ical-buddy
           pkgs.sketchybar-cpu-helper
         ];
         enable = true;

@@ -62,20 +62,6 @@ with builtins;
       ];
     }
 
-    (
-      if (builtins.hasAttr "launchd" options) then
-        {
-          launchd.daemons.activate-agenix.serviceConfig = {
-            StandardOutPath = "/tmp/agenix.log";
-            StandardErrorPath = "/tmp/agenix.log";
-          };
-        }
-      else
-        {
-          # systemd
-        }
-    )
-
     {
       age = {
         #  secrets.secret1 = {

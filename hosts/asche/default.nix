@@ -47,7 +47,6 @@
       };
     };
   };
-  custom.services.isponsorblocktv.enable = true;
 
   services.openssh.enable = true;
   services.autorandr = {
