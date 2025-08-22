@@ -2915,24 +2915,11 @@ with lib;
               gptel = {
                 enable = true;
                 config = ''
-                                       ;; OpenRouter offers an OpenAI compatible API
-                                  (gptel-make-openai "OpenRouter"               
-                      :host "openrouter.ai"
-                      :endpoint "/api/v1/chat/completions"
-                      :stream t
-                      :key (gptel-api-key-from-auth-source "api.openrouter.ai" "apikey")
-                      :models '(google/gemini-2.5-flash
-                  	            google/gemini-2.5-pro
-                                openrouter/auto
-                  	            anthropic/claude-sonnet-4
-                                deepseek/deepseek-r1-0528:free
-                                deepseek/deepseek-prover-v2:free
-                  	            open-r1/olympiccoder-32b:free
-                  	            mistralai/devstral-small:free
-                                google/gemma-3-27b-it:free
-                  	            deepseek/deepseek-r1-zero:free
-                  	            qwen/qwq-32b:free)
-                      )
+                   ;; OPTIONAL configuration
+                  (setq gptel-model 'claude-3.7-sonnet
+                      gptel-backend (gptel-make-gh-copilot "Copilot"))
+
+
 
                 '';
               };
