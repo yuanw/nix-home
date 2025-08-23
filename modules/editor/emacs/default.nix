@@ -1521,8 +1521,11 @@ with lib;
               claude-code-ide = {
                 enable = true;
                 bind = {
-                  "C-c C-," = "claude-code-ide-menu";
+                  "C-x c c" = "claude-code-ide-menu";
                 };
+                custom = ''
+                  (claude-code-ide-cli-extra-flags "--model opus")
+                '';
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/claude-code-ide {

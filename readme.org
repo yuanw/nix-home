@@ -129,7 +129,9 @@ or
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
 * See the diff between build and current system
+~nix store diff-closures /run/current-system ./result~
 ~nix-diff /run/current-system ./result~
+
 * Caveats
 ** Exclude Nix directory from Spotlight index
 ** nix-darwin permission issue
