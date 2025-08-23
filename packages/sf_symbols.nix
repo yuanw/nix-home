@@ -8,11 +8,11 @@
 # https://github.com/Homebrew/homebrew-cask/blob/d5acc87dd9ebf3cc1a38f2e4f99c1c2872f5ceb6/Casks/sf-symbols.rb
 stdenv.mkDerivation rec {
   pname = "sf-symbols";
-  version = "5";
+  version = "6";
 
   src = fetchurl {
     url = "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-${version}.dmg";
-    hash = "sha256-6dtcrwRY1qEHquZPbwnEo2CmcuNN9ZkFo8rn/8S+ctM=";
+    hash = "sha256-hG6QyidNVtI0pXO698oGVsG4awy8XWr27nEyYSUMhPo=";
   };
   unpackPhase = ''
     undmg $src

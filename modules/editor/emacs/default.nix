@@ -1735,7 +1735,7 @@ with lib;
                 '';
                 config = ''
                             (setq denote-directory "~/org/denote/")
-                            (setq denote-templates
+                             (setq denote-templates
                                   `((report . "* Some heading\n\n* Another heading")
                                     (journal . ,(concat "* Tasks todo"
                                                      "\n\n"
@@ -2922,6 +2922,7 @@ with lib;
 
               gptel = {
                 enable = true;
+                demand = true;
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/gptel.nix {
@@ -2938,9 +2939,18 @@ with lib;
                       ;
 
                   });
+
                 config = ''
-                  ;; OPTIONAL configuration
-                    (gptel-make-gh-copilot "Copilot")
+
+                                      (require '
+                       gptel-autoloads)
+
+
+
+                    ;; OPTIONAL configuration
+                  (setq gptel-model 'claude-3.7-sonnet
+                        gptel-backend (gptel-make-gh-copilot "Copilot"))
+
                 '';
               };
 
