@@ -40,6 +40,7 @@ with pkgs;
   nixpkgs-fmt
   nix-tree
   nix-diff
+  nix-update
   # nix-du
   lazygit
   gron

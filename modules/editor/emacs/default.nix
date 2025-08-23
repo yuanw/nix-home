@@ -2915,12 +2915,8 @@ with lib;
               gptel = {
                 enable = true;
                 config = ''
-                   ;; OPTIONAL configuration
-                  (setq gptel-model 'claude-3.7-sonnet
-                      gptel-backend (gptel-make-gh-copilot "Copilot"))
-
-
-
+                  ;; OPTIONAL configuration
+                    (gptel-make-gh-copilot "Copilot")
                 '';
               };
 
