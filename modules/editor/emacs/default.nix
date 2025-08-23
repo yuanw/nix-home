@@ -1898,9 +1898,14 @@ with lib;
                 '';
               };
 
+              nix-update = {
+                enable = true;
+              };
+
               yaml-ts-mode = {
                 enable = true;
               };
+
               nix-mode = {
                 enable = true;
                 hook = [
