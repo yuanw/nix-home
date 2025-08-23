@@ -2922,6 +2922,22 @@ with lib;
 
               gptel = {
                 enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage ./packages/gptel.nix {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      writeText
+                      unstableGitUpdater
+                      ;
+                    inherit lib;
+                    inherit (epkgs)
+                      melpaBuild
+                      transient
+                      compat
+                      ;
+
+                  });
                 config = ''
                   ;; OPTIONAL configuration
                     (gptel-make-gh-copilot "Copilot")

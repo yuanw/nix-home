@@ -29,9 +29,7 @@ melpaBuild {
     transient
     web-server
     vterm
-
     flycheck
-
     eat
   ];
 
