@@ -2,9 +2,10 @@ host := `hostname -s`
 
 # build os
 build:
-   nix build .#wk01174
+   @nix build ".#$(hostname)"
 
-update-all: nix flake update
+update-all:
+	@nix flake update
 
 update INPUT:
-    nix flake update lock --update-input {{INPUT}}
+    @nix flake update lock --update-input {{INPUT}}
