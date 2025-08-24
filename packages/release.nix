@@ -9,11 +9,11 @@
   sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
   # https://github.com/NixOS/nixpkgs/blob/master/pkgs/top-level/emacs-packages.nix
-  hurl-mode = pkgs.callPackage ./hurl-mode.nix {
+  hurl-mode = pkgs.callPackage ./emacs/hurl-mode.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
-  claude-code-ide = pkgs.callPackage ./claude-code-ide {
+  claude-code-ide = pkgs.callPackage ./emacs/claudeg-code-ide {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
