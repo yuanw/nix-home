@@ -547,7 +547,7 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/hurl-mode.nix {
+                  (pkgs.callPackage ../../packages/emacs/hurl-mode.nix {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
@@ -560,7 +560,6 @@ with lib;
                 extraPackages = [
                   pkgs.hurl
                 ];
-
               };
               auto-save = {
                 enable = true;
