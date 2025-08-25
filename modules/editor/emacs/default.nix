@@ -1892,7 +1892,6 @@ with lib;
               };
               thrift-mode = {
                 enable = true;
-
                 package =
                   epkgs:
                   (pkgs.callPackage "${packagePath}/thrift-mode.nix" {
