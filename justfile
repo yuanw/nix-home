@@ -13,7 +13,11 @@ update INPUT:
 nix-update:
     @nix-update -f ./packages/release.nix claude-code-ide --src-only --version=branch
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
+    @nix-update -f ./packages/release.nix emacs-reader --src-only --version=branch
+    @nix-update -f ./packages/release.nix emacs-reveal --src-only --version=branch
+    @nix-update -f ./packages/release.nix gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
+    @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
 
 sys-diff:
