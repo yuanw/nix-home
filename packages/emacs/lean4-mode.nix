@@ -4,6 +4,7 @@
 
   # Elisp dependencies
   dash ? null,
+  lsp-mode ? null,
   # Native dependencies
   ...
 }:
@@ -24,6 +25,7 @@ melpaBuild {
   '';
   packageRequires = [
     dash
+    lsp-mode
   ];
   preferLocalBuild = true;
   allowSubstitutes = false;
