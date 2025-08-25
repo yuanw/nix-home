@@ -17,5 +17,8 @@
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
-
+  ultra-scroll = pkgs.callPackage ./emacs/ultra-scroll.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
 }
