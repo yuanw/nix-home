@@ -1500,7 +1500,7 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/ob-racket.nix {
+                  (pkgs.callPackage "${packagePath}/ob-racket.nix" {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
@@ -1522,7 +1522,7 @@ with lib;
                 '';
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/claude-code-ide {
+                  (pkgs.callPackage "${packagePath}/claude-code-ide" {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
