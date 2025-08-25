@@ -509,17 +509,14 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  epkgs.trivialBuild {
-                    pname = "ultra-scroll";
-                    version = "0-unstable-2025-04-17";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "jdtsmith";
-                      repo = "ultra-scroll";
-                      rev = "f2e4fba601b6116f6f0bcb73cadf897bd8f7b764";
-                      #sha256 = lib.fakeSha256;
-                      sha256 = "sha256-Dgt7eE4a1gi7iYAxLhfPbmo3Jglq97DJopf2i+Ft7vI=";
-                    };
-                  };
+                  (pkgs.callPackage "${packagePath}/ultra-scroll.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      writeText
+                      ;
+                    inherit (epkgs) melpaBuild;
+                  });
+
                 hook = [
                   "(after-init . ultra-scroll-mode)"
                 ];
@@ -547,14 +544,12 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage (packagePath / "hurl-mode.nix") {
+                  (pkgs.callPackage "${packagePath}/hurl-mode.nix" {
                     inherit (pkgs)
                       fetchFromGitHub
-                      replaceVars
                       writeText
-                      unstableGitUpdater
                       ;
-                    inherit lib;
+
                     inherit (epkgs) melpaBuild;
                   });
                 extraPackages = [
