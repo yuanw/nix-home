@@ -48,7 +48,12 @@
 
   ob-racket = pkgs.callPackage ./emacs/ob-racket.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  thrift-mode = pkgs.callPackage ./emacs/thrift-mode.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
   };
 
   ultra-scroll = pkgs.callPackage ./emacs/ultra-scroll.nix {
