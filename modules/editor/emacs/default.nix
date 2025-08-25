@@ -31,7 +31,7 @@ let
       ])
       ++ prev.patches;
   });
-
+  packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
 with lib;
@@ -547,7 +547,7 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ../../../packages/emacs/hurl-mode.nix {
+                  (pkgs.callPackage (packagePath / hurl-mode.nix) {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
