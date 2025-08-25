@@ -1,6 +1,7 @@
 {
   melpaBuild,
-  fetchFromGitea,
+  fetchFromGitHub,
+
   writableTmpDirAsHomeHook,
   mupdf,
   writeText,
@@ -11,9 +12,8 @@ melpaBuild {
   version = "0.2.7";
   pname = "reader";
 
-  src = fetchFromGitea {
-    domain = "codeberg.org";
-    owner = "divyaranjan";
+  src = fetchFromGitHub {
+    owner = "divyaranjan1905";
     repo = "emacs-reader";
     rev = "b81d08af119f50ac0032e0dc7df260c9e6212be7";
     # sha256 = lib.fakeSha256;
