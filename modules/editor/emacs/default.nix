@@ -560,18 +560,13 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  epkgs.trivialBuild {
-                    pname = "auto-save";
-                    version = "0.0.1";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "manateelazycat";
-                      repo = "auto-save";
-                      rev = "0fb3c0f38191c0e74f00bae6adaa342de3750e83";
-                      sha256 = "sha256-MCa28kGMBKLA/WqcDgJVtbul//R80nwWuI757wc12KI=";
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
+                  (pkgs.callPackage "${packagePath}/auto-save.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      ;
+                    inherit (epkgs) melpaBuild;
+                  });
+
                 config = ''
                   (auto-save-enable)
                   (setq auto-save-silent t)   ; quietly save
