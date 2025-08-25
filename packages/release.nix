@@ -42,7 +42,7 @@
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
 
-  ob-racket = pkgs.callPackage ./emacs/racket.nix {
+  ob-racket = pkgs.callPackage ./emacs/ob-racket.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };

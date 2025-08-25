@@ -3,21 +3,21 @@
   melpaBuild,
   writeText,
   lib,
-  compat,
-  transient,
+  compat ? null,
+  transient ? null,
   ...
 }:
 
 melpaBuild {
   pname = "gptel";
-  version = "0-unstable-2025-08-22";
+  version = "0.9.8.5-unstable-2025-08-24";
 
   src = fetchFromGitHub {
     owner = "karthink";
     repo = "gptel";
-    rev = "90b41b1e45c91d2f02df886c6b86cc8bdb52090a";
+    rev = "7bb353a582d11ce210bb0a5b77c53de564c28e67";
     #sha256 = lib.fakeSha256;
-    sha256 = "sha256-39wavfSi8GsodRFZnNG4Rfp0JUJL0Z62NiQOxzsrnGA=";
+    sha256 = "sha256-5Zn+hFuEWi/lJA9/lvIyBrJsXm7pDjbGZjnb21TLC38=";
   };
 
   packageRequires = [
