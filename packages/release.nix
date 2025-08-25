@@ -29,8 +29,8 @@
 
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+    trivialBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitLab;
   };
 
   gptel = pkgs.callPackage ./emacs/gptel.nix {

@@ -1,3 +1,5 @@
 nix-update --flake sf-symbols --version 6
 nix-update --flake bandcamp-dl --src-only
 nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
+
+nix-update -f ./packages/release.nix emacs-reveal --src-only --version 9.52.0
