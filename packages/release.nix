@@ -18,8 +18,25 @@
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
+  emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
+  emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
 
+  gptel = pkgs.callPackage ./emacs/gptel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
   hurl-mode = pkgs.callPackage ./emacs/hurl-mode.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
+
+  ob-racket = pkgs.callPackage ./emacs/racket.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
