@@ -1996,6 +1996,7 @@ with lib;
                       melpaBuild
                       dash
                       lsp-mode
+                      magit-section
                       ;
                   });
 

@@ -5,6 +5,8 @@
   # Elisp dependencies
   dash ? null,
   lsp-mode ? null,
+  magit-section ? null,
+
   # Native dependencies
   ...
 }:
@@ -26,6 +28,8 @@ melpaBuild {
   packageRequires = [
     dash
     lsp-mode
+    magit-section
+
   ];
   preferLocalBuild = true;
   allowSubstitutes = false;
