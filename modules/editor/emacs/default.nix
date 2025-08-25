@@ -1990,7 +1990,7 @@ with lib;
                 package =
                   epkgs:
 
-                  (pkgs.callPackage "${packagePath}/lean4-mode" {
+                  (pkgs.callPackage "${packagePath}/lean4-mode.nix" {
                     inherit (pkgs) fetchFromGitHub;
 
                     inherit (epkgs)
