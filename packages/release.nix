@@ -9,6 +9,10 @@
   sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
 
+  auto-save = pkgs.callPackage ./emacs/auto-save.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub;
+  };
   claude-code-ide = pkgs.callPackage ./emacs/claude-code-ide {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
