@@ -20,7 +20,13 @@
   };
   emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+    inherit (pkgs)
+      fetchFromGitea
+      writableTmpDirAsHomeHook
+      mupdf
+      writeText
+      ;
+
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
