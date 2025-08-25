@@ -1992,10 +1992,10 @@ with lib;
 
                   (pkgs.callPackage "${packagePath}/lean4-mode.nix" {
                     inherit (pkgs) fetchFromGitHub;
-
                     inherit (epkgs)
                       melpaBuild
                       dash
+                      lsp-mode
                       ;
                   });
 
