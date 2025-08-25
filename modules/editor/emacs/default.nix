@@ -1995,6 +1995,7 @@ with lib;
                     inherit (epkgs)
                       melpaBuild
                       dash
+                      # https://github.com/leanprover-community/lean4-mode/issues/7
                       lsp-mode
                       magit-section
                       ;
