@@ -2168,22 +2168,6 @@ with lib;
 
               eglot-booster = {
                 enable = cfg.lspStyle == "eglot";
-                package =
-                  epkgs:
-                  epkgs.trivialBuild {
-                    pname = "eglot-booster";
-                    version = "0-unstable-2025-04-28";
-
-                    src = pkgs.fetchFromGitHub {
-                      owner = "jdtsmith";
-                      repo = "eglot-booster";
-                      rev = "1260d2f7dd18619b42359aa3e1ba6871aa52fd26";
-                      #sha256 = lib.fakeSha256;
-                      sha256 = "sha256-teAKWDDL7IrCBiZUVIVlB3W22G9H6IrWiRV/P62dFy0=";
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
                 after = [ "eglot" ];
                 extraPackages = [
                   pkgs.emacs-lsp-booster
