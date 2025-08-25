@@ -547,7 +547,7 @@ with lib;
                 enable = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ../../packages/emacs/hurl-mode.nix {
+                  (pkgs.callPackage ../../../packages/emacs/hurl-mode.nix {
                     inherit (pkgs)
                       fetchFromGitHub
                       replaceVars
