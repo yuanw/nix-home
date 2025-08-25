@@ -2919,7 +2919,7 @@ with lib;
                 demand = true;
                 package =
                   epkgs:
-                  (pkgs.callPackage ./packages/gptel.nix {
+                  (pkgs.callPackage "${packagePath}/gptel.nix" {
                     inherit (pkgs)
                       fetchFromGitHub
                       writeText
