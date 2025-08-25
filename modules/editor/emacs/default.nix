@@ -1995,7 +1995,7 @@ with lib;
 
                     inherit (epkgs)
                       melpaBuild
-
+                      dash
                       ;
                   });
 

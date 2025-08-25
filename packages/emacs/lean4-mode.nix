@@ -3,7 +3,6 @@
   fetchFromGitHub,
 
   # Elisp dependencies
-
   # Native dependencies
   ...
 }:
