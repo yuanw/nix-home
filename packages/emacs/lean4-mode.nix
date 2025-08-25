@@ -3,6 +3,7 @@
   fetchFromGitHub,
 
   # Elisp dependencies
+  dash ? null,
   # Native dependencies
   ...
 }:
@@ -21,7 +22,9 @@ melpaBuild {
 
      "data")
   '';
-
+  packageRequires = [
+    dash
+  ];
   preferLocalBuild = true;
   allowSubstitutes = false;
 
