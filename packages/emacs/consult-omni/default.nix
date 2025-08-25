@@ -2,15 +2,15 @@
   melpaBuild,
   fetchFromGitHub,
   writeText,
-  unstableGitUpdater,
+
   # Elisp dependencies
 
-  consult,
-  elfeed,
-  embark,
-  browser-hist,
-  consult-notes,
-  yequake,
+  consult ? null,
+  elfeed ? null,
+  embark ? null,
+  browser-hist ? null,
+  consult-notes ? null,
+  yequake ? null,
   ...
 
 }:
@@ -33,7 +33,6 @@ melpaBuild {
 
   dontConfigure = true;
   dontBuild = true;
-  passthru.updateScript = unstableGitUpdater { };
 
   installPhase = ''
     mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version

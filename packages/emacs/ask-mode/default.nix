@@ -1,16 +1,16 @@
 { melpaBuild, haskellPackages }:
 let
-  Ask = haskellPackages.ask;
+  ask = haskellPackages.ask;
 in
 melpaBuild {
   pname = "ask-mode";
-  inherit (Ask) src version;
+  inherit (ask) src version;
   patches = [ ./ask-mode.patch ];
 
   files = ''("emacs/*.el")'';
 
   meta = {
-    inherit (Ask.meta) homepage license;
+    inherit (ask.meta) homepage license;
     description = "Ask-mode for Emacs extracted from Ask package";
   };
 }
