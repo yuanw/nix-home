@@ -1892,21 +1892,16 @@ with lib;
               };
               thrift-mode = {
                 enable = true;
+
                 package =
                   epkgs:
-                  epkgs.trivialBuild {
-                    pname = "thrift-mode";
-                    version = "1.0.0";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "emacsmirror";
-                      repo = "thrift-mode";
-                      rev = "1293a54c6630297209d023c479712b539060d7f0";
-                      # sha256 = lib.fakeSha256;
-                      sha256 = "sha256-SQhmJ1QizEbJp7OTN/5CyQe65AwUnqwvgnzk+UaEkZs=";
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
+                  (pkgs.callPackage "${packagePath}/thrift-mode.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      ;
+                    inherit (epkgs) melpaBuild;
+                  });
+
               };
 
               # https://github.com/jwiegley/dot-emacs/blob/master/init.org#haskell-mode
