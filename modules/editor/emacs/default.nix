@@ -1989,31 +1989,16 @@ with lib;
                 command = [ "lean4-mode" ];
                 package =
                   epkgs:
-                  epkgs.melpaBuild {
-                    pname = "lean4-mode";
-                    version = "0-unstable-2025-03-31";
 
-                    packageRequires = [
-                      epkgs.dash
-                      epkgs.lsp-mode
-                      epkgs.magit-section
+                  (pkgs.callPackage "${packagePath}/lean4-mode" {
+                    inherit (pkgs) fetchFromGitHub;
 
-                    ];
-                    src = pkgs.fetchFromGitHub {
-                      owner = "leanprover-community";
-                      repo = "lean4-mode";
-                      rev = "1388f9d1429e38a39ab913c6daae55f6ce799479";
-                      #sha256 = lib.fakeSha256;
-                      sha256 = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk";
-                    };
+                    inherit (epkgs)
+                      melpaBuild
 
-                    files = ''
-                      ("*.el"
+                      ;
+                  });
 
-                       "data")
-                    '';
-
-                  };
               };
 
               popper = {
@@ -2842,21 +2827,6 @@ with lib;
 
               toggle-term = {
                 enable = false;
-                package =
-                  epkgs:
-                  epkgs.trivialBuild {
-                    pname = "toggle-term";
-                    version = "0.0.2";
-                    src = pkgs.fetchFromGitHub {
-                      owner = "justinlime";
-                      repo = "toggle-term.el";
-                      rev = "d17596b8ed52e6a2f0c7f6754ee6fa233d28c146";
-                      # sha256 = lib.fakeSha256;
-                      sha256 = "sha256-haiNWztItstQPT/NPxzioYpLgf9hJcihaxeDB64ZNxA=";
-                    };
-                    preferLocalBuild = true;
-                    allowSubstitutes = false;
-                  };
                 config = ''
                   (setq toggle-term-size 25)
                   (setq toggle-term-switch-upon-toggle t)
