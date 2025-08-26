@@ -2894,12 +2894,11 @@ with lib;
                       melpaBuild
                       org
                       gptel
-
                       ;
 
                   });
                 extraConfig = ''
-                                                  :hook ((org-mode . ob-gptel-install-completions))
+                  :hook ((org-mode . ob-gptel-install-completions))
                   :defines ob-gptel-install-completions
                   :config
                   (add-to-list 'org-babel-load-languages '(gptel . t))
@@ -2907,6 +2906,30 @@ with lib;
                   (defun ob-gptel-install-completions ()
                     (add-hook 'completion-at-point-functions
                               'ob-gptel-capf nil t))
+                '';
+              };
+
+              qptel-quick = {
+                enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage "${packagePath}/gptel-quick.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      ;
+                    inherit (epkgs)
+                      melpaBuild
+                      compat
+                      gptel
+                      ;
+
+                  });
+                extraConfig = ''
+                                    :after (gptel)
+                  :demand t
+                  :bind (:map
+                         gptel-cmd-map
+                         ("q" . gptel-quick))
                 '';
               };
 
