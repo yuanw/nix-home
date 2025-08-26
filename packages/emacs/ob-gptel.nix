@@ -1,7 +1,6 @@
 {
   melpaBuild,
   fetchFromGitHub,
-  lib,
   # Elisp dependencies
   org ? null,
   gptel ? null,
@@ -16,7 +15,7 @@ melpaBuild {
     owner = "jwiegley";
     repo = "ob-gptel";
     rev = "60e704a390d767a7d06c8d3845ba8786b75f7da3";
-    sha256 = lib.fakeSha256;
+    sha256 = "sha256-G3edExxR/Ebm2lcCBhqGEqUdAEDFVxOjqB7h0ulbilA=";
 
   };
 
