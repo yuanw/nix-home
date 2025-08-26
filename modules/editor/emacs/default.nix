@@ -555,10 +555,6 @@ with lib;
                 extraPackages = [
                   pkgs.hurl
                 ];
-                config = ''
-                  (add-to-list 'org-babel-load-languages '(hurl . ))
-
-                '';
               };
               auto-save = {
                 enable = true;
@@ -1411,17 +1407,16 @@ with lib;
                      (and local (mapconcat #'identity
                               (delq nil local)
                               (org--property-get-separator property))))))
-                       (add-to-list 'org-babel-load-languages '(emacs-lisp . t))
-
-                  # (org-babel-do-load-languages 'org-babel-load-languages
-                  # '(
-                  #   (emacs-lisp . t)
-                  #   (python . t)
-                  #   (dot . t)
-                  #   (scheme . t)
-                  #   (racket . t)
-                  #   (hurl .)
-                  #   ))
+                              
+                  (org-babel-do-load-languages 'org-babel-load-languages
+                  '(
+                    (emacs-lisp . t)
+                    (python . t)
+                    (dot . t)
+                    (scheme . t)
+                    (racket . t)
+                    (hurl .)
+                    ))
                 '';
               };
               geiser = {
@@ -1511,10 +1506,6 @@ with lib;
                     inherit (epkgs) melpaBuild;
                   });
                 after = [ "org" ];
-                config = ''
-                  (add-to-list 'org-babel-load-languages '(racket . t))
-
-                '';
               };
               claude-code-ide = {
                 enable = true;
