@@ -1,0 +1,31 @@
+{
+  melpaBuild,
+  fetchFromGitHub,
+  lib,
+  # Elisp dependencies
+  org ? null,
+  gptel ? null,
+
+  # Native dependencies
+  ...
+}:
+melpaBuild {
+  pname = "ob-gptel";
+  version = "0-unstable-2025-06-01";
+  src = fetchFromGitHub {
+    owner = "jwiegley";
+    repo = "lean4-mode";
+    rev = "60e704a390d767a7d06c8d3845ba8786b75f7da3";
+    sha256 = lib.fakeSha256;
+
+  };
+
+  packageRequires = [
+    org
+    gptel
+
+  ];
+  preferLocalBuild = true;
+  allowSubstitutes = false;
+
+}

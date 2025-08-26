@@ -51,6 +51,11 @@
     inherit (pkgs) fetchFromGitHub writeText;
   };
 
+  ob-gptel = pkgs.callPackage ./emacs/ob-gptel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub;
+  };
+
   ob-racket = pkgs.callPackage ./emacs/ob-racket.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
