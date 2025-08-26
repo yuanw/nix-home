@@ -2875,6 +2875,21 @@ with lib;
 
               ob-gptel = {
                 enable = true;
+                package =
+                  epkgs:
+                  (pkgs.callPackage "${packagePath}/ob-gptel.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      ;
+                    inherit lib;
+                    inherit (epkgs)
+                      melpaBuild
+                      org
+                      gptel
+
+                      ;
+
+                  });
                 extraConfig = ''
                                                   :hook ((org-mode . ob-gptel-install-completions))
                   :defines ob-gptel-install-completions
