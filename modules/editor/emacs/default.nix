@@ -2844,6 +2844,14 @@ with lib;
                 };
               };
 
+              goto-last-change = {
+                enable = true;
+                bind = {
+                  "C-x C-/" = "goto-last-change";
+                };
+
+              };
+
               gptel = {
                 enable = true;
                 demand = true;

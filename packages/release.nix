@@ -36,10 +36,13 @@
     trivialBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitLab;
   };
-
   gptel = pkgs.callPackage ./emacs/gptel.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
+  gptel-quick = pkgs.callPackage ./emacs/gptel-quick.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub;
   };
   hurl-mode = pkgs.callPackage ./emacs/hurl-mode.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;

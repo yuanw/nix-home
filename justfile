@@ -17,6 +17,7 @@ nix-update:
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
     @nix-update -f ./packages/release.nix emacs-reader --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch
+    @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
     @nix-update -f ./packages/release.nix lean4-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
