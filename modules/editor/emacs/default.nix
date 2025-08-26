@@ -2865,16 +2865,25 @@ with lib;
                   });
 
                 config = ''
-
-                                      (require '
-                       gptel-autoloads)
-
-
-
+                  (require 'gptel-autoloads)
                     ;; OPTIONAL configuration
                   (setq gptel-model 'claude-3.7-sonnet
                         gptel-backend (gptel-make-gh-copilot "Copilot"))
 
+                '';
+              };
+
+              ob-gptel = {
+                enable = true;
+                extraConfig = ''
+                                                  :hook ((org-mode . ob-gptel-install-completions))
+                  :defines ob-gptel-install-completions
+                  :config
+                  (add-to-list 'org-babel-load-languages '(gptel . t))
+                  ;; Optional, for better completion-at-point
+                  (defun ob-gptel-install-completions ()
+                    (add-hook 'completion-at-point-functions
+                              'ob-gptel-capf nil t))
                 '';
               };
 
