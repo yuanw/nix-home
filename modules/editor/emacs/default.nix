@@ -2855,6 +2855,17 @@ with lib;
               gptel = {
                 enable = true;
                 demand = true;
+                extraConfig = ''
+                                   :bind
+                  (("C-c u"    . gptel-menu)
+                   :prefix-map
+                   gptel-cmd-map
+                   :prefix "C-x c"
+                   ("x"        . gptel-abort)
+                   ("i"        . (lambda () (interactive) (gptel--inspect-fsm)))
+                   ("RET"      . gptel-send)
+                   ("<return>" . gptel-send))
+                '';
                 package =
                   epkgs:
                   (pkgs.callPackage "${packagePath}/gptel.nix" {
