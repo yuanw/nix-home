@@ -2920,7 +2920,7 @@ with lib;
                 '';
               };
 
-              qptel-quick = {
+              gptel-quick = {
                 enable = true;
                 package =
                   epkgs:
