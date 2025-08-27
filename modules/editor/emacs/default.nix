@@ -1512,7 +1512,7 @@ with lib;
                 enable = true;
                 after = [ "org" ];
                 custom = ''
-                  (ob-mermaid-cli-path ${lib.getExe pkgs.mermaid-cli-wrapped})
+                  (ob-mermaid-cli-path "${lib.getExe pkgs.mermaid-cli-wrapped}")
                 '';
                 config = ''
                   (add-to-list 'org-babel-load-languages '(mermaid. t))
