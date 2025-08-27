@@ -1507,6 +1507,18 @@ with lib;
                   });
                 after = [ "org" ];
               };
+
+              ob-mermaid = {
+                enable = true;
+                after = [ "org" ];
+                config = ''
+                  (setq ob-mermaid-cli-path ${lib.getExe pkgs.mermaid-cli-wrapped})
+                  (add-to-list 'org-babel-load-languages '(mermaid. t))
+                '';
+                extraPackages = [
+                  pkgs.mermaid-cli-wrapped
+                ];
+              };
               claude-code-ide = {
                 enable = true;
                 bind = {

@@ -108,4 +108,7 @@ _final: prev: {
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
+  mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix {
+
+  };
 }
