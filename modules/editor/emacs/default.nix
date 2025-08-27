@@ -235,7 +235,7 @@ with lib;
 
               ;; Disable all other themes to avoid awkward blending:
               (mapc #'disable-theme custom-enabled-themes)
-
+              (setq org-startup-with-inline-images t)
 
               ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
               (ef-themes-select 'ef-dream)
@@ -1605,7 +1605,6 @@ with lib;
                 '';
                 config = "
                 (add-hook 'dired-mode-hook  'org-download-enable)
-                (add-hook 'org-mode-hook 'org-display-inline-images)
                 ";
 
                 extraPackages =
