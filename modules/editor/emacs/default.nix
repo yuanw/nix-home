@@ -2895,6 +2895,28 @@ with lib;
                 '';
               };
 
+              gptel-claude-oauth = {
+                enable = true;
+
+                after = [ "gptel" ];
+                demand = true;
+                #https://github.com/jwiegley/dot-emacs/blob/master/lisp/gptel-claude-oauth.elA
+                package =
+                  epkgs:
+                  epkgs.trivialBuild {
+                    pname = "gptel-claude-oauth";
+                    version = "0.0.1";
+                    src = ./packages/gptel-claude-oauth.el;
+                    packageRequires = [
+
+                      epkgs.gptel
+                    ];
+                  };
+                config = ''
+                  (gptel-make-claude-oauth "Claude-OAuth" :stream t)
+                '';
+              };
+
               ob-gptel = {
                 enable = true;
                 package =
