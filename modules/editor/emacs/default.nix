@@ -2922,6 +2922,10 @@ with lib;
 
               gptel-quick = {
                 enable = true;
+                after = [
+                  "gptel"
+                  "embark"
+                ];
                 package =
                   epkgs:
                   (pkgs.callPackage "${packagePath}/gptel-quick.nix" {
@@ -2936,11 +2940,10 @@ with lib;
 
                   });
                 extraConfig = ''
-                                    :after (gptel)
-                  :demand t
-                  :bind (:map
-                         gptel-cmd-map
-                         ("q" . gptel-quick))
+
+                            :bind (:map embark-general-map
+                  ("?" . gptel-quick))
+
                 '';
               };
 
