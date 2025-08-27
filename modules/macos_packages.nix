@@ -15,6 +15,7 @@ with pkgs;
   mcp-server-filesystem
   kanata-with-cmd
   defaultbrowser
+  sbcl
   #ghostty-mac
   #calibre_mac
 ]
