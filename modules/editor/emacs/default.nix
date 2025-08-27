@@ -2944,13 +2944,10 @@ with lib;
                   });
                 extraConfig = ''
 
-                  #                 :demand t
-                  # :bind (:map
-                  #        gptel-cmd-map
-                  #        ("q" . gptel-quick)))
 
-                                            :bind (:map embark-general-map
-                                  ("?" . gptel-quick))
+
+                  :bind (:map embark-general-map
+                             ("?" . gptel-quick))
 
                 '';
               };
