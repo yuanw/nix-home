@@ -2545,6 +2545,10 @@ with lib;
                   (auto-dark-allow-osascript t)
                 '';
               };
+
+              posframe = {
+                enable = true;
+              };
               # Read the lin manual: <https://protesilaos.com/emacs/lin>.
               lin = {
                 enable = true;
@@ -2880,7 +2884,6 @@ with lib;
                       transient
                       compat
                       ;
-
                   });
 
                 config = ''
@@ -2941,8 +2944,13 @@ with lib;
                   });
                 extraConfig = ''
 
-                            :bind (:map embark-general-map
-                  ("?" . gptel-quick))
+                  #                 :demand t
+                  # :bind (:map
+                  #        gptel-cmd-map
+                  #        ("q" . gptel-quick)))
+
+                                            :bind (:map embark-general-map
+                                  ("?" . gptel-quick))
 
                 '';
               };
