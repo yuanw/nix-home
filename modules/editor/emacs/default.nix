@@ -10,6 +10,7 @@
   pkgs,
   inputs,
   isDarwin,
+  hostname,
   ...
 }:
 let
