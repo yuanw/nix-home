@@ -6,7 +6,7 @@
         buildInputs = with pkgs; [
           nix-diff
           nix-tree
-
+          dive
           treefmt
           #awscli
           lego
