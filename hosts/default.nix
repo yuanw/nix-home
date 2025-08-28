@@ -40,6 +40,7 @@
           specialArgs = {
             isDarwin = false;
             isNixOS = true;
+            hostname = "asche";
             packages = config.packages;
             nurNoPkg = import inputs.nur {
               nurpkgs = import inputs.nixpkgs { system = system; };

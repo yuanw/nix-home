@@ -1509,7 +1509,7 @@ with lib;
               };
 
               ob-mermaid = {
-                enable = true;
+                enable = hostname == "WK01174";
                 after = [ "org" ];
                 custom = ''
                   (ob-mermaid-cli-path "${lib.getExe pkgs.mermaid-cli-wrapped}")
@@ -1526,9 +1526,7 @@ with lib;
                 bind = {
                   "C-x c c" = "claude-code-ide-menu";
                 };
-                custom = ''
-                  (claude-code-ide-cli-extra-flags "--model opus")
-                '';
+
                 package =
                   epkgs:
                   (pkgs.callPackage "${packagePath}/claude-code-ide" {
