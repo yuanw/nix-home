@@ -2,6 +2,7 @@
   self,
   inputs,
   withSystem,
+  hostname,
   ...
 }:
 {
