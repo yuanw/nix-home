@@ -122,7 +122,6 @@ with lib;
               ];
             package = emacsPatched;
             enable = true;
-
             overrides = self: _super: {
               gptel = (
                 pkgs.callPackage "${packagePath}/gptel.nix" {
