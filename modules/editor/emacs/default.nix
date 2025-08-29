@@ -3013,7 +3013,7 @@ with lib;
               };
 
               eaf = {
-                enable = hostname == "WK01174";
+                enable = !isDarwin;
                 package =
                   ekgs:
                   (ekgs.eaf.withApplications [
