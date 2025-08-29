@@ -3019,6 +3019,10 @@ with lib;
                       ekgs.eaf-browser
                       ekgs.eaf-pdf-viewer
                     ]);
+                };
+
+                eaf-pdf-viewer = {
+                  enable = true;
 
                 };
 
