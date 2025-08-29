@@ -3017,8 +3017,8 @@ with lib;
                 package =
                   ekgs:
                   (ekgs.eaf.withApplications [
-                    eaf-broweser
-                    eaf-pdf-viwer
+                    ekgs.eaf-browser
+                    ekgs.eaf-pdf-viwer
                   ]);
 
               };
