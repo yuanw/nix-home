@@ -554,7 +554,7 @@ with lib;
                     inherit (epkgs) melpaBuild;
                   });
                 extraPackages = [
-                  pkgs.hurl
+                  pkgs.stable.hurl
                 ];
               };
               auto-save = {
