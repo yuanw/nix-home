@@ -3013,53 +3013,18 @@ with lib;
               };
 
               eaf = {
-                extraConfig = ''
-                                    :custom
-                  ; See https://github.com/emacs-eaf/emacs-application-framework/wiki/Customization
-                  (eaf-browser-continue-where-left-off t)
-                  (eaf-browser-enable-adblocker t)
-                  (browse-url-browser-function 'eaf-open-browser)
-                  :config
-                  (defalias 'browse-web #'eaf-open-browser)
-                  (eaf-bind-key scroll_up "C-n" eaf-pdf-viewer-keybinding)
-                  (eaf-bind-key scroll_down "C-p" eaf-pdf-viewer-keybinding)
-                  (eaf-bind-key take_photo "p" eaf-camera-keybinding)
-                  (eaf-bind-key nil "M-q" eaf-browser-keybinding)
-                '';
+                enable = hostname == "WK01174";
                 package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/eaf {
-                    elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
-                    melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
+                  ekgs:
+                  (ekgs.eaf.withApplications [
+                    eaf-broweser
+                    eaf-pdf-viwer
+                  ]);
 
-                    inherit (epkgs) melpaBuild;
-                    inherit (epkgs.melpaPackages)
-
-                      all-the-icons
-                      ;
-                  });
-
-              };
-
-              eaf-browser = {
-                package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/eaf-browser.nix {
-                    inherit (epkgs) melpaBuild;
-                  });
-              };
-
-              eaf-pdf-viewer = {
-                package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/eaf-pdf-viewer.nix {
-                    elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
-                    melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
-                    inherit (epkgs) melpaBuild;
-                  });
               };
 
               holo-layer = {
+                enable = hostname == "WK01174";
                 package =
                   epkgs:
                   (pkgs.callPackage ./packages/holo-layer.nix {
