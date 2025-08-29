@@ -48,10 +48,12 @@ let
       git
       nodejs
       wmctrl
-
+      lib.optional
+      useXdotool
+      xdotool
     ]
   ]
-  ++ lib.optional useXdotool xdotool
+
   ++ appOtherDeps;
   otherPkgs = builtins.concatLists (otherPackageLists);
 
