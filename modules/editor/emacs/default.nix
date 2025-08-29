@@ -1895,7 +1895,7 @@ with lib;
                   '';
                 };
                 pdf-tools = {
-                  enable = true;
+                  # enable = true;
                   custom = ''
                     (pdf-tools-handle-upgrades nil)
                   '';
