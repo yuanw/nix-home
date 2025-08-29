@@ -3018,7 +3018,7 @@ with lib;
                   ekgs:
                   (ekgs.eaf.withApplications [
                     ekgs.eaf-browser
-                    ekgs.eaf-pdf-viwer
+                    ekgs.eaf-pdf-viewer
                   ]);
 
               };
