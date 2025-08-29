@@ -17,8 +17,6 @@ in
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
-    ../modules/private/jellyfin-darwin.nix
-
   ];
   # determinate system
   nix.enable = false;
@@ -27,7 +25,6 @@ in
     name = "Yuan Wang";
     hostname = "mist";
     workspaceDirectory = "workspaces";
-
     homeDirectory = "/Users/yuanw";
   };
 
