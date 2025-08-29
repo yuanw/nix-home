@@ -543,6 +543,9 @@ with lib;
               };
               hurl-mode = {
                 enable = true;
+                config = ''
+                  (add-to-list 'org-babel-load-languages '(hurl. t))
+                '';
                 package =
                   epkgs:
                   (pkgs.callPackage "${packagePath}/hurl-mode.nix" {
@@ -1416,7 +1419,6 @@ with lib;
                     (dot . t)
                     (scheme . t)
                     (racket . t)
-                    (hurl .)
                     ))
                 '';
               };
@@ -2977,9 +2979,6 @@ with lib;
 
                   });
                 extraConfig = ''
-
-
-
                   :bind (:map embark-general-map
                              ("?" . gptel-quick))
 
@@ -2990,10 +2989,6 @@ with lib;
                 enable = false;
                 after = [ "gptel" ];
                 extraConfig = ''
-
-
-
-                              
                   :custom (mcp-hub-servers
                            `(("filesystem" . (:command "mcp-server-filesystem" :args ("~/Users/yuanwang")))
                              ;;("fetch" . (:command "uvx" :args ("mcp-server-fetch")))
@@ -3013,7 +3008,7 @@ with lib;
               };
 
               eaf = {
-                enable = !isDarwin;
+                enable = !darwin;
                 package =
                   ekgs:
                   (ekgs.eaf.withApplications [
