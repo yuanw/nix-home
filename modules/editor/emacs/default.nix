@@ -125,6 +125,7 @@ with lib;
             overrides = self: _super: {
               emacs-application-framework = pkgs.callPackage ./emacs-application-framework.nix {
                 inherit (pkgs) git;
+                inherit (self) all-the-icons;
               };
               gptel = (
                 pkgs.callPackage "${packagePath}/gptel.nix" {
