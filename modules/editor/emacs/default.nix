@@ -3023,16 +3023,16 @@ with lib;
 
               };
 
-              holo-layer = {
-                enable = hostname == "WK01174";
-                package =
-                  epkgs:
-                  (pkgs.callPackage ./packages/holo-layer.nix {
-                    elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
-                    melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
-                    inherit (epkgs) melpaBuild;
-                  });
-              };
+              # holo-layer = {
+              #   enable = hostname == "WK01174";
+              #   package =
+              #     epkgs:
+              #     (pkgs.callPackage ./packages/holo-layer.nix {
+              #       elpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/elpa2nix.el";
+              #       melpa2nix = "${inputs.nixpkgs}/pkgs/applications/editors/emacs/build-support/melpa2nix.el";
+              #       inherit (epkgs) melpaBuild;
+              #     });
+              # };
 
             };
           };
