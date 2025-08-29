@@ -3011,7 +3011,7 @@ with lib;
                 };
 
                 eaf = {
-                  enable = !isDarwin;
+                  enable = true;
                   package =
                     ekgs:
                     (ekgs.eaf.withApplications [
