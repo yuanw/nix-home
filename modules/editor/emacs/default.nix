@@ -122,12 +122,29 @@ with lib;
               ];
             package = emacsPatched;
             enable = true;
+
+            overrides = self: _super: {
+              gptel = (
+                pkgs.callPackage "${packagePath}/gptel.nix" {
+                  inherit (pkgs)
+                    fetchFromGitHub
+                    writeText
+                    unstableGitUpdater
+                    ;
+                  inherit lib;
+                  inherit (self)
+                    melpaBuild
+                    transient
+                    compat
+                    ;
+                }
+              );
+            };
             init = {
               enable = true;
               packageQuickstart = false;
               recommendedGcSettings = true;
               usePackageVerbose = false;
-
               earlyInit = ''
                               ;; Disable some GUI distractions. We set these manually to avoid starting
                               ;; the corresponding minor modes.
@@ -2202,13 +2219,11 @@ with lib;
 
                 lsp-diagnostics = {
                   enable = cfg.lspStyle == "lsp-mode";
-
                   after = [ "lsp-mode" ];
                 };
 
                 lsp-lens = {
                   enable = cfg.lspStyle == "lsp-mode";
-
                   command = [ "lsp-lens--enable" ];
                   after = [ "lsp-mode" ];
                 };
@@ -2885,21 +2900,6 @@ with lib;
                      ("RET"      . gptel-send)
                      ("<return>" . gptel-send))
                   '';
-                  package =
-                    epkgs:
-                    (pkgs.callPackage "${packagePath}/gptel.nix" {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        writeText
-                        unstableGitUpdater
-                        ;
-                      inherit lib;
-                      inherit (epkgs)
-                        melpaBuild
-                        transient
-                        compat
-                        ;
-                    });
 
                   config = ''
                     (require 'gptel-autoloads)
