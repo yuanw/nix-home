@@ -17,6 +17,7 @@ in
   imports = [
     inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
+    ../modules/private/jellyfin-darwin.nix
   ];
   # determinate system
   nix.enable = false;
@@ -49,6 +50,7 @@ in
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
+    jellyfin.enable = true;
     ##ai.enable = true;
     secrets.agenix = {
       enable = true;
