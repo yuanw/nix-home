@@ -18,7 +18,7 @@
   unstableGitUpdater,
   # Sub-applications in the framework
   enabledApps ? [ ],
-  useXdotool ? (!stdenv.hostPlatform.isDarwin),
+
 }:
 
 let
@@ -48,7 +48,7 @@ let
       git
       nodejs
       wmctrl
-      (lib.optional useXdotool xdotool)
+      (lib.optionals (lib.meta.availableOn stdenv.hostPlatform xdotool) xdotool)
     ]
   ]
 
