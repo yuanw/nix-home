@@ -2907,15 +2907,14 @@ with lib;
                   config = ''
                     (require 'gptel-autoloads)
                       ;; OPTIONAL configuration
-                    (setq gptel-model 'claude-3.7-sonnet
-                          gptel-backend (gptel-make-gh-copilot "Copilot"))
+
+                      (gptel-make-gh-copilot "Copilot")
 
                   '';
                 };
 
                 gptel-claude-oauth = {
                   enable = true;
-
                   after = [ "gptel" ];
                   demand = true;
                   #https://github.com/jwiegley/dot-emacs/blob/master/lisp/gptel-claude-oauth.elA
@@ -2931,7 +2930,8 @@ with lib;
                       ];
                     };
                   config = ''
-                    (gptel-make-claude-oauth "Claude-OAuth" :stream t)
+                    (setq gptel-model 'claude-sonnet-4-20250514
+                    (gptel-make-claude-oauth "Claude-OAuth" :stream t))
                   '';
                 };
 
@@ -3023,7 +3023,6 @@ with lib;
 
                 eaf-pdf-viewer = {
                   enable = true;
-
                 };
 
                 # holo-layer = {
