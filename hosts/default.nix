@@ -58,10 +58,9 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 sharedModules = [
-                  inputs.betterfox.homeManagerModules.betterfox
+                  inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
                 ];
-                # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
                 extraSpecialArgs = { inherit inputs; };
               };
@@ -128,7 +127,7 @@
                     useGlobalPkgs = true;
                     useUserPackages = true;
                     sharedModules = [
-                      inputs.betterfox.homeManagerModules.betterfox
+                      inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
                     ];
 
