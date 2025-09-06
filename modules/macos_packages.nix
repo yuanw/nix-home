@@ -11,7 +11,7 @@ with pkgs;
   github-mcp-server
   sioyek
   #mcp-server-fetch
-  slackdump
+  #slackdump
   mcp-server-filesystem
   kanata-with-cmd
   defaultbrowser
