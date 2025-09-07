@@ -42,6 +42,8 @@
       # https://github.com/NixOS/nix/issues/7273
       # auto-optimise-store = true;
       max-jobs = 12;
+      download-buffer-size = 1000000000; # 1G
+
     };
     # Avoid unwanted garbage collection when using nix-direnv
     extraOptions = ''
