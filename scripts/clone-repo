@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <org> <repo>"
+    echo "Example: $0 microsoft vscode"
+    exit 1
+fi
+
+ORG="$1"
+REPO="$2"
+WORKSPACE_DIR="$HOME/workspaces"
+REPO_URL="https://github.com/${ORG}/${REPO}.git"
+
+mkdir -p "$WORKSPACE_DIR"
+
+cd "$WORKSPACE_DIR"
+
+if [ -d "$REPO" ]; then
+    echo "Repository $REPO already exists in $WORKSPACE_DIR"
+    exit 1
+fi
+
+echo "Cloning $REPO_URL to $WORKSPACE_DIR/$REPO"
+git clone "$REPO_URL"
+
+echo "Successfully cloned $REPO to $WORKSPACE_DIR/$REPO"
