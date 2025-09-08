@@ -17,6 +17,7 @@
     betterfox = {
       url = "github:HeitorAugustoLN/betterfox-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
     catppuccin.url = "github:catppuccin/nix";
     flake-parts = {
