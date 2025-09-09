@@ -73,4 +73,6 @@
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
+
+  aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
 }
