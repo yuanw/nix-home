@@ -106,10 +106,11 @@ _final: prev: {
   choose-mac = prev.callPackage ./choose-mac.nix { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
-  ical-buddy = prev.callPackage ./ical-buddy.nix { };
+  # ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
+  aws-iam-authenticator = prev.callPackage ./aws-iam-authenticator.nix { };
+
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix {
-    aws-iam-authenticator = prev.callPackage ./aws-iam-authenticator.nix { };
 
   };
 }
