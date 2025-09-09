@@ -2,11 +2,14 @@
   lib,
   buildGoModule,
   fetchFromGitHub,
+  pkgs,
 }:
 
 buildGoModule rec {
   pname = "aws-iam-authenticator";
   version = "0.7.6";
+
+  go = pkgs.go_1_25; # Use Go 1.21
 
   src = fetchFromGitHub {
     owner = "kubernetes-sigs";
