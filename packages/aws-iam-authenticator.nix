@@ -19,7 +19,7 @@ buildGo125Module rec {
     hash = "sha256-omONJDdDUuBLxcKPjXBKRcZLJ+hfIXClC/Vl7T2vAas=";
   };
 
-  vendorHash = lib.fakeHash;
+  vendorHash = "sha256-rTX46Kw/mqZaPbUb0+iWx69tCnfFpW8VknxCXKXrCn8=";
 
   ldflags =
     let
