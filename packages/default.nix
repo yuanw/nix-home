@@ -109,6 +109,7 @@ _final: prev: {
   ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix {
+    aws-iam-authenticator = prev.callPackage ./aws-iam-authenticator.nix { };
 
   };
 }
