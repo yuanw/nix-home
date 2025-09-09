@@ -1,17 +1,16 @@
 {
   lib,
-  buildGoModule,
+  buildGo125Module,
+
   fetchFromGitHub,
-  go_1_25,
+
   ...
 
 }:
 
-buildGoModule rec {
+buildGo125Module rec {
   pname = "aws-iam-authenticator";
   version = "0.7.6";
-
-  go = go_1_25; # Use Go 1.25
 
   src = fetchFromGitHub {
     owner = "kubernetes-sigs";
