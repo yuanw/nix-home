@@ -2,7 +2,6 @@
   melpaBuild,
   fetchFromGitHub,
   writeText,
-  lib,
 
   # Elisp dependencies
 
@@ -22,7 +21,7 @@ melpaBuild {
     #https://github.com/casouri/expreg/pull/9
     rev = "e31c3da7f1df8db1de14ad6e40e2e0d0671e0970";
 
-    sha256 = lib.fakeSha256;
+    sha256 = "sha256-1s1Fo5oR5tUBC9JhXo76NBqqeoS+P7ID3PN7t3xLewI=";
 
   };
 
