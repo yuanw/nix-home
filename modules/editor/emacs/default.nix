@@ -127,7 +127,7 @@ with lib;
                 inherit (pkgs) git;
                 inherit (self) all-the-icons melpaBuild;
               };
-              expreg = (
+              home-row-expreg = (
                 pkgs.callPackage "${packagePath}/expreg.nix" {
                   inherit (pkgs)
                     fetchFromGitHub
@@ -620,12 +620,12 @@ with lib;
 
                 expreg = {
                   enable = true;
-
                 };
-                expand-region = {
-                  enable = false;
+                home-row-expreg = {
+                  after = [ "expreg" ];
+                  enable = true;
                   bind = {
-                    "C-=" = "er/expand-region";
+                    "C-=" = "home-row-expreg-expand-with-letters";
                   };
                 };
                 # vim like
