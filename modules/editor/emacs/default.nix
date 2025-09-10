@@ -127,6 +127,19 @@ with lib;
                 inherit (pkgs) git;
                 inherit (self) all-the-icons melpaBuild;
               };
+              expreg = (
+                pkgs.callPackage "${packagePath}/expreg.nix" {
+                  inherit (pkgs)
+                    fetchFromGitHub
+                    writeText
+
+                    ;
+                  inherit lib;
+                  inherit (self)
+                    melpaBuild
+                    ;
+                }
+              );
               gptel = (
                 pkgs.callPackage "${packagePath}/gptel.nix" {
                   inherit (pkgs)
@@ -605,8 +618,12 @@ with lib;
                   '';
                 };
 
-                expand-region = {
+                expreg = {
                   enable = true;
+
+                };
+                expand-region = {
+                  enable = false;
                   bind = {
                     "C-=" = "er/expand-region";
                   };
