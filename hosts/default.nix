@@ -128,7 +128,7 @@
                     useGlobalPkgs = true;
                     useUserPackages = true;
                     sharedModules = [
-                      inputs.betterfox.homeManagerModules.betterfox
+                      inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
                     ];
 
