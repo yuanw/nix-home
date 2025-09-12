@@ -6,7 +6,6 @@ _final: prev: {
       src,
       description,
       homepage,
-      sourceRoot ? ".",
       ...
     }:
     with _final;
