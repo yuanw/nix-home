@@ -58,7 +58,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 sharedModules = [
-                  inputs.betterfox.homeManagerModules.betterfox
+                  inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
                 ];
                 # users.johnw = import ./config/home.nix;
@@ -149,7 +149,7 @@
       };
   };
   perSystem =
-    { system, ... }:
+    { ... }:
     {
       packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
