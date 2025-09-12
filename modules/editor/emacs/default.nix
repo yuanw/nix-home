@@ -625,7 +625,7 @@ with lib;
                   after = [ "expreg" ];
                   enable = true;
                   bind = {
-                    "C-=" = "home-row-expreg-expand-with-letters";
+                    "C-," = "home-row-expreg-expand-with-letters";
                   };
                 };
                 # vim like
