@@ -15,7 +15,6 @@ with pkgs;
   mcp-server-filesystem
   kanata-with-cmd
   defaultbrowser
-  aws-iam-authenticator
   sbcl
   #ghostty-mac
   #calibre_mac

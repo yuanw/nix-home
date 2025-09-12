@@ -100,7 +100,6 @@ in
         programs.firefox.profiles = {
           #~/Library/Application Support/Firefox
           home = {
-            betterfox.enable = true;
             name = "home";
             extensions = {
               force = true;

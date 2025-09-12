@@ -2,7 +2,6 @@
   melpaBuild,
   fetchFromGitHub,
   writeText,
-  lib,
 
   # Elisp dependencies
 
@@ -11,18 +10,20 @@
 }:
 
 let
-  pname = "expreg";
+  pname = "home-row-expreg";
   version = "1.3.2-unstable-2025-08-27";
 in
 melpaBuild {
   inherit pname version;
   src = fetchFromGitHub {
     owner = "bommbo";
-    repo = "expreg";
+    repo = "home-row-expreg";
     #https://github.com/casouri/expreg/pull/9
-    rev = "e31c3da7f1df8db1de14ad6e40e2e0d0671e0970";
+    rev = "278c413dae4c5ea5fd9d8afe71ce2a8e4548238c";
 
-    sha256 = lib.fakeSha256;
+    #sha256 = lib.fakeSha256;
+
+    sha256 = "sha256-jsuRYiJqqyw6AWs0ZGF+pCTWCHAfIg1+FBNEQYxMoVE=";
 
   };
 
@@ -36,7 +37,7 @@ melpaBuild {
 
   recipe = writeText "recipe" ''
     (expreg
-    :repo "casouri/expreg"
+    :repo "bommbo/home-row-expreg"
     :files ("*.el")
     :fetcher github)
   '';
