@@ -24,7 +24,7 @@ in
         go = {
 
           enable = true;
-          goPath = "go";
+          env.GOPATH = "go";
           telemetry.mode = "off";
 
         };
