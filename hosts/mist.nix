@@ -35,10 +35,6 @@ in
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username}.programs = {
-    go = {
-      enable = true;
-      goPath = "go";
-    };
     git = {
       extraConfig = {
         github.user = "yuanw";
