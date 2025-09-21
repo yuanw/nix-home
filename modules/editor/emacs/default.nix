@@ -3041,6 +3041,9 @@ with lib;
                 eaf-pdf-viewer = {
                   enable = true;
                 };
+                meep = {
+                  enable = true;
+                };
 
                 # holo-layer = {
                 #   enable = hostname == "WK01174";
