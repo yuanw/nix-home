@@ -6,7 +6,7 @@ let
 in
 {
 
-  options.modules.wm.amethyst = {
+  options.modules.mouseless = {
     enable = mkEnableOption "mouseless";
   };
   config = mkIf cfg.enable {
