@@ -12,7 +12,7 @@ in
   config = mkIf cfg.enable {
     assertions = [
       {
-        assertion = config.brew.enable;
+        assertion = config.modules.brew.enable;
         message = "need homebrew to install mouseless (for now)";
       }
 
