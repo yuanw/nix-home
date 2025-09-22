@@ -1,7 +1,7 @@
-app_version: 0.4.0-preview.6
+app_version: 0.4.0-preview.7
 behavior_configs:
-- base_move_speed: 5
-  base_wheel_speed: 16
+- base_move_speed: 5.0
+  base_wheel_speed: 16.0
   free_mode_auto_off_s: 10
   grid_action_level: subgrid
   hide_cursor_on_click: false
@@ -10,16 +10,16 @@ behavior_configs:
   initial_overlay_monitor: with_mouse
   move_duration_ms: 100
   move_real_cursor_with_virtual: false
-  move_speed_multiplier: 3
-  movement_easing: 0.3
+  move_speed_multiplier: 3.0
+  movement_easing: 0.2
   multi_action_timeout_ms: 400
   name: main_behavior
   send_escape_after_global_alt_tap__windows: true
   tap_threshold_ms: 250
   wheel_easing: 0.3
-  wheel_speed_multiplier: 4
-  wheel_step_size: 100
-  wheel_step_size_large: 500
+  wheel_speed_multiplier: 4.0
+  wheel_step_size: 100.0
+  wheel_step_size_large: 500.0
 classname: AppConfig
 custom_monitor_assignments: []
 debug_options: {}
@@ -30,14 +30,14 @@ grid_configs:
   grid_defn:
   - border_width: 0.0
     callback: build_cell_strings
-    keys: WMP SNT CFD <:> HAI LUY
-    num_cells_x: 5
+    keys: ZYUO; CIEA, '-=./ QLDPX KHTNS JMGBV
+    num_cells_x: 10
     num_cells_y: 3
   - border_width: 1.0
     callback: build_cell_strings
-    keys: WMP SNT CFD <:> HAI LUY
+    keys: ''
     num_cells_x: 5
-    num_cells_y: 3
+    num_cells_y: 6
   - border_width: 0.0
     callback: apply_strings_and_subgrid_to_cells
     keys: ''
@@ -48,12 +48,12 @@ grid_configs:
   nudges_per_cell: 4
   strategy: subgrid
   subgrid_dims:
-  - 5
+  - 8
   - 3
-  subgrid_mouse_action_keys: WMP SNT CFD <:> HAI LUY
+  subgrid_mouse_action_keys: ZYUO; CIEA, '-=. LDPX HTNS MGBV
 keyboard_layout:
-  id: com.apple.keylayout.US
-  name: U.S.
+  id: com.apple.keylayout.Canadian
+  name: Canadian
   vk_to_char:
     0:
     - a
@@ -310,16 +310,16 @@ keymaps:
     middle click: null
     middle mouse button: C
     middle mouse button (w/o overlay): null
-    move down: U
+    move down: M
     move left: H
-    move right: O
-    move up: ;
+    move right: T
+    move up: L
     release hold/drag: Escape
     repeat last mouse action: null
     right click: null
     right mouse button: V
     right mouse button (w/o overlay): null
-    show overlay: cmd+o
+    show overlay: cmd+s
     subgrid nudge down:
     - D
     - K
@@ -332,20 +332,20 @@ keymaps:
     subgrid nudge up:
     - E
     - I
-    switch monitor left: ShiftLeft tap
-    switch monitor right: ShiftRight tap
+    switch monitor left: cmd+v
+    switch monitor right: cmd+b
     toggle app enabled: null
     toggle continuous mode: null
     toggle continuous mode until closed: '1'
-    toggle free mode: cmd+'
+    toggle free mode: cmd+shift+s
     toggle overlay: null
     toggle overlay lock: null
     undo last key: Backspace
-    wheel down: F
+    wheel down: G
     wheel down fast: null
-    wheel left: S
+    wheel left: B
     wheel left fast: null
-    wheel right: T
+    wheel right: V
     wheel right fast: null
     wheel step down: null
     wheel step down large: null
@@ -355,16 +355,16 @@ keymaps:
     wheel step right large: null
     wheel step up: null
     wheel step up large: null
-    wheel up: M
+    wheel up: D
     wheel up fast: null
   name: mac
 monitor_assignment_mode: auto
 name: ''
 style_configs:
 - always_on_subgrid_rgba:
-  - 1
-  - 1
-  - 1
+  - 1.0
+  - 1.0
+  - 1.0
   - 0.2
   background_rgba:
   - 0.49
@@ -400,14 +400,14 @@ style_configs:
   - 0.32
   - 0.7
   cursor_size: 7
-  font_family: PragmataPro-Regular
+  font_family: '[Apple System Font]'
   font_size_multiplier: 0.4
   font_weight: 500
   grid_line_style: lines
   grid_rgba:
-  - 1
-  - 1
-  - 1
+  - 1.0
+  - 1.0
+  - 1.0
   - 0.5
   highlight_animation_ms: 0
   highlight_rgba:
@@ -419,28 +419,28 @@ style_configs:
   show_initial_highlight: false
   subgrid_font_size_multiplier: 0.75
   subgrid_rgba:
-  - 1
-  - 1
-  - 1
+  - 1.0
+  - 1.0
+  - 1.0
   - 0.5
   subgrid_text_rgba:
-  - 1
-  - 1
-  - 1
+  - 1.0
+  - 1.0
+  - 1.0
   - 0.5
   text_rgba:
-  - 1
-  - 1
-  - 1
-  - 1
-  text_shadow_blur_radius: 4
+  - 1.0
+  - 1.0
+  - 1.0
+  - 1.0
+  text_shadow_blur_radius: 4.0
   text_shadow_offset:
-  - 0
-  - 0
+  - 0.0
+  - 0.0
   text_shadow_rgba:
-  - 0
-  - 0
-  - 0
-  - 1
-  text_y_offset: 0
+  - 0.02
+  - 0.04
+  - 0.06
+  - 1.0
+  text_y_offset: 0.0
   window_opacity: 1.0
