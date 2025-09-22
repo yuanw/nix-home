@@ -45,7 +45,7 @@
     secrets.agenix = {
       enable = true;
     };
-    mouseless.enable = true;
+    #mouseless.enable = true;
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
