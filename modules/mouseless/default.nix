@@ -20,9 +20,20 @@ in
     modules.brew = {
       casks = [
         "mouseless@preview"
-
       ];
     };
+    home-manager.users.${config.my.username} =
+      hm@{
+        ...
+      }:
+      {
+        home = {
+          file."Library/Containers/net.sonuscape.mouseless/Data/.mouseless/configs/config.yaml"
 
+          .source =
+            hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/mouseless/config.yaml";
+
+        };
+      };
   };
 }
