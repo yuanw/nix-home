@@ -24,6 +24,7 @@ nix-update:
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
+    @nix-update -f ./packages/release.nix home-row-expreg --src-only --version=branch
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result

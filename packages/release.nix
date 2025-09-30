@@ -74,5 +74,10 @@
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
 
+  home-row-expreg = pkgs.callPackage ./emacs/expreg.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
 }

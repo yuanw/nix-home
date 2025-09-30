@@ -11,7 +11,7 @@
 
 let
   pname = "home-row-expreg";
-  version = "1.3.2-unstable-2025-08-27";
+  version = "0-unstable-2025-09-22";
 in
 melpaBuild {
   inherit pname version;
@@ -19,11 +19,11 @@ melpaBuild {
     owner = "bommbo";
     repo = "home-row-expreg";
     #https://github.com/casouri/expreg/pull/9
-    rev = "278c413dae4c5ea5fd9d8afe71ce2a8e4548238c";
+    rev = "3b371bc26544d25917bdd3bbf9ba14a13092aa84";
 
     #sha256 = lib.fakeSha256;
 
-    sha256 = "sha256-jsuRYiJqqyw6AWs0ZGF+pCTWCHAfIg1+FBNEQYxMoVE=";
+    sha256 = "sha256-0JBTVCfKsu80tvZhXD0E9sYi1TEbbnv0caza3WOCVg8=";
 
   };
 
