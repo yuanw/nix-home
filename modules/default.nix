@@ -26,7 +26,7 @@
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix
-      ./mouseless
+
       ./terminal-multiplexer/zellij.nix
       ./terminal-multiplexer/tmux.nix
       ./editor/emacs
@@ -46,6 +46,8 @@
       ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
       ./macintosh.nix
+      ./mouseless
+
     ];
   };
 }
