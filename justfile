@@ -28,3 +28,7 @@ nix-update:
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
+
+# toggle .envrc file
+toggle-envrc:
+    @if [ -f .envrc ]; then mv .envrc .envrc.bk && echo "Moved .envrc to .envrc.bk"; elif [ -f .envrc.bk ]; then mv .envrc.bk .envrc && echo "Moved .envrc.bk to .envrc"; else echo "Neither .envrc nor .envrc.bk exists"; fi
