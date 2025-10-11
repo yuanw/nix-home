@@ -3096,7 +3096,7 @@ with lib;
               #: js
               # nodePackages.eslint
               #: markdown
-              nodePackages.unified-language-server
+              #              nodePackages.unified-language-server #
               #: sh
               nodePackages.bash-language-server
               #: toml
