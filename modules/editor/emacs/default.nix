@@ -587,7 +587,6 @@ with lib;
                         fetchFromGitHub
                         writeText
                         ;
-
                       inherit (epkgs) melpaBuild;
                     });
                   extraPackages = [
