@@ -3024,7 +3024,7 @@ with lib;
                 };
 
                 eaf = {
-                  enable = true;
+                  enable = false;
                   package =
                     ekgs:
                     (ekgs.eaf.withApplications [
