@@ -78,6 +78,8 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
+        gtk3 = inputs'.nixpkgs-stable.legacyPackages.gtk3;
+        sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
 
         # https://nixpk.gs/pr-tracker.html?pr=263500
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634

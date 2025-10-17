@@ -16,7 +16,7 @@ in
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username}.home.packages = [
-      pkgs.micromamba
+      #pkgs.micromamba
       (pkgs.python3.withPackages (
         ps: with ps; [
           pip

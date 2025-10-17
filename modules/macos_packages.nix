@@ -12,7 +12,7 @@ with pkgs;
   sioyek
   #mcp-server-fetch
   slackdump
-  mcp-server-filesystem
+  #mcp-server-filesystem
   kanata-with-cmd
   defaultbrowser
   sbcl
