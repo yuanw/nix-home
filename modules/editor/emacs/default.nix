@@ -123,10 +123,6 @@ with lib;
             package = emacsPatched;
             enable = true;
             overrides = self: _super: {
-              emacs-application-framework = pkgs.callPackage ./emacs-application-framework.nix {
-                inherit (pkgs) git;
-                inherit (self) all-the-icons melpaBuild;
-              };
               home-row-expreg = (
                 pkgs.callPackage "${packagePath}/expreg.nix" {
                   inherit (pkgs)
