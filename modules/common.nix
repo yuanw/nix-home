@@ -78,9 +78,13 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
-        gtk3 = inputs'.nixpkgs-stable.legacyPackages.gtk3;
+        gtk3 =
+          if _prev.stdenv.isDarwin then
+            inputs'.nixpkgs-stable.legacyPackages.gtk3
+          else
+            inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
         sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
-        gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
+        #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
         # https://nixpk.gs/pr-tracker.html?pr=263500
         # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
