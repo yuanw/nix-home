@@ -1129,9 +1129,9 @@ with lib;
                     "M-g M-w" = "avy-kill-ring-save-region";
                   };
                   config = ''
-                    (setq avy-keys '(?e ?h ?a ?o ?v ?r
-                      ?s ?g ?w ?p
-                      ?c ?f ?d))
+                    (setq avy-keys '(?r ?h ?a ?c ?i ?e
+                       ?, ?t ?n ?s
+                       ?w ?f ?l))
                   '';
                 };
                 embark = {
@@ -1139,7 +1139,7 @@ with lib;
                   command = [ "embark-prefix-help-command" ];
                   bind = {
                     "M-." = "embark-act";
-                    #"M-." = "embark-dwim";
+                    "M-," = "embark-dwim";
                     "C-h B" = "embark-bindings";
                   };
                   init = ''
