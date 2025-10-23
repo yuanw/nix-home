@@ -22,6 +22,7 @@ let
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
+    shift + ctrl + alt - p: choose-pass
     shift + ctrl + alt - f : open -n -a ~/Applications/Home\ Manager\ Apps/Firefox.app
     shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
@@ -79,6 +80,12 @@ in
         };
         home.packages = [
           pkgs.choose-mac
+          (pkgs.writeShellScriptBin "choose-pass" ''
+            find $HOME/.password-store -type f -name '*.gpg' | \
+               sed "s|.*/\.password-store/||; s|\.gpg$||" | \
+               choose | \
+               xargs -r -I{} pass show -c {}
+          '')
           (pkgs.writeShellScriptBin "yabai-next-window" ''
             #
             # yabai-next-window
