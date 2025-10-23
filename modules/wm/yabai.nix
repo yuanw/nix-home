@@ -22,7 +22,6 @@ let
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
-    shift + ctrl + alt - p: choose-pass
     shift + ctrl + alt - f : open -n -a ~/Applications/Home\ Manager\ Apps/Firefox.app
     shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
@@ -34,7 +33,7 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
-    shift + ctrl + alt - m : open ~/reiryoku.svg
+    shift + ctrl + alt - m : choose-pass
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
