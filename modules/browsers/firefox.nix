@@ -44,7 +44,7 @@ in
 
         programs.librewolf = {
           enable = true;
-          package = pkg;
+          package = cfg.pkg;
           #   darwinDefaultsId = "org.nixos.firefoxdeveloperedition";
           # betterfox = {
           #    enable = true;
