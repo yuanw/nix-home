@@ -43,10 +43,10 @@ in
         };
         programs.floorp = {
           enable = true;
-          betterfox = {
-            enable = true;
-            #version = "128.0"; # Set version here, defaults to main branch
-          };
+          # betterfox = {
+          #    enable = true;
+          #version = "128.0"; # Set version here, defaults to main branch
+          #  };
 
           #programs.firefox.package = cfg.pkg;
           # https://mozilla.github.io/policy-templates/
