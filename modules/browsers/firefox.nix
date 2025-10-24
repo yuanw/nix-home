@@ -41,14 +41,11 @@ in
         home = {
           file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
         };
-        programs.librewolf.package =
-          if isDarwin then
-            # NOTE: firefox install is handled via homebrew
-            pkgs.runCommand "librewolf-0.0.0" { } "mkdir $out"
-          else
-            pkgs.librewolf;
-        programs.librewolf = {
+
+        programs.firefox = {
           enable = true;
+          package = pkgs.firefox-devedition;
+          darwinDefaultsId = "org.nixos.firefoxdeveloperedition";
           # betterfox = {
           #    enable = true;
           #version = "128.0"; # Set version here, defaults to main branch
