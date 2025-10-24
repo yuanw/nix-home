@@ -69,6 +69,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
+    nixpkgs-firefox-darwin.url = "github:bandithedoge/nixpkgs-firefox-darwin";
   };
 
   outputs =

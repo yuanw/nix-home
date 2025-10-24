@@ -42,9 +42,9 @@ in
           file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
         };
 
-        programs.firefox = {
+        programs.librewolf = {
           enable = true;
-          package = pkgs.firefox-devedition;
+          package = pkgs.librewolf-bin;
           darwinDefaultsId = "org.nixos.firefoxdeveloperedition";
           # betterfox = {
           #    enable = true;
