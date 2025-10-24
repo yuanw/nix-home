@@ -20,7 +20,7 @@ in
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
     pkg = mkOption {
-      type = types.package;
+      type = with types; nullOr package;
       default = pkgs.floorp-bin;
     };
   };
