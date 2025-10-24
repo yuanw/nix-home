@@ -44,8 +44,8 @@ in
 
         programs.librewolf = {
           enable = true;
-          package = pkgs.librewolf-bin;
-          darwinDefaultsId = "org.nixos.firefoxdeveloperedition";
+          package = pkgs.librewolf;
+          #   darwinDefaultsId = "org.nixos.firefoxdeveloperedition";
           # betterfox = {
           #    enable = true;
           #version = "128.0"; # Set version here, defaults to main branch
