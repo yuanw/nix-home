@@ -57,6 +57,7 @@
         "sloth"
         "ungoogled-chromium"
         "viscosity"
+        "librewolf"
       ];
       brews = [
         "redis"

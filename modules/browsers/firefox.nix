@@ -41,6 +41,12 @@ in
         home = {
           file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
         };
+        programs.librewolf.package =
+          if isDarwin then
+            # NOTE: firefox install is handled via homebrew
+            pkgs.runCommand "librewolf-0.0.0" { } "mkdir $out"
+          else
+            pkgs.librewolf;
         programs.librewolf = {
           enable = true;
           # betterfox = {
