@@ -41,7 +41,7 @@ in
         home = {
           file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
         };
-        programs.floorp = {
+        programs.librewolf = {
           enable = true;
           # betterfox = {
           #    enable = true;
