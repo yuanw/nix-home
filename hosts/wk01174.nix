@@ -73,7 +73,6 @@
     browsers.firefox = {
       enable = true;
       pkg = null;
-
     };
     editors.emacs = {
       enable = true;

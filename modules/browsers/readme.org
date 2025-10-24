@@ -251,3 +251,8 @@ user_pref("layout.word_select.eat_space_to_next_word", false);
 https://www.reddit.com/r/privacy/comments/kh6398/friendly_reminder_that_firefoxs_tracking/
 Friendly reminder that Firefox's "Tracking protection" whitelisted Google trackers. Check your about:config now! 
 https://linuxreviews.org/Mozilla_Is_Rolling_Out_Redirect_Tracking_Protection_In_Firefox_In_A_Somewhat_Concerning_Fashion
+
+
+* Add libwolf
+
+https://github.com/brckd/nixdots/blob/15f25bd8a35cdc8b3ceb898cb1c81d898faa2414/modules/librewolf/home.nix
