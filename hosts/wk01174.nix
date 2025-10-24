@@ -71,7 +71,7 @@
       ];
     };
     browsers.firefox = {
-      enable = true;
+      enable = false;
       # pkg = pkgs.runCommand "firefox-0.0.0" { } "mkdir $out";
     };
     editors.emacs = {
