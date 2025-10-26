@@ -70,7 +70,7 @@
         #"docker-compose"
       ];
     };
-    browsers.firefox = {
+    browsers.librewolf = {
       enable = true;
       pkg = null;
     };

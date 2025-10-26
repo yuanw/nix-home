@@ -8,6 +8,7 @@
       ./common.nix
       ./browsers/chromium.nix
       ./browsers/firefox.nix
+      ./browsers/librewolf.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
