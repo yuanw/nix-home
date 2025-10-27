@@ -20,7 +20,7 @@ in
   options.modules.browsers.firefox = {
     enable = mkEnableOption "firefox";
     pkg = mkOption {
-      type = types.package;
+      type = with types; nullOr package;
       default = pkgs.firefox;
     };
   };
@@ -33,7 +33,7 @@ in
         home.activation.setDefaultBrowser = lib.mkIf (cfg.enable && isDarwin) (
           hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
             if ! ${lib.getExe pkgs.defaultbrowser} firefox; then
-              /usr/bin/open ~/Applications/Home\ Manager\ Apps/Firefox.app
+
               ${lib.getExe pkgs.defaultbrowser} firefox
             fi
           ''

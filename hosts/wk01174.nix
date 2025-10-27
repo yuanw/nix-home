@@ -57,7 +57,8 @@
         "sloth"
         "ungoogled-chromium"
         "viscosity"
-        "librewolf"
+        #"librewolf"
+        "firefox"
       ];
       brews = [
         "redis"
@@ -70,7 +71,7 @@
         #"docker-compose"
       ];
     };
-    browsers.librewolf = {
+    browsers.firefox = {
       enable = true;
       pkg = null;
     };
