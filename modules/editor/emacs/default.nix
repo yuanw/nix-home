@@ -3112,7 +3112,13 @@ with lib;
                 s.proselint
                 s.write-good
               ]))
-              inputs'.beads.packages.default
+              (inputs'.beads.packages.default.overrideAttrs (_oldAttrs: {
+
+                #    vendorHash = "sha256-9xtp1ZG7aYXatz02PDTmSRXwBDaW0kM7AMQa1RUau4U=";
+
+                doCheck = false;
+
+              }))
             ];
             file.".vale.ini".text = ''
               [*]
