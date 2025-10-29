@@ -3112,6 +3112,7 @@ with lib;
                 s.proselint
                 s.write-good
               ]))
+              inputs'.beads.packages.default
             ];
             file.".vale.ini".text = ''
               [*]
