@@ -253,6 +253,41 @@ Friendly reminder that Firefox's "Tracking protection" whitelisted Google tracke
 https://linuxreviews.org/Mozilla_Is_Rolling_Out_Redirect_Tracking_Protection_In_Firefox_In_A_Somewhat_Concerning_Fashion
 
 
-* Add libwolf
+* Add librewolf
 
 https://github.com/brckd/nixdots/blob/15f25bd8a35cdc8b3ceb898cb1c81d898faa2414/modules/librewolf/home.nix
+
+* open a new tab
+
+#+begin_src gptel
+how to configure on macos open a web link open in a tab not a new window  
+#+end_src
+
+#+RESULTS:
+: To configure links to open in tabs instead of new windows on macOS, you can adjust settings in your web browser:
+
+** *Safari*
+1. Open Safari and go to *Safari > Settings* (or press =⌘,=)
+2. Click the *Tabs* tab
+3. Under "Open pages in tabs instead of windows," select *Always*
+4. You can also set "⌘-click opens a link in" to *a new tab* if desired
+
+** *Chrome*
+1. Open Chrome and go to *Settings* (chrome://settings/)
+2. In the search bar, type "tabs"
+3. There's no direct setting, but Chrome generally opens links in tabs by default
+4. If links open in new windows, it's often due to how the link is coded (target="_blank")
+
+** *Firefox*
+1. Go to *Firefox > Settings*
+2. Click *General* in the left sidebar
+3. Under *Tabs*, check *Open links in tabs instead of new windows*
+
+** *System-wide tip*
+Many browsers respect this macOS keyboard modifier:
+- *⌘ + Click* a link → Opens in a new tab
+- *⌘ + Shift + Click* a link → Opens in new tab and switches to it
+
+If you're experiencing links opening in new windows from external applications (like Mail or Messages), the browser should still respect its internal tab settings. The behavior also depends on whether the application or website specifically requests a new window.
+
+Which browser are you primarily using?
