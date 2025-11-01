@@ -126,35 +126,10 @@ hm@{ pkgs, ... }:
 
     git = {
       enable = true;
+      # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
       # package = pkgs.stable.git;
       userName = config.my.username;
-
-      aliases = {
-        co = "checkout";
-        w = "status -sb";
-        l =
-          "log --graph --pretty=format:'%Cred%h%Creset"
-          + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
-          + " --abbrev-commit --date=relative --show-notes=*";
-      };
-      userEmail = config.my.email;
-
-      # difftastic = { enable = true; };
-      # delta = { enable = true; };
-
-      signing = {
-        key = config.my.gpgKey;
-        signByDefault = true;
-      };
-      ignores = [
-        ".direnv"
-        ".DS_Store"
-        ".envrc"
-        ".aider.chat.history.md"
-        ".aider.input.history"
-      ];
-      # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
-      extraConfig = {
+      settings = {
         core = {
           editor = "emacsclient -c";
         };
@@ -176,7 +151,33 @@ hm@{ pkgs, ... }:
           stat = true;
         };
         remote.origin.prune = true;
+        alias = {
+          co = "checkout";
+          w = "status -sb";
+          l =
+            "log --graph --pretty=format:'%Cred%h%Creset"
+            + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
+            + " --abbrev-commit --date=relative --show-notes=*";
+        };
+        user = {
+          email = config.my.email;
+          name = config.my.username;
+        };
       };
+      # difftastic = { enable = true; };
+      # delta = { enable = true; };
+
+      signing = {
+        key = config.my.gpgKey;
+        signByDefault = true;
+      };
+      ignores = [
+        ".direnv"
+        ".DS_Store"
+        ".envrc"
+        ".aider.chat.history.md"
+        ".aider.input.history"
+      ];
     };
 
     gpg = {
