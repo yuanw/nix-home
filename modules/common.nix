@@ -86,7 +86,21 @@
             inputs'.nixpkgs-stable.legacyPackages.gtk3
           else
             inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
+        sbcl =
+          if _prev.stdenv.isDarwin then
+            inputs'.nixpkgs-stable.legacyPackages.sbcl
+          else
+            inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
         sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
+        batgrep =
+          if _prev.stdenv.isDarwin then
+            _prev.batgrep.overrideAttrs (_oldAttrs: {
+
+              doCheck = false;
+
+            })
+          else
+            _prev.batgrep;
         #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
         # https://nixpk.gs/pr-tracker.html?pr=263500

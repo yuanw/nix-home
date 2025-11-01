@@ -29,14 +29,14 @@ with pkgs;
   shellcheck
   entr
 
-  gitAndTools.pre-commit
-  gitAndTools.pass-git-helper
-  gitAndTools.gh
+  pre-commit
+  pass-git-helper
+  gh
   git-crypt
 
   #hledger
   #ranger
-  du-dust
+  dust
   nixpkgs-fmt
   nix-tree
   nix-diff

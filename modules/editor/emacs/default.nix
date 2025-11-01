@@ -3096,7 +3096,7 @@ with lib;
               #: sh
               nodePackages.bash-language-server
               #: toml
-              taplo-lsp
+              taplo
               #: web-mode
               nodePackages.js-beautify
               nodePackages.stylelint
