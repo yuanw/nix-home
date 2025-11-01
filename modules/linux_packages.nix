@@ -5,7 +5,9 @@ with pkgs;
   gnumake
   _1password-gui
   protonvpn-gui
-  pinentry
+  # 'pinentry' has been removed. Pick an appropriate variant like 'pinentry-curses' or 'pinentry-gnome3'
+  pinentry-gnome3
+
   stalonetray
   killall
   gxmessage
