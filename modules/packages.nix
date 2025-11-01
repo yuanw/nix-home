@@ -36,7 +36,7 @@ with pkgs;
 
   #hledger
   #ranger
-  du-dust
+  dust
   nixpkgs-fmt
   nix-tree
   nix-diff
