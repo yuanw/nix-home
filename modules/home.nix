@@ -128,7 +128,7 @@ hm@{ pkgs, ... }:
       enable = true;
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
       # package = pkgs.stable.git;
-      userName = config.my.username;
+
       settings = {
         core = {
           editor = "emacsclient -c";
