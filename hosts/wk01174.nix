@@ -30,7 +30,7 @@
   home-manager.users.${config.my.username}.programs = {
 
     git = {
-      extraConfig = {
+      settings = {
         github.user = "yuanwang-wf";
         # url."git@github.com:".insteadOf = "https://github.com";
       };
