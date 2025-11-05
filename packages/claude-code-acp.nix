@@ -12,11 +12,10 @@ buildNpmPackage rec {
     owner = "zed-industries";
     repo = "claude-code-acp";
     rev = "v${version}";
-    hash = lib.fakeSha256;
+    sha256 = "sha256-ZbCumFZyGFoNBNK6PC56oauuN2Wco3rlR80/1rBPORk=";
   };
 
-  npmDepsHash = lib.fakeSha256;
-
+  npmDepsHash = "sha256-nzP2cMYKoe4S9goIbJ+ocg8bZPY/uCTOm0bLbn4m6Mw=";
   dontNpmBuild = false;
 
   npmFlags = [
