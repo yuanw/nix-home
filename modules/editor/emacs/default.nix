@@ -159,118 +159,133 @@ with lib;
               recommendedGcSettings = true;
               usePackageVerbose = false;
               earlyInit = ''
-                              ;; Disable some GUI distractions. We set these manually to avoid starting
-                              ;; the corresponding minor modes.
-                              (push '(menu-bar-lines . 0) default-frame-alist)
-                              (push '(tool-bar-lines . nil) default-frame-alist)
-                              (push '(vertical-scroll-bars . nil) default-frame-alist)
-                              ;; no title bar
-                              (add-to-list 'default-frame-alist '(undecorated-round . t))
-                              ;; Set up fonts early.
-                              ;;--------------------
-                              (let ((mono-spaced-font "${config.my.monoFont}")
-                               (proportionately-spaced-font "${config.my.font}"))
-                               (set-face-attribute 'default nil :family mono-spaced-font :height 180)
-                               (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
-                               (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+                                    ;; Disable some GUI distractions. We set these manually to avoid starting
+                                    ;; the corresponding minor modes.
+                                    (push '(menu-bar-lines . 0) default-frame-alist)
+                                    (push '(tool-bar-lines . nil) default-frame-alist)
+                                    (push '(vertical-scroll-bars . nil) default-frame-alist)
+                                    ;; no title bar
+                                    (add-to-list 'default-frame-alist '(undecorated-round . t))
+                                    ;; Set up fonts early.
+                                    ;;--------------------
+                                    (let ((mono-spaced-font "${config.my.monoFont}")
+                                     (proportionately-spaced-font "${config.my.font}"))
+                                     (set-face-attribute 'default nil :family mono-spaced-font :height 180)
+                                     (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
+                                     (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
 
-                              ;; auto-save might handle this already 
-                              (setq make-backup-files nil)
-                              (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
-                              (setq create-lockfiles nil)
+                                    ;; auto-save might handle this already 
+                                    (setq make-backup-files nil)
+                                    (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
+                                    (setq create-lockfiles nil)
 
-                              ;; Make native compilation silent and prune its cache.
-                              (when (native-comp-available-p)
-                                (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation
-                                (setq native-compile-prune-cache t)) ; Emacs 29
+                                    ;; Make native compilation silent and prune its cache.
+                                    (when (native-comp-available-p)
+                                      (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation
+                                      (setq native-compile-prune-cache t)) ; Emacs 29
 
-                              ;; Luminosity 50
-                              (defconst palette-red               "#FF0000")
-                              (defconst palette-orange            "#FF8000")
-                              (defconst palette-yellow            "#FFFF00")
-                              (defconst palette-yellow-green      "#80FF00")
-                              (defconst palette-green             "#00FF00")
-                              (defconst palette-teal              "#00FF80")
-                              (defconst palette-cyan              "#00FFFF")
-                              (defconst palette-slate-blue        "#007FFF")
-                              (defconst palette-blue              "#0000FF")
-                              (defconst palette-indigo            "#7F00FF")
-                              (defconst palette-purple            "#FF00FF")
-                              (defconst palette-fuschia           "#FF0080")
+                                    ;; Luminosity 50
+                                    (defconst palette-red               "#FF0000")
+                                    (defconst palette-orange            "#FF8000")
+                                    (defconst palette-yellow            "#FFFF00")
+                                    (defconst palette-yellow-green      "#80FF00")
+                                    (defconst palette-green             "#00FF00")
+                                    (defconst palette-teal              "#00FF80")
+                                    (defconst palette-cyan              "#00FFFF")
+                                    (defconst palette-slate-blue        "#007FFF")
+                                    (defconst palette-blue              "#0000FF")
+                                    (defconst palette-indigo            "#7F00FF")
+                                    (defconst palette-purple            "#FF00FF")
+                                    (defconst palette-fuschia           "#FF0080")
 
-                              ;; Luminosity 20
-                              (defconst palette-red-dark          "#660000")
-                              (defconst palette-orange-dark       "#663300")
-                              (defconst palette-yellow-dark       "#666600")
-                              (defconst palette-yellow-green-dark "#336600")
-                              (defconst palette-green-dark        "#006600")
-                              (defconst palette-teal-dark         "#006633")
-                              (defconst palette-cyan-dark         "#006666")
-                              (defconst palette-slate-blue-dark   "#003366")
-                              (defconst palette-blue-dark         "#000066")
-                              (defconst palette-indigo-dark       "#330066")
-                              (defconst palette-purple-dark       "#660066")
-                              (defconst palette-fuschia-dark      "#660033")
+                                    ;; Luminosity 20
+                                    (defconst palette-red-dark          "#660000")
+                                    (defconst palette-orange-dark       "#663300")
+                                    (defconst palette-yellow-dark       "#666600")
+                                    (defconst palette-yellow-green-dark "#336600")
+                                    (defconst palette-green-dark        "#006600")
+                                    (defconst palette-teal-dark         "#006633")
+                                    (defconst palette-cyan-dark         "#006666")
+                                    (defconst palette-slate-blue-dark   "#003366")
+                                    (defconst palette-blue-dark         "#000066")
+                                    (defconst palette-indigo-dark       "#330066")
+                                    (defconst palette-purple-dark       "#660066")
+                                    (defconst palette-fuschia-dark      "#660033")
 
-                              ;; Luminosity 15
-                              (defconst palette-red-darker          "#4D0000")
-                              (defconst palette-orange-darker       "#4D2600")
-                              (defconst palette-yellow-darker       "#4D4D00")
-                              (defconst palette-yellow-green-darker "#264D00")
-                              (defconst palette-green-darker        "#004D00")
-                              (defconst palette-teal-darker         "#004D26")
-                              (defconst palette-cyan-darker         "#004D4D")
-                              (defconst palette-slate-blue-darker   "#00264D")
-                              (defconst palette-blue-darker         "#00004D")
-                              (defconst palette-indigo-darker       "#26004D")
-                              (defconst palette-purple-darker       "#4D004D")
-                              (defconst palette-fuschia-darker      "#4D0026")
+                                    ;; Luminosity 15
+                                    (defconst palette-red-darker          "#4D0000")
+                                    (defconst palette-orange-darker       "#4D2600")
+                                    (defconst palette-yellow-darker       "#4D4D00")
+                                    (defconst palette-yellow-green-darker "#264D00")
+                                    (defconst palette-green-darker        "#004D00")
+                                    (defconst palette-teal-darker         "#004D26")
+                                    (defconst palette-cyan-darker         "#004D4D")
+                                    (defconst palette-slate-blue-darker   "#00264D")
+                                    (defconst palette-blue-darker         "#00004D")
+                                    (defconst palette-indigo-darker       "#26004D")
+                                    (defconst palette-purple-darker       "#4D004D")
+                                    (defconst palette-fuschia-darker      "#4D0026")
 
-                              ;; Luminosity 10
-                              (defconst palette-red-darkest          "#330000")
-                              (defconst palette-orange-darkest       "#331A00")
-                              (defconst palette-yellow-darkest       "#333300")
-                              (defconst palette-yellow-green-darkest "#1A3300")
-                              (defconst palette-green-darkest        "#003300")
-                              (defconst palette-teal-darkest         "#00331A")
-                              (defconst palette-cyan-darkest         "#003333")
-                              (defconst palette-slate-blue-darkest   "#001A33")
-                              (defconst palentte-blue-darkest         "#000033")
-                              (defconst palette-indigo-darkest       "#1A0033")
-                              (defconst palette-purple-darkest       "#330033")
-                              (defconst palette-fuschia-darkest      "#33001A")
+                                    ;; Luminosity 10
+                                    (defconst palette-red-darkest          "#330000")
+                                    (defconst palette-orange-darkest       "#331A00")
+                                    (defconst palette-yellow-darkest       "#333300")
+                                    (defconst palette-yellow-green-darkest "#1A3300")
+                                    (defconst palette-green-darkest        "#003300")
+                                    (defconst palette-teal-darkest         "#00331A")
+                                    (defconst palette-cyan-darkest         "#003333")
+                                    (defconst palette-slate-blue-darkest   "#001A33")
+                                    (defconst palentte-blue-darkest         "#000033")
+                                    (defconst palette-indigo-darkest       "#1A0033")
+                                    (defconst palette-purple-darkest       "#330033")
+                                    (defconst palette-fuschia-darkest      "#33001A")
 
-                              ;; Make customisations that affect Emacs faces BEFORE loading a theme
-                ;; (any change needs a theme re-load to take effect).
-                (require 'ef-themes)
+                                    ;; Make customisations that affect Emacs faces BEFORE loading a theme
+                      ;; (any change needs a theme re-load to take effect).
+                      (require 'ef-themes)
 
-                ;; If you like two specific themes and want to switch between them, you
-                ;; can specify them in `ef-themes-to-toggle' and then invoke the command
-                ;; `ef-themes-toggle'.  All the themes are included in the variable
-                ;; `ef-themes-collection'.
-                (setq ef-themes-to-toggle '(ef-day ef-winter))
+                      ;; If you like two specific themes and want to switch between them, you
+                      ;; can specify them in `ef-themes-to-toggle' and then invoke the command
+                      ;; `ef-themes-toggle'.  All the themes are included in the variable
+                      ;; `ef-themes-collection'.
+                      (setq ef-themes-to-toggle '(ef-day ef-winter))
 
-                (setq ef-themes-headings ; read the manual's entry or the doc string
-                      '((0 variable-pitch light 1.9)
-                        (1 variable-pitch light 1.8)
-                        (2 variable-pitch regular 1.7)
-                        (3 variable-pitch regular 1.6)
-                        (4 variable-pitch regular 1.5)
-                        (5 variable-pitch 1.4) ; absence of weight means `bold'
-                        (6 variable-pitch 1.3)
-                        (7 variable-pitch 1.2)
-                        (t variable-pitch 1.1)))
+                      (setq ef-themes-headings ; read the manual's entry or the doc string
+                            '((0 variable-pitch light 1.9)
+                              (1 variable-pitch light 1.8)
+                              (2 variable-pitch regular 1.7)
+                              (3 variable-pitch regular 1.6)
+                              (4 variable-pitch regular 1.5)
+                              (5 variable-pitch 1.4) ; absence of weight means `bold'
+                              (6 variable-pitch 1.3)
+                              (7 variable-pitch 1.2)
+                              (t variable-pitch 1.1)))
 
-                ;; They are nil by default...
-                (setq ef-themes-mixed-fonts t
-                      ef-themes-variable-pitch-ui t)
+                      ;; They are nil by default...
+                      (setq ef-themes-mixed-fonts t
+                            ef-themes-variable-pitch-ui t)
 
-                ;; Disable all other themes to avoid awkward blending:
-                (mapc #'disable-theme custom-enabled-themes)
-                (setq org-startup-with-inline-images t)
+                      ;; Disable all other themes to avoid awkward blending:
+                      (mapc #'disable-theme custom-enabled-themes)
+                      (setq org-startup-with-inline-images t)
 
-                ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-                (ef-themes-select 'ef-dream)
+                      ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
+                      (ef-themes-select 'ef-dream)
+
+                      (eval-and-compile
+                      (mapc (lambda (entry)
+                  (define-prefix-command (cdr entry))
+                  (bind-key (car entry) (cdr entry)))
+                '(("C-'"   . my-ctrl-quote-map)
+                  ("<C-m>" . my-ctrl-m-map)
+                  ("C-c e" . my-emacs-lisp-map)
+                  ("C-c m" . my-ctrl-c-m-map)
+                  ("C-c n" . my-ctrl-c-n-map)
+                  ("C-c t" . my-multi-term-map)
+                  ("C-c w" . my-web-map)
+                  ("C-c y" . my-yasnippet-map)
+                  ("C-c H" . my-highlight-map)
+                  ("C-c N" . my-ctrl-c-N-map))))
               '';
 
               prelude = ''
@@ -405,11 +420,32 @@ with lib;
               '';
 
               usePackage = {
+                enable = true;
+                activities = {
+                  extraConfig = ''
+                    :init
+                    (activities-mode)
+                    (activities-tabs-mode)
+                    ;; Prevent `edebug' default bindings from interfering.
+                    (setq edebug-inhibit-emacs-lisp-mode-bindings t)
+
+                    :bind
+                    (("C-x C-a C-n" . activities-new)
+                     ("C-x C-a C-d" . activities-define)
+                     ("C-x C-a C-a" . activities-resume)
+                     ("C-x C-a C-s" . activities-suspend)
+                     ("C-x C-a C-k" . activities-kill)
+                     ("C-x C-a RET" . activities-switch)
+                     ("C-x C-a b" . activities-switch-buffer)
+                     ("C-x C-a g" . activities-revert)
+                     ("C-x C-a l" . activities-list))
+                  '';
+                };
                 # pratice emacs-fu
                 disable-mouse = {
-                  enable = true;
+                  enable = false;
                   config = ''
-                    ;;(global-disable-mouse-mode)
+                    (global-disable-mouse-mode)
                   '';
                 };
                 gcmh = {
@@ -2011,6 +2047,7 @@ with lib;
                 };
                 protobuf-mode = {
                   enable = true;
+                  mode = [ "\\.proto\\'" ];
                 };
                 racket-mode = {
                   enable = true;
@@ -2037,7 +2074,6 @@ with lib;
                   command = [ "lean4-mode" ];
                   package =
                     epkgs:
-
                     (pkgs.callPackage "${packagePath}/lean4-mode.nix" {
                       inherit (pkgs) fetchFromGitHub;
                       inherit (epkgs)
@@ -2054,9 +2090,9 @@ with lib;
                 popper = {
                   enable = true;
                   bind = {
-                    "C-`" = "popper-toggle";
-                    "M-`" = "popper-cycle";
-                    "C-M-`" = "popper-toggle-type";
+                    "C-'" = "popper-toggle";
+                    "M-'" = "popper-cycle";
+                    "C-M-'" = "popper-toggle-type";
                   };
                   command = [
                     "popper-mode"
@@ -2147,7 +2183,7 @@ with lib;
                   enable = cfg.lspStyle == "eglot";
                   # https://emacs-china.org/t/eglot-lsp-server-command/29566
                   preface = ''
-                                      (defun my/eglot-enable-command-provider (orig-fn server)
+                     (defun my/eglot-enable-command-provider (orig-fn server)
                         "Unconditionally add :executeCommandProvider to Eglot client capabilities."
                         (let ((original-capabilities (funcall orig-fn server)))
                           ;; Add or update :executeCommandProvider at the top level
