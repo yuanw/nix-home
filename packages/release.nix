@@ -8,7 +8,7 @@
   choose-mac = pkgs.callPackage ./choose-mac.nix { };
   sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
-
+  claude-code-acp = pkgs.callPackage ./claude-code-acp.nix { };
   auto-save = pkgs.callPackage ./emacs/auto-save.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;

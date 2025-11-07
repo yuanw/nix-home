@@ -108,8 +108,6 @@ _final: prev: {
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   aws-iam-authenticator = prev.callPackage ./aws-iam-authenticator.nix { };
-
-  mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix {
-
-  };
+  claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
+  mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };
 }
