@@ -420,8 +420,9 @@ with lib;
               '';
 
               usePackage = {
-                enable = true;
+
                 activities = {
+                  enable = true;
                   extraConfig = ''
                     :init
                     (activities-mode)
