@@ -2525,6 +2525,59 @@ with lib;
                                         (consult-omni-sources-load-modules)
                                         ;; Load Embark Actions
                                         (require 'consult-omni-embark)
+
+                                        ;; Define custom password-store source for consult-omni
+                                        (defvar consult-omni--pass-store-cache nil
+                                          "Cache for password-store entries.")
+
+                                        (defun consult-omni--pass-store-list ()
+                                          "List all password-store entries."
+                                          (or consult-omni--pass-store-cache
+                                              (setq consult-omni--pass-store-cache
+                                                    (split-string (shell-command-to-string "pass ls") "\n" t))))
+
+                                        (defun consult-omni--pass-store-format (candidate)
+                                          "Format password-store CANDIDATE for display."
+                                          (let* ((parts (split-string candidate "├── \\|└── \\|│   "))
+                                                 (name (car (last parts)))
+                                                 (cleaned (replace-regexp-in-string "\\.gpg$" "" name)))
+                                            (propertize cleaned
+                                                        'consult-omni-source "Password Store"
+                                                        'consult-omni-path candidate)))
+
+                                        (defun consult-omni--pass-store-callback (candidate)
+                                          "Callback for password-store CANDIDATE selection."
+                                          (let* ((path (get-text-property 0 'consult-omni-path candidate))
+                                                 (cleaned (replace-regexp-in-string "^.*[├└]── " "" path))
+                                                 (entry (replace-regexp-in-string "\\.gpg$" "" cleaned)))
+                                            (password-store-copy entry)
+                                            (message "Password copied to clipboard: %s" entry)))
+
+                                        (defun consult-omni--pass-store-search (input)
+                                          "Search password-store entries matching INPUT."
+                                          (let* ((entries (consult-omni--pass-store-list))
+                                                 (filtered (if (string-empty-p input)
+                                                              entries
+                                                            (seq-filter (lambda (e)
+                                                                         (string-match-p (regexp-quote input) e))
+                                                                       entries))))
+                                            (mapcar #'consult-omni--pass-store-format filtered)))
+
+                                        ;; Register the password-store source
+                                        (consult-omni-define-source "Password Store"
+                                          :narrow-char ?p
+                                          :category 'password-store
+                                          :type 'sync
+                                          :require-match t
+                                          :face 'consult-omni-engine-title-face
+                                          :request #'consult-omni--pass-store-search
+                                          :on-new (lambda (cand) (consult-omni--pass-store-callback cand))
+                                          :on-callback #'consult-omni--pass-store-callback
+                                          :on-preview #'ignore
+                                          :search-hist 'consult-omni--search-history
+                                          :select-hist 'consult-omni--selection-history
+                                          :enabled (lambda () (executable-find "pass"))
+                                          :annotate nil)
                                         (setq consult-omni-apps-paths (append (file-expand-wildcards "/Applications/Adobe*")
                                         (list "/Applications"
                                               "/Applications/Utilities/"
@@ -2541,6 +2594,7 @@ with lib;
                                                                            ;; "Buffer"
                                                                            ;; "Bookmark"
                                                                            "Apps"
+                                                                           "Password Store"
                                                                            ;; "gptel"
                                                                            ;; "Brave"
                                                                            "Dictionary"
