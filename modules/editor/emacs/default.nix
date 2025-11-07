@@ -420,28 +420,6 @@ with lib;
               '';
 
               usePackage = {
-
-                activities = {
-                  enable = true;
-                  extraConfig = ''
-                    :init
-                    (activities-mode)
-                    (activities-tabs-mode)
-                    ;; Prevent `edebug' default bindings from interfering.
-                    (setq edebug-inhibit-emacs-lisp-mode-bindings t)
-
-                    :bind
-                    (("C-x C-a C-n" . activities-new)
-                     ("C-x C-a C-d" . activities-define)
-                     ("C-x C-a C-a" . activities-resume)
-                     ("C-x C-a C-s" . activities-suspend)
-                     ("C-x C-a C-k" . activities-kill)
-                     ("C-x C-a RET" . activities-switch)
-                     ("C-x C-a b" . activities-switch-buffer)
-                     ("C-x C-a g" . activities-revert)
-                     ("C-x C-a l" . activities-list))
-                  '';
-                };
                 # pratice emacs-fu
                 disable-mouse = {
                   enable = false;
@@ -820,37 +798,76 @@ with lib;
                     "C-c M-v" = "my/darwin-open";
                   };
                 };
-                auth-source-pass = {
-                  enable = false;
+
+                password-store = {
+                  enable = true;
                   extraConfig = ''
-                    :preface
-                    (defvar auth-source-pass--cache (make-hash-table :test #'equal))
+                                          :init
+                      (progn
+                        (defun my/password-length ()
+                          "Return a random number suitable for a password length."
+                          (+ 30 (random 10)))
 
-                    (defun auth-source-pass--reset-cache ()
-                      (setq auth-source-pass--cache (make-hash-table :test #'equal)))
+                        (defun my/generate-password (&optional length)
+                          "Generate a random password of size LENGTH, `my/password-length' by default.
 
-                    (defun auth-source-pass--read-entry (entry)
-                      "Return a string with the file content of ENTRY."
-                      (run-at-time 45 nil #'auth-source-pass--reset-cache)
-                      (let ((cached (gethash entry auth-source-pass--cache)))
-                        (or cached
-                            (puthash
-                             entry
-                             (with-temp-buffer
-                               (insert-file-contents (expand-file-name
-                                                      (format "%s.gpg" entry)
-                                                      (getenv "PASSWORD_STORE_DIR")))
-                               (buffer-substring-no-properties (point-min) (point-max)))
-                             auth-source-pass--cache))))
+                    If LENGTH is positive, the password is copied to the kill ring.  If
+                    negative, the password is inserted at point."
+                          (interactive "P")
+                          (let* ((length (cond
+                                          ((eq length '-) (- (my/password-length)))
+                                          (length length)
+                                          (t (my/password-length))))
+                                 (password (string-trim (shell-command-to-string
+                                                         (format "pwgen --num-passwords=1 --secure --symbols %s" (abs length))))))
+                            (if (< length 0)
+                                (insert password)
+                              (kill-new password)
+                              (message "Added %S to kill ring." password)))))
+                      :config
+                      (progn
+                        (setopt password-store-password-length (my/password-length)))
+                  '';
+                };
 
-                    (defun auth-source-pass-entries ()
-                      "Return a list of all password store entries."
-                      (let ((store-dir (getenv "PASSWORD_STORE_DIR")))
-                        (mapcar
-                         (lambda (file) (file-name-sans-extension (file-relative-name file store-dir)))
-                         (directory-files-recursively store-dir "\.gpg$"))))
+                pass = {
+                  enable = true;
+                  extraConfig = ''
+                    :commands pass
+                    :bind (
+                           :map pass-mode-map
+                           ("M-w" . pass-copy))
                     :config
-                    (auth-source-pass-enable)
+                    (progn
+                      (defun my/pass-insert-generated (entry)
+                        "Same as `pass-insert-generated' but with my own template."
+                        (interactive (list (read-string "Password entry: ")))
+                        (when (or (not (seq-contains (password-store-list) entry))
+                                  (yes-or-no-p "Erase existing entry with same name? "))
+                          (let ((password (shell-command-to-string
+                                           (format "pwgen --secure %s"
+                                                   (my/password-length)))))
+                            (password-store-insert
+                             entry
+                             (format "%s--\nusername: %s\nurl: https://%s\n"
+                                     password
+                                     user-mail-address
+                                     entry))
+                            (password-store-edit entry)
+                            (pass-update-buffer))))
+
+                      (advice-add #'pass-insert-generated :override #'my/pass-insert-generated))
+                  '';
+                };
+                auth-source-pass = {
+                  enable = true;
+                  extraConfig = ''
+                                       
+                    :demand t
+                    :after auth-source
+                    :init
+                    (progn
+                    (setopt auth-sources '(password-store)))
                   '';
                 };
 
@@ -2809,7 +2826,7 @@ with lib;
                 };
                 # Enable Electric Indent mode to do automatic indentation on RET.
                 electric = {
-                  enable = true;
+                  enable = false;
                   command = [ "electric-indent-local-mode" ];
                   hook = [
                     "(prog-mode . electric-indent-mode)"
