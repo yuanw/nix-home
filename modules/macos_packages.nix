@@ -9,7 +9,7 @@ with pkgs;
   ffmpeg
   duti
   github-mcp-server
-  sioyek
+
   #mcp-server-fetch
   slackdump
   #mcp-server-filesystem

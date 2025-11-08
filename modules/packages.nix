@@ -75,6 +75,7 @@ with pkgs;
   just
   pkg-config
   protobuf
+  sioyek
   # racket
   # open-interpreter
   # reiryoku-firmware
