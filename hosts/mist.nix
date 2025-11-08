@@ -1,8 +1,7 @@
-{
-  inputs,
-  config,
-  pkgs,
-  ...
+{ inputs
+, config
+, pkgs
+, ...
 }:
 let
   nixCustomConf = pkgs.writeText "nix.custom.conf" ''
@@ -36,7 +35,7 @@ in
   ];
   home-manager.users.${config.my.username}.programs = {
     git = {
-      extraConfig = {
+      settings = {
         github.user = "yuanw";
       };
     };
