@@ -1233,7 +1233,8 @@ with lib;
                   enable = true;
                   bind = {
                     "C-j" = "avy-goto-char-timer";
-                    "C-f" = "avy-goto-char-in-line";
+                    # maybe cause issue with meow
+                    #"C-f" = "avy-goto-char-in-line";
                     "M-g y" = "avy-copy-line";
                     "M-g M-y" = "avy-copy-region";
                     "M-g M-p" = "avy-goto-line-above";
