@@ -39,7 +39,7 @@ let
     shift + ctrl + alt - l: pmset displaysleepnow
     # display current configuration
     shift + ctrl + alt - h: open /etc/skhdrc
-    shift + ctrl + alt - . : choose-pass
+    shift + ctrl + alt - y : choose-pass
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
