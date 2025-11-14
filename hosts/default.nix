@@ -111,16 +111,12 @@
                 isDarwin = true;
                 isNixOS = false;
                 loadPrivate = loadPrivate;
-                nurNoPkg = import inputs.nur {
-                  nurpkgs = import inputs.nixpkgs { system = sys; };
-                };
+
                 packages = config.packages;
                 inherit hostname inputs inputs';
               };
               modules = [
-                {
-                  nixpkgs.hostPlatform = sys;
-                }
+
                 inputs.home-manager.darwinModules.home-manager
                 {
                   home-manager = {
