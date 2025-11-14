@@ -3166,9 +3166,7 @@ with lib;
                 s.proselint
                 s.write-good
               ]))
-              (inputs'.beads.packages.default.overrideAttrs (_oldAttrs: {
-                doCheck = false;
-              }))
+
             ];
             file.".vale.ini".text = ''
               [*]

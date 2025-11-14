@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules = {
+  flake.myModules = {
     common.imports = [
       ./agenix.nix
       ./ai.nix
