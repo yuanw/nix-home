@@ -453,6 +453,7 @@ with lib;
 
                 meow = {
                   enable = true;
+                  commands = [ "meow-global-mode" ];
                   config = ''
                                         (defun meow-setup ()
                       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
@@ -556,6 +557,7 @@ with lib;
                           src = ./packages/prot-common.el;
                         })
                       ];
+
                     };
                   config = ''
                     (setq mode-line-compact nil) ; Emacs 28
