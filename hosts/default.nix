@@ -104,6 +104,7 @@
             {
               config,
               inputs',
+              system,
               ...
             }:
             inputs.nix-darwin.lib.darwinSystem {
@@ -112,14 +113,14 @@
                 isNixOS = false;
                 loadPrivate = loadPrivate;
                 nurNoPkg = import inputs.nur {
-                  nurpkgs = import inputs.nixpkgs { system = sys; };
+                  nurpkgs = import inputs.nixpkgs { system = system; };
                 };
                 packages = config.packages;
                 inherit hostname inputs inputs';
               };
               modules = [
                 {
-                  nixpkgs.hostPlatform = sys;
+                  nixpkgs.hostPlatform = system;
                 }
                 inputs.home-manager.darwinModules.home-manager
                 {
