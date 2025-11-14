@@ -1,6 +1,6 @@
 { ... }:
 {
-  flake.nixosModules = {
+  flake.myModules = {
     common.imports = [
       ./agenix.nix
       ./ai.nix
@@ -42,12 +42,12 @@
       ./wm/xmonad.nix
     ];
     darwin.imports = [
-      # ./brew.nix
-      # ./health.nix
-      # ./editor/emacs/emacs-macos.nix
-      # ./wm/yabai.nix
-      # ./macintosh.nix
-      # ./mouseless
+      ./brew.nix
+      ./health.nix
+      ./editor/emacs/emacs-macos.nix
+      ./wm/yabai.nix
+      ./macintosh.nix
+      ./mouseless
 
     ];
   };
