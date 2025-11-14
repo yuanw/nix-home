@@ -69,11 +69,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
-    beads = {
-      url = "github:steveyegge/beads";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
   };
 
   outputs =
