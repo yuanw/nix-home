@@ -6,7 +6,7 @@
 {
 
   imports = [
-    /inputs.self.nixosModules.common
+    #  inputs.self.nixosModules.common
     inputs.self.nixosModules.darwin
     ../modules/private/work.nix
   ];
