@@ -1,7 +1,8 @@
-{ inputs
-, config
-, pkgs
-, ...
+{
+  inputs,
+  config,
+  pkgs,
+  ...
 }:
 let
   nixCustomConf = pkgs.writeText "nix.custom.conf" ''
@@ -14,8 +15,8 @@ in
 {
 
   imports = [
-    inputs.self.nixosModules.common
-    inputs.self.nixosModules.darwin
+    inputs.self.myModules.common
+    inputs.self.myModules.darwin
     ../modules/private/jellyfin-darwin.nix
   ];
   # determinate system
