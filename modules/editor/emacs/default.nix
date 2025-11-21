@@ -3153,7 +3153,7 @@ with lib;
                         ;
                       inherit (epkgs)
                         melpaBuild
-                        postframe
+                        posframe
                         nerd-icons
                         ;
                     });
