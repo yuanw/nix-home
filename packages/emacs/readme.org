@@ -1,0 +1,2 @@
+nix-build -E 'with import <nixpkgs> {}; callPackage ./packages/emacs/gptel-agent.nix { inherit (emacsPackages)
+       melpaBuild gptel; }'

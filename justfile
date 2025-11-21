@@ -2,7 +2,7 @@ host := `hostname -s`
 
 # build os
 build:
-    @nix build ".#$(hostname)"
+    @nix build ".#$(hostname | tr '[:upper:]' '[:lower:]')"
 
 update-all:
     @nix flake update
@@ -18,8 +18,10 @@ nix-update:
     @nix-update -f ./packages/release.nix emacs-reader --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
+    @nix-update -f ./packages/release.nix gptel-agent --src-only --version=branch
     @nix-update -f ./packages/release.nix lean4-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
+    @nix-update -f ./packages/release.nix knockknock --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
