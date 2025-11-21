@@ -453,7 +453,7 @@ with lib;
 
                 meow = {
                   enable = true;
-                  commands = [ "meow-global-mode" ];
+                  command = [ "meow-global-mode" ];
                   config = ''
                                         (defun meow-setup ()
                       (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
