@@ -29,7 +29,6 @@ melpaBuild {
     dash
     lsp-mode
     magit-section
-
   ];
   preferLocalBuild = true;
   allowSubstitutes = false;

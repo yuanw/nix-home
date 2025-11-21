@@ -22,6 +22,10 @@ melpaBuild {
 
      )
   '';
+  propagatedUserEnvPkgs = [
+    posframe
+    nerd-icons
+  ];
   packageRequires = [
     posframe
     nerd-icons

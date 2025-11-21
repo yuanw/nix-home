@@ -22,7 +22,6 @@ melpaBuild {
   packageRequires = [
     org
     gptel
-
   ];
   preferLocalBuild = true;
   allowSubstitutes = false;
