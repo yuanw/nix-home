@@ -3092,6 +3092,31 @@ with lib;
                   '';
                 };
 
+                gptel-agent = {
+                  after = [
+                    "gptel"
+
+                  ];
+                  enable = true;
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/gptel-agent.nix" {
+                      inherit (pkgs)
+                        fetchFromGitHub
+                        ;
+                      inherit (epkgs)
+                        melpaBuild
+                        gptel
+                        yaml
+                        orderless
+
+                        ;
+                    });
+                  config = ''
+                    (gptel-agent-update)
+                  '';
+                };
+
                 gptel-quick = {
                   enable = true;
                   after = [
@@ -3116,6 +3141,22 @@ with lib;
                                ("?" . gptel-quick))
 
                   '';
+                };
+
+                knockknock = {
+                  enable = true;
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/knockknock.nix" {
+                      inherit (pkgs)
+                        fetchFromGitHub
+                        ;
+                      inherit (epkgs)
+                        melpaBuild
+                        postframe
+                        nerd-icons
+                        ;
+                    });
                 };
 
                 mcp = {
