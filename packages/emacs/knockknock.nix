@@ -17,6 +17,11 @@ melpaBuild {
     sha256 = "sha256-EI1TG6UovaOVpN7l4DoQqyew1amc1DwTO9V4ACdOALA=";
   };
 
+  files = ''
+    ("knockknock.el"
+
+     )
+  '';
   packageRequires = [
     posframe
     nerd-icons
