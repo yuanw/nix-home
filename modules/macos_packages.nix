@@ -16,7 +16,7 @@ with pkgs;
   kanata-with-cmd
   defaultbrowser
   sbcl
-  claude-code-acp
+  #claude-code-acp
   #ghostty-mac
   #calibre_mac
 ]
