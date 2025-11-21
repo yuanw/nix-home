@@ -40,6 +40,10 @@
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
+  gptel-agent = pkgs.callPackage ./emacs/gptel-agent.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
   gptel-quick = pkgs.callPackage ./emacs/gptel-quick.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
@@ -47,6 +51,10 @@
   hurl-mode = pkgs.callPackage ./emacs/hurl-mode.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+  };
+  knockknock = pkgs.callPackage ./emacs/knockknock.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub;
   };
 
   lean4-mode = pkgs.callPackage ./emacs/lean4-mode.nix {
