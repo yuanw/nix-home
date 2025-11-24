@@ -29,7 +29,6 @@ in
           sortedcontainers
           setuptools
           pylint
-          playwright
           matplotlib
           # poetry
           pytest
