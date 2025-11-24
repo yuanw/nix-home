@@ -16,7 +16,6 @@ with pkgs;
   kanata-with-cmd
   defaultbrowser
   sbcl
-  playwright
   #claude-code-acp
   #ghostty-mac
   #calibre_mac

@@ -22,6 +22,7 @@
       ./dev/julia.nix
       ./dev/kotlin.nix
       ./dev/node.nix
+      ./dev/playwright.nix
       ./dev/python.nix
       ./dev/racket.nix
       ./dev/zig.nix

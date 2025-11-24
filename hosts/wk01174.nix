@@ -92,6 +92,7 @@
       dart.enable = true;
       java.enable = true;
       go.enable = true;
+      playwright.enable = true;
       #scheme.enable = true;
       #haskell.enable = true;
       lean.enable = true;
