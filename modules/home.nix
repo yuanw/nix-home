@@ -135,12 +135,27 @@
         };
         init.defaultBranch = "main";
         pull.rebase = true;
-        rebase.autosquash = true;
+        rebase = {
+          autosquash = true;
+          autostash = true;
+          updateRefs = true;
+        };
+        rerere.enabled = true;
+        fetch = {
+          prune = true;
+          prunetags = true;
+          fsckobjects = true;
+        };
+        transfer.fsckobjects = true;
+        receive.fsckObjects = true;
         push.default = "current";
+        push.autoSetupRemote = true;
         commit.verbose = true;
         help.autocorrect = 10;
         diff.algorithm = "histogram";
         branch.autosetupmerge = true;
+        branch.sort = "-committerdate";
+        column.ui = "auto";
         diff = {
           ignoreSubmodules = "dirty";
           renames = "copies";
@@ -150,7 +165,6 @@
           conflictstyle = "zdiff3";
           stat = true;
         };
-        remote.origin.prune = true;
         alias = {
           co = "checkout";
           w = "status -sb";
@@ -158,6 +172,11 @@
             "log --graph --pretty=format:'%Cred%h%Creset"
             + " —%Cblue%d%Creset %s %Cgreen(%cr)%Creset'"
             + " --abbrev-commit --date=relative --show-notes=*";
+          amend = "commit --amend --no-edit";
+          undo = "reset HEAD~1 --mixed";
+          stash-all = "stash push --include-untracked";
+          pushf = "push --force-with-lease";
+          gone = "!git fetch -p && git for-each-ref --format '%(refname:short) %(upstream:track)' | awk '$2 == \"[gone]\" {print $1}' | xargs -r git branch -D";
         };
         user = {
           email = config.my.email;
@@ -165,7 +184,14 @@
         };
       };
       # difftastic = { enable = true; };
-      # delta = { enable = true; };
+      delta = {
+        enable = true;
+        options = {
+          navigate = true;
+          side-by-side = true;
+          line-numbers = true;
+        };
+      };
 
       signing = {
         key = config.my.gpgKey;
@@ -177,6 +203,15 @@
         ".envrc"
         ".aider.chat.history.md"
         ".aider.input.history"
+        # Editor/IDE
+        "*.swp"
+        "*.swo"
+        "*~"
+        ".idea/"
+        ".vscode/"
+        # Tags
+        "tags"
+        "TAGS"
       ];
     };
 
