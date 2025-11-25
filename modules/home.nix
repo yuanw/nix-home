@@ -3,7 +3,7 @@
   config,
   ...
 }:
-{ pkgs, ... }:
+hm@{ pkgs, ... }:
 
 {
   home.username = config.my.username;
@@ -124,6 +124,14 @@
       enableZshIntegration = true;
     };
 
+    difftastic = {
+      enable = true;
+      git = {
+        enable = true;
+        diffToolMode = true;
+      };
+    };
+
     git = {
       enable = true;
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
@@ -181,15 +189,6 @@
         user = {
           email = config.my.email;
           name = config.my.username;
-        };
-      };
-      # difftastic = { enable = true; };
-      delta = {
-        enable = true;
-        options = {
-          navigate = true;
-          side-by-side = true;
-          line-numbers = true;
         };
       };
 
@@ -255,9 +254,8 @@
     };
     zsh = {
       enable = true;
-      # seems have collision with nix.24
-      enableCompletion = false;
-      dotDir = ".config/zsh";
+      enableCompletion = true;
+      dotDir = "${hm.config.xdg.configHome}/zsh";
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         # EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
