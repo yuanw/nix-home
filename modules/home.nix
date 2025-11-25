@@ -3,7 +3,7 @@
   config,
   ...
 }:
-hm@{ pkgs, ... }:
+{ pkgs, ... }:
 
 {
   home.username = config.my.username;
@@ -218,11 +218,11 @@ hm@{ pkgs, ... }:
       enable = true;
       enableZshIntegration = true;
     };
-    zsh = rec {
+    zsh = {
       enable = true;
       # seems have collision with nix.24
       enableCompletion = false;
-      dotDir = "${hm.config.xdg.configHome}/zsh";
+      dotDir = ".config/zsh";
       sessionVariables = {
         PLANTUML_JAR_PATH = "${pkgs.plantuml}/lib/plantuml.jar";
         # EUKLEIDES_PATH = "${pkgs.eukleides}/bin/eukleides";
@@ -232,6 +232,8 @@ hm@{ pkgs, ... }:
       };
 
       autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      historySubstringSearch.enable = true;
       history = {
         size = 50000;
         save = 500000;
@@ -248,25 +250,30 @@ hm@{ pkgs, ... }:
         ];
       };
 
-      initContent =
-        if pkgs.stdenvNoCC.isDarwin then
-          lib.mkBefore ''
-            setopt HIST_NO_STORE         # Don't store history commands
-            setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.i
+      shellAliases = {
+        ".." = "cd ..";
+        "..." = "cd ../..";
+        "...." = "cd ../../..";
+        ll = "eza -la";
+        la = "eza -a";
+        lt = "eza --tree";
+        cat = "bat";
+      };
 
-          ''
-        else
-          lib.mkBefore ''
-            setopt HIST_NO_STORE         # Don't store history commands
-            setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line being added to the history.
-          '';
+      initContent = lib.mkBefore ''
+        setopt HIST_NO_STORE         # Don't store history commands
+        setopt HIST_REDUCE_BLANKS    # Remove superfluous blanks from each command line
+        setopt AUTO_CD               # cd by typing directory name
+        setopt CORRECT               # command correction suggestions
+        setopt COMPLETE_IN_WORD      # complete from cursor position
+        setopt GLOB_DOTS             # include dotfiles in globbing
+        setopt NO_BEEP               # disable beeping
+      '';
 
       oh-my-zsh = {
         enable = true;
         plugins = [
           "history"
-          "autojump"
-          "history-substring-search"
         ];
         custom = "$HOME/.config/zsh/custom";
       };
