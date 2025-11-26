@@ -23,7 +23,7 @@ buildPythonApplication rec {
     owner = "ProtonVPN";
     repo = "proton-vpn-cli";
     rev = "refs/heads/stable"; # No tags available, using stable branch
-    hash = lib.fakeHash;
+    hash = "sha256-przQVRGEqJRT+QQIyFwZqPduPeSI9ERoovJxdHx2aos=";
   };
 
   build-system = [ setuptools ];
