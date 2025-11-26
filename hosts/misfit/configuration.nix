@@ -124,6 +124,7 @@
       "switchbot_cloud"
       "tasmota"
       "template"
+      "tplink"
       "tplink_tapo"
       "utility_meter"
       "vacuum"
