@@ -48,8 +48,11 @@
 
   services.avahi = {
     enable = true;
-    # nssmdns = true;
+    #https://github.com/georgewhewell/nixos-host/blob/329266870c2b382cc8a57bd7658e3e32752dc14c/services/home-assistant/default.nix
+    # Reflect incoming mDNS requests to all allowed network interfaces.for homekit bridge
+    reflector = true;
     openFirewall = true;
+
   };
 
   networking.firewall = {
@@ -72,6 +75,7 @@
       python3Packages: with python3Packages; [
         isal
         gtts
+        aiohomekit
         getmac
         aiohttp-fast-zlib
         pychromecast
