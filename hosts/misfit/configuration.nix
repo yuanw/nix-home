@@ -52,11 +52,19 @@
     openFirewall = true;
   };
 
-  networking.firewall.allowedTCPPorts = [
-    1400
-    1900
-  ];
+  networking.firewall = {
+    # 21063 homekit bridge
+    allowedTCPPorts = [
+      21063
+      1400
+      1900
+    ];
+    allowedUDPPorts = [
+      21063
+      5353
+    ]; # 5353 is for mDNS/Bonjour discovery
 
+  };
   services.home-assistant = {
     enable = true;
     extraArgs = [ "--debug" ];
@@ -116,6 +124,7 @@
       "switchbot_cloud"
       "tasmota"
       "template"
+      "tplink_tapo"
       "utility_meter"
       "vacuum"
       "valve"

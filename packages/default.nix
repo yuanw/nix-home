@@ -103,6 +103,7 @@ _final: prev: {
   };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
+  proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };
