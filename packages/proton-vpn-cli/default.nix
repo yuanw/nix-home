@@ -11,6 +11,7 @@
   proton-vpn-local-agent,
   click,
   dbus-fast,
+  packaging,
 # For tests (optional)
 }:
 buildPythonApplication rec {
@@ -36,6 +37,7 @@ buildPythonApplication rec {
     proton-vpn-local-agent
     click
     dbus-fast
+    packaging
   ];
 
   # Disable tests for now as they may require additional setup
