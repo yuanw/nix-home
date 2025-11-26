@@ -6,6 +6,7 @@
       ./ai.nix
       ./catppuccin.nix
       ./common.nix
+      ./git-credentials.nix
       ./browsers/chromium.nix
       ./browsers/firefox.nix
       ./browsers/librewolf.nix

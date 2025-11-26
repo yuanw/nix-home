@@ -273,7 +273,13 @@
   #   }
   # ];
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
+  # Git credentials configuration
+  modules.git-credentials = {
+    enable = true;
+    helper = "oauth"; # Use OAuth for GitHub/GitLab authentication
+  };
+
+  # Define a user account. Don't forget to set a password with 'passwd'.
   users.groups.data = { };
   users.users.yuanw = {
     isNormalUser = true;

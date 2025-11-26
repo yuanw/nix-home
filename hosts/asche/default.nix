@@ -25,17 +25,19 @@
     font = "PragmataPro Liga";
     monoFont = "PragmataPro Mono Liga";
   };
+
+  # Git credentials configuration
+  modules.git-credentials = {
+    enable = true;
+    helper = "pass"; # Use pass password manager for credential storage
+    passMapping = ''
+      [github.com*]
+      target=github
+    '';
+  };
+
   home-manager.users.${config.my.username} = {
-    home.file = {
-      ".config/pass-git-helper/git-pass-mapping.ini".text = ''
-        [github.com*]
-        target=github
-      '';
-    };
     programs = {
-      password-store = {
-        enable = true;
-      };
       rofi = {
         enable = true;
         terminal = "${pkgs.alacritty}/bin/alaritty";
@@ -43,7 +45,6 @@
       };
       git.extraConfig = {
         github.user = "yuanw";
-        credential.helper = "${pkgs.pass-git-helper}/bin/pass-git-helper";
       };
     };
   };
