@@ -101,6 +101,17 @@
             })
           else
             _prev.batgrep;
+
+        # Override go-jira to use current master
+        go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
+          version = "unstable-2025-11-27";
+          src = _prev.fetchFromGitHub {
+            owner = "go-jira";
+            repo = "jira";
+            rev = "748b7d552f8b3ad993b05810b93f0f2ed39822d1";
+            hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
+          };
+        });
         #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
         # https://nixpk.gs/pr-tracker.html?pr=263500
