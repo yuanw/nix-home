@@ -82,7 +82,7 @@
   ];
 
   # required for vpn
-  networking.firewall.checkReversePath = "loose";
+  networking.firewall.checkReversePath = false;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
