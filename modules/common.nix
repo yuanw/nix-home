@@ -112,6 +112,17 @@
             hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
           };
         });
+
+        # Override jiratui to use current master
+        jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
+          version = "unstable-2025-11-27";
+          src = _prev.fetchFromGitHub {
+            owner = "whyisdifficult";
+            repo = "jiratui";
+            rev = "fc97e1d8e81c6a3fb8537eb60b176a5ad1b73392";
+            hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
+          };
+        });
         #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
         # https://nixpk.gs/pr-tracker.html?pr=263500
