@@ -59,6 +59,8 @@
     # 21063 homekit bridge
     allowedTCPPorts = [
       21064
+      21066
+      21067
       1400
       1900
     ];
