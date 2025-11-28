@@ -64,6 +64,8 @@
     ];
     allowedUDPPorts = [
       21064
+      21066
+      21067
       5353
     ]; # 5353 is for mDNS/Bonjour discovery
 
