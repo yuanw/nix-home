@@ -47,6 +47,9 @@
   # Enable the X11 windowing system.
   services.xserver.enable = true;
 
+  # Enable D-Bus (required for ProtonVPN and many other services)
+  services.dbus.enable = true;
+
   # Enable the GNOME Desktop Environment.
 
   # services.xserver.displayManager.gdm = {
