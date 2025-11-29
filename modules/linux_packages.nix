@@ -3,8 +3,8 @@
 with pkgs;
 [
   gnumake
-  proton-vpn-cli
-  #_1password-gui
+  #proton-vpn-cli
+  _1password-gui
   #protonvpn-gui
   # 'pinentry' has been removed. Pick an appropriate variant like 'pinentry-curses' or 'pinentry-gnome3'
   pinentry-gnome3
