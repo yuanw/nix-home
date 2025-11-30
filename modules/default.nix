@@ -9,6 +9,7 @@
       ./browsers/chromium.nix
       ./browsers/firefox.nix
       ./browsers/librewolf.nix
+      ./browsers/tor.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix

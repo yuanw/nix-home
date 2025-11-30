@@ -99,5 +99,6 @@
     typing.enable = true;
     wm.xmonad.enable = true;
     browsers.firefox.enable = true;
+    browsers.tor.enable = true;
   };
 }
