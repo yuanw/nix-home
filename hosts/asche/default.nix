@@ -1,8 +1,7 @@
-{
-  config,
-  inputs,
-  pkgs,
-  ...
+{ config
+, inputs
+, pkgs
+, ...
 }:
 
 {
@@ -78,6 +77,8 @@
       };
     };
   };
+  my.mullvad.enable = true;
+
   modules = {
     secrets.agenix = {
       enable = true;

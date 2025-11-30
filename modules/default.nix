@@ -38,6 +38,7 @@
     ];
 
     linux.imports = [
+      ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix
       ./wm/xmonad.nix
