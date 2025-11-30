@@ -394,6 +394,10 @@
       dates = "weekly";
       options = "--delete-older-than 10d";
     };
+    optimise = {
+      automatic = true;
+      dates = [ "weekly" ];
+    };
     extraOptions = ''
 
       experimental-features = nix-command flakes
