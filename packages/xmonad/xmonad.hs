@@ -209,7 +209,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
 myMouseBindings (XConfig {XMonad.modMask = modm}) =
   M.fromList
     -- Find cursor - draws animated circles around cursor
-    [ ((commandMask, button2), \_ -> spawn "find-cursor -s 320 -d 40 --wait 400 -c red"),
+    [ ((modm, button2), \_ -> spawn "find-cursor -s 320 -d 40 --wait 400 -c red"),
       -- mod-button1, Set the window to floating mode and move by dragging
       ( (modm, button1),
         \w ->
