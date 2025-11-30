@@ -58,12 +58,16 @@
   networking.firewall = {
     # 21063 homekit bridge
     allowedTCPPorts = [
-      21063
+      21064
+      21066
+      21067
       1400
       1900
     ];
     allowedUDPPorts = [
-      21063
+      21064
+      21066
+      21067
       5353
     ]; # 5353 is for mDNS/Bonjour discovery
 
