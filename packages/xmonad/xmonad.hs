@@ -128,6 +128,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((commandMask, xK_space), spawn appLauncher),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_l), spawn screenLocker),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_r), spawn "autorandr-load-home"),
+      -- Find cursor - draws animated circles around cursor
+      ((controlMask .|. shiftMask .|. mod1Mask, xK_c), spawn "find-cursor -s 200 -d 100 -l 4 -c '#ff79c6' -o 3"),
       ((commandMask, xK_e), spawn myEditor),
       -- close focused window
       ((modm, xK_q), kill),

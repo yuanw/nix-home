@@ -18,6 +18,7 @@ with pkgs;
   scrot
   xdotool
   xorg.xwininfo
+  find-cursor
   wifish
   mpv-unwrapped
   brightnessctl
