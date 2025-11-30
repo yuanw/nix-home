@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib;
 let
@@ -82,6 +81,12 @@ in
     #  };
 
     home-manager.users.${config.my.username} = {
+      home.pointerCursor = {
+        name = "Vanilla-DMZ-AA";
+        package = pkgs.vanilla-dmz;
+        size = 48;
+        x11.enable = true;
+      };
       home.packages = [
         xmonad-env
         (pkgs.writeShellScriptBin "autorandr-load-home" ''
@@ -151,7 +156,7 @@ in
         "Xft.antialias" = 1;
         "Xft.rgba" = "rgb";
         "Xcursor*theme" = "Vanilla-DMZ-AA";
-        "Xcursor*size" = 24;
+        "Xcursor*size" = 48;
       };
 
       gtk = {
@@ -159,6 +164,11 @@ in
         theme = {
           name = "dracula-theme";
           package = pkgs.dracula-theme;
+        };
+        cursorTheme = {
+          name = "Vanilla-DMZ-AA";
+          package = pkgs.vanilla-dmz;
+          size = 48;
         };
       };
       xsession = {
