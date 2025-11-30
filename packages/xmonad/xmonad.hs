@@ -128,8 +128,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
       ((commandMask, xK_space), spawn appLauncher),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_l), spawn screenLocker),
       ((controlMask .|. shiftMask .|. mod1Mask, xK_r), spawn "autorandr-load-home"),
-      -- Find cursor - draws animated circles around cursor
-      ((commandMask, button1), spawn "find-cursor -s 320 -d 40 --wait 400 -c red"),
       ((commandMask, xK_e), spawn myEditor),
       -- close focused window
       ((modm, xK_q), kill),
@@ -210,8 +208,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
 --
 myMouseBindings (XConfig {XMonad.modMask = modm}) =
   M.fromList
-    -- mod-button1, Set the window to floating mode and move by dragging
-    [ ( (modm, button1),
+    -- Find cursor - draws animated circles around cursor
+    [ ((commandMask, button1), \_ -> spawn "find-cursor -s 320 -d 40 --wait 400 -c red"),
+      -- mod-button1, Set the window to floating mode and move by dragging
+      ( (modm, button1),
         \w ->
           focus w
             >> mouseMoveWindow w
