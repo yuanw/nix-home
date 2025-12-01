@@ -1,8 +1,7 @@
-{
-  config,
-  inputs,
-  pkgs,
-  ...
+{ config
+, inputs
+, pkgs
+, ...
 }:
 
 {
@@ -78,6 +77,8 @@
       };
     };
   };
+  my.mullvad.enable = true;
+
   modules = {
     secrets.agenix = {
       enable = true;
@@ -98,5 +99,6 @@
     typing.enable = true;
     wm.xmonad.enable = true;
     browsers.firefox.enable = true;
+    browsers.tor.enable = true;
   };
 }

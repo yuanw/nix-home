@@ -3,7 +3,7 @@
 with pkgs;
 [
   gnumake
-  proton-vpn-cli
+  #proton-vpn-cli
   _1password-gui
   #protonvpn-gui
   # 'pinentry' has been removed. Pick an appropriate variant like 'pinentry-curses' or 'pinentry-gnome3'
@@ -18,6 +18,7 @@ with pkgs;
   scrot
   xdotool
   xorg.xwininfo
+  find-cursor
   wifish
   mpv-unwrapped
   brightnessctl

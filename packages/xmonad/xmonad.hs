@@ -84,7 +84,7 @@ commandMask = mod4Mask
 --
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
 --
-myWorkspaces = ["web", "code", "random"]
+myWorkspaces = ["web", "code", "random", "extra"]
 
 -- | Base colours to be used.
 colorBg :: String = "#282A36"
@@ -208,15 +208,17 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) =
 --
 myMouseBindings (XConfig {XMonad.modMask = modm}) =
   M.fromList
-    -- mod-button1, Set the window to floating mode and move by dragging
-    [ ( (modm, button1),
+    -- Find cursor - draws animated circles around cursor
+    [ ((modm, button2), \_ -> spawn "find-cursor -s 320 -d 40 --wait 400 -c red"),
+      -- mod-button1, Set the window to floating mode and move by dragging
+      ( (modm, button1),
         \w ->
           focus w
             >> mouseMoveWindow w
             >> windows W.shiftMaster
       ),
       -- mod-button2, Raise the window to the top of the stack
-      ((modm, button2), \w -> focus w >> windows W.shiftMaster),
+      -- ((modm, button2), \w -> focus w >> windows W.shiftMaster),
       -- mod-button3, Set the window to floating mode and resize by dragging
       ( (modm, button3),
         \w ->

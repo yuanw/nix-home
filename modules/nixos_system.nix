@@ -1,9 +1,8 @@
-{
-  inputs,
-  config,
-  lib,
-  pkgs,
-  ...
+{ inputs
+, config
+, lib
+, pkgs
+, ...
 }:
 
 with pkgs.stdenv;
@@ -47,6 +46,10 @@ with lib;
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than 10d";
+    };
+    optimise = {
+      automatic = true;
+      dates = [ "weekly" ];
     };
     settings = {
       allowed-users = [

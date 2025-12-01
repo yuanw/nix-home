@@ -24,11 +24,14 @@
   networking.hostName = "asche"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
+  # Enable NetworkManager for easier network management and VPN support
+  networking.networkmanager.enable = true;
+
   # The global useDHCP flag is deprecated, therefore explicitly set to false here.
   # Per-interface useDHCP will be mandatory in the future, so this generated config
   # replicates the default behaviour.
-  networking.useDHCP = false;
-  networking.interfaces.wlp0s20f3.useDHCP = true;
+  # networking.useDHCP = false;
+  # networking.interfaces.wlp0s20f3.useDHCP = true;
 
   # Configure network proxy if necessary
   # networking.proxy.default = "http://user:password@proxy:port/";
@@ -43,6 +46,9 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+
+  # Enable D-Bus (required for ProtonVPN and many other services)
+  services.dbus.enable = true;
 
   # Enable the GNOME Desktop Environment.
 
@@ -76,13 +82,14 @@
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
-  # environment.systemPackages = with pkgs; [
-  #   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-  #   wget
-  #   firefox
-  #   emacs
-  #   git
-  # ];
+  #environment.systemPackages = with pkgs; [
+  #  wireguard-tools
+  #  protonvpn-gui
+  #  proton-vpn-cli
+  #];
+
+  # required for vpn
+  #networking.firewall.checkReversePath = false;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.

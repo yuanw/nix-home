@@ -9,6 +9,7 @@
       ./browsers/chromium.nix
       ./browsers/firefox.nix
       ./browsers/librewolf.nix
+      ./browsers/tor.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
@@ -38,6 +39,7 @@
     ];
 
     linux.imports = [
+      ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix
       ./wm/xmonad.nix
