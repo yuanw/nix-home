@@ -111,11 +111,12 @@ in
           lock = true;
           fade = false;
           dpmsEnabled = true;
-          dpmsQuickOff = false;
+          dpmsQuickOff = true;
           timeout = "0:05:00";
-          dpmsStandby = "0:20:00";
-          dpmsSuspend = "0:30:00";
-          mode = "random";
+          dpmsStandby = "0:05:00";
+          dpmsSuspend = "0:05:00";
+          dpmsOff = "0:10:00";
+          mode = "blank";
           selected = "-1";
         };
       };
