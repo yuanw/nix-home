@@ -42,7 +42,6 @@
       };
       git.extraConfig = {
         github.user = "yuanw";
-        credential.helper = "${pkgs.pass-git-helper}/bin/pass-git-helper";
       };
     };
   };

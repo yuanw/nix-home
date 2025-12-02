@@ -107,7 +107,6 @@ git-crypt unlock to load private files if needed
 
     Scroll down on the right and choose a web browser from the “Default web browser” menu.
 
-** Disable spotlight
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
@@ -128,6 +127,14 @@ or
 
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
+
+** Prerequisites for GitHub CLI Git Credential Helper
+The Linux hosts use GitHub CLI (~gh~) as the git credential helper. To set it up:
+
+1. Authenticate with GitHub CLI:
+   ~gh auth login~
+2. Follow the prompts to authenticate via browser or token
+3. Git operations will now use your GitHub CLI credentials automatically
 * See the diff between build and current system
 ~nix store diff-closures /run/current-system ./result~
 ~nix-diff /run/current-system ./result~
