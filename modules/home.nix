@@ -1,7 +1,6 @@
-{
-  lib,
-  config,
-  ...
+{ lib
+, config
+, ...
 }:
 hm@{ pkgs, ... }:
 
@@ -189,6 +188,13 @@ hm@{ pkgs, ... }:
         user = {
           email = config.my.email;
           name = config.my.username;
+        };
+        credential = {
+          helper =
+            if pkgs.stdenvNoCC.isDarwin
+            then "osxkeychain"
+            else "!${pkgs._1password-cli}/bin/op plugin run -- gh auth git-credential";
+          useHttpPath = true;
         };
       };
 

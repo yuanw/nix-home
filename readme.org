@@ -128,6 +128,18 @@ or
 
 * Nixos
 ~$  nixos-rebuild switch --flake '.#' -user-remote-sudo~
+
+** Prerequisites for 1Password CLI Git Credential Helper
+The Linux hosts use 1Password CLI as the git credential helper. To set it up:
+
+1. Ensure 1Password desktop app is installed and running
+2. Enable CLI integration in 1Password:
+   - Open 1Password > Settings > Developer
+   - Enable "Integrate with 1Password CLI"
+3. Set up GitHub plugin:
+   - Run ~op plugin init gh~ to initialize the GitHub plugin
+   - Or manually add GitHub credentials to 1Password
+4. First git operation will prompt for authorization in the 1Password app
 * See the diff between build and current system
 ~nix store diff-closures /run/current-system ./result~
 ~nix-diff /run/current-system ./result~
