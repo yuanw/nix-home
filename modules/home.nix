@@ -193,7 +193,7 @@ hm@{ pkgs, ... }:
           helper =
             if pkgs.stdenvNoCC.isDarwin
             then "osxkeychain"
-            else "!${pkgs._1password-cli}/bin/op plugin run -- gh auth git-credential";
+            else "!${pkgs.gh}/bin/gh auth git-credential";
           useHttpPath = true;
         };
       };
