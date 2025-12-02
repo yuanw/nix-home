@@ -107,7 +107,6 @@ git-crypt unlock to load private files if needed
 
     Scroll down on the right and choose a web browser from the “Default web browser” menu.
 
-** Disable spotlight
 
 ** [[https://github.com/LnL7/nix-darwin#updating][Update]]
 
