@@ -1,6 +1,7 @@
-{ lib
-, config
-, ...
+{
+  lib,
+  config,
+  ...
 }:
 hm@{ pkgs, ... }:
 
@@ -191,9 +192,7 @@ hm@{ pkgs, ... }:
         };
         credential = {
           helper =
-            if pkgs.stdenvNoCC.isDarwin
-            then "osxkeychain"
-            else "!${pkgs.gh}/bin/gh auth git-credential";
+            if pkgs.stdenvNoCC.isDarwin then "osxkeychain" else "!${pkgs.gh}/bin/gh auth git-credential";
           useHttpPath = true;
         };
       };
