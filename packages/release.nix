@@ -52,6 +52,7 @@
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
+
   knockknock = pkgs.callPackage ./emacs/knockknock.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;

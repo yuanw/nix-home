@@ -9,12 +9,12 @@
 }:
 melpaBuild {
   pname = "knockknock";
-  version = "0-unstable-2025-11-18";
+  version = "0-unstable-2025-11-27";
   src = fetchFromGitHub {
     owner = "konrad1977";
     repo = "knockknock";
-    rev = "2df92b46af156408230a86de775dd8cfa52981dd";
-    sha256 = "sha256-EI1TG6UovaOVpN7l4DoQqyew1amc1DwTO9V4ACdOALA=";
+    rev = "025b451e7e499eeb43ea51feedda1d8b011660d8";
+    sha256 = "sha256-0wiofhTNSdgCaa7kxukapfMnQ6HBUn9kwWj8HJdaMW0=";
   };
 
   files = ''

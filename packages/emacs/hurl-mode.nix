@@ -11,16 +11,16 @@
 
 let
   pname = "hurl-mode";
-  version = "0-unstable-2025-09-08";
+  version = "0-unstable-2025-12-02";
 in
 melpaBuild {
   inherit pname version;
   src = fetchFromGitHub {
     owner = "JasZhe";
     repo = "hurl-mode";
-    rev = "0753271bb4693924d3dcfa9d66a316086d7b7b72";
+    rev = "2344f7c4b15192e01ffbff6d763beba76af47467";
     # sha256 = lib.fakeSha256;
-    sha256 = "sha256-56/XDXYG4pq3+liB9TDIISTlmN4xMGsic9jhrIacO5E=";
+    sha256 = "sha256-LNCypwmtzdBhia6FnOHi52TkhL/coKNZW8LtKqR9g64=";
   };
 
   dontConfigure = true;
