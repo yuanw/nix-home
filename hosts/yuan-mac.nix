@@ -10,7 +10,7 @@
     inputs.self.nixosModules.darwin
 
   ];
-
+  users.users.yuanw.uid = 501;
   home-manager.users.${config.my.username} = {
     programs.git = {
       extraConfig = {
