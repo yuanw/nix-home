@@ -10,7 +10,7 @@
     inputs.self.myModules.darwin
     ../modules/private/work.nix
   ];
-
+  users.users.${config.my.username}.uid = 501;
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
@@ -28,7 +28,6 @@
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username}.programs = {
-
     git = {
       settings = {
         github.user = "yuanwang-wf";
@@ -41,7 +40,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    ai.enable = true;
+    #ai.enable = true;
     secrets.agenix = {
       enable = true;
     };

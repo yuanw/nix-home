@@ -11,6 +11,7 @@
 
   ];
 
+  users.users.${config.my.username}.uid = 501;
   home-manager.users.${config.my.username} = {
     programs.git = {
       extraConfig = {
