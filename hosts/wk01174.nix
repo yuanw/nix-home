@@ -10,7 +10,7 @@
     inputs.self.myModules.darwin
     ../modules/private/work.nix
   ];
-
+  users.users.${config.my.username}.uid = 501;
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
