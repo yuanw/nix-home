@@ -28,7 +28,6 @@
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username}.programs = {
-
     git = {
       settings = {
         github.user = "yuanwang-wf";
@@ -41,7 +40,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    ai.enable = true;
+    #ai.enable = true;
     secrets.agenix = {
       enable = true;
     };
