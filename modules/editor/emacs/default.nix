@@ -124,7 +124,7 @@ with lib;
             enable = true;
             overrides = self: _super: {
               # Override go-jira to use current master
-              expand-region = _prev.expand-region.overrideAttrs (_oldAttrs: {
+              expand-region = _super.expand-region.overrideAttrs (_oldAttrs: {
                 #https://github.com/karthink/expand-region.el/blob/master/expand-region.el
                 version = "unstable-2024-01-03";
                 src = _prev.fetchFromGitHub {
