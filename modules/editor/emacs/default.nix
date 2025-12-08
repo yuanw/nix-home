@@ -127,7 +127,7 @@ with lib;
               expand-region = _super.expand-region.overrideAttrs (_oldAttrs: {
                 #https://github.com/karthink/expand-region.el/blob/master/expand-region.el
                 version = "unstable-2024-01-03";
-                src = _super.fetchFromGitHub {
+                src = pkgs.fetchFromGitHub {
                   owner = "karthink";
                   repo = "expand-region";
                   rev = "a30ac37e4d3d8ca7b4e91f5300f30e187d56a785";
