@@ -131,7 +131,7 @@ with lib;
                   owner = "karthink";
                   repo = "expand-region";
                   rev = "a30ac37e4d3d8ca7b4e91f5300f30e187d56a785";
-                  hash = lib.fakeSha256;
+                  hash = lib.fakeHash;
                 };
               });
               home-row-expreg = (
