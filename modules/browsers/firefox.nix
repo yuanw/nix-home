@@ -114,7 +114,7 @@ in
                 sidebery
                 ublock-origin
                 userchrome-toggle-extended
-                #tridactyl
+                _1password
                 vimium-c
               ];
 
