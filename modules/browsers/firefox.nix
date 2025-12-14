@@ -114,7 +114,7 @@ in
                 sidebery
                 ublock-origin
                 userchrome-toggle-extended
-
+                onepassword-password-manager
                 vimium-c
               ];
 
