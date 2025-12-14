@@ -114,8 +114,7 @@ in
                 sidebery
                 ublock-origin
                 userchrome-toggle-extended
-                1
-                password
+
                 vimium-c
               ];
 
