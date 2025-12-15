@@ -248,8 +248,9 @@ with lib;
                       ;; can specify them in `ef-themes-to-toggle' and then invoke the command
                       ;; `ef-themes-toggle'.  All the themes are included in the variable
                       ;; `ef-themes-collection'.
-                      (setq ef-themes-to-toggle '(ef-day ef-winter))
-
+                      (setq ef-themes-to-toggle '(ef-day ef-owl))
+                      (ef-themes-take-over-modus-themes-mode 1)
+                      (setq modus-themes-mixed-fonts t)
                       (setq ef-themes-headings ; read the manual's entry or the doc string
                             '((0 variable-pitch light 1.9)
                               (1 variable-pitch light 1.8)
@@ -270,7 +271,7 @@ with lib;
                       (setq org-startup-with-inline-images t)
 
                       ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-                      (ef-themes-select 'ef-dream)
+                      (modus-themes-load-theme 'ef-dream)
 
                       (eval-and-compile
                       (mapc (lambda (entry)
