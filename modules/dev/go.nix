@@ -24,7 +24,7 @@ in
         go = {
 
           enable = true;
-          env.GOPATH = [ "${config.home.homeDirectory}/go" ];
+          env.GOPATH = [ "${config.my.homeDirectory}/go" ];
           telemetry.mode = "off";
 
         };
