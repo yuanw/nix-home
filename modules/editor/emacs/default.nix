@@ -2989,7 +2989,8 @@ with lib;
                         :mode-line-width 3                ; half the default
                         :tab-width 4
                         :right-divider-width 15           ; half the default
-                        :scroll-bar-width 8))
+                        :scroll-bar-width 8
+                        :fringe-width 8))
                   '';
                   config = "(spacious-padding-mode 1)";
                 };
