@@ -9,11 +9,11 @@
 }:
 melpaBuild {
   pname = "ultra-scroll";
-  version = "0.4.2-unstable-2025-11-22";
+  version = "0.5-unstable-2025-12-16";
   src = fetchFromGitHub {
     owner = "jdtsmith";
     repo = "ultra-scroll";
-    rev = "203178269451177e07d19f1e200a726217b6b436";
-    sha256 = "sha256-zT8Uy0oqhDwC7TKJuSrF4TRDBEnDdDNWWuHC2DzH48Q=";
+    rev = "21c568b1a26e597714ad65b40f246dd6e9f71fdd";
+    sha256 = "sha256-MV0FNI+Crqlj3sxGwNcaGXGw0Z9v1MX+cJOeyZx0MhA=";
   };
 }
