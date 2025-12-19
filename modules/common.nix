@@ -81,26 +81,24 @@
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
-        gtk3 =
-          if _prev.stdenv.isDarwin then
-            inputs'.nixpkgs-stable.legacyPackages.gtk3
-          else
-            inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
-        sbcl =
-          if _prev.stdenv.isDarwin then
-            inputs'.nixpkgs-stable.legacyPackages.sbcl
-          else
-            inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
+        # gtk3 =
+        #   if _prev.stdenv.isDarwin then
+        #     inputs'.nixpkgs-stable.legacyPackages.gtk3
+        #   else
+        #     inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
+        # sbcl =
+        #   if _prev.stdenv.isDarwin then
+        #     inputs'.nixpkgs-stable.legacyPackages.sbcl
+        #   else
+        #     inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
         sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
-        batgrep =
-          if _prev.stdenv.isDarwin then
-            _prev.batgrep.overrideAttrs (_oldAttrs: {
-
-              doCheck = false;
-
-            })
-          else
-            _prev.batgrep;
+        # batgrep =
+        #   if _prev.stdenv.isDarwin then
+        #     _prev.batgrep.overrideAttrs (_oldAttrs: {
+        #       doCheck = false;
+        #     })
+        #   else
+        #     _prev.batgrep;
 
         # Override go-jira to use current master
         go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
