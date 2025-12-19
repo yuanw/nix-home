@@ -76,6 +76,8 @@ with pkgs;
   pkg-config
   protobuf
   sioyek
+
+  internetarchive
   # racket
   # open-interpreter
   # reiryoku-firmware
