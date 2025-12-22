@@ -3087,6 +3087,9 @@ with lib;
                     :defines ob-gptel-install-completions
                     :config
                     (add-to-list 'org-babel-load-languages '(gptel . t))
+                    ;; Add structure template for gptel source blocks (<g TAB)
+                    (require 'org-tempo)
+                    (add-to-list 'org-structure-template-alist '("g" . "src gptel"))
                     ;; Optional, for better completion-at-point
                     (defun ob-gptel-install-completions ()
                       (add-hook 'completion-at-point-functions
