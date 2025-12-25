@@ -4,15 +4,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  hostname,
-  inputs',
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, hostname
+, inputs'
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -124,12 +123,22 @@ with lib;
             package = emacsPatched;
             enable = true;
             overrides = self: _super: {
+              # Override go-jira to use current master
+              expand-region = _super.expand-region.overrideAttrs (_oldAttrs: {
+                #https://github.com/karthink/expand-region.el/blob/master/expand-region.el
+                version = "unstable-2024-01-03";
+                src = pkgs.fetchFromGitHub {
+                  owner = "karthink";
+                  repo = "expand-region";
+                  rev = "a30ac37e4d3d8ca7b4e91f5300f30e187d56a785";
+                  hash = lib.fakeHash;
+                };
+              });
               home-row-expreg = (
                 pkgs.callPackage "${packagePath}/expreg.nix" {
                   inherit (pkgs)
                     fetchFromGitHub
                     writeText
-
                     ;
                   inherit lib;
                   inherit (self)
@@ -694,23 +703,30 @@ with lib;
                 };
 
                 expreg = {
-                  enable = true;
+                  enable = false;
                 };
                 home-row-expreg = {
                   after = [ "expreg" ];
-                  enable = true;
+                  enable = false;
                   bind = {
                     "C-=" = "home-row-expreg-expand-with-letters";
                   };
                 };
                 # vim like
                 change-inner = {
-                  enable = true;
+                  enable = false;
                   bind = {
                     "M-i" = "change-inner";
                     "M-o" = "change-outer";
                   };
                 };
+
+                expand-region =
+                  {
+                    enable = true;
+                  };
+
+
                 ## Remember where we where in a previously visited file. Built-in package.
                 saveplace = {
                   enable = true;
@@ -1233,6 +1249,8 @@ with lib;
                     (setq-default goggles-pulse t) ;; set to nil to disable pulsing
                   '';
                 };
+
+
 
                 avy = {
                   enable = true;
