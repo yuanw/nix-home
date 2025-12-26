@@ -8,7 +8,10 @@ with pkgs;
   #bandcamp-dl
   ffmpeg
   duti
-  github-mcp-server
+  # github-mcp-server is now in nixpkgs, removed from mcp-servers-nix overlay
+  # The overlay returns an empty-file placeholder that breaks buildEnv
+  # TODO: Re-enable once overlay is updated or use pkgs.github-mcp-server directly
+  # github-mcp-server
 
   #mcp-server-fetch
   slackdump
