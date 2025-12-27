@@ -59,7 +59,7 @@ in
         "racket"
         "protonvpn"
         "vlc"
-        "mouseless@preview"
+        #"mouseless@preview"
 
       ];
       masApps = {
