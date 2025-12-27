@@ -66,5 +66,8 @@
       mkdir -p /data/Videos
       mkdir -p /data/Books
       mkdir -p /data/Music
+      mkdir -p /data/Cameras
+      mkdir -p /data/Cameras/recordings
+      mkdir -p /data/Cameras/snapshots
     '';
 }
