@@ -59,8 +59,7 @@ in
         "racket"
         "protonvpn"
         "vlc"
-        #"mouseless@preview"
-
+        "mouseless@preview"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
