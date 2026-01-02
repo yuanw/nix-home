@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib;
 let
@@ -105,7 +104,7 @@ in
       services.blueman-applet.enable = true;
       services.network-manager-applet.enable = true;
       services.dunst.enable = true;
-
+      #https://www.jwz.org/xscreensaver/man1.html
       services.xscreensaver = {
         enable = true;
         settings = {
@@ -118,7 +117,7 @@ in
           dpmsSuspend = "0:05:00";
           dpmsOff = "0:10:00";
           mode = "blank";
-          selected = "-1";
+          #selected = "-1";
         };
       };
       # services.betterlockscreen.enable = true;
@@ -147,7 +146,6 @@ in
           height = 36;
           SetDockType = true;
           tint = "0x5f5f5f";
-
         };
       };
       xresources.properties = {
@@ -180,7 +178,6 @@ in
           enable = true;
           enableContribAndExtras = true;
           config = ../../packages/xmonad/xmonad.hs;
-
         };
       };
       programs.eww = {
@@ -222,5 +219,4 @@ in
       };
     };
   };
-
 }
