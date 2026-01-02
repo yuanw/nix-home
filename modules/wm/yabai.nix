@@ -22,7 +22,7 @@ let
     if brewInstalledFirefox then
       "firefox"
     else
-      " open -n -a ~/Applications/Home\ Manager\ Apps/Firefox.app";
+      " open -n -a ~/Applications/Home\\ Manager\\ Apps/Firefox.app";
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
