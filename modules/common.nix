@@ -100,7 +100,7 @@
         #     _prev.batgrep;
         #https://github.com/NixOS/nixpkgs/pull/476210
         trayer = inputs'.nixpkgs-master.legacyPackages.trayer;
-
+        pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
         # Override go-jira to use current master
         go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
           version = "unstable-2025-11-27";
