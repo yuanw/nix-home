@@ -1,7 +1,8 @@
-{ inputs
-, inputs'
-, config
-, ...
+{
+  inputs,
+  inputs',
+  config,
+  ...
 }:
 {
   nix = {
@@ -99,9 +100,13 @@
         #   else
         #     _prev.batgrep;
         #https://github.com/NixOS/nixpkgs/pull/476210
-        trayer = inputs'.nixpkgs-master.legacyPackages.trayer;
+        trayer =
+          if !_prev.stdenv.isDarwin then inputs'.nixpkgs-master.legacyPackages.trayer else _prev.trayer;
+        pasystray =
+          if !_prev.stdenv.isDarwin then inputs'.nixpkgs-master.legacyPackages.pasystray else _prev.pasystray;
+
         #https://github.com/NixOS/nixpkgs/pull/476003/files
-        pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
+        #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
         # Override go-jira to use current master
         go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
           version = "unstable-2025-11-27";
