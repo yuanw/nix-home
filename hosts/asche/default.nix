@@ -40,7 +40,7 @@
         terminal = "${pkgs.alacritty}/bin/alaritty";
         theme = ../../modules/theme.rafi;
       };
-      git.extraConfig = {
+      git.settings = {
         github.user = "yuanw";
       };
     };
