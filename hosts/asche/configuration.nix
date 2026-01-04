@@ -46,6 +46,7 @@
 
   # Enable the X11 windowing system.
   services.xserver.enable = true;
+  services.fwupd.enable = true;
 
   # Enable D-Bus (required for ProtonVPN and many other services)
   services.dbus.enable = true;
