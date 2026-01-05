@@ -4,14 +4,13 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  hostname,
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, hostname
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -1596,6 +1595,9 @@ with lib;
                   enable = true;
                   after = [ "org" ];
                   defer = true;
+                  bind = {
+                    "C-c a" = "org-agenda";
+                  };
                   config = ''
                     ;; Set up agenda view.
                     (setq org-agenda-span 5
@@ -1604,6 +1606,26 @@ with lib;
                           org-agenda-skip-deadline-if-done t
                           org-agenda-skip-scheduled-if-done t
                           org-agenda-start-on-weekday nil)
+
+                    ;; Custom agenda views
+                    (setq org-agenda-custom-commands
+                          '(("d" "Daily agenda"
+                             ((agenda "" ((org-agenda-span 'day)
+                                          (org-agenda-overriding-header "Today's Agenda")))
+                              (todo "NEXT" ((org-agenda-overriding-header "Next Actions")))
+                              (todo "WAITING" ((org-agenda-overriding-header "Waiting On")))))
+                            ("w" "Weekly review"
+                             ((agenda "" ((org-agenda-span 'week)
+                                          (org-agenda-overriding-header "Weekly Overview")))
+                              (stuck "" ((org-agenda-overriding-header "Stuck Projects")))
+                              (todo "TODO" ((org-agenda-overriding-header "All TODOs")))))
+                            ("p" "Projects"
+                             ((tags-todo "+LEVEL=2/TODO"
+                                         ((org-agenda-overriding-header "Active Projects")))))
+                            ("n" "Next actions"
+                             ((todo "NEXT" ((org-agenda-overriding-header "All Next Actions")))))
+                            ("W" "Waiting"
+                             ((todo "WAITING" ((org-agenda-overriding-header "All Waiting Items")))))))
                   '';
                 };
                 org-habit = {
@@ -1626,8 +1648,17 @@ with lib;
                 };
                 org-extra = {
                   enable = true;
-                  after = [ "org" ];
+                  after = [ "org" "org-agenda" ];
                   demand = true;
+                  bind = {
+                    "C-c j" = "org-extra-jump-to-agenda";
+                    "C-c i" = "org-extra-goto-inbox";
+                  };
+                  bindLocal = {
+                    org-agenda-mode-map = {
+                      "SPC" = "org-extra-agenda-show";
+                    };
+                  };
                   package =
                     epkgs:
                     epkgs.trivialBuild {
