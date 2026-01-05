@@ -61,6 +61,7 @@
       ];
       brews = [
         "redis"
+        "tccutil"
         #"go"
         # Compose is a Docker plugin. For Docker to find the plugin, add "cliPluginsExtraDirs" to ~/.docker/config.json:
         # "cliPluginsExtraDirs": [
