@@ -38,6 +38,11 @@
   "Extra functions for use with Org-mode"
   :group 'org)
 
+  (defun push-window-configuration ()
+    (interactive)
+    (push (current-window-configuration) saved-window-configuration))
+
+
 (defalias 'org-extra-up-heading #'outline-up-heading)
 
 (defun org-extra-goto-inbox-heading ()
