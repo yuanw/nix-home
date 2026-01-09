@@ -38,6 +38,12 @@
   "Extra functions for use with Org-mode"
   :group 'org)
 
+;;https://github.com/mvanzorn/dot-emacs/blob/eb5de508fdd9efabb4ff470c25f8c44676993617/init.el#L41
+(defun push-window-configuration ()
+    (interactive)
+    (push (current-window-configuration) saved-window-configuration))
+
+
 (defalias 'org-extra-up-heading #'outline-up-heading)
 
 (defun org-extra-goto-inbox-heading ()

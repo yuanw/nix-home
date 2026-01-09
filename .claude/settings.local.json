@@ -1,8 +1,10 @@
 {
   "permissions": {
     "allow": [
-	"Bash(nix-instantiate:*)",
-      "Bash(nix search:*)"
+      "Bash(nix-instantiate:*)",
+      "Bash(nix search:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
