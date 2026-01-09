@@ -4,13 +4,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{ config
-, lib
-, pkgs
-, inputs
-, isDarwin
-, hostname
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  inputs,
+  isDarwin,
+  hostname,
+  ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -1648,7 +1649,10 @@ with lib;
                 };
                 org-extra = {
                   enable = true;
-                  after = [ "org" "org-agenda" ];
+                  after = [
+                    "org"
+                    "org-agenda"
+                  ];
                   demand = true;
                   bind = {
                     "C-c j" = "org-extra-jump-to-agenda";
@@ -3297,7 +3301,7 @@ with lib;
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-              claude-code
+              inputs'.nix-ai-tools.packages.claude-code
               #: js
               # nodePackages.eslint
               #: markdown
