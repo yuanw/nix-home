@@ -38,7 +38,8 @@
   "Extra functions for use with Org-mode"
   :group 'org)
 
-  (defun push-window-configuration ()
+;;https://github.com/mvanzorn/dot-emacs/blob/eb5de508fdd9efabb4ff470c25f8c44676993617/init.el#L41
+(defun push-window-configuration ()
     (interactive)
     (push (current-window-configuration) saved-window-configuration))
 
