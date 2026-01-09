@@ -9,6 +9,7 @@
   lib,
   pkgs,
   inputs,
+  inputs',
   isDarwin,
   hostname,
   ...
