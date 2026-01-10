@@ -28,7 +28,7 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [
-        inputs'.typewell
+        inputs'.typewell.packages.default
         adept
         pkgs.ttyper
       ];
