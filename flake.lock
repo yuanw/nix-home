@@ -304,6 +304,27 @@
         "type": "github"
       }
     },
+    "flake-parts_5": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "typewell",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1743550720,
+        "narHash": "sha256-hIshGgKZCgWh6AYJpJmRgFdR3WUbkY04o82X05xqQiY=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "c621e8422220273271f52058f618c94e405bb0f5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems_5"
@@ -319,6 +340,37 @@
       "original": {
         "owner": "numtide",
         "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "fourmolu-nix": {
+      "locked": {
+        "lastModified": 1707266073,
+        "narHash": "sha256-tCFzZQJicDdYjnuJiNK4hiiRAH7c2wQzMhOCdUMbVKE=",
+        "owner": "jedimahdi",
+        "repo": "fourmolu-nix",
+        "rev": "717f5a91b0d7b97b1be7ecc3a0fd42d37ffe1c9b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jedimahdi",
+        "repo": "fourmolu-nix",
+        "type": "github"
+      }
+    },
+    "git-hooks": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1747372754,
+        "narHash": "sha256-2Y53NGIX2vxfie1rOW0Qb86vjRZ7ngizoo+bnXU9D9k=",
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "rev": "80479b6ec16fefd9c1db3ea13aeb038c60530f46",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
         "type": "github"
       }
     },
@@ -387,6 +439,21 @@
         "owner": "srid",
         "repo": "haskell-flake",
         "rev": "7029034b00bd7c9225d74915a6a53e5b44b4a1d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "type": "github"
+      }
+    },
+    "haskell-flake_3": {
+      "locked": {
+        "lastModified": 1746938027,
+        "narHash": "sha256-MGvizJ6t2DyTZlI/uAyIYSompqAotUbgzHvPn3jYDYk=",
+        "owner": "srid",
+        "repo": "haskell-flake",
+        "rev": "6531204f95cc83daafb740ccfaacdf50eba117ff",
         "type": "github"
       },
       "original": {
@@ -605,6 +672,21 @@
         "type": "github"
       }
     },
+    "nixos-unified": {
+      "locked": {
+        "lastModified": 1745965553,
+        "narHash": "sha256-Dffk3pP0/ibGLtGn4yVYgFDeyE+Y29cVtFTU2JutSME=",
+        "owner": "srid",
+        "repo": "nixos-unified",
+        "rev": "66ed53ebd5580e07963f8f2fc6a6e7160af9f4d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "srid",
+        "repo": "nixos-unified",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1767116409,
@@ -699,6 +781,22 @@
       "original": {
         "owner": "nixos",
         "ref": "nixos-25.11",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_10": {
+      "locked": {
+        "lastModified": 1747467164,
+        "narHash": "sha256-JBXbjJ0t6T6BbVc9iPVquQI9XSXCGQJD8c8SgnUquus=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "3fcbdcfc707e0aa42c541b7743e05820472bdaec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -916,7 +1014,8 @@
         "nur": "nur",
         "pre-commit": "pre-commit_2",
         "shy-fox": "shy-fox",
-        "treefmt-nix": "treefmt-nix_4"
+        "treefmt-nix": "treefmt-nix_4",
+        "typewell": "typewell"
       }
     },
     "shy-fox": {
@@ -1103,6 +1202,29 @@
         "owner": "numtide",
         "repo": "treefmt-nix",
         "rev": "9e09d30a644c57257715902efbb3adc56c79cf28",
+        "type": "github"
+      }
+    },
+    "typewell": {
+      "inputs": {
+        "flake-parts": "flake-parts_5",
+        "fourmolu-nix": "fourmolu-nix",
+        "git-hooks": "git-hooks",
+        "haskell-flake": "haskell-flake_3",
+        "nixos-unified": "nixos-unified",
+        "nixpkgs": "nixpkgs_10"
+      },
+      "locked": {
+        "lastModified": 1768007966,
+        "narHash": "sha256-w4HmAMp04lbG+BPb0h+6PScDC6THknPlXhTkzESqJv4=",
+        "owner": "yuanw",
+        "repo": "typewell",
+        "rev": "493278d90b0c093dc6bb8b67da14077fc79eb8d4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yuanw",
+        "repo": "typewell",
         "type": "github"
       }
     }
