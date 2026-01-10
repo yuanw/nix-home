@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs',
   ...
 }:
 
@@ -27,7 +28,7 @@ in
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
       home.packages = [
-        # pkgs.haskellPackages.gotta-go-fast
+        inputs'.typewell
         adept
         pkgs.ttyper
       ];
