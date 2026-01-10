@@ -52,6 +52,9 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    typewell = {
+      url = "github:yuanw/typewell";
+    };
     mono-stretchly-darwin = {
       url = "github:yuanw/mono-stretchly";
     };
@@ -65,7 +68,6 @@
     };
     declarative-jellyfin = {
       url = "github:Sveske-Juice/declarative-jellyfin";
-      # optional follow:
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
