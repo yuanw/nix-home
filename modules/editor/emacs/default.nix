@@ -3113,7 +3113,7 @@ with lib;
                       ];
                     };
                   config = ''
-                    (setq gptel-model 'claude-sonnet-4-5-20250929
+                    (setq gptel-model 'claude-opus-4-5-20251101
                       gptel-backend (gptel-make-claude-oauth "Claude-OAuth" :stream t))
                   '';
                 };
