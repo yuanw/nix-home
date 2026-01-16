@@ -68,7 +68,7 @@
         "type": "github"
       }
     },
-    "claude-code-nix": {
+    "claude-code": {
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
@@ -782,22 +782,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_10": {
-      "locked": {
-        "lastModified": 1747467164,
-        "narHash": "sha256-JBXbjJ0t6T6BbVc9iPVquQI9XSXCGQJD8c8SgnUquus=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "3fcbdcfc707e0aa42c541b7743e05820472bdaec",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1766254170,
@@ -909,6 +893,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_9": {
+      "locked": {
+        "lastModified": 1747467164,
+        "narHash": "sha256-JBXbjJ0t6T6BbVc9iPVquQI9XSXCGQJD8c8SgnUquus=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "3fcbdcfc707e0aa42c541b7743e05820472bdaec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nur": {
       "inputs": {
         "flake-parts": "flake-parts_4",
@@ -977,7 +977,7 @@
         "agenix": "agenix",
         "betterfox": "betterfox",
         "catppuccin": "catppuccin",
-        "claude-code-nix": "claude-code-nix",
+        "claude-code": "claude-code",
         "declarative-jellyfin": "declarative-jellyfin",
         "disko": "disko",
         "emacs": "emacs",
@@ -995,7 +995,8 @@
         "nur": "nur",
         "pre-commit": "pre-commit_2",
         "shy-fox": "shy-fox",
-        "treefmt-nix": "treefmt-nix_3"
+        "treefmt-nix": "treefmt-nix_3",
+        "typewell": "typewell"
       }
     },
     "shy-fox": {
@@ -1171,7 +1172,7 @@
         "git-hooks": "git-hooks",
         "haskell-flake": "haskell-flake_3",
         "nixos-unified": "nixos-unified",
-        "nixpkgs": "nixpkgs_10"
+        "nixpkgs": "nixpkgs_9"
       },
       "locked": {
         "lastModified": 1768007966,
