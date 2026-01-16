@@ -79,6 +79,7 @@
       inputs.nur.overlays.default
       inputs.mcp-servers-nix.overlays.default
       inputs.agenix.overlays.default
+      inputs.claude-code.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
         # gtk3 =
