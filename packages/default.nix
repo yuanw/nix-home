@@ -101,6 +101,7 @@ _final: prev: {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
     };
   };
+  sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
