@@ -2105,7 +2105,7 @@ with lib;
                   hook = [
                     "(nix-mode . subword-mode) "
                   ];
-                  config = ''(setq nix-indent-function 'nix-indent-line) '';
+                  config = "(setq nix-indent-function 'nix-indent-line) ";
                 };
                 thrift-mode = {
                   enable = true;
