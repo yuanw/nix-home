@@ -12,7 +12,7 @@
   click,
   dbus-fast,
   packaging,
-# For tests (optional)
+  # For tests (optional)
 }:
 buildPythonApplication rec {
   pname = "proton-vpn-cli";

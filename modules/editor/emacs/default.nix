@@ -9,7 +9,6 @@
   lib,
   pkgs,
   inputs,
-  inputs',
   isDarwin,
   hostname,
   ...
@@ -2105,7 +2104,7 @@ with lib;
                   hook = [
                     "(nix-mode . subword-mode) "
                   ];
-                  config = ''(setq nix-indent-function 'nix-indent-line) '';
+                  config = "(setq nix-indent-function 'nix-indent-line) ";
                 };
                 thrift-mode = {
                   enable = true;
@@ -3302,7 +3301,7 @@ with lib;
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-              inputs'.nix-ai-tools.packages.claude-code
+              claude-code
               #: js
               # nodePackages.eslint
               #: markdown

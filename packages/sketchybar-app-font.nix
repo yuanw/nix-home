@@ -6,11 +6,11 @@
 
 stdenv.mkDerivation rec {
   pname = "sketchybar-app-font";
-  version = "1.0.9";
+  version = "2.0.51";
 
   src = fetchurl {
     url = "https://github.com/kvndrsslr/sketchybar-app-font/releases/download/v${version}/sketchybar-app-font.ttf";
-    hash = "sha256-3QEKNT026lhstJtHPsFA8f7/XXO7Bmjrth92dd9D2xw=";
+    hash = "sha256-Fp4jiSACIZskyn6T7ru21TtA4q78PLLqtWLjkOqyAq8=";
   };
 
   buildCommand = ''
