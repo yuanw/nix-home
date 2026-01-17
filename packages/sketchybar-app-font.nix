@@ -10,7 +10,7 @@ stdenv.mkDerivation rec {
 
   src = fetchurl {
     url = "https://github.com/kvndrsslr/sketchybar-app-font/releases/download/v${version}/sketchybar-app-font.ttf";
-    hash = lib.fakeHash;
+    hash = "sha256-92Z6a/X9OyvIjqtx/IZDsAfTh4Y55frDx8u9B9aNG/w=";
   };
 
   buildCommand = ''
