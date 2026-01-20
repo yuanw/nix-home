@@ -92,7 +92,7 @@ in
       python.enable = true;
       #zig.enable = false;
     };
-
+    ledger.enable = false;
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
