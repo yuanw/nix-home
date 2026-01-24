@@ -56,7 +56,7 @@ in
       casks = [
         "1password"
         "betterdisplay"
-        "gobot"
+        "godot"
         "firefox"
         "racket"
         "protonvpn"
