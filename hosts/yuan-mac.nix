@@ -34,7 +34,7 @@
   modules = {
     browsers.firefox = {
       enable = true;
-      pkg = pkgs.firefox;
+      pkg = null;
     };
     editors.emacs = {
       enable = true;
@@ -53,7 +53,7 @@
       #   "homebrew/cask"
       # ];
       casks = [
-
+        "firefox"
         "1password"
       ];
     };
