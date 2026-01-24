@@ -56,6 +56,7 @@ in
       casks = [
         "1password"
         "betterdisplay"
+        "firefox"
         "racket"
         "protonvpn"
         "vlc"
@@ -69,6 +70,7 @@ in
     };
     browsers.firefox = {
       enable = true;
+      pkg = null;
     };
     editors.emacs = {
       enable = true;
