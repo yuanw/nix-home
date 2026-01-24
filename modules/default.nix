@@ -29,7 +29,6 @@
       ./dev/zig.nix
       ./dev/scheme.nix
       ./helix.nix
-      ./hledger.nix
 
       ./terminal-multiplexer/zellij.nix
       ./terminal-multiplexer/tmux.nix
