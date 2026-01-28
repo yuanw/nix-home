@@ -416,20 +416,29 @@ with lib;
               '';
 
               postlude = ''
-                              ;; Minimising & quitting Emacs way too many times without wanting to.
-                              (keycast-header-line-mode)
+                                              ;; Minimising & quitting Emacs way too many times without wanting to.
+                                              (keycast-header-line-mode)
 
-                                            (repeat-mode 1)
+                                                            (repeat-mode 1)
 
-                	                          ;; add smerge-basic-map to repeat-map
+                                	                          ;; add smerge-basic-map to repeat-map
 
-                             (with-eval-after-load 'smerge-mode               
-                                          (map-keymap
-                              (lambda (_key cmd)
-                                (when (symbolp cmd)
-                                  (put cmd 'repeat-map 'smerge-basic-map)))
-                                  smerge-basic-map))  
+                                             (with-eval-after-load 'smerge-mode               
+                                                          (map-keymap
+                                              (lambda (_key cmd)
+                                                (when (symbolp cmd)
+                                                  (put cmd 'repeat-map 'smerge-basic-map)))
+                                                  smerge-basic-map))
 
+                                                  (defun my/copy-buffer-file-name ()
+                  "Copy the current buffer's file name to the clipboard/kill ring."
+                  (interactive)
+                  (if-let ((filename (buffer-file-name)))
+                      (progn
+                        (kill-new filename)
+                        (message "Copied: %s" filename))
+                    (message "Buffer is not visiting a file")))
+                (global-set-key (kbd "C-c f n") 'copy-buffer-file-name)
               '';
 
               usePackage = {
