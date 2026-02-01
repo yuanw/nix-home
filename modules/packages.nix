@@ -29,7 +29,6 @@ with pkgs;
   shellcheck
   entr
 
-  pre-commit
   pass-git-helper
   gh
   git-crypt

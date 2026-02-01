@@ -52,8 +52,8 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    pre-commit = {
-      url = "github:cachix/pre-commit-hooks.nix";
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     typewell = {
@@ -90,12 +90,12 @@
         ./devshell.nix
         ./hosts
         ./modules
-        inputs.pre-commit.flakeModule
+        inputs.git-hooks.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
       perSystem =
-        { system, ... }:
+        { system, pkgs, ... }:
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
@@ -117,8 +117,8 @@
           # };
 
           treefmt.imports = [ ./treefmt.nix ];
-          # https://github.com/cachix/pre-commit-hooks.nix/blame/30d1c34bdbfe3dd0b8fbdde3962180c56cf16f12/flake-module.nix
           pre-commit.settings.hooks.treefmt.enable = true;
+          pre-commit.settings.package = pkgs.prek;
 
         };
     };

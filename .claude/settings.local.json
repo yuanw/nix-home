@@ -4,7 +4,8 @@
       "Bash(nix-instantiate:*)",
       "Bash(nix search:*)",
       "Bash(cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []
