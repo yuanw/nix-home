@@ -252,6 +252,10 @@ with lib;
 
                                     ;; Make customisations that affect Emacs faces BEFORE loading a theme
                       ;; (any change needs a theme re-load to take effect).
+
+                      ;; Fix for Emacs 31: prefer .el files over potentially incompatible .elc files
+                      (setq load-prefer-newer t)
+
                       (require 'ef-themes)
 
                       ;; If you like two specific themes and want to switch between them, you
