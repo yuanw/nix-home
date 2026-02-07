@@ -280,8 +280,8 @@ with lib;
                       (mapc #'disable-theme custom-enabled-themes)
                       (setq org-startup-with-inline-images t)
 
-                      ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-                      (modus-themes-load-theme 'ef-dream)
+                      ;; Load theme directly (compatible with Emacs 31)
+                      (load-theme 'ef-dream :no-confirm)
 
                       (eval-and-compile
                       (mapc (lambda (entry)
@@ -2735,7 +2735,7 @@ with lib;
                          )
                     (defun my/select-dark-theme ()
                            (interactive)
-                     (ef-themes-select 'ef-dream))
+                     (ef-themes-select 'ef-owl))
                   '';
                   bind = {
                     "C-c t l" = "my/select-light-theme";
@@ -2763,8 +2763,8 @@ with lib;
                   # ];
                   extraConfig = ''
                     :custom
-                    (custom-safe-themes '(ef-day ef-dream ef-winter))
-                    (auto-dark-themes '((ef-dream) (ef-day)))
+                    (custom-safe-themes '(ef-day ef-owl ef-winter))
+                    (auto-dark-themes '((ef-owl) (ef-day)))
                     (auto-dark-polling-interval-seconds 5)
                     (auto-dark-allow-osascript t)
                   '';
