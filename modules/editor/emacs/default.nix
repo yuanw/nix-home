@@ -46,9 +46,9 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-git;
-      # default =
-      #   if isDarwin then pkgs'.emacs-git.override { withNativeCompilation = true; } else pkgs.emacs-git;
+      default = pkgs.emacs-git.override {
+        withNativeCompilation = true;
+      };
     };
 
     lspStyle = mkOption {
