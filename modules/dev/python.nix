@@ -33,6 +33,7 @@ in
           # poetry
           pytest
           pyflakes
+          pillow
           # pylsp-mypy
           virtualenv
           virtualenvwrapper
