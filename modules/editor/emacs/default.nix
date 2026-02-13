@@ -284,9 +284,8 @@ with lib;
                       (mapc #'disable-theme custom-enabled-themes)
                       (setq org-startup-with-inline-images t)
 
-                      ;; Load theme directly (compatible with Emacs 31)
-                      ;; Using ef-owl instead of ef-dream due to palette generation issue in Emacs 31
-                      (load-theme 'ef-owl :no-confirm)
+                      ;; Theme loading moved to init (after display initialization)
+                      ;; to avoid color-name-to-rgb issues in early-init
 
                       (eval-and-compile
                       (mapc (lambda (entry)
@@ -2741,6 +2740,10 @@ with lib;
                     (defun my/select-dark-theme ()
                            (interactive)
                      (ef-themes-select 'ef-owl))
+                  '';
+                  config = ''
+                    ;; Load theme after display initialization (fixes Emacs 31 color-name-to-rgb issue)
+                    (load-theme 'ef-owl :no-confirm)
                   '';
                   bind = {
                     "C-c t l" = "my/select-light-theme";
