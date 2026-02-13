@@ -75,7 +75,7 @@ with pkgs;
   pkg-config
   protobuf
   sioyek
-
+  poppler-utils
   internetarchive
   # racket
   # open-interpreter

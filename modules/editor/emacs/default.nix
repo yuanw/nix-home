@@ -285,7 +285,8 @@ with lib;
                       (setq org-startup-with-inline-images t)
 
                       ;; Load theme directly (compatible with Emacs 31)
-                      (load-theme 'ef-dream :no-confirm)
+                      ;; Using ef-owl instead of ef-dream due to palette generation issue in Emacs 31
+                      (load-theme 'ef-owl :no-confirm)
 
                       (eval-and-compile
                       (mapc (lambda (entry)
