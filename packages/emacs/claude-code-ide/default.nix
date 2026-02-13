@@ -14,14 +14,14 @@
 
 melpaBuild {
   pname = "claude-code-ide";
-  version = "0-unstable-2025-12-14";
+  version = "0-unstable-2026-02-02";
 
   src = fetchFromGitHub {
     owner = "manzaltu";
     repo = "claude-code-ide.el";
-    rev = "3ad91302e16615bc42d4d69de8ff1387dedac57f";
+    rev = "5f12e60c6d2d1802c8c1b7944bbdf935d5db1364";
     #sha256 = lib.fakeSha256;
-    sha256 = "sha256-2oF7RNBZKfUwU4dYAWJ78DJiNrEj2+c3ugRWMh3QbjY=";
+    sha256 = "sha256-tivRvgfI/8XBRImE3wuZ1UD0t2dNWYscv3Aa53BmHZE=";
   };
 
   packageRequires = [
