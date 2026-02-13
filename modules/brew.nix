@@ -40,7 +40,7 @@ in
     homebrew.onActivation.cleanup = "zap";
     homebrew.global.brewfile = true;
     homebrew.global.autoUpdate = true;
-    homebrew.global.lockfiles = true;
+
     # homebrew.taps = cfg.taps;
     homebrew.brews = cfg.brews;
     homebrew.casks = cfg.casks;
