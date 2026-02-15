@@ -1041,7 +1041,7 @@ with lib;
                     ;; - To enable automatic session loading during `emacs-startup-hook', or
                     ;;   `server-after-make-frame-hook' when running in daemon mode.
                     ;; - To save the session at regular intervals, and when Emacs exits.
-                    (easysession-setup))
+                    (easysession-setup)
                   '';
                 };
                 eyebrowse = {
