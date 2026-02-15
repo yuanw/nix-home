@@ -77,6 +77,7 @@ with pkgs;
   sioyek
 
   nix-prefetch-github
+  poppler-utils
   internetarchive
   # racket
   # open-interpreter

@@ -45,9 +45,9 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-git;
-      # default =
-      #   if isDarwin then pkgs'.emacs-git.override { withNativeCompilation = true; } else pkgs.emacs-git;
+      default = pkgs.emacs-git.override {
+        withNativeCompilation = true;
+      };
     };
 
     lspStyle = mkOption {
@@ -251,6 +251,10 @@ with lib;
 
                                     ;; Make customisations that affect Emacs faces BEFORE loading a theme
                       ;; (any change needs a theme re-load to take effect).
+
+                      ;; Fix for Emacs 31: prefer .el files over potentially incompatible .elc files
+                      (setq load-prefer-newer t)
+
                       (require 'ef-themes)
 
                       ;; If you like two specific themes and want to switch between them, you
@@ -279,8 +283,8 @@ with lib;
                       (mapc #'disable-theme custom-enabled-themes)
                       (setq org-startup-with-inline-images t)
 
-                      ;; OR use this to load the theme which also calls `ef-themes-post-load-hook':
-                      (modus-themes-load-theme 'ef-dream)
+                      ;; Theme loading moved to init (after display initialization)
+                      ;; to avoid color-name-to-rgb issues in early-init
 
                       (eval-and-compile
                       (mapc (lambda (entry)
@@ -2800,7 +2804,11 @@ with lib;
                          )
                     (defun my/select-dark-theme ()
                            (interactive)
-                     (ef-themes-select 'ef-dream))
+                     (ef-themes-select 'ef-owl))
+                  '';
+                  config = ''
+                    ;; Load theme after display initialization (fixes Emacs 31 color-name-to-rgb issue)
+                    (load-theme 'ef-owl :no-confirm)
                   '';
                   bind = {
                     "C-c t l" = "my/select-light-theme";
@@ -2828,8 +2836,8 @@ with lib;
                   # ];
                   extraConfig = ''
                     :custom
-                    (custom-safe-themes '(ef-day ef-dream ef-winter))
-                    (auto-dark-themes '((ef-dream) (ef-day)))
+                    (custom-safe-themes '(ef-day ef-owl ef-winter))
+                    (auto-dark-themes '((ef-owl) (ef-day)))
                     (auto-dark-polling-interval-seconds 5)
                     (auto-dark-allow-osascript t)
                   '';

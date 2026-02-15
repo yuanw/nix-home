@@ -17,6 +17,7 @@ in
       }
 
     ];
+
     modules.brew = {
       casks = [
         "mouseless@preview"

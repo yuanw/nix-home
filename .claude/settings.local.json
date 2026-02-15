@@ -5,7 +5,8 @@
       "Bash(nix search:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(emacs:*)"
     ],
     "deny": [],
     "ask": []
