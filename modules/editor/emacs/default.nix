@@ -1911,12 +1911,6 @@ with lib;
                 dslide = {
                   enable = true;
                 };
-                casual-suite = {
-                  enable = true;
-                  bind = {
-                    "C-o" = "casual-editkit-main-tmenu";
-                  };
-                };
                 easy-kill = {
                   enable = true;
                   extraConfig = ''
