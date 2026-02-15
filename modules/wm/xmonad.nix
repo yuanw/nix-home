@@ -1,8 +1,7 @@
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 with lib;
 let
@@ -90,6 +89,7 @@ in
       };
       home.packages = [
         xmonad-env
+        pkgs.libnotify
         (pkgs.writeShellScriptBin "autorandr-load-home" ''
           #
           # load autorandr home profile

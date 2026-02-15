@@ -4,15 +4,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  hostname,
-  inputs',
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, hostname
+, inputs'
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -1008,8 +1007,49 @@ with lib;
                   '';
                 };
 
-                eyebrowse = {
+                easysession = {
                   enable = true;
+                  extraConfig = ''
+                    :ensure t
+                    :demand t
+                    :custom
+                    (easysession-save-interval (* 10 60))  ; Save every 10 minutes
+
+                    ;; Save the current session when using `easysession-switch-to'
+                    (easysession-switch-to-save-session t)
+
+                    ;; Do not exclude the current session when switching sessions
+                    (easysession-switch-to-exclude-current nil)
+
+                    ;; Display the active session name in the mode-line lighter.
+                    (easysession-save-mode-lighter-show-session-name t)
+
+                    ;; Optionally, the session name can be shown in the modeline info area:
+                    ;; (easysession-mode-line-misc-info t)
+
+                    :config
+                    ;; Key mappings
+                    (global-set-key (kbd "C-c sl") #'easysession-switch-to) ; Load session
+                    (global-set-key (kbd "C-c ss") #'easysession-save) ; Save session
+                    (global-set-key (kbd "C-c sL") #'easysession-switch-to-and-restore-geometry)
+                    (global-set-key (kbd "C-c sr") #'easysession-rename)
+                    (global-set-key (kbd "C-c sR") #'easysession-reset)
+                    (global-set-key (kbd "C-c su") #'easysession-unload)
+                    (global-set-key (kbd "C-c sd") #'easysession-delete)
+
+                    ;; non-nil: Make `easysession-setup' load the session automatically.
+                    ;; (nil: session is not loaded automatically; the user can load it manually.)
+                    (setq easysession-setup-load-session t)
+
+                    ;; The `easysession-setup' function adds hooks:
+                    ;; - To enable automatic session loading during `emacs-startup-hook', or
+                    ;;   `server-after-make-frame-hook' when running in daemon mode.
+                    ;; - To save the session at regular intervals, and when Emacs exits.
+                    (easysession-setup)
+                  '';
+                };
+                eyebrowse = {
+                  enable = false;
                   custom = ''
                     (eyebrowse-keymap-prefix "�")
                     (eyebrowse-mode-line-separator " ")
@@ -1916,12 +1956,6 @@ with lib;
                 dslide = {
                   enable = true;
                 };
-                casual-suite = {
-                  enable = true;
-                  bind = {
-                    "C-o" = "casual-editkit-main-tmenu";
-                  };
-                };
                 easy-kill = {
                   enable = true;
                   extraConfig = ''
@@ -2529,6 +2563,37 @@ with lib;
                        (lambda ()
                          (interactive)
                          (message "Called a suffix")))])
+
+                    (transient-define-prefix transient-window-management ()
+                      "Window management commands."
+                      [["Split"
+                        ("s" "Split below" split-window-below)
+                        ("v" "Split right" split-window-right)]
+                       ["Delete"
+                        ("d" "Delete window" delete-window)
+                        ("D" "Delete other windows" delete-other-windows)]
+                       ["History"
+                        ("u" "Undo" winner-undo)
+                        ("r" "Redo" winner-redo)]
+                       ["Other"
+                        ("o" "Other window" other-window)
+                        ("b" "Balance windows" balance-windows)]])
+
+                    (global-set-key (kbd "C-c w") 'transient-window-management)
+                  '';
+                };
+
+                # https://github.com/xenodium/winpulse
+                winpulse = {
+                  enable = true;
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/winpulse.nix" {
+                      inherit (pkgs) fetchFromGitHub;
+                      inherit (epkgs) melpaBuild;
+                    });
+                  config = ''
+                    (winpulse-mode 1)
                   '';
                 };
 

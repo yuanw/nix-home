@@ -75,6 +75,8 @@ with pkgs;
   pkg-config
   protobuf
   sioyek
+
+  nix-prefetch-github
   poppler-utils
   internetarchive
   # racket
