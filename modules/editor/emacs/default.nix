@@ -4,15 +4,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  hostname,
-  inputs',
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, hostname
+, inputs'
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -2525,6 +2524,23 @@ with lib;
                        (lambda ()
                          (interactive)
                          (message "Called a suffix")))])
+
+                    (transient-define-prefix transient-window-management ()
+                      "Window management commands."
+                      [["Split"
+                        ("s" "Split below" split-window-below)
+                        ("v" "Split right" split-window-right)]
+                       ["Delete"
+                        ("d" "Delete window" delete-window)
+                        ("D" "Delete other windows" delete-other-windows)]
+                       ["History"
+                        ("u" "Undo" winner-undo)
+                        ("r" "Redo" winner-redo)]
+                       ["Other"
+                        ("o" "Other window" other-window)
+                        ("b" "Balance windows" balance-windows)]])
+
+                    (global-set-key (kbd "C-c w") 'transient-window-management)
                   '';
                 };
 
