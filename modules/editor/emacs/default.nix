@@ -2579,6 +2579,20 @@ with lib;
                   '';
                 };
 
+                # https://github.com/xenodium/winpulse
+                winpulse = {
+                  enable = true;
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/winpulse.nix" {
+                      inherit (pkgs) fetchFromGitHub;
+                      inherit (epkgs) melpaBuild;
+                    });
+                  config = ''
+                    (winpulse-mode 1)
+                  '';
+                };
+
                 # https://github.com/casouri/vundo
                 vundo = {
                   enable = true;
