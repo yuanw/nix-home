@@ -76,6 +76,7 @@ with pkgs;
   protobuf
   sioyek
 
+  nix-prefetch-github
   internetarchive
   # racket
   # open-interpreter
