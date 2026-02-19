@@ -1127,7 +1127,7 @@ with lib;
                 };
 
                 free-keys = {
-                  enable = false;
+                  enable = true;
                   defer = 1;
                   command = [ "free-keys" ];
                 };
@@ -2573,6 +2573,10 @@ with lib;
                        ["Delete"
                         ("d" "Delete window" delete-window)
                         ("D" "Delete other windows" delete-other-windows)]
+                        ["Size"
+                        ("l" "enlarge window" enlarge-window)
+                        ("h" "enlarge window horizontally" enlarge-window-horizontally)
+                        ("m" "minalze window horizontally" shrink-window-horizontally)]
                        ["History"
                         ("u" "Undo" winner-undo)
                         ("r" "Redo" winner-redo)]
