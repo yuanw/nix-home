@@ -1,4 +1,4 @@
-app_version: 0.4.0-preview.7
+app_version: 0.5.0-preview.1
 behavior_configs:
 - base_move_speed: 5.0
   base_wheel_speed: 16.0
@@ -30,30 +30,30 @@ grid_configs:
   grid_defn:
   - border_width: 0.0
     callback: build_cell_strings
-    keys: ZYUO; CIEA, '-=./ QLDPX KHTNS JMGBV
-    num_cells_x: 10
-    num_cells_y: 3
+    keys: CIAE HTNS
+    num_cells_x: 8
+    num_cells_y: 1
   - border_width: 1.0
     callback: build_cell_strings
-    keys: ''
-    num_cells_x: 5
-    num_cells_y: 6
+    keys: QYOU LDPZ CIAE HTNS ',.; MGFV
+    num_cells_x: 1
+    num_cells_y: 24
   - border_width: 0.0
     callback: apply_strings_and_subgrid_to_cells
     keys: ''
     num_cells_x: 2
     num_cells_y: 1
   hold_subgrid_key_for_nudge: false
-  name: position_based_16_9
+  name: position_based_columns
   nudges_per_cell: 4
   strategy: subgrid
   subgrid_dims:
   - 8
   - 3
-  subgrid_mouse_action_keys: ZYUO; CIEA, '-=. LDPX HTNS MGBV
+  subgrid_mouse_action_keys: QYOU LDPZ CIAE HTNS ',.; MGFV
 keyboard_layout:
-  id: com.apple.keylayout.Canadian
-  name: Canadian
+  id: com.apple.keylayout.US
+  name: U.S.
   vk_to_char:
     0:
     - a
@@ -332,8 +332,8 @@ keymaps:
     subgrid nudge up:
     - E
     - I
-    switch monitor left: cmd+v
-    switch monitor right: cmd+b
+    switch monitor left: cmd+a
+    switch monitor right: cmd+u
     toggle app enabled: null
     toggle continuous mode: null
     toggle continuous mode until closed: '1'
@@ -366,14 +366,79 @@ style_configs:
   - 1.0
   - 1.0
   - 0.2
-  background_rgba:
-  - 0.49
-  - 0.4
-  - 0.0
-  - 0.35
+  background_colors:
+  - - 0.75
+    - 0.19
+    - 0.18
+    - 0.25
+  bg_color_block_size: 0
+  bg_color_transforms_level_1:
+  - - hsla_add
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.1
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.18
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.25
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.45
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.45
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.25
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.18
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.1
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  bg_color_transforms_level_2:
+  - - hsla_add
+    - 0.0
+    - 0.0
+    - 0.0
+    - 0.0
+  - - hsla_add
+    - 0.02
+    - -0.15
+    - 0.2
+    - 0.0
+  char_display: all
   char_spacing_cell_width_ratio: 0.5
   char_spacing_font_size_ratio: 0.5
   char_spacing_strategy: cell_width_relative
+  colorParamInput: none
   cursor_drag_rgba:
   - 0.0
   - 0.5
@@ -443,4 +508,5 @@ style_configs:
   - 0.06
   - 1.0
   text_y_offset: 0.0
+  use_bg_color_transforms: true
   window_opacity: 1.0
