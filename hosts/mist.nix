@@ -69,6 +69,7 @@ in
       };
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
+    mouseless.enable = true;
     browsers.firefox = {
       enable = true;
       pkg = null;

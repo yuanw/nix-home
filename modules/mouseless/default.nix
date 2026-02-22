@@ -25,16 +25,15 @@ in
     };
     home-manager.users.${config.my.username} =
       hm@{
+        pkgs,
         ...
       }:
       {
-        home = {
-          file."Library/Containers/net.sonuscape.mouseless/Data/.mouseless/configs/config_base.yaml"
-
-          .source =
-            hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/mouseless/config.yaml";
-
-        };
+        home.activation.copyMouselessConfig = hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
+          configDir="$HOME/Library/Containers/net.sonuscape.mouseless/Data/.mouseless/configs"
+          ${pkgs.coreutils}/bin/mkdir -p "$configDir"
+          ${pkgs.coreutils}/bin/cp -f "${./config.yaml}" "$configDir/config.yaml"
+        '';
       };
   };
 }

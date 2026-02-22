@@ -6,8 +6,8 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-      "Bash(emacs:*)"
-      "Bash(ls:*)"
+	"Bash(emacs:*)",
+	"Bash(ls:*)",
       "Bash(emacs:*)",
       "Bash(grep:*)"
     ],
