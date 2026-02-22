@@ -1,6 +1,6 @@
-{ melpaBuild
-, fetchFromGitHub
-, # Elisp dependencies
+{
+  melpaBuild,
+  fetchFromGitHub, # Elisp dependencies
 
   # Native dependencies
   ...
