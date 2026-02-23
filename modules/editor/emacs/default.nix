@@ -3377,11 +3377,11 @@ with lib;
                 OUTPUT="$HOME/emacs-manual.epub"
                 echo "📚 Converting local Emacs manual to EPUB..."
 
-                # Find the Emacs source directory with .texi files
-                SOURCE_DIR=$(find /nix/store -type f -name "emacs.texi" -path "*/doc/emacs/*" 2>/dev/null | head -1 | xargs dirname)
+                # Use the Emacs source derivation directly (much faster than find!)
+                SOURCE_DIR="${pkgs.emacs.src}/doc/emacs"
 
-                if [ -z "$SOURCE_DIR" ]; then
-                  echo "❌ Error: Could not find emacs.texi source files"
+                if [ ! -d "$SOURCE_DIR" ]; then
+                  echo "❌ Error: Could not find emacs.texi source files at $SOURCE_DIR"
                   exit 1
                 fi
 
@@ -3420,11 +3420,11 @@ with lib;
                 OUTPUT="$HOME/elisp-manual.epub"
                 echo "📚 Converting local Elisp manual to EPUB..."
 
-                # Find the Elisp source directory with .texi files
-                SOURCE_DIR=$(find /nix/store -type f -name "elisp.texi" -path "*/doc/lispref/*" 2>/dev/null | head -1 | xargs dirname)
+                # Use the Emacs source derivation directly (much faster than find!)
+                SOURCE_DIR="${pkgs.emacs.src}/doc/lispref"
 
-                if [ -z "$SOURCE_DIR" ]; then
-                  echo "❌ Error: Could not find elisp.texi source files"
+                if [ ! -d "$SOURCE_DIR" ]; then
+                  echo "❌ Error: Could not find elisp.texi source files at $SOURCE_DIR"
                   exit 1
                 fi
 
