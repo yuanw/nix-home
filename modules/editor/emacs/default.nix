@@ -3363,6 +3363,7 @@ with lib;
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
             packages = with pkgs; [
               texinfoInteractive # For makeinfo command to convert .texi to EPUB
+              perlPackages.ArchiveZip # Required by makeinfo for EPUB generation
               (pkgs.writeShellScriptBin "app-launcher" ''
                 ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
               '')
@@ -3403,7 +3404,8 @@ with lib;
                 cd "$TMPDIR"
 
                 echo "🔄 Converting to EPUB..."
-                # Convert to EPUB
+                # Convert to EPUB with Archive::Zip available
+                export PERL5LIB="${pkgs.perlPackages.ArchiveZip}/lib/perl5/site_perl"
                 ${pkgs.texinfoInteractive}/bin/makeinfo --epub \
                   --output="$OUTPUT" \
                   emacs.texi
@@ -3446,7 +3448,8 @@ with lib;
                 cd "$TMPDIR"
 
                 echo "🔄 Converting to EPUB..."
-                # Convert to EPUB
+                # Convert to EPUB with Archive::Zip available
+                export PERL5LIB="${pkgs.perlPackages.ArchiveZip}/lib/perl5/site_perl"
                 ${pkgs.texinfoInteractive}/bin/makeinfo --epub \
                   --output="$OUTPUT" \
                   elisp.texi
