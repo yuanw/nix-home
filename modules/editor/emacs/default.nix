@@ -3445,6 +3445,8 @@ with lib;
 
                 # Copy to source directory
                 cp -r "$SOURCE_DIR"/* "$TMPDIR/"
+                # Copy docstyle.texi from emacs directory (shared file)
+                cp "${pkgs.emacs.src}/doc/emacs/docstyle.texi" "$TMPDIR/"
                 cd "$TMPDIR"
 
                 echo "🔄 Converting to EPUB..."
