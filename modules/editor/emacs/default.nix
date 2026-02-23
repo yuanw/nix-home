@@ -32,6 +32,7 @@ let
         "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
       ])
       ++ prev.patches;
+
   });
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
@@ -3361,11 +3362,97 @@ with lib;
             file.".emacs.d/snippets".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
             packages = with pkgs; [
+              texinfoInteractive # For makeinfo command to convert .texi to EPUB
               (pkgs.writeShellScriptBin "app-launcher" ''
                 ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
               '')
               (pkgs.writeShellScriptBin "org-capture" ''
                 ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
+              '')
+              (pkgs.writeShellScriptBin "emacs-manual-to-epub" ''
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                OUTPUT="$HOME/emacs-manual.epub"
+                echo "📚 Converting local Emacs manual to EPUB..."
+
+                # Find the Emacs source directory with .texi files
+                SOURCE_DIR=$(find /nix/store -type f -name "emacs.texi" -path "*/doc/emacs/*" 2>/dev/null | head -1 | xargs dirname)
+
+                if [ -z "$SOURCE_DIR" ]; then
+                  echo "❌ Error: Could not find emacs.texi source files"
+                  exit 1
+                fi
+
+                echo "Found source at: $SOURCE_DIR"
+
+                # Create temp directory
+                TMPDIR=$(mktemp -d)
+                trap "rm -rf $TMPDIR" EXIT
+
+                # Get Emacs version
+                EMACS_VERSION=$(${emacsPackage}/bin/emacs --version | head -1 | awk '{print $3}')
+
+                # Generate emacsver.texi
+                cat > "$TMPDIR/emacsver.texi" <<EOF
+                @set EMACSVER $EMACS_VERSION
+                EOF
+
+                # Copy to source directory (read-only, so we work in temp)
+                cp -r "$SOURCE_DIR"/* "$TMPDIR/"
+                cd "$TMPDIR"
+
+                echo "🔄 Converting to EPUB..."
+                # Convert to EPUB
+                ${pkgs.texinfoInteractive}/bin/makeinfo --epub \
+                  --output="$OUTPUT" \
+                  emacs.texi
+
+                echo "✅ Emacs manual saved to: $OUTPUT"
+                ls -lh "$OUTPUT"
+              '')
+              (pkgs.writeShellScriptBin "elisp-manual-to-epub" ''
+                #!/usr/bin/env bash
+                set -euo pipefail
+
+                OUTPUT="$HOME/elisp-manual.epub"
+                echo "📚 Converting local Elisp manual to EPUB..."
+
+                # Find the Elisp source directory with .texi files
+                SOURCE_DIR=$(find /nix/store -type f -name "elisp.texi" -path "*/doc/lispref/*" 2>/dev/null | head -1 | xargs dirname)
+
+                if [ -z "$SOURCE_DIR" ]; then
+                  echo "❌ Error: Could not find elisp.texi source files"
+                  exit 1
+                fi
+
+                echo "Found source at: $SOURCE_DIR"
+
+                # Create temp directory
+                TMPDIR=$(mktemp -d)
+                trap "rm -rf $TMPDIR" EXIT
+
+                # Get Emacs version
+                EMACS_VERSION=$(${emacsPackage}/bin/emacs --version | head -1 | awk '{print $3}')
+
+                # Generate emacsver.texi (elisp manual also uses this)
+                cat > "$TMPDIR/emacsver.texi" <<EOF
+                @set EMACSVER $EMACS_VERSION
+                @set YEAR $(date +%Y)
+                EOF
+
+                # Copy to source directory
+                cp -r "$SOURCE_DIR"/* "$TMPDIR/"
+                cd "$TMPDIR"
+
+                echo "🔄 Converting to EPUB..."
+                # Convert to EPUB
+                ${pkgs.texinfoInteractive}/bin/makeinfo --epub \
+                  --output="$OUTPUT" \
+                  elisp.texi
+
+                echo "✅ Elisp manual saved to: $OUTPUT"
+                ls -lh "$OUTPUT"
               '')
               # git
               (ripgrep.override { withPCRE2 = true; })
