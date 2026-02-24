@@ -4,15 +4,14 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  inputs,
-  isDarwin,
-  hostname,
-  inputs',
-  ...
+{ config
+, lib
+, pkgs
+, inputs
+, isDarwin
+, hostname
+, inputs'
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -3378,7 +3377,7 @@ with lib;
                 echo "📚 Converting local Emacs manual to EPUB..."
 
                 # Use the Emacs source derivation directly (much faster than find!)
-                SOURCE_DIR="${pkgs.emacs.src}/doc/emacs"
+                SOURCE_DIR="${pkgs.emacs-git.src}/doc/emacs"
 
                 if [ ! -d "$SOURCE_DIR" ]; then
                   echo "❌ Error: Could not find emacs.texi source files at $SOURCE_DIR"
@@ -3421,7 +3420,7 @@ with lib;
                 echo "📚 Converting local Elisp manual to EPUB..."
 
                 # Use the Emacs source derivation directly (much faster than find!)
-                SOURCE_DIR="${pkgs.emacs.src}/doc/lispref"
+                SOURCE_DIR="${pkgs.emacs-git.src}/doc/lispref"
 
                 if [ ! -d "$SOURCE_DIR" ]; then
                   echo "❌ Error: Could not find elisp.texi source files at $SOURCE_DIR"
