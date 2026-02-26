@@ -453,6 +453,13 @@ with lib;
                     (global-disable-mouse-mode)
                   '';
                 };
+                guru-mode = {
+                  enable = true;
+                  config = ''
+                    (setq guru-warn-only t)
+                    (guru-global-mode +1)
+                  '';
+                };
                 gcmh = {
                   enable = true;
                   defer = 1;
