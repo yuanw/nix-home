@@ -4,7 +4,7 @@ with pkgs;
 [
   # alerter
   pinentry_mac
-  yt-dlp
+  #yt-dlp
   #bandcamp-dl
   ffmpeg
   duti
