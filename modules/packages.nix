@@ -79,7 +79,7 @@ with pkgs;
   nix-prefetch-github
   poppler-utils
   internetarchive
-  yt-dlp-light
+  yt-dlp
   # racket
   # open-interpreter
   # reiryoku-firmware
