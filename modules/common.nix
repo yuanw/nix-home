@@ -100,6 +100,8 @@
         #   else
         #     _prev.batgrep;
         #https://github.com/NixOS/nixpkgs/pull/476210
+        yt-dlp-light =
+          if !_prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.trayer else _prev.trayer;
         trayer =
           if !_prev.stdenv.isDarwin then inputs'.nixpkgs-master.legacyPackages.trayer else _prev.trayer;
         pasystray =
