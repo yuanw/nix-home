@@ -7,6 +7,8 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
+    direnv-instant.url = "github:Mic92/direnv-instant";
+
     claude-code.url = "github:sadjow/claude-code-nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
