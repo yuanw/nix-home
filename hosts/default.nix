@@ -60,6 +60,8 @@
                 sharedModules = [
                   inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
+                  inputs.direnv-instant.homeModules.direnv-instant
+                  inputs.mics-skills.homeManagerModules.default
                 ];
                 # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
@@ -131,6 +133,7 @@
                       inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
                       inputs.direnv-instant.homeModules.direnv-instant
+                      inputs.mics-skills.homeManagerModules.default
                     ];
 
                     backupFileExtension = "hm-bak";

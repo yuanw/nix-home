@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  inputs,
   ...
 }:
 hm@{ pkgs, ... }:
@@ -40,6 +41,16 @@ hm@{ pkgs, ... }:
       ];
     };
     direnv-instant.enable = true;
+    mics-skills = {
+      enable = true;
+      package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
+      skillsSrc = inputs.mics-skills;
+      skills = [
+        "kagi-search"
+        "pexpect-cli"
+        "screenshot-cli"
+      ];
+    };
     dircolors = {
       enable = true;
       enableZshIntegration = true;
