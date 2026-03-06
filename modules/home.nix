@@ -39,6 +39,7 @@ hm@{ pkgs, ... }:
         batwatch
       ];
     };
+    direnv-instant.enable = true;
     dircolors = {
       enable = true;
       enableZshIntegration = true;

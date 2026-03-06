@@ -130,6 +130,7 @@
                     sharedModules = [
                       inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
+                      inputs.direnv-instant.homeModules.direnv-instant
                     ];
 
                     backupFileExtension = "hm-bak";
