@@ -1560,7 +1560,7 @@ with lib;
                 };
 
                 projectile = {
-                  enable = true;
+                  enable = false;
                   hook = [ "(after-init . projectile-mode)" ];
 
                   bindKeyMap = {
