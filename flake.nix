@@ -9,6 +9,8 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
+    mics-skills.url = "github:Mic92/mics-skills";
+
     claude-code.url = "github:sadjow/claude-code-nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
