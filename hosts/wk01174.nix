@@ -49,7 +49,6 @@
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
-        "docker-desktop"
         "karabiner-elements"
         "mouseless@preview"
         "slack"
@@ -63,12 +62,6 @@
         "redis"
         "tccutil"
         #"go"
-        # Compose is a Docker plugin. For Docker to find the plugin, add "cliPluginsExtraDirs" to ~/.docker/config.json:
-        # "cliPluginsExtraDirs": [
-        #  "$HOMEBREW_PREFIX/lib/docker/cli-plugins"
-        # ]
-        # ln -sfn $HOMEBREW_PREFIX/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
-        #"docker-compose"
       ];
     };
     browsers.firefox = {
