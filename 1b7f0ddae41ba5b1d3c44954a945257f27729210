@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "1b7f0ddae41ba5b1d3c44954a945257f27729210",
+  "prompts": {
+    "3741679019ddf1ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1051e4df-4b77-4cde-ba20-6cae400f3d82",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "yuanw <me@yuanwang.ca>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
