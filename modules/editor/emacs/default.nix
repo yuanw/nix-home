@@ -2104,6 +2104,18 @@ with lib;
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
                   '';
                 };
+
+                magit-ai = {
+                  enable = true;
+                  after = [ "magit" ];
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/magit-ai.nix" {
+                      inherit (pkgs) fetchFromGitHub;
+                      inherit (epkgs) melpaBuild magit;
+                    });
+                };
+
                 flycheck = {
                   enable = true;
                   config = ''
