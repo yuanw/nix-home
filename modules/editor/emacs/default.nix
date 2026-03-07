@@ -1555,35 +1555,24 @@ with lib;
                             (?k "Kill buffers" project-kill-buffers)
                             (?! "Shell command" project-shell-command)
                             (?e "Eshell" project-eshell)))
+
+                    (defun my/project-remember-workspace-projects ()
+                      "Scan workspace directories and remember all projects found."
+                      (project-remember-projects-under "${config.my.homeDirectory}/org/" nil)
+                      (project-remember-projects-under "${config.my.homeDirectory}/${config.my.workspaceDirectory}/" t)
+                      (project-forget-zombie-projects))
+
+                    (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
                   '';
                   after = [ "magit" ];
                 };
 
-                projectile = {
+                consult-project-extra = {
                   enable = true;
-                  hook = [ "(after-init . projectile-mode)" ];
-
-                  bindKeyMap = {
-                    "C-c p" = "projectile-command-map";
-                    "C-x p" = "projectile-command-map";
+                  bind = {
+                    "C-c p f" = "consult-project-extra-find";
+                    "C-c p o" = "consult-project-extra-find-other-window";
                   };
-                  custom = ''
-                    (projectile-cache-file  (locate-user-emacs-file "projectile.cache"))
-                    (projectile-enable-caching t)
-                    (projectile-project-search-path '( "${config.my.homeDirectory}/org/"
-                    ("${config.my.homeDirectory}/${config.my.workspaceDirectory}/" . 1 )
-                    ))
-                    (projectile-cleanup-known-projects t)
-                    (projectile-create-missing-test-files t)
-                    (projectile-file-exists-local-cache-expire 300)
-                    (projectile-project-search-path '("${config.my.homeDirectory}/${config.my.workspaceDirectory}"))
-                    (projectile-remember-projects-between-sessions t)
-                    (projectile-auto-discover t)
-                  '';
-                };
-
-                consult-projectile = {
-                  enable = true;
                 };
 
                 ace-window = {
@@ -3484,7 +3473,7 @@ with lib;
               cmake
               enchant
               ## Optional dependencies
-              fd # faster projectile indexing
+              fd # faster file finding for project.el
               imagemagick # for image-dired
               zstd
               html-tidy
