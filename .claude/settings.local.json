@@ -6,10 +6,12 @@
       "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
-	"Bash(emacs:*)",
-	"Bash(ls:*)",
       "Bash(emacs:*)",
-      "Bash(grep:*)"
+      "Bash(ls:*)",
+      "Bash(emacs:*)",
+      "Bash(grep:*)",
+      "Bash(nix log:*)",
+      "Bash(nix build:*)"
     ],
     "deny": [],
     "ask": []
