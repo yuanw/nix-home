@@ -1,5 +1,9 @@
 host := `hostname -s`
 
+# list all commands
+default:
+    @just --list
+
 # build os
 build:
     @nix build ".#$(hostname | tr '[:upper:]' '[:lower:]')"
@@ -28,6 +32,14 @@ nix-update:
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
   
   
+
+# apply nix configuration (works on both macOS and NixOS)
+switch:
+    @if [ "$(uname)" = "Darwin" ]; then \
+        sudo ./result/sw/bin/darwin-rebuild switch --flake .; \
+    else \
+        nixos-rebuild switch --flake '.#' --use-remote-sudo; \
+    fi
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
