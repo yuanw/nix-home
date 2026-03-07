@@ -1,9 +1,9 @@
-{
-  inputs,
-  config,
-  lib,
-  pkgs,
-  ...
+{ inputs
+, config
+, lib
+, pkgs
+, inputs'
+, ...
 }:
 
 with pkgs.stdenv;
@@ -102,6 +102,7 @@ with lib;
       pkgs
       lib
       config
+      inputs'
       ;
   };
 
