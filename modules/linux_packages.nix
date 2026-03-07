@@ -18,7 +18,7 @@ with pkgs;
   pavucontrol
   scrot
   xdotool
-  xorg.xwininfo
+  xwininfo
   find-cursor
   wifish
   mpv-unwrapped
