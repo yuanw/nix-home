@@ -1,8 +1,9 @@
-{ lib
-, config
-, inputs'
-, inputs
-, ...
+{
+  lib,
+  config,
+  inputs',
+  inputs,
+  ...
 }:
 hm@{ pkgs, ... }:
 
@@ -151,7 +152,7 @@ hm@{ pkgs, ... }:
     git = {
       enable = true;
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
-      package = inputs.git-ai.packages.${pkgs.system}.default;
+      package = inputs'.git-ai.packages.default;
 
       settings = {
         core = {
