@@ -1,8 +1,9 @@
-{ inputs
-, config
-, lib
-, pkgs
-, inputs'
+{
+  inputs,
+  config,
+  lib,
+  pkgs,
+  inputs',
   ...
 }:
 
