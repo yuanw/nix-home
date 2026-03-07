@@ -1,0 +1,25 @@
+packages/emacs/magit-ai.nix
+  3741679019ddf1ad 1-21
+modules/editor/emacs/default.nix
+  3741679019ddf1ad 2099-2110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "30ae396602d839683ce912081dce709b2272fb4b",
+  "prompts": {
+    "3741679019ddf1ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1051e4df-4b77-4cde-ba20-6cae400f3d82",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "yuanw <me@yuanwang.ca>",
+      "messages": [],
+      "total_additions": 35,
+      "total_deletions": 0,
+      "accepted_lines": 33,
+      "overriden_lines": 0
+    }
+  }
+}
