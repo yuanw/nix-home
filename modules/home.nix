@@ -1,8 +1,8 @@
-{
-  lib,
-  config,
-  inputs,
-  ...
+{ lib
+, config
+, inputs'
+, inputs
+, ...
 }:
 hm@{ pkgs, ... }:
 
@@ -143,11 +143,15 @@ hm@{ pkgs, ... }:
         diffToolMode = true;
       };
     };
+    git-ai = {
+      enable = true;
+      installHook = true;
+    };
 
     git = {
       enable = true;
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
-      # package = pkgs.stable.git;
+      package = inputs'.git-ai.package.default;
 
       settings = {
         core = {
