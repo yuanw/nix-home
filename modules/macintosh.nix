@@ -3,6 +3,7 @@
   config,
   lib,
   pkgs,
+  inputs',
   ...
 }:
 
@@ -112,6 +113,7 @@ in
       pkgs
       lib
       config
+      inputs'
       ;
   };
 
