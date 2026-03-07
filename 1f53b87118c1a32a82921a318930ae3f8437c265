@@ -1,0 +1,23 @@
+justfile
+  8a0702a248fdca21 3-6,36-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "1f53b87118c1a32a82921a318930ae3f8437c265",
+  "prompts": {
+    "8a0702a248fdca21": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5041de6-98af-49d3-a975-83a5509a2fb5",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "yuanw <me@yuanwang.ca>",
+      "messages": [],
+      "total_additions": 13,
+      "total_deletions": 1,
+      "accepted_lines": 12,
+      "overriden_lines": 0
+    }
+  }
+}
