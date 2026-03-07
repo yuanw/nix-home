@@ -145,13 +145,13 @@ hm@{ pkgs, ... }:
     };
     git-ai = {
       enable = true;
-      installHook = true;
+      installHooks = true;
     };
 
     git = {
       enable = true;
       # https://jvns.ca/blog/2024/02/16/popular-git-config-options/
-      package = inputs'.git-ai.package.default;
+      package = inputs.git-ai.packages.${pkgs.system}.default;
 
       settings = {
         core = {
