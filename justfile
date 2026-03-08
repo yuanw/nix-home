@@ -6,7 +6,7 @@ default:
 
 # build os
 build:
-    @nix build ".#$(hostname | tr '[:upper:]' '[:lower:]')"
+    @nix build ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
