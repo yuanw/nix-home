@@ -2121,6 +2121,13 @@ with lib;
                       inherit (pkgs) fetchFromGitHub;
                       inherit (epkgs) melpaBuild magit;
                     });
+                  config = ''
+                    (require 'magit-ai-sections)
+                    (require 'magit-ai-blame)
+                    (require 'magit-ai-diff)
+                    (require 'magit-ai-log)
+                    (add-hook 'magit-status-sections-hook #'magit-insert-ai-stats t)
+                  '';
                 };
 
                 flycheck = {
