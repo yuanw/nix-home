@@ -3250,6 +3250,9 @@ with lib;
                           (agent-shell-anthropic-make-authentication
                            :oauth (lambda () (gptel-claude-oauth--get-token))))
                   '';
+                  extraPackages = [
+                    claude-code-acp
+                  ];
                 };
 
                 ob-gptel = {
