@@ -1,0 +1,27 @@
+packages/default.nix
+  34fb0f45cc5810de 34
+justfile
+  34fb0f45cc5810de 9
+modules/common.nix
+  34fb0f45cc5810de 103
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "55414bf16a5607748ff568dedd0bc006d557b110",
+  "prompts": {
+    "34fb0f45cc5810de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c8b5391f-e6f8-41c1-bff9-a33a0adaceea",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "yuanw <me@yuanwang.ca>",
+      "messages": [],
+      "total_additions": 4,
+      "total_deletions": 4,
+      "accepted_lines": 3,
+      "overriden_lines": 0
+    }
+  }
+}
