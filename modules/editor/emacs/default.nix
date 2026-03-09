@@ -3257,6 +3257,8 @@ with lib;
                     (setq agent-shell-anthropic-authentication
                           (agent-shell-anthropic-make-authentication
                            :oauth (lambda () (gptel-claude-oauth--get-token))))
+                    (setq agent-shell-anthropic-claude-acp-command
+                          '("${pkgs.claude-code-acp}/bin/claude-code-acp"))
                   '';
                   extraPackages = [
                     pkgs.claude-code-acp
