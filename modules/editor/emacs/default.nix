@@ -3251,7 +3251,7 @@ with lib;
                            :oauth (lambda () (gptel-claude-oauth--get-token))))
                   '';
                   extraPackages = [
-                    claude-code-acp
+                    pkgs.claude-code-acp
                   ];
                 };
 
