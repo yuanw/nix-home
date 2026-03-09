@@ -163,6 +163,13 @@ with lib;
                     ;
                 }
               );
+              shell-maker = (
+                pkgs.callPackage "${packagePath}/shell-maker.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild;
+                }
+              );
               agent-shell = (
                 pkgs.callPackage "${packagePath}/agent-shell.nix" {
                   inherit (pkgs) fetchFromGitHub writeText;
@@ -2090,6 +2097,7 @@ with lib;
 
                 # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
                 magit = {
+                  after = [ "project" ];
                   enable = true;
                   bind = {
                     "C-x g" = "magit-status";
