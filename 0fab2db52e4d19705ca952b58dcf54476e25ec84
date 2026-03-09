@@ -1,0 +1,23 @@
+packages/emacs/agent-shell.nix
+  e84defead46191c7 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.9",
+  "base_commit_sha": "0fab2db52e4d19705ca952b58dcf54476e25ec84",
+  "prompts": {
+    "e84defead46191c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b64b2be6-b6bf-40ae-bf0e-c3f7b13daa40",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "yuanw <me@yuanwang.ca>",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 1,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
