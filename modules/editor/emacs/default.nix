@@ -163,6 +163,13 @@ with lib;
                     ;
                 }
               );
+              agent-shell = (
+                pkgs.callPackage "${packagePath}/agent-shell.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild shell-maker;
+                }
+              );
             };
             init = {
               enable = true;
@@ -3236,6 +3243,17 @@ with lib;
                   config = ''
                     (setq gptel-model 'claude-opus-4-5-20251101
                       gptel-backend (gptel-make-claude-oauth "Claude-OAuth" :stream t))
+                  '';
+                };
+
+                agent-shell = {
+                  enable = true;
+                  after = [ "gptel-claude-oauth" ];
+                  package = epkgs: epkgs.agent-shell;
+                  config = ''
+                    (setq agent-shell-anthropic-authentication
+                          (agent-shell-anthropic-make-authentication
+                           :oauth (lambda () (gptel-claude-oauth--get-token))))
                   '';
                 };
 
