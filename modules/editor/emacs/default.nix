@@ -167,7 +167,7 @@ with lib;
                 pkgs.callPackage "${packagePath}/agent-shell.nix" {
                   inherit (pkgs) fetchFromGitHub writeText;
                   inherit lib;
-                  inherit (self) melpaBuild shell-maker;
+                  inherit (self) melpaBuild shell-maker acp;
                 }
               );
             };

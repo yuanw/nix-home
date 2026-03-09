@@ -4,6 +4,7 @@
   writeText,
   lib,
   shell-maker,
+  acp,
   ...
 }:
 
@@ -18,7 +19,10 @@ melpaBuild {
     sha256 = "sha256-CLYnHntVTu+pw8n1/ZyCruVNlwV6XxcovGJXEaBBPwY=";
   };
 
-  packageRequires = [ shell-maker ];
+  packageRequires = [
+    shell-maker
+    acp
+  ];
 
   recipe = writeText "recipe" ''
     (agent-shell
