@@ -39,8 +39,6 @@ let
 in
 with lib;
 {
-  imports = [ ./ai.nix ];
-
   options.modules.editors.emacs = {
     enable = mkOption {
       type = types.bool;
@@ -2117,6 +2115,20 @@ with lib;
                       (interactive)
                       (magit-status-setup-buffer (project-root (project-current t))))
                     (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t)
+                  '';
+                };
+
+                magit-ai = {
+                  enable = config.modules.ai.enableGitAI;
+                  after = [ "magit" ];
+                  package =
+                    epkgs:
+                    (pkgs.callPackage "${packagePath}/magit-ai.nix" {
+                      inherit (pkgs) fetchFromGitHub;
+                      inherit (epkgs) melpaBuild magit;
+                    });
+                  config = ''
+                    (magit-ai-mode 1)
                   '';
                 };
 
