@@ -1547,18 +1547,12 @@ with lib;
                 project = {
                   enable = true;
                   config = ''
-                    (defun project-magit-status ()
-                      "Run magit-status in the current project's root."
-                      (interactive)
-                      (magit-status-setup-buffer (project-root (project-current t))))
-
                     (setq project-switch-commands
                      '((?f "Find file" project-find-file)
-                            (?g "Find regexp" project-find-regexp)
+                            (?r "Find regexp" project-find-regexp)
                             (?d "Dired" project-dired)
                             (?b "Buffer" project-switch-to-buffer)
                             (?q "Query replace" project-query-replace-regexp)
-                            (?v "magit" project-magit-status)
                             (?k "Kill buffers" project-kill-buffers)
                             (?! "Shell command" project-shell-command)
                             (?e "Eshell" project-eshell)))
@@ -1571,7 +1565,6 @@ with lib;
 
                     (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
                   '';
-                  after = [ "magit" ];
                 };
 
                 consult-project-extra = {
@@ -2116,6 +2109,12 @@ with lib;
                     (setq magit-display-buffer-function
                      #'magit-display-buffer-fullframe-status-v1)
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
+
+                    (defun project-magit-status ()
+                      "Run magit-status in the current project's root."
+                      (interactive)
+                      (magit-status-setup-buffer (project-root (project-current t))))
+                    (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t)
                   '';
                 };
 
