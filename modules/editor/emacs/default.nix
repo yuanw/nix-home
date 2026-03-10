@@ -11,7 +11,6 @@
   inputs,
   isDarwin,
   hostname,
-  inputs',
   ...
 }:
 let
@@ -3540,7 +3539,6 @@ with lib;
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-              inputs'.claude-code.packages.claude-code
               #: js
               # nodePackages.eslint
               #: markdown
