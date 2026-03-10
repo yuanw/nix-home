@@ -226,6 +226,7 @@ hm@{ pkgs, ... }:
         # Tags
         "tags"
         "TAGS"
+        ".claude"
       ];
     };
 
