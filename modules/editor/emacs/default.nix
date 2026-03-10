@@ -163,6 +163,20 @@ with lib;
                     ;
                 }
               );
+              shell-maker = (
+                pkgs.callPackage "${packagePath}/shell-maker.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild;
+                }
+              );
+              agent-shell = (
+                pkgs.callPackage "${packagePath}/agent-shell.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild shell-maker acp;
+                }
+              );
             };
             init = {
               enable = true;
@@ -1540,18 +1554,12 @@ with lib;
                 project = {
                   enable = true;
                   config = ''
-                    (defun project-magit-status ()
-                      "Run magit-status in the current project's root."
-                      (interactive)
-                      (magit-status-setup-buffer (project-root (project-current t))))
-
                     (setq project-switch-commands
                      '((?f "Find file" project-find-file)
-                            (?g "Find regexp" project-find-regexp)
+                            (?r "Find regexp" project-find-regexp)
                             (?d "Dired" project-dired)
                             (?b "Buffer" project-switch-to-buffer)
                             (?q "Query replace" project-query-replace-regexp)
-                            (?v "magit" project-magit-status)
                             (?k "Kill buffers" project-kill-buffers)
                             (?! "Shell command" project-shell-command)
                             (?e "Eshell" project-eshell)))
@@ -1564,7 +1572,6 @@ with lib;
 
                     (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
                   '';
-                  after = [ "magit" ];
                 };
 
                 consult-project-extra = {
@@ -2090,6 +2097,7 @@ with lib;
 
                 # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
                 magit = {
+                  after = [ "project" ];
                   enable = true;
                   bind = {
                     "C-x g" = "magit-status";
@@ -2109,11 +2117,17 @@ with lib;
                     (setq magit-display-buffer-function
                      #'magit-display-buffer-fullframe-status-v1)
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
+
+                    (defun project-magit-status ()
+                      "Run magit-status in the current project's root."
+                      (interactive)
+                      (magit-status-setup-buffer (project-root (project-current t))))
+                    (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t)
                   '';
                 };
 
                 magit-ai = {
-                  enable = true;
+                  enable = config.modules.ai.enableGitAI;
                   after = [ "magit" ];
                   package =
                     epkgs:
@@ -2122,11 +2136,7 @@ with lib;
                       inherit (epkgs) melpaBuild magit;
                     });
                   config = ''
-                    (require 'magit-ai-sections)
-                    (require 'magit-ai-blame)
-                    (require 'magit-ai-diff)
-                    (require 'magit-ai-log)
-                    (add-hook 'magit-status-sections-hook #'magit-insert-ai-stats t)
+                    (magit-ai-mode 1)
                   '';
                 };
 
@@ -3237,6 +3247,22 @@ with lib;
                     (setq gptel-model 'claude-opus-4-5-20251101
                       gptel-backend (gptel-make-claude-oauth "Claude-OAuth" :stream t))
                   '';
+                };
+
+                agent-shell = {
+                  enable = true;
+                  after = [ "gptel-claude-oauth" ];
+                  package = epkgs: epkgs.agent-shell;
+                  config = ''
+                    (setq agent-shell-anthropic-authentication
+                          (agent-shell-anthropic-make-authentication
+                           :oauth (lambda () (gptel-claude-oauth--get-token))))
+                    (setq agent-shell-anthropic-claude-acp-command
+                          '("${pkgs.claude-code-acp}/bin/claude-code-acp"))
+                  '';
+                  extraPackages = [
+                    pkgs.claude-code-acp
+                  ];
                 };
 
                 ob-gptel = {

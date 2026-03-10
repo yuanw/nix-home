@@ -2,7 +2,7 @@
   pkgs ? import <nixpkgs> { },
   ...
 }:
-{
+rec {
   sketchybar-cpu-helper = pkgs.callPackage ./sketchybar-cpu-helper { };
   bandcamp-dl = pkgs.python3Packages.callPackage ./bandcamp { };
   choose-mac = pkgs.callPackage ./choose-mac.nix { };
@@ -86,6 +86,23 @@
   home-row-expreg = pkgs.callPackage ./emacs/expreg.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  shell-maker = pkgs.callPackage ./emacs/shell-maker.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  agent-shell = pkgs.callPackage ./emacs/agent-shell.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit shell-maker;
+    acp = pkgs.emacsPackages.acp;
+  };
+
+  magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub;
   };
 
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };

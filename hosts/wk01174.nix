@@ -86,6 +86,7 @@
       java.enable = true;
       go.enable = true;
       playwright.enable = true;
+      podman.enable = true;
       #scheme.enable = true;
       #haskell.enable = true;
       lean.enable = true;

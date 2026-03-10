@@ -17,6 +17,7 @@
       ./dev/haxe.nix
       ./dev/idris2.nix
       ./dev/go.nix
+      ./dev/podman.nix
 
       ./dev/lean.nix
       ./dev/java.nix

@@ -17,9 +17,7 @@ update INPUT:
 # update ad-hoc packages upstream references 
 nix-update:
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
-  
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
-
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-agent --src-only --version=branch
@@ -30,6 +28,9 @@ nix-update:
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
+    @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch
+    @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
+    @nix-update -f ./packages/release.nix magit-ai --src-only --version=branch
   
   
 
