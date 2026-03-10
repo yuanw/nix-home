@@ -5,11 +5,15 @@
   inputs',
   ...
 }:
+let
+  claudePlugins = pkgs.callPackage ../packages/claude-plugins { };
+in
 {
   home-manager.users.${config.my.username} = {
     programs.claude-code = {
       enable = true;
       package = inputs'.claude-code.packages.claude-code;
+      plugins = [ claudePlugins.claude-mem ];
       settings = {
         alwaysThinkingEnabled = true;
         enabledPlugins = {
@@ -20,7 +24,7 @@
           "learning-output-style@claude-code-plugins" = true;
           "pr-review-toolkit@claude-code-plugins" = true;
           "security-guidance@claude-code-plugins" = true;
-          "claude-mem@thedotmack" = true;
+          # claude-mem is auto-added via programs.claude-code.plugins
         };
         hooks = {
           Notification = lib.mkIf pkgs.stdenv.isDarwin [
