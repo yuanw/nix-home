@@ -1,13 +1,14 @@
-{ melpaBuild
-, fetchFromGitHub
-, # Elisp dependencies
-  magit ? null
-, # Native dependencies
+{
+  melpaBuild,
+  fetchFromGitHub,
+  # Elisp dependencies
+  magit ? null,
+  # Native dependencies
   ...
 }:
 melpaBuild {
   pname = "magit-ai";
-  version = "0-unstable-2026-03-06";
+  version = "0-unstable-2026-01-25";
   src = fetchFromGitHub {
     owner = "jwiegley";
     repo = "magit-ai";
