@@ -13,19 +13,19 @@ in
     programs.claude-code = {
       enable = true;
       package = inputs'.claude-code.packages.claude-code;
-      plugins = [ claudePlugins.claude-mem ];
+      plugins = with claudePlugins; [
+        claude-mem
+        code-review
+        commit-commands
+        explanatory-output-style
+        frontend-design
+        learning-output-style
+        pr-review-toolkit
+        security-guidance
+      ];
       settings = {
         alwaysThinkingEnabled = true;
-        enabledPlugins = {
-          "code-review@claude-code-plugins" = true;
-          "commit-commands@claude-code-plugins" = true;
-          "explanatory-output-style@claude-code-plugins" = true;
-          "frontend-design@claude-code-plugins" = true;
-          "learning-output-style@claude-code-plugins" = true;
-          "pr-review-toolkit@claude-code-plugins" = true;
-          "security-guidance@claude-code-plugins" = true;
-          # claude-mem is auto-added via programs.claude-code.plugins
-        };
+        # enabledPlugins auto-generated from programs.claude-code.plugins list
         hooks = {
           Notification = lib.mkIf pkgs.stdenv.isDarwin [
             {

@@ -36,7 +36,17 @@ let
     };
 
   callPlugin = path: pkgs.callPackage path { inherit mkClaudePlugin; };
+  claudeCodePlugins = callPlugin ./claude-code-plugins.nix;
 in
 {
   claude-mem = callPlugin ./claude-mem.nix;
+  inherit (claudeCodePlugins)
+    code-review
+    commit-commands
+    explanatory-output-style
+    frontend-design
+    learning-output-style
+    pr-review-toolkit
+    security-guidance
+    ;
 }

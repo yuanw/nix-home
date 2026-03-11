@@ -11,7 +11,9 @@
       "Bash(emacs:*)",
       "Bash(grep:*)",
       "Bash(nix log:*)",
-      "Bash(nix build:*)"
+      "Bash(nix build:*)",
+      "Read(//Users/yuanwang/.claude/plugins/marketplaces/claude-code-plugins/plugins/code-review/**)",
+      "Bash(python3 -m json.tool)"
     ],
     "deny": [],
     "ask": []
