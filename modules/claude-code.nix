@@ -15,6 +15,7 @@ in
       package = inputs'.claude-code.packages.claude-code;
       plugins = with claudePlugins; [
         claude-mem
+        cozempic
         code-review
         commit-commands
         explanatory-output-style

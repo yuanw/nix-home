@@ -40,6 +40,7 @@ let
 in
 {
   claude-mem = callPlugin ./claude-mem.nix;
+  cozempic = callPlugin ./cozempic.nix;
   inherit (claudeCodePlugins)
     code-review
     commit-commands
