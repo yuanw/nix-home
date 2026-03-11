@@ -31,6 +31,7 @@ nix-update:
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
     @nix-update -f ./packages/release.nix magit-ai --src-only --version=branch
+    @nix-update -f ./packages/release.nix claude-mem --src-only
   
   
 
