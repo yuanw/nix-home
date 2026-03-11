@@ -25,6 +25,7 @@ in
         security-guidance
       ];
       settings = {
+        includeCoAuthoredBy = false;
         alwaysThinkingEnabled = true;
         # enabledPlugins auto-generated from programs.claude-code.plugins list
         hooks = {
