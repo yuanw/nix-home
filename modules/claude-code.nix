@@ -27,6 +27,10 @@ in
       settings = {
         includeCoAuthoredBy = false;
         alwaysThinkingEnabled = true;
+        git = {
+          includeCoAuthor = false;
+          includePRFooter = false;
+        };
         # enabledPlugins auto-generated from programs.claude-code.plugins list
         hooks = {
           Notification = lib.mkIf pkgs.stdenv.isDarwin [
