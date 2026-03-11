@@ -38,6 +38,7 @@ in
           virtualenv
           virtualenvwrapper
           opentype-feature-freezer
+          fpdf2
           #litellm
           #tokenizers
         ]
