@@ -2105,7 +2105,7 @@ with lib;
 
                 # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
                 magit = {
-
+                  demand = true;
                   enable = true;
                   bind = {
                     "C-x g" = "magit-status";
@@ -2342,7 +2342,7 @@ with lib;
                   '';
                 };
                 direnv = {
-                  enable = false;
+                  enable = true;
                   functions = [ "direnv--maybe-update-environment" ];
                   preface = ''
                      (defconst emacs-binary-path (directory-file-name
@@ -2371,13 +2371,6 @@ with lib;
                     (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
                   '';
                 };
-                envrc = {
-                  enable = true;
-                  config = ''
-                    (envrc-global-mode)
-                  '';
-                };
-
                 editorconfig = {
                   enable = true;
                   config = ''
