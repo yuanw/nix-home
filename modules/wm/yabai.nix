@@ -43,6 +43,7 @@ let
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
+    shift + ctrl + alt - c: screencapture /tmp/$(date +%s).png
     cmd - space: app-launcher
   '';
 
