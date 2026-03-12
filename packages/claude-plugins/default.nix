@@ -63,7 +63,9 @@ let
   claudeCodePlugins = callPlugin ./claude-code-plugins.nix;
 in
 {
+  caveman = callPlugin ./caveman.nix;
   claude-mem = callPlugin ./claude-mem.nix;
+  emacs-skills = callPlugin ./emacs-skills.nix;
   cozempic = callPlugin ./cozempic.nix;
   humanizer = callPlugin ./humanizer.nix;
   inherit (claudeCodePlugins)

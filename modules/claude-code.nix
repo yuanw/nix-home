@@ -13,10 +13,14 @@ in
     programs.claude-code = {
       enable = true;
       package = inputs'.claude-code.packages.claude-code;
-      skillPackages = with claudePlugins; [ humanizer ];
+      skillPackages = with claudePlugins; [
+        caveman
+        humanizer
+      ];
       plugins = with claudePlugins; [
         claude-mem
         cozempic
+        emacs-skills
         code-review
         commit-commands
         explanatory-output-style
