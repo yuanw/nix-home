@@ -16,11 +16,11 @@ in
       skillPackages = with claudePlugins; [
         caveman
         humanizer
+        emacs-skills
       ];
       plugins = with claudePlugins; [
         claude-mem
         cozempic
-        emacs-skills
         code-review
         commit-commands
         explanatory-output-style
