@@ -484,6 +484,7 @@ with lib;
                 };
                 browse-kill-ring = {
                   enable = true;
+                  defer = true;
                   command = [ "browse-kill-ring" ];
                 };
 
@@ -756,6 +757,7 @@ with lib;
 
                 expand-region = {
                   enable = true;
+                  defer = true;
                 };
 
                 ## Remember where we where in a previously visited file. Built-in package.
@@ -1153,6 +1155,7 @@ with lib;
 
                 nerd-icons = {
                   enable = true;
+                  defer = true;
                   custom = ''
                     (nerd-icons-font-family "PragmataPro Mono Liga")
                   '';
@@ -1567,7 +1570,6 @@ with lib;
                       (project-remember-projects-under "${config.my.homeDirectory}/${config.my.workspaceDirectory}/" t)
                       (project-forget-zombie-projects))
 
-                      (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
 
                       (with-eval-after-load 'magit
                         (defun project-magit-status ()
@@ -1672,6 +1674,7 @@ with lib;
                 };
                 geiser = {
                   enable = true;
+                  defer = true;
                 };
                 org-agenda = {
                   enable = true;
@@ -1917,6 +1920,7 @@ with lib;
 
                 djvu = {
                   enable = true;
+                  defer = true;
 
                 };
                 reader = {
@@ -2184,6 +2188,7 @@ with lib;
 
                 nix-update = {
                   enable = true;
+                  defer = true;
                 };
 
                 yaml-ts-mode = {
@@ -2350,12 +2355,13 @@ with lib;
                           (setenv "PATH" (concat emacs-binary-path ":" (getenv "PATH")))
                           (setq exec-path (cons dir exec-path)))))
 
-                    (defvar my-direnv-last-buffer nil)
+                    (defvar my-direnv-idle-timer nil)
 
                     (defun my-direnv-maybe-update (&rest _ignore)
-                      (unless (eq (current-buffer) my-direnv-last-buffer)
-                        (setq my-direnv-last-buffer (current-buffer))
-                        (direnv--maybe-update-environment)))
+                      (when my-direnv-idle-timer
+                        (cancel-timer my-direnv-idle-timer))
+                      (setq my-direnv-idle-timer
+                            (run-with-idle-timer 0.3 nil #'direnv--maybe-update-environment)))
                   '';
                   init = ''
                     (advice-add 'direnv-update-directory-environment
@@ -2892,6 +2898,7 @@ with lib;
 
                 posframe = {
                   enable = true;
+                  defer = true;
                 };
                 # Read the lin manual: <https://protesilaos.com/emacs/lin>.
                 lin = {
@@ -2940,6 +2947,7 @@ with lib;
                 };
                 all-the-icons = {
                   enable = true;
+                  defer = true;
                 };
 
                 yasnippet = {
@@ -3119,6 +3127,7 @@ with lib;
                 };
                 eat = {
                   enable = true;
+                  defer = true;
                 };
                 multi-vterm = {
                   enable = true;

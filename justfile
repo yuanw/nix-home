@@ -6,7 +6,7 @@ default:
 
 # build os
 build:
-    @nix build ".#{{lowercase(host)}}"
+    @nix build --quite ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
@@ -43,7 +43,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo ./result/sw/bin/darwin-rebuild switch --flake .; \
     else \
-        nixos-rebuild switch --flake '.#' --use-remote-sudo; \
+        nixos-rebuild switch --flake '.#' --quite  --use-remote-sudo; \
     fi
 
 sys-diff:
