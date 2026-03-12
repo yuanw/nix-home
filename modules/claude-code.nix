@@ -13,7 +13,7 @@ in
     programs.claude-code = {
       enable = true;
       package = inputs'.claude-code.packages.claude-code;
-      skills = with claudePlugins; [ humanizer ];
+      skillPackages = with claudePlugins; [ humanizer ];
       plugins = with claudePlugins; [
         claude-mem
         cozempic

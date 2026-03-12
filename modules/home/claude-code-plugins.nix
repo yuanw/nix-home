@@ -103,19 +103,22 @@ in
     description = "List of claude plugin packages built with mkClaudePlugin.";
   };
 
-  options.programs.claude-code.skills = lib.mkOption {
+  options.programs.claude-code.skillPackages = lib.mkOption {
     type = lib.types.listOf lib.types.package;
     default = [ ];
-    description = "List of claude skill packages built with mkClaudeSkill. Each is linked into ~/.claude/skills/<pname>/SKILL.md.";
+    description = "List of skill packages built with mkClaudeSkill. Each is linked recursively into ~/.claude/skills/<pname>/.";
   };
 
   config = lib.mkMerge [
-    (lib.mkIf (cfg.enable && cfg.skills != [ ]) {
+    (lib.mkIf (cfg.enable && cfg.skillPackages != [ ]) {
       home.file = lib.listToAttrs (
         map (s: {
-          name = ".claude/skills/${s.passthru.claudeSkill.pname}/SKILL.md";
-          value.source = s.passthru.claudeSkill.skillMd;
-        }) cfg.skills
+          name = ".claude/skills/${s.passthru.claudeSkill.pname}";
+          value = {
+            source = s;
+            recursive = true;
+          };
+        }) cfg.skillPackages
       );
     })
     (lib.mkIf (cfg.enable && allPlugins != [ ]) {
