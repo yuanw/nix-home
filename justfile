@@ -6,7 +6,7 @@ default:
 
 # build os
 build:
-    @nix build --quite ".#{{lowercase(host)}}"
+    @nix build --quiet ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
