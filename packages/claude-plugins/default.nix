@@ -1,5 +1,29 @@
 { pkgs, ... }:
 let
+  # Package a single SKILL.md file into a derivation.
+  # The resulting drv exposes `passthru.skillMd` (the source path of SKILL.md)
+  # so the home-manager module can link it into ~/.claude/skills/<pname>/SKILL.md.
+  mkClaudeSkill =
+    {
+      pname,
+      version,
+      rev,
+      src,
+      # Path of the SKILL.md within src (defaults to root)
+      skillMdPath ? "SKILL.md",
+    }:
+    pkgs.runCommand "${pname}-skill"
+      {
+        passthru.claudeSkill = {
+          inherit pname version rev;
+          skillMd = "${src}/${skillMdPath}";
+        };
+      }
+      ''
+        mkdir -p $out
+        cp ${src}/${skillMdPath} $out/SKILL.md
+      '';
+
   mkClaudePlugin =
     {
       pname,
@@ -35,7 +59,7 @@ let
       };
     };
 
-  callPlugin = path: pkgs.callPackage path { inherit mkClaudePlugin; };
+  callPlugin = path: pkgs.callPackage path { inherit mkClaudePlugin mkClaudeSkill; };
   claudeCodePlugins = callPlugin ./claude-code-plugins.nix;
 in
 {

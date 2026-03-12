@@ -103,34 +103,50 @@ in
     description = "List of claude plugin packages built with mkClaudePlugin.";
   };
 
-  config = lib.mkIf (cfg.enable && allPlugins != [ ]) {
-    home.packages = allRuntimeInputs;
-
-    programs.claude-code.settings = lib.mkMerge [
-      {
-        enabledPlugins = lib.listToAttrs (map (p: lib.nameValuePair p.id true) allPlugins);
-      }
-    ];
-
-    home.activation.claudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-      # Remove old symlinks if they exist from a previous approach
-      [ -L "${homeDir}/.claude/plugins/cache" ] && rm "${homeDir}/.claude/plugins/cache"
-      [ -L "${homeDir}/.claude/plugins/marketplaces" ] && rm "${homeDir}/.claude/plugins/marketplaces"
-      [ -L "${homeDir}/.claude/plugins/installed_plugins.json" ] && rm "${homeDir}/.claude/plugins/installed_plugins.json"
-      [ -L "${homeDir}/.claude/plugins/known_marketplaces.json" ] && rm "${homeDir}/.claude/plugins/known_marketplaces.json"
-
-      mkdir -p "${homeDir}/.claude/plugins"
-
-      # Copy with write permissions — Claude Code writes state into plugin dirs
-      ${pkgs.rsync}/bin/rsync -a --chmod=u+w "${pluginsDir}/cache" "${homeDir}/.claude/plugins/"
-      ${pkgs.rsync}/bin/rsync -a --chmod=u+w "${pluginsDir}/marketplaces" "${homeDir}/.claude/plugins/"
-
-      cp -f "${pluginsDir}/installed_plugins.json" "${homeDir}/.claude/plugins/"
-      cp -f "${pluginsDir}/known_marketplaces.json" "${homeDir}/.claude/plugins/"
-      chmod u+w "${homeDir}/.claude/plugins/installed_plugins.json"
-      chmod u+w "${homeDir}/.claude/plugins/known_marketplaces.json"
-
-      ${allActivationScripts}
-    '';
+  options.programs.claude-code.skills = lib.mkOption {
+    type = lib.types.listOf lib.types.package;
+    default = [ ];
+    description = "List of claude skill packages built with mkClaudeSkill. Each is linked into ~/.claude/skills/<pname>/SKILL.md.";
   };
+
+  config = lib.mkMerge [
+    (lib.mkIf (cfg.enable && cfg.skills != [ ]) {
+      home.file = lib.listToAttrs (
+        map (s: {
+          name = ".claude/skills/${s.passthru.claudeSkill.pname}/SKILL.md";
+          value.source = s.passthru.claudeSkill.skillMd;
+        }) cfg.skills
+      );
+    })
+    (lib.mkIf (cfg.enable && allPlugins != [ ]) {
+      home.packages = allRuntimeInputs;
+
+      programs.claude-code.settings = lib.mkMerge [
+        {
+          enabledPlugins = lib.listToAttrs (map (p: lib.nameValuePair p.id true) allPlugins);
+        }
+      ];
+
+      home.activation.claudePlugins = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        # Remove old symlinks if they exist from a previous approach
+        [ -L "${homeDir}/.claude/plugins/cache" ] && rm "${homeDir}/.claude/plugins/cache"
+        [ -L "${homeDir}/.claude/plugins/marketplaces" ] && rm "${homeDir}/.claude/plugins/marketplaces"
+        [ -L "${homeDir}/.claude/plugins/installed_plugins.json" ] && rm "${homeDir}/.claude/plugins/installed_plugins.json"
+        [ -L "${homeDir}/.claude/plugins/known_marketplaces.json" ] && rm "${homeDir}/.claude/plugins/known_marketplaces.json"
+
+        mkdir -p "${homeDir}/.claude/plugins"
+
+        # Copy with write permissions — Claude Code writes state into plugin dirs
+        ${pkgs.rsync}/bin/rsync -a --chmod=u+w "${pluginsDir}/cache" "${homeDir}/.claude/plugins/"
+        ${pkgs.rsync}/bin/rsync -a --chmod=u+w "${pluginsDir}/marketplaces" "${homeDir}/.claude/plugins/"
+
+        cp -f "${pluginsDir}/installed_plugins.json" "${homeDir}/.claude/plugins/"
+        cp -f "${pluginsDir}/known_marketplaces.json" "${homeDir}/.claude/plugins/"
+        chmod u+w "${homeDir}/.claude/plugins/installed_plugins.json"
+        chmod u+w "${homeDir}/.claude/plugins/known_marketplaces.json"
+
+        ${allActivationScripts}
+      '';
+    })
+  ];
 }
