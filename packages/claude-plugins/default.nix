@@ -41,6 +41,7 @@ in
 {
   claude-mem = callPlugin ./claude-mem.nix;
   cozempic = callPlugin ./cozempic.nix;
+  humanizer = callPlugin ./humanizer.nix;
   inherit (claudeCodePlugins)
     code-review
     commit-commands

@@ -107,4 +107,5 @@ rec {
 
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
   claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
+  humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
 }

@@ -16,6 +16,7 @@ in
       plugins = with claudePlugins; [
         claude-mem
         cozempic
+        humanizer
         code-review
         commit-commands
         explanatory-output-style
