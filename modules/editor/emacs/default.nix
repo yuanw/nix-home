@@ -2342,7 +2342,7 @@ with lib;
                   '';
                 };
                 direnv = {
-                  enable = true;
+                  enable = false;
                   functions = [ "direnv--maybe-update-environment" ];
                   preface = ''
                      (defconst emacs-binary-path (directory-file-name
@@ -2371,6 +2371,13 @@ with lib;
                     (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
                   '';
                 };
+                envrc = {
+                  enable = true;
+                  config = ''
+                    (envrc-global-mode)
+                  '';
+                };
+
                 editorconfig = {
                   enable = true;
                   config = ''
