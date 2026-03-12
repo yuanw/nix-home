@@ -1,7 +1,7 @@
 # Hashes: nix-prefetch-github xenodium emacs-skills --rev <rev>
 {
   fetchFromGitHub,
-  mkClaudePlugin,
+  mkClaudeSkill,
   ...
 }:
 let
@@ -13,14 +13,9 @@ let
     hash = "sha256-ilgWnb3w+6mkeLwy5xkU5iX0NRbguur7iTLVqCu27TA=";
   };
 in
-mkClaudePlugin {
+mkClaudeSkill {
   pname = "emacs-skills";
   version = "1.0.0";
   inherit rev src;
-  marketplace = {
-    name = "xenodium";
-    inherit src;
-    owner = "xenodium";
-    repo = "emacs-skills";
-  };
+  skillsDir = "skills";
 }

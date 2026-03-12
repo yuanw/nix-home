@@ -9,19 +9,25 @@ let
       version,
       rev,
       src,
-      # Path of the SKILL.md within src (defaults to root)
+      # Path of the SKILL.md within src (single skill, defaults to root)
       skillMdPath ? "SKILL.md",
+      # Directory within src containing multiple skill subdirectories (skill collection)
+      skillsDir ? null,
     }:
     pkgs.runCommand "${pname}-skill"
       {
         passthru.claudeSkill = {
           inherit pname version rev;
-          skillMd = "${src}/${skillMdPath}";
         };
       }
       ''
         mkdir -p $out
-        cp ${src}/${skillMdPath} $out/SKILL.md
+        ${
+          if skillsDir != null then
+            "cp -r ${src}/${skillsDir}/. $out/"
+          else
+            "cp ${src}/${skillMdPath} $out/SKILL.md"
+        }
       '';
 
   mkClaudePlugin =

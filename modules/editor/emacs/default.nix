@@ -46,9 +46,7 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-git.override {
-        withNativeCompilation = true;
-      };
+      default = pkgs.emacs-git;
     };
 
     lspStyle = mkOption {
@@ -1569,7 +1567,14 @@ with lib;
                       (project-remember-projects-under "${config.my.homeDirectory}/${config.my.workspaceDirectory}/" t)
                       (project-forget-zombie-projects))
 
-                    (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
+                      (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
+
+                      (with-eval-after-load 'magit
+                        (defun project-magit-status ()
+                          "Run magit-status in the current project's root."
+                          (interactive)
+                          (magit-status-setup-buffer (project-root (project-current t))))
+                        (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t))
                   '';
                 };
 
@@ -2096,7 +2101,7 @@ with lib;
 
                 # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
                 magit = {
-                  after = [ "project" ];
+
                   enable = true;
                   bind = {
                     "C-x g" = "magit-status";
@@ -2116,12 +2121,6 @@ with lib;
                     (setq magit-display-buffer-function
                      #'magit-display-buffer-fullframe-status-v1)
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
-
-                    (defun project-magit-status ()
-                      "Run magit-status in the current project's root."
-                      (interactive)
-                      (magit-status-setup-buffer (project-root (project-current t))))
-                    (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t)
                   '';
                 };
 
