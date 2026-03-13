@@ -1,7 +1,8 @@
-{ self
-, inputs
-, withSystem
-, ...
+{
+  self,
+  inputs,
+  withSystem,
+  ...
 }:
 {
   flake = {
@@ -29,10 +30,11 @@
       # };
 
       asche = withSystem "x86_64-linux" (
-        { config
-        , inputs'
-        , system
-        , ...
+        {
+          config,
+          inputs',
+          system,
+          ...
         }:
         inputs.nixpkgs.lib.nixosSystem {
           specialArgs = {
@@ -61,6 +63,7 @@
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeManagerModules.default
                   inputs.git-ai.homeManagerModules.default
+                  (import ../modules/home/claude-code-plugins.nix)
                 ];
                 # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
@@ -72,10 +75,11 @@
         }
       );
       misfit = withSystem "x86_64-linux" (
-        { config
-        , inputs'
-        , system
-        , ...
+        {
+          config,
+          inputs',
+          system,
+          ...
         }:
         inputs.nixpkgs.lib.nixosSystem {
           specialArgs = {
@@ -101,10 +105,11 @@
         configure =
           hostname: sys: loadPrivate: addtionsModule:
           withSystem sys (
-            { config
-            , inputs'
-            , system
-            , ...
+            {
+              config,
+              inputs',
+              system,
+              ...
             }:
             inputs.nix-darwin.lib.darwinSystem {
               specialArgs = {
@@ -132,6 +137,7 @@
                       inputs.direnv-instant.homeModules.direnv-instant
                       inputs.mics-skills.homeManagerModules.default
                       inputs.git-ai.homeManagerModules.default
+                      (import ../modules/home/claude-code-plugins.nix)
                     ];
 
                     backupFileExtension = "hm-bak";

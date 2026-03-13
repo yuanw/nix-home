@@ -227,6 +227,7 @@ hm@{ pkgs, ... }:
         "tags"
         "TAGS"
         ".claude"
+        ".agent-shell"
       ];
     };
 

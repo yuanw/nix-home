@@ -106,4 +106,8 @@ rec {
   };
 
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
+  caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
+  claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
+  emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;
+  humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
 }
