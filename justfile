@@ -6,7 +6,7 @@ default:
 
 # build os
 build:
-    @nix build ".#{{lowercase(host)}}"
+    @nix build --quiet ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
@@ -31,6 +31,10 @@ nix-update:
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
     @nix-update -f ./packages/release.nix magit-ai --src-only --version=branch
+    @nix-update -f ./packages/release.nix caveman --src-only
+    @nix-update -f ./packages/release.nix claude-mem --src-only
+    @nix-update -f ./packages/release.nix emacs-skills --src-only
+    @nix-update -f ./packages/release.nix humanizer --src-only
   
   
 
@@ -39,7 +43,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo ./result/sw/bin/darwin-rebuild switch --flake .; \
     else \
-        nixos-rebuild switch --flake '.#' --use-remote-sudo; \
+        nixos-rebuild switch --flake '.#' --quite  --use-remote-sudo; \
     fi
 
 sys-diff:

@@ -11,7 +11,6 @@
   inputs,
   isDarwin,
   hostname,
-  inputs',
   ...
 }:
 let
@@ -47,9 +46,7 @@ with lib;
 
     pkg = mkOption {
       type = types.package;
-      default = pkgs.emacs-git.override {
-        withNativeCompilation = true;
-      };
+      default = pkgs.emacs-git;
     };
 
     lspStyle = mkOption {
@@ -487,6 +484,7 @@ with lib;
                 };
                 browse-kill-ring = {
                   enable = true;
+                  defer = true;
                   command = [ "browse-kill-ring" ];
                 };
 
@@ -759,6 +757,7 @@ with lib;
 
                 expand-region = {
                   enable = true;
+                  defer = true;
                 };
 
                 ## Remember where we where in a previously visited file. Built-in package.
@@ -1156,6 +1155,7 @@ with lib;
 
                 nerd-icons = {
                   enable = true;
+                  defer = true;
                   custom = ''
                     (nerd-icons-font-family "PragmataPro Mono Liga")
                   '';
@@ -1570,7 +1570,13 @@ with lib;
                       (project-remember-projects-under "${config.my.homeDirectory}/${config.my.workspaceDirectory}/" t)
                       (project-forget-zombie-projects))
 
-                    (add-hook 'after-init-hook #'my/project-remember-workspace-projects)
+
+                      (with-eval-after-load 'magit
+                        (defun project-magit-status ()
+                          "Run magit-status in the current project's root."
+                          (interactive)
+                          (magit-status-setup-buffer (project-root (project-current t))))
+                        (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t))
                   '';
                 };
 
@@ -1668,6 +1674,7 @@ with lib;
                 };
                 geiser = {
                   enable = true;
+                  defer = true;
                 };
                 org-agenda = {
                   enable = true;
@@ -1913,6 +1920,7 @@ with lib;
 
                 djvu = {
                   enable = true;
+                  defer = true;
 
                 };
                 reader = {
@@ -2097,7 +2105,7 @@ with lib;
 
                 # https://takeonrules.com/2024/03/01/quality-of-life-improvement-for-entering-and-exiting-magit/
                 magit = {
-                  after = [ "project" ];
+                  demand = true;
                   enable = true;
                   bind = {
                     "C-x g" = "magit-status";
@@ -2117,12 +2125,6 @@ with lib;
                     (setq magit-display-buffer-function
                      #'magit-display-buffer-fullframe-status-v1)
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
-
-                    (defun project-magit-status ()
-                      "Run magit-status in the current project's root."
-                      (interactive)
-                      (magit-status-setup-buffer (project-root (project-current t))))
-                    (add-to-list 'project-switch-commands '(?g "magit" project-magit-status) t)
                   '';
                 };
 
@@ -2186,6 +2188,7 @@ with lib;
 
                 nix-update = {
                   enable = true;
+                  defer = true;
                 };
 
                 yaml-ts-mode = {
@@ -2352,12 +2355,13 @@ with lib;
                           (setenv "PATH" (concat emacs-binary-path ":" (getenv "PATH")))
                           (setq exec-path (cons dir exec-path)))))
 
-                    (defvar my-direnv-last-buffer nil)
+                    (defvar my-direnv-idle-timer nil)
 
                     (defun my-direnv-maybe-update (&rest _ignore)
-                      (unless (eq (current-buffer) my-direnv-last-buffer)
-                        (setq my-direnv-last-buffer (current-buffer))
-                        (direnv--maybe-update-environment)))
+                      (when my-direnv-idle-timer
+                        (cancel-timer my-direnv-idle-timer))
+                      (setq my-direnv-idle-timer
+                            (run-with-idle-timer 0.3 nil #'direnv--maybe-update-environment)))
                   '';
                   init = ''
                     (advice-add 'direnv-update-directory-environment
@@ -2894,6 +2898,7 @@ with lib;
 
                 posframe = {
                   enable = true;
+                  defer = true;
                 };
                 # Read the lin manual: <https://protesilaos.com/emacs/lin>.
                 lin = {
@@ -2942,6 +2947,7 @@ with lib;
                 };
                 all-the-icons = {
                   enable = true;
+                  defer = true;
                 };
 
                 yasnippet = {
@@ -3121,6 +3127,7 @@ with lib;
                 };
                 eat = {
                   enable = true;
+                  defer = true;
                 };
                 multi-vterm = {
                   enable = true;
@@ -3540,7 +3547,6 @@ with lib;
               sqlite
               # wordnet
               # :lang latex & :lang org (latex previews)
-              inputs'.claude-code.packages.claude-code
               #: js
               # nodePackages.eslint
               #: markdown

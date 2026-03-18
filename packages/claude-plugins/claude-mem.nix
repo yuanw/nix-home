@@ -1,0 +1,32 @@
+# Hashes: nix-prefetch-github thedotmack claude-mem --rev <rev>
+{
+  pkgs,
+  fetchFromGitHub,
+  mkClaudePlugin,
+  ...
+}:
+let
+  rev = "a16b25275e5f56b6d35d5fcf1a8324b8670792c8";
+  src = fetchFromGitHub {
+    owner = "thedotmack";
+    repo = "claude-mem";
+    inherit rev;
+    hash = "sha256-U1eM3NALFmq6ACYVympRPJMnfW7h9RYdLttW4c9jr04=";
+  };
+in
+mkClaudePlugin {
+  pname = "claude-mem";
+  version = "9.0.12";
+  inherit rev src;
+  pluginSubdir = "plugin";
+  marketplace = {
+    name = "thedotmack";
+    inherit src;
+    owner = "thedotmack";
+    repo = "claude-mem";
+  };
+  runtimeInputs = [
+    pkgs.bun
+    pkgs.uv
+  ];
+}
