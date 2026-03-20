@@ -16,6 +16,7 @@ let
     }:
     pkgs.runCommand "${pname}-skill"
       {
+        inherit pname version src;
         passthru.claudeSkill = {
           inherit pname version rev;
         };

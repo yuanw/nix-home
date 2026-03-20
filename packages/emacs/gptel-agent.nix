@@ -9,12 +9,12 @@
 }:
 melpaBuild {
   pname = "gptel-agent";
-  version = "0-unstable-2026-03-08";
+  version = "0-unstable-2026-03-18";
   src = fetchFromGitHub {
     owner = "karthink";
     repo = "gptel-agent";
-    rev = "c3612aee925f5bbe53d24d9ad2dc3e11e006962f";
-    sha256 = "sha256-ACimZfoRh6y1P0E121jKv9tAvdk5E6hdtlsF68NHpwE=";
+    rev = "33a391871596c997c3dbce7f9f14457a94dd6c3c";
+    sha256 = "sha256-6OMzH/AScM2lqCBiB3nzNqYiN6WezQbDFT4RFKx+C5Q=";
   };
 
   packageRequires = [
