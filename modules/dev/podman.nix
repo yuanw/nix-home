@@ -21,16 +21,6 @@ in
         podman-compose
       ];
 
-      # Testcontainers reads this file to override defaults.
-      # We set ryuk.disabled here (static); DOCKER_HOST is set dynamically
-      # in the shell because the Podman socket path contains $TMPDIR which
-      # is only known at runtime.
-      home.file.".testcontainers.properties".text = ''
-        # Ryuk requires privileged Docker socket access unavailable under
-        # rootless Podman. Disable it so Testcontainers starts cleanly.
-        testcontainers.ryuk.disabled=true
-      '';
-
       programs.zsh = {
         shellAliases = {
           # podman-compose as a drop-in for the legacy hyphenated form
@@ -50,6 +40,11 @@ in
               export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
             fi
           fi
+
+          # Ryuk requires a privileged Docker socket unavailable under rootless Podman.
+          # Testcontainers 2.x only honours this as an environment variable, not via
+          # .testcontainers.properties, so we set it here for all zsh invocations.
+          export TESTCONTAINERS_RYUK_DISABLED=true
         '';
         initContent = ''
           # Route all `docker` calls to podman.
