@@ -16,6 +16,7 @@ update INPUT:
 
 # update ad-hoc packages upstream references 
 nix-update:
+    @nix-update -f ./packages/release.nix acp --src-only --version=branch
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch

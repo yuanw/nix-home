@@ -88,6 +88,11 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText;
   };
 
+  acp = pkgs.callPackage ./emacs/acp.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
   shell-maker = pkgs.callPackage ./emacs/shell-maker.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
@@ -96,8 +101,7 @@ rec {
   agent-shell = pkgs.callPackage ./emacs/agent-shell.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
-    inherit shell-maker;
-    acp = pkgs.emacsPackages.acp;
+    inherit shell-maker acp;
   };
 
   magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {

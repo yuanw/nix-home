@@ -160,6 +160,13 @@ with lib;
                     ;
                 }
               );
+              acp = (
+                pkgs.callPackage "${packagePath}/acp.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild;
+                }
+              );
               shell-maker = (
                 pkgs.callPackage "${packagePath}/shell-maker.nix" {
                   inherit (pkgs) fetchFromGitHub writeText;
