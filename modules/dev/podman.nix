@@ -36,6 +36,21 @@ in
           # podman-compose as a drop-in for the legacy hyphenated form
           docker-compose = "podman-compose";
         };
+        # envExtra writes to .zshenv, which is sourced for every zsh invocation
+        # (interactive, non-interactive, and login shells alike).  This ensures
+        # DOCKER_HOST is set even for the shell that first spawns the Gradle daemon.
+        envExtra = ''
+          # Point DOCKER_HOST at the Podman socket so tools like Testcontainers
+          # work without per-project configuration.
+          # Checked at shell startup so it reflects the currently running machine.
+          if [[ -z "$DOCKER_HOST" ]]; then
+            if [[ -n "$TMPDIR" && -S "''${TMPDIR%/}/podman/podman-machine-default-api.sock" ]]; then
+              export DOCKER_HOST="unix://''${TMPDIR%/}/podman/podman-machine-default-api.sock"
+            elif [[ -n "$XDG_RUNTIME_DIR" && -S "$XDG_RUNTIME_DIR/podman/podman.sock" ]]; then
+              export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+            fi
+          fi
+        '';
         initContent = ''
           # Route all `docker` calls to podman.
           # `docker compose` (plugin form) is intercepted and forwarded to podman-compose,
@@ -48,17 +63,6 @@ in
               podman "$@"
             fi
           }
-
-          # Point DOCKER_HOST at the Podman socket so tools like Testcontainers
-          # work without per-project configuration.
-          # Checked at shell startup so it reflects the currently running machine.
-          if [[ -z "$DOCKER_HOST" ]]; then
-            if [[ -n "$TMPDIR" && -S "''${TMPDIR}podman/podman-machine-default-api.sock" ]]; then
-              export DOCKER_HOST="unix://''${TMPDIR}podman/podman-machine-default-api.sock"
-            elif [[ -n "$XDG_RUNTIME_DIR" && -S "$XDG_RUNTIME_DIR/podman/podman.sock" ]]; then
-              export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
-            fi
-          fi
         '';
       };
     };
