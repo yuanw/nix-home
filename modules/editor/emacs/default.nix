@@ -322,7 +322,6 @@ with lib;
                     ("C-c N" . my-ctrl-c-N-map))))'
 
                 (setq whitespace-style '(face tabs tab-mark spaces space-mark))
-                (global-whitespace-mode 1)
               '';
 
               prelude = ''
@@ -3413,10 +3412,10 @@ with lib;
                 };
 
                 eaf-pdf-viewer = {
-                  enable = true;
+                  enable = false;
                 };
                 meep = {
-                  enable = true;
+                  enable = false;
                 };
 
                 # holo-layer = {
