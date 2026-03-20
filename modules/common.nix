@@ -1,7 +1,8 @@
-{ inputs
-, inputs'
-, config
-, ...
+{
+  inputs,
+  inputs',
+  config,
+  ...
 }:
 {
   nix = {
