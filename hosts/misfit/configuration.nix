@@ -2,7 +2,12 @@
 # your system. Help is available in the configuration.nix(5) man page, on
 # https://search.nixos.org/options and in the NixOS manual (`nixos-help`).
 
-{ pkgs, config, ... }:
+{
+  pkgs,
+  config,
+  lib,
+  ...
+}:
 
 {
   imports = [
@@ -334,8 +339,53 @@
   ];
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
   boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
+  boot.initrd.postDeviceCommands = lib.mkAfter ''
+    zfs rollback -r zroot/root@blank
+  '';
+
+  fileSystems."/persist".neededForBoot = true;
+  fileSystems."/persistSave".neededForBoot = true;
+  fileSystems."/sshkeys".neededForBoot = true;
+
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/var/log"
+      "/var/lib/nixos"
+      "/var/lib/private"
+      "/etc/nixos"
+    ];
+    files = [
+      "/etc/machine-id"
+    ];
+  };
+
+  environment.persistence."/persistSave" = {
+    hideMounts = true;
+    directories = [
+      "/var/lib/acme"
+      "/var/lib/caddy"
+      "/var/lib/hass"
+      "/var/lib/jellyfin"
+      "/var/lib/isponsorblocktv"
+      "/etc/secrets"
+    ];
+  };
+
+  services.openssh.hostKeys = [
+    {
+      path = "/sshkeys/ssh_host_ed25519_key";
+      type = "ed25519";
+    }
+    {
+      path = "/sshkeys/ssh_host_rsa_key";
+      type = "rsa";
+      bits = 4096;
+    }
+  ];
+
   boot.initrd.network = {
-    enable = false;
+    enable = true;
     ssh = {
       enable = true;
       port = 2222;

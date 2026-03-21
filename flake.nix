@@ -80,6 +80,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
+    impermanence.url = "github:nix-community/impermanence";
   };
 
   outputs =
