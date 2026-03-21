@@ -19,7 +19,6 @@ in
         emacs-skills
       ];
       plugins = with claudePlugins; [
-        claude-mem
         cozempic
         code-review
         commit-commands
