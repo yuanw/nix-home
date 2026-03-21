@@ -228,6 +228,7 @@ hm@{ pkgs, ... }:
         "TAGS"
         ".claude"
         ".agent-shell"
+        ".dir-locals.el"
       ];
     };
 
