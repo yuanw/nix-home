@@ -175,7 +175,7 @@ hm@{ pkgs, ... }:
         branch.sort = "-committerdate";
         column.ui = "auto";
         diff = {
-          ignoreSubmodules = "dirty";
+          # ignoreSubmodules = "dirty";
           renames = "copies";
           mnemonicprefix = true;
         };
