@@ -53,7 +53,7 @@ in
     };
     claude-code = {
       enable = true;
-      enableClaudeMem = true;
+      enableClaudeMem = false;
     };
     brew = {
       enable = true;
