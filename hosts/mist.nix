@@ -51,6 +51,10 @@ in
     secrets.agenix = {
       enable = true;
     };
+    claude-code = {
+      enable = true;
+      enableClaudeMem = true;
+    };
     brew = {
       enable = true;
       casks = [
