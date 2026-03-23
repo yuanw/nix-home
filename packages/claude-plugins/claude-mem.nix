@@ -26,7 +26,7 @@ in
   };
   runtimeInputs = [
     pkgs.bun
-    pkgs.chrome-mcp
+    pkgs.chroma-mcp
   ];
   # Workaround: claude-mem hardcodes 'thedotmack' marketplace path
   activationScript = ''
