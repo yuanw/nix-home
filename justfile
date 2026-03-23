@@ -44,7 +44,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo ./result/sw/bin/darwin-rebuild switch --flake .; \
     else \
-        nixos-rebuild switch --flake '.#' --quiet  --sudo; \
+        nixos-rebuild switch --flake '.#' --quiet  --use-remote-sudo; \
     fi
 
 sys-diff:

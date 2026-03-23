@@ -1,8 +1,7 @@
-{
-  config,
-  inputs,
-  pkgs,
-  ...
+{ config
+, inputs
+, pkgs
+, ...
 }:
 
 {
@@ -80,6 +79,11 @@
   my.mullvad.enable = true;
 
   modules = {
+    claude-code = {
+      enable = true;
+      enableClaudeMem = false;
+    };
+
     secrets.agenix = {
       enable = true;
     };
