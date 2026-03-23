@@ -13,7 +13,7 @@ let
     hash = "sha256-U1eM3NALFmq6ACYVympRPJMnfW7h9RYdLttW4c9jr04=";
   };
 in
-mkClaudePlugin {
+(mkClaudePlugin {
   pname = "claude-mem";
   version = "9.0.12";
   inherit rev src;
@@ -26,10 +26,16 @@ mkClaudePlugin {
   };
   runtimeInputs = [
     pkgs.bun
-    pkgs.uv
+    pkgs.chrome-mcp
   ];
   # Workaround: claude-mem hardcodes 'thedotmack' marketplace path
   activationScript = ''
     ln -sfn "$HOME/.claude/plugins/marketplaces/claude-mem" "$HOME/.claude/plugins/marketplaces/thedotmack"
   '';
-}
+}).overrideAttrs (old: {
+  installPhase = old.installPhase + ''
+    substituteInPlace $out/scripts/worker-service.cjs \
+      --replace-fail 'command:"uvx",args:["--python",r,"chroma-mcp",' \
+                     'command:"${pkgs.chroma-mcp}/bin/chroma-mcp",args:['
+  '';
+})
