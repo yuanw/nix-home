@@ -1,9 +1,8 @@
 # Hashes: nix-prefetch-github thedotmack claude-mem --rev <rev>
-{
-  pkgs,
-  fetchFromGitHub,
-  mkClaudePlugin,
-  ...
+{ pkgs
+, fetchFromGitHub
+, mkClaudePlugin
+, ...
 }:
 let
   rev = "a16b25275e5f56b6d35d5fcf1a8324b8670792c8";
@@ -29,4 +28,8 @@ mkClaudePlugin {
     pkgs.bun
     pkgs.uv
   ];
+  # Workaround: claude-mem hardcodes 'thedotmack' marketplace path
+  activationScript = ''
+    ln -sfn "$HOME/.claude/plugins/marketplaces/claude-mem" "$HOME/.claude/plugins/marketplaces/thedotmack"
+  '';
 }
