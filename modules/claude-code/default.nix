@@ -41,7 +41,6 @@ in
             pr-review-toolkit
             security-guidance
           ];
-        hooks = import ./hooks/notification.nix { inherit pkgs lib; };
         settings = {
           includeCoAuthoredBy = false;
           alwaysThinkingEnabled = true;
@@ -55,6 +54,7 @@ in
             includePRFooter = false;
           };
           # enabledPlugins auto-generated from programs.claude-code.plugins list
+          hooks = import ./hooks/notification.nix { inherit pkgs lib; };
         };
       };
     };
