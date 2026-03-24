@@ -1,8 +1,9 @@
-{ config
-, lib
-, pkgs
-, inputs'
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  inputs',
+  ...
 }:
 let
   cfg = config.modules.claude-code;
@@ -43,6 +44,11 @@ in
         settings = {
           includeCoAuthoredBy = false;
           alwaysThinkingEnabled = true;
+          gitAttribution = false;
+          attribution = {
+            commit = "";
+            pr = "";
+          };
           git = {
             includeCoAuthor = false;
             includePRFooter = false;

@@ -36,8 +36,9 @@ nix-update:
     @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch
     @nix-update -f ./packages/release.nix emacs-skills --src-only --version=branch
     @nix-update -f ./packages/release.nix humanizer --src-only --version=branch
-  
-  
+    @nix-update -f ./packages/release.nix chroma-mcp --src-only
+
+
 
 # apply nix configuration (works on both macOS and NixOS)
 switch:
