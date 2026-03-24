@@ -1,9 +1,8 @@
-{
-  config,
-  lib,
-  pkgs,
-  inputs',
-  ...
+{ config
+, lib
+, pkgs
+, inputs'
+, ...
 }:
 let
   cfg = config.modules.claude-code;
@@ -20,6 +19,7 @@ in
       programs.claude-code = {
         enable = true;
         package = inputs'.claude-code.packages.claude-code;
+        skillsDir = ./skills;
         skillPackages = with claudePlugins; [
           caveman
           humanizer

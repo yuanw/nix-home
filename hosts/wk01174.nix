@@ -44,7 +44,11 @@
     secrets.agenix = {
       enable = true;
     };
-    #mouseless.enable = true;
+    claude-code = {
+      enable = true;
+      enableClaudeMem = false;
+    };
+    mouseless.enable = true;
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
