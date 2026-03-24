@@ -1,13 +1,13 @@
 { pkgs, lib, ... }:
 let
   notifyCommand =
-    _title: _message:
+    title: message:
     if pkgs.stdenv.hostPlatform.isDarwin then
       ''
-        ${lib.getExe pkgs.terminal-notifier} -title "Claude Code" -message "Awaiting your input" -sender "com.anthropic.claudecode" -sound default 2>/dev/null || ${lib.getExe pkgs.terminal-notifier} -title "Claude Code" -message "Awaiting your input" -sound default
+        ${lib.getExe pkgs.terminal-notifier} -title ${title} -message ${message} -sender "com.anthropic.claudecode" -sound default 2>/dev/null
       ''
     else
-      ''notify-send -a "Claude Code" -i "$HOME/.local/share/icons/claude.ico" 'Claude Code' 'Awaiting your input' '';
+      ''notify-send -a ${title} -i "$HOME/.local/share/icons/claude.ico" ${title} ${message} '';
 in
 {
   Notification = [
