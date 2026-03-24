@@ -1,6 +1,7 @@
 { pkgs, lib, ... }:
 let
   notifyCommand =
+    _title: _message:
     if pkgs.stdenv.hostPlatform.isDarwin then
       ''
         if command -v terminal-notifier &>/dev/null; then
@@ -20,7 +21,7 @@ in
       hooks = [
         {
           type = "command";
-          command = notifyCommand;
+          command = notifyCommand "Claude Code" "Awaiting your input";
         }
       ];
     }
