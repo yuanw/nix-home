@@ -46,7 +46,7 @@
     };
     claude-code = {
       enable = true;
-      enableClaudeMem = false;
+      enableClaudeMem = true;
     };
     mouseless.enable = true;
     brew = {
