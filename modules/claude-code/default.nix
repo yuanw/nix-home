@@ -7,7 +7,7 @@
 }:
 let
   cfg = config.modules.claude-code;
-  claudePlugins = pkgs.callPackage ../packages/claude-plugins { };
+  claudePlugins = pkgs.callPackage ../../packages/claude-plugins { };
 in
 {
   options.modules.claude-code = {
@@ -54,7 +54,7 @@ in
             includePRFooter = false;
           };
           # enabledPlugins auto-generated from programs.claude-code.plugins list
-          hooks = lib.importDir ./hooks { inherit pkgs; };
+          hooks = import ./hooks/notification.nix { inherit pkgs; };
         };
       };
     };
