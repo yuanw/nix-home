@@ -2,7 +2,7 @@
 
 with pkgs;
 [
-  # alerter
+  alerter
   pinentry_mac
   #yt-dlp
   #bandcamp-dl
