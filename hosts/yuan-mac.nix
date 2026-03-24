@@ -32,6 +32,11 @@
   };
 
   modules = {
+    claude-code = {
+      enable = true;
+      enableClaudeMem = true;
+    };
+
     browsers.firefox = {
       enable = true;
       pkg = null;
