@@ -24,6 +24,9 @@ in
     yuanwang_wv
     yuanwang_ca
   ];
+  "jira-pat.age".publicKeys = [
+    yuanwang_wv
+  ];
   "secret1.age".publicKeys = users ++ systems;
   "adguard.age".publicKeys = users ++ systems;
   "isponsorblockvg.age".publicKeys = [
