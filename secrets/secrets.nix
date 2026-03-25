@@ -3,6 +3,7 @@ let
   yuanwang_wv = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHM9A47jwAmysQRtmnDdfXtV1Slt8irXG2UsDZUn41rS";
   yuanwang_ca = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpYgmWwtRG7vlRbtWheYrtHl9E9qx84sdU+YlE8w+CZ";
   yuanwang_wk = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDIGi8pbEy3R5Ju2euxpL3+JF5kP9Jx7jn4mHO7JH5Qy";
+  yuanw_wk_host = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH9un5wxjg/CNMmBpJHLR2NZY4fmqHlUidzejBsk3oAP";
   yuanw_mist = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW";
   users = [
     user1
@@ -28,6 +29,8 @@ in
   "jira-pat.age".publicKeys = [
     yuanwang_wv
     yuanwang_wk
+    yuanw_wk_host
+    yuanwang_ca
   ];
   "secret1.age".publicKeys = users ++ systems;
   "adguard.age".publicKeys = users ++ systems;
