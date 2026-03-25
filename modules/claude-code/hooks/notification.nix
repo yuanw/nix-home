@@ -23,7 +23,7 @@ let
       ${notify}
     '';
 
-  darwinNotify = notifyScript "${lib.getExe pkgs.alerter} --title \"$session_label\" --message \"$msg\" &";
+  darwinNotify = notifyScript "osascript -e \"display notification \\\"$msg\\\" with title \\\"$session_label\\\"\" &";
   linuxNotify = notifyScript "notify-send -a 'Claude Code' -i \"$HOME/.local/share/icons/claude.ico\" \"$session_label\" \"$msg\"";
 
   notifyCommand = if pkgs.stdenv.hostPlatform.isDarwin then "${darwinNotify}" else "${linuxNotify}";
