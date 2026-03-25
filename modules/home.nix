@@ -229,6 +229,9 @@ hm@{ pkgs, ... }:
         ".claude"
         ".agent-shell"
         ".dir-locals.el"
+        # claude-mem generated folder context files
+        "**/CLAUDE.md"
+        "!/CLAUDE.md"
       ];
     };
 
