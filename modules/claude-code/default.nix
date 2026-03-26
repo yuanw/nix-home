@@ -17,6 +17,9 @@ in
   };
   config = lib.mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
+      home.packages = with pkgs; [
+        agnix
+      ];
       programs.claude-code = {
         enable = true;
         package = inputs'.claude-code.packages.claude-code;
