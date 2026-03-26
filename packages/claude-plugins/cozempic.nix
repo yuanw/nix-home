@@ -27,5 +27,6 @@ mkClaudePlugin {
   };
   runtimeInputs = [
     pkgs.uv
+    pkgs.cozempic
   ];
 }
