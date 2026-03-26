@@ -1,0 +1,4 @@
+https://github.com/jwiegley/claude-prompts/
+
+
+https://github.com/khaneliman/khanelinix/blob/bc68b2fce3a9f5e239fe68122997f0f20781bf23/modules/home/programs/terminal/tools/claude-code/default.nix
