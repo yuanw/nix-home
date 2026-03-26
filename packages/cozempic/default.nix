@@ -3,7 +3,7 @@
   fetchFromGitHub,
   setuptools,
   lib,
-  python3,
+  python,
 }:
 buildPythonApplication rec {
   pname = "cozempic";
@@ -25,7 +25,7 @@ buildPythonApplication rec {
   makeWrapperArgs = [
     "--set"
     "PYTHONPATH"
-    "${builtins.placeholder "out"}/${python3.sitePackages}"
+    "${builtins.placeholder "out"}/${python.sitePackages}"
   ];
 
   doCheck = false;
