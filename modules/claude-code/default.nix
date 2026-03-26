@@ -21,6 +21,7 @@ in
         enable = true;
         package = inputs'.claude-code.packages.claude-code;
         skillsDir = ./skills;
+        commandsDir = ./commands;
         skillPackages = with claudePlugins; [
           caveman
           humanizer
