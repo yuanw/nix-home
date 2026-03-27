@@ -87,14 +87,12 @@
       inputs.agenix.overlays.default
       (
         _final: _prev:
-        # emacs depends on mailutils. mailutils 3.21 added nss_wrapper to
-        # nativeCheckInputs, but nss_wrapper doesn't build on darwin.
-        # doCheck is already false on darwin, so strip nativeCheckInputs.
+        # nss_wrapper is a nativeCheckInput of mailutils 3.21, pulled in via emacs.
+        # It doesn't compile on darwin. Since it's only used for tests (doCheck=false
+        # on darwin anyway), stub it out with an empty derivation.
         if _prev.stdenv.isDarwin then
           {
-            mailutils = _prev.mailutils.overrideAttrs (_: {
-              nativeCheckInputs = [ ];
-            });
+            nss_wrapper = _prev.runCommand "nss_wrapper-stub" { } "mkdir -p $out/lib";
           }
         else
           { }
