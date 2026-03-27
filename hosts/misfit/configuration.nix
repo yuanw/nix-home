@@ -19,6 +19,18 @@
     bimmer-connected.broken = "ignore";
   };
 
+  nixpkgs.overlays = [
+    (_final: prev: {
+      python314Packages = prev.python314Packages.overrideScope (
+        _pyfinal: pyprev: {
+          bimmer-connected = pyprev.bimmer-connected.overrideAttrs (_: {
+            doCheck = false;
+          });
+        }
+      );
+    })
+  ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.systemd-boot.enable = true;
