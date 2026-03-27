@@ -61,6 +61,7 @@
         "viscosity"
         #"librewolf"
         "firefox"
+        "wispr-flow"
       ];
       brews = [
         "redis"

@@ -1,7 +1,7 @@
-{ lib
-, python313Packages
-, fetchPypi
-,
+{
+  lib,
+  python313Packages,
+  fetchPypi,
 }:
 
 python313Packages.buildPythonApplication rec {
