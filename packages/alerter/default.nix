@@ -1,44 +1,40 @@
-{ stdenv, lib }:
+{
+  stdenv,
+  lib,
+  fetchurl,
+  unzip,
+}:
 stdenv.mkDerivation rec {
 
   pname = "alerter";
-  # big sur version
-  version = "1.0.1";
+  version = "26.5";
 
-  # nativeBuildInputs = [ unzip ];
+  src = fetchurl {
+    url = "https://github.com/vjeantet/alerter/releases/download/v${version}/alerter-${version}.zip";
+    hash = "sha256-EfY83cm7P4VU7Zt2JjKhIM+nvuBePAnWVzSCPgnSTxA=";
+  };
 
-  # src = fetchurl {
-  #   url = "https://github.com/vjeantet/alerter/releases/download/1.0.1/alerter_v1.0.1_darwin_amd64.zip";
-  #     # "https://github.com/vjeantet/alerter/releases/download/${version}/alerter_v${version}_darwin_amd64.zip";
-  #   sha256 = "sha256-gWHzn1CBcpKrGRD1pi3M/kOEuQShXvBnavBlgg3KLVo=";
-  # };
-  # # Work around the "unpacker appears to have produced no directories"
-  # # case that happens when the archive doesn't have a subdirectory.
-  # # setSourceRoot = "sourceRoot=`pwd`";
+  nativeBuildInputs = [ unzip ];
 
-  #  buildPhase = ''
-  #    unzip $src
-  # '';
+  # zip contains a single file with no subdirectory
+  setSourceRoot = "sourceRoot=$(pwd)";
 
   installPhase = ''
-    mkdir -p $out
-    cp ${./alerter} $out/alerter-bin
+    mkdir -p $out/bin
+    cp alerter $out/bin/alerter
+    chmod +x $out/bin/alerter
   '';
 
   meta = {
     homepage = "https://github.com/vjeantet/alerter";
-    description = "alerter";
+    description = "Send Mac OS X User Alerts (Notifications) from the command line";
     longDescription = ''
-      alerter is a command-line tool to send Mac OS X User Alerts (Notifications),
-      which are available in Mac OS X 10.8 and higher. (even catalina) the program ends when the alerter is activated or closed,
-      writing a the activated value to output (stdout), or a json object to describe the alert event.
+      alerter is a command-line tool to send Mac OS X User Alerts (Notifications).
+      The program ends when the alert is activated or closed, writing the activated
+      value to stdout, or a JSON object describing the alert event.
     '';
     license = lib.licenses.mit;
-    platforms = [
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ];
+    mainProgram = "alerter";
+    platforms = [ "aarch64-darwin" ];
   };
-
-  dontUnpack = true;
 }

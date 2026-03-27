@@ -1,42 +1,43 @@
 _final: prev: {
   installApplication =
-    { name
-    , version
-    , src
-    , description
-    , homepage
-    , ...
+    {
+      name,
+      version,
+      src,
+      description,
+      homepage,
+      ...
     }:
-      with _final;
-      stdenv.mkDerivation {
-        name = "${name}-${version}";
-        version = "${version}";
-        src = src;
-        buildInputs = [ _7zz ];
-        sourceRoot = ".";
-        phases = [
-          "unpackPhase"
-          "installPhase"
-        ];
-        unpackCmd = ''
-          7zz x $src -snld
-        '';
-        installPhase = ''
-          runHook preInstall
-          mkdir -p $out/Applications
-          cp -r *.app "$out/Applications/"
+    with _final;
+    stdenv.mkDerivation {
+      name = "${name}-${version}";
+      version = "${version}";
+      src = src;
+      buildInputs = [ _7zz ];
+      sourceRoot = ".";
+      phases = [
+        "unpackPhase"
+        "installPhase"
+      ];
+      unpackCmd = ''
+        7zz x $src -snld
+      '';
+      installPhase = ''
+        runHook preInstall
+        mkdir -p $out/Applications
+        cp -r *.app "$out/Applications/"
 
-          mkdir -p $out/bin
+        mkdir -p $out/bin
 
-          runHook postInstall
-        '';
+        runHook postInstall
+      '';
 
-        meta = with _final.lib; {
-          description = description;
-          homepage = homepage;
-          platforms = platforms.darwin;
-        };
+      meta = with _final.lib; {
+        description = description;
+        homepage = homepage;
+        platforms = platforms.darwin;
       };
+    };
   # https://github.com/Homebrew/homebrew-cask/blob/f144ade7bcc8884fdf2a57b114cf11e7d98b2c93/Casks/c/calibre.rb
   calibre_mac = _final.installApplication rec {
     name = "calibre";
@@ -100,11 +101,48 @@ _final: prev: {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
     };
   };
+  agnix =
+    with prev;
+    rustPlatform.buildRustPackage rec {
+      pname = "agnix";
+      version = "0.16.5";
+
+      src = fetchFromGitHub {
+        owner = "avifenesh";
+        repo = "agnix";
+        tag = "v${version}";
+        hash = "sha256-VUd+i1vogfLMkoJ/hzYR6besxlnKWSyH4LBYPfs1h0o=";
+      };
+
+      cargoHash = "sha256-amLDxWS4kIMeMsgAlhqECuixXd8xuYLVCzi3K9mEg1M=";
+
+      cargoBuildFlags = [
+        "--package"
+        "agnix-cli"
+        "--package"
+        "agnix-lsp"
+        "--package"
+        "agnix-mcp"
+      ];
+
+      doCheck = false;
+
+      meta = with lib; {
+        description = "Linter and LSP for AI coding assistant config files (CLAUDE.md, AGENTS.md, hooks, MCP)";
+        homepage = "https://github.com/avifenesh/agnix";
+        license = with licenses; [
+          mit
+          asl20
+        ];
+        mainProgram = "agnix";
+      };
+    };
   chroma-mcp = prev.callPackage ./chrome-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
+  cozempic = prev.python3Packages.callPackage ./cozempic { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };

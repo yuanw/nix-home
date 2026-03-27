@@ -4,7 +4,7 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
-      ./claude-code.nix
+      ./claude-code
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix

@@ -14,10 +14,11 @@ in
   options.modules.ai = {
     enable = mkEnableOption "ai";
     enableGitAI = mkEnableOption "git-ai";
+    enableOllama = mkEnableOption "ollama";
   };
 
   config = mkMerge [
-    (mkIf cfg.enable {
+    (mkIf cfg.enableOllama {
       home-manager.users.${config.my.username} = {
         home.packages = [
           # (pkgs.python3.withPackages (ps:

@@ -109,6 +109,8 @@ rec {
     inherit (pkgs) fetchFromGitHub;
   };
 
+  cozempic = pkgs.python3Packages.callPackage ./cozempic { };
+  chroma-mcp = pkgs.python313Packages.callPackage ./chrome-mcp.nix { };
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
   caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
   claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
