@@ -21,7 +21,8 @@
 
   nixpkgs.overlays = [
     (_final: prev: {
-      python3 = prev.python3.override {
+      # home-assistant hardcodes python314, not the generic python3
+      python314 = prev.python314.override {
         packageOverrides = _pyfinal: pyprev: {
           bimmer-connected = pyprev.bimmer-connected.overrideAttrs (_: {
             doCheck = false;
