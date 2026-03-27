@@ -12,9 +12,19 @@
     ./disk-config.nix
   ];
 
-  nixpkgs.config.problems.handlers = {
-    bimmer-connected.broken = "ignore";
-  };
+  nixpkgs.overlays = [
+    (_final: prev: {
+      # bimmer-connected is used by home-assistant. Tests fail with Python 3.14
+      # due to asyncio API changes (no current event loop in thread 'MainThread').
+      python3 = prev.python3.override {
+        packageOverrides = _pyfinal: pyprev: {
+          bimmer-connected = pyprev.bimmer-connected.overrideAttrs (_: {
+            doCheck = false;
+          });
+        };
+      };
+    })
+  ];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.configurationLimit = 5;
