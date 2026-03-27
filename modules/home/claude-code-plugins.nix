@@ -97,12 +97,6 @@ let
   '';
 in
 {
-  options.programs.claude-code.plugins = lib.mkOption {
-    type = lib.types.listOf lib.types.package;
-    default = [ ];
-    description = "List of claude plugin packages built with mkClaudePlugin.";
-  };
-
   options.programs.claude-code.skillPackages = lib.mkOption {
     type = lib.types.listOf lib.types.package;
     default = [ ];
