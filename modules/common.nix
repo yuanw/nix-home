@@ -73,6 +73,12 @@
       allowUnfree = true;
       allowBroken = false;
       allowUnsupportedSystem = true;
+      problems.handlers = {
+        # nss_wrapper is broken on darwin. It's a nativeCheckInput of mailutils
+        # (used by emacs). The overlay below strips it; this allows evaluation
+        # to proceed so the override can take effect.
+        nss_wrapper.broken = "ignore";
+      };
     };
     overlays = [
       inputs.emacs.overlay
