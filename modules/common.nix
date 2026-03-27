@@ -73,15 +73,23 @@
       allowUnfree = true;
       allowBroken = false;
       allowUnsupportedSystem = true;
-      problems.handlers = {
-        nss_wrapper.broken = "ignore";
-      };
     };
     overlays = [
       inputs.emacs.overlay
       inputs.nur.overlays.default
       inputs.mcp-servers-nix.overlays.default
       inputs.agenix.overlays.default
+      (
+        _final: _prev:
+        lib.optionalAttrs _prev.stdenv.isDarwin {
+          # emacs depends on mailutils. mailutils 3.21 added nss_wrapper to
+          # nativeCheckInputs, but nss_wrapper doesn't build on darwin.
+          # doCheck is already false on darwin, so strip nativeCheckInputs.
+          mailutils = _prev.mailutils.overrideAttrs (_: {
+            nativeCheckInputs = [ ];
+          });
+        }
+      )
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
         # gtk3 =
