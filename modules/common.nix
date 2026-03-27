@@ -73,12 +73,6 @@
       allowUnfree = true;
       allowBroken = false;
       allowUnsupportedSystem = true;
-      problems.handlers = {
-        # nss_wrapper is broken on darwin. It's a nativeCheckInput of mailutils
-        # (used by emacs). The overlay below strips it; this allows evaluation
-        # to proceed so the override can take effect.
-        nss_wrapper.broken = "ignore";
-      };
     };
     overlays = [
       inputs.emacs.overlay
@@ -87,12 +81,12 @@
       inputs.agenix.overlays.default
       (
         _final: _prev:
-        # nss_wrapper is a nativeCheckInput of mailutils 3.21, pulled in via emacs.
-        # It doesn't compile on darwin. Since it's only used for tests (doCheck=false
-        # on darwin anyway), stub it out with an empty derivation.
+        # mailutils 3.21 added nss_wrapper to nativeCheckInputs, which doesn't
+        # build on darwin. NixOS/nixpkgs#503376 (merged to master as c207940c)
+        # reverts this. Use nixpkgs-master's mailutils until nixos-unstable catches up.
         if _prev.stdenv.isDarwin then
           {
-            nss_wrapper = _prev.runCommand "nss_wrapper-stub" { } "mkdir -p $out/lib";
+            mailutils = inputs'.nixpkgs-master.legacyPackages.mailutils;
           }
         else
           { }
