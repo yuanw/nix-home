@@ -41,7 +41,7 @@
     haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs = {
-      url = "github:nix-community/emacs-overlay/640fb2092ce9e7547e5d717ff621e561ea5d12a4";
+      url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     emacs-plus = {
