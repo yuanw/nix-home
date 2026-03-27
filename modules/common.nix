@@ -73,6 +73,9 @@
       allowUnfree = true;
       allowBroken = false;
       allowUnsupportedSystem = true;
+      problems.handlers = {
+        nss_wrapper.broken = "ignore";
+      };
     };
     overlays = [
       inputs.emacs.overlay
