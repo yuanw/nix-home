@@ -12,10 +12,15 @@
     ./disk-config.nix
   ];
 
+  nixpkgs.config.problems.handlers = {
+    # bimmer-connected is used by home-assistant. Marked broken due to test
+    # failures with Python 3.14 asyncio API changes. The overlay below disables
+    # tests; this handler allows evaluation to proceed past the broken check.
+    bimmer-connected.broken = "ignore";
+  };
+
   nixpkgs.overlays = [
     (_final: prev: {
-      # bimmer-connected is used by home-assistant. Tests fail with Python 3.14
-      # due to asyncio API changes (no current event loop in thread 'MainThread').
       python3 = prev.python3.override {
         packageOverrides = _pyfinal: pyprev: {
           bimmer-connected = pyprev.bimmer-connected.overrideAttrs (_: {
