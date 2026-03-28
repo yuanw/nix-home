@@ -120,15 +120,39 @@
                     if [ -n "$old_pdmp" ]; then
                       tmp_pdmp="$old_pdmp.tmp"
                       eln_dir="$out/lib/emacs/$emacs_version/native-lisp"
+                      elisp_file=$(mktemp "$TMPDIR/emacs-redump-XXXXXX.el")
+                      cat > "$elisp_file" << ELISP
+                    ; Fix pdmp-frozen variables that point to the build sandbox.
+                    ; In Emacs 30+, package.el is preloaded into the pdmp, so
+                    ; package-directory-list and other vars are frozen at dump time.
+                    (when (boundp 'native-comp-eln-load-path)
+                      (setq native-comp-eln-load-path (list "$eln_dir/")))
+                    (setq temporary-file-directory "/tmp/")
+                    ; package-directory-list is computed from load-path at dump time and
+                    ; frozen. At runtime, EMACSLOADPATH adds package deps to load-path but
+                    ; package-directory-list is never updated. Advise package-initialize to
+                    ; recompute it from the current load-path before scanning for packages.
+                    (advice-add 'package-initialize :before
+                      (lambda (&rest _)
+                        (setq package-directory-list
+                          (let (result)
+                            (dolist (f load-path)
+                              (and (stringp f)
+                                   (equal (file-name-nondirectory f) "site-lisp")
+                                   (push (expand-file-name "elpa" f) result)))
+                            (nreverse result)))))
+                    (dump-emacs-portable "$tmp_pdmp")
+                    ELISP
                       EMACSDATA="$out/share/emacs/$emacs_version/etc" \
                       EMACSLOADPATH="$out/share/emacs/$emacs_version/lisp:" \
                         "$out/bin/emacs" \
                           --dump-file "$old_pdmp" \
                           --batch \
                           --no-site-file \
-                          --eval "(progn (when (boundp 'native-comp-eln-load-path) (setq native-comp-eln-load-path (list \"$eln_dir/\"))) (setq temporary-file-directory \"/tmp/\") (dump-emacs-portable \"$tmp_pdmp\"))" \
+                          --load "$elisp_file" \
                         && mv "$tmp_pdmp" "$old_pdmp" \
                         || echo "Warning: emacs re-dump failed, continuing with original pdmp"
+                      rm -f "$elisp_file"
                     fi
                     wrapProgram "$out/bin/emacs" \
                       --set-default EMACSDATA "$out/share/emacs/$emacs_version/etc"
