@@ -8,20 +8,22 @@ let
     notify:
     pkgs.writeShellScript "claude-notify" ''
       payload=$(cat)
-      session_id=$(echo "$payload" | ${jq} -r '.session_id')
-      transcript=$(find "$HOME/.claude/projects" -name "''${session_id}.jsonl" 2>/dev/null | head -1)
-      session_label=$(${jq} -r '
-        select(.role == "user") |
-        .content |
-        if type == "array" then .[0].text else . end |
-        split("\n")[0] |
-        .[0:60]
-      ' "$transcript" 2>/dev/null | head -1)
+      transcript=$(echo "$payload" | ${jq} -r '.transcript_path // empty')
+      session_label=""
+      if [ -n "$transcript" ] && [ -f "$transcript" ]; then
+        session_label=$(${jq} -r '
+          select(.role == "user") |
+          .content |
+          if type == "array" then .[0].text else . end |
+          split("\n")[0] |
+          .[0:60]
+        ' "$transcript" 2>/dev/null | head -1)
+      fi
       if [ -z "$session_label" ]; then
         session_label="Claude Code"
       fi
-      msg=$(echo "$payload" | ${jq} -r '.last_assistant_message | split("\n")[0] | .[0:80]')
-      ${notify}
+      msg=$(echo "$payload" | ${jq} -r '.message // .last_assistant_message // "" | split("\n")[0] | .[0:80]')
+      ( ${notify} ) &
     '';
 
   darwinNotify = notifyScript "osascript -e \"display notification \\\"$msg\\\" with title \\\"$session_label\\\"\" &";
