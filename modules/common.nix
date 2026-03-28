@@ -126,7 +126,7 @@
                           --dump-file "$old_pdmp" \
                           --batch \
                           --no-site-file \
-                          --eval "(progn (when (boundp 'native-comp-eln-load-path) (setq native-comp-eln-load-path (list \"$eln_dir/\"))) (dump-emacs-portable \"$tmp_pdmp\"))" \
+                          --eval "(progn (when (boundp 'native-comp-eln-load-path) (setq native-comp-eln-load-path (list \"$eln_dir/\"))) (setq temporary-file-directory \"/tmp/\") (dump-emacs-portable \"$tmp_pdmp\"))" \
                         && mv "$tmp_pdmp" "$old_pdmp" \
                         || echo "Warning: emacs re-dump failed, continuing with original pdmp"
                     fi
