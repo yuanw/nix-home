@@ -135,16 +135,21 @@
                     ;
                     ; NOTE: advice-add before package.el loads is wiped when defun redefines
                     ; the symbol; with-eval-after-load ensures the hook runs after defun.
+                    ; Gate on noninteractive: in interactive Emacs, package-activate-all is
+                    ; called at startup which triggers this hook and resets package-alist,
+                    ; breaking package activation (org-mode not rendering, treesit nil, etc.).
+                    ; Only batch/build-time invocations need this fix.
                     (with-eval-after-load 'package
-                      (setq package-directory-list
-                        (let (result)
-                          (dolist (f load-path)
-                            (and (stringp f)
-                                 (equal (file-name-nondirectory f) "site-lisp")
-                                 (push (expand-file-name "elpa" f) result)))
-                          (nreverse result)))
-                      (unless (bound-and-true-p package--initialized)
-                        (package-initialize t)))
+                      (when noninteractive
+                        (setq package-directory-list
+                          (let (result)
+                            (dolist (f load-path)
+                              (and (stringp f)
+                                   (equal (file-name-nondirectory f) "site-lisp")
+                                   (push (expand-file-name "elpa" f) result)))
+                            (nreverse result)))
+                        (unless (bound-and-true-p package--initialized)
+                          (package-initialize t))))
                     (dump-emacs-portable "$tmp_pdmp")
                     ELISP
                       EMACSDATA="$out/share/emacs/$emacs_version/etc" \
