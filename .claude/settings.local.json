@@ -12,8 +12,7 @@
       "Bash(grep:*)",
       "Bash(nix log:*)",
       "Bash(nix build:*)",
-      "Read(//Users/yuanwang/.claude/plugins/marketplaces/claude-code-plugins/plugins/code-review/**)",
-      "Bash(python3 -m json.tool)"
+      "Read(//Users/yuanwang/.claude/plugins/marketplaces/claude-code-plugins/plugins/code-review/**)"
     ],
     "deny": [],
     "ask": []

@@ -722,7 +722,8 @@ with lib;
                   ];
                 };
                 auto-save = {
-                  enable = true;
+                  enable = hostname == "WK01174";
+                  #enable = true;
                   package =
                     epkgs:
                     (pkgs.callPackage "${packagePath}/auto-save.nix" {

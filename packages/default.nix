@@ -101,6 +101,7 @@ _final: prev: {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
     };
   };
+  claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
   agnix =
     with prev;
     rustPlatform.buildRustPackage rec {
