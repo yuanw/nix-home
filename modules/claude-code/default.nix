@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs',
   ...
 }:
 let
@@ -22,7 +21,7 @@ in
       ];
       programs.claude-code = {
         enable = true;
-        package = inputs'.claude-code.packages.claude-code;
+        package = pkgs.llm-agents.claude-code;
         skillsDir = ./skills;
         commandsDir = ./commands;
         skillPackages = with claudePlugins; [

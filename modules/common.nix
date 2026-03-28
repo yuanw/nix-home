@@ -22,6 +22,7 @@
         "https://cache.iog.io"
         "https://cache.zw3rk.com"
         "https://numtide.cachix.org"
+        "https://cache.numtide.com"
       ];
       trusted-substituters = [
         "https://cache.nixos.org"
@@ -30,6 +31,7 @@
         "https://cache.garnix.io"
         "https://cache.iog.io"
         "https://numtide.cachix.org"
+        "https://cache.numtide.com"
       ];
       trusted-public-keys = [
         "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -41,6 +43,7 @@
         "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
         "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
         "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
+        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
       ];
       # https://github.com/NixOS/nix/issues/7273
       # auto-optimise-store = true;
@@ -78,6 +81,7 @@
       inputs.emacs.overlay
       inputs.nur.overlays.default
       inputs.mcp-servers-nix.overlays.default
+      inputs.llm-agents.overlays.default
       inputs.agenix.overlays.default
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;

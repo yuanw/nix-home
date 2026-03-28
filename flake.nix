@@ -11,7 +11,7 @@
 
     mics-skills.url = "github:Mic92/mics-skills";
 
-    claude-code.url = "github:sadjow/claude-code-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -99,6 +99,15 @@
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
+
+      flake = {
+        nixConfig = {
+          extra-substituters = [ "https://cache.numtide.com" ];
+          extra-trusted-public-keys = [
+            "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+          ];
+        };
+      };
       perSystem =
         { system, pkgs, ... }:
         {
