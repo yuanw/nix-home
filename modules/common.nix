@@ -93,12 +93,16 @@
       )
       (
         _final: _prev:
-        # On macOS, emacs-git built from source embeds the Nix build directory
-        # (/private/tmp/nix-build-.../emacs-<hash>/etc) as EMACSDATA instead of
-        # the nix store path. This causes byte-compilation of emacs packages to
-        # fail when the build sandbox is torn down.
-        # Fix: wrap the emacs binary to set EMACSDATA to the store path, and
-        # update passthru.pkgs so all downstream packages use the fixed emacs.
+        # On macOS, the emacs-git pdmp (portable dump) captures the Nix build
+        # sandbox path (/private/tmp/nix-build-.../etc) as data-directory.
+        # When emacs is later used as a build tool for elisp packages, the new
+        # sandbox returns EPERM (not ENOENT) for that stale temp path — causing
+        # a fatal startup crash before EMACSDATA env var processing in startup.el.
+        #
+        # Fix: re-dump emacs immediately after install (while still inside the
+        # build sandbox where those paths are accessible), with EMACSDATA and
+        # native-comp-eln-load-path corrected to point at $out store paths.
+        # The new pdmp captures the corrected values, eliminating the EPERM.
         if _prev.stdenv.isDarwin then
           {
             emacs-git =
@@ -108,6 +112,20 @@
                   nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ _prev.makeWrapper ];
                   postInstall = (old.postInstall or "") + ''
                     emacs_version=$(ls "$out/share/emacs" | grep -E '^[0-9]' | sort -V | tail -1)
+                    old_pdmp=$(find "$out/libexec/emacs/$emacs_version" -name 'emacs-*.pdmp' 2>/dev/null | head -1)
+                    if [ -n "$old_pdmp" ]; then
+                      tmp_pdmp="$old_pdmp.tmp"
+                      eln_dir="$out/lib/emacs/$emacs_version/native-lisp"
+                      EMACSDATA="$out/share/emacs/$emacs_version/etc" \
+                      EMACSLOADPATH="$out/share/emacs/$emacs_version/lisp:" \
+                        "$out/bin/emacs" \
+                          --dump-file "$old_pdmp" \
+                          --batch \
+                          --no-site-file \
+                          --eval "(progn (when (boundp 'native-comp-eln-load-path) (setq native-comp-eln-load-path (list \"$eln_dir/\"))) (dump-emacs-portable \"$tmp_pdmp\"))" \
+                        && mv "$tmp_pdmp" "$old_pdmp" \
+                        || echo "Warning: emacs re-dump failed, continuing with original pdmp"
+                    fi
                     wrapProgram "$out/bin/emacs" \
                       --set-default EMACSDATA "$out/share/emacs/$emacs_version/etc"
                   '';
