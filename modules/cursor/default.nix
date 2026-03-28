@@ -31,7 +31,7 @@ in
 
   config = lib.mkIf cfg.enable {
     home-manager.users.${config.my.username} = lib.mkMerge [
-      { home.packages = [ pkgs.llm-agents.cursor-cli ]; }
+      { home.packages = [ pkgs.llm-agents.cursor-agent ]; }
 
       (lib.mkIf (cfg.skillsDir != null) {
         home.file.".cursor/rules/_local" = {
