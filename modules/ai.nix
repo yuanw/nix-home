@@ -31,7 +31,7 @@ in
       };
     })
 
-    (mkIf cfg.enableOllama {
+    (mkIf cfg.enableCursor {
       home-manager.users.${config.my.username} = {
         home.packages = [
           # (pkgs.python3.withPackages (ps:

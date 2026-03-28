@@ -41,6 +41,7 @@
     #   supportLocalVirtualBuilder = true;
     # };
     #ai.enable = true;
+    ai.enableCursor = true;
     secrets.agenix = {
       enable = true;
     };
