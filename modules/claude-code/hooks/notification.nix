@@ -8,6 +8,7 @@ let
     notify:
     pkgs.writeShellScript "claude-notify" ''
       payload=$(cat)
+      echo "$payload" >> /tmp/claude-notify-debug.log
       transcript=$(echo "$payload" | ${jq} -r '.transcript_path // empty')
       session_label=""
       if [ -n "$transcript" ] && [ -f "$transcript" ]; then

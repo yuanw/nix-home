@@ -19,8 +19,13 @@ in
       home.packages = with pkgs; [
         agnix
       ];
+      mcp-servers.programs.sequential-thinking.enable = true;
+
+      programs.mcp.enable = true;
+
       programs.claude-code = {
         enable = true;
+        enableMcpIntegration = true;
         package = pkgs.llm-agents.claude-code;
         skillsDir = ./skills;
         commandsDir = ./commands;

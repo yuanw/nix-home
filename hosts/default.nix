@@ -63,6 +63,7 @@
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeManagerModules.default
                   inputs.git-ai.homeManagerModules.default
+                  inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                 ];
                 # users.johnw = import ./config/home.nix;
@@ -137,6 +138,7 @@
                       inputs.direnv-instant.homeModules.direnv-instant
                       inputs.mics-skills.homeManagerModules.default
                       inputs.git-ai.homeManagerModules.default
+                      inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
                     ];
 
