@@ -5,6 +5,7 @@
       ./agenix.nix
       ./ai.nix
       ./claude-code
+      ./cursor
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix

@@ -15,7 +15,6 @@ in
     enable = mkEnableOption "ai";
     enableGitAI = mkEnableOption "git-ai";
     enableOllama = mkEnableOption "ollama";
-    enableCursor = mkEnableOption "cursor";
   };
 
   config = mkMerge [
@@ -27,18 +26,6 @@ in
           #     huggingface-hub
           #   ]))
           pkgs.stable.ollama
-        ];
-      };
-    })
-
-    (mkIf cfg.enableCursor {
-      home-manager.users.${config.my.username} = {
-        home.packages = [
-          # (pkgs.python3.withPackages (ps:
-          #   with ps; [
-          #     huggingface-hub
-          #   ]))
-          pkgs.cursor-cli
         ];
       };
     })
