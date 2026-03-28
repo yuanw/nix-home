@@ -91,6 +91,37 @@
         else
           { }
       )
+      (
+        _final: _prev:
+        # On macOS, emacs-git built from source embeds the Nix build directory
+        # (/private/tmp/nix-build-.../emacs-<hash>/etc) as EMACSDATA instead of
+        # the nix store path. This causes byte-compilation of emacs packages to
+        # fail when the build sandbox is torn down.
+        # Fix: wrap the emacs binary to set EMACSDATA to the store path, and
+        # update passthru.pkgs so all downstream packages use the fixed emacs.
+        if _prev.stdenv.isDarwin then
+          {
+            emacs-git =
+              let
+                emacs = _final.emacs-git;
+                base = _prev.emacs-git.overrideAttrs (old: {
+                  nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ _prev.makeWrapper ];
+                  postInstall = (old.postInstall or "") + ''
+                    emacs_version=$(ls "$out/share/emacs" | grep -E '^[0-9]' | sort -V | tail -1)
+                    wrapProgram "$out/bin/emacs" \
+                      --set-default EMACSDATA "$out/share/emacs/$emacs_version/etc"
+                  '';
+                });
+              in
+              base.overrideAttrs (oa: {
+                passthru = oa.passthru // {
+                  pkgs = oa.passthru.pkgs.overrideScope (_eself: _esuper: { inherit emacs; });
+                };
+              });
+          }
+        else
+          { }
+      )
       (_final: _prev: {
         stable = inputs'.nixpkgs-stable.legacyPackages;
         # gtk3 =
