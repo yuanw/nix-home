@@ -122,18 +122,29 @@
                     (when (boundp 'native-comp-eln-load-path)
                       (setq native-comp-eln-load-path (list "$eln_dir/")))
                     (setq temporary-file-directory "/tmp/")
-                    ; package.el is NOT preloaded in the pdmp, but package-directory-list
-                    ; IS bound (inherited from the original dump). On first load, defcustom
-                    ; is a no-op (variable already bound) so EMACSLOADPATH additions to
-                    ; load-path are not reflected in package-directory-list.
-                    ; Nixpkgs emacs package builds call -f package-activate-all, which does
-                    ; not populate package-alist on its own. Advise it to call
-                    ; package-initialize first (which in Emacs 31 scans load-path for
-                    ; packages), ensuring build-time deps like denote are found.
-                    (advice-add 'package-activate-all :before
-                      (lambda (&rest _)
-                        (unless (bound-and-true-p package--initialized)
-                          (package-initialize t))))
+                    ; package-directory-list is frozen in the pdmp at emacs-git build time
+                    ; when no user packages are present. When this emacs is later used to
+                    ; build elisp packages, EMACSLOADPATH adds deps to load-path but
+                    ; package-directory-list (already bound → defcustom is a no-op) does
+                    ; not include their elpa dirs, so package-activate-all cannot find deps.
+                    ;
+                    ; Fix: use with-eval-after-load so that AFTER package.el loads (triggered
+                    ; by the -f package-activate-all autoload), we reset package-directory-list
+                    ; from the current load-path (which includes EMACSLOADPATH additions) and
+                    ; call package-initialize to populate package-alist.
+                    ;
+                    ; NOTE: advice-add before package.el loads is wiped when defun redefines
+                    ; the symbol; with-eval-after-load ensures the hook runs after defun.
+                    (with-eval-after-load 'package
+                      (setq package-directory-list
+                        (let (result)
+                          (dolist (f load-path)
+                            (and (stringp f)
+                                 (equal (file-name-nondirectory f) "site-lisp")
+                                 (push (expand-file-name "elpa" f) result)))
+                          (nreverse result)))
+                      (unless (bound-and-true-p package--initialized)
+                        (package-initialize t)))
                     (dump-emacs-portable "$tmp_pdmp")
                     ELISP
                       EMACSDATA="$out/share/emacs/$emacs_version/etc" \
