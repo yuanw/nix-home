@@ -8,7 +8,8 @@ let
     notify:
     pkgs.writeShellScript "claude-notify" ''
       payload=$(cat)
-      transcript=$(echo "$payload" | ${jq} -r '.transcript_path')
+      session_id=$(echo "$payload" | ${jq} -r '.session_id')
+      transcript=$(find "$HOME/.claude/projects" -name "''${session_id}.jsonl" 2>/dev/null | head -1)
       session_label=$(${jq} -r '
         select(.role == "user") |
         .content |

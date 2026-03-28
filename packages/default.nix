@@ -148,4 +148,5 @@ _final: prev: {
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };
+  cursor-agent-acp = prev.callPackage ./cursor-agent-acp.nix { };
 }

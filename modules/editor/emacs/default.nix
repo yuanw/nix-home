@@ -3278,6 +3278,7 @@ with lib;
                   '';
                   extraPackages = [
                     pkgs.claude-code-acp
+                    pkgs.cursor-agent-acp
                   ];
                 };
 

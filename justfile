@@ -20,6 +20,7 @@ nix-update:
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
     @nix-update -f ./packages/release.nix chroma-mcp --src-only
+    @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
     @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
     @nix-update -f ./packages/release.nix cozempic --src-only
