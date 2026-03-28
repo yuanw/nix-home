@@ -6,6 +6,7 @@
 }:
 let
   cfg = config.modules.cursor;
+  claudePlugins = pkgs.callPackage ../../packages/claude-plugins { };
 in
 {
   options.modules.cursor = {
@@ -13,13 +14,17 @@ in
 
     skillsDir = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
-      default = null;
+      default = ./skills;
       description = "Local directory of cursor rules linked recursively into ~/.cursor/rules/.";
     };
 
     skillPackages = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default = [ ];
+      default = with claudePlugins; [
+        caveman
+        humanizer
+        emacs-skills
+      ];
       description = "Skill packages built with mkClaudeSkill. Each is linked into ~/.cursor/rules/<pname>/.";
     };
   };
