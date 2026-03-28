@@ -1,0 +1,130 @@
+#+title: Emacs pdmp macOS Build Failures (March 2026)
+#+date: 2026-03-28
+
+* Background
+
+When =emacs-git= is built from source and not available in a binary cache,
+Nix builds it locally. Part of that build produces a /portable dump file/
+(=.pdmp=), which captures the state of Emacs's Lisp environment at install
+time — including file path variables that point into the Nix build sandbox
+(=/private/tmp/nix-build-emacs-git-*.drv-0/=).
+
+On macOS, the sandbox uses =sandbox-exec= which returns =EPERM= (not =ENOENT=)
+for paths outside its whitelist. When a later elisp package build uses
+=emacs-git= as a build tool, that new sandbox has no knowledge of the stale
+temp paths captured in the pdmp — causing fatal crashes before Emacs can
+apply any runtime environment variable overrides.
+
+These issues surfaced in late March 2026 due to Emacs 31 upstream changes that
+tightened pdmp initialization (variables captured at dump time are no longer
+reset from compile-time constants after the dump loads).
+
+The fix lives in the =emacs-git= overlay in =modules/common.nix=. During
+=postInstall=, while still inside the original build sandbox where the old paths
+are accessible, Emacs re-dumps the =.pdmp= with corrected variable values.
+
+* Issue 1: =data-directory= pointing to build sandbox
+
+** Symptom
+
+#+begin_example
+emacs: Could not read /private/tmp/nix-build-emacs-git-20260327.0.drv-0/emacs-9b5a9c9/etc/rgb.txt
+#+end_example
+
+** Root cause
+
+=data-directory= (pointing to the =etc/= subtree) is captured in the pdmp.
+In Emacs 31, =init_data()= no longer resets =Vdata_directory= from =PATH_DATA=
+after a pdmp load. When a downstream elisp build uses emacs as a build tool,
+macOS returns =EPERM= for the stale sandbox path → fatal crash before =EMACSDATA=
+env var processing in =startup.el=.
+
+** Fix
+
+Re-dump the pdmp during =postInstall= with =EMACSDATA= set to =$out= store path.
+The new pdmp captures the correct, permanent store path for =data-directory=.
+
+* Issue 2: =temporary-file-directory= pointing to build sandbox
+
+** Symptom
+
+#+begin_example
+Creating directory with prefix: No such file or directory,
+  /private/tmp/nix-build-emacs-git-20260327.0.drv-0/browse-kill-ring
+#+end_example
+
+** Root cause
+
+=temporary-file-directory= is also captured in the pdmp. =defvar= is a no-op
+at runtime if the variable is already bound, so the pdmp-frozen path persists.
+When =browse-kill-ring= (or any package) creates a temp file, it uses the stale
+sandbox path → =ENOENT= / crash.
+
+** Fix
+
+Add =(setq temporary-file-directory "/tmp/")= to the re-dump elisp before
+=dump-emacs-portable=, so the new pdmp captures =/tmp/= instead of the sandbox path.
+
+* Issue 3: =package-activate-all= cannot find dependencies (e.g. =denote=)
+
+** Symptom
+
+#+begin_example
+Unable to activate package 'denote-org'.
+Required package 'denote-4.0.0' is unavailable
+
+Error: file-missing ("Cannot open load file" "No such file or directory"
+  "denote" ".../denote-org-0.2.1/denote-org.el")
+#+end_example
+
+** Root cause
+
+Three interacting factors:
+
+1. =package-directory-list= is computed by a =defcustom= default form that
+   scans =load-path= for =site-lisp= dirs and appends their =elpa/= subdirs.
+   This value is captured in the pdmp at emacs-git build time, when no user
+   packages are present.
+
+2. When a downstream build (e.g. =denote-org=) uses emacs, nixpkgs adds each
+   =nativeBuildInput='s =share/emacs/site-lisp= dir to =EMACSLOADPATH= →
+   =load-path=. But =package-directory-list= is already bound from the pdmp,
+   so =defcustom= is a no-op — the new =site-lisp= dirs are not reflected.
+
+3. The nixpkgs emacs build process calls =emacs --batch -f package-activate-all=.
+   =package-activate-all= iterates =package-alist=, which is empty because
+   =package-initialize= was never called to scan =package-directory-list=.
+
+   A first attempt at fixing this used =advice-add= on =package-activate-all=
+   in the re-dumped pdmp to call =(package-initialize t)= before activation.
+   This failed because =package-activate-all= is an autoload in the pdmp —
+   when =-f package-activate-all= triggers loading =package.el=, =defun=
+   replaces the symbol's function cell, wiping the advice.
+
+** Fix
+
+Use =with-eval-after-load 'package= in the re-dump elisp. The thunk is stored
+in =after-load-alist= in the pdmp and runs after =package.el= fully loads
+(i.e., after =defun= has run). The hook:
+
+1. Resets =package-directory-list= by scanning the current =load-path= (which
+   includes =EMACSLOADPATH= additions from the build's =nativeBuildInputs=).
+2. Calls =(package-initialize t)= to populate =package-alist= from the
+   recomputed directory list.
+
+=package-activate-all= then finds all declared dependencies and activation
+succeeds.
+
+* Fix location
+
+=modules/common.nix= — the =nixpkgs.overlays= block that overrides =emacs-git=
+on Darwin. The relevant =postInstall= shell snippet:
+
+1. Finds the installed =.pdmp= path.
+2. Writes a temp elisp file correcting all three variables.
+3. Runs emacs with =--dump-file= (original pdmp) and =--load= (the elisp).
+4. On success, =mv= the new pdmp over the old one.
+5. Calls =wrapProgram= to set =EMACSDATA= as a default env var.
+
+See also =.claude/commands/debug-emacs-build.md= for the diagnostic workflow
+used to identify root failing derivations and decode error patterns.
