@@ -1,6 +1,131 @@
 #+title: Emacs pdmp macOS Build Failures (March 2026)
 #+date: 2026-03-28
 
+* How pdmp, the Emacs build, and the Nix sandbox interact
+
+** What is a portable dump?
+
+Emacs is unusual among programs: it bootstraps itself by loading thousands of
+Lisp files at startup. To avoid repeating this every launch, Emacs /dumps/ the
+entire Lisp state — all loaded functions, variables, and their values — into a
+binary snapshot file called a *portable dump* (=.pdmp=). On next start, Emacs
+loads this snapshot instead of re-evaluating all those Lisp files. Startup goes
+from ~5 seconds to ~0.1 seconds.
+
+The dump is created by running a special Emacs invocation at the end of
+=make install=:
+
+#+begin_src sh
+emacs --batch --load loadup.el --dump-file emacs.pdmp
+#+end_src
+
+This evaluates =loadup.el= (which loads all of Emacs's core Lisp), then calls
+=dump-emacs-portable= to freeze the entire Lisp heap into the =.pdmp= file.
+
+** What gets frozen
+
+The pdmp captures /everything/ in the Lisp environment at dump time — including
+variable values. Critical ones:
+
+| Variable                  | What it holds                        | Set from                            |
+|---------------------------+--------------------------------------+-------------------------------------|
+| =data-directory=          | path to =etc/= (rgb.txt, etc.)       | =PATH_DATA= compile-time constant   |
+| =temporary-file-directory=| temp dir for scratch files           | defaulted in =files.el=             |
+| =native-comp-eln-load-path= | where =.eln= native-compiled files live | set during build               |
+| =package-directory-list=  | dirs to scan for ELPA packages       | =defcustom= scanning =load-path= at dump time |
+
+In older Emacs versions, =init_data()= in C would /reset/ =data-directory= from
+=PATH_DATA= after loading a pdmp. Emacs 31 tightened this — it only resets
+variables when =!initialized=, so a pdmp load no longer overrides frozen values.
+
+** Where Nix's sandbox comes in
+
+Nix builds every derivation inside an isolated *sandbox*. On macOS, this is
+implemented with =sandbox-exec= using a profile that whitelists specific paths.
+The build gets a fresh temp dir like:
+
+#+begin_example
+/private/tmp/nix-build-emacs-git-20260327.0.drv-0/
+#+end_example
+
+When =make install= runs inside this sandbox and dumps the pdmp, the frozen
+variables point /into this temp dir/:
+
+#+begin_example
+data-directory      → /private/tmp/nix-build-emacs-git-.../emacs-9b5a9c9/etc/
+temporary-file-dir  → /private/tmp/nix-build-emacs-git-.../
+#+end_example
+
+After the build completes, Nix moves the output to
+=/nix/store/abc123-emacs-git-*/= and *tears down the sandbox* — the temp dir
+is gone.
+
+** The two-sandbox problem
+
+Emacs is used as a /build tool/ to compile downstream elisp packages. When
+nixpkgs builds =emacs-denote-org=, it runs:
+
+#+begin_src sh
+emacs --batch -f package-activate-all -f batch-byte-compile denote-org.el
+#+end_src
+
+This runs inside a *new sandbox* for the =denote-org= derivation. That sandbox:
+
+- Has no knowledge of the old emacs-git sandbox paths
+- On Linux: returns =ENOENT= for missing paths → Emacs handles gracefully
+- On macOS: returns =EPERM= for paths outside its whitelist → *Emacs crashes*
+
+This asymmetry is why the issue only manifests on macOS. Linux sandboxing (user
+namespaces) makes paths simply not exist; macOS =sandbox-exec= actively denies
+access.
+
+** The fix: re-dump while still inside the original sandbox
+
+The trick is to re-dump the pdmp at the /end/ of =postInstall=, while the
+original build sandbox is still active (the old temp paths are still
+accessible):
+
+#+begin_src sh
+emacs --dump-file old.pdmp --batch --load fix.el
+#+end_src
+
+where =fix.el= corrects the frozen variables to point at =$out= (the permanent
+store path) before calling =dump-emacs-portable= again:
+
+#+begin_src emacs-lisp
+(setq native-comp-eln-load-path (list "$out/lib/emacs/.../native-lisp/"))
+(setq temporary-file-directory "/tmp/")
+;; package-directory-list fix via with-eval-after-load ...
+(dump-emacs-portable "new.pdmp")
+#+end_src
+
+The new pdmp captures store paths that exist permanently — the downstream
+sandbox never needs to access the old temp dir.
+
+** Why =package-directory-list= needed a different approach
+
+The first two fixes were direct =setq= calls — straightforward. The
+=package-directory-list= case was trickier because:
+
+1. *It's a =defcustom=* — its default value is computed by scanning =load-path=
+   at the time =package.el= is first loaded. But at re-dump time, only Emacs's
+   own Lisp is in =load-path=, so =package-directory-list= gets frozen as
+   essentially empty.
+
+2. *=defcustom= is a no-op if already bound* — so when =package.el= loads
+   during a downstream build (with the full =EMACSLOADPATH= set), the default
+   form never runs.
+
+3. *=advice-add= was wiped* — adding advice on =package-activate-all= in the
+   pdmp failed because =package-activate-all= is an /autoload/. When
+   =-f package-activate-all= triggered loading =package.el=, =defun= replaced
+   the symbol's function cell, which destroyed the advice.
+
+The solution was =with-eval-after-load 'package= — the thunk is stored in
+=after-load-alist= in the pdmp, survives the =defun=, and runs /after/
+=package.el= finishes loading, at which point it can correctly recompute
+=package-directory-list= from the runtime =load-path=.
+
 * Background
 
 When =emacs-git= is built from source and not available in a binary cache,
