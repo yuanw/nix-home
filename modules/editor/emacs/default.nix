@@ -891,7 +891,11 @@ with lib;
                   ];
                   config = ''
                     (put 'dired-find-alternate-file 'disabled nil)
-                    (setq dired-use-ls-dired nil)
+                    ;; macOS /bin/ls does not support --group-directories-first;
+                    ;; use GNU coreutils gls which does.
+                    (when (eq system-type 'darwin)
+                      (setq insert-directory-program "gls")
+                      (setq dired-use-ls-dired t))
                     ;; Be smart about choosing file targets.
                     (setq dired-dwim-target t)
                     (setq dired-auto-revert-buffer t)

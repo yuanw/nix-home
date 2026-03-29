@@ -159,6 +159,11 @@
                             (nreverse result)))
                         (unless (bound-and-true-p package--initialized)
                           (package-initialize t))))
+                    ; Re-enable global minor modes that batch mode leaves disabled but
+                    ; the original pdmp (built by loadup.el) had enabled. Without this,
+                    ; interactive Emacs inherits the batch-mode nil state.
+                    (global-font-lock-mode 1)
+                    (transient-mark-mode 1)
                     (dump-emacs-portable "$tmp_pdmp")
                     ELISP
                       EMACSDATA="$out/share/emacs/$emacs_version/etc" \
