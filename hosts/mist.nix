@@ -66,6 +66,7 @@ in
         "protonvpn"
         "vlc"
         "mouseless@preview"
+        "wispr-flow"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
