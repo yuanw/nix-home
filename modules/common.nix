@@ -126,6 +126,11 @@
                     (when (boundp 'native-comp-eln-load-path)
                       (setq native-comp-eln-load-path (list "$eln_dir/")))
                     (setq temporary-file-directory "/tmp/")
+                    ; source-directory captures the unpacked build tree path. Emacs source
+                    ; is not installed to the store, but $out is a better fallback than a
+                    ; stale sandbox path — prevents "Listing directory failed" errors from
+                    ; xref/find-function trying to scan the missing build dir.
+                    (setq source-directory "$out/")
                     ; package-directory-list is frozen in the pdmp at emacs-git build time
                     ; when no user packages are present. When this emacs is later used to
                     ; build elisp packages, EMACSLOADPATH adds deps to load-path but
