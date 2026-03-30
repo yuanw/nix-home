@@ -12,7 +12,7 @@ in
   options.modules.claude-code = {
     enable = lib.mkEnableOption "claude-code";
     enableClaudeMem = lib.mkEnableOption "claude-mem";
-
+    enableCozempic = lib.mkEnableOption "cozempic";
   };
   config = lib.mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
@@ -26,7 +26,6 @@ in
 
       # https://github.com/anthropics/claude-code/issues/37490
       programs.zsh.profileExtra = lib.mkAfter ''
-                # Add to ~/.bashrc or ~/.zshrc
         export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1
       '';
       programs.claude-code = {
@@ -45,8 +44,10 @@ in
           lib.optionals cfg.enableClaudeMem [
             claude-mem
           ]
-          ++ [
+          ++ lib.optional cfg.enableCozempic [
             cozempic
+          ]
+          ++ [
             code-review
             commit-commands
             explanatory-output-style
