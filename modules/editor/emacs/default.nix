@@ -2592,6 +2592,8 @@ with lib;
                 tree-sitter = {
                   enable = true;
                   config = ''
+                    (setq treesit-extra-load-path
+                          '("${pkgs.emacsPackages.treesit-grammars.with-all-grammars}/lib"))
                     (global-tree-sitter-mode)
                     (add-hook 'tree-sitter-mode-hook 'tree-sitter-hl-mode)
                     (setq major-mode-remap-alist
