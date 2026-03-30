@@ -31,7 +31,7 @@ in
         # Observer sessions run under ~/.claude-mem/observer-sessions and must
         # not trigger further PostToolUse observations or the chain never ends.
         # Pattern uses ** (matches any path including /) to handle any DATA_DIR location.
-        export CLAUDE_MEM_EXCLUDED_PROJECTS="**/.claude-mem/observer-sessions"
+        export CLAUDE_MEM_EXCLUDED_PROJECTS="~/.claude-mem/**"
       '';
       programs.claude-code = {
         enable = true;

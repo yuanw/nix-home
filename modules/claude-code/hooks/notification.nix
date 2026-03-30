@@ -8,19 +8,10 @@ let
     notify:
     pkgs.writeShellScript "claude-notify" ''
       payload=$(cat)
-      echo "$payload" >> /tmp/claude-notify-debug.log
-      transcript=$(echo "$payload" | ${jq} -r '.transcript_path // empty')
-      session_label=""
-      if [ -n "$transcript" ] && [ -f "$transcript" ]; then
-        session_label=$(${jq} -r '
-          select(.role == "user") |
-          .content |
-          if type == "array" then .[0].text else . end |
-          split("\n")[0] |
-          .[0:60]
-        ' "$transcript" 2>/dev/null | head -1)
-      fi
-      if [ -z "$session_label" ]; then
+      cwd=$(echo "$payload" | ${jq} -r '.cwd // empty')
+      if [ -n "$cwd" ]; then
+        session_label=$(basename "$cwd")
+      else
         session_label="Claude Code"
       fi
       msg=$(echo "$payload" | ${jq} -r '.message // .last_assistant_message // "" | split("\n")[0] | .[0:80]')
