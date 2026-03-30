@@ -47,7 +47,7 @@ in
     #   supportLocalVirtualBuilder = true;
     # };
     jellyfin.enable = true;
-    ##ai.enable = true;
+    ai.enableOllama = true;
     secrets.agenix = {
       enable = true;
     };
