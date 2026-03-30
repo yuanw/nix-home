@@ -25,7 +25,7 @@ in
           #   with ps; [
           #     huggingface-hub
           #   ]))
-          pkgs.stable.ollama
+          pkgs.ollama
           pkgs.llm-agents.opencode
         ];
       };
