@@ -27,6 +27,11 @@ in
       # https://github.com/anthropics/claude-code/issues/37490
       programs.zsh.profileExtra = lib.mkAfter ''
         export CLAUDE_CODE_DISABLE_BACKGROUND_TASKS=1
+        # Prevent observer sessions from spawning new observers (fork bomb).
+        # Observer sessions run under ~/.claude-mem/observer-sessions and must
+        # not trigger further PostToolUse observations or the chain never ends.
+        # Pattern uses ** (matches any path including /) to handle any DATA_DIR location.
+        export CLAUDE_MEM_EXCLUDED_PROJECTS="**/.claude-mem/observer-sessions"
       '';
       programs.claude-code = {
         enable = true;
