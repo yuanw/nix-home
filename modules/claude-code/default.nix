@@ -33,7 +33,7 @@ in
         enableMcpIntegration = true;
         package = pkgs.llm-agents.claude-code;
         skillsDir = ./skills;
-        commandsDir = ./commands;
+        #commandsDir = ./commands;
         skillPackages = with claudePlugins; [
           caveman
           humanizer
