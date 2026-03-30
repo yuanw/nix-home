@@ -2,24 +2,33 @@
 let
   jq = lib.getExe pkgs.jq;
 
-  # Read payload from stdin, extract transcript path, parse first user message
-  # as session label, then send a platform notification.
-  notifyScript =
-    notify:
-    pkgs.writeShellScript "claude-notify" ''
-      payload=$(cat)
-      cwd=$(echo "$payload" | ${jq} -r '.cwd // empty')
-      if [ -n "$cwd" ]; then
-        session_label=$(basename "$cwd")
-      else
-        session_label="Claude Code"
-      fi
-      msg=$(echo "$payload" | ${jq} -r '.message // .last_assistant_message // "" | split("\n")[0] | .[0:80]')
-      ( ${notify} ) &
-    '';
+  darwinNotify = pkgs.writeShellScript "claude-notify" ''
+    payload=$(cat)
+    cwd=$(echo "$payload" | ${jq} -r '.cwd // empty')
+    session_label=$([ -n "$cwd" ] && basename "$cwd" || echo "Claude Code")
+    msg=$(echo "$payload" | ${jq} -r '.message // "" | split("\n")[0] | .[0:80]')
+    notification_type=$(echo "$payload" | ${jq} -r '.notification_type // empty')
 
-  darwinNotify = notifyScript "osascript -e \"display notification \\\"$msg\\\" with title \\\"$session_label\\\"\" &";
-  linuxNotify = notifyScript "notify-send -a 'Claude Code' -i \"$HOME/.local/share/icons/claude.ico\" \"$session_label\" \"$msg\"";
+    if [ "$notification_type" = "permission_prompt" ]; then
+      osascript -e "display notification \"$msg\" with title \"$session_label\" sound name \"Ping\"" &
+    else
+      osascript -e "display notification \"$msg\" with title \"$session_label\"" &
+    fi
+  '';
+
+  linuxNotify = pkgs.writeShellScript "claude-notify" ''
+    payload=$(cat)
+    cwd=$(echo "$payload" | ${jq} -r '.cwd // empty')
+    session_label=$([ -n "$cwd" ] && basename "$cwd" || echo "Claude Code")
+    msg=$(echo "$payload" | ${jq} -r '.message // "" | split("\n")[0] | .[0:80]')
+    notification_type=$(echo "$payload" | ${jq} -r '.notification_type // empty')
+
+    if [ "$notification_type" = "permission_prompt" ]; then
+      notify-send -a 'Claude Code' -u critical -i "$HOME/.local/share/icons/claude.ico" "$session_label" "$msg" &
+    else
+      notify-send -a 'Claude Code' -i "$HOME/.local/share/icons/claude.ico" "$session_label" "$msg" &
+    fi
+  '';
 
   notifyCommand = if pkgs.stdenv.hostPlatform.isDarwin then "${darwinNotify}" else "${linuxNotify}";
 in
