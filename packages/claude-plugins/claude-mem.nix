@@ -6,17 +6,17 @@
   ...
 }:
 let
-  rev = "a16b25275e5f56b6d35d5fcf1a8324b8670792c8";
+  rev = "d06882126fe24f6ebcbe433385daeb8322ba8009";
   src = fetchFromGitHub {
     owner = "thedotmack";
     repo = "claude-mem";
     inherit rev;
-    hash = "sha256-U1eM3NALFmq6ACYVympRPJMnfW7h9RYdLttW4c9jr04=";
+    hash = "sha256-hzG54ODli2KD47OI5w784dPR/D1JMu4oayQ5ovHIhcA=";
   };
 in
 (mkClaudePlugin {
   pname = "claude-mem";
-  version = "9.0.12";
+  version = "10.6.3-unstable-2026-03-29";
   inherit rev src;
   pluginSubdir = "plugin";
   marketplace = {
