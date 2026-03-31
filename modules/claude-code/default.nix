@@ -7,6 +7,7 @@
 let
   cfg = config.modules.claude-code;
   claudePlugins = pkgs.callPackage ../../packages/claude-plugins { };
+  watchdog = import ./hooks/watchdog.nix { inherit pkgs lib; };
 in
 {
   options.modules.claude-code = {
@@ -76,6 +77,18 @@ in
           # enabledPlugins auto-generated from programs.claude-code.plugins list
           hooks = import ./hooks/notification.nix { inherit pkgs lib; };
         };
+      };
+    };
+
+    # Watchdog: alert (warn ≥ ${toString watchdog.warnThreshold}) or kill (≥ ${toString watchdog.killThreshold}) runaway bash processes
+    # caused by the Claude Code background-task fork bomb (github.com/anthropics/claude-code/issues/37490).
+    launchd.user.agents.claude-fork-bomb-watchdog = lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
+      serviceConfig = {
+        ProgramArguments = [ "${watchdog.watchdogScript}" ];
+        StartInterval = 30;
+        RunAtLoad = true;
+        StandardOutPath = "/tmp/claude-watchdog.log";
+        StandardErrorPath = "/tmp/claude-watchdog.log";
       };
     };
   };
