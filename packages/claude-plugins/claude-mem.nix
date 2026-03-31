@@ -33,25 +33,39 @@ let
     done
     exec "''${args[@]}"
   '';
-in
-mkClaudePlugin {
-  pname = "claude-mem";
-  version = "10.6.3-unstable-2026-03-29";
-  inherit rev src;
-  pluginSubdir = "plugin";
-  marketplace = {
-    name = "thedotmack";
-    inherit src;
-    owner = "thedotmack";
-    repo = "claude-mem";
+  plugin = mkClaudePlugin {
+    pname = "claude-mem";
+    version = "10.6.3-unstable-2026-03-29";
+    inherit rev src;
+    pluginSubdir = "plugin";
+    marketplace = {
+      name = "thedotmack";
+      inherit src;
+      owner = "thedotmack";
+      repo = "claude-mem";
+    };
+    runtimeInputs = [
+      pkgs.bun
+      pkgs.chroma-mcp
+    ];
+    # Workaround: claude-mem hardcodes 'thedotmack' marketplace path
+    activationScript = ''
+      ln -sfn "$HOME/.claude/plugins/marketplaces/claude-mem" "$HOME/.claude/plugins/marketplaces/thedotmack"
+    '';
   };
-  runtimeInputs = [
-    pkgs.bun
-    pkgs.chroma-mcp
-    fakeUvx
-  ];
-  # Workaround: claude-mem hardcodes 'thedotmack' marketplace path
-  activationScript = ''
-    ln -sfn "$HOME/.claude/plugins/marketplaces/claude-mem" "$HOME/.claude/plugins/marketplaces/thedotmack"
+in
+plugin.overrideAttrs (old: {
+  nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
+  # Prepend fakeUvx before the real uv-provided uvx so claude-mem's bundled
+  # binary resolves `uvx chroma-mcp` to pkgs.chroma-mcp without touching the
+  # global PATH (avoids conflict with pkgs.uv which also ships uvx).
+  postInstall = (old.postInstall or "") + ''
+    wrapProgram $out/scripts/claude-mem \
+      --prefix PATH : ${
+        pkgs.lib.makeBinPath [
+          fakeUvx
+          pkgs.chroma-mcp
+        ]
+      }
   '';
-}
+})
