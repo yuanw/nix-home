@@ -137,6 +137,7 @@ _final: prev: {
         mainProgram = "agnix";
       };
     };
+  claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
   chroma-mcp = prev.callPackage ./chrome-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };

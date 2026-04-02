@@ -47,7 +47,7 @@ in
     #   supportLocalVirtualBuilder = true;
     # };
     jellyfin.enable = true;
-    ##ai.enable = true;
+    ai.enableOllama = true;
     secrets.agenix = {
       enable = true;
     };
@@ -66,6 +66,7 @@ in
         "protonvpn"
         "vlc"
         "mouseless@preview"
+        "wispr-flow"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;

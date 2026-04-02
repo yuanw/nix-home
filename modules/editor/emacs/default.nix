@@ -722,7 +722,8 @@ with lib;
                   ];
                 };
                 auto-save = {
-                  enable = true;
+                  enable = hostname == "WK01174";
+                  #enable = true;
                   package =
                     epkgs:
                     (pkgs.callPackage "${packagePath}/auto-save.nix" {
@@ -890,7 +891,11 @@ with lib;
                   ];
                   config = ''
                     (put 'dired-find-alternate-file 'disabled nil)
-                    (setq dired-use-ls-dired nil)
+                    ;; macOS /bin/ls does not support --group-directories-first;
+                    ;; use GNU coreutils gls which does.
+                    (when (eq system-type 'darwin)
+                      (setq insert-directory-program "gls")
+                      (setq dired-use-ls-dired t))
                     ;; Be smart about choosing file targets.
                     (setq dired-dwim-target t)
                     (setq dired-auto-revert-buffer t)
@@ -2587,6 +2592,8 @@ with lib;
                 tree-sitter = {
                   enable = true;
                   config = ''
+                    (setq treesit-extra-load-path
+                          '("${pkgs.emacsPackages.treesit-grammars.with-all-grammars}/lib"))
                     (global-tree-sitter-mode)
                     (add-hook 'tree-sitter-mode-hook 'tree-sitter-hl-mode)
                     (setq major-mode-remap-alist

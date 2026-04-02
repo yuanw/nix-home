@@ -1,0 +1,398 @@
+#+title: Emacs pdmp macOS Build Failures (March 2026)
+#+date: 2026-03-29
+
+* How pdmp, the Emacs build, and the Nix sandbox interact
+
+** What is a portable dump?
+
+Emacs is unusual among programs: it bootstraps itself by loading thousands of
+Lisp files at startup. To avoid repeating this every launch, Emacs /dumps/ the
+entire Lisp state — all loaded functions, variables, and their values — into a
+binary snapshot file called a *portable dump* (=.pdmp=). On next start, Emacs
+loads this snapshot instead of re-evaluating all those Lisp files. Startup goes
+from ~5 seconds to ~0.1 seconds.
+
+The dump is created by running a special Emacs invocation at the end of
+=make install=:
+
+#+begin_src sh
+emacs --batch --load loadup.el --dump-file emacs.pdmp
+#+end_src
+
+This evaluates =loadup.el= (which loads all of Emacs's core Lisp), then calls
+=dump-emacs-portable= to freeze the entire Lisp heap into the =.pdmp= file.
+
+** What gets frozen
+
+The pdmp captures /everything/ in the Lisp environment at dump time — including
+variable values. Critical ones:
+
+| Variable                    | What it holds                             | Set from                                      |
+|-----------------------------+-------------------------------------------+-----------------------------------------------|
+| =data-directory=            | path to =etc/= (rgb.txt, etc.)            | =PATH_DATA= compile-time constant             |
+| =temporary-file-directory=  | temp dir for scratch files                | defaulted in =files.el=                       |
+| =native-comp-eln-load-path= | where =.eln= native-compiled files live   | set during build                              |
+| =package-directory-list=    | dirs to scan for ELPA packages            | =defcustom= scanning =load-path= at dump time |
+| =source-directory=          | root of Emacs source tree                 | set by C code from build tree path            |
+| =global-font-lock-mode=     | whether font-lock is enabled globally     | enabled by =loadup.el=, off in =--batch=      |
+| =transient-mark-mode=       | whether region highlighting is active     | enabled by =loadup.el=, off in =--batch=      |
+
+In older Emacs versions, =init_data()= in C would /reset/ =data-directory= from
+=PATH_DATA= after loading a pdmp. Emacs 31 tightened this — it only resets
+variables when =!initialized=, so a pdmp load no longer overrides frozen values.
+
+** Where Nix's sandbox comes in
+
+Nix builds every derivation inside an isolated *sandbox*. On macOS, this is
+implemented with =sandbox-exec= using a profile that whitelists specific paths.
+The build gets a fresh temp dir like:
+
+#+begin_example
+/private/tmp/nix-build-emacs-git-20260327.0.drv-0/
+#+end_example
+
+When =make install= runs inside this sandbox and dumps the pdmp, the frozen
+variables point /into this temp dir/:
+
+#+begin_example
+data-directory      → /private/tmp/nix-build-emacs-git-.../emacs-9b5a9c9/etc/
+temporary-file-dir  → /private/tmp/nix-build-emacs-git-.../
+source-directory    → /private/tmp/nix-build-emacs-git-.../emacs-9b5a9c9/
+#+end_example
+
+After the build completes, Nix moves the output to
+=/nix/store/abc123-emacs-git-*/= and *tears down the sandbox* — the temp dir
+is gone.
+
+** The two-sandbox problem
+
+Emacs is used as a /build tool/ to compile downstream elisp packages. When
+nixpkgs builds =emacs-denote-org=, it runs:
+
+#+begin_src sh
+emacs --batch -f package-activate-all -f batch-byte-compile denote-org.el
+#+end_src
+
+This runs inside a *new sandbox* for the =denote-org= derivation. That sandbox:
+
+- Has no knowledge of the old emacs-git sandbox paths
+- On Linux: returns =ENOENT= for missing paths → Emacs handles gracefully
+- On macOS: returns =EPERM= for paths outside its whitelist → *Emacs crashes*
+
+This asymmetry is why the issue only manifests on macOS. Linux sandboxing (user
+namespaces) makes paths simply not exist; macOS =sandbox-exec= actively denies
+access.
+
+** The fix: re-dump while still inside the original sandbox
+
+The trick is to re-dump the pdmp at the /end/ of =postInstall=, while the
+original build sandbox is still active (the old temp paths are still
+accessible):
+
+#+begin_src sh
+emacs --dump-file old.pdmp --batch --load fix.el
+#+end_src
+
+where =fix.el= corrects the frozen variables to point at =$out= (the permanent
+store path) before calling =dump-emacs-portable= again:
+
+#+begin_src emacs-lisp
+(setq native-comp-eln-load-path (list "$out/lib/emacs/.../native-lisp/"))
+(setq temporary-file-directory "/tmp/")
+(setq source-directory "$out/")
+;; package-directory-list fix via with-eval-after-load ...
+;; re-enable global minor modes disabled by --batch
+(global-font-lock-mode 1)
+(transient-mark-mode 1)
+(dump-emacs-portable "new.pdmp")
+#+end_src
+
+The new pdmp captures store paths that exist permanently — the downstream
+sandbox never needs to access the old temp dir.
+
+** Why =package-directory-list= needed a different approach
+
+The first two fixes were direct =setq= calls — straightforward. The
+=package-directory-list= case was trickier because:
+
+1. *It's a =defcustom=* — its default value is computed by scanning =load-path=
+   at the time =package.el= is first loaded. But at re-dump time, only Emacs's
+   own Lisp is in =load-path=, so =package-directory-list= gets frozen as
+   essentially empty.
+
+2. *=defcustom= is a no-op if already bound* — so when =package.el= loads
+   during a downstream build (with the full =EMACSLOADPATH= set), the default
+   form never runs.
+
+3. *=advice-add= was wiped* — adding advice on =package-activate-all= in the
+   pdmp failed because =package-activate-all= is an /autoload/. When
+   =-f package-activate-all= triggered loading =package.el=, =defun= replaced
+   the symbol's function cell, which destroyed the advice.
+
+The solution was =with-eval-after-load 'package= — the thunk is stored in
+=after-load-alist= in the pdmp, survives the =defun=, and runs /after/
+=package.el= finishes loading, at which point it can correctly recompute
+=package-directory-list= from the runtime =load-path=.
+
+** Why global minor modes needed explicit re-enabling
+
+The re-dump runs emacs with =--batch=. In batch mode, =global-font-lock-mode=
+and =transient-mark-mode= are not enabled — there is no display to render to.
+The original pdmp (produced by =loadup.el= during the upstream Emacs build) /did/
+have these modes enabled because =loadup.el= enables them explicitly.
+
+Our re-dump overwrites that pdmp with a new one captured from a =--batch=
+invocation, freezing both modes as =nil=. Emacs 31's "only reset when
+=!initialized=" change means =startup.el= no longer re-enables them after
+loading a pdmp. Interactive Emacs then starts with font-lock globally off:
+
+- Org buffers show no heading faces, no link rendering, no syntax colour
+- Region highlighting (=transient-mark-mode=) is absent
+
+The fix is to call =(global-font-lock-mode 1)= and =(transient-mark-mode 1)=
+in the re-dump elisp before =dump-emacs-portable=, so the new pdmp matches
+the state =loadup.el= would have produced.
+
+* Background
+
+When =emacs-git= is built from source and not available in a binary cache,
+Nix builds it locally. Part of that build produces a /portable dump file/
+(=.pdmp=), which captures the state of Emacs's Lisp environment at install
+time — including file path variables that point into the Nix build sandbox
+(=/private/tmp/nix-build-emacs-git-*.drv-0/=).
+
+On macOS, the sandbox uses =sandbox-exec= which returns =EPERM= (not =ENOENT=)
+for paths outside its whitelist. When a later elisp package build uses
+=emacs-git= as a build tool, that new sandbox has no knowledge of the stale
+temp paths captured in the pdmp — causing fatal crashes before Emacs can
+apply any runtime environment variable overrides.
+
+These issues surfaced in late March 2026 due to Emacs 31 upstream changes that
+tightened pdmp initialization (variables captured at dump time are no longer
+reset from compile-time constants after the dump loads).
+
+The fix lives in the =emacs-git= overlay in =modules/common.nix=. During
+=postInstall=, while still inside the original build sandbox where the old paths
+are accessible, Emacs re-dumps the =.pdmp= with corrected variable values.
+
+* Issue 1: =data-directory= pointing to build sandbox
+
+** Symptom
+
+#+begin_example
+emacs: Could not read /private/tmp/nix-build-emacs-git-20260327.0.drv-0/emacs-9b5a9c9/etc/rgb.txt
+#+end_example
+
+** Root cause
+
+=data-directory= (pointing to the =etc/= subtree) is captured in the pdmp.
+In Emacs 31, =init_data()= no longer resets =Vdata_directory= from =PATH_DATA=
+after a pdmp load. When a downstream elisp build uses emacs as a build tool,
+macOS returns =EPERM= for the stale sandbox path → fatal crash before =EMACSDATA=
+env var processing in =startup.el=.
+
+** Fix
+
+Re-dump the pdmp during =postInstall= with =EMACSDATA= set to =$out= store path.
+The new pdmp captures the correct, permanent store path for =data-directory=.
+
+* Issue 2: =temporary-file-directory= pointing to build sandbox
+
+** Symptom
+
+#+begin_example
+Creating directory with prefix: No such file or directory,
+  /private/tmp/nix-build-emacs-git-20260327.0.drv-0/browse-kill-ring
+#+end_example
+
+** Root cause
+
+=temporary-file-directory= is also captured in the pdmp. =defvar= is a no-op
+at runtime if the variable is already bound, so the pdmp-frozen path persists.
+When =browse-kill-ring= (or any package) creates a temp file, it uses the stale
+sandbox path → =ENOENT= / crash.
+
+** Fix
+
+Add =(setq temporary-file-directory "/tmp/")= to the re-dump elisp before
+=dump-emacs-portable=, so the new pdmp captures =/tmp/= instead of the sandbox path.
+
+* Issue 3: =package-activate-all= cannot find dependencies (e.g. =denote=)
+
+** Symptom
+
+#+begin_example
+Unable to activate package 'denote-org'.
+Required package 'denote-4.0.0' is unavailable
+
+Error: file-missing ("Cannot open load file" "No such file or directory"
+  "denote" ".../denote-org-0.2.1/denote-org.el")
+#+end_example
+
+** Root cause
+
+Three interacting factors:
+
+1. =package-directory-list= is computed by a =defcustom= default form that
+   scans =load-path= for =site-lisp= dirs and appends their =elpa/= subdirs.
+   This value is captured in the pdmp at emacs-git build time, when no user
+   packages are present.
+
+2. When a downstream build (e.g. =denote-org=) uses emacs, nixpkgs adds each
+   =nativeBuildInput='s =share/emacs/site-lisp= dir to =EMACSLOADPATH= →
+   =load-path=. But =package-directory-list= is already bound from the pdmp,
+   so =defcustom= is a no-op — the new =site-lisp= dirs are not reflected.
+
+3. The nixpkgs emacs build process calls =emacs --batch -f package-activate-all=.
+   =package-activate-all= iterates =package-alist=, which is empty because
+   =package-initialize= was never called to scan =package-directory-list=.
+
+   A first attempt at fixing this used =advice-add= on =package-activate-all=
+   in the re-dumped pdmp to call =(package-initialize t)= before activation.
+   This failed because =package-activate-all= is an autoload in the pdmp —
+   when =-f package-activate-all= triggers loading =package.el=, =defun=
+   replaces the symbol's function cell, wiping the advice.
+
+** Fix
+
+Use =with-eval-after-load 'package= in the re-dump elisp. The thunk is stored
+in =after-load-alist= in the pdmp and runs after =package.el= fully loads
+(i.e., after =defun= has run). The hook:
+
+1. Resets =package-directory-list= by scanning the current =load-path= (which
+   includes =EMACSLOADPATH= additions from the build's =nativeBuildInputs=).
+2. Calls =(package-initialize t)= to populate =package-alist= from the
+   recomputed directory list.
+
+=package-activate-all= then finds all declared dependencies and activation
+succeeds.
+
+The hook is gated on =(when noninteractive ...)=: in an interactive session,
+=package-activate-all= fires at startup and would trigger the hook, resetting
+=package-alist= and breaking package activation (org-mode not rendering,
+=treesit= nil, etc.). Only batch/build-time invocations need this fix.
+
+* Issue 4: =source-directory= pointing to build sandbox
+
+** Symptom
+
+In interactive Emacs, opening a dired buffer or using =xref=/=find-function=
+to navigate to a built-in C source produces:
+
+#+begin_example
+Listing directory failed but 'access-file' worked
+#+end_example
+
+** Root cause
+
+=source-directory= (pointing to the Emacs source tree root) is captured in the
+pdmp at build time. In macOS =sandbox-exec=, the stale temp path returns =EPERM=
+for =readdir=/=ls= (giving the "Listing directory failed" message) but /not/ for
+=access()= (so =access-file= reports no error). This EPERM/access asymmetry is
+the macOS sandbox signature.
+
+This manifests in interactive Emacs when anything calls =(dired source-directory)=
+or tries to locate a C source file via =(find-file (concat source-directory
+"src/buffer.c"))=.
+
+Confirmed via =emacsclient -e 'source-directory'=: the value was the build
+sandbox path until the re-dump fix was applied.
+
+** Fix
+
+Add =(setq source-directory "$out/")= to the re-dump elisp. The nix store path
+exists permanently. Emacs source is not installed there, so C source navigation
+via =find-function= will not work (=find-function-C-source-directory= defaults
+to =nil= when =source-directory/src/= does not exist), but no EPERM errors occur.
+
+* Issue 5: =global-font-lock-mode= and =transient-mark-mode= disabled after re-dump
+
+** Symptom
+
+After a successful nix build and restart of interactive Emacs, org-mode buffers
+do not render: links show as raw =[[...][...]]=, headings have no face, and there
+is no syntax highlighting anywhere. Confirmed by:
+
+#+begin_src emacs-lisp
+(with-current-buffer (car (org-buffer-list))
+  (list font-lock-mode global-font-lock-mode))
+;; → (nil nil)
+#+end_src
+
+** Root cause
+
+The re-dump runs =emacs --batch=. Batch mode does not enable display-oriented
+global minor modes: =global-font-lock-mode= and =transient-mark-mode= are both
+=nil=. The original pdmp (built by =loadup.el= during upstream Emacs compilation)
+had them enabled. Our re-dump overwrites the pdmp with a batch-mode snapshot,
+freezing them as =nil=.
+
+Emacs 31's tightened pdmp semantics mean =startup.el= does not re-enable them
+after loading the pdmp (they are Lisp-level minor modes, not C-level constants,
+but the chain of hooks that would re-enable them is not run in the same way
+without =!initialized= being true). Interactive Emacs inherits the batch state.
+
+** Fix
+
+Add the following to the re-dump elisp before =dump-emacs-portable=:
+
+#+begin_src emacs-lisp
+(global-font-lock-mode 1)
+(transient-mark-mode 1)
+#+end_src
+
+This restores the modes to the state =loadup.el= would have produced, so the
+new pdmp behaves identically to the original for interactive use.
+
+* Unrelated: macOS dired "Listing directory failed" with =--group-directories-first=
+
+** Symptom
+
+Opening any dired buffer on macOS fails with:
+
+#+begin_example
+Listing directory failed but 'access-file' worked
+#+end_example
+
+Backtrace shows =insert-directory= called with =-alvh --group-directories-first=.
+
+** Root cause
+
+=dired-listing-switches= was set to ="-alvh --group-directories-first"=.
+The =--group-directories-first= flag is a GNU coreutils extension — macOS's
+=/bin/ls= does not support it and exits non-zero, causing =insert-directory= to
+signal the error. =dired-use-ls-dired= was =nil= (set to suppress an earlier
+macOS warning), so Emacs used the system =ls= rather than GNU =ls=.
+
+This is unrelated to the pdmp issues above; it is a macOS-specific dired
+configuration bug.
+
+** Fix
+
+In =modules/editor/emacs/default.nix=, switch to GNU coreutils =gls= on Darwin:
+
+#+begin_src emacs-lisp
+(when (eq system-type 'darwin)
+  (setq insert-directory-program "gls")
+  (setq dired-use-ls-dired t))
+#+end_src
+
+=gls= is available at =/etc/profiles/per-user/$USER/bin/gls= via the
+=coreutils= package in the Nix profile.
+
+* Fix location
+
+=modules/common.nix= — the =nixpkgs.overlays= block that overrides =emacs-git=
+on Darwin. The relevant =postInstall= shell snippet:
+
+1. Finds the installed =.pdmp= path.
+2. Writes a temp elisp file correcting all variables and re-enabling global modes.
+3. Runs emacs with =--dump-file= (original pdmp) and =--load= (the elisp).
+4. On success, =mv= the new pdmp over the old one.
+5. Calls =wrapProgram= to set =EMACSDATA= as a default env var.
+
+=modules/editor/emacs/default.nix= — the =dired= use-package block, for the
+=gls= fix.
+
+See also =.claude/commands/debug-emacs-build.md= for the diagnostic workflow
+used to identify root failing derivations and decode error patterns.

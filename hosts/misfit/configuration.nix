@@ -12,6 +12,25 @@
     ./disk-config.nix
   ];
 
+  nixpkgs.config.problems.handlers = {
+    # bimmer-connected is used by home-assistant. Marked broken due to test
+    # failures with Python 3.14 asyncio API changes. The overlay below disables
+    # tests; this handler allows evaluation to proceed past the broken check.
+    bimmer-connected.broken = "ignore";
+  };
+
+  nixpkgs.overlays = [
+    (_final: prev: {
+      python314Packages = prev.python314Packages.overrideScope (
+        _pyfinal: pyprev: {
+          bimmer-connected = pyprev.bimmer-connected.overrideAttrs (_: {
+            doCheck = false;
+          });
+        }
+      );
+    })
+  ];
+
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.systemd-boot.enable = true;
@@ -74,6 +93,14 @@
   };
   services.home-assistant = {
     enable = true;
+    package = pkgs.home-assistant.override {
+      packageOverrides = _self: super: {
+        # Tests fail with Python 3.14 asyncio API changes. Disable until upstream fixes.
+        bimmer-connected = super.bimmer-connected.overrideAttrs (_: {
+          doCheck = false;
+        });
+      };
+    };
     extraArgs = [ "--debug" ];
     extraPackages =
       python3Packages: with python3Packages; [

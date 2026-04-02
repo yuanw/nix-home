@@ -21,7 +21,7 @@ nix-update:
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
     @nix-update -f ./packages/release.nix chroma-mcp --src-only
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
-    @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch
+    @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch --override-filename ./packages/claude-plugins/claude-mem.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
     @nix-update -f ./packages/release.nix cozempic --src-only
     @nix-update -f ./packages/release.nix emacs-skills --src-only --version=branch
@@ -51,6 +51,11 @@ switch:
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
+
+# clear easysession saved sessions (fixes stale dired/buffer paths after Emacs rebuild)
+clean-easysession:
+    @rm -rf ~/.emacs.d/easysession/
+    @echo "easysession cleared"
 
 # toggle .envrc file
 toggle-envrc:
