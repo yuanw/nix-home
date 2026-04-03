@@ -3569,14 +3569,14 @@ with lib;
               #: markdown
 
               #: sh
-              nodePackages.bash-language-server
+              bash-language-server
               #: toml
               taplo
               #: web-mode
-              nodePackages.js-beautify
-              nodePackages.stylelint
+              js-beautify
+              stylelint
               # :lang yaml
-              nodePackages.yaml-language-server
+              yaml-language-server
               tree-sitter
               # emacsWithDeps
               (vale.withStyles (s: [
