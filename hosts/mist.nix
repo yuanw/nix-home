@@ -1,5 +1,6 @@
 {
   inputs,
+  inputs',
   config,
   pkgs,
   ...
@@ -18,6 +19,9 @@ in
     inputs.self.myModules.common
     inputs.self.myModules.darwin
     ../modules/private/jellyfin-darwin.nix
+  ];
+  environment.casks = with inputs'.nix-casks.packages; [
+    mouseless_preview
   ];
   # determinate system
   nix.enable = false;
@@ -65,7 +69,6 @@ in
         "racket"
         "protonvpn"
         "vlc"
-        "mouseless@preview"
         "wispr-flow"
       ];
       masApps = {
