@@ -140,7 +140,6 @@
                       inputs.git-ai.homeManagerModules.default
                       inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
-                      inputs.nix-profile-gen.homeModules.${system}.profiles
                     ];
 
                     backupFileExtension = "hm-bak";

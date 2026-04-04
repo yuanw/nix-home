@@ -86,7 +86,6 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
       inputs.flake-parts.follows = "flake-parts";
     };
-    nix-profile-gen.url = "github:Hypercookie/nix-profile-gen";
   };
 
   outputs =
