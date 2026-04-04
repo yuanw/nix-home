@@ -5,7 +5,7 @@
   packaging,
 }:
 buildPythonApplication rec {
-  pname = "tccutil";
+  pname = "tccutil-manage";
   version = "1.5.1";
   format = "other";
 
@@ -20,9 +20,9 @@ buildPythonApplication rec {
 
   installPhase = ''
     mkdir -p $out/bin
-    cp tccutil.py $out/bin/tccutil
-    chmod +x $out/bin/tccutil
-    patchShebangs $out/bin/tccutil
+    cp tccutil.py $out/bin/tccutil-manage
+    chmod +x $out/bin/tccutil-manage
+    patchShebangs $out/bin/tccutil-manage
   '';
 
   doCheck = false;
@@ -31,7 +31,7 @@ buildPythonApplication rec {
     description = "Manage macOS Privacy Preferences (TCC) from the command line";
     homepage = "https://github.com/jacobsalmela/tccutil";
     license = lib.licenses.mit;
-    mainProgram = "tccutil";
+    mainProgram = "tccutil-manage";
     platforms = lib.platforms.darwin;
   };
 }

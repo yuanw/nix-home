@@ -120,7 +120,7 @@ in
       # Grant Accessibility via tccutil (requires Filesystem Protections disabled in SIP).
       # Runs as root during darwin-rebuild switch; tccutil --enable is idempotent.
       system.activationScripts.yabaiTCCProfile.text = ''
-        TCCUTIL="${pkgs.tccutil}/bin/tccutil"
+        TCCUTIL="${pkgs.tccutil-manage}/bin/tccutil-manage"
         YABAI="${pkgs.yabai}/bin/yabai"
         echo "Granting Accessibility to yabai..."
         "$TCCUTIL" --insert "$YABAI" || true
