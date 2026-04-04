@@ -60,6 +60,13 @@ in
       type = types.bool;
       default = false;
     };
+    tccCodeRequirement = mkOption {
+      type = types.str;
+      # Refresh with: codesign -display -r - $(which yabai) 2>&1
+      # This hash changes on each yabai version bump.
+      default = ''cdhash H"c4d593d7fc687375d1df8b36310b0750b00386bb" or cdhash H"360208b81259d7ce80798507415a58fe69fa1e7c"'';
+      description = "Designated code requirement for yabai, used in the Accessibility TCC profile.";
+    };
   };
 
   config = mkMerge [
@@ -115,7 +122,49 @@ in
         ];
 
         xdg.configFile."sketchybar".source = ./sketchybar;
+
+        # Consolidated PPPC profile for darwin accessibility grants.
+        # String options (profileName etc.) must be set once; list options
+        # (Services.Accessibility) are extended here for each app.
+        programs.macprofile = {
+          enable = true;
+          profileName = "Darwin Accessibility";
+          organizationIdentifier = "nix-home";
+          scope = "System";
+          payloads."apple-com-apple-TCC-configuration-profile-policy" = {
+            enable = true;
+            Services.Accessibility = [
+              {
+                # NOTE: tccCodeRequirement changes on each yabai version bump.
+                # Refresh with: codesign -display -r - $(which yabai) 2>&1
+                Identifier = "${pkgs.yabai}/bin/yabai";
+                IdentifierType = "path";
+                CodeRequirement = cfg.tccCodeRequirement;
+                Allowed = true;
+              }
+            ]
+            ++ lib.optionals config.modules.mouseless.enable [
+              {
+                # Apple-signed; CodeRequirement is stable across app updates.
+                Identifier = "net.sonuscape.mouseless";
+                IdentifierType = "bundleID";
+                CodeRequirement = ''identifier "net.sonuscape.mouseless" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = RY5H5A2266'';
+                Allowed = true;
+              }
+            ];
+          };
+        };
       };
+      # Install the generated mobileconfig so macOS enforces the TCC entry.
+      # Runs as root during darwin-rebuild switch; profiles install is idempotent.
+      system.activationScripts.yabaiTCCProfile.text = ''
+        PROFILE="/Users/${config.my.username}/Library/Application Support/HomeManager/profile.mobileconfig"
+        if [ -f "$PROFILE" ]; then
+          echo "Installing yabai TCC profile..."
+          profiles install -path "$PROFILE" || true
+        fi
+      '';
+
       services.skhd = {
         enable = true;
         skhdConfig = ''
