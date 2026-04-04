@@ -2790,6 +2790,7 @@ with lib;
                                         (setq consult-omni-apps-paths (append (file-expand-wildcards "/Applications/Adobe*")
                                         (list "/Applications"
                                               "/Applications/Utilities/"
+                                              "/Applications/Nix Casks/"
                                               "/System/Applications/"
                                               "/System/Applications/Utilities/"
                                               "/System/Library/CoreServices/Applications/"

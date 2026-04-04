@@ -54,7 +54,7 @@
       ./wm/yabai.nix
       ./macintosh.nix
       ./mouseless
-
+      ./nix-casks.nix
     ];
   };
 }
