@@ -20,10 +20,13 @@ in
     inputs.self.myModules.darwin
     ../modules/private/jellyfin-darwin.nix
   ];
-  environment.casks = with inputs'.nix-casks.packages; [
-    mouseless_preview
-    betterdisplay
-  ];
+  environment.casks =
+    with inputs'.nix-casks.packages;
+    [
+      mouseless_preview
+      betterdisplay
+    ]
+    ++ [ pkgs.vibeproxy ];
   # determinate system
   nix.enable = false;
   my = {
