@@ -22,6 +22,7 @@ in
   ];
   environment.casks = with inputs'.nix-casks.packages; [
     mouseless_preview
+    betterdisplay
   ];
   # determinate system
   nix.enable = false;
@@ -63,7 +64,7 @@ in
       enable = true;
       casks = [
         "1password"
-        "betterdisplay"
+
         "godot"
         "firefox"
         "racket"

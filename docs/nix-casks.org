@@ -1,0 +1,119 @@
+#+title: nix-casks: Installing macOS Apps Without Homebrew
+#+date: 2026-04-03
+
+* Overview
+
+=nix-casks= replaces Homebrew cask management for macOS =.app= bundles. Apps are
+fetched directly from vendor download URLs, stored in the Nix store, and copied
+into =/Applications/Nix Casks/= on each =darwin-rebuild switch=.
+
+Two pieces work together:
+
+1. =github:atahanyorganci/nix-casks/archive= — the flake providing pre-built
+   derivations for each cask (=packages.<system>.<name>=).
+2. =modules/nix-casks.nix= — a darwin activation module that copies =.app=
+   bundles from the Nix store into =/Applications/Nix Casks/= using =ditto=.
+
+* How nix-casks packages work
+
+Each package in the =nix-casks= flake is a derivation that:
+
+1. Downloads the vendor =.dmg= or =.zip= directly from the upstream URL
+   (verified by hash).
+2. Runs =unpack.sh= to extract the =.app= bundle — mounting DMGs via =hdiutil=
+   or unzipping archives.
+3. Moves the =.app= into =$out/Applications/<AppName>.app=, matching the macOS
+   directory convention.
+
+The result is a normal Nix store path like:
+#+begin_example
+/nix/store/abc123-mouseless-preview-1.2.3/Applications/Mouseless.app
+#+end_example
+
+* How the activation module works
+
+=modules/nix-casks.nix= adds a script to =system.activationScripts.postActivation=
+that runs on every =darwin-rebuild switch=.
+
+** The sync_app function
+
+For each package in =environment.casks=, =sync_app= is called with the store path.
+It iterates over every =*.app= inside =$src/Applications/= and:
+
+1. Checks a marker file at =/Applications/Nix Casks/.sources/<AppName>=.
+2. The marker contains the store path that was used for the last copy.
+3. If the marker matches the current store path → skip (nothing changed).
+4. If missing or different → copy with =/usr/bin/ditto=, update the marker.
+
+** Why ditto instead of cp
+
+=ditto= is a macOS system tool that deep-copies directory trees while preserving:
+- Resource forks
+- Extended attributes (=com.apple.quarantine=, etc.)
+- Code signatures
+
+Plain =cp -r= can corrupt code signatures, causing Gatekeeper to reject the app.
+
+** Garbage collection
+
+After syncing all wanted apps, the script scans =/Applications/Nix Casks/*.app=
+and removes any =.app= that is no longer in =environment.casks=. This keeps the
+directory clean when you remove a package from your config.
+
+* Usage
+
+Add =inputs'= to your host's function arguments, then set =environment.casks=:
+
+#+begin_src nix
+{ inputs, inputs', config, pkgs, ... }:
+{
+  environment.casks = with inputs'.nix-casks.packages; [
+    mouseless_preview
+    vlc
+  ];
+}
+#+end_src
+
+Package names use underscores for characters that are illegal in Nix identifiers
+(e.g. =mouseless@preview= → =mouseless_preview=). Browse the full list at
+https://nix-casks.yorganci.dev.
+
+After =darwin-rebuild switch=, apps appear in =/Applications/Nix Casks/= and are
+discoverable by Spotlight and Raycast.
+
+* Comparison with brew-nix
+
+| Feature            | nix-casks                          | brew-nix                              |
+|--------------------+------------------------------------+---------------------------------------|
+| Package count      | Curated subset (~verified working) | Full Homebrew catalog (~6000+)        |
+| Hash coverage      | All packages have hashes           | ~700 casks require manual hash        |
+| Integration        | =packages.<system>.<name>=         | nixpkgs overlay (=pkgs.brewCasks.*=)  |
+| App placement      | Handled by this module via ditto   | =$out/Applications/=, bring your own  |
+| Architecture vars  | Not exposed                        | =.override { variation = "sequoia"; }=|
+| Update model       | Pin =archive= branch               | Maintain separate =brew-api= input    |
+
+* Comparison with nix-darwin homebrew module
+
+The nix-darwin =modules.brew= option manages Homebrew itself and installs casks
+via =brew install --cask=. This requires Homebrew to be installed and running.
+=nix-casks= eliminates the Homebrew dependency entirely — apps are pure Nix
+derivations fetched and built like any other package.
+
+* Limitations
+
+- Only =.dmg= and =.zip= source formats are supported; =.pkg= files require
+  =sudo= and are unsupported.
+- Apps copied with =ditto= are writable mutable copies — they are not
+  updated automatically when you update the flake input. You must run
+  =darwin-rebuild switch= again after =nix flake update=.
+- Not all Homebrew casks are available. Check https://nix-casks.yorganci.dev
+  before migrating a cask from =modules.brew.casks=.
+
+* Configuration in this repo
+
+- Flake input: =flake.nix= — =nix-casks= pinned to the =archive= branch
+- Module: =modules/nix-casks.nix= — activation script and =environment.casks= option
+- Registered: =modules/default.nix= — included in all darwin host imports
+- Host usage: =hosts/mist.nix= — =environment.casks= list
+- Emacs integration: =consult-omni-apps-paths= includes =/Applications/Nix Casks/=
+  so apps are searchable via =consult-omni=
