@@ -140,6 +140,7 @@ _final: prev: {
   claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
   chroma-mcp = prev.callPackage ./chrome-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
+  tccutil = prev.python3Packages.callPackage ./tccutil { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };

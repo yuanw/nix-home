@@ -66,7 +66,6 @@
       ];
       brews = [
         "redis"
-        "tccutil"
         #"go"
       ];
     };

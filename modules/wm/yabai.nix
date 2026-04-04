@@ -155,14 +155,17 @@ in
           };
         };
       };
-      # Install the generated mobileconfig so macOS enforces the TCC entry.
-      # Runs as root during darwin-rebuild switch; profiles install is idempotent.
+      # Grant Accessibility via tccutil (requires Filesystem Protections disabled in SIP).
+      # Runs as root during darwin-rebuild switch; tccutil --enable is idempotent.
       system.activationScripts.yabaiTCCProfile.text = ''
-        PROFILE="/Users/${config.my.username}/Library/Application Support/HomeManager/profile.mobileconfig"
-        if [ -f "$PROFILE" ]; then
-          echo "Installing yabai TCC profile..."
-          profiles install -path "$PROFILE" || true
-        fi
+        TCCUTIL="${pkgs.tccutil}/bin/tccutil"
+        YABAI="${pkgs.yabai}/bin/yabai"
+        echo "Granting Accessibility to yabai..."
+        "$TCCUTIL" --insert "$YABAI" || true
+        ${lib.optionalString config.modules.mouseless.enable ''
+          echo "Granting Accessibility to mouseless..."
+          "$TCCUTIL" --insert net.sonuscape.mouseless || true
+        ''}
       '';
 
       services.skhd = {
