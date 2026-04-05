@@ -23,7 +23,6 @@ in
   environment.casks =
     with inputs'.nix-casks.packages;
     [
-      claude-voice
       mouseless_preview
       betterdisplay
     ]
@@ -43,12 +42,9 @@ in
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${config.my.username}.programs = {
-    git = {
-      settings = {
-        github.user = "yuanw";
-      };
-    };
+  home-manager.users.${config.my.username} = {
+    home.packages = [ inputs'.my-packages.packages.claude-voice ];
+    programs.git.settings.github.user = "yuanw";
   };
   modules = {
     # common = {
