@@ -6,6 +6,7 @@
       ./ai.nix
       ./claude-code
       ./cursor
+      ./forge.nix
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
