@@ -108,10 +108,10 @@ writeShellApplication {
       printf 'You: %s\n' "$TRANSCRIPT" >&2
 
       if $FIRST_TURN; then
-        RESPONSE=$(claude --append-system-prompt "$VOICE_PROMPT" -p "$TRANSCRIPT" 2>&1) || true
+        RESPONSE=$(claude --model claude-haiku-4-5-20251001 --append-system-prompt "$VOICE_PROMPT" -p "$TRANSCRIPT" 2>&1) || true
         FIRST_TURN=false
       else
-        RESPONSE=$(claude -c --append-system-prompt "$VOICE_PROMPT" -p "$TRANSCRIPT" 2>&1) || true
+        RESPONSE=$(claude --model claude-haiku-4-5-20251001 -c --append-system-prompt "$VOICE_PROMPT" -p "$TRANSCRIPT" 2>&1) || true
       fi
 
       if [[ -z "$RESPONSE" ]]; then
