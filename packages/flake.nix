@@ -26,7 +26,11 @@
             sketchybar-cpu-helper = pkgs.callPackage ./sketchybar-cpu-helper { };
             bandcamp-dl = pkgs.python3Packages.callPackage ./bandcamp { };
             parakeet-mlx = pkgs.python3Packages.callPackage ./parakeet-mlx.nix { };
+            mlx-speech = pkgs.python3Packages.callPackage ./mlx-speech.nix { };
             parakeet-transcribe = pkgs.callPackage ./parakeet-transcribe.nix {
+              inherit parakeet-mlx;
+            };
+            claude-voice = pkgs.callPackage ./claude-voice.nix {
               inherit parakeet-mlx;
             };
             choose-mac = pkgs.callPackage ./choose-mac.nix { };

@@ -24,6 +24,11 @@ buildPythonPackage rec {
     hash = "sha256-udiDBB8vp27ID1JRhT8rNj1S8agJslb2OVo5tkhnRLw=";
   };
 
+  postPatch = ''
+    substituteInPlace pyproject.toml \
+      --replace-fail "dacite>=1.9.2" "dacite>=1.9.1"
+  '';
+
   build-system = [
     setuptools
     wheel
