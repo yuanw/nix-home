@@ -99,7 +99,7 @@
               inherit parakeet-mlx;
             };
             claude-voice = pkgs.callPackage ./claude-voice.nix {
-              inherit parakeet-mlx mlx-speak mlx-speak-server;
+              inherit parakeet-mlx;
             };
             choose-mac = pkgs.callPackage ./choose-mac.nix { };
             sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
