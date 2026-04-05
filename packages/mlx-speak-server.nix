@@ -39,6 +39,7 @@ writers.writePython3Bin "mlx-speak-server"
     )
     config = MossTTSLocalGenerationConfig()
 
+
     class SpeakHandler(BaseHTTPRequestHandler):
         def do_POST(self):
             if self.path == "/speak":
@@ -65,6 +66,7 @@ writers.writePython3Bin "mlx-speak-server"
 
         def log_message(self, format, *args):
             pass  # suppress per-request noise
+
 
     port = int(os.environ.get("MLX_SPEAK_PORT", "47732"))
     print(f"mlx-speak-server: ready on 127.0.0.1:{port}", file=sys.stderr, flush=True)
