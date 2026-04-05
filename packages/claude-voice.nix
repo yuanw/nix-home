@@ -4,6 +4,7 @@
   sox,
   ffmpeg,
   parakeet-mlx,
+  mlx-speak,
   python3Packages,
 }:
 
@@ -25,6 +26,7 @@ writeShellApplication {
     sox
     ffmpeg
     parakeet-mlx
+    mlx-speak
     python3Packages.huggingface-hub
   ];
 
@@ -37,14 +39,29 @@ writeShellApplication {
 
     step() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" >&2; }
 
-    # -- init subcommand: download model and report cache location -------------
+    # -- init subcommand: download all models ---------------------------------
     if [[ "''${1:-}" == "init" ]]; then
-      MODEL="mlx-community/parakeet-tdt-0.6b-v3"
-      step "Downloading $MODEL via huggingface-cli..."
-      huggingface-cli download "$MODEL"
+      # STT: parakeet-mlx uses the HuggingFace cache directly
+      step "Downloading STT model (mlx-community/parakeet-tdt-0.6b-v3)..."
+      huggingface-cli download mlx-community/parakeet-tdt-0.6b-v3
       HF_CACHE="''${HF_HOME:-''${XDG_CACHE_HOME:-$HOME/.cache}/huggingface}/hub"
-      MODEL_DIR="$HF_CACHE/models--mlx-community--parakeet-tdt-0.6b-v3"
-      step "Done. Model cached at: $MODEL_DIR"
+      step "STT model cached at: $HF_CACHE/models--mlx-community--parakeet-tdt-0.6b-v3"
+
+      # TTS: mlx-speech expects models at a specific path, not the HF cache
+      MLX_SPEECH_MODELS="''${MLX_SPEECH_MODELS:-$HOME/.local/share/mlx-speech/models}"
+      TTS_DIR="$MLX_SPEECH_MODELS/openmoss/moss_tts_local/mlx-int8"
+      CODEC_DIR="$MLX_SPEECH_MODELS/openmoss/moss_audio_tokenizer/mlx-int8"
+      mkdir -p "$TTS_DIR" "$CODEC_DIR"
+
+      step "Downloading TTS model (OpenMOSS-Team/MOSS-TTS-Local-Transformer)..."
+      huggingface-cli download OpenMOSS-Team/MOSS-TTS-Local-Transformer --local-dir "$TTS_DIR"
+      step "TTS model saved at: $TTS_DIR"
+
+      step "Downloading TTS codec (OpenMOSS-Team/MOSS-Audio-Tokenizer)..."
+      huggingface-cli download OpenMOSS-Team/MOSS-Audio-Tokenizer --local-dir "$CODEC_DIR"
+      step "TTS codec saved at: $CODEC_DIR"
+
+      step "All models ready."
       exit 0
     fi
     # -------------------------------------------------------------------------
@@ -86,7 +103,7 @@ writeShellApplication {
       # parakeet-mlx writes a sidecar file next to the input; --format txt
       # gives us clean text without SRT timestamps
       TXT_OUT="''${TMPFILE%.wav}.txt"
-      parakeet-mlx --format txt "$TMPFILE" && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
+      parakeet-mlx --output-format txt "$TMPFILE" && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
 
       if [[ $PARAKEET_EXIT -ne 0 ]]; then
         step "parakeet-mlx exited with code $PARAKEET_EXIT"
@@ -118,7 +135,13 @@ writeShellApplication {
 
       step 'Speaking response...'
       printf 'Claude: %s\n\n' "$RESPONSE" >&2
-      /usr/bin/say "$RESPONSE"
+      MLX_SPEECH_MODELS="''${MLX_SPEECH_MODELS:-$HOME/.local/share/mlx-speech/models}"
+      if MLX_SPEECH_MODELS="$MLX_SPEECH_MODELS" mlx-speak "$RESPONSE" 2>/dev/null; then
+        true
+      else
+        step 'mlx-speak unavailable, falling back to say'
+        /usr/bin/say "$RESPONSE"
+      fi
     done
   '';
 

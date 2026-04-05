@@ -1,0 +1,60 @@
+{
+  writers,
+  mlx-speech,
+}:
+
+writers.writePython3Bin "mlx-speak"
+  {
+    libraries = [ mlx-speech ];
+    flakeIgnore = [ "E501" ];
+  }
+  ''
+    import os
+    import sys
+    import subprocess
+    import tempfile
+    from pathlib import Path
+
+    from mlx_speech.audio import write_wav
+    from mlx_speech.checkpoints.layout import get_openmoss_v0_layouts
+    from mlx_speech.generation import (
+        MossTTSLocalGenerationConfig,
+        synthesize_moss_tts_local_conversations,
+    )
+    from mlx_speech.models.moss_audio_tokenizer import load_moss_audio_tokenizer_model
+    from mlx_speech.models.moss_local import MossTTSLocalProcessor, load_moss_tts_local_model
+
+    text = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else sys.stdin.read().strip()
+    if not text:
+        sys.exit(0)
+
+    models_root = Path(
+        os.environ.get("MLX_SPEECH_MODELS", Path.home() / ".local/share/mlx-speech/models")
+    )
+    layout = get_openmoss_v0_layouts(models_root=models_root)
+
+    loaded_model = load_moss_tts_local_model(str(layout.moss_tts_local.mlx_int8_dir))
+    loaded_codec = load_moss_audio_tokenizer_model(str(layout.audio_tokenizer.mlx_int8_dir))
+    processor = MossTTSLocalProcessor.from_path(
+        loaded_model.model_dir,
+        audio_tokenizer=loaded_codec.model,
+    )
+
+    config = MossTTSLocalGenerationConfig()
+    conversations = [[processor.build_user_message(text=text)]]
+    result = synthesize_moss_tts_local_conversations(
+        loaded_model.model,
+        processor,
+        loaded_codec.model,
+        conversations=conversations,
+        mode="generation",
+        config=config,
+    )
+
+    synthesis = result.outputs[0]
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
+        out_path = Path(f.name)
+    write_wav(out_path, synthesis.waveform, sample_rate=synthesis.sample_rate)
+    subprocess.run(["/usr/bin/afplay", str(out_path)], check=True)
+    out_path.unlink()
+  ''
