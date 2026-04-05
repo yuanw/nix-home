@@ -4,6 +4,7 @@
   sox,
   ffmpeg,
   parakeet-mlx,
+  python3Packages,
 }:
 
 let
@@ -24,6 +25,7 @@ writeShellApplication {
     sox
     ffmpeg
     parakeet-mlx
+    python3Packages.huggingface-hub
   ];
 
   text = ''
@@ -35,8 +37,20 @@ writeShellApplication {
 
     step() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" >&2; }
 
+    # -- init subcommand: download model and report cache location -------------
+    if [[ "''${1:-}" == "init" ]]; then
+      MODEL="mlx-community/parakeet-tdt-0.6b-v3"
+      step "Downloading $MODEL via huggingface-cli..."
+      huggingface-cli download "$MODEL"
+      HF_CACHE="''${HF_HOME:-''${XDG_CACHE_HOME:-$HOME/.cache}/huggingface}/hub"
+      MODEL_DIR="$HF_CACHE/models--mlx-community--parakeet-tdt-0.6b-v3"
+      step "Done. Model cached at: $MODEL_DIR"
+      exit 0
+    fi
+    # -------------------------------------------------------------------------
+
     step 'Claude voice assistant — Ctrl+C to exit'
-    step 'Note: first run will download the parakeet model (~600MB) — this may take a minute'
+    step 'Tip: run with "init" first to pre-download the model'
     printf '\n' >&2
 
     while true; do
