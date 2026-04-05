@@ -140,10 +140,14 @@ writeShellApplication {
       step 'Speaking response...'
       printf 'Claude: %s\n\n' "$RESPONSE" >&2
       MLX_SPEECH_MODELS="''${MLX_SPEECH_MODELS:-$HOME/.local/share/mlx-speech/models}"
-      if MLX_SPEECH_MODELS="$MLX_SPEECH_MODELS" mlx-speak "$RESPONSE" 2>/dev/null; then
-        true
+      if [[ -d "$MLX_SPEECH_MODELS/openmoss/moss_tts_local/mlx-int8" ]]; then
+        step 'TTS: using mlx-speak'
+        MLX_SPEECH_MODELS="$MLX_SPEECH_MODELS" mlx-speak "$RESPONSE" || {
+          step "mlx-speak failed (exit $?), falling back to say"
+          /usr/bin/say "$RESPONSE"
+        }
       else
-        step 'mlx-speak unavailable, falling back to say'
+        step 'TTS: mlx-speech models not found, using say (run "init" to download)'
         /usr/bin/say "$RESPONSE"
       fi
     done
