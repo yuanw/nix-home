@@ -7,6 +7,9 @@
   mlx-speak,
   python3Packages,
 }:
+let
+  pythonWithHf = python3Packages.python.withPackages (p: [ p.huggingface-hub ]);
+in
 
 let
   voicePrompt = ''
@@ -27,7 +30,7 @@ writeShellApplication {
     ffmpeg
     parakeet-mlx
     mlx-speak
-    python3Packages.huggingface-hub
+    pythonWithHf
   ];
 
   text = ''
@@ -43,7 +46,7 @@ writeShellApplication {
     if [[ "''${1:-}" == "init" ]]; then
       # STT: parakeet-mlx uses the HuggingFace cache directly
       step "Downloading STT model (mlx-community/parakeet-tdt-0.6b-v3)..."
-      huggingface-cli download mlx-community/parakeet-tdt-0.6b-v3
+      python3 -c "from huggingface_hub import snapshot_download; snapshot_download('mlx-community/parakeet-tdt-0.6b-v3')"
       HF_CACHE="''${HF_HOME:-''${XDG_CACHE_HOME:-$HOME/.cache}/huggingface}/hub"
       step "STT model cached at: $HF_CACHE/models--mlx-community--parakeet-tdt-0.6b-v3"
 
@@ -54,11 +57,11 @@ writeShellApplication {
       mkdir -p "$TTS_DIR" "$CODEC_DIR"
 
       step "Downloading TTS model (OpenMOSS-Team/MOSS-TTS-Local-Transformer)..."
-      huggingface-cli download OpenMOSS-Team/MOSS-TTS-Local-Transformer --local-dir "$TTS_DIR"
+      python3 -c "from huggingface_hub import snapshot_download; snapshot_download('OpenMOSS-Team/MOSS-TTS-Local-Transformer', local_dir='$TTS_DIR')"
       step "TTS model saved at: $TTS_DIR"
 
       step "Downloading TTS codec (OpenMOSS-Team/MOSS-Audio-Tokenizer)..."
-      huggingface-cli download OpenMOSS-Team/MOSS-Audio-Tokenizer --local-dir "$CODEC_DIR"
+      python3 -c "from huggingface_hub import snapshot_download; snapshot_download('OpenMOSS-Team/MOSS-Audio-Tokenizer', local_dir='$CODEC_DIR')"
       step "TTS codec saved at: $CODEC_DIR"
 
       step "All models ready."
