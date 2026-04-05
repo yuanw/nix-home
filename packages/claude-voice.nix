@@ -106,7 +106,8 @@ writeShellApplication {
       # parakeet-mlx writes a sidecar file next to the input; --format txt
       # gives us clean text without SRT timestamps
       TXT_OUT="''${TMPFILE%.wav}.txt"
-      parakeet-mlx --output-format txt "$TMPFILE" && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
+      # Run from TMPFILE's directory so parakeet-mlx writes the sidecar there
+      ( cd "$(dirname "$TMPFILE")" && parakeet-mlx --output-format txt "$TMPFILE" ) && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
 
       if [[ $PARAKEET_EXIT -ne 0 ]]; then
         step "parakeet-mlx exited with code $PARAKEET_EXIT"
