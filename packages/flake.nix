@@ -91,11 +91,15 @@
               inherit (pkgs) writers;
               inherit mlx-speech;
             };
+            mlx-speak-server = pkgs.callPackage ./mlx-speak-server.nix {
+              inherit (pkgs) writers;
+              inherit mlx-speech;
+            };
             parakeet-transcribe = pkgs.callPackage ./parakeet-transcribe.nix {
               inherit parakeet-mlx;
             };
             claude-voice = pkgs.callPackage ./claude-voice.nix {
-              inherit parakeet-mlx mlx-speak;
+              inherit parakeet-mlx mlx-speak mlx-speak-server;
             };
             choose-mac = pkgs.callPackage ./choose-mac.nix { };
             sf-symbols = pkgs.callPackage ./sf_symbols.nix { };

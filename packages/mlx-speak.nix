@@ -11,8 +11,32 @@ writers.writePython3Bin "mlx-speak"
   ''
     import os
     import sys
-    import subprocess
+    import urllib.request
+    import urllib.error
+
+    text = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else sys.stdin.read().strip()
+    if not text:
+        sys.exit(0)
+
+    port = int(os.environ.get("MLX_SPEAK_PORT", "47732"))
+
+    # Try the server first — model already loaded, no startup cost
+    try:
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}/speak",
+            data=text.encode("utf-8"),
+            method="POST",
+            headers={"Content-Type": "text/plain"},
+        )
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            resp.read()
+        sys.exit(0)
+    except (urllib.error.URLError, OSError):
+        pass  # server not running, fall through to local load
+
+    # Fall back: load model inline (slow first call, but works standalone)
     import tempfile
+    import subprocess
     from pathlib import Path
 
     from mlx_speech.audio import write_wav
@@ -23,10 +47,6 @@ writers.writePython3Bin "mlx-speak"
     )
     from mlx_speech.models.moss_audio_tokenizer import load_moss_audio_tokenizer_model
     from mlx_speech.models.moss_local import MossTTSLocalProcessor, load_moss_tts_local_model
-
-    text = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else sys.stdin.read().strip()
-    if not text:
-        sys.exit(0)
 
     models_root = Path(
         os.environ.get("MLX_SPEECH_MODELS", Path.home() / ".local/share/mlx-speech/models")
