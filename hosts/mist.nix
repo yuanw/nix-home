@@ -23,6 +23,7 @@ in
   environment.casks =
     with inputs'.nix-casks.packages;
     [
+      claude-voice
       mouseless_preview
       betterdisplay
     ]
