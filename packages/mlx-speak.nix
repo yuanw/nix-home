@@ -6,7 +6,10 @@
 writers.writePython3Bin "mlx-speak"
   {
     libraries = [ mlx-speech ];
-    flakeIgnore = [ "E501" ];
+    flakeIgnore = [
+      "E501"
+      "E402"
+    ];
   }
   ''
     import os
@@ -30,9 +33,14 @@ writers.writePython3Bin "mlx-speak"
         )
         with urllib.request.urlopen(req, timeout=120) as resp:
             resp.read()
+        print(f"mlx-speak: used server on port {port}", file=sys.stderr, flush=True)
         sys.exit(0)
+    except urllib.error.HTTPError as e:
+        # Server running but synthesis failed — surface the error, don't fall back silently
+        print(f"mlx-speak-server returned HTTP {e.code}: check /tmp/mlx-speak-server.log", file=sys.stderr)
+        sys.exit(1)
     except (urllib.error.URLError, OSError):
-        pass  # server not running, fall through to local load
+        print(f"mlx-speak: server not available on port {port}, loading model locally...", file=sys.stderr, flush=True)
 
     # Fall back: load model inline (slow first call, but works standalone)
     import tempfile

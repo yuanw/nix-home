@@ -42,10 +42,15 @@ writers.writePython3Bin "mlx-speak-server"
 
     class SpeakHandler(BaseHTTPRequestHandler):
         def do_POST(self):
-            if self.path == "/speak":
-                length = int(self.headers.get("Content-Length", 0))
-                text = self.rfile.read(length).decode("utf-8").strip()
+            if self.path != "/speak":
+                self.send_response(404)
+                self.end_headers()
+                return
+            length = int(self.headers.get("Content-Length", 0))
+            text = self.rfile.read(length).decode("utf-8").strip()
+            try:
                 if text:
+                    print(f"mlx-speak-server: synthesizing {len(text)} chars...", file=sys.stderr, flush=True)
                     conversations = [[processor.build_user_message(text=text)]]
                     result = synthesize_moss_tts_local_conversations(
                         loaded_model.model,
@@ -59,9 +64,20 @@ writers.writePython3Bin "mlx-speak-server"
                     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
                         out_path = Path(f.name)
                     write_wav(out_path, synthesis.waveform, sample_rate=synthesis.sample_rate)
-                    subprocess.run(["/usr/bin/afplay", str(out_path)], check=True)
+                    wav_size = out_path.stat().st_size
+                    print(f"mlx-speak-server: wav={wav_size} bytes, playing...", file=sys.stderr, flush=True)
+                    import shutil
+                    shutil.copy2(str(out_path), "/tmp/mlx-speak-last.wav")
+                    result_play = subprocess.run(["/usr/bin/afplay", str(out_path)])
                     out_path.unlink()
+                    print(f"mlx-speak-server: afplay exit={result_play.returncode}", file=sys.stderr, flush=True)
                 self.send_response(200)
+                self.end_headers()
+            except Exception as e:
+                import traceback
+                print(f"mlx-speak-server ERROR: {e}", file=sys.stderr, flush=True)
+                traceback.print_exc(file=sys.stderr)
+                self.send_response(500)
                 self.end_headers()
 
         def log_message(self, format, *args):

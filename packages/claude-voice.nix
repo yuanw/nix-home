@@ -150,11 +150,11 @@ writeShellApplication {
 
           step "Recorded $(wc -c < "$TMPFILE") bytes — transcribing with parakeet-mlx..."
 
-          # parakeet-mlx writes a sidecar file next to the input; --format txt
-          # gives us clean text without SRT timestamps
-          TXT_OUT="''${TMPFILE%.wav}.txt"
-          # Run from TMPFILE's directory so parakeet-mlx writes the sidecar there
-          ( cd "$(dirname "$TMPFILE")" && parakeet-mlx --output-format txt "$TMPFILE" ) && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
+          # Resolve /tmp symlink → /private/tmp on macOS so TXT_OUT matches
+          # the path parakeet-mlx resolves when writing its sidecar file
+          REAL_TMPFILE=$(realpath "$TMPFILE")
+          TXT_OUT="''${REAL_TMPFILE%.wav}.txt"
+          ( cd "$(dirname "$REAL_TMPFILE")" && parakeet-mlx --output-format txt "$REAL_TMPFILE" ) && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
 
           if [[ $PARAKEET_EXIT -ne 0 ]]; then
             step "parakeet-mlx exited with code $PARAKEET_EXIT"
