@@ -83,16 +83,17 @@ writeShellApplication {
 
       step "Recorded $(wc -c < "$TMPFILE") bytes — transcribing with parakeet-mlx..."
 
-      # Let parakeet stderr through so model downloads and errors are visible
-      TRANSCRIPT=$(parakeet-mlx "$TMPFILE" 2>&1 1>/tmp/parakeet-stdout-$$ || true)
-      PARAKEET_EXIT=$?
-      TRANSCRIPT=$(cat /tmp/parakeet-stdout-$$ 2>/dev/null || true)
-      rm -f "/tmp/parakeet-stdout-$$"
+      # parakeet-mlx writes a sidecar file next to the input; --format txt
+      # gives us clean text without SRT timestamps
+      TXT_OUT="''${TMPFILE%.wav}.txt"
+      parakeet-mlx --format txt "$TMPFILE" && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
 
       if [[ $PARAKEET_EXIT -ne 0 ]]; then
         step "parakeet-mlx exited with code $PARAKEET_EXIT"
       fi
 
+      TRANSCRIPT=$(cat "$TXT_OUT" 2>/dev/null || true)
+      rm -f "$TXT_OUT"
       TRANSCRIPT=$(printf '%s' "$TRANSCRIPT" | tr -d '\n' | sed 's/^[[:space:]]*//')
 
       if [[ -z "$TRANSCRIPT" ]]; then
