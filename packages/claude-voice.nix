@@ -121,7 +121,7 @@ writeShellApplication {
 
       step 'Speaking response...'
       printf 'Claude: %s\n\n' "$RESPONSE" >&2
-      /usr/bin/say "$RESPONSE"
+      /usr/bin/say "$RESPONSE" 2>/dev/null
     done
   '';
 
