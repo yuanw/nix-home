@@ -43,9 +43,9 @@ in
         };
         programs.firefox = {
           enable = true;
+          package = cfg.pkg;
           betterfox = {
             enable = true;
-            package = cfg.pkg;
             #version = "128.0"; # Set version here, defaults to main branch
           };
         };
