@@ -4,10 +4,10 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
-      ./claude-code
-      ./cursor
-      ./droid.nix
-      ./forge.nix
+      ./code-agents/claude-code
+      ./code-agents/cursor
+      ./code-agents/droid.nix
+      ./code-agents/forge.nix
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
