@@ -6,6 +6,7 @@
       ./ai.nix
       ./claude-code
       ./cursor
+      ./droid.nix
       ./forge.nix
       ./catppuccin.nix
       ./common.nix
