@@ -816,25 +816,6 @@
         "type": "github"
       }
     },
-    "my-packages": {
-      "inputs": {
-        "flake-parts": [
-          "flake-parts"
-        ],
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./packages",
-        "type": "path"
-      },
-      "original": {
-        "path": "./packages",
-        "type": "path"
-      },
-      "parent": []
-    },
     "nanovg": {
       "flake": false,
       "locked": {
@@ -1284,7 +1265,6 @@
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",
         "mono-stretchly-darwin": "mono-stretchly-darwin",
-        "my-packages": "my-packages",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
