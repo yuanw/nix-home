@@ -112,6 +112,7 @@ rec {
 
   cozempic = pkgs.python3Packages.callPackage ./cozempic { };
   chroma-mcp = pkgs.python313Packages.callPackage ./chrome-mcp.nix { };
+  tccutil = pkgs.python3Packages.callPackage ./tccutil { };
   vibeproxy = pkgs.callPackage ./vibeproxy { };
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
   caveman = (pkgs.callPackage ./claude-plugins { }).caveman;

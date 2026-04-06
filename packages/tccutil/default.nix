@@ -12,7 +12,7 @@ buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "jacobsalmela";
     repo = "tccutil";
-    rev = "28b1942216d30b0d9970690a238c3fc8785e5279";
+    tag = version;
     hash = "sha256-gb67xM8daBA03Oq8XCkLdNcPjx5qymz0U859gRaHofs=";
   };
 
