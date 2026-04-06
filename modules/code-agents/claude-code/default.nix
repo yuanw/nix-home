@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.modules.claude-code;
-  claudePlugins = pkgs.callPackage ../../packages/claude-plugins { };
+  claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   watchdog = import ./hooks/watchdog.nix { inherit pkgs lib; };
 in
 {
