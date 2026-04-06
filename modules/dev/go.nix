@@ -18,7 +18,7 @@ in
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
         gotools
-
+        golangci-lint
       ];
       programs = {
         go = {
