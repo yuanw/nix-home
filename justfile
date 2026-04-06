@@ -38,6 +38,7 @@ nix-update:
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
+    @nix-update -f ./packages/release.nix vibeproxy --src-only
 
 
 
