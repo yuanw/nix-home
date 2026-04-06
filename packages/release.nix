@@ -111,7 +111,7 @@ rec {
   };
 
   cozempic = pkgs.python3Packages.callPackage ./cozempic { };
-  chroma-mcp = pkgs.python3Packages.callPackage ./chrome-mcp.nix { };
+  chroma-mcp = pkgs.python3Packages.callPackage ./chroma-mcp.nix { };
   tccutil = pkgs.python3Packages.callPackage ./tccutil { };
   vibeproxy = pkgs.callPackage ./vibeproxy { };
   aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
