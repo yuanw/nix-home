@@ -152,4 +152,5 @@ _final: prev: {
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };
   cursor-agent-acp = prev.callPackage ./cursor-agent-acp.nix { };
+  cohere-transcribe = prev.callPackage ./cohere-transcribe { };
 }
