@@ -154,4 +154,6 @@ _final: prev: {
   cursor-agent-acp = prev.callPackage ./cursor-agent-acp.nix { };
   pi-extensions = prev.callPackage ./pi-extensions { };
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
+  parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
+  parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
 }

@@ -9,6 +9,7 @@
       ./code-agents/droid.nix
       ./code-agents/forge.nix
       ./code-agents/pi
+      ./speak2text.nix
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
