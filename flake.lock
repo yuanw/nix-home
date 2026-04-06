@@ -832,6 +832,32 @@
         "type": "github"
       }
     },
+    "nix-casks": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "treefmt-nix"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775174512,
+        "owner": "atahanyorganci",
+        "repo": "nix-casks",
+        "rev": "6de135dd6699e08219485b8b6f1ea7183adf4420",
+        "type": "github"
+      },
+      "original": {
+        "owner": "atahanyorganci",
+        "ref": "archive",
+        "repo": "nix-casks",
+        "type": "github"
+      }
+    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -1239,6 +1265,7 @@
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",
         "mono-stretchly-darwin": "mono-stretchly-darwin",
+        "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_9",

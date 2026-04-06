@@ -118,6 +118,7 @@ with lib;
                   version = "0.0.1";
                   src = ./packages/prot-common.el;
                 })
+                whisper
               ];
             package = emacsPatched;
             enable = true;
@@ -179,6 +180,13 @@ with lib;
                   inherit (pkgs) fetchFromGitHub writeText;
                   inherit lib;
                   inherit (self) melpaBuild shell-maker acp;
+                }
+              );
+              whisper = (
+                pkgs.callPackage "${packagePath}/whisper-el.nix" {
+                  inherit (pkgs) fetchFromGitHub writeText;
+                  inherit lib;
+                  inherit (self) melpaBuild;
                 }
               );
             };
@@ -2790,6 +2798,7 @@ with lib;
                                         (setq consult-omni-apps-paths (append (file-expand-wildcards "/Applications/Adobe*")
                                         (list "/Applications"
                                               "/Applications/Utilities/"
+                                              "/Applications/Nix Casks/"
                                               "/System/Applications/"
                                               "/System/Applications/Utilities/"
                                               "/System/Library/CoreServices/Applications/"

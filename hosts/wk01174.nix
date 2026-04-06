@@ -1,6 +1,8 @@
 {
   inputs,
+  inputs',
   config,
+  pkgs,
   ...
 }:
 {
@@ -35,12 +37,20 @@
       };
     };
   };
+  environment.casks =
+    with inputs'.nix-casks.packages;
+    [
+      mouseless_preview
+      betterdisplay
+    ]
+    ++ [ pkgs.vibeproxy ];
   modules = {
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
     #ai.enable = true;
+    droid.enable = true;
     cursor.enable = true;
     secrets.agenix = {
       enable = true;
@@ -55,7 +65,6 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "karabiner-elements"
-        "mouseless@preview"
         "slack"
         "sloth"
         "ungoogled-chromium"
@@ -66,7 +75,6 @@
       ];
       brews = [
         "redis"
-        "tccutil"
         #"go"
       ];
     };

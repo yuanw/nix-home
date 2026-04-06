@@ -18,11 +18,6 @@ in
 
     ];
 
-    modules.brew = {
-      casks = [
-        "mouseless@preview"
-      ];
-    };
     home-manager.users.${config.my.username} =
       hm@{
         pkgs,

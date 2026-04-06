@@ -115,7 +115,21 @@ in
         ];
 
         xdg.configFile."sketchybar".source = ./sketchybar;
+
       };
+      # Grant Accessibility via tccutil (requires Filesystem Protections disabled in SIP).
+      # Runs as root during darwin-rebuild switch; tccutil --enable is idempotent.
+      system.activationScripts.yabaiTCCProfile.text = ''
+        TCCUTIL="${pkgs.tccutil-manage}/bin/tccutil-manage"
+        YABAI="${pkgs.yabai}/bin/yabai"
+        echo "Granting Accessibility to yabai..."
+        "$TCCUTIL" --insert "$YABAI" || true
+        ${lib.optionalString config.modules.mouseless.enable ''
+          echo "Granting Accessibility to mouseless..."
+          "$TCCUTIL" --insert net.sonuscape.mouseless || true
+        ''}
+      '';
+
       services.skhd = {
         enable = true;
         skhdConfig = ''

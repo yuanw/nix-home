@@ -6,6 +6,8 @@
       ./ai.nix
       ./claude-code
       ./cursor
+      ./droid.nix
+      ./forge.nix
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
@@ -54,7 +56,7 @@
       ./wm/yabai.nix
       ./macintosh.nix
       ./mouseless
-
+      ./nix-casks.nix
     ];
   };
 }

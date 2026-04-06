@@ -1,5 +1,6 @@
 {
   inputs,
+  inputs',
   config,
   pkgs,
   ...
@@ -19,6 +20,13 @@ in
     inputs.self.myModules.darwin
     ../modules/private/jellyfin-darwin.nix
   ];
+  environment.casks =
+    with inputs'.nix-casks.packages;
+    [
+      mouseless_preview
+      betterdisplay
+    ]
+    ++ [ pkgs.vibeproxy ];
   # determinate system
   nix.enable = false;
   my = {
@@ -34,12 +42,9 @@ in
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${config.my.username}.programs = {
-    git = {
-      settings = {
-        github.user = "yuanw";
-      };
-    };
+  home-manager.users.${config.my.username} = {
+    home.packages = [ inputs'.my-packages.packages.claude-voice ];
+    programs.git.settings.github.user = "yuanw";
   };
   modules = {
     # common = {
@@ -48,6 +53,7 @@ in
     # };
     jellyfin.enable = true;
     ai.enableOllama = true;
+
     secrets.agenix = {
       enable = true;
     };
@@ -59,13 +65,12 @@ in
       enable = true;
       casks = [
         "1password"
-        "betterdisplay"
+
         "godot"
         "firefox"
         "racket"
         "protonvpn"
         "vlc"
-        "mouseless@preview"
         "wispr-flow"
       ];
       masApps = {

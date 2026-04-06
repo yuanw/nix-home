@@ -140,6 +140,8 @@ _final: prev: {
   claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
   chroma-mcp = prev.callPackage ./chrome-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
+  tccutil-manage = prev.python3Packages.callPackage ./tccutil { };
+  vibeproxy = prev.callPackage ./vibeproxy { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
@@ -150,4 +152,5 @@ _final: prev: {
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };
   cursor-agent-acp = prev.callPackage ./cursor-agent-acp.nix { };
+  cohere-transcribe = prev.callPackage ./cohere-transcribe { };
 }
