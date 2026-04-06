@@ -53,10 +53,7 @@ in
     # };
     jellyfin.enable = true;
     ai.enableOllama = true;
-    forge = {
-      enable = true;
-      enableZshIntegration = true;
-    };
+
     secrets.agenix = {
       enable = true;
     };
