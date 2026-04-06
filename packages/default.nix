@@ -138,7 +138,7 @@ _final: prev: {
       };
     };
   claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
-  chroma-mcp = prev.callPackage ./chrome-mcp.nix { };
+  chroma-mcp = prev.python3Packages.callPackage ./chrome-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   tccutil-manage = prev.python3Packages.callPackage ./tccutil { };
   vibeproxy = prev.callPackage ./vibeproxy { };
