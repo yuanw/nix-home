@@ -1,10 +1,20 @@
 {
   lib,
-  python313Packages,
+  buildPythonApplication,
   fetchPypi,
+  pythonRelaxDepsHook,
+  hatchling,
+  chromadb,
+  cohere,
+  httpx,
+  mcp,
+  openai,
+  pillow,
+  python-dotenv,
+  typing-extensions,
 }:
 
-python313Packages.buildPythonApplication rec {
+buildPythonApplication rec {
   pname = "chroma-mcp";
   version = "0.2.6";
   pyproject = true;
@@ -15,15 +25,11 @@ python313Packages.buildPythonApplication rec {
     hash = "sha256-0fCX0jVo5TI13BDC+o7O+9Vj+C8cGIRpeLpoea+xnhc=";
   };
 
-  nativeBuildInputs = with python313Packages; [
-    pythonRelaxDepsHook
-  ];
+  nativeBuildInputs = [ pythonRelaxDepsHook ];
 
-  build-system = with python313Packages; [
-    hatchling
-  ];
+  build-system = [ hatchling ];
 
-  dependencies = with python313Packages; [
+  dependencies = [
     chromadb
     cohere
     httpx
