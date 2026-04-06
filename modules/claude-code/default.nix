@@ -14,6 +14,10 @@ in
     enable = lib.mkEnableOption "claude-code";
     enableClaudeMem = lib.mkEnableOption "claude-mem";
     enableCozempic = lib.mkEnableOption "cozempic";
+    pkg = lib.mkOption {
+      type = with lib.types; nullOr package;
+      default = pkgs.llm-agents.claude-code;
+    };
   };
   config = lib.mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
@@ -37,7 +41,7 @@ in
       programs.claude-code = {
         enable = true;
         enableMcpIntegration = true;
-        package = pkgs.llm-agents.claude-code;
+        package = cfg.pkg;
         skillsDir = ./skills;
         #commandsDir = ./commands;
         skillPackages = with claudePlugins; [

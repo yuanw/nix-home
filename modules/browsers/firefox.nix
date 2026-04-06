@@ -45,10 +45,11 @@ in
           enable = true;
           betterfox = {
             enable = true;
+            package = cfg.pkg;
             #version = "128.0"; # Set version here, defaults to main branch
           };
         };
-        programs.firefox.package = cfg.pkg;
+
         # https://mozilla.github.io/policy-templates/
         # ~/Applications/Home Manager Apps/Firefox.app/Contents/Resources/distribution/policies.json
         programs.firefox.policies = {
