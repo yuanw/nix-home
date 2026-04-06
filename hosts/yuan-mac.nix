@@ -36,7 +36,7 @@
       enable = true;
       enableClaudeMem = true;
       # llm-agent.claude-code doesn't work in garnix ci
-      pkg = pkgs.claude-code;
+      pkg = null;
     };
 
     browsers.firefox = {
