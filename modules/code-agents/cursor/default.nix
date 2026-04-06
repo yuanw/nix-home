@@ -6,7 +6,7 @@
 }:
 let
   cfg = config.modules.cursor;
-  claudePlugins = pkgs.callPackage ../../packages/claude-plugins { };
+  claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
 in
 {
   options.modules.cursor = {
