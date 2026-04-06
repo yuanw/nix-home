@@ -153,7 +153,7 @@
       in
       {
         ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
-        yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
+        # yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
         mist = configure "mist" "aarch64-darwin" true ./mist.nix;
         WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
       };
