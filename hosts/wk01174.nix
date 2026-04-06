@@ -2,6 +2,7 @@
   inputs,
   inputs',
   config,
+  pkgs,
   ...
 }:
 {
