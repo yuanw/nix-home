@@ -58,7 +58,9 @@
         pi-loop
         pi-review
       ];
-
+      extensionFiles = {
+        "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
+      };
     };
     secrets.agenix = {
       enable = true;
