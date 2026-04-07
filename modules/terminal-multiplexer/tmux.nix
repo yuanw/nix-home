@@ -80,6 +80,7 @@ with lib;
             setw -g window-status-format "#[fg=colour60,bg=colour60] #I #[fg=colour60,bg=colour60] #W "
             setw -g window-status-current-format "#[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]#[fg=colour146,bg=colour60] #I #[fg=colour146,bg=colour60] #W #[fg=colour60,bg=colour60,nobold,nounderscore,noitalics]"
             set -g mouse on
+            set -g extended-keys on
             bind v split-window -h -c '#{pane_current_path}'
             bind s split-window -v -c '#{pane_current_path}'
 
