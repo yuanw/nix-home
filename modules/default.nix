@@ -8,6 +8,7 @@
       ./code-agents/cursor
       ./code-agents/droid.nix
       ./code-agents/forge.nix
+      ./code-agents/pi.nix
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
