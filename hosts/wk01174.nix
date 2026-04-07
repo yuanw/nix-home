@@ -61,6 +61,7 @@
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
+        "notify.ts" = ../modules/code-agents/pi/extensions/notify.ts;
       };
     };
     secrets.agenix = {
