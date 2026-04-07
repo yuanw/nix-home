@@ -62,7 +62,7 @@
       extensionFiles = {
         "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
         "notify.ts" = ../modules/code-agents/pi/extensions/notify.ts;
-        "custom-footer.ts" = ../modules/code-agents/pi/extensions/customer-footer.ts;
+        "custom-footer.ts" = ../modules/code-agents/pi/extensions/custom-footer.ts;
       };
     };
     secrets.agenix = {
