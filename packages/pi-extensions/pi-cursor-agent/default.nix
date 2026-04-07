@@ -3,6 +3,7 @@
   fetchFromGitHub,
   lib,
   nix-update-script,
+  ...
 }:
 
 buildNpmPackage (finalAttrs: {
