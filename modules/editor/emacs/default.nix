@@ -733,7 +733,7 @@ with lib;
                 };
                 auto-save = {
                   #enable = hostname == "WK01174";
-                  #enable = true;
+                  enable = true;
                   package =
                     epkgs:
                     (pkgs.callPackage "${packagePath}/auto-save.nix" {
@@ -2396,7 +2396,7 @@ with lib;
                   '';
                 };
                 editorconfig = {
-                  enable = false;
+                  enable = true;
                   config = ''
                     (editorconfig-mode 1)
                   '';
