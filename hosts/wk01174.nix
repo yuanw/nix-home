@@ -54,8 +54,9 @@
     cursor.enable = true;
     pi = {
       enable = true;
-      extensions = [
-        config.modules.pi.pkgs.pi-loop
+      extensionsPkgs = with config.modules.pi.pkgs; [
+        pi-loop
+        pi-review
       ];
     };
     secrets.agenix = {
