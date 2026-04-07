@@ -57,6 +57,7 @@
       extensionsPkgs = with pkgs.pi-extensions; [
         pi-loop
         pi-review
+        pi-cursor-agent
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
