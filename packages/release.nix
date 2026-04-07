@@ -119,4 +119,5 @@ rec {
   claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
   emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
+  pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
 }

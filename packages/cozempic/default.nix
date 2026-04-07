@@ -7,14 +7,14 @@
 }:
 buildPythonApplication rec {
   pname = "cozempic";
-  version = "1.6.11";
+  version = "1.6.13";
   pyproject = true;
 
   src = fetchFromGitHub {
     owner = "Ruya-AI";
     repo = "cozempic";
     tag = "v${version}";
-    hash = "sha256-jq8yPG3/OlVXh5NG5iHk7rd86PMqexpcoRO3LoqkTXg=";
+    hash = "sha256-oRdQszBIdTOoiqgwJkdQWleUAWJden0g1Ecmgsag28c=";
   };
 
   build-system = [ setuptools ];

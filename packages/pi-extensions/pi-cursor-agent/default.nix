@@ -7,13 +7,13 @@
 
 buildNpmPackage (finalAttrs: {
   pname = "pi-cursor-agent";
-  version = "0.4.3";
+  version = "0.4.4";
 
   src = fetchFromGitHub {
     owner = "sudosubin";
     repo = "pi-frontier";
     rev = "${finalAttrs.pname}@${finalAttrs.version}";
-    hash = "sha256-SCbqlUDlZIN/26qMrvVY+rGXOszrCcUBRccDmvM1MKA=";
+    hash = "sha256-31ixjrEOfU7S4BcGjdVjp1RTr8xyZqbGpjC2Ec0njIQ=";
   };
 
   sourceRoot = "${finalAttrs.src.name}/pi-cursor-agent";

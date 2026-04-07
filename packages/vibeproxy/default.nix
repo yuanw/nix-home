@@ -5,11 +5,11 @@
 }:
 stdenv.mkDerivation rec {
   pname = "vibeproxy";
-  version = "1.8.131";
+  version = "1.8.132";
 
   src = fetchzip {
     url = "https://github.com/automazeio/vibeproxy/releases/download/v${version}/VibeProxy-arm64.zip";
-    hash = "sha256-VhDSXZARPOAv7J8UZjVraIxx00SZpwLs9ylIve7Mklo=";
+    hash = "sha256-6SxML/z53znTUCPm/mmLy66BCFwJ8gpnAGKZgfVj6cY=";
     stripRoot = false;
   };
 
