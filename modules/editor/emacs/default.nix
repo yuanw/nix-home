@@ -730,7 +730,7 @@ with lib;
                   ];
                 };
                 auto-save = {
-                  enable = hostname == "WK01174";
+                  #enable = hostname == "WK01174";
                   #enable = true;
                   package =
                     epkgs:
@@ -2396,14 +2396,7 @@ with lib;
                 editorconfig = {
                   enable = true;
                   config = ''
-                                      (editorconfig-mode 1)
-                                       (defun my/editorconfig-skip-directories (orig-fun fn filename &rest args)
-                      (if (file-directory-p filename)
-                          (apply fn filename args)
-                        (apply orig-fun fn filename args)))
-
-                    (advice-add 'editorconfig--advice-find-file-noselect
-                                :around #'my/editorconfig-skip-directories)
+                    (editorconfig-mode 1)
                   '';
                 };
                 envrc = {
