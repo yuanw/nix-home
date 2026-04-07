@@ -6,7 +6,6 @@
 }:
 let
   cfg = config.modules.pi;
-  piExtensions = pkgs.callPackage ../../../packages/pi-extensions { };
   defaultConfigDir = ".pi/agent";
 
   mkEntries =
@@ -34,15 +33,6 @@ in
     package = lib.mkOption {
       type = lib.types.package;
       default = pkgs.llm-agents.pi;
-    };
-
-    # Convenience read-only attribute exposing the bundled pi-extensions packages.
-    # Usage in host config: config.modules.pi.pkgs.pi-loop
-    pkgs = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = piExtensions;
-      readOnly = true;
-      description = "Bundled pi extension packages from packages/pi-extensions.";
     };
 
     configDir = lib.mkOption {
