@@ -19,7 +19,7 @@ buildNpmPackage (finalAttrs: {
 
   sourceRoot = "${finalAttrs.src.name}/pi-cursor-agent";
 
-  npmDepsHash = "sha256-owaUeemJI8otZQ8AgFxZ7HaFjuw52l4GpCNFkueXCMQ=";
+  npmDepsHash = "sha256-aePcIq6OatykdUVBs3ECc5USw5Fd/1HrLHJ/IUfJACU=";
 
   dontNpmBuild = true;
 
