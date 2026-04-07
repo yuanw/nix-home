@@ -26,11 +26,26 @@ let
       };
     };
 
+  # Package a local .ts file as a pi extension.
+  # pname must include the .ts suffix (used as the filename in extensions/).
+  # Example: mkLocalPiExtension "permission-gate.ts" ./extensions/permission-gate.ts
+  mkLocalPiExtension =
+    pname: src:
+    pkgs.runCommand pname
+      {
+        inherit pname;
+        passthru.piExtension = { inherit pname; };
+      }
+      ''
+        install -Dm644 ${src} $out
+      '';
+
   callExtension = path: pkgs.callPackage path { inherit mkPiExtension; };
 in
 {
-  inherit mkPiExtension;
+  inherit mkPiExtension mkLocalPiExtension;
   pi-loop = callExtension ./pi-loop.nix;
   pi-review = callExtension ./pi-review.nix;
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
+  pi-cursor-agent = callExtension ./pi-cursor-agent;
 }

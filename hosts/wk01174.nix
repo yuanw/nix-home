@@ -52,6 +52,12 @@
     #ai.enable = true;
     droid.enable = true;
     cursor.enable = true;
+    pi = {
+      enable = true;
+      extensions = [
+        config.modules.pi.pkgs.pi-loop
+      ];
+    };
     secrets.agenix = {
       enable = true;
     };

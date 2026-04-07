@@ -66,12 +66,42 @@ in
       description = "Extra environment variables to set for pi.";
     };
 
-    extensions = lib.mkOption {
+    nodeDeps = lib.mkOption {
+      type = lib.types.nullOr lib.types.package;
+      default = null;
+      example = lib.literalExpression ''
+        pkgs.callPackage ./pi-node-deps.nix { }
+      '';
+      description = ''
+        A derivation whose node_modules/ directory is linked into
+        <configDir>/node_modules/. Build it with buildNpmPackage +
+        importNpmLock. Required when extensions import runtime npm packages
+        (anything beyond `import type` from the pi API).
+      '';
+    };
+
+    extensionsPkgs = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [ ];
       description = ''
-        Pi extension packages. Each package's pname is used as the extension
-        directory name under <configDir>/extensions/.
+        Pi extension packages built with mkPiExtension or mkLocalPiExtension.
+        Each package's pname is used as the filename under <configDir>/extensions/.
+      '';
+    };
+
+    extensionFiles = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          "permission-gate.ts" = ./extensions/permission-gate.ts;
+          "my-tool.ts" = ./extensions/my-tool.ts;
+        }
+      '';
+      description = ''
+        Local .ts files to link directly into <configDir>/extensions/.
+        Keys are the filenames (must include .ts suffix); values are paths to
+        the source files. No packaging step required.
       '';
     };
 
@@ -107,18 +137,25 @@ in
           Set modules.pi.configDir instead of PI_CODING_AGENT_DIR.
         '';
       }
-      (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensions) "extension")
+      (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
       (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
     ];
 
     home-manager.users.${config.my.username} = {
       home.packages = [ cfg.package ];
 
-      home.file = lib.listToAttrs (
-        (mkEntries cfg.extensions (ext: "extensions/${ext.pname}") (x: x))
-        ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
-        ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
-      );
+      home.file =
+        lib.listToAttrs (
+          (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
+          ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
+          ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
+        )
+        // lib.mapAttrs' (
+          name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
+        ) cfg.extensionFiles
+        // lib.optionalAttrs (cfg.nodeDeps != null) {
+          "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
+        };
 
       home.sessionVariables =
         cfg.environment
