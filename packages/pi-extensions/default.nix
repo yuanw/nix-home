@@ -48,4 +48,5 @@ in
   pi-review = callExtension ./pi-review.nix;
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
   pi-cursor-agent = callExtension ./pi-cursor-agent;
+  pi-slow-mode = callExtension ./pi-slow-mode.nix;
 }

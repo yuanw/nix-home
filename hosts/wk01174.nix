@@ -58,6 +58,7 @@
         pi-loop
         pi-review
         pi-cursor-agent
+        pi-slow-mode
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
