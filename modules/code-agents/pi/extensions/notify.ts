@@ -8,8 +8,10 @@
  * Protocols:
  *   OSC 777 — Ghostty, iTerm2, WezTerm, foot, rxvt-unicode (default)
  *   OSC 99  — Kitty
- *   Native  — Alacritty (no OSC notify); uses osascript / notify-send when
+ *   Native  — Alacritty; uses osascript / notify-send when
  *             ALACRITTY_WINDOW_ID is set
+ *   Emacs   — vterm/term/eat/shell; uses knockknock.el via emacsclient
+ *             when INSIDE_EMACS is set (falls back to native if unavailable)
  *
  * Toggle with /notify or start with --no-notify.
  *
@@ -31,6 +33,32 @@ function sanitize(s: string): string {
 /** AppleScript string literal for `osascript -e` (title/body may contain quotes). */
 function appleScriptQuoted(s: string): string {
   return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+/** Elisp string literal (escape backslashes and double quotes). */
+function elispQuoted(s: string): string {
+  return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+/** Notify via knockknock.el through emacsclient. Returns true if successful. */
+function notifyKnockknock(title: string, body: string): boolean {
+  try {
+    execFileSync(
+      "emacsclient",
+      [
+        "--eval",
+        `(when (fboundp 'knockknock-notify)
+           (knockknock-notify :title ${elispQuoted(title)}
+                              :message ${elispQuoted(body)}
+                              :icon "cod-robot"
+                              :duration 5))`,
+      ],
+      { stdio: "ignore" },
+    );
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** Desktop notification without terminal OSC (Alacritty and similar). */
@@ -66,6 +94,11 @@ function notify(title: string, body: string): void {
     process.stdout.write(`\x1b]99;i=1:p=body;${b}\x1b\\`);
   } else if (process.env.ALACRITTY_WINDOW_ID) {
     notifyNative(t, b);
+  } else if (process.env.INSIDE_EMACS) {
+    // vterm/term/eat/shell inside Emacs — use knockknock.el, fallback to native
+    if (!notifyKnockknock(t, b)) {
+      notifyNative(t, b);
+    }
   } else {
     process.stdout.write(`\x1b]777;notify;${t};${b}\x07`);
   }
