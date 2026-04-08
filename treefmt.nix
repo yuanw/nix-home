@@ -9,5 +9,8 @@
   programs.cabal-fmt.enable = true;
   # programs.hlint.enable = true;
   programs.shellcheck.enable = true;
+  settings.formatter.shellcheck = {
+    excludes = [ "modules/private/*" ];
+  };
   programs.shfmt.enable = true;
 }
