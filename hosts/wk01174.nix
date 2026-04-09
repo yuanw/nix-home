@@ -50,6 +50,8 @@
     #   supportLocalVirtualBuilder = true;
     # };
     #ai.enable = true;
+    ai.enableOllama = true;
+
     droid.enable = true;
     cursor.enable = true;
     pi = {
