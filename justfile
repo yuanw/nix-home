@@ -42,7 +42,8 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
     @nix-update -f ./packages/release.nix tccutil --src-only
 
-
+update-wk:
+	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
 
 # apply nix configuration (works on both macOS and NixOS)
 switch:
