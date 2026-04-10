@@ -21,20 +21,17 @@ in
   config = mkMerge [
     (mkIf cfg.enableOllama {
 
-      launchd.agents.ollama-service = lib.mkIf isDarwin {
-        ollama-serve = {
-          enable = true;
-          config = {
-            ProgramArguments = [
-              "${pkgs.ollama}/bin/ollama"
-              "serve"
-            ];
-            KeepAlive = true;
-            RunAtLoad = true;
-            StandardOutPath = "/tmp/ollama.log";
-            StandardErrorPath = "/tmp/ollama.log";
-          };
-        };
+      launchd.user.agents.ollama-service.serviceConfig = lib.mkIf isDarwin {
+
+        ProgramArguments = [
+          "${pkgs.ollama}/bin/ollama"
+          "serve"
+        ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        StandardOutPath = "/tmp/ollama.log";
+        StandardErrorPath = "/tmp/ollama.log";
+
       };
       home-manager.users.${config.my.username} = {
         home.packages = [

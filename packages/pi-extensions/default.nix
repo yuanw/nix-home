@@ -44,6 +44,7 @@ let
 in
 {
   inherit mkPiExtension mkLocalPiExtension;
+  pi-autoresearch = callExtension ./pi-autoresearch.nix;
   pi-loop = callExtension ./pi-loop.nix;
   pi-review = callExtension ./pi-review.nix;
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
