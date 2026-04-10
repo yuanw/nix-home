@@ -323,12 +323,16 @@ in
                 #     "moz-extension-scheme"
                 #   ];
                 # };
-                # "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
+                "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
                 "${mtab.addonId}".settings = builtins.fromJSON (builtins.readFile ./mtab.json);
 
                 "${vimium-c.addonId}".settings = {
                   keyMappings = "#!no-check\nunmap x";
                 };
+
+                "${userchrome-toggle-extended.addonId}".settings = builtins.fromJSON (
+                  builtins.readFile ./userchrome-toggle-extended.json
+                );
               };
             };
 
