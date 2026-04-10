@@ -26,7 +26,7 @@ in
           #     huggingface-hub
           #   ]))
           pkgs.ollama
-          pkgs.llm-agents.opencode
+          # pkgs.llm-agents.opencode
         ];
       };
     })
