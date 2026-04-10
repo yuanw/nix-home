@@ -83,6 +83,18 @@ in
             shortcut = "Alt+L";
           };
         };
+        # userchrome-toggle-extended: shortcuts as in ~/Library/Application Support/Firefox/Profiles/home/extension-settings.json (macOS).
+        "userchrome-toggle-extended@n2ezr.ru" = {
+          "1" = {
+            shortcut = "MacCtrl+Alt+H";
+          };
+          "2" = {
+            shortcut = "MacCtrl+Alt+T";
+          };
+          "3" = {
+            shortcut = "MacCtrl+Alt+N";
+          };
+        };
       };
     })
     (mkIf cfg.enable {
