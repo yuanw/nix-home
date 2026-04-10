@@ -43,7 +43,6 @@ in
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username} = {
-    home.packages = [ inputs'.my-packages.packages.claude-voice ];
     programs.git.settings.github.user = "yuanw";
   };
   modules = {
@@ -65,7 +64,6 @@ in
       enable = true;
       casks = [
         "1password"
-
         "godot"
         "firefox"
         "racket"
