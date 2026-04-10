@@ -100,6 +100,7 @@
         ./devshell.nix
         ./hosts
         ./modules
+        ./tests/flake-module.nix
         inputs.git-hooks.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
