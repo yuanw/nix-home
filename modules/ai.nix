@@ -21,7 +21,7 @@ in
   config = mkMerge [
     (mkIf cfg.enableOllama {
 
-      launchd.users.agents.ollama-service.serviceConfig = lib.mkIf isDarwin {
+      launchd.user.agents.ollama-service.serviceConfig = lib.mkIf isDarwin {
 
         ProgramArguments = [
           "${pkgs.ollama}/bin/ollama"
