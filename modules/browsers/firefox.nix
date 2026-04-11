@@ -215,7 +215,7 @@ in
                     userchrome-toggle-extended
                     vimium-c
                   ]
-                  ++ lib.mkIf hostname != "WK01174" [
+                  ++ lib.optionals (hostname != "WK01174") [
                     onepassword-password-manager
                   ];
 
