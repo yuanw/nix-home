@@ -423,21 +423,19 @@ in
                   #     "moz-extension-scheme"
                   #   ];
                   # };
-                  "${sidebery.addonId}".settings = builtins.fromJSON (builtins.readFile ./sidebery.json);
-                  "${mtab.addonId}".settings = builtins.fromJSON (builtins.readFile ./mtab.json);
+                  "${sidebery.addonId}".settings = import ./sidebery.nix;
+                  "${mtab.addonId}".settings =
+                    if hostname == "wk1000" then import ./private/workMtab.nix else import ./private/personalMtab.nix;
 
                   "${vimium-c.addonId}".settings = {
                     keyMappings = "#!no-check\nunmap x";
                   };
 
-                  "${userchrome-toggle-extended.addonId}".settings = builtins.fromJSON (
-                    builtins.readFile ./userchrome-toggle-extended.json
-                  );
+                  "${userchrome-toggle-extended.addonId}".settings = import ./userchrome-toggle-extended.nix;
                 };
               };
 
               containers = {
-
                 "Banking" = {
                   id = 3;
                   color = "green";
