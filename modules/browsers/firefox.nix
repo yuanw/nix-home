@@ -6,6 +6,7 @@
   lib,
   pkgs,
   inputs,
+  hostname,
   ...
 }:
 
@@ -188,19 +189,23 @@ in
               extensions = {
                 force = true;
                 #https://gitlab.com/rycee/nur-expressions/-/blob/master/pkgs/firefox-addons/generated-firefox-addons.nix
-                packages = with pkgs.nur.repos.rycee.firefox-addons; [
-                  darkreader
-                  ghosttext
-                  history-cleaner
-                  leechblock-ng
-                  mtab
-                  privacy-badger
-                  sidebery
-                  ublock-origin
-                  userchrome-toggle-extended
-                  onepassword-password-manager
-                  vimium-c
-                ];
+                packages =
+                  with pkgs.nur.repos.rycee.firefox-addons;
+                  [
+                    darkreader
+                    ghosttext
+                    history-cleaner
+                    leechblock-ng
+                    mtab
+                    privacy-badger
+                    sidebery
+                    ublock-origin
+                    userchrome-toggle-extended
+                    vimium-c
+                  ]
+                  ++ lib.mkIf hostname != "WK01174" [
+                    onepassword-password-manager
+                  ];
 
                 # Addon IDs can be found in about:support#addons
                 # https://github.com/kittywitch/nixfiles/blob/026208109467e27b52953382074d24ce8acadd0a/home/profiles/graphical/floorp/mtab.nix
