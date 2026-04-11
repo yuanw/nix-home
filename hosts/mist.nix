@@ -51,7 +51,7 @@ in
     # };
     jellyfin.enable = true;
     ai.enableOllama = true;
-
+    pi.enable = true;
     secrets.agenix = {
       enable = true;
     };
