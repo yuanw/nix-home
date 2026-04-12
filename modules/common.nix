@@ -2,7 +2,6 @@
   inputs,
   inputs',
   config,
-  lib,
   ...
 }:
 {
@@ -80,12 +79,14 @@
     };
     overlays = [
       (
-        _final: prev:
-        lib.optionalAttrs prev.stdenv.isDarwin (inputs.nix-darwin-emacs.overlays.emacs _final prev)
+        final: prev:
+        if prev.stdenv.isDarwin then
+          (inputs.nix-darwin-emacs.overlays.emacs final prev) // (inputs.emacs.overlays.package final prev)
+        else
+          inputs.emacs.overlay final prev
       )
     ]
     ++ [
-      inputs.emacs.overlay
       inputs.nur.overlays.default
       inputs.mcp-servers-nix.overlays.default
       inputs.llm-agents.overlays.default
