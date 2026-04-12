@@ -2371,7 +2371,7 @@ with lib;
                   '';
                 };
                 direnv = {
-                  enable = true;
+                  enable = false;
                   functions = [ "direnv--maybe-update-environment" ];
                   preface = ''
                      (defconst emacs-binary-path (directory-file-name
