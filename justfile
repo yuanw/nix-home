@@ -48,7 +48,7 @@ update-wk:
 # apply nix configuration (works on both macOS and NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo ./result/sw/bin/darwin-rebuild switch --flake .; \
+        sudo darwin-rebuild switch --flake .; \
     else \
         nixos-rebuild switch --flake '.#' --quiet --sudo; \
     fi

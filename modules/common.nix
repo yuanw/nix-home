@@ -77,184 +77,78 @@
       allowBroken = false;
       allowUnsupportedSystem = true;
     };
-    overlays = [
-      inputs.emacs.overlay
-      inputs.nur.overlays.default
-      inputs.mcp-servers-nix.overlays.default
-      inputs.llm-agents.overlays.default
-      inputs.agenix.overlays.default
-      (
-        _final: _prev:
-        # mailutils 3.21 added nss_wrapper to nativeCheckInputs, which doesn't
-        # build on darwin. NixOS/nixpkgs#503376 (merged to master as c207940c)
-        # reverts this. Use nixpkgs-master's mailutils until nixos-unstable catches up.
-        if _prev.stdenv.isDarwin then
-          {
-            mailutils = inputs'.nixpkgs-master.legacyPackages.mailutils;
-          }
-        else
-          { }
-      )
-      (
-        _final: _prev:
-        # On macOS, the emacs-git pdmp (portable dump) captures the Nix build
-        # sandbox path (/private/tmp/nix-build-.../etc) as data-directory.
-        # When emacs is later used as a build tool for elisp packages, the new
-        # sandbox returns EPERM (not ENOENT) for that stale temp path — causing
-        # a fatal startup crash before EMACSDATA env var processing in startup.el.
-        #
-        # Fix: re-dump emacs immediately after install (while still inside the
-        # build sandbox where those paths are accessible), with EMACSDATA and
-        # native-comp-eln-load-path corrected to point at $out store paths.
-        # The new pdmp captures the corrected values, eliminating the EPERM.
-        if _prev.stdenv.isDarwin then
-          {
-            emacs-git =
-              let
-                emacs = _final.emacs-git;
-                base = _prev.emacs-git.overrideAttrs (old: {
-                  nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ _prev.makeWrapper ];
-                  postInstall = (old.postInstall or "") + ''
-                    emacs_version=$(ls "$out/share/emacs" | grep -E '^[0-9]' | sort -V | tail -1)
-                    old_pdmp=$(find "$out/libexec/emacs/$emacs_version" -name 'emacs-*.pdmp' 2>/dev/null | head -1)
-                    if [ -n "$old_pdmp" ]; then
-                      tmp_pdmp="$old_pdmp.tmp"
-                      eln_dir="$out/lib/emacs/$emacs_version/native-lisp"
-                      elisp_file=$(mktemp "$TMPDIR/emacs-redump-XXXXXX.el")
-                      cat > "$elisp_file" << ELISP
-                    ; Fix pdmp-frozen variables that point to the build sandbox.
-                    (when (boundp 'native-comp-eln-load-path)
-                      (setq native-comp-eln-load-path (list "$eln_dir/")))
-                    (setq temporary-file-directory "/tmp/")
-                    ; source-directory captures the unpacked build tree path. Emacs source
-                    ; is not installed to the store, but $out is a better fallback than a
-                    ; stale sandbox path — prevents "Listing directory failed" errors from
-                    ; xref/find-function trying to scan the missing build dir.
-                    (setq source-directory "$out/")
-                    ; package-directory-list is frozen in the pdmp at emacs-git build time
-                    ; when no user packages are present. When this emacs is later used to
-                    ; build elisp packages, EMACSLOADPATH adds deps to load-path but
-                    ; package-directory-list (already bound → defcustom is a no-op) does
-                    ; not include their elpa dirs, so package-activate-all cannot find deps.
-                    ;
-                    ; Fix: use with-eval-after-load so that AFTER package.el loads (triggered
-                    ; by the -f package-activate-all autoload), we reset package-directory-list
-                    ; from the current load-path (which includes EMACSLOADPATH additions) and
-                    ; call package-initialize to populate package-alist.
-                    ;
-                    ; NOTE: advice-add before package.el loads is wiped when defun redefines
-                    ; the symbol; with-eval-after-load ensures the hook runs after defun.
-                    ; Gate on noninteractive: in interactive Emacs, package-activate-all is
-                    ; called at startup which triggers this hook and resets package-alist,
-                    ; breaking package activation (org-mode not rendering, treesit nil, etc.).
-                    ; Only batch/build-time invocations need this fix.
-                    (with-eval-after-load 'package
-                      (when noninteractive
-                        (setq package-directory-list
-                          (let (result)
-                            (dolist (f load-path)
-                              (and (stringp f)
-                                   (equal (file-name-nondirectory f) "site-lisp")
-                                   (push (expand-file-name "elpa" f) result)))
-                            (nreverse result)))
-                        (unless (bound-and-true-p package--initialized)
-                          (package-initialize t))))
-                    ; Re-enable global minor modes that batch mode leaves disabled but
-                    ; the original pdmp (built by loadup.el) had enabled. Without this,
-                    ; interactive Emacs inherits the batch-mode nil state.
-                    (global-font-lock-mode 1)
-                    (transient-mark-mode 1)
-                    (dump-emacs-portable "$tmp_pdmp")
-                    ELISP
-                      EMACSDATA="$out/share/emacs/$emacs_version/etc" \
-                      EMACSLOADPATH="$out/share/emacs/$emacs_version/lisp:" \
-                        "$out/bin/emacs" \
-                          --dump-file "$old_pdmp" \
-                          --batch \
-                          --no-site-file \
-                          --load "$elisp_file" \
-                        && mv "$tmp_pdmp" "$old_pdmp" \
-                        || echo "Warning: emacs re-dump failed, continuing with original pdmp"
-                      rm -f "$elisp_file"
-                    fi
-                    wrapProgram "$out/bin/emacs" \
-                      --set-default EMACSDATA "$out/share/emacs/$emacs_version/etc"
-                  '';
-                });
-              in
-              base.overrideAttrs (oa: {
-                passthru = oa.passthru // {
-                  pkgs = oa.passthru.pkgs.overrideScope (_eself: _esuper: { inherit emacs; });
-                };
-              });
-          }
-        else
-          { }
-      )
-      (_final: _prev: {
-        stable = inputs'.nixpkgs-stable.legacyPackages;
-        # gtk3 =
-        #   if _prev.stdenv.isDarwin then
-        #     inputs'.nixpkgs-stable.legacyPackages.gtk3
-        #   else
-        #     inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
-        # sbcl =
-        #   if _prev.stdenv.isDarwin then
-        #     inputs'.nixpkgs-stable.legacyPackages.sbcl
-        #   else
-        #     inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
-        sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
-        # batgrep =
-        #   if _prev.stdenv.isDarwin then
-        #     _prev.batgrep.overrideAttrs (_oldAttrs: {
-        #       doCheck = false;
-        #     })
-        #   else
-        #     _prev.batgrep;
-        #https://github.com/NixOS/nixpkgs/pull/476210
-        yt-dlp =
-          if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
+    overlays =
 
-        #https://github.com/NixOS/nixpkgs/pull/476003/files
-        #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
-        # Override go-jira to use current master
-        go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
-          version = "unstable-2025-11-27";
-          src = _prev.fetchFromGitHub {
-            owner = "go-jira";
-            repo = "jira";
-            rev = "748b7d552f8b3ad993b05810b93f0f2ed39822d1";
-            hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
-          };
-        });
+      [
+        inputs.emacs.overlay
+        inputs.nur.overlays.default
+        inputs.mcp-servers-nix.overlays.default
+        inputs.llm-agents.overlays.default
+        inputs.agenix.overlays.default
+        (_final: _prev: {
+          stable = inputs'.nixpkgs-stable.legacyPackages;
+          # gtk3 =
+          #   if _prev.stdenv.isDarwin then
+          #     inputs'.nixpkgs-stable.legacyPackages.gtk3
+          #   else
+          #     inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
+          # sbcl =
+          #   if _prev.stdenv.isDarwin then
+          #     inputs'.nixpkgs-stable.legacyPackages.sbcl
+          #   else
+          #     inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
+          sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
+          # batgrep =
+          #   if _prev.stdenv.isDarwin then
+          #     _prev.batgrep.overrideAttrs (_oldAttrs: {
+          #       doCheck = false;
+          #     })
+          #   else
+          #     _prev.batgrep;
+          #https://github.com/NixOS/nixpkgs/pull/476210
+          yt-dlp =
+            if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
 
-        # Override jiratui to use current master
-        jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
-          version = "unstable-2025-11-27";
-          src = _prev.fetchFromGitHub {
-            owner = "whyisdifficult";
-            repo = "jiratui";
-            rev = "fc97e1d8e81c6a3fb8537eb60b176a5ad1b73392";
-            hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
-          };
-        });
-        #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
+          #https://github.com/NixOS/nixpkgs/pull/476003/files
+          #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
+          # Override go-jira to use current master
+          go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
+            version = "unstable-2025-11-27";
+            src = _prev.fetchFromGitHub {
+              owner = "go-jira";
+              repo = "jira";
+              rev = "748b7d552f8b3ad993b05810b93f0f2ed39822d1";
+              hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
+            };
+          });
 
-        # https://nixpk.gs/pr-tracker.html?pr=263500
-        # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-        # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-        #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
-        #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
+          # Override jiratui to use current master
+          jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
+            version = "unstable-2025-11-27";
+            src = _prev.fetchFromGitHub {
+              owner = "whyisdifficult";
+              repo = "jiratui";
+              rev = "fc97e1d8e81c6a3fb8537eb60b176a5ad1b73392";
+              hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
+            };
+          });
+          #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
-        # use this variant if unfree packages are needed:
-        # unstable = import nixpkgs-unstable {
-        #   inherit system;
-        #   config.allowUnfree = true;
-        # };
+          # https://nixpk.gs/pr-tracker.html?pr=263500
+          # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
+          # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+          #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
+          #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
 
-      })
-      (import ../packages)
-    ];
+          # use this variant if unfree packages are needed:
+          # unstable = import nixpkgs-unstable {
+          #   inherit system;
+          #   config.allowUnfree = true;
+          # };
+
+        })
+        (import ../packages)
+      ];
 
   };
 }

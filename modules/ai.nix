@@ -9,6 +9,7 @@
 with lib;
 let
   cfg = config.modules.ai;
+  inherit (pkgs.stdenv) isDarwin;
 in
 {
   options.modules.ai = {
@@ -19,6 +20,19 @@ in
 
   config = mkMerge [
     (mkIf cfg.enableOllama {
+
+      launchd.user.agents.ollama-service.serviceConfig = lib.mkIf isDarwin {
+
+        ProgramArguments = [
+          "${pkgs.ollama}/bin/ollama"
+          "serve"
+        ];
+        KeepAlive = true;
+        RunAtLoad = true;
+        StandardOutPath = "/tmp/ollama.log";
+        StandardErrorPath = "/tmp/ollama.log";
+
+      };
       home-manager.users.${config.my.username} = {
         home.packages = [
           # (pkgs.python3.withPackages (ps:
@@ -26,7 +40,7 @@ in
           #     huggingface-hub
           #   ]))
           pkgs.ollama
-          #pkgs.llm-agents.opencode
+          # pkgs.llm-agents.opencode
         ];
       };
     })

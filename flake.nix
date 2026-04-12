@@ -44,10 +44,6 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    emacs-plus = {
-      url = "github:d12frosted/homebrew-emacs-plus";
-      flake = false;
-    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "nix-darwin";
@@ -100,6 +96,7 @@
         ./devshell.nix
         ./hosts
         ./modules
+        ./tests/flake-module.nix
         inputs.git-hooks.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule

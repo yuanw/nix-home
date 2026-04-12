@@ -1,0 +1,29 @@
+diff --git a/src/emacs.c b/src/emacs.c
+index 23e0c6f5318..abd8e883f44 100644
+--- a/src/emacs.c
++++ b/src/emacs.c
+@@ -2050,10 +2050,6 @@ Using an Emacs configured with --with-x-toolkit=lucid does not have this problem
+ #endif
+ 
+ #ifdef HAVE_NS
+-  /* For early calls to ns_lisp_to_color or Fns_list_colors.  */
+-  if (!dump_mode)
+-    ns_init_colors ();
+-
+   if (!noninteractive)
+     {
+ #ifdef NS_IMPL_COCOA
+@@ -2223,6 +2219,13 @@ Using an Emacs configured with --with-x-toolkit=lucid does not have this problem
+   init_fileio ();
+   init_lread ();
+ 
++#ifdef HAVE_NS
++  /* For early calls to ns_lisp_to_color or Fns_list_colors.
++     Must follow init_callproc which sets data-directory.  */
++  if (!dump_mode)
++    ns_init_colors ();
++#endif
++
+   /* If "-version" was specified, produce version information and
+      exit.  We do it here because the code below needs to call Lisp
+      primitives, which cannot be done safely before we call all the

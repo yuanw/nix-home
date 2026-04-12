@@ -33,11 +33,11 @@
 
   modules = {
     claude-code = {
-      enable = true;
       enableClaudeMem = true;
       # llm-agent.claude-code doesn't work in garnix ci
-      pkg = null;
+      pkg = pkgs.claude-code;
     };
+    pi.enable = true;
 
     browsers.firefox = {
       enable = true;

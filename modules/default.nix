@@ -13,7 +13,7 @@
       ./catppuccin.nix
       ./common.nix
       ./browsers/chromium.nix
-      ./browsers/firefox.nix
+      ./browsers/firefox
       ./browsers/librewolf.nix
       ./browsers/tor.nix
       ./dev/agda.nix

@@ -7,7 +7,6 @@
 }:
 let
   nixCustomConf = pkgs.writeText "nix.custom.conf" ''
-        lazy-trees = true
     substituters = https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.garnix.io https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
     trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ= cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk=
     trusted-substituters = https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cache.garnix.io https://cache.iog.io
@@ -43,7 +42,6 @@ in
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username} = {
-    home.packages = [ inputs'.my-packages.packages.claude-voice ];
     programs.git.settings.github.user = "yuanw";
   };
   modules = {
@@ -53,7 +51,7 @@ in
     # };
     jellyfin.enable = true;
     ai.enableOllama = true;
-
+    pi.enable = true;
     secrets.agenix = {
       enable = true;
     };
@@ -65,7 +63,6 @@ in
       enable = true;
       casks = [
         "1password"
-
         "godot"
         "firefox"
         "racket"
@@ -88,6 +85,7 @@ in
       enable = true;
       enableLatex = false;
       enableService = true;
+
       # enableAider = true;
       # enableCopilot = true;
       #lspStyle = "lsp-bridge";
