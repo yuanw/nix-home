@@ -425,7 +425,7 @@ in
                   # };
                   "${sidebery.addonId}".settings = import ./sidebery.nix;
                   "${mtab.addonId}".settings =
-                    if hostname == "wk1000" then import ./private/workMtab.nix else import ./private/personalMtab.nix;
+                    if hostname == "WK01174" then import ../../private/workMtab.nix else import ./mtab.nix;
 
                   "${vimium-c.addonId}".settings = {
                     keyMappings = "#!no-check\nunmap x";
