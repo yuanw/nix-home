@@ -85,7 +85,7 @@ in
       enable = true;
       enableLatex = false;
       enableService = true;
-      pkg = pkgs.emacs-unstable;
+
       # enableAider = true;
       # enableCopilot = true;
       #lspStyle = "lsp-bridge";
