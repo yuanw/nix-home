@@ -111,7 +111,7 @@ with lib;
                 })
                 whisper
               ];
-            package = cfg.package;
+            package = cfg.pkg;
             enable = true;
             overrides = self: _super: {
               # Override go-jira to use current master
