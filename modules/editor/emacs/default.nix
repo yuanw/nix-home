@@ -23,7 +23,16 @@ let
     ])
   );
   emacsclient = "emacsclient -c -a 'emacs'";
+  emacsPatched = cfg.pkg.overrideAttrs (prev: {
+    patches =
+      (lib.optionals pkgs.stdenv.isDarwin [
+        ./patches/system-appearance.patch
+        ./patches/round-undecorated-frame.patch
+        ./patches/adjust-ns-init-colors.patch
+      ])
+      ++ prev.patches;
 
+  });
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
@@ -111,7 +120,7 @@ with lib;
                 })
                 whisper
               ];
-            package = cfg.pkg;
+            package = emacsPatched;
             enable = true;
             overrides = self: _super: {
               # Override go-jira to use current master
