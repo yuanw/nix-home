@@ -48,6 +48,12 @@
       url = "github:d12frosted/homebrew-emacs-plus";
       flake = false;
     };
+
+    nix-darwin-emacs = {
+      url = "github:nix-giant/nix-darwin-emacs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "nix-darwin";
