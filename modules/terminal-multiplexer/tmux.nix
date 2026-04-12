@@ -108,8 +108,8 @@ with lib;
         zsh = {
           sessionVariables = {
             # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/tmux#configuration-variables
-            # automatically start tmux
-            ZSH_TMUX_AUTOSTART = "true";
+            # Disable global autostart; we conditionally autostart per-terminal below
+            ZSH_TMUX_AUTOSTART = "false";
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
           };
           shellAliases = {
@@ -120,6 +120,12 @@ with lib;
             #   "for s in $(tmux list-sessions | awk '{print $1}' | rg ':' -r '' | fzf); do tmux kill-session -t $s; done;";
           };
           initContent = mkAfter ''
+            # Auto-start tmux only in Alacritty (not in WezTerm, etc.)
+            if [ -n "$ALACRITTY_WINDOW_ID" ] && [ -z "$TMUX" ]; then
+              tmux attach 2>/dev/null || tmux new-session
+              exit
+            fi
+
             function zt {
                z $1 && tat
             }
