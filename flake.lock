@@ -234,22 +234,6 @@
         "type": "github"
       }
     },
-    "emacs-plus": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1775709658,
-        "narHash": "sha256-/BmJkCQ4ATzADnu3I5OgwWz4O3FMusrltiPhwuwyDHo=",
-        "owner": "d12frosted",
-        "repo": "homebrew-emacs-plus",
-        "rev": "dbc6302006fde84a49a1425c766fecde82dd6db8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "d12frosted",
-        "repo": "homebrew-emacs-plus",
-        "type": "github"
-      }
-    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -465,24 +449,6 @@
     "flake-utils_2": {
       "inputs": {
         "systems": "systems_7"
-      },
-      "locked": {
-        "lastModified": 1685518550,
-        "narHash": "sha256-o2d0KcvaXzTrPRIo0kOLV0/QXHhDQ5DTi+OxcjO8xqY=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "a1720a10a6cfe8234c0e93907ffe81be440f4cef",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_3": {
-      "inputs": {
-        "systems": "systems_8"
       },
       "locked": {
         "lastModified": 1685518550,
@@ -898,27 +864,6 @@
         "type": "github"
       }
     },
-    "nix-darwin-emacs": {
-      "inputs": {
-        "flake-utils": "flake-utils_3",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1775990644,
-        "narHash": "sha256-DAv1o2zpk42Z/bT4GK5Clzj/gC9dD+PRtFSRvsyKBuo=",
-        "owner": "nix-giant",
-        "repo": "nix-darwin-emacs",
-        "rev": "9fc50932a1e335ce341b0fee5220398924652776",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-giant",
-        "repo": "nix-darwin-emacs",
-        "type": "github"
-      }
-    },
     "nix-fast-build": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1295,7 +1240,6 @@
         "direnv-instant": "direnv-instant",
         "disko": "disko",
         "emacs": "emacs",
-        "emacs-plus": "emacs-plus",
         "flake-parts": "flake-parts_3",
         "git-ai": "git-ai",
         "git-hooks": "git-hooks",
@@ -1307,7 +1251,6 @@
         "mono-stretchly-darwin": "mono-stretchly-darwin",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
-        "nix-darwin-emacs": "nix-darwin-emacs",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_9",
         "nixpkgs-master": "nixpkgs-master",
@@ -1445,21 +1388,6 @@
       }
     },
     "systems_7": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
-    "systems_8": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
