@@ -106,7 +106,8 @@
       #lspStyle = "lsp-bridge";
     };
     # health.enable = true;
-    typing.enable = true;
+
+    speak2text.enable = true;
     dev = {
       # agda.enable = true;
       # ask.enable = true;
