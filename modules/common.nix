@@ -77,84 +77,78 @@
       allowBroken = false;
       allowUnsupportedSystem = true;
     };
-    overlays = [
-      (
-        final: prev:
-        if prev.stdenv.isDarwin then
-          (inputs.nix-darwin-emacs.overlays.emacs final prev) // (inputs.emacs.overlays.package final prev)
-        else
-          inputs.emacs.overlay final prev
-      )
-    ]
-    ++ [
-      inputs.nur.overlays.default
-      inputs.mcp-servers-nix.overlays.default
-      inputs.llm-agents.overlays.default
-      inputs.agenix.overlays.default
-      (_final: _prev: {
-        stable = inputs'.nixpkgs-stable.legacyPackages;
-        # gtk3 =
-        #   if _prev.stdenv.isDarwin then
-        #     inputs'.nixpkgs-stable.legacyPackages.gtk3
-        #   else
-        #     inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
-        # sbcl =
-        #   if _prev.stdenv.isDarwin then
-        #     inputs'.nixpkgs-stable.legacyPackages.sbcl
-        #   else
-        #     inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
-        sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
-        # batgrep =
-        #   if _prev.stdenv.isDarwin then
-        #     _prev.batgrep.overrideAttrs (_oldAttrs: {
-        #       doCheck = false;
-        #     })
-        #   else
-        #     _prev.batgrep;
-        #https://github.com/NixOS/nixpkgs/pull/476210
-        yt-dlp =
-          if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
+    overlays =
 
-        #https://github.com/NixOS/nixpkgs/pull/476003/files
-        #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
-        # Override go-jira to use current master
-        go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
-          version = "unstable-2025-11-27";
-          src = _prev.fetchFromGitHub {
-            owner = "go-jira";
-            repo = "jira";
-            rev = "748b7d552f8b3ad993b05810b93f0f2ed39822d1";
-            hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
-          };
-        });
+      [
+        inputs.emacs.overlay
+        inputs.nur.overlays.default
+        inputs.mcp-servers-nix.overlays.default
+        inputs.llm-agents.overlays.default
+        inputs.agenix.overlays.default
+        (_final: _prev: {
+          stable = inputs'.nixpkgs-stable.legacyPackages;
+          # gtk3 =
+          #   if _prev.stdenv.isDarwin then
+          #     inputs'.nixpkgs-stable.legacyPackages.gtk3
+          #   else
+          #     inputs.nixpkgs.legacyPackages.${_prev.system}.gtk3;
+          # sbcl =
+          #   if _prev.stdenv.isDarwin then
+          #     inputs'.nixpkgs-stable.legacyPackages.sbcl
+          #   else
+          #     inputs.nixpkgs.legacyPackages.${_prev.system}.sbcl;
+          sioyek = inputs'.nixpkgs-stable.legacyPackages.sioyek;
+          # batgrep =
+          #   if _prev.stdenv.isDarwin then
+          #     _prev.batgrep.overrideAttrs (_oldAttrs: {
+          #       doCheck = false;
+          #     })
+          #   else
+          #     _prev.batgrep;
+          #https://github.com/NixOS/nixpkgs/pull/476210
+          yt-dlp =
+            if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
 
-        # Override jiratui to use current master
-        jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
-          version = "unstable-2025-11-27";
-          src = _prev.fetchFromGitHub {
-            owner = "whyisdifficult";
-            repo = "jiratui";
-            rev = "fc97e1d8e81c6a3fb8537eb60b176a5ad1b73392";
-            hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
-          };
-        });
-        #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
+          #https://github.com/NixOS/nixpkgs/pull/476003/files
+          #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
+          # Override go-jira to use current master
+          go-jira = _prev.go-jira.overrideAttrs (_oldAttrs: {
+            version = "unstable-2025-11-27";
+            src = _prev.fetchFromGitHub {
+              owner = "go-jira";
+              repo = "jira";
+              rev = "748b7d552f8b3ad993b05810b93f0f2ed39822d1";
+              hash = "sha256-PFmgnGGayrgcC46UvvSzCQ1uVc87H1kgWBdMrcCRZD4=";
+            };
+          });
 
-        # https://nixpk.gs/pr-tracker.html?pr=263500
-        # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
-        # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
-        #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
-        #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
+          # Override jiratui to use current master
+          jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
+            version = "unstable-2025-11-27";
+            src = _prev.fetchFromGitHub {
+              owner = "whyisdifficult";
+              repo = "jiratui";
+              rev = "fc97e1d8e81c6a3fb8537eb60b176a5ad1b73392";
+              hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
+            };
+          });
+          #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
-        # use this variant if unfree packages are needed:
-        # unstable = import nixpkgs-unstable {
-        #   inherit system;
-        #   config.allowUnfree = true;
-        # };
+          # https://nixpk.gs/pr-tracker.html?pr=263500
+          # https://gitlab.freedesktop.org/mesa/mesa/-/issues/8634
+          # mesa = if _prev.stdenv.isDarwin then inputs.nixpkgs-stable.legacyPackages.${_prev.system}.mesa else
+          #   # reiryoku-firmware =  inputs.reiryoku.packages.${prev.system}.firmware;
+          #   # devenv = inputs.devenv.packages.${prev.system}.devenv;
 
-      })
-      (import ../packages)
-    ];
+          # use this variant if unfree packages are needed:
+          # unstable = import nixpkgs-unstable {
+          #   inherit system;
+          #   config.allowUnfree = true;
+          # };
+
+        })
+        (import ../packages)
+      ];
 
   };
 }
