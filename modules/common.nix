@@ -3,7 +3,6 @@
   inputs',
   config,
   lib,
-  pkgs,
   ...
 }:
 {
@@ -80,8 +79,7 @@
       allowUnsupportedSystem = true;
     };
     overlays =
-      (lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
-
+      (lib.optionals.isDarwin [
         inputs.nix-darwin-emacs.overlays.emacs
       ])
       ++ [
