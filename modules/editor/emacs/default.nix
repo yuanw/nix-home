@@ -8,7 +8,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   isDarwin,
   hostname,
   ...
@@ -24,15 +23,7 @@ let
     ])
   );
   emacsclient = "emacsclient -c -a 'emacs'";
-  emacsPatched = cfg.pkg.overrideAttrs (prev: {
-    patches =
-      (lib.optionals pkgs.stdenv.isDarwin [
-        "${inputs.emacs-plus}/patches/emacs-31/round-undecorated-frame.patch"
-        "${inputs.emacs-plus}/patches/emacs-31/system-appearance.patch"
-      ])
-      ++ prev.patches;
 
-  });
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
@@ -120,7 +111,7 @@ with lib;
                 })
                 whisper
               ];
-            package = emacsPatched;
+            package = cfg.package;
             enable = true;
             overrides = self: _super: {
               # Override go-jira to use current master
