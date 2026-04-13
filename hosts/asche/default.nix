@@ -81,8 +81,8 @@
 
   modules = {
     claude-code = {
-      enable = true;
-      enableClaudeMem = true;
+      #   enable = true;
+      #   enableClaudeMem = true;
     };
 
     secrets.agenix = {
