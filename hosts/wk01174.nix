@@ -52,6 +52,7 @@
     ai.enableOllama = true;
     droid.enable = true;
     cursor.enable = true;
+    speak2text.enable = true;
     pi = {
       enable = true;
       extensionsPkgs = with pkgs.pi-extensions; [
