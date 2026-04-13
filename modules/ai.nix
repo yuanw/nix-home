@@ -3,13 +3,13 @@
   lib,
   pkgs,
   inputs',
+  isDarwin ? false,
   ...
 }:
 
 with lib;
 let
   cfg = config.modules.ai;
-  inherit (pkgs.stdenv) isDarwin;
 in
 {
   options.modules.ai = {
@@ -18,11 +18,35 @@ in
     enableOllama = mkEnableOption "ollama";
   };
 
-  config = mkMerge [
-    (mkIf cfg.enableOllama {
+  config = mkMerge (
+    [
+      (mkIf cfg.enableOllama {
+        home-manager.users.${config.my.username} = {
+          home.packages = [
+            # (pkgs.python3.withPackages (ps:
+            #   with ps; [
+            #     huggingface-hub
+            #   ]))
+            pkgs.ollama
+            # pkgs.llm-agents.opencode
+          ];
+        };
+      })
 
-      launchd.user.agents.ollama-service.serviceConfig = lib.mkIf isDarwin {
-
+      (mkIf cfg.enableGitAI {
+        home-manager.users.${config.my.username} = {
+          programs = {
+            git-ai = {
+              enable = true;
+              installHooks = true;
+            };
+            git.package = inputs'.git-ai.packages.default;
+          };
+        };
+      })
+    ]
+    ++ lib.optional isDarwin {
+      launchd.user.agents.ollama-service.serviceConfig = mkIf cfg.enableOllama {
         ProgramArguments = [
           "${pkgs.ollama}/bin/ollama"
           "serve"
@@ -31,30 +55,7 @@ in
         RunAtLoad = true;
         StandardOutPath = "/tmp/ollama.log";
         StandardErrorPath = "/tmp/ollama.log";
-
       };
-      home-manager.users.${config.my.username} = {
-        home.packages = [
-          # (pkgs.python3.withPackages (ps:
-          #   with ps; [
-          #     huggingface-hub
-          #   ]))
-          pkgs.ollama
-          # pkgs.llm-agents.opencode
-        ];
-      };
-    })
-
-    (mkIf cfg.enableGitAI {
-      home-manager.users.${config.my.username} = {
-        programs = {
-          git-ai = {
-            enable = true;
-            installHooks = true;
-          };
-          git.package = inputs'.git-ai.packages.default;
-        };
-      };
-    })
-  ];
+    }
+  );
 }
