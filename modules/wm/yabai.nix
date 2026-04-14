@@ -45,13 +45,6 @@ let
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
     shift + ctrl + alt - c: screencapture /tmp/$(date +%s).png
     cmd - space: app-launcher
-    ${optionalString config.modules.speak2text.enable ''
-      # Speak2Text: MY_GLOBE (QMK consumer 0x029d → macOS aux keycode 0x9d/157 by default; override via
-      # modules.speak2text.pttConsumerKeycode) is push-to-talk via launchd agent speak2text-ptt-listener
-      # (see modules/speak2text.nix). skhd cannot bind key-up on consumer keys, so the globe key is
-      # not listed here as a keysym.
-      shift + ctrl + alt - g : speak2text
-    ''}
   '';
 
 in
