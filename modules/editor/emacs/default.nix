@@ -1059,7 +1059,7 @@ with lib;
                 };
 
                 easysession = {
-                  enable = true;
+                  enable = false;
                   extraConfig = ''
                     :ensure t
                     :demand t
