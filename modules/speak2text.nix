@@ -163,6 +163,8 @@ let
 
   selectedPair = flavorPairs.${cfg.flavor};
 
+  transcribeBinPath = "${selectedPair.transcribeWav}/bin/speak2text-transcribe-wav-${cfg.flavor}";
+
   packages = {
     whispercpp = [
       pkgs.whisper-cpp
@@ -224,13 +226,36 @@ in
         `skhd -o` or `/tmp/speak2text-ptt.log` shows a different code.
       '';
     };
+
+    transcribeBin = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      readOnly = true;
+      visible = false;
+      description = "Absolute path to speak2text-transcribe-wav-* (set when speak2text is enabled).";
+    };
   };
 
   config = lib.mkMerge (
     [
       (lib.mkIf cfg.enable {
+        modules.speak2text.transcribeBin = transcribeBinPath;
         home-manager.users.${config.my.username} = {
           home.packages = packages.${cfg.flavor};
+        }
+        // lib.optionalAttrs config.modules.editors.emacs.enable {
+          programs.emacs.init.usePackage.whisper = {
+            # whisper.el records via ffmpeg (see whisper--record-command)
+            extraPackages = [ pkgs.ffmpeg ];
+            config = ''
+              ;; Route whisper.el transcription through the same backend as CLI speak2text
+              ;; (https://github.com/natrys/whisper.el — whisper-install-whispercpp nil + whisper-command).
+              ;; whispercpp flavor: Emacs must inherit WHISPER_MODEL (ggml path), same as CLI speak2text.
+              (with-eval-after-load 'whisper
+                (defun whisper-command (input-file)
+                  `("${transcribeBinPath}" ,input-file)))
+            '';
+          };
         };
       })
     ]
