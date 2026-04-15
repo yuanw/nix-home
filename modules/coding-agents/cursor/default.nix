@@ -14,7 +14,7 @@ in
 
     skillsDir = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
-      default = ../claude-code/skills;
+      default = null;
       description = "Local directory of cursor skills linked recursively into ~/.cursor/skills/.";
     };
 
