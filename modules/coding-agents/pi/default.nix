@@ -9,7 +9,7 @@ let
   cfg = config.modules.pi;
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
-  commonSkills = pkgs.callPackage ../common/skills.nix { };
+  commonPrompts = pkgs.callPackage ../common/prompts.nix { };
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -103,16 +103,14 @@ in
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default =
-        with claudePlugins;
-        [
-          caveman
-          humanizer
-          emacs-skills
-        ]
-        ++ [ (commonSkills.mkJournalSessionSkill "pi") ];
+      default = with claudePlugins; [
+        caveman
+        humanizer
+        emacs-skills
+      ];
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
+        name under <configDir>/skills/.
         name under <configDir>/skills/.
       '';
     };
@@ -123,6 +121,17 @@ in
       description = ''
         Path to a directory containing skill files to link into <configDir>/skills/.
         Set to null to disable.
+      '';
+    };
+
+    prompts = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      default = {
+        "journal-session.md" = commonPrompts.mkJournalSessionPrompt "pi";
+      };
+      description = ''
+        Prompt templates to install under <configDir>/prompts/.
+        Keys are filenames (must include .md suffix); values are paths to the template files.
       '';
     };
 
@@ -170,7 +179,10 @@ in
         }
         // lib.optionalAttrs (cfg.skillsDir != null) {
           "${cfg.configDir}/skills".source = cfg.skillsDir;
-        };
+        }
+        // lib.mapAttrs' (
+          name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
+        ) cfg.prompts;
 
       home.sessionVariables =
         cfg.environment
