@@ -64,9 +64,9 @@
         earendil-pi-review
       ];
       extensionFiles = {
-        "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;
-        "notify.ts" = ../modules/code-agents/pi/extensions/notify.ts;
-        "custom-footer.ts" = ../modules/code-agents/pi/extensions/custom-footer.ts;
+        "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
+        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
+        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
     };
     secrets.agenix = {
