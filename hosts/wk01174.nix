@@ -55,6 +55,7 @@
     speak2text.enable = true;
     pi = {
       enable = true;
+      enableWorkMux = true;
       extensionsPkgs = with pkgs.pi-extensions; [
         pi-loop
         pi-review

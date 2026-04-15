@@ -30,6 +30,8 @@ in
   options.modules.pi = {
     enable = lib.mkEnableOption "pi";
 
+    enableWorkMux = lib.mkEnableOption "workmux";
+
     package = lib.mkOption {
       type = lib.types.package;
       default = pkgs.llm-agents.pi;
@@ -134,7 +136,7 @@ in
     ];
 
     home-manager.users.${config.my.username} = {
-      home.packages = [ cfg.package ];
+      home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
       home.file =
         lib.listToAttrs (
