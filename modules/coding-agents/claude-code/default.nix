@@ -10,6 +10,7 @@
 let
   cfg = config.modules.claude-code;
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
+  commonSkills = pkgs.callPackage ../common/skills.nix { };
   watchdog = import ./hooks/watchdog.nix { inherit pkgs lib; };
 in
 {
@@ -50,13 +51,16 @@ in
             enable = true;
             enableMcpIntegration = true;
             package = cfg.pkg;
-            skillsDir = ../common/skills;
             #commandsDir = ./commands;
-            skillPackages = with claudePlugins; [
-              caveman
-              humanizer
-              emacs-skills
-            ];
+            #commandsDir = ./commands;
+            skillPackages =
+              with claudePlugins;
+              [
+                caveman
+                humanizer
+                emacs-skills
+              ]
+              ++ [ (commonSkills.mkJournalSessionSkill "Claude") ];
             plugins =
               with claudePlugins;
               lib.optionals cfg.enableClaudeMem [

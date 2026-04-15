@@ -9,6 +9,7 @@ let
   cfg = config.modules.pi;
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
+  commonSkills = pkgs.callPackage ../common/skills.nix { };
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -102,11 +103,14 @@ in
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default = with claudePlugins; [
-        caveman
-        humanizer
-        emacs-skills
-      ];
+      default =
+        with claudePlugins;
+        [
+          caveman
+          humanizer
+          emacs-skills
+        ]
+        ++ [ (commonSkills.mkJournalSessionSkill "pi") ];
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
         name under <configDir>/skills/.
@@ -115,7 +119,7 @@ in
 
     skillsDir = lib.mkOption {
       type = lib.types.nullOr lib.types.path;
-      default = ../common/skills;
+      default = null;
       description = ''
         Path to a directory containing skill files to link into <configDir>/skills/.
         Set to null to disable.
