@@ -61,6 +61,8 @@
         pi-review
         pi-cursor-agent
         pi-slow-mode
+        pi-tutorial
+        earendil-pi-review
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/code-agents/pi/extensions/permission-gate.ts;

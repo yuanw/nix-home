@@ -50,4 +50,6 @@ in
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
   pi-cursor-agent = callExtension ./pi-cursor-agent;
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
+  pi-tutorial = callExtension ./pi-tutorial.nix;
+  earendil-pi-review = callExtension ./earendil-pi-review.nix;
 }
