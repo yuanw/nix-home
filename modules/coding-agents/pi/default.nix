@@ -2,12 +2,13 @@
   config,
   lib,
   pkgs,
+
   ...
 }:
 let
   cfg = config.modules.pi;
   defaultConfigDir = ".pi/agent";
-
+  claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -101,7 +102,11 @@ in
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default = [ ];
+      default = with claudePlugins; [
+        caveman
+        humanizer
+        emacs-skills
+      ];
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
         name under <configDir>/skills/.

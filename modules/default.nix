@@ -4,11 +4,11 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
-      ./code-agents/claude-code
-      ./code-agents/cursor
-      ./code-agents/droid.nix
-      ./code-agents/forge.nix
-      ./code-agents/pi
+      ./coding-agents/claude-code
+      ./coding-agents/cursor
+      ./coding-agents/droid.nix
+      ./coding-agents/forge.nix
+      ./coding-agents/pi
       ./speak2text.nix
       ./catppuccin.nix
       ./common.nix

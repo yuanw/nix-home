@@ -61,7 +61,6 @@
         pi-review
         pi-cursor-agent
         pi-slow-mode
-        pi-tutorial
         earendil-pi-review
       ];
       extensionFiles = {
