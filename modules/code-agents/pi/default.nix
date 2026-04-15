@@ -47,7 +47,9 @@ in
 
     environment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      default = { };
+      default = {
+        PI_TELEMETRY = "0";
+      };
       example = lib.literalExpression ''
         {
           PI_SKIP_VERSION_CHECK = "1";
