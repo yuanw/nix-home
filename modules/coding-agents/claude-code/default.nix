@@ -50,7 +50,7 @@ in
             enable = true;
             enableMcpIntegration = true;
             package = cfg.pkg;
-            skillsDir = ./skills;
+            skillsDir = ../common/skills;
             #commandsDir = ./commands;
             skillPackages = with claudePlugins; [
               caveman

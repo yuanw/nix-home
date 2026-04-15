@@ -113,6 +113,15 @@ in
       '';
     };
 
+    skillsDir = lib.mkOption {
+      type = lib.types.nullOr lib.types.path;
+      default = ../common/skills;
+      description = ''
+        Path to a directory containing skill files to link into <configDir>/skills/.
+        Set to null to disable.
+      '';
+    };
+
     themes = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {
@@ -154,6 +163,9 @@ in
         ) cfg.extensionFiles
         // lib.optionalAttrs (cfg.nodeDeps != null) {
           "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
+        }
+        // lib.optionalAttrs (cfg.skillsDir != null) {
+          "${cfg.configDir}/skills".source = cfg.skillsDir;
         };
 
       home.sessionVariables =
