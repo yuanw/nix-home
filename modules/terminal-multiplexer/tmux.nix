@@ -61,7 +61,7 @@ with lib;
       };
       dataDir = mkOption {
         type = types.str;
-        default = "\${config.my.homeDirectory}/.local/share/opensessions/plugin";
+        default = "${config.my.homeDirectory}/.local/share/opensessions/plugin";
         defaultText = "~/.local/share/opensessions/plugin";
         description = "Directory for opensessions plugin data";
       };
