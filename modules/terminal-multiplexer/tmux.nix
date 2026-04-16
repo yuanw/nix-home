@@ -39,6 +39,22 @@ let
     sidebarWidth = cfg.opensessions.width;
     inherit (cfg.opensessions) sidebarPosition showWindowDetails;
   };
+
+  # tmux-which-key integration
+  tmuxWhichKeyYaml = builtins.replaceStrings [ "__OPENSESSIONS_DIR__" ] [ cfg.opensessions.dataDir ] (
+    builtins.readFile ./tmux-which-key.yaml
+  );
+
+  tmuxWhichKeyInit =
+    pkgs.runCommand "tmux-which-key-init.tmux"
+      {
+        nativeBuildInputs = [ pkgs.python3 ];
+      }
+      ''
+        ${pkgs.python3}/bin/python3 ${pkgs.tmuxPlugins.tmux-which-key}/share/tmux-plugins/tmux-which-key/plugin/build.py \
+          ${pkgs.writeText "tmux-which-key-config.yaml" tmuxWhichKeyYaml} \
+          $out
+      '';
 in
 with lib;
 {
@@ -51,6 +67,18 @@ with lib;
       default = "$HOME/workspace";
       type = types.str;
       description = "directory for prefix+m to point to";
+    };
+    whichKey = {
+      enable = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Enable tmux-which-key plugin for keybinding menu";
+      };
+      prefixKey = mkOption {
+        type = types.str;
+        default = "Space";
+        description = "Key to trigger which-key menu after prefix";
+      };
     };
 
     opensessions = {
@@ -67,13 +95,13 @@ with lib;
       };
       key = mkOption {
         type = types.str;
-        default = "M-s";
+        default = "";
         example = "M-s";
         description = "Direct toggle key for sidebar (no prefix required, e.g. 'M-s' for Alt+s, empty to disable)";
       };
       focusKey = mkOption {
         type = types.str;
-        default = "M-S";
+        default = "";
         example = "M-S";
         description = "Direct focus key for sidebar (no prefix required, empty to disable)";
       };
@@ -226,6 +254,14 @@ with lib;
         executable = true;
       };
 
+      # tmux-which-key config
+      xdg.configFile."tmux/plugins/tmux-which-key/config.yaml" = mkIf cfg.whichKey.enable {
+        text = tmuxWhichKeyYaml;
+      };
+      xdg.dataFile."tmux/plugins/tmux-which-key/init.tmux" = mkIf cfg.whichKey.enable {
+        source = tmuxWhichKeyInit;
+      };
+
       programs = {
         tmux = {
           aggressiveResize = true;
@@ -306,6 +342,13 @@ with lib;
 
               # Load opensessions on startup
               run-shell '$XDG_CONFIG_HOME/tmux/opensessions.sh'
+            ''}
+
+            # tmux-which-key
+            ${lib.optionalString cfg.whichKey.enable ''
+              set -g @tmux-which-key-xdg-enable 1
+              set -g @tmux-which-key-disable-autobuild 1
+              bind-key ${cfg.whichKey.prefixKey} run-shell "${pkgs.coreutils}/bin/cat $XDG_DATA_HOME/tmux/plugins/tmux-which-key/init.tmux"
             ''}
 
             # Session menu (keep at bottom)

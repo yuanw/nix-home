@@ -129,6 +129,7 @@
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
+      whichKey.enable = true;
       opensessions = {
         enable = true;
         width = 34;
