@@ -6,12 +6,12 @@
   ...
 }:
 let
-  rev = "cde4faae2f33f92d2092ca87537b17b837fdcfb7";
+  rev = "70a150db74ca82110a62d194b20aa0422491dd6a";
   src = fetchFromGitHub {
     owner = "thedotmack";
     repo = "claude-mem";
     inherit rev;
-    hash = "sha256-SkD+QFTPzxjMFZ21XJmKsdroxqeoM4L+xZ3QqlTtWcU=";
+    hash = "sha256-QJgxTkZD5cbT9HdzBkNtJj+gbSyPd8UCj+6EwFjLRI0=";
   };
 
   # claude-mem calls `uvx chroma-mcp [args]` via StdioClientTransport in its
@@ -35,7 +35,7 @@ let
   '';
   plugin = mkClaudePlugin {
     pname = "claude-mem";
-    version = "12.1.0-unstable-2026-04-09";
+    version = "12.1.5-unstable-2026-04-15";
     inherit rev src;
     pluginSubdir = "plugin";
     marketplace = {

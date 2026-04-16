@@ -10,6 +10,7 @@ rec {
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
   claude-code-acp = pkgs.callPackage ./claude-code-acp.nix { };
   cursor-agent-acp = pkgs.callPackage ./cursor-agent-acp.nix { };
+  pi-acp = pkgs.callPackage ./pi-acp.nix { };
   auto-save = pkgs.callPackage ./emacs/auto-save.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
