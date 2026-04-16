@@ -199,72 +199,62 @@ with lib;
       };
 
       # Opensessions activation script - syncs from Nix store and runs bun install
-      home.activation.opensessions-setup = mkIf cfg.opensessions.enable (
-        let
-          inherit (config.home-manager.users.${config.my.username}.lib.hm) dag;
-        in
-        dag.entryAfter [ "writeBoundary" ] ''
-          checkout_root="${opensessionsCheckout}"
-          current_link="${opensessionsCurrent}"
-          runtime_root="${opensessionsRuntimeRoot}"
+      home.activation.opensessions-setup = mkIf cfg.opensessions.enable ''
+        checkout_root="${opensessionsCheckout}"
+        current_link="${opensessionsCurrent}"
+        runtime_root="${opensessionsRuntimeRoot}"
 
-          ${pkgs.coreutils}/bin/mkdir -p "$runtime_root" "$checkout_root"
-          ${pkgs.rsync}/bin/rsync -a --no-perms --delete --exclude node_modules --exclude .git \
-            "${opensessionsSource}/" \
-            "$checkout_root/"
+        ${pkgs.coreutils}/bin/mkdir -p "$runtime_root" "$checkout_root"
+        ${pkgs.rsync}/bin/rsync -a --no-perms --delete --exclude node_modules --exclude .git \
+          "${opensessionsSource}/" \
+          "$checkout_root/"
 
-          # Source is copied from the read-only Nix store; make runtime checkout writable.
-          ${pkgs.coreutils}/bin/chmod -R u+w "$checkout_root"
+        # Source is copied from the read-only Nix store; make runtime checkout writable.
+        ${pkgs.coreutils}/bin/chmod -R u+w "$checkout_root"
 
-          lock_hash_file="$checkout_root/.bun-lock.sha256"
-          current_lock_hash=""
-          previous_lock_hash=""
-          needs_install=0
+        lock_hash_file="$checkout_root/.bun-lock.sha256"
+        current_lock_hash=""
+        previous_lock_hash=""
+        needs_install=0
 
-          if [ -f "$checkout_root/bun.lock" ]; then
-            current_lock_hash="$(${pkgs.coreutils}/bin/sha256sum "$checkout_root/bun.lock" 2>/dev/null | ${pkgs.gawk}/bin/awk '{print $1}' || true)"
-            if [ -f "$lock_hash_file" ]; then
-              previous_lock_hash="$(${pkgs.coreutils}/bin/cat "$lock_hash_file")"
+        if [ -f "$checkout_root/bun.lock" ]; then
+          current_lock_hash="$(${pkgs.coreutils}/bin/sha256sum "$checkout_root/bun.lock" 2>/dev/null | ${pkgs.gawk}/bin/awk '{print $1}' || true)"
+          if [ -f "$lock_hash_file" ]; then
+            previous_lock_hash="$(${pkgs.coreutils}/bin/cat "$lock_hash_file")"
+          fi
+        fi
+
+        if [ ! -d "$checkout_root/node_modules" ]; then
+          needs_install=1
+        elif [ -n "$current_lock_hash" ] && [ "$current_lock_hash" != "$previous_lock_hash" ]; then
+          needs_install=1
+        fi
+
+        if [ "$needs_install" -eq 1 ]; then
+          echo "Bootstrapping opensessions dependencies at $checkout_root..." >&2
+          if (cd "$checkout_root" && ${pkgs.bun}/bin/bun install --silent --frozen-lockfile 2>/dev/null || ${pkgs.bun}/bin/bun install --silent); then
+            if [ -n "$current_lock_hash" ]; then
+              ${pkgs.coreutils}/bin/printf '%s\n' "$current_lock_hash" > "$lock_hash_file"
             fi
+          else
+            echo "Warning: bun install failed; opensessions may be incomplete." >&2
           fi
+        fi
 
-          if [ ! -d "$checkout_root/node_modules" ]; then
-            needs_install=1
-          elif [ -n "$current_lock_hash" ] && [ "$current_lock_hash" != "$previous_lock_hash" ]; then
-            needs_install=1
-          fi
-
-          if [ "$needs_install" -eq 1 ]; then
-            echo "Bootstrapping opensessions dependencies at $checkout_root..." >&2
-            if (cd "$checkout_root" && ${pkgs.bun}/bin/bun install --silent --frozen-lockfile 2>/dev/null || ${pkgs.bun}/bin/bun install --silent); then
-              if [ -n "$current_lock_hash" ]; then
-                ${pkgs.coreutils}/bin/printf '%s\n' "$current_lock_hash" > "$lock_hash_file"
-              fi
-            else
-              echo "Warning: bun install failed; opensessions may be incomplete." >&2
-            fi
-          fi
-
-          ${pkgs.coreutils}/bin/rm -rf "$current_link"
-          ${pkgs.coreutils}/bin/ln -s "$checkout_root" "$current_link"
-        ''
-      );
+        ${pkgs.coreutils}/bin/rm -rf "$current_link"
+        ${pkgs.coreutils}/bin/ln -s "$checkout_root" "$current_link"
+      '';
 
       # Seed opensessions config if missing
-      home.activation.opensessions-config = mkIf cfg.opensessions.enable (
-        let
-          inherit (config.home-manager.users.${config.my.username}.lib.hm) dag;
-        in
-        dag.entryAfter [ "opensessions-setup" ] ''
-          config_dir="$HOME/.config/opensessions"
-          config_path="$config_dir/config.json"
+      home.activation.opensessions-config = mkIf cfg.opensessions.enable ''
+        config_dir="$HOME/.config/opensessions"
+        config_path="$config_dir/config.json"
 
-          if [ ! -f "$config_path" ]; then
-            ${pkgs.coreutils}/bin/mkdir -p "$config_dir"
-            ${pkgs.coreutils}/bin/printf '%s\n' ${lib.escapeShellArg opensessionsConfigJson} > "$config_path"
-          fi
-        ''
-      );
+        if [ ! -f "$config_path" ]; then
+          ${pkgs.coreutils}/bin/mkdir -p "$config_dir"
+          ${pkgs.coreutils}/bin/printf '%s\n' ${lib.escapeShellArg opensessionsConfigJson} > "$config_path"
+        fi
+      '';
 
       xdg.configFile."tmux/opensessions.sh" = mkIf cfg.opensessions.enable {
         source = opensessionsLoader;
