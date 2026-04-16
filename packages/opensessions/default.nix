@@ -17,6 +17,14 @@ stdenvNoCC.mkDerivation (_finalAttrs: {
 
   dontBuild = true;
 
+  # Patch hardcoded homebrew paths to use environment variables or system PATH
+  postPatch = ''
+    # Patch zellij provider
+    substituteInPlace packages/mux/providers/zellij/src/provider.ts \
+      --replace-fail 'const zellijBin = "/opt/homebrew/bin/zellij";' 'const zellijBin = process.env.ZELLIJ_BIN ?? "zellij";' \
+      --replace-fail 'const tmuxBin = "/opt/homebrew/bin/tmux";' 'const tmuxBin = process.env.TMUX_BIN ?? "tmux";'
+  '';
+
   installPhase = ''
     runHook preInstall
 
