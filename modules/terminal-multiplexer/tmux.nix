@@ -67,13 +67,15 @@ with lib;
       };
       key = mkOption {
         type = types.str;
-        default = "";
-        description = "Direct toggle key for sidebar";
+        default = "M-s";
+        example = "M-s";
+        description = "Direct toggle key for sidebar (no prefix required, e.g. 'M-s' for Alt+s, empty to disable)";
       };
       focusKey = mkOption {
         type = types.str;
-        default = "";
-        description = "Direct focus key for sidebar";
+        default = "M-S";
+        example = "M-S";
+        description = "Direct focus key for sidebar (no prefix required, empty to disable)";
       };
       width = mkOption {
         type = types.int;
@@ -281,10 +283,18 @@ with lib;
 
             # Opensessions keybindings
             ${lib.optionalString cfg.opensessions.enable ''
-              # Sidebar controls
-              bind S run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"
-              bind s run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"
+              # Sidebar controls (prefix + key)
+              #bind S run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"
+              #bind s run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"
               bind O run-shell '$XDG_CONFIG_HOME/tmux/restart-opensessions.sh'
+
+              # Direct keybindings (no prefix required)
+              ${lib.optionalString (cfg.opensessions.key != "")
+                ''bind-key -n ${cfg.opensessions.key} run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"''
+              }
+              ${lib.optionalString (cfg.opensessions.focusKey != "")
+                ''bind-key -n ${cfg.opensessions.focusKey} run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"''
+              }
 
               # Environment for opensessions
               set-environment -g OPENSESSIONS_DIR "${cfg.opensessions.dataDir}"
