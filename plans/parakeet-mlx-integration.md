@@ -261,13 +261,15 @@ For completeness: `whisper-cpp` package already includes `whisper-server`. We co
 
 | Step | What | Effort | Impact |
 |------|------|-------|--------|
-| **1** | Create `packages/parakeet-mlx-server.nix` | Medium | **Core enabler** — eliminates 2–5s cold start |
+| **1** | Create `packages/parakeet-mlx-server.py` + `parakeet-mlx-server.nix` | Medium | **Core enabler** — eliminates 2–5s cold start |
+| **1b** | Package `speech-input.el` as Emacs package (speech-input-transcribe.el + speech-input.el) | Small | Clean HTTP client, VAD, voice menus |
 | **2** | Add `parakeetServer` option to `modules/speak2text.nix` | Small | Wiring for launchd + Emacs |
-| **3** | Write Emacs Elisp override for whisper.el server mode | Small | Interactive dictation via server |
+| **3** | Configure whisper.el and/or speech-input.el for server mode | Small | Interactive dictation via server |
+| **3b** | Port `vad-events.py` to macOS audio (CoreAudio/AVFoundation) | Medium | Auto-segmentation without PTT key |
 | **4** | Update PTT listener to use HTTP server when available | Small | Faster push-to-talk |
 | **5** | Update CLI `speak2text` to try server first | Small | Faster CLI use |
 | **6** | Add `whispercpp-server` flavor | Small | Choice of backend |
-| **7** | Streaming transcription (stretch) | Large | Real-time display |
+| **7** | Streaming transcription via parakeet-mlx `transcribe_stream()` | Large | Real-time display |
 | **8** | Unified STT+TTS voice assistant server | Medium | Always-on voice assistant |
 
 ---
@@ -510,6 +512,90 @@ And set `(setq whisper-command (lambda (input-file) `("parakeet-server-client" ,
 
 ---
 
+## Relevance of `sachac/speech-input` Codeberg Repo
+
+Sacha extracted her speech-input code into a standalone repo:
+https://codeberg.org/sachac/speech-input/src/branch/main
+
+It contains **6 files** that are **directly relevant** to our plan:
+
+### File-by-File Analysis
+
+| File | What It Does | Relevance to Our Plan |
+|------|-------------|----------------------|
+| `speech-input.el` | **Core module** — recording (ffmpeg), transcription via HTTP (`speech-input-curl-json`), fuzzy string matching against lists, `speech-input-from-list` (voice command menus) | **High.** This is a **whisper.el-independent** speech input framework. `speech-input-curl-json` already does exactly what our parakeet-mlx-server client needs: multipart POST to an OpenAI-compatible endpoint, parse JSON `{"text": ...}`. The fuzzy matching (`speech-input-match-in-list`, `speech-input-match-all`) is a bonus for voice command dispatch. |
+| `speech-input-transcribe.el` | **Thin transcription client** — `speech-input-transcribe-url` (default: `http://localhost:8000/v1/audio/transcriptions`), `speech-input-transcribe-model`, `speech-input-transcribe` (sync + async callbacks) | **Very High.** This is literally the client half of our server. It's already configured for the OpenAI `/v1/audio/transcriptions` endpoint format. With our `parakeet-mlx-server` running, we'd just set `speech-input-transcribe-url` to `http://127.0.0.1:5092/v1/audio/transcriptions` and it works. |
+| `speech-input-speaches.el` | **Speaches server launcher** — starts/stops a Docker-based speaches server, lists models, downloads models | **Medium.** The *server management* pattern (start process, check liveness, etc.) is a good reference for our launchd-based approach. But we don't use Docker/speaches — our server is a native Python process. |
+| `speech-input-vad.el` | **Silero VAD (Voice Activity Detection)** — Python subprocess that streams mic audio through Silero VAD model, emits `START`/`END` events on stdout, drives `speech-input-vad-on-start-functions` / `speech-input-vad-on-end-functions` hooks | **Very High.** This is a **game-changer** for our PTT listener. Currently your `speak2text-ptt-listener.py` uses a **hardware keycode** (consumer key hold) to gate recording. VAD eliminates the need for a dedicated PTT key: the system auto-detects when you start/stop speaking. This enables "always-listening" mode with automatic segmentation. |
+| `speech-input-test.el` | Unit tests for fuzzy matching | Low (just tests) |
+| `vad-events.py` | **Silero VAD Python script** — uses `sounddevice` + PyTorch Silero VAD model to detect speech start/end in real-time, prints `START`/`END` events to stdout | **High.** This is the VAD worker that `speech-input-vad.el` spawns. We could adapt it for macOS (replace `sounddevice` PulseAudio input with CoreAudio/AVFoundation input) and integrate it into our launchd agent architecture. |
+
+### Key Takeaways for Our Plan
+
+1. **We should adopt Sacha's `speech-input-transcribe.el` pattern instead of (or alongside) raw whisper.el overrides.** Her `speech-input.el` framework is more modular than whisper.el — it decouples recording, transcription, and post-processing. We could:
+   - Package `speech-input.el` as an Emacs package in our Nix config
+   - Point `speech-input-transcribe-url` at our `parakeet-mlx-server`
+   - Use it **alongside** whisper.el (whisper.el for the recording UI / keybindings, speech-input for the transcription backend)
+   - Or eventually **replace** the whisper.el dependency entirely (speech-input.el is simpler, fewer assumptions)
+
+2. **VAD (Voice Activity Detection) is the biggest opportunity.** Sacha's `speech-input-vad.el` + `vad-events.py` shows how to:
+   - Stream mic audio continuously
+   - Detect speech boundaries in real-time (no button press needed)
+   - Auto-segment into utterances
+   - Automatically record only the spoken parts
+   - Hook into Emacs when speech ends
+   
+   On **macOS with M2 Max**, Silero VAD on MLX would be extremely fast. We could:
+   - Port `vad-events.py` from PyTorch/SoundDevice → MLX/CoreAudio
+   - Or run Silero VAD on CPU (it's tiny, ~1MB model) and keep parakeet-mlx for the heavy transcription
+   - Integrate VAD events into the existing PTT listener (make it "PTT or VAD" configurable)
+
+3. **The `speech-input-from-list` pattern is interesting for voice commands.** It records one utterance, transcribes it, then fuzzy-matches against a list of candidates. This could power command dispatch in your Emacs workflow (e.g., "Org Mode" → jump to org config, "Coding" → switch to coding workspace). This is a natural extension of the `my-whisper-handle-commands` function Sacha already has in her dotemacs.
+
+4. **Her architecture is server-agnostic.** The `speech-input-transcribe.el` module only needs a URL — it doesn't care whether the backend is speaches, whisper.cpp, parakeet-mlx, or anything else. This validates our plan to build a parakeet-mlx-server with an OpenAI-compatible endpoint: any client that speaks the OpenAI format (whisper.el, speech-input.el, curl, etc.) can use it.
+
+### What We Should Borrow
+
+| Concept | How to Integrate |
+|---------|-----------------|
+| `speech-input-transcribe.el` | Package it as an Emacs package (`speech-input`), point `speech-input-transcribe-url` at `parakeet-mlx-server` |
+| `speech-input-curl-json` | Reuse this curl-based multipart POST pattern in the PTT listener and `speak2text` CLI for server mode |
+| VAD for auto-segmentation | Port `vad-events.py` to macOS audio APIs, integrate as optional mode in `speak2text-ptt-listener` |
+| `speech-input-from-list` | Add to Emacs config for voice command dispatch |
+| Server-agnostic transcription URL | Our `parakeet-mlx-server` becomes one backend; `speech-input-transcribe-url` is the switch |
+
+### Updated Architecture with speech-input.el
+
+```
+                          ┌──────────────────────────────────┐
+                          │      parakeet-mlx-server          │
+                          │  :5092 /v1/audio/transcriptions   │
+                          │  (model loaded, Metal warm)       │
+                          └─────────┬────────────────────────┘
+                                    │
+                    ┌───────────────┼───────────────┐
+                    │               │               │
+                    ▼               ▼               ▼
+              ┌──────────┐  ┌──────────────┐  ┌──────────────┐
+              │whisper.el│  │speech-input │  │speak2text    │
+              │(recording│  │.el          │  │CLI / PTT     │
+              │ UI, hooks│  │(transcribe  │  │listener      │
+              │ +server  │  │  client,    │  │              │
+              │ override)│  │  VAD,       │  │              │
+              │          │  │  voice menus│  │              │
+              └──────────┘  └──────────────┘  └──────────────┘
+                    │               │               │
+                    └───────────────┼───────────────┘
+                                    │
+                          also falls back to:
+                          ┌───────────────────┐
+                          │ parakeet-mlx CLI   │
+                          │ (cold start, slow) │
+                          └───────────────────┘
+```
+
+---
+
 ## Summary of Files to Create/Modify
 
 ### New Files
@@ -517,6 +603,7 @@ And set `(setq whisper-command (lambda (input-file) `("parakeet-server-client" ,
 |------|---------|
 | `packages/parakeet-mlx-server.py` | Python server script |
 | `packages/parakeet-mlx-server.nix` | Nix packaging for the server |
+| `packages/emacs/speech-input-el.nix` | Nix packaging for Sacha's speech-input.el library |
 
 ### Modified Files
 | File | Changes |
@@ -534,3 +621,4 @@ And set `(setq whisper-command (lambda (input-file) `("parakeet-server-client" ,
 | `packages/parakeet-transcribe.nix` | CLI tool still useful as fallback |
 | `packages/claude-voice.nix` | Can optionally switch to HTTP later |
 | `packages/mlx-speak*.nix` | TTS (separate concern, already works) |
+| Sacha's `speech-input.el` | Borrowed/packaged as Nix Emacs package, not forked |
