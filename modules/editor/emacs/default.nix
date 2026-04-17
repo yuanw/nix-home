@@ -3474,7 +3474,7 @@ with lib;
               (ripgrep.override { withPCRE2 = true; })
               gnutls # for TLS connectivity
               cmake
-              enchant
+              #enchant
               ## Optional dependencies
               fd # faster file finding for project.el
               imagemagick # for image-dired
