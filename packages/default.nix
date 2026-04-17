@@ -157,6 +157,17 @@ _final: prev: {
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
+  parakeet-mlx-server = prev.callPackage ./parakeet-mlx-server.nix {
+    inherit (prev) writers;
+    parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
+  };
+  parakeet-mlx-server-test = prev.callPackage ./parakeet-mlx-server-test.nix {
+    inherit (prev)
+      curl
+      ffmpeg
+      python3
+      ;
+  };
 
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };

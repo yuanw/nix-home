@@ -3,6 +3,7 @@
   writeShellApplication,
   sox,
   ffmpeg,
+  curl,
   parakeet-mlx,
   python3Packages,
 }:
@@ -27,6 +28,7 @@ writeShellApplication {
   runtimeInputs = [
     sox
     ffmpeg
+    curl
     parakeet-mlx
     pythonWithHf
   ];
@@ -37,6 +39,7 @@ writeShellApplication {
     trap 'rm -f "$TMPFILE"; printf "\nGoodbye.\n" >&2' EXIT
 
     VOICE_PROMPT=${lib.escapeShellArg voicePrompt}
+    SERVER_PORT="''${PARAKEET_MLX_PORT:-5092}"
 
     step() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*" >&2; }
 
@@ -83,21 +86,35 @@ writeShellApplication {
         continue
       fi
 
-      step "Recorded $(wc -c < "$TMPFILE") bytes — transcribing with parakeet-mlx..."
+      step "Recorded $(wc -c < "$TMPFILE") bytes — transcribing..."
 
-      # Resolve /tmp symlink → /private/tmp on macOS so TXT_OUT matches
-      # the path parakeet-mlx resolves when writing its sidecar file
-      REAL_TMPFILE=$(realpath "$TMPFILE")
-      TXT_OUT="''${REAL_TMPFILE%.wav}.txt"
-      ( cd "$(dirname "$REAL_TMPFILE")" && parakeet-mlx --output-format txt "$REAL_TMPFILE" ) && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
+      TRANSCRIPT=""
 
-      if [[ $PARAKEET_EXIT -ne 0 ]]; then
-        step "parakeet-mlx exited with code $PARAKEET_EXIT"
+      # Try server first (fast, model already loaded)
+      if TRANSCRIPT=$(curl -sf "http://127.0.0.1:''${SERVER_PORT}/v1/audio/transcriptions" \
+          -F "file=@$TMPFILE" 2>/dev/null \
+          | python3 -c "import json,sys; print(json.load(sys.stdin)['text'])" 2>/dev/null); then
+        TRANSCRIPT=$(printf '%s' "$TRANSCRIPT" | tr -d '\n' | sed 's/^[[:space:]]*//')
+        if [[ -n "$TRANSCRIPT" ]]; then
+          step "Server transcription succeeded"
+        fi
       fi
 
-      TRANSCRIPT=$(cat "$TXT_OUT" 2>/dev/null || true)
-      rm -f "$TXT_OUT"
-      TRANSCRIPT=$(printf '%s' "$TRANSCRIPT" | tr -d '\n' | sed 's/^[[:space:]]*//')
+      # Fall back to CLI if server didn't work or returned empty
+      if [[ -z "$TRANSCRIPT" ]]; then
+        step 'Server unavailable or empty, falling back to parakeet-mlx CLI...'
+        REAL_TMPFILE=$(realpath "$TMPFILE")
+        TXT_OUT="''${REAL_TMPFILE%.wav}.txt"
+        ( cd "$(dirname "$REAL_TMPFILE")" && parakeet-mlx --output-format txt "$REAL_TMPFILE" ) && PARAKEET_EXIT=0 || PARAKEET_EXIT=$?
+
+        if [[ $PARAKEET_EXIT -ne 0 ]]; then
+          step "parakeet-mlx exited with code $PARAKEET_EXIT"
+        fi
+
+        TRANSCRIPT=$(cat "$TXT_OUT" 2>/dev/null || true)
+        rm -f "$TXT_OUT"
+        TRANSCRIPT=$(printf '%s' "$TRANSCRIPT" | tr -d '\n' | sed 's/^[[:space:]]*//')
+      fi
 
       if [[ -z "$TRANSCRIPT" ]]; then
         step 'No speech detected in audio'
@@ -126,7 +143,7 @@ writeShellApplication {
   '';
 
   meta = with lib; {
-    description = "Voice assistant: mic → parakeet-mlx → Claude → say";
+    description = "Voice assistant: mic → parakeet-mlx (server or CLI) → Claude → say";
     platforms = [ "aarch64-darwin" ];
   };
 }

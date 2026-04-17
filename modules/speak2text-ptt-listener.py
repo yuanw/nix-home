@@ -76,6 +76,23 @@ def _notify(title: str, body: str) -> None:
 
 
 def _transcribe(wav: str) -> str:
+    """Transcribe a WAV file.
+
+    If SPEAK2TEXT_SERVER_MODE is set, POST to the parakeet-mlx HTTP server
+    first and fall back to CLI on failure. Otherwise use the CLI directly.
+    """
+    server_mode = os.environ.get("SPEAK2TEXT_SERVER_MODE")
+    server_port = int(os.environ.get("SPEAK2TEXT_SERVER_PORT", "5092"))
+
+    if server_mode:
+        try:
+            text = _transcribe_via_server(wav, server_port)
+            if text:
+                return text
+        except Exception as exc:
+            print(f"speak2text-ptt: server failed ({exc}), falling back to CLI", file=sys.stderr)
+
+    # CLI fallback (or primary when server mode is off)
     bin_ = os.environ.get("SPEAK2TEXT_TRANSCRIBE_BIN")
     if not bin_:
         print("speak2text-ptt: SPEAK2TEXT_TRANSCRIBE_BIN unset", file=sys.stderr)
@@ -85,6 +102,36 @@ def _transcribe(wav: str) -> str:
         print(r.stderr or r.stdout or "transcribe failed", file=sys.stderr)
         return ""
     return (r.stdout or "").strip()
+
+
+def _transcribe_via_server(wav_path: str, port: int = 5092) -> str:
+    """POST to parakeet-mlx-server and return transcript text."""
+    import json
+    import urllib.error
+    import urllib.request
+
+    url = f"http://127.0.0.1:{port}/v1/audio/transcriptions"
+    with open(wav_path, "rb") as f:
+        audio_bytes = f.read()
+
+    boundary = b"----ParakeetBoundary7MA4YWxkTrZu0gW"
+    body = (
+        b"--" + boundary + b"\r\n"
+        b'Content-Disposition: form-data; name="file"; filename="audio.wav"\r\n'
+        b"Content-Type: audio/wav\r\n\r\n"
+        + audio_bytes
+        + b"\r\n"
+        b"--" + boundary + b"--\r\n"
+    )
+    req = urllib.request.Request(
+        url,
+        data=body,
+        method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary.decode()}"},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        result = json.loads(resp.read())
+        return result.get("text", "").strip()
 
 
 def _pbcopy(text: str) -> None:

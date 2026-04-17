@@ -259,20 +259,20 @@ For completeness: `whisper-cpp` package already includes `whisper-server`. We co
 
 ## Implementation Order
 
-| Step | What | Effort | Impact |
-|------|------|-------|--------|
-| **1** | Create `packages/parakeet-mlx-server.py` + `parakeet-mlx-server.nix` | Medium | **Core enabler** — eliminates 2–5s cold start |
-| **1a** | Test `parakeet-mlx-server` end-to-end (health, transcription, errors, latency, concurrency) | Small | **Confidence before wiring** — catch regressions early |
-| **1b** | Package `speech-input.el` as Emacs package (speech-input-transcribe.el + speech-input.el) | Small | Clean HTTP client, VAD, voice menus |
-| **2** | Add `parakeetServer` option to `modules/speak2text.nix` | Small | Wiring for launchd + Emacs |
-| **3** | Configure whisper.el and/or speech-input.el for server mode | Small | Interactive dictation via server |
-| **3b** | Port `vad-events.py` to macOS audio (CoreAudio/AVFoundation) | Medium | Auto-segmentation without PTT key |
-| **4** | Update PTT listener to use HTTP server when available | Small | Faster push-to-talk |
-| **5** | Update CLI `speak2text` to try server first | Small | Faster CLI use |
-| **5b** | Update `claude-voice` to use server-first pattern | Small | Faster multi-turn voice chat |
-| **6** | Add `whispercpp-server` flavor | Small | Choice of backend |
-| **7** | Streaming transcription via parakeet-mlx `transcribe_stream()` | Large | Real-time display |
-| **8** | Unified STT+TTS voice assistant server | Medium | Always-on voice assistant |
+| Step | What | Effort | Impact | Status |
+|------|------|-------|--------|--------|
+| **1** | Create `packages/parakeet-mlx-server.py` + `parakeet-mlx-server.nix` | Medium | **Core enabler** — eliminates 2–5s cold start | ✅ Done |
+| **1a** | Test `parakeet-mlx-server` end-to-end (health, transcription, errors, latency, concurrency) | Small | **Confidence before wiring** — catch regressions early | ✅ Done |
+| **1b** | Package `speech-input.el` as Emacs package (speech-input-transcribe.el + speech-input.el) | Small | Clean HTTP client, VAD, voice menus | |
+| **2** | Add `parakeetServer` option to `modules/speak2text.nix` | Small | Wiring for launchd + Emacs | ✅ Done |
+| **3** | Configure whisper.el and/or speech-input.el for server mode | Small | Interactive dictation via server | ✅ Done |
+| **3b** | Port `vad-events.py` to macOS audio (CoreAudio/AVFoundation) | Medium | Auto-segmentation without PTT key | |
+| **4** | Update PTT listener to use HTTP server when available | Small | Faster push-to-talk | ✅ Done |
+| **5** | Update CLI `speak2text` to try server first | Small | Faster CLI use | ✅ Done |
+| **5b** | Update `claude-voice` to use server-first pattern | Small | Faster multi-turn voice chat | ✅ Done |
+| **6** | Add `whispercpp-server` flavor | Small | Choice of backend | |
+| **7** | Streaming transcription via parakeet-mlx `transcribe_stream()` | Large | Real-time display | |
+| **8** | Unified STT+TTS voice assistant server | Medium | Always-on voice assistant | |
 
 ---
 

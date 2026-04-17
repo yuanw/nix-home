@@ -97,7 +97,19 @@
             parakeet-transcribe = pkgs.callPackage ./parakeet-transcribe.nix {
               inherit parakeet-mlx;
             };
+            parakeet-mlx-server = pkgs.callPackage ./parakeet-mlx-server.nix {
+              inherit (pkgs) writers;
+              inherit parakeet-mlx;
+            };
+            parakeet-mlx-server-test = pkgs.callPackage ./parakeet-mlx-server-test.nix {
+              inherit (pkgs)
+                curl
+                ffmpeg
+                python3
+                ;
+            };
             claude-voice = pkgs.callPackage ./claude-voice.nix {
+              inherit (pkgs) curl;
               inherit parakeet-mlx;
             };
             choose-mac = pkgs.callPackage ./choose-mac.nix { };
