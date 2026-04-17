@@ -3474,7 +3474,6 @@ with lib;
                       with pkgs;
                       [
                         whisper-cpp
-                        sox
                       ]
                       ++ pkgs.lib.optionals s2s.enable [ pkgs.ffmpeg ];
                     bind = {
@@ -3494,7 +3493,8 @@ with lib;
                           (with-eval-after-load 'whisper
                             (setq whisper-server-mode 'remote
                                   whisper-server-host "127.0.0.1"
-                                  whisper-server-port ${port})
+                                  whisper-server-port ${port}
+                                  whisper--ffmpeg-input-device ":0")
 
                             (defun my-whisper--check-model-consistency () t)
                             (advice-add 'whisper--check-model-consistency :override
@@ -3509,7 +3509,8 @@ with lib;
                                   whisper-model "base.en"
                                   whisper-language "en"
                                   whisper-translate nil
-                                  whisper-use-threads (num-processors))
+                                  whisper-use-threads (num-processors)
+                                  whisper--ffmpeg-input-device ":0")
                             ${
                               pkgs.lib.optionalString (transcribeBin != null) ''
                                 (defun whisper-command (input-file)
@@ -3524,7 +3525,8 @@ with lib;
                                 whisper-model "base.en"
                                 whisper-language "en"
                                 whisper-translate nil
-                                whisper-use-threads (num-processors))
+                                whisper-use-threads (num-processors)
+                                whisper--ffmpeg-input-device ":0")
                         '';
                   };
               };
