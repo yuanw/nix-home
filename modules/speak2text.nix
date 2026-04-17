@@ -317,47 +317,6 @@ in
         modules.speak2text.transcribeBin = transcribeBinPath;
         home-manager.users.${config.my.username} = {
           home.packages = packages.${cfg.flavor};
-        }
-        // lib.optionalAttrs config.modules.editors.emacs.enable {
-          programs.emacs.init.usePackage.whisper = {
-            # whisper.el records via ffmpeg (see whisper--record-command)
-            extraPackages = [ pkgs.ffmpeg ];
-            config =
-              if cfg.parakeetServer && cfg.flavor == "parakeet-mlx" then
-                let
-                  port = toString cfg.parakeetServerPort;
-                in
-                ''
-                  ;; Use parakeet-mlx HTTP server for transcription (remote mode)
-                  ;;
-                  ;; The server serves /inference with JSON {"text": "..."} — same format
-                  ;; whisper.cpp server returns, so whisper.el's built-in remote mode
-                  ;; works with just host/port config. No advice overrides needed for
-                  ;; the transcription path.
-                  ;;
-                  ;; We do advise whisper--check-model-consistency to always return t
-                  ;; because our model (mlx-community/parakeet-tdt-0.6b-v3) is not a
-                  ;; whisper.cpp model name and would otherwise trigger a validation
-                  ;; error.
-                  (with-eval-after-load 'whisper
-                    (setq whisper-server-mode 'remote
-                          whisper-server-host "127.0.0.1"
-                          whisper-server-port ${port})
-
-                    (defun my-whisper--check-model-consistency () t)
-                    (advice-add 'whisper--check-model-consistency :override
-                                #'my-whisper--check-model-consistency))
-                ''
-              else
-                ''
-                  ;; Route whisper.el transcription through the same backend as CLI speak2text
-                  ;; (https://github.com/natrys/whisper.el — whisper-install-whispercpp nil + whisper-command).
-                  ;; whispercpp flavor: Emacs must inherit WHISPER_MODEL (ggml path), same as CLI speak2text.
-                  (with-eval-after-load 'whisper
-                    (defun whisper-command (input-file)
-                      `("${transcribeBinPath}" ,input-file)))
-                '';
-          };
         };
       })
     ]

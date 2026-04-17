@@ -3454,6 +3454,78 @@ with lib;
                 #     });
                 # };
 
+                whisper =
+                  let
+                    s2s = config.modules.speak2text;
+                    # whisper.el expects a binary named "main"; whisper-cpp in nixpkgs uses "whisper-cpp"
+                    whisperCppWrapper = pkgs.runCommand "whisper-cpp-main" { } ''
+                      mkdir -p $out/bin
+                      ln -s ${pkgs.whisper-cpp}/bin/whisper-cpp $out/bin/main
+                    '';
+                    transcribeBin = if s2s.enable then s2s.transcribeBin else null;
+                  in
+                  {
+                    command = [
+                      "whisper-run"
+                      "whisper-file"
+                    ];
+                    extraPackages =
+                      with pkgs;
+                      [
+                        whisper-cpp
+                        sox
+                      ]
+                      ++ pkgs.lib.optionals s2s.enable [ pkgs.ffmpeg ];
+                    bind = {
+                      "C-c C-w" = "whisper-run";
+                    };
+                    config =
+                      if s2s.enable && s2s.parakeetServer && s2s.flavor == "parakeet-mlx" then
+                        let
+                          port = toString s2s.parakeetServerPort;
+                        in
+                        ''
+                          ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
+                          ;; The server serves /inference with JSON {"text": "..."} — same format
+                          ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
+                          ;; We only advise whisper--check-model-consistency because our model
+                          ;; name isn't a whisper.cpp model and would fail validation.
+                          (with-eval-after-load 'whisper
+                            (setq whisper-server-mode 'remote
+                                  whisper-server-host "127.0.0.1"
+                                  whisper-server-port ${port})
+
+                            (defun my-whisper--check-model-consistency () t)
+                            (advice-add 'whisper--check-model-consistency :override
+                                        #'my-whisper--check-model-consistency))
+                        ''
+                      else if s2s.enable then
+                        ''
+                          ;; Subprocess mode: route whisper.el through the speak2text transcribe wrapper.
+                          (with-eval-after-load 'whisper
+                            (setq whisper-install-whispercpp nil
+                                  whisper-install-directory "${whisperCppWrapper}/bin"
+                                  whisper-model "base.en"
+                                  whisper-language "en"
+                                  whisper-translate nil
+                                  whisper-use-threads (num-processors))
+                            ${
+                              pkgs.lib.optionalString (transcribeBin != null) ''
+                                (defun whisper-command (input-file)
+                                                              `("${transcribeBin}" ,input-file))''
+                            })
+                        ''
+                      else
+                        ''
+                          ;; No speak2text module — default whisper.cpp config.
+                          (setq whisper-install-whispercpp nil
+                                whisper-install-directory "${whisperCppWrapper}/bin"
+                                whisper-model "base.en"
+                                whisper-language "en"
+                                whisper-translate nil
+                                whisper-use-threads (num-processors))
+                        '';
+                  };
               };
             };
           };

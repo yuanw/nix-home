@@ -6,14 +6,6 @@
   ...
 }:
 
-let
-  # whisper.el expects a binary named "main"; whisper-cpp in nixpkgs uses "whisper-cpp"
-  whisperCppWrapper = pkgs.runCommand "whisper-cpp-main" { } ''
-    mkdir -p $out/bin
-    ln -s ${pkgs.whisper-cpp}/bin/whisper-cpp $out/bin/main
-  '';
-in
-
 {
   programs.emacs.init.usePackage = {
     all-the-icons = {
@@ -282,29 +274,6 @@ in
       mode = [ ''"\\.\\(e?ya?\\|ra\\)ml\\'"'' ];
       init = ''
         (add-to-list 'major-mode-remap-alist '(yaml-mode . yaml-ts-mode))
-      '';
-    };
-
-    whisper = {
-      # whisper-cpp and sox (audio recorder) are installed as system deps
-      extraPackages = with pkgs; [
-        whisper-cpp
-        sox
-      ];
-      command = [
-        "whisper-run"
-        "whisper-file"
-      ];
-      bind = {
-        "C-c C-w" = "whisper-run";
-      };
-      config = ''
-        (setq whisper-install-whispercpp nil
-              whisper-install-directory "${whisperCppWrapper}/bin"
-              whisper-model "base.en"
-              whisper-language "en"
-              whisper-translate nil
-              whisper-use-threads (num-processors))
       '';
     };
   };
