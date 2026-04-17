@@ -291,8 +291,12 @@ in
         whisper-cpp
         sox
       ];
+      command = [
+        "whisper-run"
+        "whisper-file"
+      ];
       bind = {
-        "C-c w" = "whisper";
+        "C-c C-w" = "whisper-run";
       };
       config = ''
         (setq whisper-install-whispercpp nil
