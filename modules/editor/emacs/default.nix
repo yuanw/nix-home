@@ -3465,6 +3465,7 @@ with lib;
                     transcribeBin = if s2s.enable then s2s.transcribeBin else null;
                   in
                   {
+                    enable = s2s.enable;
                     command = [
                       "whisper-run"
                       "whisper-file"
