@@ -320,9 +320,9 @@ with lib;
             # Opensessions keybindings
             ${lib.optionalString cfg.opensessions.enable ''
               # Sidebar controls (prefix + key)
-              #bind S run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"
-              #bind s run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"
-              bind O run-shell '$XDG_CONFIG_HOME/tmux/restart-opensessions.sh'
+              bind S run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"
+              bind o run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"
+              #bind O run-shell '$XDG_CONFIG_HOME/tmux/restart-opensessions.sh'
 
               # Direct keybindings (no prefix required)
               ${lib.optionalString (cfg.opensessions.key != "")

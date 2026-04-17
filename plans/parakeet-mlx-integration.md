@@ -81,7 +81,7 @@ Key design decisions:
 
 Actually, since we already have `mlx-speech` in the closure and it likely pulls in starlette/httpx, let's check if we can reuse. But for simplicity and minimal closure, let's go with stdlib + `cgi` for multipart parsing.
 
-#### 1.2 Add launchd Agent for the Server
+#### 1.2 Add launchd Agent for the Server for macOS only
 
 In `modules/speak2text.nix`, add a launchd agent (Darwin-only) for the parakeet-mlx server:
 
