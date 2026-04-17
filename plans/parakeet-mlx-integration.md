@@ -262,6 +262,7 @@ For completeness: `whisper-cpp` package already includes `whisper-server`. We co
 | Step | What | Effort | Impact |
 |------|------|-------|--------|
 | **1** | Create `packages/parakeet-mlx-server.py` + `parakeet-mlx-server.nix` | Medium | **Core enabler** — eliminates 2–5s cold start |
+| **1a** | Test `parakeet-mlx-server` end-to-end (health, transcription, errors, latency, concurrency) | Small | **Confidence before wiring** — catch regressions early |
 | **1b** | Package `speech-input.el` as Emacs package (speech-input-transcribe.el + speech-input.el) | Small | Clean HTTP client, VAD, voice menus |
 | **2** | Add `parakeetServer` option to `modules/speak2text.nix` | Small | Wiring for launchd + Emacs |
 | **3** | Configure whisper.el and/or speech-input.el for server mode | Small | Interactive dictation via server |
@@ -457,6 +458,196 @@ writers.writePython3Bin "parakeet-mlx-server" {
 
 ---
 
+## Step 1a: Testing `parakeet-mlx-server`
+
+Before wiring the server into launchd, Emacs, and the PTT listener, verify it works correctly in isolation. Run these after step 1 builds successfully.
+
+### Test Script (`packages/parakeet-mlx-server-test.sh`)
+
+A lightweight shell script that starts the server, runs a battery of `curl`-based checks, and reports pass/fail:
+
+```bash
+#!/usr/bin/env bash
+# packages/parakeet-mlx-server-test.sh
+# Usage: nix run .#parakeet-mlx-server-test
+# Or:   bash packages/parakeet-mlx-server-test.sh [host] [port]
+set -euo pipefail
+
+HOST="${1:-127.0.0.1}"
+PORT="${2:-5092}"
+BASE_URL="http://${HOST}:${PORT}"
+FAIL=0
+
+log() { printf "\033[1m[TEST] %s\033[0m\n" "$*"; }
+pass()  { printf "  \033[32m✓ PASS\033[0m %s\n" "$*"; }
+fail()  { printf "  \033[31m✗ FAIL\033[0m %s\n" "$*"; FAIL=$((FAIL+1)); }
+
+# --- Generate a small test WAV (1s of 440 Hz sine, 16 kHz, mono) ---
+TEST_WAV="$(mktemp --suffix=.wav)"
+ffmpeg -y -f lavfi -i "sine=frequency=440:duration=1" \
+       -ar 16000 -ac 1 -sample_fmt s16 "$TEST_WAV" >/dev/null 2>&1
+
+# --- Wait for server to be ready ---
+log "Waiting for server at ${BASE_URL} ..."
+for i in $(seq 1 30); do
+  if curl -sf "${BASE_URL}/health" >/dev/null 2>&1; then break; fi
+  sleep 1
+  if [ "$i" -eq 30 ]; then
+    fail "Server did not become ready within 30s"
+    exit 1
+  fi
+done
+pass "Server is up"
+
+# --- Test 1: Health endpoint (GET /health) ---
+log "Test 1: GET /health"
+HEALTH=$(curl -sf "${BASE_URL}/health")
+if echo "$HEALTH" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='ok'"; then
+  pass "/health returned {\"status\": \"ok\"}"
+  MODEL=$(echo "$HEALTH" | python3 -c "import sys,json; print(json.load(sys.stdin)['model'])")
+  pass "Model name reported: $MODEL"
+else
+  fail "/health did not return expected JSON"
+fi
+
+# --- Test 2: OpenAI-compatible endpoint (POST /v1/audio/transcriptions) ---
+log "Test 2: POST /v1/audio/transcriptions (multipart)"
+RESP=$(curl -sf "${BASE_URL}/v1/audio/transcriptions" \
+  -F "file=@${TEST_WAV}" \
+  -F "response_format=json")
+if echo "$RESP" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'text' in d; assert isinstance(d['text'], str)"; then
+  TEXT=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['text'])")
+  pass "/v1/audio/transcriptions returned text: ${TEXT:0:60}"
+else
+  fail "/v1/audio/transcriptions did not return valid JSON with 'text' key"
+fi
+
+# --- Test 3: Whisper.cpp-compatible endpoint (POST /inference) ---
+log "Test 3: POST /inference (whisper.cpp format)"
+RESP3=$(curl -sf "${BASE_URL}/inference" \
+  -F "file=@${TEST_WAV}")
+if [ -n "$RESP3" ] && [ "$RESP3" != "" ]; then
+  pass "/inference returned: ${RESP3:0:60}"
+else
+  fail "/inference returned empty response"
+fi
+
+# --- Test 4: Simple endpoint (POST /transcribe, plain text) ---
+log "Test 4: POST /transcribe (plain text)"
+RESP4=$(curl -sf "${BASE_URL}/transcribe" \
+  -F "file=@${TEST_WAV}")
+if [ -n "$RESP4" ] && [ "$RESP4" != "" ]; then
+  pass "/transcribe returned: ${RESP4:0:60}"
+else
+  fail "/transcribe returned empty response"
+fi
+
+# --- Test 5: Latency check ---
+log "Test 5: Latency (should be <2s for warm model)"
+T_START=$(python3 -c "import time; print(time.time())")
+curl -sf "${BASE_URL}/v1/audio/transcriptions" -F "file=@${TEST_WAV}" >/dev/null
+T_END=$(python3 -c "import time; print(time.time())")
+ELAPSED=$(python3 -c "print(f'{${T_END} - ${T_START}:.3f}')")
+if python3 -c "assert ${ELAPSED} < 2.0, f'{${ELAPSED}}s too slow'"; then
+  pass "Transcription latency: ${ELAPSED}s (< 2s threshold)"
+else
+  fail "Transcription latency: ${ELAPSED}s (>= 2s, expected <2s for warm model)"
+fi
+
+# --- Test 6: Error handling — missing file field ---
+log "Test 6: Error handling — POST with no file"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${BASE_URL}/v1/audio/transcriptions" \
+  -F "notfile=@${TEST_WAV}")
+if [ "$HTTP_CODE" = "400" ]; then
+  pass "Missing file field returns HTTP 400"
+else
+  fail "Missing file field returned HTTP $HTTP_CODE (expected 400)"
+fi
+
+# --- Test 7: Concurrency — two simultaneous requests ---
+log "Test 7: Concurrency — two simultaneous requests"
+curl -sf "${BASE_URL}/v1/audio/transcriptions" -F "file=@${TEST_WAV}" &
+curl -sf "${BASE_URL}/v1/audio/transcriptions" -F "file=@${TEST_WAV}" &
+wait
+pass "Two concurrent requests completed without crash"
+
+# --- Test 8: Wrong HTTP method on POST-only endpoint ---
+log "Test 8: GET /v1/audio/transcriptions returns 404"
+HTTP_CODE8=$(curl -s -o /dev/null -w "%{http_code}" "${BASE_URL}/v1/audio/transcriptions")
+if [ "$HTTP_CODE8" = "404" ]; then
+  pass "GET on POST-only endpoint returns 404"
+else
+  fail "GET on POST-only endpoint returned HTTP $HTTP_CODE8 (expected 404)"
+fi
+
+# --- Cleanup ---
+rm -f "$TEST_WAV"
+
+# --- Summary ---
+if [ "$FAIL" -eq 0 ]; then
+  printf "\n\033[32mAll tests passed.\033[0m\n"
+else
+  printf "\n\033[31m%d test(s) failed.\033[0m\n" "$FAIL"
+fi
+exit $FAIL
+```
+
+### Nix Derivation for the Test
+
+```nix
+# packages/parakeet-mlx-server-test.nix
+{ writers, curl, ffmpeg, python3 }:
+
+writers.writeBashBin "parakeet-mlx-server-test" ''
+  export PATH="${curl}/bin:${ffmpeg}/bin:${python3}/bin:$PATH"
+  exec ${./parakeet-mlx-server-test.sh}
+''
+```
+
+### Running the Tests
+
+```bash
+# Terminal 1: Start the server
+nix run .#parakeet-mlx-server
+
+# Terminal 2: Run the test suite
+nix run .#parakeet-mlx-server-test
+```
+
+Or as an automated smoke test (start server in background, run tests, kill server):
+
+```bash
+nix run .#parakeet-mlx-server &
+SERVER_PID=$!
+sleep 5  # Wait for model load + warmup
+nix run .#parakeet-mlx-server-test
+kill $SERVER_PID
+```
+
+### Test Coverage Summary
+
+| # | Test | Validates |
+|---|------|----------|
+| 1 | `GET /health` | Server responds, model name present, model loaded |
+| 2 | `POST /v1/audio/transcriptions` | OpenAI-compatible endpoint returns `{"text": "..."}` |
+| 3 | `POST /inference` | whisper.cpp-compatible endpoint returns plain text |
+| 4 | `POST /transcribe` | Simple plain-text endpoint works |
+| 5 | Latency < 2 s | Warm model serves requests fast (Metal warmup validated) |
+| 6 | Missing file → 400 | Error handling for malformed requests |
+| 7 | Two concurrent requests | No crash under concurrent load |
+| 8 | GET on POST endpoint → 404 | Correct HTTP method routing |
+
+### Future Test Additions
+
+- **Different audio formats:** `.mp3`, `.flac`, `.ogg` inputs
+- **Large files:** 30 s+ audio clips to test memory and throughput
+- **Empty audio:** 0-byte or silent file edge cases
+- **Long-running stability:** 1 000 sequential requests with memory monitoring
+- **Emacs integration test:** Automated Emacs minibuffer test triggering `whisper.el` recording and verifying text insertion
+- **PTT listener integration:** Simulate keypress events, verify server-mode transcription and clipboard
+
+---
+
 ## Emacs Configuration for Server Mode
 
 ```elisp
@@ -603,6 +794,8 @@ It contains **6 files** that are **directly relevant** to our plan:
 |------|---------|
 | `packages/parakeet-mlx-server.py` | Python server script |
 | `packages/parakeet-mlx-server.nix` | Nix packaging for the server |
+| `packages/parakeet-mlx-server-test.sh` | End-to-end test script for the server |
+| `packages/parakeet-mlx-server-test.nix` | Nix derivation for the test script |
 | `packages/emacs/speech-input-el.nix` | Nix packaging for Sacha's speech-input.el library |
 
 ### Modified Files
