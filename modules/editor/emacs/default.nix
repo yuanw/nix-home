@@ -3492,8 +3492,7 @@ with lib;
                           ;; name isn't a whisper.cpp model and would fail validation.
                           (with-eval-after-load 'whisper
                             (setq whisper-server-mode 'remote
-                                  whisper-server-host "127.0.0.1"
-                                  whisper-server-port ${port}
+                                  whisper-server-baseurl "http://127.0.0.1:${port}"
                                   whisper--ffmpeg-input-device ":0")
 
                             (defun my-whisper--check-model-consistency () t)
