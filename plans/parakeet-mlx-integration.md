@@ -269,6 +269,7 @@ For completeness: `whisper-cpp` package already includes `whisper-server`. We co
 | **3b** | Port `vad-events.py` to macOS audio (CoreAudio/AVFoundation) | Medium | Auto-segmentation without PTT key |
 | **4** | Update PTT listener to use HTTP server when available | Small | Faster push-to-talk |
 | **5** | Update CLI `speak2text` to try server first | Small | Faster CLI use |
+| **5b** | Update `claude-voice` to use server-first pattern | Small | Faster multi-turn voice chat |
 | **6** | Add `whispercpp-server` flavor | Small | Choice of backend |
 | **7** | Streaming transcription via parakeet-mlx `transcribe_stream()` | Large | Real-time display |
 | **8** | Unified STT+TTS voice assistant server | Medium | Always-on voice assistant |
@@ -648,6 +649,234 @@ kill $SERVER_PID
 
 ---
 
+## Client Integration Guide: Using parakeet-mlx-server from Any Application
+
+The server exposes three HTTP endpoints, all on `127.0.0.1:${PARAKEET_MLX_PORT:-5092}`:
+
+| Endpoint | Method | Request | Response | Compatible with |
+|----------|--------|---------|----------|----------------|
+| `/v1/audio/transcriptions` | POST | multipart form (`file` + optional `response_format`, `language`) | `{"text": "..."}` | **OpenAI Whisper API** — any OpenAI client library works |
+| `/inference` | POST | multipart form (`file`) | plain text | **whisper.cpp server** — unpatched `whisper.el` in local/remote mode |
+| `/transcribe` | POST | multipart form (`file`) | plain text | Simple clients (curl, scripts) |
+| `/health` | GET | — | `{"status": "ok", "model": "..."}` | Liveness checks, launchd health checks |
+
+The **canonical client pattern** (try server → fall back to CLI) is already used by `mlx-speak` in this repo:
+
+```python
+# From packages/mlx-speak.nix — the pattern to copy
+port = int(os.environ.get("PARAKEET_MLX_PORT", "5092"))
+try:
+    req = urllib.request.Request(
+        f"http://127.0.0.1:{port}/v1/audio/transcriptions",
+        data=multipart_body,
+        method="POST",
+        headers={"Content-Type": "multipart/form-data; boundary=..."},
+    )
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        text = json.loads(resp.read())["text"]
+except (urllib.error.HTTPError, urllib.error.URLError, OSError):
+    # Server not running — fall back to CLI
+    ...
+```
+
+### 1. Shell Scripts (curl)
+
+The simplest client — works anywhere `curl` is available:
+
+```bash
+# Transcribe a WAV file (OpenAI-compatible, returns JSON)
+TRANSCRIPT=$(curl -sf http://127.0.0.1:5092/v1/audio/transcriptions \
+  -F "file=@recording.wav" | python3 -c "import json,sys; print(json.load(sys.stdin)['text'])")
+
+# Plain text response (simpler, no JSON parsing)
+TRANSCRIPT=$(curl -sf http://127.0.0.1:5092/transcribe -F "file=@recording.wav")
+
+# With fallback to CLI
+if TRANSCRIPT=$(curl -sf http://127.0.0.1:5092/transcribe -F "file=@recording.wav" 2>/dev/null); then
+  echo "Server response: $TRANSCRIPT"
+else
+  echo "Server unavailable, falling back to parakeet-mlx CLI..."
+  TRANSCRIPT=$(parakeet-mlx --output-format txt recording.wav)
+fi
+```
+
+### 2. Python (stdlib only — no extra dependencies)
+
+```python
+import json, urllib.request, urllib.error
+
+def transcribe_server(wav_path: str, port: int = 5092) -> str:
+    """POST to parakeet-mlx-server, return transcript text."""
+    url = f"http://127.0.0.1:{port}/v1/audio/transcriptions"
+    with open(wav_path, "rb") as f:
+        audio_bytes = f.read()
+    boundary = b"----ParakeetBoundary7MA4YWxkTrZu0gW"
+    body = (
+        b"--" + boundary + b"\r\n"
+        b"Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n"
+        b"Content-Type: audio/wav\r\n\r\n" + audio_bytes + b"\r\n"
+        b"--" + boundary + b"--\r\n"
+    )
+    req = urllib.request.Request(url, data=body, method="POST",
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary.decode()}}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read())["text"]
+    except (urllib.error.URLError, OSError):
+        # Server not running — fall back to CLI
+        import subprocess
+        result = subprocess.run(["parakeet-mlx", "--output-format", "txt", wav_path],
+                               capture_output=True, text=True)
+        return result.stdout.strip()
+```
+
+### 3. Python (with `requests` — if already in the closure)
+
+```python
+import requests
+
+def transcribe_server(wav_path: str, port: int = 5092) -> str:
+    try:
+        resp = requests.post(
+            f"http://127.0.0.1:{port}/v1/audio/transcriptions",
+            files={"file": open(wav_path, "rb")},
+            data={"response_format": "json"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()["text"]
+    except requests.ConnectionError:
+        # Fall back to CLI
+        import subprocess
+        result = subprocess.run(["parakeet-mlx", "--output-format", "txt", wav_path],
+                               capture_output=True, text=True)
+        return result.stdout.strip()
+```
+
+### 4. Emacs Lisp
+
+**Option A: Via whisper.el (server mode)** — covered in the Emacs Configuration section below.
+
+**Option B: Via Sacha's `speech-input-transcribe.el`** — set `speech-input-transcribe-url`:
+
+```elisp
+(setq speech-input-transcribe-url "http://127.0.0.1:5092/v1/audio/transcriptions")
+```
+
+**Option C: Direct `url-retrieve` (no extra packages):**
+
+```elisp
+(defun my-transcribe-file (wav-file callback)
+  "POST WAV-FILE to parakeet-mlx-server, call CALLBACK with transcript text."
+  (let ((url-request-method "POST")
+        (url-request-data
+         (with-temp-buffer
+           (insert "--ParakeetBoundary\r\n"
+                   "Content-Disposition: form-data; name=\"file\"; filename=\"audio.wav\"\r\n"
+                   "Content-Type: audio/wav\r\n\r\n")
+           (insert-file-contents-literally wav-file)
+           (goto-char (point-max))
+           (insert "\r\n--ParakeetBoundary--\r\n")
+           (buffer-string)))
+        (url-request-extra-headers
+         '(("Content-Type" . "multipart/form-data; boundary=ParakeetBoundary"))))
+    (url-retrieve "http://127.0.0.1:5092/v1/audio/transcriptions"
+                  (lambda (_status)
+                    (goto-char (point-min))
+                    (re-search-forward "^$")           ; skip headers
+                    (let* ((json (json-read))
+                           (text (cdr (assq 'text json))))
+                      (funcall callback text))))))
+```
+
+### 5. OpenAI-Compatible Clients
+
+Since `/v1/audio/transcriptions` matches the OpenAI Whisper API format, **any** OpenAI client library works — just change the base URL:
+
+```python
+# Python openai library
+from openai import OpenAI
+client = OpenAI(base_url="http://127.0.0.1:5092/v1", api_key="not-needed")
+result = client.audio.transcriptions.create(model="parakeet-tdt-0.6b-v3", file=open("recording.wav", "rb"))
+print(result.text)
+```
+
+```javascript
+// Node.js openai library
+import OpenAI from 'openai';
+const client = new OpenAI({ baseURL: 'http://127.0.0.1:5092/v1', apiKey: 'not-needed' });
+const result = await client.audio.transcriptions.create({ model: 'parakeet-tdt-0.6b-v3', file: fs.createReadStream('recording.wav') });
+console.log(result.text);
+```
+
+This also means **any application that supports custom OpenAI endpoints** can use parakeet-mlx-server by pointing the base URL at it — no code changes needed.
+
+### 6. macOS Automation (Shortcuts, AppleScript, Hammerspoon)
+
+```applescript
+-- AppleScript: transcribe a WAV file
+set wavFile to POSIX path of (choose file with prompt "Select audio file:" of type {"wav"})
+set cmd to "curl -sf http://127.0.0.1:5092/transcribe -F file=@" & quoted form of wavFile
+do shell script cmd
+```
+
+```lua
+-- Hammerspoon: transcribe on hotkey
+hs.hotkey.bind({"cmd", "alt"}, "t", function()
+  local output = hs.execute("curl -sf http://127.0.0.1:5092/v1/audio/transcriptions -F file=@/tmp/recording.wav")
+  local text = hs.json.decode(output).text
+n  hs.pasteboard.setContents(text)
+  hs.alert.show("Copied: " .. text)
+end)
+```
+
+### 7. Existing Tools in This Repo
+
+| Tool | Current backend | How to switch to server |
+|------|----------------|------------------------|
+| `speak2text` CLI | `parakeet-mlx` CLI (2–5 s cold start) | Phase 5: try HTTP first, fall back to CLI |
+| `speak2text-ptt-listener` | calls `speak2text-transcribe-wav-*` subprocess | Phase 4: add `_transcribe_via_server()` fallback |
+| `claude-voice` | `parakeet-mlx` CLI per turn | Replace `parakeet-mlx` call with `curl` POST to server |
+| `whisper.el` | `whisper-command` subprocess | Phase 3: set `whisper-server-mode 'remote`, point at server |
+| `speech-input.el` | N/A (not yet packaged) | Phase 1c: set `speech-input-transcribe-url`|
+| `mlx-speak` (TTS) | Already uses server-first pattern | N/A (different concern — TTS, not STT) |
+
+### 8. `claude-voice` Server Integration (concrete example)
+
+The `claude-voice` script currently calls `parakeet-mlx` CLI per turn (~2–5 s each). Switching it to the server is a small change in `packages/claude-voice.nix`:
+
+```bash
+# Replace this:
+parakeet-mlx --output-format txt "$REAL_TMPFILE"
+
+# With this:
+TRANSCRIPT=$(curl -sf http://127.0.0.1:${PARAKEET_MLX_PORT:-5092}/v1/audio/transcriptions \
+  -F "file=@$REAL_TMPFILE" 2>/dev/null | python3 -c "import json,sys; print(json.load(sys.stdin)['text'])")
+if [ -z "$TRANSCRIPT" ]; then
+  # Fallback to CLI if server is down
+  step 'Server unavailable, falling back to parakeet-mlx CLI...'
+  ( cd "$(dirname "$REAL_TMPFILE")" && parakeet-mlx --output-format txt "$REAL_TMPFILE" )
+  TXT_OUT="${REAL_TMPFILE%.wav}.txt"
+  TRANSCRIPT=$(cat "$TXT_OUT" 2>/dev/null || true)
+fi
+```
+
+This follows the same pattern as `mlx-speak`: try server first, fall back to CLI. The latency improvement is dramatic for multi-turn conversations where `claude-voice` currently pays 2–5 s **per turn**.
+
+### General Pattern: Server-First with CLI Fallback
+
+All clients in this repo should follow the `mlx-speak` pattern:
+
+```
+1. Check liveness: GET /health (optional, saves building multipart if server is down)
+2. POST audio to /v1/audio/transcriptions
+3. If connection refused or timeout → fall back to parakeet-mlx CLI
+```
+
+This means the system **works whether or not the server is running** — the server is an optimization, not a requirement. The launchd agent ensures it's nearly always up on macOS.
+
+---
+
 ## Emacs Configuration for Server Mode
 
 ```elisp
@@ -755,29 +984,30 @@ It contains **6 files** that are **directly relevant** to our plan:
 | `speech-input-from-list` | Add to Emacs config for voice command dispatch |
 | Server-agnostic transcription URL | Our `parakeet-mlx-server` becomes one backend; `speech-input-transcribe-url` is the switch |
 
-### Updated Architecture with speech-input.el
+### Updated Architecture
 
 ```
-                          ┌──────────────────────────────────┐
-                          │      parakeet-mlx-server          │
-                          │  :5092 /v1/audio/transcriptions   │
-                          │  (model loaded, Metal warm)       │
-                          └─────────┬────────────────────────┘
-                                    │
-                    ┌───────────────┼───────────────┐
-                    │               │               │
-                    ▼               ▼               ▼
-              ┌──────────┐  ┌──────────────┐  ┌──────────────┐
-              │whisper.el│  │speech-input │  │speak2text    │
-              │(recording│  │.el          │  │CLI / PTT     │
-              │ UI, hooks│  │(transcribe  │  │listener      │
-              │ +server  │  │  client,    │  │              │
-              │ override)│  │  VAD,       │  │              │
-              │          │  │  voice menus│  │              │
-              └──────────┘  └──────────────┘  └──────────────┘
-                    │               │               │
-                    └───────────────┼───────────────┘
-                                    │
+                           parakeet-mlx-server :5092
+                           ┌──────────────────────────────────┐
+                           │  /v1/audio/transcriptions (OpenAI) │
+                           │  /inference          (whisper.cpp)│
+                           │  /transcribe         (plain text) │
+                           │  /health             (liveness)   │
+                           │  (model loaded, Metal warm)        │
+                           └─────────┬────────────────────────┘
+                                     │
+              ┌───────────┬───────────┼──────────────┬──────────────┐
+              │           │           │              │              │
+              ▼           ▼           ▼              ▼              ▼
+        ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌───────────────────┐
+        │whisper.el│ │speech-  │ │speak2text│ │claude-   │ │any OpenAI client  │
+        │          │ │input.el  │ │CLI / PTT │ │voice     │ │(python, node,     │
+        │(Emacs    │ │(trans-   │ │listener  │ │          │ │ curl, shortcuts,  │
+        │ dictation│ │ cribe,   │ │          │ │(STT→Cla │ │ hammerspoon, etc) │
+        │ UI)      │ │ VAD,     │ │          │ │ ude→TTS) │ │                   │
+        └──────────┘ │ menus)   │ └──────────┘ └──────────┘ └───────────────────┘
+                      └──────────┘
+                                     │
                           also falls back to:
                           ┌───────────────────┐
                           │ parakeet-mlx CLI   │
@@ -803,6 +1033,7 @@ It contains **6 files** that are **directly relevant** to our plan:
 |------|----------|
 | `modules/speak2text.nix` | Add `parakeetServer` bool option, launchd agent, Emacs server-mode config, update PTT listener to use HTTP |
 | `modules/speak2text-ptt-listener.py` | Add `_transcribe_via_server()` fallback |
+| `packages/claude-voice.nix` | Add server-first transcription pattern (try HTTP, fall back to CLI) |
 | `packages/flake.nix` | Add `parakeet-mlx-server` package |
 | `modules/editor/emacs/emacs-init-defaults.nix` | Optionally coordinate whisper.el config with speak2text module |
 | `packages/default.nix` | Expose `parakeet-mlx-server` |
@@ -812,6 +1043,5 @@ It contains **6 files** that are **directly relevant** to our plan:
 |-----------|--------|
 | `packages/parakeet-mlx.nix` | Already works; server imports it as a library |
 | `packages/parakeet-transcribe.nix` | CLI tool still useful as fallback |
-| `packages/claude-voice.nix` | Can optionally switch to HTTP later |
 | `packages/mlx-speak*.nix` | TTS (separate concern, already works) |
 | Sacha's `speech-input.el` | Borrowed/packaged as Nix Emacs package, not forked |
