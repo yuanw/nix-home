@@ -413,11 +413,19 @@ class ParakeetHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(response.encode())
                 else:
-                    # /transcribe or /inference: return plain text
-                    self.send_response(200)
-                    self.send_header("Content-Type", "text/plain; charset=utf-8")
-                    self.end_headers()
-                    self.wfile.write(text.encode())
+                    # /transcribe: return plain text
+                    # /inference: return JSON (whisper.cpp server compatibility)
+                    if self.path == "/inference":
+                        response = json.dumps({"text": text})
+                        self.send_response(200)
+                        self.send_header("Content-Type", "application/json")
+                        self.end_headers()
+                        self.wfile.write(response.encode())
+                    else:
+                        self.send_response(200)
+                        self.send_header("Content-Type", "text/plain; charset=utf-8")
+                        self.end_headers()
+                        self.wfile.write(text.encode())
 
             except Exception as e:
                 print(f"parakeet-mlx-server ERROR: {e}", file=sys.stderr, flush=True)
@@ -631,7 +639,7 @@ kill $SERVER_PID
 |---|------|----------|
 | 1 | `GET /health` | Server responds, model name present, model loaded |
 | 2 | `POST /v1/audio/transcriptions` | OpenAI-compatible endpoint returns `{"text": "..."}` |
-| 3 | `POST /inference` | whisper.cpp-compatible endpoint returns plain text |
+| 3 | `POST /inference` | whisper.cpp-compatible endpoint returns JSON |
 | 4 | `POST /transcribe` | Simple plain-text endpoint works |
 | 5 | Latency < 2 s | Warm model serves requests fast (Metal warmup validated) |
 | 6 | Missing file → 400 | Error handling for malformed requests |
@@ -656,7 +664,7 @@ The server exposes three HTTP endpoints, all on `127.0.0.1:${PARAKEET_MLX_PORT:-
 | Endpoint | Method | Request | Response | Compatible with |
 |----------|--------|---------|----------|----------------|
 | `/v1/audio/transcriptions` | POST | multipart form (`file` + optional `response_format`, `language`) | `{"text": "..."}` | **OpenAI Whisper API** — any OpenAI client library works |
-| `/inference` | POST | multipart form (`file`) | plain text | **whisper.cpp server** — unpatched `whisper.el` in local/remote mode |
+| `/inference` | POST | multipart form (`file`) | `{"text": "..."}` | **whisper.cpp server** — unpatched `whisper.el` in local/remote mode |
 | `/transcribe` | POST | multipart form (`file`) | plain text | Simple clients (curl, scripts) |
 | `/health` | GET | — | `{"status": "ok", "model": "..."}` | Liveness checks, launchd health checks |
 
@@ -879,45 +887,48 @@ This means the system **works whether or not the server is running** — the ser
 
 ## Emacs Configuration for Server Mode
 
+The simplest way to use parakeet-mlx-server with whisper.el is **`'remote` mode with no advice overrides**. Since our `/inference` endpoint returns the same JSON format as whisper.cpp server (`{"text": "..."}`), whisper.el's built-in remote mode works out of the box:
+
 ```elisp
 ;; When speak2text flavor is "parakeet-mlx" and parakeetServer is true:
 (setq whisper-server-mode 'remote
       whisper-server-host "127.0.0.1"
       whisper-server-port 5092)
 
-(defun my-whisper--transcribe-via-parakeet-server ()
-  "Transcribe audio using the parakeet-mlx HTTP server."
-  (message "[-] Transcribing via parakeet-mlx server")
-  (whisper--setup-mode-line :show 'transcribing)
-  (setq whisper--transcribing-process
-        (whisper--process-curl-request
-         (format "http://%s:%d/v1/audio/transcriptions"
-                 whisper-server-host whisper-server-port)
-         (list "Content-Type: multipart/form-data")
-         (list (concat "file=@" whisper--temp-file)
-               "temperature=0.0"
-               "temperature_inc=0.2"
-               "response_format=json"
-               (concat "language=" whisper-language)))))
-
+;; Bypass model-name validation — our model isn't a whisper.cpp model name
 (defun my-whisper--check-model-consistency () t)
-
 (with-eval-after-load 'whisper
-  (advice-add 'whisper--transcribe-via-local-server :override
-              #'my-whisper--transcribe-via-parakeet-server)
   (advice-add 'whisper--check-model-consistency :override
               #'my-whisper--check-model-consistency))
 ```
 
-**Note:** `whisper--process-curl-request` is an internal function in whisper.el that uses `curl` to send multipart form data. This is exactly what Sacha Chua uses. However, looking at the actual whisper.el code, `whisper--transcribe-via-local-server` sends to the `"inference"` endpoint with specific form fields. Our server needs to handle either:
-- The exact fields whisper.cpp server expects (`file`, `temperature`, etc.), OR
-- The OpenAI-compatible `/v1/audio/transcriptions` format
+**How it works:**
 
-Since we're overriding `whisper--transcribe-via-local-server`, we control the URL and format. We'll use `/v1/audio/transcriptions` with OpenAI-compatible response format.
+1. `whisper-run` (bound to `C-c w` in this config) starts recording via ffmpeg
+2. Press `C-c w` again to stop recording
+3. whisper.el calls `whisper--transcribe-via-local-server` with `skip-start=t` (remote mode)
+4. This sends a `curl` multipart POST to `http://127.0.0.1:5092/inference`
+5. Our server returns `{"text": "..."}` — same JSON format whisper.cpp server returns
+6. whisper.el parses the JSON and inserts text at point
 
-### Alternative: Use whisper-server-mode = nil (subprocess with server-aware wrapper)
+**Why only `whisper--check-model-consistency` needs advice:** The default implementation validates the model name against whisper.cpp model names (tiny, base, small, medium, large). Our model (`mlx-community/parakeet-tdt-0.6b-v3`) would fail this check. Overriding it to return `t` skips the validation.
 
-If we don't want to advise whisper.el internals, we could create a thin CLI wrapper that POSTs to the parakeet server:
+### Alternative: `'openai` Mode
+
+You can also use `whisper-server-mode 'openai`, which sends to `/v1/audio/transcriptions` (also served by our server). This requires setting a dummy API key:
+
+```elisp
+(setq whisper-server-mode 'openai
+      whisper-openai-api-baseurl "http://127.0.0.1:5092/"
+      whisper-openai-api-key "not-needed"
+      whisper-openai-model "parakeet-tdt-0.6b-v3")
+```
+
+The `'openai` mode also needs `whisper--check-model-consistency` advised to return `t`.
+
+### Alternative: Subprocess Mode (server-aware CLI wrapper)
+
+If you don't want to advise whisper.el internals at all, create a thin CLI wrapper that POSTs to the parakeet server:
 
 ```bash
 #!/bin/sh
@@ -928,7 +939,7 @@ curl -s -X POST http://127.0.0.1:5092/v1/audio/transcriptions \
 
 And set `(setq whisper-command (lambda (input-file) `("parakeet-server-client" ,input-file)))`.
 
-**Recommendation:** Use the advice approach (Sacha's pattern). It gives us the benefits of whisper.el's progress tracking, mode-line indicators, and `whisper-after-transcription-hook` while using our fast server.
+**Recommendation:** Use `'remote` mode. It works with zero advice overrides on the transcription path (only `whisper--check-model-consistency` is advised), and gives you whisper.el's progress tracking, mode-line indicators, and `whisper-after-transcription-hook`.
 
 ---
 

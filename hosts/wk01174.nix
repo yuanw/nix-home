@@ -52,7 +52,12 @@
     ai.enableOllama = true;
     droid.enable = true;
     cursor.enable = true;
-    speak2text.enable = true;
+    speak2text = {
+      enable = true;
+      flavor = "parakeet-mlx";
+      parakeetServer = true; # ← enables the server
+      parakeetServerPort = 5092; # ← default, optional
+    };
     pi = {
       enable = true;
       enableWorkMux = true;

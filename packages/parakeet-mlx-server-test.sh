@@ -61,11 +61,11 @@ fi
 log "Test 3: POST /inference (whisper.cpp format)"
 RESP3=$(curl -sf "${BASE_URL}/inference" \
   -F "file=@${TEST_WAV}")
-# Empty text is valid for non-speech audio
-if [ -n "$RESP3" ] || [ "$RESP3" = "" ]; then
-  pass "/inference returned: ${RESP3:-(empty, OK for non-speech)}"
+if echo "$RESP3" | python3 -c "import sys,json; d=json.load(sys.stdin); assert 'text' in d"; then
+  TEXT3=$(echo "$RESP3" | python3 -c "import sys,json; print(json.load(sys.stdin)['text'])")
+  pass "/inference returned JSON: text='${TEXT3:-(empty, OK for non-speech)}'"
 else
-  fail "/inference returned unexpected response"
+  fail "/inference did not return valid JSON with 'text' key"
 fi
 
 # --- Test 4: Simple endpoint (POST /transcribe, plain text) ---

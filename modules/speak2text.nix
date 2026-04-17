@@ -328,29 +328,23 @@ in
                   port = toString cfg.parakeetServerPort;
                 in
                 ''
-                  ;; Use parakeet-mlx HTTP server for transcription (server mode)
+                  ;; Use parakeet-mlx HTTP server for transcription (remote mode)
+                  ;;
+                  ;; The server serves /inference with JSON {"text": "..."} — same format
+                  ;; whisper.cpp server returns, so whisper.el's built-in remote mode
+                  ;; works with just host/port config. No advice overrides needed for
+                  ;; the transcription path.
+                  ;;
+                  ;; We do advise whisper--check-model-consistency to always return t
+                  ;; because our model (mlx-community/parakeet-tdt-0.6b-v3) is not a
+                  ;; whisper.cpp model name and would otherwise trigger a validation
+                  ;; error.
                   (with-eval-after-load 'whisper
                     (setq whisper-server-mode 'remote
                           whisper-server-host "127.0.0.1"
                           whisper-server-port ${port})
 
-                    (defun my-whisper--transcribe-via-parakeet-server ()
-                      "Transcribe audio using the parakeet-mlx HTTP server."
-                      (message "[-] Transcribing via parakeet-mlx server")
-                      (whisper--setup-mode-line :show 'transcribing)
-                      (setq whisper--transcribing-process
-                            (whisper--process-curl-request
-                             (format "http://%s:%d/v1/audio/transcriptions"
-                                     whisper-server-host whisper-server-port)
-                             (list "Content-Type: multipart/form-data")
-                             (list (concat "file=@" whisper--temp-file)
-                                   "response_format=json"
-                                   (concat "language=" whisper-language)))))
-
                     (defun my-whisper--check-model-consistency () t)
-
-                    (advice-add 'whisper--transcribe-via-local-server :override
-                                #'my-whisper--transcribe-via-parakeet-server)
                     (advice-add 'whisper--check-model-consistency :override
                                 #'my-whisper--check-model-consistency))
                 ''

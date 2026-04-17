@@ -137,15 +137,23 @@ class ParakeetHandler(BaseHTTPRequestHandler):
                     flush=True,
                 )
 
-                # Return OpenAI-compatible response
+                # Return response based on endpoint
                 if self.path == "/v1/audio/transcriptions":
+                    # OpenAI-compatible: JSON {"text": "..."}
+                    response = json.dumps({"text": text})
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    self.wfile.write(response.encode())
+                elif self.path == "/inference":
+                    # whisper.cpp server also returns JSON {"text": "..."}
                     response = json.dumps({"text": text})
                     self.send_response(200)
                     self.send_header("Content-Type", "application/json")
                     self.end_headers()
                     self.wfile.write(response.encode())
                 else:
-                    # /transcribe or /inference: return plain text
+                    # /transcribe: plain text
                     self.send_response(200)
                     self.send_header("Content-Type", "text/plain; charset=utf-8")
                     self.end_headers()
