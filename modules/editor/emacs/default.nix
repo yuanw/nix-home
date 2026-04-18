@@ -3499,31 +3499,6 @@ with lib;
                             (advice-add 'whisper--check-model-consistency :override
                                         #'my-whisper--check-model-consistency))
 
-                          ;; Interactive audio device picker for macOS (from whisper.el wiki)
-                          ;; Use M-x whisper-select-audio-device to pick the mic at runtime
-                          (defun my/whisper-select-audio-device ()
-                            "Interactively select an audio input device for whisper.el."
-                            (interactive)
-                            (let* ((raw (shell-command-to-string "ffmpeg -f avfoundation -list_devices true -i dummy 2>&1"))
-                                   (lines (split-string raw "\n"))
-                                   (audio-devices nil)
-                                   (in-audio nil))
-                              (dolist (line lines)
-                                (when (string-match "AVFoundation audio devices:" line)
-                                  (setq in-audio t))
-                                (when (and in-audio (string-match "\\[\\([0-9]+\\)\\] \\(.+\\)" line))
-                                  (push (cons (string-to-number (match-string 1 line))
-                                               (match-string 2 line)) audio-devices)))
-                              (setq audio-devices (nreverse audio-devices))
-                              (if (not audio-devices)
-                                  (message "No audio devices found")
-                                (let* ((names (mapcar #\='cdr audio-devices))
-                                       (name (completing-read "Select audio device: " names nil t))
-                                       (idx (cl-loop for (i . nm) in audio-devices
-                                                      when (equal nm name) return i)))
-                                  (setq whisper--ffmpeg-input-device (format ":%d" idx))
-                                  (message "Set whisper--ffmpeg-input-device to %s" whisper--ffmpeg-input-device))))
-                          )
                         ''
                       else if s2s.enable then
                         ''
