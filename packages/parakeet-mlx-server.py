@@ -12,7 +12,7 @@ from parakeet_mlx import from_pretrained, DecodingConfig
 
 PORT = int(os.environ.get("PARAKEET_MLX_PORT", "5092"))
 MODEL_NAME = os.environ.get("PARAKEET_MODEL", "mlx-community/parakeet-tdt-0.6b-v3")
-LOG_DIR = os.environ.get("PARAKEET_MLX_LOG_DIR", os.path.join(tempfile.gettempdir(), "parakeet-mlx-server-audio"))
+LOG_DIR = os.environ.get("PARAKEET_MLX_LOG_DIR", "/tmp/parakeet-mlx-server-audio")
 os.makedirs(LOG_DIR, exist_ok=True)
 
 print(f"parakeet-mlx-server: Loading model {MODEL_NAME}...", file=sys.stderr, flush=True)

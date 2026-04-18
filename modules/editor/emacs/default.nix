@@ -3498,6 +3498,35 @@ with lib;
                             (defun my-whisper--check-model-consistency () t)
                             (advice-add 'whisper--check-model-consistency :override
                                         #'my-whisper--check-model-consistency))
+
+                          ;; Interactive audio device picker (from whisper.el wiki)
+                          ;; Use M-x whisper-select-audio-device to choose the mic at runtime
+                          (defun my/whisper--get-ffmpeg-devices ()
+                            "Parse ffmpeg avfoundation device list."
+                            (unless (eq system-type 'darwin)
+                              (error "Only supported on macOS"))
+                            (let ((lines (string-split (shell-command-to-string "ffmpeg -list_devices true -f avfoundation -i dummy || true") "\n")))
+                              (cl-loop with at-audio = nil
+                                       with audio-devices = nil
+                                       for line in lines
+                                       when (string-match "AVFoundation audio devices:" line)
+                                       do (setq at-audio t)
+                                       when (and at-audio
+                                                 (string-match "\\[\\([0-9]+\\)\\] \\(.+\\)" line))
+                                       do (push (cons (string-to-number (match-string 1 line))
+                                                       (match-string 2 line)) audio-devices)
+                                       finally return (nreverse audio-devices))))
+
+                          (defun whisper-select-audio-device ()
+                            "Interactively select an audio device for whisper.el recording."
+                            (interactive)
+                            (let* ((devices (my/whisper--get-ffmpeg-devices))
+                                   (names (mapcar #\='cdr devices))
+                                   (name (completing-read "Select audio device: " names nil t)))
+                              (setq whisper--ffmpeg-input-device
+                                    (format ":%d" (cl-loop for (idx . nm) in devices
+                                                           when (string= nm name) return idx)))
+                              (message "whisper--ffmpeg-input-device set to %s" whisper--ffmpeg-input-device)))
                         ''
                       else if s2s.enable then
                         ''
