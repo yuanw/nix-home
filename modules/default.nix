@@ -4,44 +4,42 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
+      ./browsers/chromium.nix
+      ./browsers/firefox
+      ./browsers/librewolf.nix
+      ./browsers/tor.nix
+      ./catppuccin.nix
       ./coding-agents/claude-code
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix
       ./coding-agents/pi
-      ./speak2text.nix
-      ./catppuccin.nix
       ./common.nix
-      ./browsers/chromium.nix
-      ./browsers/firefox
-      ./browsers/librewolf.nix
-      ./browsers/tor.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
+      ./dev/go.nix
       ./dev/haskell.nix
       ./dev/haxe.nix
       ./dev/idris2.nix
-      ./dev/go.nix
-      ./dev/podman.nix
-
-      ./dev/lean.nix
       ./dev/java.nix
       ./dev/julia.nix
       ./dev/kotlin.nix
+      ./dev/lean.nix
       ./dev/node.nix
       ./dev/playwright.nix
+      ./dev/podman.nix
       ./dev/python.nix
       ./dev/racket.nix
-      ./dev/zig.nix
       ./dev/scheme.nix
-      ./helix.nix
-
-      ./terminal-multiplexer/zellij.nix
-      ./terminal-multiplexer/tmux.nix
+      ./dev/zig.nix
       ./editor/emacs
+      ./helix.nix
       ./settings.nix
+      ./speak2text/speak2text.nix
       ./terminal
+      ./terminal-multiplexer/tmux.nix
+      ./terminal-multiplexer/zellij.nix
       ./typing
     ];
 
