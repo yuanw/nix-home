@@ -3524,7 +3524,7 @@ with lib;
                   package =
                     epkgs:
                     epkgs.trivialBuild {
-                      pname = "prot-modeline";
+                      pname = "whisper-device";
                       version = "0.0.1";
                       src = ./packages/whisper-device.el;
                     };
