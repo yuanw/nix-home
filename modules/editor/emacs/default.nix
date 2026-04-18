@@ -35,27 +35,6 @@ let
   });
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
-
-  # Utility: create a usePackage attrs set from a standalone .el file.
-  # Usage in usePackage: (mkElispPackage ./path/to/my-pkg.el { after = [ "dep" ]; command = [ "my-func" ]; })
-  # This avoids the need to separately add the package to overrides, extraPackages, etc.
-  mkElispPackage =
-    src: attrs:
-    let
-      basename = builtins.match "(.+)\\.el" (baseNameOf (toString src));
-      pname = if basename != null then builtins.head basename else baseNameOf (toString src);
-    in
-    attrs
-    // {
-      package =
-        epkgs:
-        epkgs.trivialBuild {
-          inherit pname src;
-          version = "0.1.0";
-          preferLocalBuild = true;
-          allowSubstitutes = false;
-        };
-    };
 in
 with lib;
 {
@@ -3481,20 +3460,23 @@ with lib;
                           port = toString s2s.parakeetServerPort;
                         in
                         ''
-                          ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
-                          ;; The server serves /inference with JSON {"text": "..."} — same format
-                          ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
-                          ;; We only advise whisper--check-model-consistency because our model
-                          ;; name isn't a whisper.cpp model and would fail validation.
-                          (with-eval-after-load 'whisper
-                            (setq whisper-server-mode 'remote
-                                  whisper-server-baseurl "http://127.0.0.1:${port}"
-                                  whisper--ffmpeg-input-device ":1")
+                            ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
+                            ;; The server serves /inference with JSON {"text": "..."} — same format
+                            ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
+                            ;; We only advise whisper--check-model-consistency because our model
+                            ;; name isn't a whisper.cpp model and would fail validation.
+                            (with-eval-after-load 'whisper
+                              (setq whisper-server-mode 'remote
+                                    whisper-server-baseurl "http://127.0.0.1:${port}"
+                                    whisper--ffmpeg-input-device ":1")
 
-                            (defun my-whisper--check-model-consistency () t)
-                            (advice-add 'whisper--check-model-consistency :override
-                                        #'my-whisper--check-model-consistency))
+                              (defun my-whisper--check-model-consistency () t)
+                              (advice-add 'whisper--check-model-consistency :override
+                                          #'my-whisper--check-model-consistency)
 
+                              ;; Interactive audio device picker from whisper-device.el
+                              ${builtins.readFile ./packages/whisper-device.el}
+                          )
                         ''
                       else if s2s.enable then
                         ''
@@ -3525,11 +3507,6 @@ with lib;
                                 whisper--ffmpeg-input-device ":1")
                         '';
                   };
-                whisper-device = mkElispPackage ./packages/whisper-device.el {
-                  enable = config.modules.speak2text.enable;
-                  after = [ "whisper" ];
-                  command = [ "whisper-select-audio-device" ];
-                };
               };
             };
           };
