@@ -3477,7 +3477,6 @@ with lib;
                       "whisper-run"
                       "whisper-file"
                     ];
-                    after = [ "whisper" ];
                     extraPackages =
                       with pkgs;
                       [
