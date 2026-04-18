@@ -1188,7 +1188,7 @@ with lib;
                 };
 
                 evil = {
-                  enable = true;
+                  enable = false;
                   command = [ "evil-mode" ];
                 };
 
