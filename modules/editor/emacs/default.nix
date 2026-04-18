@@ -3477,12 +3477,19 @@ with lib;
                       "whisper-run"
                       "whisper-file"
                     ];
-                    extraPackages =
-                      with pkgs;
-                      [
-                        whisper-cpp
-                      ]
-                      ++ pkgs.lib.optionals s2s.enable [ pkgs.ffmpeg ];
+                    extraPackages = with pkgs; [
+                      whisper-cpp
+
+                      ffmpeg
+                    ];
+                    packageRequires = [
+                      (epkgs.trivialBuild {
+                        pname = "prot-common";
+                        version = "0.0.1";
+                        src = ./packages/whisper-device.el;
+                      })
+
+                    ];
                     bind = {
                       "C-c C-w" = "whisper-run";
                     };
