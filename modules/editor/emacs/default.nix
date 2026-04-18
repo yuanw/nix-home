@@ -172,6 +172,15 @@ with lib;
                   inherit (self) melpaBuild;
                 }
               );
+              whisper-device = (
+                self.trivialBuild {
+                  pname = "whisper-device";
+                  version = "0.1.0";
+                  src = ./packages/whisper-device.el;
+                  preferLocalBuild = true;
+                  allowSubstitutes = false;
+                }
+              );
             };
             init = {
               enable = true;
@@ -3455,17 +3464,9 @@ with lib;
                     ];
                     extraPackages = with pkgs; [
                       whisper-cpp
-
                       ffmpeg
                     ];
-                    packageRequires = [
-                      (epkgs.trivialBuild {
-                        pname = "prot-common";
-                        version = "0.0.1";
-                        src = ./packages/whisper-device.el;
-                      })
 
-                    ];
                     bind = {
                       "C-c C-w" = "whisper-run";
                     };
@@ -3519,6 +3520,11 @@ with lib;
                                 whisper--ffmpeg-input-device ":1")
                         '';
                   };
+                whisper-device = {
+                  enable = config.modules.speak2text.enable;
+                  after = [ "whisper" ];
+                  command = [ "whisper-select-audio-device" ];
+                };
               };
             };
           };
