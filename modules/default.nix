@@ -36,7 +36,7 @@
       ./editor/emacs
       ./helix.nix
       ./settings.nix
-      ./speak2text/speak2text.nix
+      ./speech2text/speak2text.nix
       ./terminal
       ./terminal-multiplexer/tmux.nix
       ./terminal-multiplexer/zellij.nix
