@@ -35,6 +35,27 @@ let
   });
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+
+  # Utility: create a usePackage attrs set from a standalone .el file.
+  # Usage in usePackage: (mkElispPackage ./path/to/my-pkg.el { after = [ "dep" ]; command = [ "my-func" ]; })
+  # This avoids the need to separately add the package to overrides, extraPackages, etc.
+  mkElispPackage =
+    src: attrs:
+    let
+      basename = builtins.match "(.+)\\.el" (baseNameOf (toString src));
+      pname = if basename != null then builtins.head basename else baseNameOf (toString src);
+    in
+    attrs
+    // {
+      package =
+        epkgs:
+        epkgs.trivialBuild {
+          inherit pname src;
+          version = "0.1.0";
+          preferLocalBuild = true;
+          allowSubstitutes = false;
+        };
+    };
 in
 with lib;
 {
@@ -118,13 +139,6 @@ with lib;
                   version = "0.0.1";
                   src = ./packages/prot-common.el;
                 })
-                (epkgs.trivialBuild {
-                  pname = "whisper-device";
-                  version = "0.1.0";
-                  src = ./packages/whisper-device.el;
-                  preferLocalBuild = true;
-                  allowSubstitutes = false;
-                })
               ];
             package = emacsPatched;
             enable = true;
@@ -170,15 +184,6 @@ with lib;
                   inherit (pkgs) fetchFromGitHub writeText;
                   inherit lib;
                   inherit (self) melpaBuild;
-                }
-              );
-              whisper-device = (
-                self.trivialBuild {
-                  pname = "whisper-device";
-                  version = "0.1.0";
-                  src = ./packages/whisper-device.el;
-                  preferLocalBuild = true;
-                  allowSubstitutes = false;
                 }
               );
             };
@@ -3520,14 +3525,7 @@ with lib;
                                 whisper--ffmpeg-input-device ":1")
                         '';
                   };
-                whisper-device = {
-                  package =
-                    epkgs:
-                    epkgs.trivialBuild {
-                      pname = "whisper-device";
-                      version = "0.0.1";
-                      src = ./packages/whisper-device.el;
-                    };
+                whisper-device = mkElispPackage ./packages/whisper-device.el {
                   enable = config.modules.speak2text.enable;
                   after = [ "whisper" ];
                   command = [ "whisper-select-audio-device" ];
