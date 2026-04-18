@@ -182,7 +182,7 @@ let
         };
 
         config = mkOption {
-          type = types.lines;
+          type = types.either types.lines types.path;
           default = "";
           description = ''
             Code to place in the <option>:config</option> section.
@@ -295,9 +295,9 @@ let
               ":init"
               config.init
             ]
-            ++ optionals (config.config != "") [
+            ++ optionals (config.config != "" && config.config != null) [
               ":config"
-              config.config
+              (if builtins.isPath config.config then builtins.readFile config.config else config.config)
             ]
             ++ optionals (config.preface != "") [
               ":preface"
