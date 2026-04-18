@@ -12,6 +12,8 @@ from parakeet_mlx import from_pretrained, DecodingConfig
 
 PORT = int(os.environ.get("PARAKEET_MLX_PORT", "5092"))
 MODEL_NAME = os.environ.get("PARAKEET_MODEL", "mlx-community/parakeet-tdt-0.6b-v3")
+LOG_DIR = os.environ.get("PARAKEET_MLX_LOG_DIR", os.path.join(tempfile.gettempdir(), "parakeet-mlx-server-audio"))
+os.makedirs(LOG_DIR, exist_ok=True)
 
 print(f"parakeet-mlx-server: Loading model {MODEL_NAME}...", file=sys.stderr, flush=True)
 model = from_pretrained(MODEL_NAME)
@@ -118,21 +120,26 @@ class ParakeetHandler(BaseHTTPRequestHandler):
                     audio_bytes = body
                     fname = "audio.wav"
 
-                # Write to temp file
+                # Write to log directory instead of temp file so audio can be inspected
                 suffix = Path(fname).suffix if fname else ".wav"
-                with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as f:
+                import datetime
+                ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+                log_path = os.path.join(LOG_DIR, f"{ts}{suffix}")
+                with open(log_path, "wb") as f:
                     f.write(audio_bytes)
-                    tmp_path = f.name
+                tmp_path = log_path
 
                 try:
                     text = transcribe_file(tmp_path)
-                finally:
-                    os.unlink(tmp_path)
+                except Exception:
+                    # Keep the file even if transcription fails
+                    raise
 
                 elapsed = time.time() - t0
                 print(
                     f"parakeet-mlx-server: {self.path} transcribed "
-                    f"{len(audio_bytes)}B audio in {elapsed:.2f}s: {text!r}",
+                    f"{len(audio_bytes)}B audio in {elapsed:.2f}s: {text!r} "
+                    f"[saved {log_path}]",
                     file=sys.stderr,
                     flush=True,
                 )
