@@ -118,6 +118,13 @@ with lib;
                   version = "0.0.1";
                   src = ./packages/prot-common.el;
                 })
+                (epkgs.trivialBuild {
+                  pname = "whisper-device";
+                  version = "0.1.0";
+                  src = ./packages/whisper-device.el;
+                  preferLocalBuild = true;
+                  allowSubstitutes = false;
+                })
                 whisper
               ];
             package = emacsPatched;
@@ -3470,6 +3477,7 @@ with lib;
                       "whisper-run"
                       "whisper-file"
                     ];
+                    after = [ "whisper" ];
                     extraPackages =
                       with pkgs;
                       [
