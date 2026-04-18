@@ -1423,7 +1423,7 @@ with lib;
                     (setq corfu-preview-current nil)
                     (setq corfu-min-width 20)
                     (setq corfu-popupinfo-delay '(1.25 . 0.5))
-                    (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+                   ;; (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
 
                     ;; Sort by input history (no need to modify `corfu-sort-function').
                     (with-eval-after-load 'savehist
@@ -1522,7 +1522,6 @@ with lib;
                      consult--source-bookmark
                      consult--source-file-register
                      consult--source-recent-file
-                     consult--source-project-recent-file
                      :preview-key '(:debounce 0.4 any))
 
                   '';
@@ -3318,7 +3317,7 @@ with lib;
                     "gptel"
 
                   ];
-                  enable = true;
+                  enable = false;
                   package =
                     epkgs:
                     (pkgs.callPackage "${packagePath}/gptel-agent.nix" {
@@ -3477,7 +3476,7 @@ with lib;
 
                             (defun my-whisper--check-model-consistency () t)
                             (advice-add 'whisper--check-model-consistency :override
-                                        #'my-whisper--check-model-consistency)
+l                                        #'my-whisper--check-model-consistency)
                         ''
                       else if s2s.enable then
                         ''
