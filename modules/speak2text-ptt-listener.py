@@ -162,7 +162,7 @@ class Recorder:
                     "-f",
                     "avfoundation",
                     "-i",
-                    ":0",
+                    os.environ.get("SPEAK2TEXT_INPUT_DEVICE", ":1"),
                     "-ar",
                     "16000",
                     "-ac",

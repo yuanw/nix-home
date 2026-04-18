@@ -3493,7 +3493,7 @@ with lib;
                           (with-eval-after-load 'whisper
                             (setq whisper-server-mode 'remote
                                   whisper-server-baseurl "http://127.0.0.1:${port}"
-                                  whisper--ffmpeg-input-device ":0")
+                                  whisper--ffmpeg-input-device ":1")
 
                             (defun my-whisper--check-model-consistency () t)
                             (advice-add 'whisper--check-model-consistency :override
@@ -3509,7 +3509,7 @@ with lib;
                                   whisper-language "en"
                                   whisper-translate nil
                                   whisper-use-threads (num-processors)
-                                  whisper--ffmpeg-input-device ":0")
+                                  whisper--ffmpeg-input-device ":1")
                             ${
                               pkgs.lib.optionalString (transcribeBin != null) ''
                                 (defun whisper-command (input-file)
@@ -3525,7 +3525,7 @@ with lib;
                                 whisper-language "en"
                                 whisper-translate nil
                                 whisper-use-threads (num-processors)
-                                whisper--ffmpeg-input-device ":0")
+                                whisper--ffmpeg-input-device ":1")
                         '';
                   };
               };
