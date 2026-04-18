@@ -3521,6 +3521,13 @@ with lib;
                         '';
                   };
                 whisper-device = {
+                  package =
+                    epkgs:
+                    epkgs.trivialBuild {
+                      pname = "prot-modeline";
+                      version = "0.0.1";
+                      src = ./packages/whisper-device.el;
+                    };
                   enable = config.modules.speak2text.enable;
                   after = [ "whisper" ];
                   command = [ "whisper-select-audio-device" ];
