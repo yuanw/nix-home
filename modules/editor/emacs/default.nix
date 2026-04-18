@@ -3460,23 +3460,24 @@ with lib;
                           port = toString s2s.parakeetServerPort;
                         in
                         ''
-                            ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
-                            ;; The server serves /inference with JSON {"text": "..."} — same format
-                            ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
-                            ;; We only advise whisper--check-model-consistency because our model
-                            ;; name isn't a whisper.cpp model and would fail validation.
-                            (with-eval-after-load 'whisper
-                              (setq whisper-server-mode 'remote
-                                    whisper-server-baseurl "http://127.0.0.1:${port}"
-                                    whisper--ffmpeg-input-device ":1")
+                          ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
+                          ;; The server serves /inference with JSON {"text": "..."} — same format
+                          ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
+                          ;; We only advise whisper--check-model-consistency because our model
+                          ;; name isn't a whisper.cpp model and would fail validation.
+                          ;;
+                          ;; Interactive audio device picker — always available, not deferred:
+                          ;; M-x whisper-select-audio-device
+                          ${builtins.readFile ./packages/whisper-device.el}
 
-                              (defun my-whisper--check-model-consistency () t)
-                              (advice-add 'whisper--check-model-consistency :override
-                                          #'my-whisper--check-model-consistency)
 
-                              ;; Interactive audio device picker from whisper-device.el
-                              ${builtins.readFile ./packages/whisper-device.el}
-                          )
+                            (setq whisper-server-mode 'remote
+                                  whisper-server-baseurl "http://127.0.0.1:${port}"
+                                  whisper--ffmpeg-input-device ":1")
+
+                            (defun my-whisper--check-model-consistency () t)
+                            (advice-add 'whisper--check-model-consistency :override
+                                        #'my-whisper--check-model-consistency)
                         ''
                       else if s2s.enable then
                         ''
