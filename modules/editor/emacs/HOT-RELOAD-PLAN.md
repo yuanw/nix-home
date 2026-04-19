@@ -6,7 +6,7 @@
 |-------|--------|-------------|
 | Phase 1 | ✅ Done | Path-aware assembly generation in `emacs-init.nix` |
 | Phase 2 | ✅ Done | Hot-reload infrastructure (`hm/reload-config`, `hm-hot-reload-mode`, `personal.el` autoload) |
-| Phase 3 | ✅ Done (meow) | `~/.emacs.d/external` symlink; meow migrated to `configs/meow.el` |
+| Phase 3 | ✅ Done (meow, prot-modeline) | `~/.emacs.d/external` symlink; packages migrated to `configs/*.el` |
 | Phase 4 | ⬜ Gradual | Migrate more packages' `config`/`init`/`preface` fields to `./configs/*.el` |
 
 ## Current Architecture
