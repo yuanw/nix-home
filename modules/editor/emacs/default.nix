@@ -1302,7 +1302,7 @@ with lib;
 
                      ;; Sort by input history (no need to modify `corfu-sort-function').
                      (with-eval-after-load 'savehist
-                       (corfu-history-mode 1)
+                       ;;(corfu-history-mode 1)
                        (add-to-list 'savehist-additional-variables 'corfu-history))
                   '';
                 };
@@ -1395,8 +1395,8 @@ with lib;
                      consult-recent-file
                      consult-xref
                      consult--source-bookmark
-                     consult--source-file-register
-                     consult--source-recent-file
+                     ;;consult--source-file-register
+                     ;;consult--source-recent-file
                      :preview-key '(:debounce 0.4 any))
 
                   '';
