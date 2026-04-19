@@ -174,10 +174,12 @@ let
         };
 
         preface = mkOption {
-          type = types.lines;
+          type = types.either types.lines types.path;
           default = "";
           description = ''
             Code to place in the <option>:preface</option> section.
+            When a path is given, the file is loaded at runtime instead of
+            being embedded, enabling hot-reload.
           '';
         };
 
@@ -190,10 +192,12 @@ let
         };
 
         extraConfig = mkOption {
-          type = types.lines;
+          type = types.either types.lines types.path;
           default = "";
           description = ''
             Additional lines to place in the use-package configuration.
+            When a path is given, the file is loaded at runtime instead of
+            being embedded, enabling hot-reload.
           '';
         };
 
@@ -218,10 +222,12 @@ let
         };
 
         init = mkOption {
-          type = types.lines;
+          type = types.either types.lines types.path;
           default = "";
           description = ''
             The entries to use for <option>:init</option>.
+            When a path is given, the file is loaded at runtime instead of
+            being embedded, enabling hot-reload.
           '';
         };
 
@@ -272,6 +278,13 @@ let
             mkNoRequire = v: optional v ":no-require t";
             mkDefer = v: if isBool v then optional v ":defer t" else [ ":defer ${toString v}" ];
             mkDemand = v: optional v ":demand t";
+
+            # When a Nix path is given, emit (hm--load-external "...") instead of
+            # embedding content.  This allows Emacs to load the file at runtime,
+            # enabling hot-reload when an external version exists in
+            # `user-emacs-directory/external/'.
+            mkElispOrLoad =
+              content: if builtins.isPath content then "(hm--load-external \"${toString content}\")" else content;
           in
           concatStringsSep "\n  " (
             [ "(use-package ${name}" ]
@@ -293,17 +306,17 @@ let
             ++ mkMode config.mode
             ++ optionals (config.init != "") [
               ":init"
-              config.init
+              (mkElispOrLoad config.init)
             ]
             ++ optionals (config.config != "" && config.config != null) [
               ":config"
-              (if builtins.isPath config.config then builtins.readFile config.config else config.config)
+              (mkElispOrLoad config.config)
             ]
             ++ optionals (config.preface != "") [
               ":preface"
-              config.preface
+              (mkElispOrLoad config.preface)
             ]
-            ++ optional (config.extraConfig != "") config.extraConfig
+            ++ optional (config.extraConfig != "") (mkElispOrLoad config.extraConfig)
           )
           + ")";
       };
@@ -411,27 +424,85 @@ let
   '';
 
   initFile = ''
-    ;;; hm-init.el --- Emacs configuration à la Home Manager -*- lexical-binding: t; -*-
-    ;;
-    ;;; Commentary:
-    ;;
-    ;; A configuration generated from a Nix based configuration by
-    ;; Home Manager.
-    ;;
-    ;;; Code:
+        ;;; hm-init.el --- Emacs configuration à la Home Manager -*- lexical-binding: t; -*-
+        ;;
+        ;;; Commentary:
+        ;;
+        ;; A configuration generated from a Nix based configuration by
+        ;; Home Manager.
+        ;;
+        ;;; Code:
 
-    ${optionalString cfg.startupTimer ''
-      (defun hm/print-startup-stats ()
-        "Prints some basic startup statistics."
-        (let ((elapsed (float-time (time-subtract after-init-time
-                                                  before-init-time))))
-          (message "Startup took %.2fs with %d GCs" elapsed gcs-done)))
-      (add-hook 'emacs-startup-hook #'hm/print-startup-stats)
-    ''}
+        ${optionalString cfg.startupTimer ''
+          (defun hm/print-startup-stats ()
+            "Prints some basic startup statistics."
+            (let ((elapsed (float-time (time-subtract after-init-time
+                                                      before-init-time))))
+              (message "Startup took %.2fs with %d GCs" elapsed gcs-done)))
+          (add-hook 'emacs-startup-hook #'hm/print-startup-stats)
+        ''}
 
-    ${cfg.prelude}
+        ;; ── Hot-reload infrastructure ──────────────────────────────────────
+        (defvar hm-external-config-files nil
+          "List of external config files loaded via hm-init.
+    Each entry is an absolute file path.  When `hm-hot-reload-mode' is
+    active, these files are watched for changes and auto-reloaded.")
 
-    ${usePackageSetup}
+        (defun hm--load-external (store-path)
+          "Load a config file, preferring external version over store version.
+    If the file basename exists in `user-emacs-directory/external/', use
+    that (hot-reloadable).  Otherwise fall back to STORE-PATH (immutable)."
+          (let* ((basename (file-name-nondirectory store-path))
+                 (ext-dir (expand-file-name "external" user-emacs-directory))
+                 (ext-path (expand-file-name basename ext-dir))
+                 (effective-path (if (and (file-directory-p ext-dir)
+                                          (file-exists-p ext-path))
+                                     ext-path
+                                   store-path)))
+            (add-to-list 'hm-external-config-files effective-path)
+            (load effective-path t)))
+
+        (defun hm/reload-config ()
+          "Reload all external config files."
+          (interactive)
+          (dolist (file hm-external-config-files)
+            (when (file-exists-p file)
+              (load file t)))
+          (message "Reloaded %d config files" (length hm-external-config-files)))
+
+        (defvar hm--file-watchers nil
+          "File-notify watch descriptors for hot-reload.")
+
+        (defun hm--watch-config-file (file)
+          "Watch FILE for changes and reload it."
+          (when (and (file-exists-p file) (fboundp 'file-notify-add-watch))
+            (push (file-notify-add-watch
+                    file '(change)
+                    (lambda (_event)
+                      (when (file-exists-p file)
+                        (load file t)
+                        (message "Hot-reloaded: %s" file))))
+                  hm--file-watchers)))
+
+        (defun hm--unwatch-config-files ()
+          "Stop watching all config files."
+          (dolist (w hm--file-watchers)
+            (file-notify-rm-watch w))
+          (setq hm--file-watchers nil))
+
+        (define-minor-mode hm-hot-reload-mode
+          "Auto-reload external config files on change."
+          :global t
+          :lighter " \U0001F525"
+          (if hm-hot-reload-mode
+              (dolist (f hm-external-config-files)
+                (hm--watch-config-file f))
+            (hm--unwatch-config-files)))
+        ;; ── End hot-reload infrastructure──────────────────────────────────
+
+        ${cfg.prelude}
+
+        ${usePackageSetup}
   ''
   + concatStringsSep "\n\n" (
     map (getAttr "assembly") (filter (getAttr "enable") (attrValues cfg.usePackage))
@@ -439,6 +510,11 @@ let
   + ''
 
     ${cfg.postlude}
+
+    ;; Load personal config if it exists — no rebuild needed
+    (let ((personal-file (expand-file-name "personal.el" user-emacs-directory)))
+      (when (file-exists-p personal-file)
+        (load personal-file t)))
 
     (provide 'hm-init)
     ;; hm-init.el ends here

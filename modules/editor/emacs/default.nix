@@ -500,92 +500,7 @@ with lib;
                 meow = {
                   enable = true;
                   command = [ "meow-global-mode" ];
-                  config = ''
-                                        (defun meow-setup ()
-                      (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
-                      (meow-motion-define-key
-                       '("j" . meow-next)
-                       '("k" . meow-prev)
-                       '("<escape>" . ignore))
-                      (meow-leader-define-key
-                       ;; Use SPC (0-9) for digit arguments.
-                       '("1" . meow-digit-argument)
-                       '("2" . meow-digit-argument)
-                       '("3" . meow-digit-argument)
-                       '("4" . meow-digit-argument)
-                       '("5" . meow-digit-argument)
-                       '("6" . meow-digit-argument)
-                       '("7" . meow-digit-argument)
-                       '("8" . meow-digit-argument)
-                       '("9" . meow-digit-argument)
-                       '("0" . meow-digit-argument)
-                       '("/" . meow-keypad-describe-key)
-                       '("?" . meow-cheatsheet))
-                      (meow-normal-define-key
-                       '("0" . meow-expand-0)
-                       '("9" . meow-expand-9)
-                       '("8" . meow-expand-8)
-                       '("7" . meow-expand-7)
-                       '("6" . meow-expand-6)
-                       '("5" . meow-expand-5)
-                       '("4" . meow-expand-4)
-                       '("3" . meow-expand-3)
-                       '("2" . meow-expand-2)
-                       '("1" . meow-expand-1)
-                       '("-" . negative-argument)
-                       '(";" . meow-reverse)
-                       '("," . meow-inner-of-thing)
-                       '("." . meow-bounds-of-thing)
-                       '("[" . meow-beginning-of-thing)
-                       '("]" . meow-end-of-thing)
-                       '("a" . meow-append)
-                       '("A" . meow-open-below)
-                       '("b" . meow-back-word)
-                       '("B" . meow-back-symbol)
-                       '("c" . meow-change)
-                       '("d" . meow-delete)
-                       '("D" . meow-backward-delete)
-                       '("e" . meow-next-word)
-                       '("E" . meow-next-symbol)
-                       '("f" . meow-find)
-                       '("g" . meow-cancel-selection)
-                       '("G" . meow-grab)
-                       '("h" . meow-left)
-                       '("H" . meow-left-expand)
-                       '("i" . meow-insert)
-                       '("I" . meow-open-above)
-                       '("j" . meow-next)
-                       '("J" . meow-next-expand)
-                       '("k" . meow-prev)
-                       '("K" . meow-prev-expand)
-                       '("l" . meow-right)
-                       '("L" . meow-right-expand)
-                       '("m" . meow-join)
-                       '("n" . meow-search)
-                       '("o" . meow-block)
-                       '("O" . meow-to-block)
-                       '("p" . meow-yank)
-                       '("q" . meow-quit)
-                       '("Q" . meow-goto-line)
-                       '("r" . meow-replace)
-                       '("R" . meow-swap-grab)
-                       '("s" . meow-kill)
-                       '("t" . meow-till)
-                       '("u" . meow-undo)
-                       '("U" . meow-undo-in-selection)
-                       '("v" . meow-visit)
-                       '("w" . meow-mark-word)
-                       '("W" . meow-mark-symbol)
-                       '("x" . meow-line)
-                       '("X" . meow-goto-line)
-                       '("y" . meow-save)
-                       '("Y" . meow-sync-grab)
-                       '("z" . meow-pop-selection)
-                       '("'" . repeat)
-                       '("<escape>" . ignore)))
-                       (meow-setup)
-                    (meow-global-mode 1)
-                  '';
+                  config = ./configs/meow.el;
                 };
                 # steal modeline from prot
                 prot-modeline = {
@@ -605,47 +520,7 @@ with lib;
                       ];
 
                     };
-                  config = ''
-                    (setq mode-line-compact nil) ; Emacs 28
-                    (setq mode-line-right-align-edge 'right-margin) ; Emacs 30
-                    (setq-default mode-line-format
-                         '("%e"
-                           prot-modeline-kbd-macro
-                           prot-modeline-narrow
-                           prot-modeline-buffer-status
-                           prot-modeline-window-dedicated-status
-                           prot-modeline-input-method
-                           "  "
-                           prot-modeline-buffer-identification
-                           "  "
-                           prot-modeline-major-mode
-                           "  "
-                           mode-line-position
-                           "  "
-                           prot-modeline-process
-                           "  "
-                           prot-modeline-vc-branch
-                           "  "
-                           prot-modeline-eglot
-                           "  "
-                           prot-modeline-flymake
-                           "  "
-                           mode-line-format-right-align ; Emacs 30
-                           prot-modeline-notmuch-indicator
-                           "  "
-                           prot-modeline-misc-info))
-                                    
-                    (with-eval-after-load 'spacious-padding
-                      (defun prot/modeline-spacious-indicators ()
-                        "Set box attribute to `'prot-modeline-indicator-button' if spacious-padding is enabled."
-                        (if (bound-and-true-p spacious-padding-mode)
-                            (set-face-attribute 'prot-modeline-indicator-button nil :box t)))
-
-                      ;; Run it at startup and then afterwards whenever
-                      ;; `spacious-padding-mode' is toggled on/off.
-                      (prot/modeline-spacious-indicators)
-                      (add-hook 'spacious-padding-mode-hook #'prot/modeline-spacious-indicators))
-                  '';
+                  config = ./configs/prot-modeline.el;
                 };
                 autorevert = {
                   enable = true;
@@ -1419,16 +1294,16 @@ with lib;
                     (corfu-scroll-margin 5)        ;; Use scroll margin
                   '';
                   config = ''
-                    (setq tab-always-indent 'complete)
-                    (setq corfu-preview-current nil)
-                    (setq corfu-min-width 20)
-                    (setq corfu-popupinfo-delay '(1.25 . 0.5))
-                   ;; (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
+                     (setq tab-always-indent 'complete)
+                     (setq corfu-preview-current nil)
+                     (setq corfu-min-width 20)
+                     (setq corfu-popupinfo-delay '(1.25 . 0.5))
+                    ;; (corfu-popupinfo-mode 1) ; shows documentation after `corfu-popupinfo-delay'
 
-                    ;; Sort by input history (no need to modify `corfu-sort-function').
-                    (with-eval-after-load 'savehist
-                      (corfu-history-mode 1)
-                      (add-to-list 'savehist-additional-variables 'corfu-history))
+                     ;; Sort by input history (no need to modify `corfu-sort-function').
+                     (with-eval-after-load 'savehist
+                       ;;(corfu-history-mode 1)
+                       (add-to-list 'savehist-additional-variables 'corfu-history))
                   '';
                 };
 
@@ -1520,8 +1395,8 @@ with lib;
                      consult-recent-file
                      consult-xref
                      consult--source-bookmark
-                     consult--source-file-register
-                     consult--source-recent-file
+                     ;;consult--source-file-register
+                     ;;consult--source-recent-file
                      :preview-key '(:debounce 0.4 any))
 
                   '';
@@ -3459,24 +3334,24 @@ with lib;
                           port = toString s2s.parakeetServerPort;
                         in
                         ''
-                          ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
-                          ;; The server serves /inference with JSON {"text": "..."} — same format
-                          ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
-                          ;; We only advise whisper--check-model-consistency because our model
-                          ;; name isn't a whisper.cpp model and would fail validation.
-                          ;;
-                          ;; Interactive audio device picker — always available, not deferred:
-                          ;; M-x whisper-select-audio-device
-                          ${builtins.readFile ./packages/whisper-device.el}
+                                                    ;; parakeet-mlx server mode: POST to HTTP server instead of CLI subprocess.
+                                                    ;; The server serves /inference with JSON {"text": "..."} — same format
+                                                    ;; whisper.cpp returns, so whisper.el's built-in remote mode works.
+                                                    ;; We only advise whisper--check-model-consistency because our model
+                                                    ;; name isn't a whisper.cpp model and would fail validation.
+                                                    ;;
+                                                    ;; Interactive audio device picker — always available, not deferred:
+                                                    ;; M-x whisper-select-audio-device
+                                                    ${builtins.readFile ./packages/whisper-device.el}
 
 
-                            (setq whisper-server-mode 'remote
-                                  whisper-server-baseurl "http://127.0.0.1:${port}"
-                                  whisper--ffmpeg-input-device ":1")
+                                                      (setq whisper-server-mode 'remote
+                                                            whisper-server-baseurl "http://127.0.0.1:${port}"
+                                                            whisper--ffmpeg-input-device ":1")
 
-                            (defun my-whisper--check-model-consistency () t)
-                            (advice-add 'whisper--check-model-consistency :override
-l                                        #'my-whisper--check-model-consistency)
+                                                      (defun my-whisper--check-model-consistency () t)
+                                                      (advice-add 'whisper--check-model-consistency :override
+                          l                                        #'my-whisper--check-model-consistency)
                         ''
                       else if s2s.enable then
                         ''
@@ -3514,6 +3389,12 @@ l                                        #'my-whisper--check-model-consistency)
           home = {
             file.".emacs.d/snippets".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
+            # Hot-reloadable external config files — symlink the configs/ directory
+            # so that Emacs can load files from ~/.emacs.d/external/ at runtime.
+            # When `hm-hot-reload-mode' is active, changes to these files are
+            # auto-reloaded without rebuilding.
+            file.".emacs.d/external".source =
+              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/configs";
             packages = with pkgs; [
               texinfoInteractive # For makeinfo command to convert .texi to EPUB
               perlPackages.ArchiveZip # Required by makeinfo for EPUB generation
