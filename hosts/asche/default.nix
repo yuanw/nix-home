@@ -1,8 +1,7 @@
-{
-  config,
-  inputs,
-  pkgs,
-  ...
+{ config
+, inputs
+, pkgs
+, ...
 }:
 
 {
@@ -84,6 +83,7 @@
       #   enable = true;
       #   enableClaudeMem = true;
     };
+    ai.enableOllama = true;
 
     secrets.agenix = {
       enable = true;
