@@ -79,12 +79,9 @@
   my.mullvad.enable = true;
 
   modules = {
-    claude-code = {
-      #   enable = true;
-      #   enableClaudeMem = true;
-    };
-    ai.enableOllama = true;
 
+    ai.enableOllama = true;
+    pi.enable = true;
     secrets.agenix = {
       enable = true;
     };
