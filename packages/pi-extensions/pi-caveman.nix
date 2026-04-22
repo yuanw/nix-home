@@ -10,7 +10,7 @@ mkPiExtension {
     owner = "jonjonrankin";
     repo = "pi-caveman";
     inherit rev;
-    hash = "sha256-04qn0p22355qx8rq1j3cpy6fzb389hx9ssngsn6av15z836f1fq1=";
+    hash = "sha256-AbvgzEC/hK2M1c9qnTpMaKzvjL9syIAz6riUIcQFFhM=";
   };
   tsPath = "extensions/caveman.ts";
 }
