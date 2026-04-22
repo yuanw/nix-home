@@ -8,8 +8,6 @@
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
    '("<escape>" . ignore))
   (meow-leader-define-key
    ;; Use SPC (0-9) for digit arguments.
