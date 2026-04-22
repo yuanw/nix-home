@@ -67,6 +67,7 @@
         pi-cursor-agent
         pi-slow-mode
         earendil-pi-review
+        pi-caveman
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;

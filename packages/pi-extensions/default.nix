@@ -52,4 +52,5 @@ in
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
   pi-tutorial = callExtension ./pi-tutorial.nix;
   earendil-pi-review = callExtension ./earendil-pi-review.nix;
+  pi-caveman = callExtension ./pi-caveman.nix;
 }
