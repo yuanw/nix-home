@@ -87,6 +87,6 @@
    '("<escape>" . ignore)))
 
 (meow-setup)
-;;;(meow-global-mode 1)
+(meow-global-mode 1)
 
 ;;; meow.el ends here
