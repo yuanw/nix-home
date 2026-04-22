@@ -74,6 +74,38 @@
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
+      models = {
+        providers = {
+          ollama = {
+            api = "openai-completions";
+            apiKey = "ollama";
+            baseUrl = "http://localhost:11434/v1";
+            models = [
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5.1:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 262144;
+                id = "kimi-k2.6:cloud";
+                input = [ "text" "image" ];
+                reasoning = true;
+              }
+            ];
+          };
+        };
+      };
     };
     secrets.agenix = {
       enable = true;
