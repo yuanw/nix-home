@@ -19,6 +19,7 @@ in
       home.packages = with pkgs; [
         gotools
         golangci-lint
+        gopls
       ];
       programs = {
         go = {
