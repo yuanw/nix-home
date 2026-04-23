@@ -504,7 +504,7 @@ with lib;
                 };
                 repeat-fu = {
                   enable = true;
-                  commands =  ["repeat-fu-mode" "repeat-fu-execute"];
+                  command =  ["repeat-fu-mode" "repeat-fu-execute"];
                   config = ''
                       (setq repeat-fu-preset 'meow)
                     '';
