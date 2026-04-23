@@ -829,7 +829,7 @@ Only difference is to compose symbols in comments as well. See
                 # steal modeline from prot
                 prot-modeline = {
                   enable = true;
-                  after = ["meow"];
+                
                   package =
                     epkgs:
                     epkgs.trivialBuild {
