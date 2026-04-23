@@ -502,6 +502,34 @@ with lib;
                   command = [ "meow-global-mode" ];
                   config = ./configs/meow.el;
                 };
+                repeat-fu = {
+                  enable = true;
+                  commands =  ["repeat-fu-mode" "repeat-fu-execute"];
+                  config = ''
+                      (setq repeat-fu-preset 'meow)
+                    '';
+                    extraConfig = ''
+
+                    :hook
+  ((meow-mode)
+   .
+   (lambda ()
+     (when (and (not (minibufferp)) (not (derived-mode-p 'special-mode)))
+       (repeat-fu-mode)
+       (define-key meow-normal-state-keymap (kbd "C-'") 'repeat-fu-execute)
+       (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute))))
+
+
+                      '';
+   # :bind
+   # ("C-." . repeat-fu-execute)
+   # :hook
+   # (after-change-major-mode
+   #  .
+   #  (lambda ()
+   #    (when (and (not (minibufferp)) (not (derived-mode-p 'special-mode)))
+   #      (repeat-fu-mode)))))
+              };            
                 # steal modeline from prot
                 prot-modeline = {
                   enable = true;

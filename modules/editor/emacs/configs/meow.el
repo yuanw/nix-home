@@ -88,5 +88,6 @@
 
 (meow-setup)
 (meow-global-mode 1)
+(setq meow-use-clipboard 't)
 
 ;;; meow.el ends here
