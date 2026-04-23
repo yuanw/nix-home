@@ -530,6 +530,7 @@ with lib;
                 # steal modeline from prot
                 prot-modeline = {
                   enable = true;
+                  after = ["meow"];
                   package =
                     epkgs:
                     epkgs.trivialBuild {
@@ -1419,7 +1420,7 @@ with lib;
                      consult-bookmark
                      consult-recent-file
                      consult-xref
-                     consult--source-bookmark
+                     ;;consult--source-bookmark
                      ;;consult--source-file-register
                      ;;consult--source-recent-file
                      :preview-key '(:debounce 0.4 any))
