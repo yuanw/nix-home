@@ -505,22 +505,19 @@ with lib;
                 repeat-fu = {
                   enable = true;
                   command =  ["repeat-fu-mode" "repeat-fu-execute"];
-                  config = ''
-                      (setq repeat-fu-preset 'meow)
+                  custom = ''
+                      (repeat-fu-preset 'meow)
                     '';
-                    extraConfig = ''
-
-                    :hook
-  ((meow-mode)
+                    hook = [
+                      ''                    
+  (meow-mode)
    .
    (lambda ()
      (when (and (not (minibufferp)) (not (derived-mode-p 'special-mode)))
        (repeat-fu-mode)
-       (define-key meow-normal-state-keymap (kbd "C-'") 'repeat-fu-execute)
-       (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute))))
-
-
-                      '';
+       (define-key meow-normal-state-keymap (kbd "'") 'repeat-fu-execute)
+       (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute)))
+     ''];
    # :bind
    # ("C-." . repeat-fu-execute)
    # :hook
