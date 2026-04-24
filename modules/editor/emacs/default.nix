@@ -798,7 +798,7 @@ Only difference is to compose symbols in comments as well. See
 
                 meow = {
                   enable = true;
-                  command = [ "meow-global-mode" ];
+                  demand = true;
                   config = ./configs/meow.el;
                 };
                 repeat-fu = {
