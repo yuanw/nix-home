@@ -61,7 +61,7 @@
                   inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
-                  inputs.mics-skills.homeManagerModules.default
+                  inputs.mics-skills.homeModules.default
                   inputs.git-ai.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
@@ -137,7 +137,7 @@
                       inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
                       inputs.direnv-instant.homeModules.direnv-instant
-                      inputs.mics-skills.homeManagerModules.default
+                      inputs.mics-skills.homeModules.default
                       inputs.git-ai.homeManagerModules.default
                       inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
