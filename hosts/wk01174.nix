@@ -68,6 +68,7 @@
         pi-slow-mode
         earendil-pi-review
         pi-caveman
+        pi-interactive-shell
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
