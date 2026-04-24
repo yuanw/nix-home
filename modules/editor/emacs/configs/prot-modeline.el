@@ -10,6 +10,20 @@
 
 ;; ── Meow indicator ─────────────────────────────────────────────────
 ;; Only configure meow faces/hooks when meow is actually available.
+
+(defun prot-modeline--meow-or-emacs ()
+  "Return a mode-line indicator for the current modal state.
+Shows the Meow state when `meow-mode' is active, otherwise shows EMACS."
+  (cond
+   ;; Meow is active in this buffer: delegate to its indicator
+   ((and (fboundp 'meow-indicator) meow-mode)
+    (meow-indicator))
+   ;; Meow is installed but not active here
+   ((fboundp 'meow-indicator)
+    (propertize " EMACS " 'face 'prot-modeline-indicator-gray-bg))
+   ;; Meow not installed at all
+   (t nil)))
+
 (with-eval-after-load 'meow
   ;; Style meow's state indicator faces to match prot-modeline's look.
   ;; Each state gets a colored background using prot-modeline indicator faces.
@@ -25,7 +39,7 @@
                       :inherit 'prot-modeline-indicator-magenta-bg)
 
   ;; Suppress meow's built-in minor mode lighters (" [N]", " [I]", etc.)
-  ;; since we display the state via `(:eval (meow-indicator))' above.
+  ;; since we display the state via `prot-modeline--meow-or-emacs'.
   (dolist (mode '(meow-normal-mode meow-insert-mode meow-motion-mode
                   meow-keypad-mode meow-beacon-mode))
     (when-let* ((entry (assq mode minor-mode-alist)))
@@ -34,7 +48,7 @@
 ;; ── Mode-line format ───────────────────────────────────────────────
 (setq-default mode-line-format
      '("%e"
-       (:eval (when (fboundp 'meow-indicator) (meow-indicator))) ; meow state (safe when meow absent)
+       (:eval (prot-modeline--meow-or-emacs)) ; meow state or EMACS fallback
        prot-modeline-kbd-macro
        prot-modeline-narrow
        prot-modeline-buffer-status

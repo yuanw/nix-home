@@ -91,5 +91,6 @@
 (meow-global-mode 1)
 (setq meow-use-clipboard 't)
 (add-to-list 'meow-mode-state-list '(nov-mode . insert))
+(add-to-list 'meow-mode-state-list '(dired-mode . insert))
 
 ;;; meow.el ends here
