@@ -107,6 +107,7 @@
           };
         };
       };
+      skills = with pkgs.claude-plugins; [ caveman humanizer emacs-skills ] ++ [ pkgs.pi-extensions.pi-interactive-shell ];
     };
     secrets.agenix = {
       enable = true;
