@@ -31,7 +31,7 @@
         target=github
       '';
     };
-    packages = with pkgs; [ ipref ];
+    packages = with pkgs; [ iperf ];
     programs = {
       password-store = {
         enable = true;
