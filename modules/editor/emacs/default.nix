@@ -4,13 +4,12 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  isDarwin,
-  hostname,
-  ...
+{ config
+, lib
+, pkgs
+, isDarwin
+, hostname
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -2321,6 +2320,10 @@ with lib;
                     ;;(add-hook 'kotlin-mode-hook #'eglot-ensure)
                     ;;(add-hook 'java-mode-hook #'eglot-ensure)
                     ;;(add-hook 'java-ts-mode-hook #'eglot-ensure)
+                    (when (executable-find "zls")
+                      (add-to-list 'eglot-server-programs '((zig-mode zig-ts-mode) . ("zls")))
+                      (add-hook 'zig-mode-hook #'eglot-ensure)
+                      (add-hook 'zig-ts-mode-hook #'eglot-ensure))
                   '';
                 };
 
@@ -2429,6 +2432,16 @@ with lib;
                   enable = cfg.lspStyle == "lsp-mode";
                   hook = [ "(dap-mode . dap-ui-mode)" ];
                 };
+                zig-mode = {
+                  enable = config.modules.dev.zig.enable;
+                  hook = [ "(zig-mode . subword-mode)" ];
+                  mode = [
+                    ''"\\.zig\'"''
+                  ];
+                };
+                zig-ts-mode = {
+                  enable = config.modules.dev.zig.enable;
+                };
                 go-mode = {
                   enable = true;
                 };
@@ -2469,7 +2482,8 @@ with lib;
                       (json-mode . json-ts-mode)
                       ;;(kotlin-mode . kotlin-ts-mode)
                       (css-mode . css-ts-mode)
-                      (python-mode . python-ts-mode)))'';
+                      (python-mode . python-ts-mode)
+                      (zig-mode . zig-ts-mode)))'';
                 };
                 tree-sitter-langs = {
                   enable = true;
