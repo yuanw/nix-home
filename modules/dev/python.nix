@@ -40,6 +40,7 @@ in
           virtualenvwrapper
           opentype-feature-freezer
           fpdf2
+          requests
           #litellm
           #tokenizers
         ]

@@ -8,9 +8,8 @@
 (defun meow-setup ()
   (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
   (meow-motion-define-key
-   '("j" . meow-next)
-   '("k" . meow-prev)
-   '("<escape>" . ignore))
+   '("<escape>" . keyboard-escape-quit)
+   )
   (meow-leader-define-key
    ;; Use SPC (0-9) for digit arguments.
    '("1" . meow-digit-argument)
@@ -89,6 +88,9 @@
    '("<escape>" . ignore)))
 
 (meow-setup)
-;;;(meow-global-mode 1)
+(meow-global-mode 1)
+(setq meow-use-clipboard 't)
+(add-to-list 'meow-mode-state-list '(nov-mode . insert))
+(add-to-list 'meow-mode-state-list '(dired-mode . insert))
 
 ;;; meow.el ends here

@@ -147,6 +147,27 @@ in
       default = { };
       description = "Custom themes to install under <configDir>/themes/.";
     };
+
+    models = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          providers = {
+            ollama = {
+              api = "openai-completions";
+              baseUrl = "http://localhost:11434/v1";
+              models = [ { id = "llama3"; } ];
+            };
+          };
+        }
+      '';
+      description = ''
+        Declarative pi model configuration. Merged into <configDir>/models.json
+        at activation time using yq, preserving existing settings and backing up
+        the previous file. Set to { } to skip model management.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -189,6 +210,15 @@ in
         // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
           PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
         };
+
+      mergetools = lib.mkIf (cfg.models != { }) {
+        "pi-models" = {
+          target = "${config.my.homeDirectory}/${cfg.configDir}/models.json";
+          format = "json";
+          force = true;
+          settings = cfg.models;
+        };
+      };
     };
   };
 }

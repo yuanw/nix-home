@@ -67,12 +67,47 @@
         pi-cursor-agent
         pi-slow-mode
         earendil-pi-review
+        pi-caveman
+        pi-interactive-shell
       ];
       extensionFiles = {
         "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
+      models = {
+        providers = {
+          ollama = {
+            api = "openai-completions";
+            apiKey = "ollama";
+            baseUrl = "http://localhost:11434/v1";
+            models = [
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5.1:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 262144;
+                id = "kimi-k2.6:cloud";
+                input = [ "text" "image" ];
+                reasoning = true;
+              }
+            ];
+          };
+        };
+      };
+      skills = with pkgs.claude-plugins; [ caveman humanizer emacs-skills ] ++ [ pkgs.pi-extensions.pi-interactive-shell ];
     };
     secrets.agenix = {
       enable = true;
