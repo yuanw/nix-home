@@ -1541,7 +1541,7 @@ with lib;
                 avy = {
                   enable = true;
                   bind = {
-                    "C-j" = "avy-goto-char-timer";
+                    "C-c j" = "avy-goto-char-timer";
                     # maybe cause issue with meow
                     #"C-f" = "avy-goto-char-in-line";
                     "M-g y" = "avy-copy-line";
@@ -1562,8 +1562,8 @@ with lib;
                   demand = true;
                   command = [ "embark-prefix-help-command" ];
                   bind = {
-                    "M-." = "embark-act";
-                    "M-," = "embark-dwim";
+                    "C-c ." = "embark-act";
+                    "C-c ," = "embark-dwim";
                     "C-h B" = "embark-bindings";
                   };
                   init = ''
@@ -1945,7 +1945,7 @@ with lib;
                   };
                 };
                 org-extra = {
-                  enable = true;
+                  enable = false;
                   after = [
                     "org"
                     "org-agenda"

@@ -24,10 +24,7 @@
    '("0" . meow-digit-argument)
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet)
-   ;; Avy jump
-   '("a" . avy-goto-char-timer)
-   ;; Embark
-   '(";" . embark-act)
+  
    )
   (meow-normal-define-key
    '("0" . meow-expand-0)
