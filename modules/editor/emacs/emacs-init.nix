@@ -23,6 +23,19 @@ let
       options = {
         enable = mkEnableOption "Emacs package ${name}";
 
+        enableUsePackage = mkOption {
+          type = types.bool;
+          default = true;
+          example = false;
+          description = ''
+            Whether to emit a use-package entry in the generated initialization
+            file.
+            </para><para>
+            It may be beneficial to disable this if you want to load and
+            configure the package in the early initialization file.
+          '';
+        };
+
         package = mkOption {
           type = types.either (types.str // { description = "name of package"; }) packageFunctionType;
           default = name;
@@ -42,7 +55,7 @@ let
         };
 
         defer = mkOption {
-          type = types.either types.bool types.ints.positive;
+          type = types.either types.bool types.numbers.positive;
           default = false;
           description = ''
             The <option>:defer</option> setting.
@@ -101,11 +114,18 @@ let
           '';
         };
 
+        interpreter = mkOption {
+          type = types.listOf types.str;
+          default = [ ];
+          description = ''
+            The entries to use for <option>:interpreter</option>.
+          '';
+        };
+
         after = mkOption {
           type = types.listOf types.str;
           default = [ ];
           description = ''
-
             The entries to use for <option>:after</option>.
           '';
         };
@@ -119,6 +139,18 @@ let
           };
           description = ''
             The entries to use for <option>:bind</option>.
+          '';
+        };
+
+        bind' = mkOption {
+          type = types.attrsOf types.str;
+          default = { };
+          example = {
+            "M-<up>" = "drag-stuff-up";
+            "M-<down>" = "drag-stuff-down";
+          };
+          description = ''
+            The entries to use for <option>:bind*</option>.
           '';
         };
 
@@ -152,8 +184,8 @@ let
           description = ''
             The entries to use for <option>:custom</option>.
           '';
-
         };
+
         customFace = mkOption {
           type = types.attrsOf types.str;
           default = { };
@@ -188,6 +220,8 @@ let
           default = "";
           description = ''
             Code to place in the <option>:config</option> section.
+            When a path is given, the file is loaded at runtime instead of
+            being embedded, enabling hot-reload.
           '';
         };
 
@@ -247,7 +281,7 @@ let
         };
       };
 
-      config = mkIf config.enable {
+      config = mkIf (config.enable && config.enableUsePackage) {
         assembly =
           let
             quoted = v: ''"${escape [ ''"'' ] v}"'';
@@ -263,8 +297,10 @@ let
             mkDefines = vs: optional (vs != [ ]) ":defines (${toString vs})";
             mkDiminish = vs: optional (vs != [ ]) ":diminish (${toString vs})";
             mkMode = map (v: ":mode ${v}");
+            mkInterpreter = map (v: ":interpreter ${v}");
             mkFunctions = vs: optional (vs != [ ]) ":functions (${toString vs})";
             mkBind = mkBindHelper "bind" "";
+            mkBind' = mkBindHelper "bind*" "";
             mkBindLocal =
               bs:
               let
@@ -283,14 +319,18 @@ let
             # embedding content.  This allows Emacs to load the file at runtime,
             # enabling hot-reload when an external version exists in
             # `user-emacs-directory/external/'.
+            # Using ${content} instead of ${toString content} preserves Nix string
+            # context, which avoids the "references store path without proper context"
+            # warning in newer Nix versions.
             mkElispOrLoad =
-              content: if builtins.isPath content then "(hm--load-external \"${toString content}\")" else content;
+              content: if builtins.isPath content then "(hm--load-external \"${content}\")" else content;
           in
           concatStringsSep "\n  " (
             [ "(use-package ${name}" ]
             ++ mkNoRequire config.noRequire
             ++ mkAfter config.after
             ++ mkBind config.bind
+            ++ mkBind' config.bind'
             ++ mkBindKeyMap config.bindKeyMap
             ++ mkBindLocal config.bindLocal
             ++ mkChords config.chords
@@ -304,6 +344,7 @@ let
             ++ mkDiminish config.diminish
             ++ mkHook config.hook
             ++ mkMode config.mode
+            ++ mkInterpreter config.interpreter
             ++ optionals (config.init != "") [
               ":init"
               (mkElispOrLoad config.init)
@@ -347,7 +388,7 @@ let
 
     (defun hm/restore-gc ()
       "Restore the frequency of garbage collection."
-      (setq gc-cons-threshold 16777216
+      (setq gc-cons-threshold (* 50 1024 1024)
             gc-cons-percentage 0.1))
 
     ;; Make GC more rare during init, while minibuffer is active, and
@@ -399,7 +440,7 @@ let
     ;; For :bind in (use-package).
     (require 'bind-key)
 
-    ;; Fixes "Symbol’s function definition is void: use-package-autoload-keymap".
+    ;; Fixes "Symbol's function definition is void: use-package-autoload-keymap".
     (autoload #'use-package-autoload-keymap "use-package-bind-key")
   ''
   + optionalString hasChords ''
@@ -505,7 +546,7 @@ let
         ${usePackageSetup}
   ''
   + concatStringsSep "\n\n" (
-    map (getAttr "assembly") (filter (getAttr "enable") (attrValues cfg.usePackage))
+    map (v: v.assembly) (filter (v: v.enable && v.enableUsePackage) (attrValues cfg.usePackage))
   )
   + ''
 
@@ -580,6 +621,8 @@ in
 
     usePackageVerbose = mkEnableOption "verbose use-package mode";
 
+    checkGeneratedConfig = mkEnableOption "try to load the generated config with emacs -batch";
+
     usePackage = mkOption {
       type = types.attrsOf usePackageType;
       default = { };
@@ -627,7 +670,7 @@ in
 
         # Collect the early initialization strings for each package.
         packageEarlyInits = map (p: p.earlyInit) (
-          filter (p: p.earlyInit != "") (builtins.attrValues cfg.usePackage)
+          filter (p: p.enable && p.earlyInit != "") (builtins.attrValues cfg.usePackage)
         );
 
       in
@@ -644,16 +687,18 @@ in
             filter (getAttr "enable") (builtins.attrValues cfg.usePackage)
           )
         );
-      in
-      [
-        (epkgs.trivialBuild {
+
+        hmEarlyInit = epkgs.trivialBuild {
           pname = "hm-early-init";
           src = pkgs.writeText "hm-early-init.el" earlyInitFile;
           version = "0.1.2";
           packageRequires = packages;
           preferLocalBuild = true;
           allowSubstitutes = false;
-        })
+        };
+      in
+      [
+        hmEarlyInit
 
         (epkgs.trivialBuild {
           pname = "hm-init";
@@ -661,6 +706,7 @@ in
           version = "0.1.2";
           packageRequires = [
             epkgs.use-package
+            hmEarlyInit
           ]
           ++ packages
           ++ optional hasBind epkgs.bind-key
@@ -668,6 +714,34 @@ in
           ++ optional hasChords epkgs.use-package-chords;
           preferLocalBuild = true;
           allowSubstitutes = false;
+          doCheck = cfg.checkGeneratedConfig;
+          checkPhase = optionalString cfg.checkGeneratedConfig ''
+            runHook preCheck
+            HOME=$(mktemp -d)
+            output=$(mktemp)
+
+            emacs -batch \
+              -f package-initialize \
+              -L . \
+              -l hm-early-init \
+              -l hm-init \
+              --eval '(message "init.el loaded successfully!")' 2>&1 | tee "$output"
+
+            if ! grep -q "init.el loaded successfully" "$output"; then
+              echo "ERROR: 'init.el loaded successfully' message not found"
+              exit 1
+            fi
+
+            if grep -q "^Error " "$output"; then
+              echo "ERROR: Found lines starting with 'Error ' in output:"
+              grep "^Error " "$output"
+              exit 1
+            fi
+
+            rm -f "$output"
+            rm -rf "$HOME"
+            runHook postCheck
+          '';
           preBuild = ''
             # Do a bit of basic formatting of the generated init file.
             emacs -Q --batch \

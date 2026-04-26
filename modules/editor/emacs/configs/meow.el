@@ -24,7 +24,17 @@
    '("0" . meow-digit-argument)
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet)
-  
+   ;; Avy jump
+   '("a j" . avy-goto-char-timer)
+   '("a k" . avy-goto-char-2)
+   '("a l" . avy-goto-line)
+   '("a w" . avy-goto-word-1)
+   '("a r" . avy-resume)
+   ;; Embark (using "e" prefix to avoid C-c . conflict with vertico-repeat)
+   '("e a" . embark-act)
+   '("e d" . embark-dwim)
+   '("e o" . embark-export-write)
+   '("e b" . embark-become)
    )
   (meow-normal-define-key
    '("0" . meow-expand-0)
@@ -89,8 +99,8 @@
    '("'" . repeat)
    '("<escape>" . ignore))
   ;; Avy: override meow-visit to use avy for jumping
-  ;;(define-key meow-normal-state-keymap (kbd "v") 'avy-goto-char-timer)
-  ;;(define-key meow-motion-state-keymap (kbd "v") 'avy-goto-char-timer)
+  (define-key meow-normal-state-keymap (kbd "v") 'avy-goto-char-timer)
+  (define-key meow-motion-state-keymap (kbd "v") 'avy-goto-char-timer)
   )
 
 (meow-setup)
