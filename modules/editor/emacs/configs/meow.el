@@ -25,11 +25,7 @@
    '("/" . meow-keypad-describe-key)
    '("?" . meow-cheatsheet)
    ;; Avy jump
-   '("a j" . avy-goto-char-timer)
-   '("a k" . avy-goto-char-2)
-   '("a l" . avy-goto-line)
-   '("a w" . avy-goto-word-1)
-   '("a r" . avy-resume)
+   '("a" . avy-goto-char-timer)
    ;; Embark
    '("." . embark-act)
    '("," . embark-dwim))
@@ -96,8 +92,9 @@
    '("'" . repeat)
    '("<escape>" . ignore))
   ;; Avy: override meow-visit to use avy for jumping
-  (define-key meow-normal-state-keymap (kbd "v") 'avy-goto-char-timer)
-  (define-key meow-motion-state-keymap (kbd "v") 'avy-goto-char-timer))
+  ;;(define-key meow-normal-state-keymap (kbd "v") 'avy-goto-char-timer)
+  ;;(define-key meow-motion-state-keymap (kbd "v") 'avy-goto-char-timer)
+  )
 
 (meow-setup)
 (meow-global-mode 1)
