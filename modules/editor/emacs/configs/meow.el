@@ -27,8 +27,8 @@
    ;; Avy jump
    '("a" . avy-goto-char-timer)
    ;; Embark
-   '("." . embark-act)
-   '("," . embark-dwim))
+   '(";" . embark-act)
+   )
   (meow-normal-define-key
    '("0" . meow-expand-0)
    '("9" . meow-expand-9)
