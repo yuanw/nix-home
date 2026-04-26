@@ -1344,7 +1344,7 @@ with lib;
 
                 #`C-c-.’ is bound to dot-mode-copy-to-last-kbd-macro, which will copy the current dot mode keyboard macro to the last-kbd-macro variable. It can then be executed via call-last-kbd-macro (normally bound to `C-x-e’), named via name-last-kbd-macro, and then inserted into your .emacs via insert-kbd-macro.
                 dot-mode = {
-                  enable = true;
+                  enable = false;
                   command = [
                     "dot-mode"
                     "dot-mode-execute"
@@ -1562,8 +1562,8 @@ with lib;
                   demand = true;
                   command = [ "embark-prefix-help-command" ];
                   bind = {
-                    "C-c ." = "embark-act";
-                    "C-c ," = "embark-dwim";
+                    "C-c ," = "embark-act";
+                    #"C-c ," = "embark-dwim";
                     "C-h B" = "embark-bindings";
                   };
                   init = ''
