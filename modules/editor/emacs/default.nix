@@ -1559,6 +1559,7 @@ with lib;
                 };
                 embark = {
                   enable = true;
+                  demand = true;
                   command = [ "embark-prefix-help-command" ];
                   bind = {
                     "M-." = "embark-act";
