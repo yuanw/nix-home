@@ -804,7 +804,7 @@ with lib;
                     epkgs.trivialBuild {
                       pname = "my-meow";
                       version = "0.0.1";
-                      src = ./configs/meow.el;
+                      src = ./packages/my-meow.el;
                       packageRequires = with epkgs; [
                         meow
                         avy

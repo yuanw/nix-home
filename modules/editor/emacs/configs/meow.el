@@ -23,7 +23,16 @@
    '("9" . meow-digit-argument)
    '("0" . meow-digit-argument)
    '("/" . meow-keypad-describe-key)
-   '("?" . meow-cheatsheet))
+   '("?" . meow-cheatsheet)
+   ;; Avy jump
+   '("a j" . avy-goto-char-timer)
+   '("a k" . avy-goto-char-2)
+   '("a l" . avy-goto-line)
+   '("a w" . avy-goto-word-1)
+   '("a r" . avy-resume)
+   ;; Embark
+   '("." . embark-act)
+   '("," . embark-dwim))
   (meow-normal-define-key
    '("0" . meow-expand-0)
    '("9" . meow-expand-9)
@@ -85,12 +94,27 @@
    '("Y" . meow-sync-grab)
    '("z" . meow-pop-selection)
    '("'" . repeat)
-   '("<escape>" . ignore)))
+   '("<escape>" . ignore))
+  ;; Avy: override meow-visit to use avy for jumping
+  (define-key meow-normal-state-keymap (kbd "v") 'avy-goto-char-timer)
+  (define-key meow-motion-state-keymap (kbd "v") 'avy-goto-char-timer))
 
 (meow-setup)
 (meow-global-mode 1)
 (setq meow-use-clipboard 't)
 (add-to-list 'meow-mode-state-list '(nov-mode . insert))
 (add-to-list 'meow-mode-state-list '(dired-mode . insert))
+
+;;; Avy configuration
+(setq avy-timeout-seconds 0.4)
+(setq avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?q ?w ?e ?r ?t ?y ?u ?i ?o ?p ?z ?x ?c ?v ?b ?n ?m))
+
+;;; Embark configuration
+(setq embark-indicators
+      '(embark-minibuffer-indicator embark-highlight-indicator))
+(with-eval-after-load 'embark
+  (setq which-key-enable-embark t)
+  (with-eval-after-load 'consult
+    (require 'embark-consult nil t)))
 
 ;;; meow.el ends here
