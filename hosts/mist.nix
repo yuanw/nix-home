@@ -68,7 +68,6 @@ in
         "racket"
         "protonvpn"
         "vlc"
-        "wispr-flow"
       ];
       masApps = {
         "Fresh Eyes" = 6480411697;
