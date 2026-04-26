@@ -805,7 +805,7 @@ with lib;
                       pname = "my-meow";
                       version = "0.0.1";
                       src = ./configs/meow.el;
-                      packageRequires = [
+                      packageRequires = with epkgs; [
                         meow
                         avy
                         embark
