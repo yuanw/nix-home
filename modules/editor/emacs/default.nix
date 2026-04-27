@@ -928,7 +928,7 @@ with lib;
                 };
                 moonbit-mode = {
                   enable = true;
-
+                  demand = true;
                 };
                 auto-save = {
                   #enable = hostname == "WK01174";
