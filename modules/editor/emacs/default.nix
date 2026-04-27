@@ -302,7 +302,6 @@ with lib;
                                     (bind-key (car entry) (cdr entry)))
                                   '(("C-'"   . my-ctrl-quote-map)
                                     ("<C-m>" . my-ctrl-m-map)
-                                    ("C-c e" . my-emacs-lisp-map)
                                     ("C-c m" . my-ctrl-c-m-map)
                                     ("C-c n" . my-ctrl-c-n-map)
                                     ("C-c t" . my-multi-term-map)
@@ -1569,10 +1568,9 @@ with lib;
                 };
                 embark = {
                   enable = true;
-                  demand = true;
                   command = [ "embark-prefix-help-command" ];
                   bind = {
-                    "C-c ," = "embark-act";
+                    "C-c e" = "embark-act";
                     #"C-c ," = "embark-dwim";
                     "C-h B" = "embark-bindings";
                   };
