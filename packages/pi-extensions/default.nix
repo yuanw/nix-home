@@ -53,4 +53,5 @@ in
   pi-tutorial = callExtension ./pi-tutorial.nix;
   earendil-pi-review = callExtension ./earendil-pi-review.nix;
   pi-caveman = callExtension ./pi-caveman.nix;
+  pi-mcp-adapter = callExtension ./pi-mcp-adapter.nix;
 }

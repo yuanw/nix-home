@@ -66,7 +66,7 @@
         pi-review
         pi-cursor-agent
         pi-slow-mode
-        earendil-pi-review
+        pi-mcp-adapter
         pi-caveman
         pi-interactive-shell
       ];
@@ -100,14 +100,24 @@
                 _launch = true;
                 contextWindow = 262144;
                 id = "kimi-k2.6:cloud";
-                input = [ "text" "image" ];
+                input = [
+                  "text"
+                  "image"
+                ];
                 reasoning = true;
               }
             ];
           };
         };
       };
-      skills = with pkgs.claude-plugins; [ caveman humanizer emacs-skills ] ++ [ pkgs.pi-extensions.pi-interactive-shell ];
+      skills =
+        with pkgs.claude-plugins;
+        [
+          caveman
+          humanizer
+          emacs-skills
+        ]
+        ++ [ pkgs.pi-extensions.pi-interactive-shell ];
     };
     secrets.agenix = {
       enable = true;

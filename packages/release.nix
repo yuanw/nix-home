@@ -121,4 +121,5 @@ rec {
   emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
+  pi-mcp-adapter = pkgs.callPackage ./pi-extensions/pi-mcp-adapter.nix { };
 }
