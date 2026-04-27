@@ -165,6 +165,12 @@ with lib;
                   inherit (self) melpaBuild;
                 }
               );
+              moonbit-mode = (
+                pkgs.callPackage "${packagePath}/moonbit-mode.nix" {
+                  inherit (pkgs) fetchFromGitHub;
+                  inherit (self) trivialBuild;
+                }
+              );
             };
             init = {
               enable = true;
@@ -919,6 +925,10 @@ with lib;
                   extraPackages = [
                     pkgs.stable.hurl
                   ];
+                };
+                moonbit-mode = {
+                  enable = true;
+
                 };
                 auto-save = {
                   #enable = hostname == "WK01174";
