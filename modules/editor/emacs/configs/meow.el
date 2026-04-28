@@ -98,6 +98,25 @@
 (add-to-list 'meow-mode-state-list '(nov-mode . insert))
 (add-to-list 'meow-mode-state-list '(dired-mode . insert))
 
+(defvar my-meow-off-modes
+  '(vterm-mode term-mode shell-mode eshell-mode comint-mode dired-mode)
+  "Major mode symbols: if the buffer `major-mode' derives from one of them,
+`my-meow-off' turns off `meow-mode'.  Add modes with \\='(add-to-list \\='my-meow-off-modes \\='some-mode).")
+
+(defun my-meow-off ()
+  "Disable Meow in buffers where the major mode should use plain Emacs keys.
+Runs from `after-change-major-mode-hook' with late priority so it wins over
+`meow-global-mode', which re-enables `meow-mode' after major-mode hooks."
+  (unless (minibufferp)
+    (let ((modes my-meow-off-modes))
+      (while modes
+        (when (derived-mode-p (car modes))
+          (meow-mode -1)
+          (setq modes nil))
+        (setq modes (cdr modes))))))
+
+(add-hook 'after-change-major-mode-hook #'my-meow-off 100)
+
 ;;; Avy configuration
 (setq avy-timeout-seconds 0.4)
 (setq avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l ?q ?w ?e ?r ?t ?y ?u ?i ?o ?p ?z ?x ?c ?v ?b ?n ?m))
