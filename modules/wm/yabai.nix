@@ -3,11 +3,10 @@
 # this module aims to encapsulate all configurations
 # to have a functional tiling window manager environment on MacOS
 # yabai/skhd
-{
-  config,
-  lib,
-  pkgs,
-  ...
+{ config
+, lib
+, pkgs
+, ...
 }:
 
 with lib;
@@ -169,7 +168,7 @@ in
         enable = cfg.enableJankyborders;
         width = 6.0;
         hidpi = true;
-          active_color = "0xff7793d1";
+        active_color = "0xff7793d1";
         inactive_color = "0xff5e6798";
       };
 
