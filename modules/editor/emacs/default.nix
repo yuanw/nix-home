@@ -4,13 +4,12 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/editors/emacs.nix
 # and adamcstephens emacs module
 # https://github.com/adamcstephens/dotfiles/blob/34f28fc71cad6ffbf463eee00730f75ee39c1b4c/apps/emacs/default.nix
-{
-  config,
-  lib,
-  pkgs,
-  isDarwin,
-  hostname,
-  ...
+{ config
+, lib
+, pkgs
+, isDarwin
+, hostname
+, ...
 }:
 let
   cfg = config.modules.editors.emacs;
@@ -2392,7 +2391,7 @@ with lib;
                   '';
                 };
                 pdf-tools = {
-                  # enable = true;
+                  enable = true;
                   custom = ''
                     (pdf-tools-handle-upgrades nil)
                   '';
