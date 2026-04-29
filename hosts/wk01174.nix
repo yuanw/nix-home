@@ -42,7 +42,7 @@
     [
       mouseless_preview
       betterdisplay
-      #ungoogled-chromium
+      ungoogled-chromium
     ]
     ++ [ pkgs.vibeproxy ];
   modules = {
