@@ -2426,9 +2426,13 @@ with lib;
 
                     (defun my/nixfmt-buffer ()
                       "Format current Nix buffer with nixfmt to match treefmt.nix."
-                      (when (and (eq major-mode 'nix-mode) (executable-find "nixfmt"))
+                      (when (eq major-mode 'nix-mode)
                         (let ((p (point)))
-                          (call-process-region (point-min) (point-max) "nixfmt" t t nil)
+                          (call-process-region
+                           (point-min)
+                           (point-max)
+                           "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
+                           t t nil)
                           (goto-char p))))
                   '';
                 };
