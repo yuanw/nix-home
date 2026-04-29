@@ -46,6 +46,7 @@
     ]
     ++ [ pkgs.vibeproxy ];
   modules = {
+    browsers.nixCasksChromiumWrap.enable = true;
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;

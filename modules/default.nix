@@ -51,6 +51,7 @@
     ];
     darwin.imports = [
       ./brew.nix
+      ./browsers/nix-casks-chromium-wrap.nix
       ./health.nix
       ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
