@@ -42,6 +42,7 @@
     [
       mouseless_preview
       betterdisplay
+      #ungoogled-chromium
     ]
     ++ [ pkgs.vibeproxy ];
   modules = {
@@ -134,11 +135,8 @@
         "karabiner-elements"
         "slack"
         "sloth"
-        "ungoogled-chromium"
         "viscosity"
-        #"librewolf"
         "firefox"
-        "wispr-flow"
       ];
       brews = [
         "redis"
