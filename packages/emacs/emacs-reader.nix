@@ -7,15 +7,15 @@
 }:
 
 melpaBuild {
-  version = "0.3.0-unstable-2025-07-28";
+  version = "0.3.0";
   pname = "reader";
 
   src = fetchFromGitea {
     domain = "codeberg.org";
     owner = "MonadicSheep";
     repo = "emacs-reader";
-    rev = "9824fc91eb51bec0edb8c3634a74d73226d26525";
-    sha256 = "sha256-84v8NzAjH0djD98RKElzy3dIkSSh1c3OyjrHXR8cQrY=";
+    rev = "0.3.0";
+    sha256 = "sha256-BpuWWGt46BVgQZPHzeLEbzT+ooR4v29R+1Lv0K55kK8=";
   };
 
   nativeCheckInputs = [
