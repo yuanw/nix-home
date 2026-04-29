@@ -2147,7 +2147,7 @@ with lib;
                   enable = true;
                   package =
                     epkgs:
-                    (pkgs.callPackage "{packagePath}/emacs-reader.nix" {
+                    (pkgs.callPackage "${packagePath}/emacs-reader.nix" {
                       inherit (epkgs) melpaBuild;
                     });
                 };
