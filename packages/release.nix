@@ -24,7 +24,13 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
   emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
-    inherit (pkgs) lib stdenv fetchFromGitea mupdf-headless pkg-config;
+    inherit (pkgs)
+      lib
+      stdenv
+      fetchFromGitea
+      mupdf-headless
+      pkg-config
+      ;
     melpaBuild = pkgs.emacs.pkgs.melpaBuild;
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
