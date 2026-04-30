@@ -2145,10 +2145,10 @@ with lib;
 
                 };
                 reader = {
-                  # enable = true;
+                  enable = true;
                   package =
                     epkgs:
-                    (pkgs.callPackage ./packages/emacs-reader.nix {
+                    (pkgs.callPackage "${packagePath}/emacs-reader.nix" {
                       inherit (epkgs) melpaBuild;
                     });
                 };
@@ -2197,7 +2197,7 @@ with lib;
                 };
 
                 org-pdftools = {
-                  enable = true;
+                  enable = false;
                   hook = [
                     "(org-mode . org-pdftools-setup-link)"
                   ];
@@ -2392,7 +2392,7 @@ with lib;
                   '';
                 };
                 pdf-tools = {
-                  # enable = true;
+                  enable = false;
                   custom = ''
                     (pdf-tools-handle-upgrades nil)
                   '';
@@ -2421,7 +2421,7 @@ with lib;
                   hook = [
                     "(nix-mode . subword-mode) "
                   ];
-                  config = "(setq nix-indent-function 'nix-indent-line) ";
+
                 };
                 thrift-mode = {
                   enable = true;

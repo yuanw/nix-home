@@ -1,44 +1,91 @@
 {
+  lib,
+  stdenv,
   melpaBuild,
-  fetchFromGitHub,
-
-  writableTmpDirAsHomeHook,
-  mupdf,
-  writeText,
+  fetchFromGitea,
+  mupdf-headless,
+  pkg-config,
   ...
 }:
 
-melpaBuild {
-  version = "0.3.0-unstable-2025-07-28";
-  pname = "reader";
+let
+  version = "0-unstable-2025-07-28";
 
-  src = fetchFromGitHub {
-    owner = "divyaranjan1905";
+  libName = "render-core${stdenv.hostPlatform.extensions.sharedLibrary}";
+
+  src = fetchFromGitea {
+    domain = "codeberg.org";
+    owner = "MonadicSheep";
     repo = "emacs-reader";
-    rev = "ae547d87c7a03eebc8fc00a820a85f8b64f8dfad";
-    # sha256 = lib.fakeSha256;
-    sha256 = "sha256-jvvJu/7lXZ2weHSEtQkJMNqGOkHOwDjxcfPzmSHBZEU=";
-
+    rev = "9824fc91eb51bec0edb8c3634a74d73226d26525";
+    hash = "sha256-84v8NzAjH0djD98RKElzy3dIkSSh1c3OyjrHXR8cQrY=";
   };
 
-  nativeCheckInputs = [
-    # Executables
-    mupdf
-    writableTmpDirAsHomeHook
-  ];
-  dontConfigure = true;
-  dontBuild = true;
+  render-core = stdenv.mkDerivation {
+    inherit version src;
+    pname = "render-core";
 
-  installPhase = ''
-    mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
-    cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
+    strictDeps = true;
+
+    buildFlags = [
+      "CC=cc"
+      "USE_PKGCONFIG=yes"
+    ];
+
+    nativeBuildInputs = [ pkg-config ];
+
+    buildInputs = [ mupdf-headless ];
+
+    # Darwin: upstream disables pkg-config and expects Homebrew MuPDF; Nix has mupdf via pkg-config.
+    # Also, HAVE_NIX=yes runs before the Darwin branch and forces USE_PKGCONFIG=no, which then
+    # incorrectly selects the Homebrew MuPDF branch — skip that assignment on Darwin.
+    postPatch = lib.optionalString stdenv.isDarwin ''
+            substituteInPlace Makefile \
+              --replace-fail 'else ifeq ($(HAVE_NIX),yes)
+        $(info Nix detected: skipping pkg-config checks.)
+        USE_PKGCONFIG := no' 'else ifeq ($(HAVE_NIX),yes)
+      ifneq ($(OS_NAME),Darwin)
+        $(info Nix detected: skipping pkg-config checks.)
+        USE_PKGCONFIG := no
+      endif'
+            substituteInPlace Makefile \
+              --replace-fail 'else ifeq ($(OS_NAME),Darwin)
+        $(info macOS detected: skipping pkg-config and using Homebrew for MuPDF paths.)
+        USE_PKGCONFIG := no' 'else ifeq ($(OS_NAME),Darwin)
+        $(info macOS (Nix stdenv): use pkg-config for MuPDF)
+        USE_PKGCONFIG := yes'
+    '';
+
+    # Only build the shared library; skip autoloads generation and byte-compilation
+    buildPhase = ''
+      runHook preBuild
+      make ${libName} $buildFlags
+      runHook postBuild
+    '';
+
+    installPhase = ''
+      runHook preInstall
+
+      install -Dm444 -t $out/lib/ ${libName}
+
+      runHook postInstall
+    '';
+  };
+
+in
+melpaBuild {
+  pname = "reader";
+
+  inherit src version;
+
+  files = ''
+    (:defaults "${lib.getLib render-core}/lib/render-core.*")
   '';
 
-  recipe = writeText "recipe" ''
-    (reader
-
-    :files ("*.el", "render")
-
-  '';
-
+  meta = {
+    homepage = "https://codeberg.org/MonadicSheep/emacs-reader";
+    description = "An all-in-one document reader for all formats in Emacs, backed by MuPDF";
+    license = lib.licenses.gpl3Plus;
+    maintainers = [ ];
+  };
 }

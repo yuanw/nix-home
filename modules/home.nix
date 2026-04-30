@@ -11,7 +11,7 @@ hm@{ pkgs, ... }:
   home.homeDirectory = config.my.homeDirectory;
   # https://github.com/nix-community/home-manager/blob/c1e671036224089937e111e32ea899f59181c383/modules/misc/version.nix#L14
 
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
   home.packages =
     (import ./packages.nix { inherit pkgs; })
     ++ lib.optionals pkgs.stdenvNoCC.isDarwin (import ./macos_packages.nix { inherit pkgs; })

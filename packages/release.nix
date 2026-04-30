@@ -25,14 +25,14 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
   emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs)
+      lib
+      stdenv
       fetchFromGitea
-      writableTmpDirAsHomeHook
-      mupdf
-      writeText
+      mupdf-headless
+      pkg-config
       ;
-
+    melpaBuild = pkgs.emacs.pkgs.melpaBuild;
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
     trivialBuild = pkgs.stdenv.mkDerivation;
