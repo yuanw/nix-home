@@ -8,7 +8,7 @@
 
 melpaBuild {
   pname = "shell-maker";
-  version = "0.89.2-unstable-2026-03-30";
+  version = "0.90.1-unstable-2026-03-30";
 
   src = fetchFromGitHub {
     owner = "xenodium";
