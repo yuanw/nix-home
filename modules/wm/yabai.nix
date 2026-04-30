@@ -169,7 +169,7 @@ in
         enable = cfg.enableJankyborders;
         width = 6.0;
         hidpi = true;
-          active_color = "0xff7793d1";
+        active_color = "0xff7793d1";
         inactive_color = "0xff5e6798";
       };
 
