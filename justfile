@@ -21,7 +21,7 @@ nix-update:
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
     @nix-update -f ./packages/release.nix chroma-mcp --src-only
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
-    @nix-update -f ./packages/release.nix pi-acp --src-only
+    @nix-update -f ./packages/release.nix pi-acp --src-only --version=branch --override-filename ./packages/pi-acp.nix
     @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch --override-filename ./packages/claude-plugins/claude-mem.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
     @nix-update -f ./packages/release.nix cozempic --src-only
@@ -36,7 +36,7 @@ nix-update:
     @nix-update -f ./packages/release.nix magit-ai --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
-    @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch
+    @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch --override-filename ./packages/emacs/shell-maker.nix
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
     @nix-update -f ./packages/release.nix vibeproxy --src-only
