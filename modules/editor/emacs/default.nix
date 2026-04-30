@@ -1418,7 +1418,7 @@ with lib;
                   enable = true;
                   demand = true;
                   config = ''
-                    (setq completion-styles '( basic substring orderless))
+                    (setq completion-styles '( flex basic substring orderless))
                     (setq read-file-name-completion-ignore-case t)
                     (setq completion-category-overrides
                      '((file (styles basic partial-completion))))
