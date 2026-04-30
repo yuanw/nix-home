@@ -35,11 +35,11 @@ let
     buildInputs = [ mupdf-headless ];
 
     # Only build the shared library; skip autoloads generation and byte-compilation
-    # buildPhase = ''
-    #   runHook preBuild
-    #   make render-core.so $buildFlags
-    #   runHook postBuild
-    # '';
+    buildPhase = ''
+      runHook preBuild
+      make render-core.so $buildFlags
+      runHook postBuild
+    '';
 
     installPhase = ''
       runHook preInstall
