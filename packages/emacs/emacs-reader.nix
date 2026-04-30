@@ -8,14 +8,14 @@
 }:
 
 let
-  version = "0.3.0";
+  version = "0-unstable-2025-07-28";
 
   src = fetchFromGitea {
     domain = "codeberg.org";
     owner = "MonadicSheep";
     repo = "emacs-reader";
-    rev = "0.3.0";
-    hash = "sha256-BpuWWGt46BVgQZPHzeLEbzT+ooR4v29R+1Lv0K55kK8=";
+    rev = "9824fc91eb51bec0edb8c3634a74d73226d26525";
+    hash = "sha256-84v8NzAjH0djD98RKElzy3dIkSSh1c3OyjrHXR8cQrY=";
   };
 
   render-core = stdenv.mkDerivation {
@@ -32,6 +32,13 @@ let
     nativeBuildInputs = [ pkg-config ];
 
     buildInputs = [ mupdf-headless ];
+
+    # Only build the shared library; skip autoloads generation and byte-compilation
+    buildPhase = ''
+      runHook preBuild
+      make render-core.so $buildFlags
+      runHook postBuild
+    '';
 
     installPhase = ''
       runHook preInstall
