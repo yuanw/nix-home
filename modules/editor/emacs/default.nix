@@ -2419,22 +2419,8 @@ with lib;
                   enable = true;
                   hook = [
                     "(nix-mode . subword-mode) "
-                    "(nix-mode . (lambda () (add-hook 'before-save-hook #'my/nixfmt-buffer nil t)))"
                   ];
-                  config = ''
-                    (setq nix-indent-function 'nix-indent-line)
 
-                    (defun my/nixfmt-buffer ()
-                      "Format current Nix buffer with nixfmt to match treefmt.nix."
-                      (when (eq major-mode 'nix-mode)
-                        (let ((p (point)))
-                          (call-process-region
-                           (point-min)
-                           (point-max)
-                           "${pkgs.nixfmt}/bin/nixfmt"
-                           t t nil)
-                          (goto-char p))))
-                  '';
                 };
                 thrift-mode = {
                   enable = true;
