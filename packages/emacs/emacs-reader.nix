@@ -1,41 +1,61 @@
-{ melpaBuild
+{ lib
+, stdenv
+, melpaBuild
 , fetchFromGitea
-, writableTmpDirAsHomeHook
-, mupdf
-, writeText
+, mupdf-headless
+, pkg-config
 , ...
 }:
 
-melpaBuild {
+let
   version = "0.3.0";
-  pname = "reader";
 
   src = fetchFromGitea {
     domain = "codeberg.org";
     owner = "MonadicSheep";
     repo = "emacs-reader";
     rev = "0.3.0";
-    sha256 = "sha256-BpuWWGt46BVgQZPHzeLEbzT+ooR4v29R+1Lv0K55kK8=";
+    hash = "sha256-BpuWWGt46BVgQZPHzeLEbzT+ooR4v29R+1Lv0K55kK8=";
   };
 
-  nativeCheckInputs = [
-    # Executables
-    mupdf
-    writableTmpDirAsHomeHook
-  ];
-  dontConfigure = true;
-  dontBuild = true;
+  render-core = stdenv.mkDerivation {
+    inherit version src;
+    pname = "render-core";
 
-  installPhase = ''
-    mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
-    cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
+    strictDeps = true;
+
+    buildFlags = [
+      "CC=cc"
+      "USE_PKGCONFIG=yes"
+    ];
+
+    nativeBuildInputs = [ pkg-config ];
+
+    buildInputs = [ mupdf-headless ];
+
+    installPhase = ''
+      runHook preInstall
+
+      install -Dm444 -t $out/lib/ render-core${stdenv.hostPlatform.extensions.sharedLibrary}
+
+      runHook postInstall
+    '';
+  };
+
+in
+melpaBuild {
+  pname = "reader";
+
+  inherit src version;
+
+  files = ''
+    (:defaults "${lib.getLib render-core}/lib/render-core.*")
   '';
 
-  recipe = writeText "recipe" ''
-    (reader
-
-    :files ("*.el", "render")
-
-  '';
-
+  meta = {
+    homepage = "https://codeberg.org/MonadicSheep/emacs-reader";
+    description = "An all-in-one document reader for all formats in Emacs, backed by MuPDF";
+    license = lib.licenses.gpl3Plus;
+    maintainers = [ ];
+  };
 }

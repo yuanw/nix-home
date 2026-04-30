@@ -1,6 +1,5 @@
-{
-  pkgs ? import <nixpkgs> { },
-  ...
+{ pkgs ? import <nixpkgs> { }
+, ...
 }:
 rec {
   sketchybar-cpu-helper = pkgs.callPackage ./sketchybar-cpu-helper { };
@@ -25,14 +24,8 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
   emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs)
-      fetchFromGitea
-      writableTmpDirAsHomeHook
-      mupdf
-      writeText
-      ;
-
+    inherit (pkgs) lib stdenv fetchFromGitea mupdf-headless pkg-config;
+    melpaBuild = pkgs.emacs.pkgs.melpaBuild;
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
     trivialBuild = pkgs.stdenv.mkDerivation;
