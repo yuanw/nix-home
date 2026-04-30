@@ -1,10 +1,11 @@
-{ lib
-, stdenv
-, melpaBuild
-, fetchFromGitea
-, mupdf-headless
-, pkg-config
-, ...
+{
+  lib,
+  stdenv,
+  melpaBuild,
+  fetchFromGitea,
+  mupdf-headless,
+  pkg-config,
+  ...
 }:
 
 let

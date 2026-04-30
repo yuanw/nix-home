@@ -1,5 +1,6 @@
-{ pkgs ? import <nixpkgs> { }
-, ...
+{
+  pkgs ? import <nixpkgs> { },
+  ...
 }:
 rec {
   sketchybar-cpu-helper = pkgs.callPackage ./sketchybar-cpu-helper { };
