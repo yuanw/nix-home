@@ -14,7 +14,7 @@ melpaBuild {
     owner = "xenodium";
     repo = "shell-maker";
     rev = "6377cbdb49248d670170f1c8dbe045648063583e";
-    sha256 = "sha256-KeC3NN0wR3yxwekuLxwb9EsRQZoIcS1EK89yL/LGUWw=";
+    hash = "sha256-KeC3NN0wR3yxwekuLxwb9EsRQZoIcS1EK89yL/LGUWw=";
   };
 
   packageRequires = [ ];
