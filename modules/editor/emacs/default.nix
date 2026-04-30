@@ -2431,7 +2431,7 @@ with lib;
                           (call-process-region
                            (point-min)
                            (point-max)
-                           "${pkgs.nixfmt-rfc-style}/bin/nixfmt"
+                           "${pkgs.nixfmt}/bin/nixfmt"
                            t t nil)
                           (goto-char p))))
                   '';
