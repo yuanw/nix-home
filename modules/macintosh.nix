@@ -66,6 +66,9 @@ in
       AppleShowAllExtensions = true;
       _FXShowPosixPathInTitle = true;
       FXEnableExtensionChangeWarning = false;
+      FXDefaultSearchScope = "SCcf"; # search current folder, not iCloud
+      FXPreferredViewStyle = "Nlsv";
+      ShowPathbar = true;
     };
 
     #am I sure about want to open an app downloaded from the internet
@@ -76,7 +79,13 @@ in
     #  TrackpadThreeFingerDrag = true;
     #};
 
-    NSGlobalDomain._HIHideMenuBar = true;
+    NSGlobalDomain = {
+      _HIHideMenuBar = true;
+      # Don't save to iCloud by default
+      NSDocumentSaveNewDocumentsToCloud = false;
+      # Disable auto-correct / type-to-search phoning home
+      NSAutomaticSpellingCorrectionEnabled = false;
+    };
     #NSGlobalDomain."com.apple.mouse.tapBehavior" = null;
   };
   system.keyboard = {
