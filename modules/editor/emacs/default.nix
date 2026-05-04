@@ -2133,7 +2133,6 @@ with lib;
                 };
 
                 nov = {
-                  enable = true;
                   mode = [
                     ''("\\.epub\\'" . nov-mode)''
                   ];

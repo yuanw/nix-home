@@ -95,8 +95,7 @@
 (meow-setup)
 (meow-global-mode 1)
 (setq meow-use-clipboard 't)
-(add-to-list 'meow-mode-state-list '(nov-mode . insert))
-(add-to-list 'meow-mode-state-list '(dired-mode . insert))
+
 
 (defvar my-meow-off-modes
   '(vterm-mode term-mode shell-mode eshell-mode comint-mode dired-mode)
