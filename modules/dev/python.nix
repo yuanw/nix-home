@@ -41,6 +41,7 @@ in
           opentype-feature-freezer
           fpdf2
           requests
+          uv
           #litellm
           #tokenizers
         ]
