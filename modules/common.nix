@@ -130,6 +130,16 @@
               hash = "sha256-Otds9VFEgDvlOhSj+tWL/34/T1Q9tWU3BNbfCrxBiy4=";
             };
           });
+
+          # buildPythonPackage maps `doCheck` → underlying `doInstallCheck`; overrideAttrs on
+          # `doCheck` does not skip pytest. Use overridePythonAttrs (all hosts; mcp-atlassian + HM MCP).
+          python313Packages = _prev.python313Packages.overrideScope (
+            _pyfinal: pyprev: {
+              fastmcp = pyprev.fastmcp.overridePythonAttrs (_: {
+                doCheck = false;
+              });
+            }
+          );
           #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
 
           # https://nixpk.gs/pr-tracker.html?pr=263500
