@@ -98,7 +98,7 @@
 
 
 (defvar my-meow-off-modes
-  '(vterm-mode term-mode shell-mode eshell-mode comint-mode dired-mode)
+  '(vterm-mode term-mode shell-mode eshell-mode comint-mode dired-mode reader-mode reader-outline-mode)
   "Major mode symbols: if the buffer `major-mode' derives from one of them,
 `my-meow-off' turns off `meow-mode'.  Add modes with \\='(add-to-list \\='my-meow-off-modes \\='some-mode).")
 
