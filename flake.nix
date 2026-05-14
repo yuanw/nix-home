@@ -82,6 +82,11 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
       inputs.flake-parts.follows = "flake-parts";
     };
+
+    preservation = {
+      url = "github:nix-community/preservation";
+    };
+    dgx-spark.url = "github:graham33/nixos-dgx-spark";
   };
 
   outputs =
