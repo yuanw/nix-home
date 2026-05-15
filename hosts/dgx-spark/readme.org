@@ -30,7 +30,7 @@ drawn from the [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 
 
 | Feature                | impermanence                       | preservation                      |
 |------------------------+------------------------------------+-----------------------------------|
-| Mechanism              | Bash activation scripts + helpers  | Static systemd tmpfiles.d + mount |
+| Mechanism              | Bash activation scripts + helpers | Static systemd tmpfiles.d + mount |
 | initrd-less systems    | Not supported                      | Supported (but we use systemd initrd) |
 | Interpreter-less boot  | No                                 | Yes                               |
 | Per-mount options      | No (=hideMounts= global only)      | Yes (=commonMountOptions= per-level) |
@@ -68,6 +68,81 @@ drawn from the [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 
 To add more persisted directories, edit =preservation.preserveAt."/persistent"=
 in =configuration.nix=.
 
+* Networking
+
+The DGX Spark is a headless server, so we use =systemd-networkd= instead of
+NetworkManager. This provides predictable, declarative wired networking without
+requiring a desktop session.
+
+All Ethernet interfaces (=en**=, =eth*=) get DHCP automatically. The interface
+is marked as =RequiredForOnline= so the boot waits for a link before starting
+services like SSH.
+
+* SSH Access
+
+** How SSH works with impermanence
+
+Because the root filesystem is tmpfs, SSH host keys would be regenerated every
+boot. We avoid this by:
+
+1. Configuring =services.openssh.hostKeys= to generate keys directly into
+   =/persistent/etc/ssh/=
+2. Using preservation to symlink =/etc/ssh/ssh_host_*_key= → =/persistent/etc/ssh/ssh_host_*_key=
+
+On first boot, =sshd= generates the keys into =/persistent/etc/ssh/=, and the
+preservation symlinks point to them. On subsequent boots, the existing keys are
+reused.
+
+** Connecting
+
+The =yuanw= user has password login disabled — authentication is SSH key only
+(=PasswordAuthentication = false=). Your public key is pre-configured:
+
+#+begin_src
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca
+#+end_src
+
+#+begin_src shell
+ssh yuanw@dgx-spark
+# or by IP:
+ssh yuanw@<ip-address>
+#+end_src
+
+** Finding the IP address
+
+If you don't know the DGX Spark's IP:
+
+- Check your router's DHCP client list
+- Use =nixos-fractal= or =arp-scan= on the same subnet
+- Connect a monitor and keyboard for the first boot to get the IP from the console
+
+** Setting a password (optional)
+
+The account starts with a locked password (SSH keys only). To add a password
+for console login:
+
+#+begin_src shell
+# On the DGX Spark console or via SSH:
+passwd yuanw
+#+end_src
+
+To generate a hashed password for the config instead:
+
+#+begin_src shell
+mkpasswd -m sha-512
+#+end_src
+
+Then set =users.users.yuanw.hashedPassword= in =configuration.nix=.
+
+** Troubleshooting SSH
+
+| Symptom                          | Cause                                    | Fix                                              |
+|----------------------------------+------------------------------------------+--------------------------------------------------|
+| =Connection refused=             =sshd= not running or firewall blocking  | Check =systemctl status sshd=, verify port 22   |
+| =Host key changed= warning       Keys regenerated (shouldn't happen)       | Remove old key: =ssh-keygen -R dgx-spark=       |
+| =Permission denied (publickey)=  Key not in authorized_keys                | Verify =~/.ssh/authorized_keys= on the host      |
+| Keys regenerated every boot       =/persistent= not mounted or symlinks broken | Check =ls -la /etc/ssh= and =mount \| grep persistent= |
+
 * DGX Spark Hardware Module
 
 The =hardware.dgx-spark= module (from =nixos-dgx-spark=) enables:
@@ -90,7 +165,8 @@ The =hardware.dgx-spark= module (from =nixos-dgx-spark=) enables:
 ** Option A: USB image
 
 #+begin_src shell
-nix build .#usb-image  # from nixos-dgx-spark repo
+# Build the USB image from the nixos-dgx-spark repo
+nix build github:graham33/nixos-dgx-spark#usb-image
 sudo dd if=result/iso/*.iso of=/dev/your_usb bs=1M status=progress
 #+end_src
 
@@ -114,13 +190,17 @@ nix run github:nix-community/nixos-anywhere -- \
   --flake .#dgx-spark --vm-test
 #+end_src
 
-** Post-install: initial population
+** Post-install: first boot checklist
 
-On first boot, =/persistent= will be empty. The system will create needed
-directories automatically via tmpfiles.d, but you'll need to:
+On first boot, =/persistent= will be empty. The system handles most things
+automatically:
 
-1. Set your user password: =passwd yuanw=
-2. SSH host keys will be generated on first boot and persisted via symlinks
+- [x] Directories created via systemd-tmpfiles (preservation module)
+- [x] SSH host keys generated into =/persistent/etc/ssh/= and symlinked
+- [x] =machine-id= symlinked from =/persistent/etc/machine-id=
+- [ ] *Set your user password* (optional, SSH keys already work): =passwd yuanw=
+- [ ] *Verify SSH access*: =ssh yuanw@dgx-spark=
+- [ ] *Check GPU*: =nvidia-smi= or visit =http://dgx-spark:11000= (DGX Dashboard)
 
 * Common Operations
 
@@ -130,27 +210,49 @@ directories automatically via tmpfiles.d, but you'll need to:
 nix build .#dgx-spark
 #+end_src
 
-** Deploy (if already installed)
+** Deploy remotely
 
 #+begin_src shell
 nixos-rebuild switch --flake .#dgx-spark --target-host root@dgx-spark
-# or locally:
-nixos-rebuild switch --flake .#dgx-spark
+# or by IP:
+nixos-rebuild switch --flake .#dgx-spark --target-host root@<ip>
 #+end_src
 
 ** Inspect what's persisted
 
 #+begin_src shell
 ls /persistent/
+# etc/ssh/        — SSH host keys
+# home/yuanw/     — user state (bind-mounts from preservation)
+# var/log/        — system logs
+# var/lib/nixos/  — NixOS uid/gid state
+# var/lib/podman/ — container storage
 #+end_src
 
-** Clean persistent state (factory reset)
+** Factory reset (destroy all persisted state)
 
 #+begin_src shell
 # WARNING: destroys all persisted state
 rm -rf /persistent/*
 reboot
+# After reboot: SSH keys regenerate, machine-id regenerates,
+# all user data is gone.
 #+end_src
+
+** Add a new persisted directory
+
+Edit =configuration.nix= and add to the =preservation.preserveAt."/persistent"= block:
+
+#+begin_src nix
+# Example: persist Hugging Face model cache
+preservation.preserveAt."/persistent" = {
+  users.yuanw.directories = [
+    ".cache/huggingface"
+  ];
+};
+#+end_src
+
+Then rebuild: =nixos-rebuild switch --flake .#dgx-spark=
 
 * References
 

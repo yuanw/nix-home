@@ -131,7 +131,27 @@
 
   # ─── Networking ─────────────────────────────────────────────────────
   networking.hostName = "dgx-spark";
-  networking.networkmanager.enable = true;
+
+  # Use systemd-networkd for predictable wired networking on a headless server.
+  # NetworkManager is desktop-oriented; systemd-networkd is lighter and works
+  # reliably without a user session.
+  systemd.network.enable = true;
+  networking.useNetworkd = true;
+  # Wait for network to be online before starting services that need it
+  # (SSH, podman, etc.).
+  systemd.network.wait-online.enable = true;
+
+  # DHCP on all wired interfaces — the DGX Spark has one or two Ethernet
+  # ports. This matches eno*, enp*, eth* but ignores wlan/wwan.
+  systemd.network.networks."10-wired" = {
+    matchConfig.Name = "en* eth*";
+    networkConfig = {
+      DHCP = true;
+      MulticastDNS = true;
+    };
+    dhcpV4Config.RouteMetric = 100;
+    linkConfig.RequiredForOnline = "routable";
+  };
 
   # ─── Time zone / locale ─────────────────────────────────────────────
   time.timeZone = "America/Regina";
@@ -141,6 +161,10 @@
   users.users.yuanw = {
     isNormalUser = true;
     shell = pkgs.zsh;
+    # No password set — SSH key authentication only.
+    # To set a password later: passwd yuanw
+    # (or use initialPassword = "changeme" for first-boot convenience)
+    hashedPassword = "$y$j9T$0"; # locked — SSH keys only
     extraGroups = [
       "wheel"
       "networkmanager"
@@ -178,6 +202,20 @@
       PermitRootLogin = "no";
       PasswordAuthentication = false;
     };
+    # Generate host keys on first boot if they don't exist in /persistent yet.
+    # This is needed because /etc/ssh is on tmpfs (impermanence) and the
+    # symlink targets in /persistent won't exist until keys are generated.
+    hostKeys = [
+      {
+        path = "/persistent/etc/ssh/ssh_host_ed25519_key";
+        type = "ed25519";
+      }
+      {
+        path = "/persistent/etc/ssh/ssh_host_rsa_key";
+        type = "rsa";
+        bits = 4096;
+      }
+    ];
   };
 
   # ─── ZRAM swap ──────────────────────────────────────────────────────
