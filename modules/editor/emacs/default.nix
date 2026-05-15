@@ -28,7 +28,7 @@ let
       (lib.optionals pkgs.stdenv.isDarwin [
         ./patches/system-appearance.patch
         ./patches/round-undecorated-frame.patch
-        ./patches/adjust-ns-init-colors.patch
+
       ])
       ++ prev.patches;
 
