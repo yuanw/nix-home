@@ -161,10 +161,10 @@
   users.users.yuanw = {
     isNormalUser = true;
     shell = pkgs.zsh;
-    # No password set — SSH key authentication only.
-    # To set a password later: passwd yuanw
-    # (or use initialPassword = "changeme" for first-boot convenience)
-    hashedPassword = "$y$j9T$0"; # locked — SSH keys only
+    # Lock the password — SSH key authentication only.
+    # The "!" prefix in /etc/shadow disables password login entirely.
+    # To enable console login later: passwd yuanw
+    hashedPassword = "!";
     extraGroups = [
       "wheel"
       "networkmanager"
