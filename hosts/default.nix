@@ -101,6 +101,57 @@
           ];
         }
       );
+      dgx-spark = withSystem "aarch64-linux" (
+        {
+          config,
+          inputs',
+          system,
+          ...
+        }:
+        inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            isDarwin = false;
+            isNixOS = true;
+            hostname = "dgx-spark";
+            packages = config.packages;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { system = system; };
+            };
+            inherit inputs inputs';
+          };
+          modules = [
+            {
+              nixpkgs.hostPlatform = system;
+              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.cudaSupport = true;
+              nixpkgs.config.cudaCapabilities = [
+                "12.0"
+                "12.1"
+              ];
+            }
+            inputs.home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                sharedModules = [
+                  inputs.betterfox.homeModules.betterfox
+                  inputs.catppuccin.homeModules.catppuccin
+                  inputs.direnv-instant.homeModules.direnv-instant
+                  inputs.mics-skills.homeModules.default
+                  inputs.git-ai.homeManagerModules.default
+                  inputs.mcp-servers-nix.homeManagerModules.default
+                  (import ../modules/home/claude-code-plugins.nix)
+                  (import ../modules/helpers/mergetools.nix)
+                ];
+                backupFileExtension = "hm-bak";
+                extraSpecialArgs = { inherit inputs; };
+              };
+            }
+            ./dgx-spark
+          ];
+        }
+      );
     };
     darwinConfigurations =
       let
@@ -165,6 +216,7 @@
     {
       packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
+      packages.dgx-spark = self.nixosConfigurations.dgx-spark.config.system.build.toplevel;
       packages.yuanw = self.darwinConfigurations.yuanw.system;
       packages.ci = self.darwinConfigurations.ci.system;
       packages.wk01174 = self.darwinConfigurations.WK01174.system;

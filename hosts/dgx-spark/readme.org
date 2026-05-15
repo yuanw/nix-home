@@ -1,0 +1,162 @@
+#+title: NVIDIA DGX Spark (Project DIGITS) — NixOS with Impermanence
+
+* Overview
+
+This host configuration targets the [[https://www.nvidia.com/en-us/dgx/dgx-spark/][NVIDIA DGX Spark]] (also sold as the Asus Ascent GX10) — a Grace Blackwell-based AI workstation. It uses:
+
+- [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] for hardware support (NVIDIA kernel, GPU drivers, DGX Dashboard)
+- [[https://github.com/nix-community/preservation][preservation]] for declarative state management (impermanence via tmpfiles.d + mount units instead of activation scripts)
+- [[https://github.com/nix-community/disko][disko]] for declarative disk partitioning
+
+* Disk Layout
+
+#+begin_src
+/dev/nvme0n1
+  ├── ESP (512M)        → /boot        (vfat, UEFI)
+  ├── swap (16G)                       (disk swap + ZRAM)
+  └── persistent (rest) → /persistent  (ext4, all persistent state)
+
+Root (/)               → tmpfs (2G, volatile — erased every boot)
+#+end_src
+
+The root filesystem is =tmpfs=, meaning the system boots from a clean slate
+every time. Everything that must survive reboots lives under =/persistent= and
+is wired in by the preservation module via bind-mounts and symlinks.
+
+* Impermanence Design
+
+We use [[https://github.com/nix-community/preservation][preservation]] instead of the older [[https://github.com/nix-community/impermanence][impermanence]] module. Key differences
+drawn from the [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 impermanence discussion]]:
+
+| Feature                | impermanence                       | preservation                      |
+|------------------------+------------------------------------+-----------------------------------|
+| Mechanism              | Bash activation scripts + helpers  | Static systemd tmpfiles.d + mount |
+| initrd-less systems    | Not supported                      | Supported (but we use systemd initrd) |
+| Interpreter-less boot  | No                                 | Yes                               |
+| Per-mount options      | No (=hideMounts= global only)      | Yes (=commonMountOptions= per-level) |
+| =how= per entry        | No                                 | Yes (=bindmount= or =symlink=)      |
+| =configureParent=      | No                                 | Yes (own/group/mode for parents)  |
+
+** Preserved state
+
+*** System directories (bind-mount from =/persistent=)
+
+- =/var/lib/nixos= — NixOS user/group state
+- =/var/lib/systemd/coredump=, =/var/lib/systemd/timers=
+- =/var/log=
+- =/var/lib/fwupd= — firmware update data
+- =/var/lib/podman= — container storage (podman enabled by dgx-spark module)
+- =/var/cache=
+
+*** System files (symlink into =/persistent=)
+
+- =/etc/machine-id= — symlinked in initrd so it's available early
+- =/etc/ssh/ssh_host_*_{key,key}.pub}= — SSH host keys
+
+*** Per-user state
+
+| User  | Path                    | Method    | Notes                          |
+|-------+-------------------------+-----------+--------------------------------|
+| yuanw | =~/.config=             | bindmount | Hidden from GUI (=x-gvfs-hide=) |
+| yuanw | =~/.ssh=                | bindmount | Hidden from GUI                 |
+| yuanw | =~/.cache=              | bindmount | mode 0750                       |
+| yuanw | =~/.local/state/nix=    | bindmount | Nix profile state              |
+| yuanw | =~/.local/share/direnv= | bindmount | direnv cache                   |
+| yuanw | =~/.histfile=           | bindmount | Shell history                  |
+| root  | =/root/.ssh=            | bindmount | mode 0700                       |
+
+To add more persisted directories, edit =preservation.preserveAt."/persistent"=
+in =configuration.nix=.
+
+* DGX Spark Hardware Module
+
+The =hardware.dgx-spark= module (from =nixos-dgx-spark=) enables:
+
+- NVIDIA's custom DGX Spark kernel (6.17+nvidia patches, built from source)
+- NVIDIA open GPU driver (=hardware.nvidia.open = true=)
+- Podman with NVIDIA container toolkit
+- DGX Dashboard at =http://localhost:11000=
+- Flox binary cache for pre-built CUDA packages
+- Security hardening (=module_blacklist= for vulnerable kernel modules)
+
+* Installation
+
+** Prerequisites
+
+1. Update firmware on the DGX Spark from DGX OS first — NixOS cannot boot from factory firmware.
+   See [[https://github.com/graham33/nixos-dgx-spark#firmware-updates][nixos-dgx-spark firmware notes]].
+2. Disable Secure Boot in BIOS.
+
+** Option A: USB image
+
+#+begin_src shell
+nix build .#usb-image  # from nixos-dgx-spark repo
+sudo dd if=result/iso/*.iso of=/dev/your_usb bs=1M status=progress
+#+end_src
+
+Boot from USB, partition with disko, then install.
+
+** Option B: nixos-anywhere (recommended for headless)
+
+#+begin_src shell
+nix run github:nix-community/nixos-anywhere -- \
+  --flake .#dgx-spark root@<ip>
+#+end_src
+
+This will:
+1. Partition the NVMe disk using the disko config
+2. Install NixOS with all modules
+3. Reboot into the new system
+
+To test the disk config in a VM first:
+#+begin_src shell
+nix run github:nix-community/nixos-anywhere -- \
+  --flake .#dgx-spark --vm-test
+#+end_src
+
+** Post-install: initial population
+
+On first boot, =/persistent= will be empty. The system will create needed
+directories automatically via tmpfiles.d, but you'll need to:
+
+1. Set your user password: =passwd yuanw=
+2. SSH host keys will be generated on first boot and persisted via symlinks
+
+* Common Operations
+
+** Build the system
+
+#+begin_src shell
+nix build .#dgx-spark
+#+end_src
+
+** Deploy (if already installed)
+
+#+begin_src shell
+nixos-rebuild switch --flake .#dgx-spark --target-host root@dgx-spark
+# or locally:
+nixos-rebuild switch --flake .#dgx-spark
+#+end_src
+
+** Inspect what's persisted
+
+#+begin_src shell
+ls /persistent/
+#+end_src
+
+** Clean persistent state (factory reset)
+
+#+begin_src shell
+# WARNING: destroys all persisted state
+rm -rf /persistent/*
+reboot
+#+end_src
+
+* References
+
+- [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] — hardware module and playbooks
+- [[https://github.com/nix-community/preservation][preservation]] — declarative impermanence via tmpfiles.d
+- [[https://github.com/nix-community/impermanence][impermanence]] — older approach (not used here)
+- [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 impermanence discussion]]
+- [[https://nix-community.github.io/preservation][preservation documentation]]
+- [[https://github.com/nix-community/disko][disko]] — declarative disk partitioning

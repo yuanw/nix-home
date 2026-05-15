@@ -1,0 +1,213 @@
+# DGX Spark — NixOS configuration with impermanence via preservation
+#
+# Disk layout (see disk-config.nix):
+#   /boot        — ESP partition (vfat)
+#   /persistent  — ext4 partition holding all persistent state
+#   /            — tmpfs (ephemeral, recreated on every boot)
+#
+# Preservation (https://github.com/nix-community/preservation) manages
+# bind-mounts and symlinks from the volatile root into /persistent,
+# replacing impermanence with a purely static (tmpfiles.d + mount units)
+# approach. This requires systemd initrd.
+#
+# Reference: https://www.reddit.com/r/NixOS/comments/1ndo35n/
+
+{ pkgs, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+  ];
+
+  # ─── Impermanence: volatile root ───────────────────────────────────
+  #
+  # Mount the root filesystem as tmpfs so the system starts from a clean
+  # slate on every boot. All state that must survive reboots lives under
+  # /persistent and is wired in by the preservation module.
+  fileSystems."/" = {
+    device = "tmpfs";
+    fsType = "tmpfs";
+    options = [
+      "defaults"
+      "size=2G"
+      "mode=755"
+    ];
+  };
+
+  # ─── Preservation ──────────────────────────────────────────────────
+  #
+  # Requires systemd initrd — the module asserts this automatically.
+  boot.initrd.systemd.enable = true;
+
+  preservation = {
+    enable = true;
+    preserveAt."/persistent" = {
+      # ── System directories ────────────────────────────────────────
+      directories = [
+        "/var/lib/nixos" # NixOS user/group state
+        "/var/lib/systemd/coredump"
+        "/var/lib/systemd/timers"
+        "/var/log"
+        "/var/lib/fwupd" # Firmware updates
+        "/var/lib/podman" # Container storage (podman is enabled by dgx-spark module)
+        "/var/cache" # General cache dir
+      ];
+
+      # ── System files ──────────────────────────────────────────────
+      files = [
+        # Machine identity — read in initrd so it's available very early
+        {
+          file = "/etc/machine-id";
+          inInitrd = true;
+          how = "symlink";
+        }
+        # SSH host keys — symlink so they persist across reboots but
+        # live on the persistent volume directly
+        {
+          file = "/etc/ssh/ssh_host_ed25519_key";
+          how = "symlink";
+          configureParent = true;
+        }
+        {
+          file = "/etc/ssh/ssh_host_ed25519_key.pub";
+          how = "symlink";
+          configureParent = true;
+        }
+        {
+          file = "/etc/ssh/ssh_host_rsa_key";
+          how = "symlink";
+          configureParent = true;
+        }
+        {
+          file = "/etc/ssh/ssh_host_rsa_key.pub";
+          how = "symlink";
+          configureParent = true;
+        }
+      ];
+
+      # ── Per-user state ────────────────────────────────────────────
+      users = {
+        yuanw = {
+          commonMountOptions = [
+            "x-gvfs-hide"
+            "x-gdu.hide"
+          ];
+          directories = [
+            # Shell / desktop state
+            ".config"
+            ".ssh"
+            {
+              directory = ".cache";
+              mode = "0750";
+            }
+            # Nix and dev tool state
+            ".local/state/nix"
+            ".local/share/direnv"
+          ];
+          files = [
+            ".histfile"
+          ];
+        };
+        root = {
+          home = "/root";
+          directories = [
+            {
+              directory = ".ssh";
+              mode = "0700";
+            }
+          ];
+        };
+      };
+    };
+  };
+
+  # ─── Bootloader ─────────────────────────────────────────────────────
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.systemd-boot.configurationLimit = 10;
+
+  # ─── DGX Spark hardware ─────────────────────────────────────────────
+  hardware.dgx-spark.enable = true;
+
+  # ─── Networking ─────────────────────────────────────────────────────
+  networking.hostName = "dgx-spark";
+  networking.networkmanager.enable = true;
+
+  # ─── Time zone / locale ─────────────────────────────────────────────
+  time.timeZone = "America/Regina";
+  i18n.defaultLocale = "en_US.UTF-8";
+
+  # ─── User accounts ──────────────────────────────────────────────────
+  users.users.yuanw = {
+    isNormalUser = true;
+    shell = pkgs.zsh;
+    extraGroups = [
+      "wheel"
+      "networkmanager"
+      "video" # GPU access
+      "docker" # Podman/docker compat
+    ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
+    ];
+  };
+
+  # ─── Nix settings ──────────────────────────────────────────────────
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+    auto-optimise-store = true;
+    trusted-users = [
+      "root"
+      "yuanw"
+    ];
+  };
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 30d";
+  };
+  nixpkgs.config.allowUnfree = true;
+
+  # ─── SSH ───────────────────────────────────────────────────────────
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "no";
+      PasswordAuthentication = false;
+    };
+  };
+
+  # ─── ZRAM swap ──────────────────────────────────────────────────────
+  # Complementary to the disk swap partition for memory pressure handling
+  zramSwap.enable = true;
+
+  # ─── System packages ───────────────────────────────────────────────
+  environment.systemPackages = with pkgs; [
+    curl
+    git
+    htop
+    tmux
+    tree
+    vim
+    wget
+    fastfetch
+    pciutils
+    ethtool
+    rdma-core
+  ];
+
+  # ─── Zsh ───────────────────────────────────────────────────────────
+  programs.zsh.enable = true;
+
+  # ─── Firmware updates ──────────────────────────────────────────────
+  # Already enabled by dgx-spark module, but listed here for clarity
+  services.fwupd.enable = true;
+
+  # This value determines the NixOS release from which the default
+  # settings for stateful data were taken. Do NOT change this after
+  # the initial install.
+  system.stateVersion = "25.11";
+}
