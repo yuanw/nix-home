@@ -17,7 +17,7 @@
 
 let
   pname = "consult-omni";
-  version = "0.1-unstable-2025-12-04";
+  version = "0-unstable-2025-12-04";
 
 in
 melpaBuild {

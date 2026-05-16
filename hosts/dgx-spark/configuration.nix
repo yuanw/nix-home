@@ -2,11 +2,11 @@
 #
 # Disk layout (see disk-config.nix):
 #   /boot        — ESP partition (vfat)
-#   /persistent  — ext4 partition holding all persistent state
+#   /persist     — btrfs subvolume holding all persistent state
 #   /            — tmpfs (ephemeral, recreated on every boot)
 #
 # Preservation (https://github.com/nix-community/preservation) manages
-# bind-mounts and symlinks from the volatile root into /persistent,
+# bind-mounts and symlinks from the volatile root into /persist,
 # replacing impermanence with a purely static (tmpfiles.d + mount units)
 # approach. This requires systemd initrd.
 #
@@ -23,16 +23,9 @@
   #
   # Mount the root filesystem as tmpfs so the system starts from a clean
   # slate on every boot. All state that must survive reboots lives under
-  # /persistent and is wired in by the preservation module.
-  fileSystems."/" = {
-    device = "tmpfs";
-    fsType = "tmpfs";
-    options = [
-      "defaults"
-      "size=2G"
-      "mode=755"
-    ];
-  };
+  # /persist and is wired in by the preservation module.
+  fileSystems."/nix".neededForBoot = true;
+  fileSystems."/persist".neededForBoot = true;
 
   # ─── Preservation ──────────────────────────────────────────────────
   #
@@ -41,10 +34,17 @@
 
   preservation = {
     enable = true;
-    preserveAt."/persistent" = {
+    preserveAt."/persist" = {
       # ── System directories ────────────────────────────────────────
       directories = [
-        "/var/lib/nixos" # NixOS user/group state
+        "/etc/nixos"
+
+        "/var/lib/bluetooth"
+        "/var/lib/iwd" # Wi-Fi credentials (when wireless is enabled)
+        {
+          directory = "/var/lib/nixos"; # NixOS user/group state
+          inInitrd = true;
+        }
         "/var/lib/systemd/coredump"
         "/var/lib/systemd/timers"
         "/var/log"
@@ -153,6 +153,18 @@
     linkConfig.RequiredForOnline = "routable";
   };
 
+  # Wi-Fi support (optional) — enable iwd if you need wireless.
+  networking.wireless.iwd.enable = true;
+  systemd.network.networks."20-wifi" = {
+    matchConfig.Name = "wl*";
+    networkConfig = {
+      DHCP = true;
+      MulticastDNS = true;
+    };
+    dhcpV4Config.RouteMetric = 600;
+    linkConfig.RequiredForOnline = "no";
+  };
+
   # ─── Time zone / locale ─────────────────────────────────────────────
   time.timeZone = "America/Regina";
   i18n.defaultLocale = "en_US.UTF-8";
@@ -202,16 +214,16 @@
       PermitRootLogin = "no";
       PasswordAuthentication = false;
     };
-    # Generate host keys on first boot if they don't exist in /persistent yet.
+    # Generate host keys on first boot if they don't exist in /persist yet.
     # This is needed because /etc/ssh is on tmpfs (impermanence) and the
-    # symlink targets in /persistent won't exist until keys are generated.
+    # symlink targets in /persist won't exist until keys are generated.
     hostKeys = [
       {
-        path = "/persistent/etc/ssh/ssh_host_ed25519_key";
+        path = "/persist/etc/ssh/ssh_host_ed25519_key";
         type = "ed25519";
       }
       {
-        path = "/persistent/etc/ssh/ssh_host_rsa_key";
+        path = "/persist/etc/ssh/ssh_host_rsa_key";
         type = "rsa";
         bits = 4096;
       }
