@@ -14,8 +14,12 @@ with lib;
 let
   cfg = config.modules.browsers.firefox;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
+  # HM creates the profiles.ini at the XDG path on Linux
+  # (~/.config/mozilla/firefox/profiles.ini) when xdg.enable = true.
+  # Keep this aligned so file paths (chrome, extensions, mergetools)
+  # point to the same directory.
   profilesPath =
-    if isDarwin then "Library/Application Support/Firefox/Profiles" else ".mozilla/firefox";
+    if isDarwin then "Library/Application Support/Firefox/Profiles" else ".config/mozilla/firefox";
 in
 {
   options.modules.browsers.firefox = {
@@ -137,6 +141,27 @@ in
           home = {
             file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
           };
+          # Firefox on Linux reads profiles.ini from the legacy path
+          # (~/.mozilla/firefox) but HM writes it to the XDG path
+          # (~/.config/mozilla/firefox).  Tell it to use the XDG path so
+          # the HM-managed `home` profile (user.js, extensions, etc.)
+          # takes effect.
+          home.sessionVariables = lib.mkIf (!isDarwin) {
+            MOZ_FIREFOX_HOME = "${config.my.homeDirectory}/.config/mozilla/firefox";
+          };
+          # Fallback symlink in the legacy path for launchers that don't
+          # inherit the environment (e.g. desktop entries).
+          home.file.".mozilla/firefox/profiles.ini".text = ''
+            [General]
+            StartWithLastProfile=1
+            Version=2
+
+            [Profile0]
+            Default=1
+            IsRelative=1
+            Name=home
+            Path=home
+          '';
           programs.firefox = {
             enable = true;
             package = cfg.pkg;
@@ -467,7 +492,7 @@ in
               settings = {
                 browser.uiCustomization.state = ''
                   {"placements":{"widget-overflow-fixed-list":[],"unified-extensions-area":["contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"nav-bar":["back-button","forward-button","stop-reload-button","vertical-spacer","customizableui-special-spring1","urlbar-container","customizableui-special-spring2","save-to-pocket-button","downloads-button","unified-extensions-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action"],"TabsToolbar":["firefox-view-button","tabbrowser-tabs","new-tab-button","alltabs-button"],"vertical-tabs":[],"PersonalToolbar":["import-button","personal-bookmarks"]},"seen":["developer-button","_3c078156-979c-498b-8990-85f7987dd929_-browser-action","ghosttext_bfred_it-browser-action","search_kagi_com-browser-action","leechblockng_proginosko_com-browser-action","contact_maxhu_dev-browser-action","jid1-mnnxcxisbpnsxq_jetpack-browser-action","ublock0_raymondhill_net-browser-action","userchrome-toggle-extended_n2ezr_ru-browser-action","addon_darkreader_org-browser-action","_a138007c-5ff6-4d10-83d9-0afaf0efbe5e_-browser-action","vimium-c_gdh1995_cn-browser-action"],"dirtyAreaCache":["nav-bar","PersonalToolbar","unified-extensions-area","TabsToolbar","vertical-tabs"],"currentVersion":22,"newElementCount":4}
-                                       #        '';
+                '';
 
                 # PREF: notification interval (in microseconds) to avoid layout thrashing
                 #  When Firefox is loading a page, it periodically reformats
