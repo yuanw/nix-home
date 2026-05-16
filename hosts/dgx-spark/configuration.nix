@@ -39,6 +39,7 @@
         "/etc/nixos"
 
         "var/lib/bluetooth"
+        "/var/lib/iwd" # Wi-Fi credentials (when wireless is enabled)
         {
           directory = "/var/lib/nixos"; # NixOS user/group state
           inInitrd = true;
@@ -149,6 +150,18 @@
     };
     dhcpV4Config.RouteMetric = 100;
     linkConfig.RequiredForOnline = "routable";
+  };
+
+  # Wi-Fi support (optional) — enable iwd if you need wireless.
+  networking.wireless.iwd.enable = true;
+  systemd.network.networks."20-wifi" = {
+    matchConfig.Name = "wl*";
+    networkConfig = {
+      DHCP = true;
+      MulticastDNS = true;
+    };
+    dhcpV4Config.RouteMetric = 600;
+    linkConfig.RequiredForOnline = "no";
   };
 
   # ─── Time zone / locale ─────────────────────────────────────────────
