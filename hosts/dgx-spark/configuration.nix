@@ -37,20 +37,20 @@
     preserveAt."/persist" = {
       # ── System directories ────────────────────────────────────────
       directories = [
-        "etc/nixos"
+        "/etc/nixos"
 
-        "var/lib/bluetooth"
-        "var/lib/iwd" # Wi-Fi credentials (when wireless is enabled)
+        "/var/lib/bluetooth"
+        "/var/lib/iwd" # Wi-Fi credentials (when wireless is enabled)
         {
           directory = "/var/lib/nixos"; # NixOS user/group state
           inInitrd = true;
         }
-        "var/lib/systemd/coredump"
-        "var/lib/systemd/timers"
-        "var/log"
-        "var/lib/fwupd" # Firmware updates
-        "var/lib/podman" # Container storage (podman is enabled by dgx-spark module)
-        "var/cache" # General cache dir
+        "/var/lib/systemd/coredump"
+        "/var/lib/systemd/timers"
+        "/var/log"
+        "/var/lib/fwupd" # Firmware updates
+        "/var/lib/podman" # Container storage (podman is enabled by dgx-spark module)
+        "/var/cache" # General cache dir
       ];
 
       # ── System files ──────────────────────────────────────────────
