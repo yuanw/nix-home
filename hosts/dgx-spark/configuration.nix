@@ -36,7 +36,13 @@
     preserveAt."/persist" = {
       # ── System directories ────────────────────────────────────────
       directories = [
-        "/var/lib/nixos" # NixOS user/group state
+        "/etc/nixos"
+
+        "var/lib/bluetooth"
+        {
+          directory = "/var/lib/nixos"; # NixOS user/group state
+          inInitrd = true;
+        }
         "/var/lib/systemd/coredump"
         "/var/lib/systemd/timers"
         "/var/log"

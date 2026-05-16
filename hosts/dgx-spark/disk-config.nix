@@ -42,14 +42,14 @@
               type = "btrfs";
               extraArgs = [ "-f" ];
               subvolumes = {
-                "@nix" = {
+                "/nix" = {
                   mountpoint = "/nix";
                   mountOptions = [
                     "compress=zstd"
                     "noatime"
                   ];
                 };
-                "@persist" = {
+                "/persist" = {
                   mountpoint = "/persist";
                   mountOptions = [
                     "compress=zstd"
