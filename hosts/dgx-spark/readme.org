@@ -176,7 +176,7 @@ Boot from USB, partition with disko, then install.
 sudo nix --extra-experimental-features "nix-command flakes" \
   run 'github:nix-community/disko/latest#disko-install' -- \
   --flake .#dgx-spark \
-  --disk main /dev/vda \
+  --disk main /dev/nvm
 #+end_src
 ** Option B: nixos-anywhere (recommended for headless)
 
