@@ -171,12 +171,12 @@ sudo dd if=result/iso/*.iso of=/dev/your_usb bs=1M status=progress
 #+end_src
 
 Boot from USB, partition with disko, then install.
-
+lsblk
 #+begin_src shell
 sudo nix --extra-experimental-features "nix-command flakes" \
   run 'github:nix-community/disko/latest#disko-install' -- \
   --flake .#dgx-spark \
-  --disk main /dev/nvm
+  --disk main /dev/nvme0n1
 #+end_src
 ** Option B: nixos-anywhere (recommended for headless)
 
