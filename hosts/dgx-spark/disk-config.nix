@@ -2,22 +2,12 @@
 
 {
   disko.devices = {
-    nodev = {
-      "/" = {
-        fsType = "tmpfs";
-        mountOptions = [
-          "size=25%"
-          "mode=755"
-        ];
-      };
-    };
     disk.main = {
       device = lib.mkDefault "/dev/nvme0n1";
       type = "disk";
       content = {
         type = "gpt";
         partitions = {
-
           esp = {
             size = "1G";
             type = "EF00";
@@ -28,35 +18,13 @@
               mountOptions = [ "umask=0077" ];
             };
           };
-          swap = {
-            size = "16G";
-            content = {
-              type = "swap";
-              resumeDevice = true;
-            };
-          };
           root = {
             name = "root";
             size = "100%";
             content = {
-              type = "btrfs";
-              extraArgs = [ "-f" ];
-              subvolumes = {
-                "/nix" = {
-                  mountpoint = "/nix";
-                  mountOptions = [
-                    "compress=zstd"
-                    "noatime"
-                  ];
-                };
-                "/persist" = {
-                  mountpoint = "/persist";
-                  mountOptions = [
-                    "compress=zstd"
-                    "noatime"
-                  ];
-                };
-              };
+              type = "filesystem";
+              format = "ext4";
+              mountpoint = "/";
             };
           };
         };
