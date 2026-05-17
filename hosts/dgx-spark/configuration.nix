@@ -138,19 +138,20 @@
   systemd.network.enable = true;
   networking.useNetworkd = true;
   # Wait for network to be online before starting services that need it
-  # (SSH, podman, etc.).
-  systemd.network.wait-online.enable = true;
+  # (SSH, podman, etc.). Disabled for first-boot debugging.
+  systemd.network.wait-online.enable = false;
+  # systemd.network.wait-online.anyInterface = true;  # alternative: just need link, not routable
 
   # DHCP on all wired interfaces — the DGX Spark has one or two Ethernet
   # ports. This matches eno*, enp*, eth* but ignores wlan/wwan.
   systemd.network.networks."10-wired" = {
-    matchConfig.Name = "en* eth*";
+    matchConfig.Name = "en* eth* end0*";
     networkConfig = {
       DHCP = true;
       MulticastDNS = true;
     };
     dhcpV4Config.RouteMetric = 100;
-    linkConfig.RequiredForOnline = "routable";
+    linkConfig.RequiredForOnline = "no"; # don't block boot
   };
 
   # Wi-Fi support (optional) — enable iwd if you need wireless.
@@ -177,6 +178,8 @@
     # To set a password later: passwd yuanw
     # (or use initialPassword = "changeme" for first-boot convenience)
     hashedPassword = "$y$j9T$0"; # locked — SSH keys only
+    # For first-boot console debugging, temporarily uncomment below:
+    # initialPassword = "changeme";
     extraGroups = [
       "wheel"
       "networkmanager"
