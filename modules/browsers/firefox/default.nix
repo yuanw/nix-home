@@ -149,8 +149,11 @@ in
           home.sessionVariables = lib.mkIf (!isDarwin) {
             MOZ_FIREFOX_HOME = "${config.my.homeDirectory}/.config/mozilla/firefox";
           };
-          # Fallback symlink in the legacy path for launchers that don't
-          # inherit the environment (e.g. desktop entries).
+          # Fallback profiles.ini in the legacy path for launchers that don't
+          # inherit the environment (e.g. desktop entries).  Uses an absolute
+          # path so Firefox finds the HM-managed profile at its XDG location
+          # (~/.config/mozilla/firefox/home) even when MOZ_FIREFOX_HOME is
+          # unset (e.g. launched from a desktop entry).
           home.file.".mozilla/firefox/profiles.ini".text = ''
             [General]
             StartWithLastProfile=1
@@ -158,9 +161,9 @@ in
 
             [Profile0]
             Default=1
-            IsRelative=1
+            IsRelative=0
             Name=home
-            Path=home
+            Path=${config.my.homeDirectory}/.config/mozilla/firefox/home
           '';
           programs.firefox = {
             enable = true;
