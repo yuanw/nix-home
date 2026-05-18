@@ -1,11 +1,10 @@
 {
   lib,
-  stdenv,
   fetchFromGitHub,
   cudaPackages,
 }:
 
-stdenv.mkDerivation {
+cudaPackages.backendStdenv.mkDerivation {
   pname = "ds4";
   version = "0-unstable-2026-05-17";
 
@@ -28,9 +27,8 @@ stdenv.mkDerivation {
     cudaPackages.cuda_cccl
   ];
 
-  buildTarget = "cuda-spark";
-
   makeFlags = [
+    "cuda-spark"
     "NVCC=nvcc"
     "NATIVE_CPU_FLAG="
     "NVCCFLAGS=-O3 --use_fast_math -Xcompiler -pthread"
