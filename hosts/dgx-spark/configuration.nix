@@ -94,10 +94,11 @@
     pciutils
     ethtool
     rdma-core
+    fwupd
   ];
 
   # ─── Zsh ───────────────────────────────────────────────────────────
-  programs.zsh.enable = true;
+  #programs.zsh.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data were taken. Do NOT change this after
