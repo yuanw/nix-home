@@ -43,17 +43,15 @@
       userAgent = "";
     };
   };
-  ver = "5.4.0";
+  ver = "5.5.0";
   sidebar = {
     nav = [
       "Fsj2n0_6MnzM"
-      "ZuShLmjiZRi7"
       "cWehKcAg-Am8"
       "h3Nc-aQmYPsa"
-      "QNWVTksx5BCE"
       "5-ipfIWbSvaF"
-      "KkHt1lrGAAuP"
-      "ImT3MDM4Asoe"
+      "B9CtHuCXuE-7"
+      "xjQVv5-LjU-7"
       "add_tp"
       "sp-0"
       "settings"
@@ -65,25 +63,6 @@
         name = "Tabs";
         color = "toolbar";
         iconSVG = "icon_tabs";
-        iconIMGSrc = "";
-        iconIMG = "";
-        lockedPanel = false;
-        skipOnSwitching = false;
-        noEmpty = false;
-        newTabCtx = "none";
-        dropTabCtx = "none";
-        moveRules = [ ];
-        moveExcludedTo = -1;
-        bookmarksFolderId = -1;
-        newTabBtns = [ ];
-        srcPanelConfig = null;
-      };
-      ZuShLmjiZRi7 = {
-        type = 2;
-        id = "ZuShLmjiZRi7";
-        name = "m";
-        color = "toolbar";
-        iconSVG = "icon_coffee";
         iconIMGSrc = "";
         iconIMG = "";
         lockedPanel = false;
@@ -135,25 +114,6 @@
         newTabBtns = [ ];
         srcPanelConfig = null;
       };
-      QNWVTksx5BCE = {
-        type = 2;
-        id = "QNWVTksx5BCE";
-        name = "t";
-        color = "toolbar";
-        iconSVG = "fruit";
-        iconIMGSrc = "";
-        iconIMG = "";
-        lockedPanel = false;
-        skipOnSwitching = false;
-        noEmpty = false;
-        newTabCtx = "none";
-        dropTabCtx = "none";
-        moveRules = [ ];
-        moveExcludedTo = -1;
-        bookmarksFolderId = -1;
-        newTabBtns = [ ];
-        srcPanelConfig = null;
-      };
       "5-ipfIWbSvaF" = {
         type = 2;
         id = "5-ipfIWbSvaF";
@@ -173,18 +133,18 @@
         newTabBtns = [ ];
         srcPanelConfig = null;
       };
-      KkHt1lrGAAuP = {
+      "B9CtHuCXuE-7" = {
         type = 2;
-        id = "KkHt1lrGAAuP";
-        name = "i";
+        id = "B9CtHuCXuE-7";
+        name = "bank";
         color = "toolbar";
-        iconSVG = "icon_coffee";
+        iconSVG = "dollar";
         iconIMGSrc = "";
         iconIMG = "";
         lockedPanel = false;
         skipOnSwitching = false;
         noEmpty = false;
-        newTabCtx = "none";
+        newTabCtx = "firefox-container-4";
         dropTabCtx = "none";
         moveRules = [ ];
         moveExcludedTo = -1;
@@ -192,18 +152,18 @@
         newTabBtns = [ ];
         srcPanelConfig = null;
       };
-      ImT3MDM4Asoe = {
+      "xjQVv5-LjU-7" = {
         type = 2;
-        id = "ImT3MDM4Asoe";
-        name = "claude";
+        id = "xjQVv5-LjU-7";
+        name = "dumperfire";
         color = "toolbar";
-        iconSVG = "icon_tabs";
+        iconSVG = "fence";
         iconIMGSrc = "";
         iconIMG = "";
         lockedPanel = false;
         skipOnSwitching = false;
         noEmpty = false;
-        newTabCtx = "none";
+        newTabCtx = "firefox-container-9";
         dropTabCtx = "none";
         moveRules = [ ];
         moveExcludedTo = -1;

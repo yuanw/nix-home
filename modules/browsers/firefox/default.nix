@@ -423,6 +423,7 @@ in
                   #     "moz-extension-scheme"
                   #   ];
                   # };
+                  # {3c078156-979c-498b-8990-85f7987dd929}
                   "${sidebery.addonId}".settings = import ./sidebery.nix;
                   "${mtab.addonId}".settings =
                     if hostname == "WK01174" then import ../../private/workMtab.nix else import ./mtab.nix;
