@@ -46,7 +46,12 @@ nix-update:
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
 
-# apply nix configuration (works on both macOS and NixOS)
+# deploy to DGX Spark: sync flake and rebuild remotely
+spark-deploy IP="dgx-spark.local":
+    @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
+
+# build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo darwin-rebuild switch --flake .; \

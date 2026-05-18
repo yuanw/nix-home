@@ -259,7 +259,12 @@ preservation.preserveAt."/persistent" = {
 #+end_src
 
 Then rebuild: =nixos-rebuild switch --flake .#dgx-spark=
+   ssh yuanw@dgx-spark.local
 
+   # One-time setup
+   sudo mkdir -p /etc/nixos
+   sudo chown yuanw /etc/nixos
+   git clone https://github.com/yuanw/nix-home.git /etc/nixos
 * References
 
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] — hardware module and playbooks
