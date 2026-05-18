@@ -25,7 +25,7 @@
   # ─── User accounts ──────────────────────────────────────────────────
   users.users.yuanw = {
     isNormalUser = true;
-    shell = pkgs.zsh;
+    #shell = pkgs.zsh;
     # Temporary password for first-boot console access.
     # Change it after login with: passwd yuanw
     initialPassword = "changeme";
