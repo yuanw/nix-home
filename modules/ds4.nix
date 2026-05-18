@@ -77,6 +77,7 @@ in
         ExecStart = "${cfg.package}/bin/ds4-server --host ${cfg.host} --port ${toString cfg.port} --ctx ${toString cfg.contextSize}";
         Restart = "on-failure";
         RestartSec = "5s";
+        PrivateTmp = true; # isolate /tmp to avoid stale lock files
         Environment = "LD_LIBRARY_PATH=${pkgs.lib.makeLibraryPath [ pkgs.cudaPackages.cuda_cudart ]}";
       };
     };

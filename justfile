@@ -52,6 +52,25 @@ spark-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
     @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
 
+# DS4 server management on DGX Spark
+spark-ds4-start IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl start ds4-server"
+
+spark-ds4-stop IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server"
+
+spark-ds4-restart IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl restart ds4-server"
+
+spark-ds4-status IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl status ds4-server"
+
+spark-ds4-logs IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo journalctl -u ds4-server -f"
+
+spark-ds4-download MODEL="q2-imatrix" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo -u ds4 bash -c 'cd /var/lib/ds4 && ds4-download-model {{MODEL}}'"
+
 # build ds4 on DGX Spark (without switching)
 spark-build-ds4 IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
