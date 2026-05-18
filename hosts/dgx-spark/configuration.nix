@@ -58,6 +58,17 @@
   };
   nixpkgs.config.allowUnfree = true;
 
+  # ─── mDNS (Avahi) ──────────────────────────────────────────────────
+  # Publish hostname so clients can reach dgx-spark.local
+  services.avahi = {
+    enable = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
+  };
+
   # ─── SSH ───────────────────────────────────────────────────────────
   services.openssh = {
     enable = true;
