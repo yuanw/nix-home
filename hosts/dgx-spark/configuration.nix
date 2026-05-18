@@ -28,7 +28,6 @@
     #shell = pkgs.zsh;
     # Temporary password for first-boot console access.
     # Change it after login with: passwd yuanw
-    initialPassword = "changeme";
     extraGroups = [
       "wheel"
       "video" # GPU access
@@ -61,6 +60,9 @@
     options = "--delete-older-than 30d";
   };
   nixpkgs.config.allowUnfree = true;
+
+  # ─── Firewall ──────────────────────────────────────────────────────
+  networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard
 
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
   # Publish hostname so clients can reach dgx-spark.local
