@@ -2,22 +2,8 @@
   lib,
   fetchFromGitHub,
   cudaPackages,
-  writeShellScriptBin,
 }:
 
-let
-  # Wrapper for download_model.sh that defaults to the current working
-  # directory instead of the Nix store path (which is read-only).
-  downloadModel = writeShellScriptBin "ds4-download-model" ''
-    : "${""}{DS4_GGUF_DIR:=$PWD/gguf}
-    export DS4_GGUF_DIR
-
-    # Find the original download_model.sh shipped with ds4
-    script="${placeholder "out"}/share/ds4/download_model.sh"
-
-    exec "$script" "$@"
-  '';
-in
 cudaPackages.backendStdenv.mkDerivation {
   pname = "ds4";
   version = "0-unstable-2026-05-17";
@@ -56,7 +42,22 @@ cudaPackages.backendStdenv.mkDerivation {
     mkdir -p $out/bin $out/share/ds4
     cp ds4 ds4-server ds4-bench ds4-eval $out/bin/
     cp download_model.sh $out/share/ds4/
-    cp ${downloadModel}/bin/ds4-download-model $out/bin/
+
+    # Patch the script so the ds4flash.gguf symlink is created in the
+    # caller's working directory instead of the read-only Nix store.
+    substituteInPlace $out/share/ds4/download_model.sh \
+      --replace 'cd "$ROOT"' '# cd "$ROOT"  # patched by Nix: use $PWD instead'
+
+    cat >$out/bin/ds4-download-model <<'EOF'
+    #!/bin/sh
+    : "''${DS4_GGUF_DIR:=$PWD/gguf}"
+    export DS4_GGUF_DIR
+    script="PLACEHOLDER"
+    exec "$script" "$@"
+    EOF
+    substituteInPlace $out/bin/ds4-download-model --replace PLACEHOLDER "$out/share/ds4/download_model.sh"
+    chmod +x $out/bin/ds4-download-model
+
     runHook postInstall
   '';
 

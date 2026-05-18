@@ -61,11 +61,12 @@
   };
   nixpkgs.config.allowUnfree = true;
 
-  # ─── Firewall ──────────────────────────────────────────────────────
-  networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard
+  # ─── DS4 Server ─────────────────────────────────────────────────────
+  services.ds4.enable = true;
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   # Move dashboard to internal port 11001, then proxy external 11000
+  networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard LAN proxy
   services.dgx-dashboard = {
     enable = true;
     port = 11001;
