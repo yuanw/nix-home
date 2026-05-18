@@ -122,4 +122,5 @@ rec {
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
   pi-mcp-adapter = pkgs.callPackage ./pi-extensions/pi-mcp-adapter.nix { };
+  ds4 = pkgs.callPackage ./ds4 { };
 }

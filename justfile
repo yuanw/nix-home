@@ -42,6 +42,7 @@ nix-update:
     @nix-update -f ./packages/release.nix vibeproxy --src-only
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
     @nix-update -f ./packages/release.nix tccutil --src-only
+    @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
@@ -50,6 +51,11 @@ update-wk:
 spark-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
     @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
+
+# build ds4 on DGX Spark (without switching)
+spark-build-ds4 IP="dgx-spark.local":
+    @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
 
 # build and deploy to local host (macOS or NixOS)
 switch:

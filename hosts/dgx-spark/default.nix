@@ -10,4 +10,6 @@
     ./disk-config.nix
     ./configuration.nix
   ];
+
+  nixpkgs.overlays = [ (import ../../packages) ];
 }
