@@ -39,6 +39,10 @@
     ];
   };
 
+  # ─── Sudo ────────────────────────────────────────────────────────
+  # Allow wheel group to sudo without password (headless rebuilds)
+  security.sudo.wheelNeedsPassword = false;
+
   # ─── Nix settings ──────────────────────────────────────────────────
   nix.settings = {
     experimental-features = [
