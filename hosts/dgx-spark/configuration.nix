@@ -64,6 +64,32 @@
   # ─── Firewall ──────────────────────────────────────────────────────
   networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard
 
+  # ─── DGX Dashboard ─────────────────────────────────────────────────
+  # Move dashboard to internal port 11001, then proxy external 11000
+  services.dgx-dashboard = {
+    enable = true;
+    port = 11001;
+  };
+
+  systemd.sockets.dgx-dashboard-lan = {
+    description = "DGX Dashboard LAN socket";
+    wantedBy = [ "sockets.target" ];
+    listenStreams = [ "11000" ];
+  };
+
+  systemd.services.dgx-dashboard-lan = {
+    description = "DGX Dashboard LAN proxy";
+    requires = [ "dgx-dashboard-lan.socket" ];
+    after = [
+      "dgx-dashboard-lan.socket"
+      "dgx-dashboard.service"
+    ];
+    serviceConfig = {
+      ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd 127.0.0.1:11001";
+      PrivateTmp = true;
+    };
+  };
+
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
   # Publish hostname so clients can reach dgx-spark.local
   services.avahi = {
