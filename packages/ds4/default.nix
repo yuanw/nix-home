@@ -31,9 +31,8 @@ cudaPackages.backendStdenv.mkDerivation {
     runHook preBuild
     make ds4 ds4-server ds4-bench ds4-eval \
       NVCC=nvcc \
-      CUDA_ARCH= \
       NATIVE_CPU_FLAG= \
-      "NVCCFLAGS=-O3 --use_fast_math -Xcompiler -pthread" \
+      "NVCCFLAGS=-O3 --use_fast_math -arch=sm_100 -Xcompiler -pthread" \
       "CUDA_LDLIBS=-lm -Xcompiler -pthread -lcudart -lcublas"
     runHook postBuild
   '';
