@@ -20,7 +20,7 @@ let
     ps: with ps; [
       torch
       torchvision
-      (torchaudio.overrideAttrs (_old: {
+      (torchaudio.overridePythonAttrs (_old: {
         doCheck = false;
       }))
       transformers
@@ -74,6 +74,13 @@ let
       albumentations
       torchmetrics
       triton
+      ((builtins.getAttr "flash-attn" ps).overridePythonAttrs (old: {
+        meta = (old.meta or { }) // {
+          broken = false;
+        };
+        # CUDA 12.9 requires g++ < 15.0; use gcc14 for compatibility
+        stdenv = pkgs.gcc14Stdenv;
+      }))
     ]
   );
 
@@ -113,6 +120,15 @@ pkgs.stdenv.mkDerivation {
     cp lance_gradio_t2v_v2t.py $out/share/lance/
     cp setup_env.sh         $out/share/lance/
     cp requirements.txt     $out/share/lance/
+
+    # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
+    # Move top-level import to just before first use
+    substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
+      --replace 'from data.datasets_custom import ValidationDataset' \
+                '# from data.datasets_custom import ValidationDataset  # moved inside function'
+    substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
+      --replace '        val_dataset = ValidationDataset(' \
+                '        from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
 
     mkdir -p $out/share/lance/downloads
     mkdir -p $out/share/lance/results
@@ -307,14 +323,17 @@ pkgs.stdenv.mkDerivation {
     BINSH
 
         # ── 4. Substitute store paths ──
-        for f in $out/bin/lance-gradio $out/bin/lance; do
-          substituteInPlace "$f" \
-            --replace-fail '__PYTHON_EXEC__' "${pythonExec}" \
-            --replace-fail '__LANCE_SHARE__' "$out/share/lance"
-        done
+        substituteInPlace $out/bin/lance-gradio \
+          --replace-fail '__PYTHON_EXEC__' "${pythonExec}" \
+          --replace-fail '__LANCE_SHARE__' "$out/share/lance"
 
         chmod +x $out/bin/lance
         chmod +x $out/bin/lance-gradio
+
+        # Fix shebang lines: remove any leading whitespace before #!
+        # (Nix indented strings can leave partial indentation)
+        sed -i '1s/^[[:space:]]\{1,\}#!/#!/' $out/bin/lance-gradio
+        sed -i '1s/^[[:space:]]\{1,\}#!/#!/' $out/bin/lance
 
         runHook postInstall
   '';

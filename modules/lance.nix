@@ -162,6 +162,7 @@ in
             Type = "simple";
             User = "lance";
             Group = "lance";
+            StateDirectory = "lance";
             WorkingDirectory = cfg.dataDir;
             ExecStart = "${cfg.package}/bin/lance-gradio";
             Restart = "on-failure";
