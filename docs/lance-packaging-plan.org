@@ -10,6 +10,58 @@
   (ARM64, NVIDIA Grace+Blackwell), running it as a systemd service, and
   providing a user-facing interface.
 
+* Implementation Progress :PROGRESS:
+  :PROPERTIES:
+  :DATE: <2026-05-19>
+  :STATUS: IMPLEMENTING
+  :END:
+
+  /NOTE:/ All implementation files created. Next step: build on DGX Spark.
+
+  - [X] *Section 2* – Packaging: =packages/lance/default.nix= created (supports both variants)
+  - [X] *Section 3* – Systemd service: =modules/lance.nix= created (multi-instance: video + image)
+  - [X] *Section 4* – CLI wrapper (=lance= command) included, auto-selects model by task
+  - [X] *Section 5* – Flake integration: packages/default.nix + modules/default.nix updated
+  - [X] *Section 5.3* – Host config: =hosts/dgx-spark/configuration.nix= updated (both instances)
+  - [X] *Justfile* – All =spark-lance-*= commands added (deploy, download, start/stop/logs)
+  - [X] *Syntax check* – All Nix files parse correctly (packages, modules, config)
+  - [ ] *Build* – Run =nix build .#dgx-spark= to verify (requires ARM64 host or remote build)
+  - [ ] *Deploy* – Run =just spark-lance-deploy= to push to DGX Spark
+  - [ ] *Download models* – Run =just spark-lance-download-models= on DGX Spark
+  - [ ] *Verify* – Check =just spark-lance-status video= and =spark-lance-logs video=
+  - [ ] *REST API* – Not yet implemented (Section 4.2)
+  - [ ] *Container image* – Not yet implemented (Section 2.3.1)
+
+  Syntax verification results:
+  - =packages/lance/default.nix= – evaluates to =lance-0-unstable-2026-05-19=
+  - =modules/lance.nix= – options parse, descriptions correct
+  - =hosts/dgx-spark/configuration.nix= – =services.lance.instances.video.enable = true=
+  - =justfile= – all lance commands listed correctly
+
+  /NOTE:/ The package has an empty hash (=hash = ""=) for the GitHub fetch. First build
+  will fail with a hash mismatch error, providing the correct SRI hash to fill in.
+
+  Known ARM64 issues (to resolve on DGX Spark):
+  - =kornia-rs= has =aarch64-linux= in =badPlatforms= – may need override
+  - =flash-attn=, =bitsandbytes=, =triton= need ARM64-specific builds
+  - =decord= and =qwen-vl-utils= removed (not in nixpkgs)
+  - =transformers-stream-generator= removed (optional, not in nixpkgs)
+  - Build on DGX Spark directly where packages are available for ARM64
+
+  Both model variants supported:
+  - =Lance_3B= (image tasks: t2i, image_edit, x2t_image) → =lance-gradio-image= on port 7861
+  - =Lance_3B_Video= (video tasks: t2v, video_edit, x2t_video) → =lance-gradio-video= on port 7860
+  - CLI auto-selects model based on task name
+  - Model downloader fetches both variants
+
+  Files created/modified:
+  - [[file:./packages/lance/default.nix][packages/lance/default.nix]] – Main package: Python env + source + CLI + downloader
+  - [[file:./modules/lance.nix][modules/lance.nix]] – NixOS module: systemd service + config options
+  - [[file:./packages/default.nix][packages/default.nix]] – Added =lance= to overlay
+  - [[file:./modules/default.nix][modules/default.nix]] – Added =lance.nix= to linux imports
+  - [[file:./hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] – Enabled Lance service
+  - [[file:./justfile][justfile]] – Added =spark-lance-*= commands
+
 * Table of Contents :TOC:
   - [[*1.  DGX-Spark Platform & Environment][1. Platform & Environment]]
   - [[*2.  Packaging the Lance Model][2. Packaging the Lance Model]]
@@ -17,6 +69,7 @@
   - [[*4.  User-Facing Interface][4. User-Facing Interface]]
   - [[*5.  Integration with Nix Flake][5. Integration with Nix Flake]]
   - [[*6.  Operational Runbook][6. Operational Runbook]]
+  - [[*Implementation Progress][Progress]]
 
 * 1.  DGX-Spark Platform & Environment
 

@@ -64,6 +64,25 @@
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = true;
 
+  # ─── Lance Multimodal AI ────────────────────────────────────────────
+  services.lance = {
+    enable = true;
+    instances = {
+      video = {
+        enable = true;
+        model = "video";
+        gradioTask = "t2v";
+        gradioPort = 7860;
+      };
+      image = {
+        enable = true;
+        model = "image";
+        gradioTask = "t2i";
+        gradioPort = 7861;
+      };
+    };
+  };
+
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   # Move dashboard to internal port 11001, then proxy external 11000
   networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard LAN proxy

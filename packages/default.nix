@@ -172,6 +172,8 @@ _final: prev: {
 
   ds4 = prev.callPackage ./ds4 { };
 
+  lance = prev.callPackage ./lance { };
+
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
 }
