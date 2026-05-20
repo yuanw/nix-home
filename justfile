@@ -80,7 +80,7 @@ spark-lance-deploy IP="dgx-spark.local":
 
 # download both Lance model variants (Lance_3B + Lance_3B_Video) on DGX Spark
 spark-lance-download-models IP="dgx-spark.local":
-    @ssh yuanw@{{IP}} "sudo -u lance bash -c 'export LANCE_DATA_DIR=/var/lib/lance && lance-download-model'"
+    @ssh yuanw@{{IP}} "sudo -u lance bash -c 'export LANCE_DATA_DIR=/var/lib/lance && \$(command -v lance-download-model)'"
 
 # service management (replace INSTANCE with "video" or "image")
 spark-lance-start INSTANCE="video" IP="dgx-spark.local":

@@ -182,6 +182,9 @@ in
       )
     ) cfg.instances;
 
+    # ─── System packages: add lance CLI ────────────────────────
+    environment.systemPackages = [ cfg.package ];
+
     # ─── Firewall: open all instance ports ───────────────────────
     networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall (
       lib.flatten (lib.mapAttrsToList (_: instance: [ instance.gradioPort ]) cfg.instances)

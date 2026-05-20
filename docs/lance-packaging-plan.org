@@ -25,28 +25,19 @@
   - [X] *Section 5.3* – Host config: =hosts/dgx-spark/configuration.nix= updated (both instances)
   - [X] *Justfile* – All =spark-lance-*= commands added (deploy, download, start/stop/logs)
   - [X] *Syntax check* – All Nix files parse correctly (packages, modules, config)
-  - [ ] *Build* – Run =nix build .#dgx-spark= to verify (requires ARM64 host or remote build)
+  - [X] *Full evaluation* – =nix eval .#dgx-spark= succeeds (derivation created)
+  - [ ] *Build* – Run =nix build .#dgx-spark= on DGX Spark (requires ARM64 host)
   - [ ] *Deploy* – Run =just spark-lance-deploy= to push to DGX Spark
   - [ ] *Download models* – Run =just spark-lance-download-models= on DGX Spark
   - [ ] *Verify* – Check =just spark-lance-status video= and =spark-lance-logs video=
   - [ ] *REST API* – Not yet implemented (Section 4.2)
   - [ ] *Container image* – Not yet implemented (Section 2.3.1)
 
-  Syntax verification results:
-  - =packages/lance/default.nix= – evaluates to =lance-0-unstable-2026-05-19=
-  - =modules/lance.nix= – options parse, descriptions correct
-  - =hosts/dgx-spark/configuration.nix= – =services.lance.instances.video.enable = true=
-  - =justfile= – all lance commands listed correctly
-
-  /NOTE:/ The package has an empty hash (=hash = ""=) for the GitHub fetch. First build
-  will fail with a hash mismatch error, providing the correct SRI hash to fill in.
-
-  Known ARM64 issues (to resolve on DGX Spark):
-  - =kornia-rs= has =aarch64-linux= in =badPlatforms= – may need override
-  - =flash-attn=, =bitsandbytes=, =triton= need ARM64-specific builds
-  - =decord= and =qwen-vl-utils= removed (not in nixpkgs)
-  - =transformers-stream-generator= removed (optional, not in nixpkgs)
-  - Build on DGX Spark directly where packages are available for ARM64
+  Evaluation results:
+  - =nix eval .#dgx-spark= → =/nix/store/...-nixos-system-dgx-spark-26.05...= (derivation created)
+  - =kornia= removed from dependencies (kornia-rs has =aarch64-linux= badPlatforms)
+  - =modules/lance.nix= now adds =cfg.package= to =environment.systemPackages=
+  - =justfile= download command uses =command -v= for PATH-independent lookup
 
   Both model variants supported:
   - =Lance_3B= (image tasks: t2i, image_edit, x2t_image) → =lance-gradio-image= on port 7861

@@ -12,7 +12,7 @@ let
     owner = "bytedance";
     repo = "Lance";
     rev = "main";
-    hash = ""; # FIXME: set after first build
+    hash = "sha256-2fkog+feEJDcq5LRjjeAIy04LNUbkpWcGOgVPKRT9U4=";
   };
 
   # Python environment with all Lance dependencies.
@@ -59,7 +59,6 @@ let
       pydantic
       typing-extensions
       packaging
-      kornia
       librosa
       soundfile
       gpustat
