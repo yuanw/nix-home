@@ -174,16 +174,6 @@ _final: prev: {
 
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 
-  # torchaudio tests fail on aarch64-linux (ARM64 precision issues, illegal immediate parameter errors)
-  python3Packages = prev.python3Packages.overrideScope (
-    _self: super: {
-      torchaudio = super.torchaudio.overrideAttrs (_old: {
-        doCheck = false;
-      });
-    }
-  );
-  python3 = _final.python3Packages.python;
-
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
 

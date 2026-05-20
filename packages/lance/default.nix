@@ -20,7 +20,9 @@ let
     ps: with ps; [
       torch
       torchvision
-      torchaudio
+      (torchaudio.overrideAttrs (_old: {
+        doCheck = false;
+      }))
       transformers
       diffusers
       accelerate
