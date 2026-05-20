@@ -123,75 +123,7 @@ pkgs.stdenv.mkDerivation {
 
         mkdir -p $out/bin
 
-        # ── 1. lance-download-model ──
-        cat > $out/bin/lance-download-model << 'BINSH'
-        #!/bin/sh
-        set -e
-        : "''${LANCE_DATA_DIR:=$PWD}"
-        : "''${HF_TOKEN:=}"
-
-        MODELS_DIR="$LANCE_DATA_DIR/downloads"
-        mkdir -p "$MODELS_DIR"
-
-        echo "=== Lance Model Downloader ==="
-        echo "Models directory: $MODELS_DIR"
-        echo ""
-
-        download_variant() {
-          VARIANT="$1"
-          DIR="$MODELS_DIR/$VARIANT"
-          mkdir -p "$DIR"
-          echo "Downloading $VARIANT ..."
-
-          __python3__ -c "
-        import os, sys
-        from huggingface_hub import snapshot_download, hf_hub_download
-
-        repo_id = 'bytedance-research/Lance'
-        variant = '$VARIANT'
-        dest = '$DIR'
-
-        snapshot_download(
-            repo_id=repo_id,
-            allow_patterns=[f'{variant}/*'],
-            local_dir=dest,
-            local_dir_use_symlinks=False,
-        )
-        print(f'Downloaded {variant} to {dest}')
-        "
-        }
-
-        download_variant "Lance_3B"
-        download_variant "Lance_3B_Video"
-
-        echo "Downloading shared components ..."
-        __python3__ -c "
-        from huggingface_hub import snapshot_download, hf_hub_download
-        repo_id = 'bytedance-research/Lance'
-
-        snapshot_download(
-            repo_id=repo_id,
-            allow_patterns=['Qwen2.5-VL-ViT/*'],
-            local_dir='$MODELS_DIR',
-            local_dir_use_symlinks=False,
-        )
-
-        hf_hub_download(
-            repo_id=repo_id,
-            filename='Wan2.2_VAE.pth',
-            local_dir='$MODELS_DIR',
-            local_dir_use_symlinks=False,
-        )
-        print('Shared components downloaded.')
-        "
-
-        echo ""
-        echo "=== Download complete ==="
-        echo "Models are at: $MODELS_DIR"
-        ls -la "$MODELS_DIR"
-    BINSH
-
-        # ── 2. lance-gradio ──
+        # ── 1. lance-gradio ──
         cat > $out/bin/lance-gradio << 'BINSH'
         #!/bin/sh
         set -e
@@ -359,7 +291,12 @@ pkgs.stdenv.mkDerivation {
             exec $out/bin/lance-gradio "$@"
             ;;
           download-models)
-            exec $out/bin/lance-download-model "$@"
+            if command -v lance-download-model >/dev/null 2>&1; then
+              exec lance-download-model "$@"
+            else
+              echo "ERROR: lance-download-model not found. Install the lance-download-model package."
+              exit 1
+            fi
             ;;
           *)
             usage
@@ -368,17 +305,14 @@ pkgs.stdenv.mkDerivation {
     BINSH
 
         # ── 4. Substitute store paths ──
-        for f in $out/bin/lance-gradio $out/bin/lance $out/bin/lance-download-model; do
+        for f in $out/bin/lance-gradio $out/bin/lance; do
           substituteInPlace "$f" \
             --replace-fail '__PYTHON_EXEC__' "${pythonExec}" \
             --replace-fail '__LANCE_SHARE__' "$out/share/lance"
         done
-        substituteInPlace $out/bin/lance-download-model \
-          --replace-fail '__python3__' "${pythonExec}"
 
         chmod +x $out/bin/lance
         chmod +x $out/bin/lance-gradio
-        chmod +x $out/bin/lance-download-model
 
         runHook postInstall
   '';

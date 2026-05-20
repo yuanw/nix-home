@@ -172,7 +172,9 @@ _final: prev: {
 
   ds4 = prev.callPackage ./ds4 { };
 
+  ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
   lance = prev.callPackage ./lance { };
+  lance-download-model = prev.callPackage ./lance-download-model { };
 
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };

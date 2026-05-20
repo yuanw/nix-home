@@ -182,8 +182,11 @@ in
       )
     ) cfg.instances;
 
-    # ─── System packages: add lance CLI ────────────────────────
-    environment.systemPackages = [ cfg.package ];
+    # ─── System packages: add lance CLI + model downloader ────
+    environment.systemPackages = [
+      cfg.package
+      pkgs.lance-download-model
+    ];
 
     # ─── Firewall: open all instance ports ───────────────────────
     networking.firewall.allowedTCPPorts = mkIf cfg.openFirewall (
