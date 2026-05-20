@@ -26,8 +26,9 @@
   - [X] *Justfile* – All =spark-lance-*= commands added (deploy, download, start/stop/logs)
   - [X] *Syntax check* – All Nix files parse correctly (packages, modules, config)
   - [X] *Full evaluation* – =nix eval .#dgx-spark= succeeds (derivation created)
-  - [ ] *Build* – Run =nix build .#dgx-spark= on DGX Spark (requires ARM64 host)
-  - [ ] *Deploy* – Run =just spark-lance-deploy= to push to DGX Spark
+  - [X] *Source hash* – =sha256-2fkog+feEJDcq5LRjjeAIy04LNUbkpWcGOgVPKRT9U4= (from =spark-build-lance=)
+  - [ ] *Build* – =nix build .#dgx-spark= running on DGX Spark (58 derivations, incl. torch+triton)
+  - [ ] *Deploy* – =just spark-lance-deploy= pushed to DGX Spark (switch in progress)
   - [ ] *Download models* – Run =just spark-lance-download-models= on DGX Spark
   - [ ] *Verify* – Check =just spark-lance-status video= and =spark-lance-logs video=
   - [ ] *REST API* – Not yet implemented (Section 4.2)
@@ -35,6 +36,7 @@
 
   Evaluation results:
   - =nix eval .#dgx-spark= → =/nix/store/...-nixos-system-dgx-spark-26.05...= (derivation created)
+  - Source hash: =sha256-2fkog+feEJDcq5LRjjeAIy04LNUbkpWcGOgVPKRT9U4= (GitHub =bytedance/Lance=, =main= branch)
   - =kornia= removed from dependencies (kornia-rs has =aarch64-linux= badPlatforms)
   - =modules/lance.nix= now adds =cfg.package= to =environment.systemPackages=
   - =justfile= download command uses =command -v= for PATH-independent lookup
