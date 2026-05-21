@@ -87,7 +87,19 @@ spark-lance-start INSTANCE="video" IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl start lance-gradio-{{INSTANCE}}"
 
 spark-lance-stop INSTANCE="video" IP="dgx-spark.local":
-    @ssh yuanw@{{IP}} "sudo systemctl stop lance-gradio-{{INSTANCE}}"
+    @ssh yuanw@{{IP}} "sudo systemctl kill --kill-who=main --signal=SIGKILL lance-gradio-{{INSTANCE}} 2>/dev/null; sudo systemctl stop lance-gradio-{{INSTANCE}}"
+
+# start both image & video services (stops ds4-server first)
+spark-lance-start-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server; sudo systemctl start lance-gradio-image lance-gradio-video"
+
+# stop both image & video services (force kill first)
+spark-lance-stop-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl kill --kill-who=main --signal=SIGKILL lance-gradio-image lance-gradio-video 2>/dev/null; sudo systemctl stop lance-gradio-image lance-gradio-video"
+
+# restart both services
+spark-lance-restart-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server; sudo systemctl restart lance-gradio-image lance-gradio-video"
 
 spark-lance-restart INSTANCE="video" IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl restart lance-gradio-{{INSTANCE}}"

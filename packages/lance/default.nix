@@ -86,6 +86,10 @@ let
           export MAX_JOBS=1
           export NVCC_THREADS=2
         '';
+        # DGX Spark GB10 is sm121, add to arch list
+        env = (old.env or { }) // {
+          TORCH_CUDA_ARCH_LIST = "8.0;9.0;10.0;12.0;12.1";
+        };
       }))
     ]
   );
