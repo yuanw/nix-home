@@ -12,128 +12,120 @@
 
 * Implementation Progress :PROGRESS:
   :PROPERTIES:
-  :DATE: <2026-05-19>
+  :DATE: <2026-05-21>
   :STATUS: IMPLEMENTING
   :END:
 
-  /NOTE:/ Initial implementation done. Successfully builds and deploys to DGX Spark
-  (system activation works). Gradio server script now executes (shebang fixed, StateDirectory added,
-  decord import made lazy). Blocked on =flash-attn= build (g++ 15 vs CUDA 12.9 compat issue)
-  and =decord= missing at runtime (video validation dataset).
+  /NOTE:/ Full system builds, deploys, and both Gradio servers start. =flash-attn= built
+  successfully (gcc14Stdenv + MAX_JOBS=1 + NVCC_THREADS=2). =decord= remains WIP — using
+  NUR-based approach (commit 38f59c34 with ffmpeg_4, separate libdecord build).
+  Model weights not yet downloaded (~20GB via huggingface-hub).
 
 ** ✓ Done
 
-  - [X] *Section 2* – Packaging: =packages/lance/default.nix= created (supports both variants)
-  - [X] *Section 3* – Systemd service: =modules/lance.nix= created (multi-instance: video + image)
-  - [X] *Section 4* – CLI wrapper (=lance= command) included, auto-selects model by task
-  - [X] *Section 5* – Flake integration: packages/default.nix + modules/default.nix updated
-  - [X] *Section 5.3* – Host config: =hosts/dgx-spark/configuration.nix= updated (both instances)
-  - [X] *Justfile* – All =spark-lance-*= commands added (deploy, download, start/stop/logs)
-  - [X] *Syntax check* – All Nix files parse correctly (packages, modules, config)
-  - [X] *Full evaluation* – =nix eval .#dgx-spark= succeeds (derivation created)
-  - [X] *Source hash* – =sha256-2fkog+feEJDcq5LRjjeAIy04LNUbkpWcGOgVPKRT9U4= (from =spark-build-lance=)
-  - [X] *Build + Deploy* – =nix build .#dgx-spark= + =just spark-lance-deploy= completes
-    (system activation succeeds, gradio services start)
-  - [X] *lance-download-model* – Extracted from main Lance package into standalone
-    =packages/lance-download-model/default.nix= (lightweight, huggingface-hub only)
-  - [X] *ffmpeg-full whisper fix* – =packages/default.nix= overrides =ffmpeg-full= with
-    =withWhisper = false= (worked around strictDeps issue with whisper-cpp .pc file)
-  - [X] *shebang leading spaces* – Fixed indent before =#!/bin/sh= in heredoc (caused
-    systemd =status=203/EXEC=). Added =sed= cleanup in installPhase.
-  - [X] *StateDirectory* – Added =StateDirectory = "lance";= to module serviceConfig
+  - [X] *Full build + deploy* – =nix build .#dgx-spark= + =nixos-rebuild switch= completes
+    (system activation works, both Gradio services start)
+  - [X] *flash-attn from source* – Built with:
+    - =gcc14Stdenv= (g++ 14.3.0, CUDA 12.9 max is < 15.0)
+    - =MAX_JOBS=1= (prevents OOM on unified memory, DGX Spark has 121GB CPU+GPU shared)
+    - =NVCC_THREADS=2= (each =cicc= process uses ~5GB RSS, 2-4 per kernel for sm_80/90/100/120)
+    - Build time: ~5.5 hours (73+ CUDA kernel files, each 2-3 min on ARM64)
+    - =256MB wheel= produced (=flash_attn-2.8.2-cp313-cp313-linux_aarch64.whl=)
+  - [X] *Both Gradio servers running* – =lance-gradio-image= (port 7861) and
+    =lance-gradio-video= (port 7860) both =active (running)=
+  - [X] *decord lazy import* – Patched =lance_gradio_t2v_v2t.py= and =inference_lance.py=
+    to move =ValidationDataset= import from top-level to local (server starts without decord)
+  - [X] *init script fixes* – Added =chmod -R u+w= after =cp -r= in =lance-gradio=
+    init (nix store files are read-only; =downloads/= and =results/= need write perms)
+  - [X] *StateDirectory* – =StateDirectory = "lance";= in module serviceConfig
     (fixes =status=200/CHDIR=, auto-creates =/var/lib/lance/= with correct perms)
-  - [X] *decord lazy import* – Patched =lance_gradio_t2v_v2t.py= to move
-    =ValidationDataset= import from top-level to local inside function that uses it
-    (avoids crashing on startup when decord not in environment)
+  - [X] *shebang fix* – Fixed leading whitespace before =#!/bin/sh= (caused =status=203/EXEC=)
+  - [X] *lance-download-model* – Standalone package with proper python path via substituteInPlace
+  - [X] *torchaudio build fix* – =overridePythonAttrs (_old: { doCheck = false; })=
+    (3 tests fail on aarch64-linux; =overrideAttrs= doesn't affect python packages)
+  - [X] *ffmpeg-full whisper fix* – =withWhisper = false= (strictDeps issue with whisper-cpp .pc)
 
 ** ✗ Attempted – Failed
 
-  - [ ] *torchaudio build* – Tests fail on aarch64-linux (3 failures:
-    =test_lfilter_shape_4=, =test_lfilter_shape_6=, =test_batch_melspectrogram=).
-    Fixed with =overridePythonAttrs (_old: { doCheck = false; })= inside
-    =withPackages= call. Tried =overrideAttrs= first (didn't change hash because
-    python packages need =overridePythonAttrs=).
-  - [ ] *decord from source (ffmpeg_8)* – Failed: C++ compilation errors with FFmpeg 8.0.1 API
-    (=AVBSFContext=, =channel_layout=, =avcodec_close= removed in FFmpeg 8).
-  - [ ] *decord from source (ffmpeg_6)* – Failed: same FFmpeg API issues (FFmpeg 6 also
-    changed =channel_layout= → =ch_layout=).
-  - [ ] *decord from source (ffmpeg_4 + int64 patch)* – Failed: =setup.py= not at source root
-    (in =python/= subdirectory). Tried =sourceRoot = "source/python";= + CMake in
-    =postUnpack=/=preBuild=. Source tree read-only (hard-linked from nix store).
-    =chmod -R u+w= in =patchPhase= fixed permissions but build still complex.
-  - [ ] *decord nix package* – Abandoned: Too many FFmpeg API compatibility issues,
-    submodule handling, and CMake+Python hybrid build complexity.
-    Removed =packages/decord/= and overlay entry from =packages/default.nix=.
+  - [ ] *decord from source (ffmpeg_8)* – C++ errors: =AVBSFContext=, =channel_layout=,
+    =avcodec_close= removed in FFmpeg 8
+  - [ ] *decord from source (ffmpeg_6)* – Same FFmpeg API issues (6.x also changed
+    =channel_layout= → =ch_layout=)
+  - [ ] *decord from source (CMake + Python in postUnpack)* – Source tree read-only
+    (hard-linked from nix store); =chmod -R u+w= fixed perms but build remained complex
+  - [ ] *decord from source (standalone package)* – Abandoned due to FFmpeg 8 API
+    incompat, submodule handling, CMake+Python hybrid complexity
 
-** ✗ Blocked
+** ✓ Working (WIP decord approach)
 
-  - [ ] *flash-attn build* – Fails with =g++ 15.2.0 > max required by CUDA 12.9=
-    (=cudaPackages.backendStdenv= doesn't override stdenv correctly for flash-attn).
-    Tried =gcc14Stdenv= via =overridePythonAttrs=. Next: fix stdenv override,
-    possibly via =buildPythonPackage.override= in flash-attn package.
+  - [X] *decord via NUR pattern* – Using commit =38f59c34= (PR #301, ffmpeg6 compat fix)
+    with =ffmpeg_4= (4.4.6, version decord 0.6.0 was designed for):
+    - =libdecord= as separate =stdenv.mkDerivation= with cmake + ffmpeg_4
+    - =buildPythonPackage= copies =libdecord.so= and runs =setup.py= from =python/= dir
+    - Cleaned stale lock files; needs fresh build on DGX Spark (~2h due to ffmpeg_4)
 
 ** ☐ To Do
 
-  - [ ] *Unblock flash-attn* – Fix stdenv override (g++ < 15) or use a compatible CUDA version.
-  - [ ] *Add decord* – Either build from source (patched for FFmpeg 8), use pre-built
-    wheel, or replace with =av= package (available in nixpkgs).
-  - [ ] *Download models* – Run =just spark-lance-download-models= on DGX Spark
-  - [ ] *Start services* – Verify =just spark-lance-start video= and =spark-lance-start image=
-  - [ ] *Verify* – Check =just spark-lance-status video= and =spark-lance-logs video=
+  - [ ] *Build decord* – Fresh build on DGX Spark (stale locks cleaned)
+  - [ ] *Deploy + clear cache* – =
+    sudo rm -rf /var/lib/lance\; sudo systemctl restart lance-gradio-{image,video}=
+  - [ ] *Download models* – =sudo -u lance LANCE_DATA_DIR=/var/lib/lance lance-download-model=
+    (fetches Lance_3B + Lance_3B_Video + shared components, ~20GB)
+  - [ ] *Verify* – Check =http://dgx-spark.local:7860= and =http://dgx-spark.local:7861=
   - [ ] *REST API* – Not yet implemented (Section 4.2)
   - [ ] *Container image* – Not yet implemented (Section 2.3.1)
 
-** Build & Deploy Log (most recent iterations)
+** Build & Deploy Log
 
-  | # | Hash                          | Duration | Result              | Key issue                   |
-  |---+-------------------------------+----------+---------------------+-----------------------------|
-  | 1 | =...ncacw2kxs7...=            | timeout  | Build timeout        | torchaudio tests (fixed)    |
-  | 2 | =...xc7rg1af42...=            | 5:52     | Build fail (decord)   | decord source hash mismatch |
-  | 3 | =...wwvyhyp24...=             | timeout  | Build timeout        | decord no setup.py at root  |
-  | 4 | =...32hv9hvq1v...=            | timeout  | Lance build fail     | =__PYTHON_EXEC__= not in    |
-  |   |                               |          |                      | lance script (remove from   |
-  |   |                               |          |                      | substituteInPlace loop)      |
-  | 5 | =...nbbzhbh8a...=             | timeout  | Lance build fail     | substituteInPlace loop      |
-  |   |                               |          |                      | (only lance-gradio needs it)|  
-  | 6 | =...hr975nvw0...=             | timeout  | Lance build fail     | =mkdir build= Permission    |
-  |   |                               |          |                      | denied (read-only source)   |
-  | 7 | =...31qpyvqy...=              | 5:30     | decord build fail    | C++ errors with ffmpeg 8.0  |
-  | 8 | =...is17gcjyr...=             | 5:15     | decord build fail    | C++ errors (int64 + FFmpeg) |
-  | 9 | =...ighs67pd...=              | 4:00     | Build ok, service    | 203/EXEC (shebang spaces)   |
-  |   |                               |          | 203/EXEC             |                             |
-  |10 | =...xl4i9cpf...=              | 3:45     | Build ok, service    | 1/FAILURE (flash-attn       |
-  |   |                               |          | status=1/FAILURE     | missing at runtime)         |
-  |11 | =...s33f33lz...=              | 4:15     | flash-attn build     | g++ 15 vs CUDA 12.9        |
-  |   |                               |          | fail                 | (stdenv issue)              |
+  | #  | Hash                          | Duration | Result              | Key issue                              |
+  |----+-------------------------------+----------+---------------------+----------------------------------------|
+  | 1  | =...ncacw2kxs7...=            | timeout  | Build timeout        | torchaudio tests (fixed)               |
+  | 2  | =...xc7rg1af42...=            | 5:52     | Build fail (decord)  | decord source hash mismatch            |
+  | 3  | =...wwvyhyp24...=             | timeout  | Build timeout        | decord no setup.py at root             |
+  | 4  | =...32hv9hvq1v...=            | timeout  | Lance build fail     | =__PYTHON_EXEC__= in wrong script      |
+  | 5  | =...nbbzhbh8a...=             | timeout  | Lance build fail     | substituteInPlace loop (lance didn't   |
+  |    |                               |          |                      | need it)                                |
+  | 6  | =...hr975nvw0...=             | timeout  | Lance build fail     | =mkdir build= Permission denied        |
+  | 7  | =...31qpyvqy...=              | 5:30     | decord build fail    | C++ errors with ffmpeg 8.0             |
+  | 8  | =...is17gcjyr...=             | 5:15     | decord build fail    | C++ errors (int64 + FFmpeg)            |
+  | 9  | =...ighs67pd...=              | 4:00     | Build ok, 203/EXEC   | shebang leading spaces (heredoc indent)|
+  | 10 | =...xl4i9cpf...=              | 3:45     | Build ok, 1/FAILURE  | flash-attn missing at runtime          |
+  | 11 | =...s33f33lz...=              | 4:15     | flash-attn build fail| g++ 15 vs CUDA 12.9 (stdenv)           |
+  | 12 | =...0f93nkgz...=              | 5.5h     | flash-attn OK, OOM   | =cicc= killed by OOM (20 nvcc procs)   |
+  | 13 | =...n27brz4q8...=             | 5.5h     | flash-attn OK, OOM   | MAX_JOBS=4 still OOM (cicc= 6.5GB ea)  |
+  | 14 | =...hvhyk1s8j...=             | 5.5h     | flash-attn OK        | MAX_JOBS=1 + NVCC_THREADS=2 +          |
+  |    |                               |          | system OK (decord lazy)| ds4-server stopped → no OOM            |
+  | 15 | =...1lzlib9d...=              | 3h       | Services run,        | decord missing at runtime (both         |
+  |    |                               |          | no weights           | =lance_gradio= and =inference_lance=   |
+  |    |                               |          |                      | needed lazy patches)                    |
+  | 16 | =...b7cjbak9...=              | timeout  | decord build stuck   | stale lock files from prev attempts;    |
+  |    |                               |          |                      | NUR approach (ffmpeg_4) not yet built   |
 
-** Key Decisions
+** Key Findings
 
-  - *Model download at runtime*: Models are large (~20GB+) and not in Nix store;
-    =lance-download-model= (standalone, huggingface-hub only) runs on target machine.
-  - *Python env via =python3.withPackages=*: Self-contained closure.
-  - *Multi-instance architecture*: =lance-gradio-video= (port 7860) + =lance-gradio-image=
-    (port 7861) with independent model/task/port settings.
-  - *decord lazy import*: Since decord is hard to build from source (FFmpeg API
-    incompat), made import lazy. Gradio server starts without decord; video
-    tasks that need it will fail until decord is available.
-  - *flash-attn*: Required for all Lance inference. Build blocked by g++ 15 / CUDA 12.9
-    incompatibility. =backendStdenv= should handle this but doesn't propagate correctly.
+  - *flash-attn OOM* – Each =cicc= process uses ~6.5GB RSS. Compiling for 4 GPU
+    architectures (sm_80/90/100/120) spawns 2-4 =cicc= processes per kernel file.
+    DGX Spark has unified memory (121GB shared CPU+GPU). GPU was using ~80GB.
+    Fix: =MAX_JOBS=1= + =NVCC_THREADS=2= + stop =ds4-server=
+  - *g++ version* – PyTorch 2.11.0 (nixpkgs) has =CUDA_GCC_VERSIONS['12.9'] = (6,0,0), (15,0)=
+    (max < 15.0). System g++ is 15.2.0. Fix: =gcc14Stdenv= (g++ 14.3.0).
+    =cudaPackages.backendStdenv= on aarch64-linux was still using default stdenv.
+  - *CUDA 13 alternative* – =CUDA_GCC_VERSIONS['13.0'] = (6,0,0), (16,0)= accepts g++ 15.
+    [[https://github.com/NixOS/nixpkgs/pull/437723][PR #437723]] adds CUDA 13 support to nixpkgs.
+  - *decord FFmpeg compat* – decord 0.6.0 uses FFmpeg 4 API (=channel_layout=,
+    =avcodec_close=, =AVBSFContext=). NUR commit =38f59c34= (PR #301) claims FFmpeg 6 fix.
+    Using =ffmpeg_4= (4.4.6) is safest. Build approach: separate =libdecord= (cmake)
+    + =buildPythonPackage= (copies =.so=, runs setup.py from =python/= dir).
 
 ** Files created/modified
 
-  - [[file:./packages/lance/default.nix][packages/lance/default.nix]] – Main package: Python env + source + various CLI wrappers
+  - [[file:./packages/lance/default.nix][packages/lance/default.nix]] – Main package
   - [[file:./packages/lance-download-model/default.nix][packages/lance-download-model/default.nix]] – Standalone model downloader
-  - [[file:./modules/lance.nix][modules/lance.nix]] – NixOS module: systemd service + config options
-  - [[file:./packages/default.nix][packages/default.nix]] – Overlay: =lance=, =lance-download-model=, =ffmpeg-full= override
-  - [[file:./modules/default.nix][modules/default.nix]] – Added =lance.nix= to linux imports
-  - [[file:./hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] – Enabled Lance service (image + video)
+  - [[file:./packages/decord/default.nix][packages/decord/default.nix]] – NUR-based decord build (WIP)
+  - [[file:./modules/lance.nix][modules/lance.nix]] – NixOS module: systemd service + StateDirectory
+  - [[file:./packages/default.nix][packages/default.nix]] – Overlay: =lance=, =lance-download-model=, =decord=, =ffmpeg-full= override
+  - [[file:./hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] – =nixpkgs.config.cudaSupport = true=
   - [[file:./justfile][justfile]] – =spark-lance-*= commands
-  - [[file:./packages/decord/ (deleted)][packages/decord/]] – Attempted decord package, reverted
-
-  Both model variants supported:
-  - =Lance_3B= (image tasks: t2i, image_edit, x2t_image) → =lance-gradio-image= on port 7861
-  - =Lance_3B_Video= (video tasks: t2v, video_edit, x2t_video) → =lance-gradio-video= on port 7860
-  - CLI auto-selects model based on task name
 
 * Table of Contents :TOC:
   - [[*1.  DGX-Spark Platform & Environment][1. Platform & Environment]]
