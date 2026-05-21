@@ -122,7 +122,8 @@ pkgs.stdenv.mkDerivation {
     cp -r data              $out/share/lance/
 
     # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
-    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nROPE_INIT_FUNCTIONS["default"] = ROPE_INIT_FUNCTIONS["llama3"]/' \
+    # Use a simple sinusoidal init compatible with mrope config
+    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/import math\nfrom transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nif "default" not in ROPE_INIT_FUNCTIONS:\n    def _default_rope_init(config, device):\n        theta = getattr(config, "rope_theta", 1000000.0)\n        max_seq_len = getattr(config, "max_position_embeddings", 8192)\n        inv_freq = 1.0 \/ (theta ** (torch.arange(0, 64, 2).float() \/ 64))\n        return inv_freq, 1.0\n    ROPE_INIT_FUNCTIONS["default"] = _default_rope_init/' \
       $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
     cp -r benchmarks        $out/share/lance/
     cp inference_lance.py   $out/share/lance/
@@ -184,13 +185,23 @@ pkgs.stdenv.mkDerivation {
           cp -r __LANCE_SHARE__/* "$LANCE_DATA_DIR/"
           # Make writable (nix store files are read-only)
           chmod -R u+w "$LANCE_DATA_DIR"
-          mkdir -p "$LANCE_DATA_DIR/downloads"
+          # If persistent models exist at /var/lib/lance-models, symlink to save disk space
+          if [ -d "/var/lib/lance-models" ]; then
+            rm -rf "$LANCE_DATA_DIR/downloads"
+            ln -sf /var/lib/lance-models "$LANCE_DATA_DIR/downloads"
+          else
+            mkdir -p "$LANCE_DATA_DIR/downloads"
+          fi
           mkdir -p "$LANCE_DATA_DIR/results"
         fi
 
         if [ -d "$MODEL_PATH" ]; then
           mkdir -p "$LANCE_DATA_DIR/downloads"
-          ln -sfn "$MODEL_PATH" "$LANCE_DATA_DIR/downloads/Lance_3B_Video"
+          # Avoid circular symlink if MODEL_PATH is the same as the target
+          EXPECTED="$LANCE_DATA_DIR/downloads/Lance_3B_Video"
+          if [ "$MODEL_PATH" != "$EXPECTED" ]; then
+            ln -sfn "$MODEL_PATH" "$EXPECTED"
+          fi
         fi
 
         cd "$LANCE_DATA_DIR"

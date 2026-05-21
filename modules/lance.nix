@@ -167,13 +167,16 @@ in
             ExecStart = "${cfg.package}/bin/lance-gradio";
             Restart = "on-failure";
             RestartSec = "10s";
-            PrivateTmp = true;
+            PrivateTmp = false;
             # Wait up to 10 minutes for model to load
             TimeoutStartSec = 600;
             # Prevent OOM kills on model reload
             OOMScoreAdjust = -500;
             # GPU device access
-            DeviceAllow = "/dev/nvidia*";
+            # NOTE: DeviceAllow + User=lance causes torch.cuda.is_available() to return False
+            # on DGX Spark (GB10 unified memory). NVIDIA devices are world-writable (0666)
+            # so no explicit DeviceAllow is needed.
+            # DeviceAllow = "/dev/nvidia*";
             # Memory limit (adjust based on VRAM)
             MemoryMax = "96G";
 
