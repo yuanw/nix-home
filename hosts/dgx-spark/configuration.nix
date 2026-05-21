@@ -63,7 +63,7 @@
   nixpkgs.config.cudaSupport = true;
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = true;
+  services.ds4.enable = false;
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
