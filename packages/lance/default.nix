@@ -80,10 +80,10 @@ let
         };
         # CUDA 12.9 requires g++ < 15.0; use gcc14 for compatibility
         stdenv = pkgs.gcc14Stdenv;
-        # Reduce parallelism to avoid OOM on DGX Spark (20+ nvcc procs kill RAM)
+        # Reduce parallelism to avoid OOM on DGX Spark (unified memory, GPU uses most RAM)
         preConfigure = (old.preConfigure or "") + ''
-          export MAX_JOBS=4
-          export NVCC_THREADS=4
+          export MAX_JOBS=1
+          export NVCC_THREADS=2
         '';
       }))
     ]

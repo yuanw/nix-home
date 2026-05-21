@@ -60,6 +60,7 @@
     options = "--delete-older-than 30d";
   };
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.cudaSupport = true;
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = true;
