@@ -74,6 +74,7 @@ let
       albumentations
       torchmetrics
       triton
+      pkgs.decord
       ((builtins.getAttr "flash-attn" ps).overridePythonAttrs (old: {
         meta = (old.meta or { }) // {
           broken = false;
@@ -177,6 +178,8 @@ pkgs.stdenv.mkDerivation {
         if [ ! -d "$LANCE_DATA_DIR/common" ]; then
           echo "Initialising Lance app directory in $LANCE_DATA_DIR ..."
           cp -r __LANCE_SHARE__/* "$LANCE_DATA_DIR/"
+          # Make writable (nix store files are read-only)
+          chmod -R u+w "$LANCE_DATA_DIR"
           mkdir -p "$LANCE_DATA_DIR/downloads"
           mkdir -p "$LANCE_DATA_DIR/results"
         fi

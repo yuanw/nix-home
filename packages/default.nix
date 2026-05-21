@@ -174,6 +174,7 @@ _final: prev: {
 
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 
+  decord = prev.callPackage ./decord { };
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
 

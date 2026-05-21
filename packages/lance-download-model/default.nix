@@ -39,6 +39,8 @@ pkgs.stdenv.mkDerivation {
     MODELS_DIR="$LANCE_DATA_DIR/downloads"
     mkdir -p "$MODELS_DIR"
 
+    PYTHON='__PYTHON_EXEC__'
+
     echo "=== Lance Model Downloader ==="
     echo "Models directory: $MODELS_DIR"
     echo ""
@@ -49,7 +51,7 @@ pkgs.stdenv.mkDerivation {
       mkdir -p "$DIR"
       echo "Downloading $VARIANT ..."
 
-      python3 -c "
+      "$PYTHON" -c "
     import os, sys
     from huggingface_hub import snapshot_download, hf_hub_download
 
@@ -71,7 +73,7 @@ pkgs.stdenv.mkDerivation {
     download_variant "Lance_3B_Video"
 
     echo "Downloading shared components ..."
-    python3 -c "
+    "$PYTHON" -c "
     from huggingface_hub import snapshot_download, hf_hub_download
     repo_id = 'bytedance-research/Lance'
 
@@ -96,6 +98,9 @@ pkgs.stdenv.mkDerivation {
     echo "Models are at: $MODELS_DIR"
     ls -la "$MODELS_DIR"
     BINSH
+
+    substituteInPlace $out/bin/lance-download-model \
+      --replace-fail '__PYTHON_EXEC__' '${python}/bin/python3'
 
     chmod +x $out/bin/lance-download-model
     runHook postInstall
