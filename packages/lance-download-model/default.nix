@@ -60,17 +60,33 @@ pkgs.stdenv.mkDerivation {
     dest = '$DIR'
     tmp = dest + '.tmp'
 
-    # Download to a flat temp dir (snapshot_download preserves repo structure)
+    # Download to a temp dir (snapshot_download preserves repo structure)
+    if os.path.exists(tmp):
+        shutil.rmtree(tmp)
     os.makedirs(tmp, exist_ok=True)
     snapshot_download(
         repo_id=repo_id,
         allow_patterns=[f'{variant}/**'],
         local_dir=tmp,
     )
-    # Move files from nested variant/ dir up to the real dest
+    # Handle nested variant/ dir: files might be at tmp/variant/ or tmp/
     src = os.path.join(tmp, variant)
-    for f in os.listdir(src):
-        shutil.move(os.path.join(src, f), os.path.join(dest, f))
+    if os.path.isdir(src):
+        for f in os.listdir(src):
+            s = os.path.join(src, f)
+            d = os.path.join(dest, f)
+            if os.path.islink(s):
+                # Dereference symlinks (copy the target)
+                target = os.readlink(s)
+                if not os.path.isabs(target):
+                    target = os.path.join(os.path.dirname(s), target)
+                shutil.copy2(target, d)
+            else:
+                shutil.move(s, d)
+    else:
+        # Files are directly in tmp
+        for f in os.listdir(tmp):
+            shutil.move(os.path.join(tmp, f), os.path.join(dest, f))
     shutil.rmtree(tmp)
     print(f'Downloaded {variant} to {dest}')
     "
@@ -87,13 +103,15 @@ pkgs.stdenv.mkDerivation {
     repo_id = 'bytedance-research/Lance'
 
     tmp = os.path.join('$MODELS_DIR', 'shared.tmp')
+    if os.path.exists(tmp):
+        shutil.rmtree(tmp)
     os.makedirs(tmp, exist_ok=True)
     snapshot_download(
         repo_id=repo_id,
         allow_patterns=['Qwen2.5-VL-ViT/**'],
         local_dir=tmp,
     )
-    # Move Qwen2.5-VL-ViT dir up
+    # Handle nested Qwen2.5-VL-ViT dir
     src = os.path.join(tmp, 'Qwen2.5-VL-ViT')
     dst = os.path.join('$MODELS_DIR', 'Qwen2.5-VL-ViT')
     if os.path.exists(dst):

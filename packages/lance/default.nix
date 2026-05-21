@@ -120,6 +120,10 @@ pkgs.stdenv.mkDerivation {
     cp -r common            $out/share/lance/
     cp -r config            $out/share/lance/
     cp -r data              $out/share/lance/
+
+    # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
+    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nROPE_INIT_FUNCTIONS["default"] = ROPE_INIT_FUNCTIONS["llama3"]/' \
+      $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
     cp -r benchmarks        $out/share/lance/
     cp inference_lance.py   $out/share/lance/
     cp inference_lance.sh   $out/share/lance/
