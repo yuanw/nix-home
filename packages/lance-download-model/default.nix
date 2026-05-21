@@ -52,19 +52,26 @@ pkgs.stdenv.mkDerivation {
       echo "Downloading $VARIANT ..."
 
       "$PYTHON" -c "
-    import os, sys
-    from huggingface_hub import snapshot_download, hf_hub_download
+    import os, shutil, sys
+    from huggingface_hub import snapshot_download
 
     repo_id = 'bytedance-research/Lance'
     variant = '$VARIANT'
     dest = '$DIR'
+    tmp = dest + '.tmp'
 
+    # Download to a flat temp dir (snapshot_download preserves repo structure)
+    os.makedirs(tmp, exist_ok=True)
     snapshot_download(
         repo_id=repo_id,
-        allow_patterns=[f'{variant}/*'],
-        local_dir=dest,
-        local_dir_use_symlinks=False,
+        allow_patterns=[f'{variant}/**'],
+        local_dir=tmp,
     )
+    # Move files from nested variant/ dir up to the real dest
+    src = os.path.join(tmp, variant)
+    for f in os.listdir(src):
+        shutil.move(os.path.join(src, f), os.path.join(dest, f))
+    shutil.rmtree(tmp)
     print(f'Downloaded {variant} to {dest}')
     "
     }
@@ -74,21 +81,30 @@ pkgs.stdenv.mkDerivation {
 
     echo "Downloading shared components ..."
     "$PYTHON" -c "
+    import os, shutil
     from huggingface_hub import snapshot_download, hf_hub_download
+
     repo_id = 'bytedance-research/Lance'
 
+    tmp = os.path.join('$MODELS_DIR', 'shared.tmp')
+    os.makedirs(tmp, exist_ok=True)
     snapshot_download(
         repo_id=repo_id,
-        allow_patterns=['Qwen2.5-VL-ViT/*'],
-        local_dir='$MODELS_DIR',
-        local_dir_use_symlinks=False,
+        allow_patterns=['Qwen2.5-VL-ViT/**'],
+        local_dir=tmp,
     )
+    # Move Qwen2.5-VL-ViT dir up
+    src = os.path.join(tmp, 'Qwen2.5-VL-ViT')
+    dst = os.path.join('$MODELS_DIR', 'Qwen2.5-VL-ViT')
+    if os.path.exists(dst):
+        shutil.rmtree(dst)
+    shutil.move(src, dst)
+    shutil.rmtree(tmp)
 
     hf_hub_download(
         repo_id=repo_id,
         filename='Wan2.2_VAE.pth',
         local_dir='$MODELS_DIR',
-        local_dir_use_symlinks=False,
     )
     print('Shared components downloaded.')
     "
