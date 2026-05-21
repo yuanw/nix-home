@@ -1,80 +1,33 @@
 {
   lib,
-  stdenv,
   python3,
-  ffmpeg_4,
-  fetchFromGitHub,
-  cmake,
-  pkg-config,
+  fetchurl,
 }:
 
 let
-  version = "0.6.0";
-  # commit with ffmpeg6 compatibility fix (PR #301)
-  srcRev = "38f59c34799071a20076a1d16e9ea400fa40595a";
-  srcHash = "sha256-5aOZnq0VvWjeD6rOeu+cCiF22G4J4OJie0J5UXtvsTI=";
-
-  libdecord = stdenv.mkDerivation {
-    pname = "libdecord";
-    inherit version;
-
-    src = fetchFromGitHub {
-      owner = "dmlc";
-      repo = "decord";
-      rev = srcRev;
-      hash = srcHash;
-      fetchSubmodules = true;
-    };
-
-    nativeBuildInputs = [
-      cmake
-      pkg-config
-    ];
-    buildInputs = [ ffmpeg_4 ];
-
-    installPhase = ''
-      mkdir -p $out/lib
-      cp libdecord.so $out/lib
-    '';
+  version = "3.3.0";
+  wheel = fetchurl {
+    url = "https://files.pythonhosted.org/packages/e8/37/947bc17d6a16f5c678ab2c6ba3330b20f617ec7652f103051881cf1d98d9/decord2-3.3.0-cp313-cp313-manylinux_2_28_aarch64.whl";
+    hash = "sha256-3q3Rf8HMMVUXD1ocT3VS0IUPLmdjJg9p4HMLEtpDQxM=";
   };
 in
 
 python3.pkgs.buildPythonPackage {
   pname = "decord";
   inherit version;
-  format = "setuptools";
+  format = "wheel";
 
-  src = fetchFromGitHub {
-    owner = "dmlc";
-    repo = "decord";
-    rev = srcRev;
-    hash = srcHash;
-    fetchSubmodules = true;
-  };
-
-  sourceRoot = "source/python";
-
-  nativeBuildInputs = with python3.pkgs; [
-    setuptools
-    wheel
-  ];
-
-  propagatedBuildInputs = with python3.pkgs; [ numpy ];
-
-  preBuild = ''
-    mkdir -p build
-    cp ${libdecord}/lib/libdecord.so build/
-  '';
+  src = wheel;
 
   doCheck = false;
 
   pythonImportsCheck = [ "decord" ];
 
   meta = with lib; {
-    description = "Efficient video loader for deep learning with fast random access";
-    homepage = "https://github.com/dmlc/decord";
+    description = "Efficient video loader for deep learning with fast random access (FFmpeg8 compatible fork)";
+    homepage = "https://github.com/johnnynunez/decord2";
     license = licenses.asl20;
-    platforms = platforms.all;
+    platforms = [ "aarch64-linux" ];
     maintainers = [ ];
   };
 }
