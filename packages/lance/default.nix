@@ -161,6 +161,14 @@ pkgs.stdenv.mkDerivation {
       --replace '    val_dataset = ValidationDataset(' \
                 '    from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
 
+    # Move model to GPU AFTER checkpoint loading to avoid double memory allocation
+    # Original: create model (CPU) → move to GPU → load checkpoint (CPU) → copy to GPU → OOM
+    # Fixed:    create model (CPU) → load checkpoint (CPU) → move to GPU → OK
+    sed -i 's/^            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)$/            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)\n            init_from_model_path_if_needed(language_model, model_args)/' \
+      $out/share/lance/lance_gradio_t2v_v2t.py
+    sed -i 's/^            init_from_model_path_if_needed(model, model_args)$/            # moved before model.to(device)/' \
+      $out/share/lance/lance_gradio_t2v_v2t.py
+
     mkdir -p $out/share/lance/downloads
     mkdir -p $out/share/lance/results
 

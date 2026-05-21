@@ -156,7 +156,8 @@ in
           description = "Lance Multimodal AI Model – Gradio Server (${instance.model}, ${name})";
           after = [ "network-online.target" ];
           wants = [ "network-online.target" ];
-          wantedBy = [ "multi-user.target" ];
+          # Don't start by default — user starts manually with systemctl start lance-gradio-{image,video}
+          # wantedBy = [ "multi-user.target" ];
 
           serviceConfig = {
             Type = "simple";
