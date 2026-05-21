@@ -135,6 +135,14 @@ pkgs.stdenv.mkDerivation {
       --replace '        val_dataset = ValidationDataset(' \
                 '        from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
 
+    # Same lazy import fix for inference_lance.py (also imports ValidationDataset)
+    substituteInPlace $out/share/lance/inference_lance.py \
+      --replace 'from data.datasets_custom import ValidationDataset' \
+                '# from data.datasets_custom import ValidationDataset  # moved inside function'
+    substituteInPlace $out/share/lance/inference_lance.py \
+      --replace '    val_dataset = ValidationDataset(' \
+                '    from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
+
     mkdir -p $out/share/lance/downloads
     mkdir -p $out/share/lance/results
 
