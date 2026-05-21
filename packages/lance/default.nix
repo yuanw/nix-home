@@ -123,12 +123,24 @@ pkgs.stdenv.mkDerivation {
 
     # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
     # Use a simple sinusoidal init compatible with mrope config
-    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/import math\nfrom transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nif "default" not in ROPE_INIT_FUNCTIONS:\n    def _default_rope_init(config, device):\n        theta = getattr(config, "rope_theta", 1000000.0)\n        max_seq_len = getattr(config, "max_position_embeddings", 8192)\n        inv_freq = 1.0 \/ (theta ** (torch.arange(0, 64, 2).float() \/ 64))\n        return inv_freq, 1.0\n    ROPE_INIT_FUNCTIONS["default"] = _default_rope_init/' \
+    # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
+    # Use a simple sinusoidal init compatible with mrope config
+    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nif "default" not in ROPE_INIT_FUNCTIONS:\n    def _default_rope_init(config, device):\n        head_dim = getattr(config, "head_dim", getattr(config, "hidden_size", 2048) \/\/ getattr(config, "num_attention_heads", 16))\n        theta = getattr(config, "rope_theta", 1000000.0)\n        inv_freq = 1.0 \/ (theta ** (torch.arange(0, head_dim, 2, dtype=torch.float32) \/ head_dim))\n        return inv_freq, 1.0\n    ROPE_INIT_FUNCTIONS["default"] = _default_rope_init/' \
       $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
+    # mrope_section doubling (needed because cos/sin have 2*head_dim dims in transformers rope)
+    # This is already correct in the source: mrope_section = mrope_section * 2
+
     cp -r benchmarks        $out/share/lance/
     cp inference_lance.py   $out/share/lance/
     cp inference_lance.sh   $out/share/lance/
     cp lance_gradio_t2v_v2t.py $out/share/lance/
+
+    # Use MODEL_PATH env var instead of hardcoded DEFAULT_MODEL_PATH
+    # This allows image/video instances to use different model variants
+    sed -i '/^from pathlib/a import os' \
+      $out/share/lance/lance_gradio_t2v_v2t.py
+    sed -i 's|DEFAULT_MODEL_PATH = REPO_ROOT / "downloads" / "Lance_3B_Video"|DEFAULT_MODEL_PATH = Path(os.environ.get("MODEL_PATH", str(REPO_ROOT / "downloads" / "Lance_3B_Video")))|' \
+      $out/share/lance/lance_gradio_t2v_v2t.py
     cp setup_env.sh         $out/share/lance/
     cp requirements.txt     $out/share/lance/
 
