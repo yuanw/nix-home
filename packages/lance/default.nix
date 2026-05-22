@@ -110,86 +110,96 @@ pkgs.stdenv.mkDerivation {
   ];
 
   buildPhase = ''
-    runHook preBuild
+        runHook preBuild
 
-    mkdir -p $out/share/lance
-    mkdir -p $out/share/lance/tmps/gradio_t2v_v2t
+        mkdir -p $out/share/lance
+        mkdir -p $out/share/lance/tmps/gradio_t2v_v2t
 
-    cp -r modeling          $out/share/lance/
-    cp -r common            $out/share/lance/
-    cp -r config            $out/share/lance/
-    cp -r data              $out/share/lance/
+        cp -r modeling          $out/share/lance/
+        cp -r common            $out/share/lance/
+        cp -r config            $out/share/lance/
+        cp -r data              $out/share/lance/
 
-    # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
-    # Use a simple sinusoidal init compatible with mrope config
-    # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
-    # Use a simple sinusoidal init compatible with mrope config
-    sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nif "default" not in ROPE_INIT_FUNCTIONS:\n    def _default_rope_init(config, device):\n        head_dim = getattr(config, "head_dim", getattr(config, "hidden_size", 2048) \/\/ getattr(config, "num_attention_heads", 16))\n        theta = getattr(config, "rope_theta", 1000000.0)\n        inv_freq = 1.0 \/ (theta ** (torch.arange(0, head_dim, 2, dtype=torch.float32) \/ head_dim))\n        return inv_freq, 1.0\n    ROPE_INIT_FUNCTIONS["default"] = _default_rope_init/' \
-      $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
-    # mrope_section doubling (needed because cos/sin have 2*head_dim dims in transformers rope)
-    # This is already correct in the source: mrope_section = mrope_section * 2
+        # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
+        # Use a simple sinusoidal init compatible with mrope config
+        # Patch ROPE_INIT_FUNCTIONS to add "default" key (removed in transformers 5.x)
+        # Use a simple sinusoidal init compatible with mrope config
+        sed -i 's/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS/from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS\nif "default" not in ROPE_INIT_FUNCTIONS:\n    def _default_rope_init(config, device):\n        head_dim = getattr(config, "head_dim", getattr(config, "hidden_size", 2048) \/\/ getattr(config, "num_attention_heads", 16))\n        theta = getattr(config, "rope_theta", 1000000.0)\n        inv_freq = 1.0 \/ (theta ** (torch.arange(0, head_dim, 2, dtype=torch.float32) \/ head_dim))\n        return inv_freq, 1.0\n    ROPE_INIT_FUNCTIONS["default"] = _default_rope_init/' \
+          $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
+        # mrope_section doubling (needed because cos/sin have 2*head_dim dims in transformers rope)
+        # This is already correct in the source: mrope_section = mrope_section * 2
 
-    cp -r benchmarks        $out/share/lance/
-    cp inference_lance.py   $out/share/lance/
-    cp inference_lance.sh   $out/share/lance/
-    cp lance_gradio_t2v_v2t.py $out/share/lance/
+        cp -r benchmarks        $out/share/lance/
+        cp inference_lance.py   $out/share/lance/
+        cp inference_lance.sh   $out/share/lance/
+        cp lance_gradio_t2v_v2t.py $out/share/lance/
 
-    # Use MODEL_PATH env var instead of hardcoded DEFAULT_MODEL_PATH
-    # This allows image/video instances to use different model variants
-    sed -i '/^from pathlib/a import os' \
-      $out/share/lance/lance_gradio_t2v_v2t.py
-    sed -i 's|DEFAULT_MODEL_PATH = REPO_ROOT / "downloads" / "Lance_3B_Video"|DEFAULT_MODEL_PATH = Path(os.environ.get("MODEL_PATH", str(REPO_ROOT / "downloads" / "Lance_3B_Video")))|' \
-      $out/share/lance/lance_gradio_t2v_v2t.py
-    cp setup_env.sh         $out/share/lance/
-    cp requirements.txt     $out/share/lance/
+        # Use MODEL_PATH env var instead of hardcoded DEFAULT_MODEL_PATH
+        # This allows image/video instances to use different model variants
+        sed -i '/^from pathlib/a import os' \
+          $out/share/lance/lance_gradio_t2v_v2t.py
+        sed -i 's|DEFAULT_MODEL_PATH = REPO_ROOT / "downloads" / "Lance_3B_Video"|DEFAULT_MODEL_PATH = Path(os.environ.get("MODEL_PATH", str(REPO_ROOT / "downloads" / "Lance_3B_Video")))|' \
+          $out/share/lance/lance_gradio_t2v_v2t.py
+        cp setup_env.sh         $out/share/lance/
+        cp requirements.txt     $out/share/lance/
 
-    # Disable flash-attn entirely (sm121/GB10 incompatibility — flash-attn doesn't support sm121)
-    # Do NOT patch flash-attn imports — direct inference works with sm120 kernels on GB10.
-    # The Gradio server error was from _attn_implementation="flash_attention_2" in config.
-    # That's fixed below by forcing _attn_implementation="eager" after config load.
-    # Disable flash-attn entirely (sm121 GB10 incompatibility)
-    sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
-      $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
-    sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
-      $out/share/lance/modeling/qwen2/modeling_qwen2.py
-    sed -i 's/_attn_implementation="flash_attention_2"/_attn_implementation="eager"/' \
-      $out/share/lance/modeling/qwen2/configuration_qwen2.py
-    # Force _attn_implementation = "eager" after config is loaded (property bypass bug)
-    # Force _attn_implementation after config init (property bypass bug)
-    # The PretrainedConfig property setter is bypassed by direct __dict__ assignment
-    sed -i '/self\._attn_implementation = _attn_implementation$/a \
-        self._attn_implementation_internal = "eager"' \
-      $out/share/lance/modeling/qwen2/configuration_qwen2.py
+        # Disable flash-attn entirely (sm121/GB10 incompatibility — flash-attn doesn't support sm121)
+        # Do NOT patch flash-attn imports — direct inference works with sm120 kernels on GB10.
+        # The Gradio server error was from _attn_implementation="flash_attention_2" in config.
+        # That's fixed below by forcing _attn_implementation="eager" after config load.
+        # Disable flash-attn entirely (sm121 GB10 incompatibility)
+        sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
+          $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
+        sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
+          $out/share/lance/modeling/qwen2/modeling_qwen2.py
+        sed -i 's/_attn_implementation="flash_attention_2"/_attn_implementation="eager"/' \
+          $out/share/lance/modeling/qwen2/configuration_qwen2.py
+        # Force _attn_implementation = "eager" after config is loaded (property bypass bug)
+        # Force _attn_implementation after config init (property bypass bug)
+        # The PretrainedConfig property setter is bypassed — set internal attr directly
+        cat > /tmp/patch_attn.py << SRCEND
+    import re, sys
+    path = sys.argv[1]
+    with open(path) as f:
+        src = f.read()
+    old = "self._attn_implementation = _attn_implementation"
+    new = old + chr(10) + "        self._attn_implementation_internal = 'eager'"
+    src = src.replace(old, new, 1)
+    with open(path, 'w') as f:
+        f.write(src)
+    print("Patched", path)
+    SRCEND
+        ${lancePython}/bin/python3 /tmp/patch_attn.py "$out/share/lance/modeling/qwen2/configuration_qwen2.py"
 
-    # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
-    # Move top-level import to just before first use
-    substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
-      --replace 'from data.datasets_custom import ValidationDataset' \
-                '# from data.datasets_custom import ValidationDataset  # moved inside function'
-    substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
-      --replace '        val_dataset = ValidationDataset(' \
-                '        from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
+        # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
+        # Move top-level import to just before first use
+        substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
+          --replace 'from data.datasets_custom import ValidationDataset' \
+                    '# from data.datasets_custom import ValidationDataset  # moved inside function'
+        substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
+          --replace '        val_dataset = ValidationDataset(' \
+                    '        from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
 
-    # Same lazy import fix for inference_lance.py (also imports ValidationDataset)
-    substituteInPlace $out/share/lance/inference_lance.py \
-      --replace 'from data.datasets_custom import ValidationDataset' \
-                '# from data.datasets_custom import ValidationDataset  # moved inside function'
-    substituteInPlace $out/share/lance/inference_lance.py \
-      --replace '    val_dataset = ValidationDataset(' \
-                '    from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
+        # Same lazy import fix for inference_lance.py (also imports ValidationDataset)
+        substituteInPlace $out/share/lance/inference_lance.py \
+          --replace 'from data.datasets_custom import ValidationDataset' \
+                    '# from data.datasets_custom import ValidationDataset  # moved inside function'
+        substituteInPlace $out/share/lance/inference_lance.py \
+          --replace '    val_dataset = ValidationDataset(' \
+                    '    from data.datasets_custom import ValidationDataset; val_dataset = ValidationDataset('
 
-    # Move model to GPU AFTER checkpoint loading to avoid double memory allocation
-    # Original: create model (CPU) → move to GPU → load checkpoint (CPU) → copy to GPU → OOM
-    # Fixed:    create model (CPU) → load checkpoint (CPU) → move to GPU → OK
-    sed -i 's/^            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)$/            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)\n            init_from_model_path_if_needed(language_model, model_args)/' \
-      $out/share/lance/lance_gradio_t2v_v2t.py
-    sed -i 's/^            init_from_model_path_if_needed(model, model_args)$/            # moved before model.to(device)/' \
-      $out/share/lance/lance_gradio_t2v_v2t.py
+        # Move model to GPU AFTER checkpoint loading to avoid double memory allocation
+        # Original: create model (CPU) → move to GPU → load checkpoint (CPU) → copy to GPU → OOM
+        # Fixed:    create model (CPU) → load checkpoint (CPU) → move to GPU → OK
+        sed -i 's/^            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)$/            language_model: Qwen2ForCausalLM = Qwen2ForCausalLM(llm_config)\n            init_from_model_path_if_needed(language_model, model_args)/' \
+          $out/share/lance/lance_gradio_t2v_v2t.py
+        sed -i 's/^            init_from_model_path_if_needed(model, model_args)$/            # moved before model.to(device)/' \
+          $out/share/lance/lance_gradio_t2v_v2t.py
 
-    mkdir -p $out/share/lance/downloads
-    mkdir -p $out/share/lance/results
+        mkdir -p $out/share/lance/downloads
+        mkdir -p $out/share/lance/results
 
-    runHook postBuild
+        runHook postBuild
   '';
 
   installPhase = ''
