@@ -75,7 +75,17 @@ let
       torchmetrics
       triton
       pkgs.decord
-      pkgs.python3Packages.flash-attn
+      # flash-attn required by Lance. Override for CUDA 12.9 + gcc14 compat + sm120 arch
+      ((builtins.getAttr "flash-attn" ps).overridePythonAttrs (old: {
+        meta = (old.meta or { }) // {
+          broken = false;
+        };
+        stdenv = pkgs.gcc14Stdenv;
+        preConfigure = (old.preConfigure or "") + ''
+          export MAX_JOBS=1
+          export NVCC_THREADS=2
+        '';
+      }))
     ]
   );
 
@@ -133,9 +143,23 @@ pkgs.stdenv.mkDerivation {
     cp setup_env.sh         $out/share/lance/
     cp requirements.txt     $out/share/lance/
 
-    # Patch flash-attn import to use eager attention (sm121/GB10 compatibility)
-    sed -i 's/from flash_attn import flash_attn_varlen_func/flash_attn_varlen_func = None/' \
-      $out/share/lance/modeling/lance/qwen2_navit.py
+    # Disable flash-attn entirely (sm121/GB10 incompatibility — flash-attn doesn't support sm121)
+    # Do NOT patch flash-attn imports — direct inference works with sm120 kernels on GB10.
+    # The Gradio server error was from _attn_implementation="flash_attention_2" in config.
+    # That's fixed below by forcing _attn_implementation="eager" after config load.
+    # Disable flash-attn entirely (sm121 GB10 incompatibility)
+    sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
+      $out/share/lance/modeling/qwen2_5_vl/modeling_qwen2_5_vl.py
+    sed -i 's/_supports_flash_attn_2 = True/_supports_flash_attn_2 = False/' \
+      $out/share/lance/modeling/qwen2/modeling_qwen2.py
+    sed -i 's/_attn_implementation="flash_attention_2"/_attn_implementation="eager"/' \
+      $out/share/lance/modeling/qwen2/configuration_qwen2.py
+    # Force _attn_implementation = "eager" after config is loaded (property bypass bug)
+    # Force _attn_implementation after config init (property bypass bug)
+    # The PretrainedConfig property setter is bypassed by direct __dict__ assignment
+    sed -i '/self\._attn_implementation = _attn_implementation$/a \
+        self._attn_implementation_internal = "eager"' \
+      $out/share/lance/modeling/qwen2/configuration_qwen2.py
 
     # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
     # Move top-level import to just before first use
@@ -198,6 +222,8 @@ pkgs.stdenv.mkDerivation {
           cp -r __LANCE_SHARE__/* "$LANCE_DATA_DIR/"
           # Make writable (nix store files are read-only)
           chmod -R u+w "$LANCE_DATA_DIR"
+          # Clear __pycache__ so Python recompiles patched .py files
+          find "$LANCE_DATA_DIR" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
           # If persistent models exist at /var/lib/lance-models, symlink to save disk space
           if [ -d "/var/lib/lance-models" ]; then
             rm -rf "$LANCE_DATA_DIR/downloads"
