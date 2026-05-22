@@ -75,22 +75,7 @@ let
       torchmetrics
       triton
       pkgs.decord
-      ((builtins.getAttr "flash-attn" ps).overridePythonAttrs (old: {
-        meta = (old.meta or { }) // {
-          broken = false;
-        };
-        # CUDA 12.9 requires g++ < 15.0; use gcc14 for compatibility
-        stdenv = pkgs.gcc14Stdenv;
-        # Reduce parallelism to avoid OOM on DGX Spark (unified memory, GPU uses most RAM)
-        preConfigure = (old.preConfigure or "") + ''
-          export MAX_JOBS=1
-          export NVCC_THREADS=2
-        '';
-        # DGX Spark GB10 is sm121, add to arch list
-        env = (old.env or { }) // {
-          TORCH_CUDA_ARCH_LIST = "8.0;9.0;10.0;12.0;12.1";
-        };
-      }))
+      pkgs.python3Packages.flash-attn
     ]
   );
 
@@ -147,6 +132,10 @@ pkgs.stdenv.mkDerivation {
       $out/share/lance/lance_gradio_t2v_v2t.py
     cp setup_env.sh         $out/share/lance/
     cp requirements.txt     $out/share/lance/
+
+    # Patch flash-attn import to use eager attention (sm121/GB10 compatibility)
+    sed -i 's/from flash_attn import flash_attn_varlen_func/flash_attn_varlen_func = None/' \
+      $out/share/lance/modeling/lance/qwen2_navit.py
 
     # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
     # Move top-level import to just before first use
