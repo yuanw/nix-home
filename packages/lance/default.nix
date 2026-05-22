@@ -75,17 +75,8 @@ let
       torchmetrics
       triton
       pkgs.decord
-      # flash-attn required by Lance. Override for CUDA 12.9 + gcc14 compat + sm120 arch
-      ((builtins.getAttr "flash-attn" ps).overridePythonAttrs (old: {
-        meta = (old.meta or { }) // {
-          broken = false;
-        };
-        stdenv = pkgs.gcc14Stdenv;
-        preConfigure = (old.preConfigure or "") + ''
-          export MAX_JOBS=1
-          export NVCC_THREADS=2
-        '';
-      }))
+      # FA4 supports sm121 (GB10/DGX Spark). Built with CUDA 13 + FLASH_ATTN_CUDA_ARCHS=...;121
+      pkgs.flash-attn-4
     ]
   );
 
@@ -171,6 +162,9 @@ pkgs.stdenv.mkDerivation {
     SRCEND
         ${lancePython}/bin/python3 /tmp/patch_attn.py "$out/share/lance/modeling/qwen2/configuration_qwen2.py"
 
+        # NOTE: FA4 replaces flash-attn 2.x. If FA4 build fails, revert to FA2 + SDPBackend.MATH patches.
+        # The if True: and SDPBackend.MATH patches are removed because FA4's CuTe kernels support sm121.
+
         # Patch ValidationDataset import to be lazy (avoids missing decord at startup)
         # Move top-level import to just before first use
         substituteInPlace $out/share/lance/lance_gradio_t2v_v2t.py \
@@ -243,6 +237,9 @@ pkgs.stdenv.mkDerivation {
           fi
           mkdir -p "$LANCE_DATA_DIR/results"
         fi
+
+        # Always clear __pycache__ on every start (patched .py files need fresh bytecode)
+        find "$LANCE_DATA_DIR" -name __pycache__ -type d -exec rm -rf {} + 2>/dev/null || true
 
         if [ -d "$MODEL_PATH" ]; then
           mkdir -p "$LANCE_DATA_DIR/downloads"
