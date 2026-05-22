@@ -22,7 +22,8 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
     owner = "Dao-AILab";
     repo = "flash-attention";
     rev = "fa4-v4.0.0.beta14";
-    hash = "sha256-Y10xmKrKRb+7l+WrM2WUGnQkn2R9fYkksgcpbFeOTPU=";
+    fetchSubmodules = true;
+    hash = "sha256-T8WBmuydGQrBqT5hXbxMh0DP8UT1ErJTq9+XOAwyivs=";
   };
 
   preConfigure = ''
