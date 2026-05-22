@@ -26,9 +26,10 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
     hash = "sha256-T8WBmuydGQrBqT5hXbxMh0DP8UT1ErJTq9+XOAwyivs=";
   };
 
+  # Reduce parallelism to avoid OOM on DGX Spark (unified memory)
   preConfigure = ''
-    export MAX_JOBS="$NIX_BUILD_CORES"
-    export NVCC_THREADS="$NIX_BUILD_CORES"
+    export MAX_JOBS=1
+    export NVCC_THREADS=2
   '';
 
   env = lib.optionalAttrs cudaSupport {
