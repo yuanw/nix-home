@@ -16,106 +16,93 @@
   :STATUS: IMPLEMENTING
   :END:
 
-  /NOTE:/ Full system builds, deploys, and both Gradio servers start. =flash-attn= built
-  successfully (gcc14Stdenv + MAX_JOBS=1 + NVCC_THREADS=2). =decord= remains WIP — using
-  NUR-based approach (commit 38f59c34 with ffmpeg_4, separate libdecord build).
-  Model weights not yet downloaded (~20GB via huggingface-hub).
+  /NOTE:/ Direct inference works (=inference_lance.py= produced 11 T2I images on DGX Spark).
+  Gradio server blocked by =flash-attn= sm121 kernel mismatch (DGX Spark GB10 = sm121, but
+  flash-attn only supports up to sm120). Fix: use PyTorch eager attention instead of flash-attn.
+  =decord2= wheel works (FFmpeg8 compat). Models downloaded and cached at =/var/lib/lance-models/=.
 
 ** ✓ Done
 
   - [X] *Full build + deploy* – =nix build .#dgx-spark= + =nixos-rebuild switch= completes
-    (system activation works, both Gradio services start)
-  - [X] *flash-attn from source* – Built with:
-    - =gcc14Stdenv= (g++ 14.3.0, CUDA 12.9 max is < 15.0)
-    - =MAX_JOBS=1= (prevents OOM on unified memory, DGX Spark has 121GB CPU+GPU shared)
-    - =NVCC_THREADS=2= (each =cicc= process uses ~5GB RSS, 2-4 per kernel for sm_80/90/100/120)
-    - Build time: ~5.5 hours (73+ CUDA kernel files, each 2-3 min on ARM64)
-    - =256MB wheel= produced (=flash_attn-2.8.2-cp313-cp313-linux_aarch64.whl=)
-  - [X] *Both Gradio servers running* – =lance-gradio-image= (port 7861) and
-    =lance-gradio-video= (port 7860) both =active (running)=
-  - [X] *decord lazy import* – Patched =lance_gradio_t2v_v2t.py= and =inference_lance.py=
-    to move =ValidationDataset= import from top-level to local (server starts without decord)
-  - [X] *init script fixes* – Added =chmod -R u+w= after =cp -r= in =lance-gradio=
-    init (nix store files are read-only; =downloads/= and =results/= need write perms)
-  - [X] *StateDirectory* – =StateDirectory = "lance";= in module serviceConfig
-    (fixes =status=200/CHDIR=, auto-creates =/var/lib/lance/= with correct perms)
-  - [X] *shebang fix* – Fixed leading whitespace before =#!/bin/sh= (caused =status=203/EXEC=)
-  - [X] *lance-download-model* – Standalone package with proper python path via substituteInPlace
-  - [X] *torchaudio build fix* – =overridePythonAttrs (_old: { doCheck = false; })=
-    (3 tests fail on aarch64-linux; =overrideAttrs= doesn't affect python packages)
-  - [X] *ffmpeg-full whisper fix* – =withWhisper = false= (strictDeps issue with whisper-cpp .pc)
+  - [X] *Direct inference works* – =inference_lance.py= with =task=t2i= produced 11 valid PNG images
+  - [X] *Both Gradio servers* – =lance-gradio-image= (port 7861) and =lance-gradio-video= (port 7860)
+    start and serve HTTP 200. Model variants loaded via =MODEL_PATH= env var.
+  - [X] *Services disabled by default* – Removed =wantedBy = [ "multi-user.target" ];=,
+    start manually with =sudo systemctl start lance-gradio-{image,video}=
+  - [X] *flash-attn built* – CUDA-enabled for sm80/sm90/sm100/sm120 with:
+    - =gcc14Stdenv= (g++ 14.3.0 < 15.0 for CUDA 12.9)
+    - =MAX_JOBS=1=, =NVCC_THREADS=2= (prevents OOM: each cicc process ~5-6.5GB RSS)
+    - =256MB wheel= produced
+  - [X] *decord2 wheel* – Pre-built ARM64 wheel from PyPI (=decord2-3.3.0=, FFmpeg8 compatible)
+  - [X] *Models downloaded* – Lance_3B (24GB) + Lance_3B_Video (27GB) + shared (4GB)
+    Cached at =/var/lib/lance-models/=, auto-linked on service start
+  - [X] *Path patches* – =MODEL_PATH= env var patch, =pad_token_id= fix, ROPE init fix (transformers 5.x)
+  - [X] *mDNS (avahi)* – Restart with =sudo rm -f /run/avahi-daemon/pid; sudo systemctl restart avahi-daemon=
+  - [X] *All prior fixes* – shebang, StateDirectory, torchaudio, ffmpeg-full, decord lazy import
 
-** ✗ Attempted – Failed
+** ✗ Blocked
 
-  - [ ] *decord from source (ffmpeg_8)* – C++ errors: =AVBSFContext=, =channel_layout=,
-    =avcodec_close= removed in FFmpeg 8
-  - [ ] *decord from source (ffmpeg_6)* – Same FFmpeg API issues (6.x also changed
-    =channel_layout= → =ch_layout=)
-  - [ ] *decord from source (CMake + Python in postUnpack)* – Source tree read-only
-    (hard-linked from nix store); =chmod -R u+w= fixed perms but build remained complex
-  - [ ] *decord from source (standalone package)* – Abandoned due to FFmpeg 8 API
-    incompat, submodule handling, CMake+Python hybrid complexity
+  - [ ] *flash-attn on sm121 (GB10)* – =FATAL: kernel ... is for sm80-sm100, but was built for sm121=
+    [[https://github.com/Dao-AILab/flash-attention/issues/1969][Issue #1969]]: flash-attn doesn't support
+    compute capability 12.1. sm120 kernels are NOT backward compatible with sm121.
+    Workaround: patch Lance to use PyTorch eager attention (=scaled_dot_product_attention=)
+    instead of =flash_attn_varlen_func=. Lance already has fallback code paths.
+  - [ ] *g++ 15 vs CUDA 12.9* – CUDA 12.9 requires g++ < 15.0, system has 15.2.0.
+    Fix: =gcc14Stdenv= (g++ 14.3.0). =
+    cudaPackages.backendStdenv= doesn't propagate correctly on aarch64-linux.
+    CUDA 13 option: PR #437723 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
 
-** ✓ Working (WIP decord approach)
+** ☐ To Do (in order)
 
-  - [X] *decord via NUR pattern* – Using commit =38f59c34= (PR #301, ffmpeg6 compat fix)
-    with =ffmpeg_4= (4.4.6, version decord 0.6.0 was designed for):
-    - =libdecord= as separate =stdenv.mkDerivation= with cmake + ffmpeg_4
-    - =buildPythonPackage= copies =libdecord.so= and runs =setup.py= from =python/= dir
-    - Cleaned stale lock files; needs fresh build on DGX Spark (~2h due to ffmpeg_4)
+  1. [ ] *Deploy eager attention patch* – =sed -i 's/from flash_attn import flash_attn_varlen_func/flash_attn_varlen_func = None/'=
+     in =qwen2_navit.py= to use PyTorch native attention on sm121
+  2. [ ] *Verify Gradio inference* – Test T2I/T2V via web UI after patch
+  3. [ ] *Build decord2 from source* – If needed, use decord2 wheel (already working)
+  4. [ ] *REST API* – Not yet implemented (Section 4.2)
+  5. [ ] *Container image* – Not yet implemented (Section 2.3.1)
 
-** ☐ To Do
+** Sm121 Issue Details
 
-  - [ ] *Build decord* – Fresh build on DGX Spark (stale locks cleaned)
-  - [ ] *Deploy + clear cache* – =
-    sudo rm -rf /var/lib/lance\; sudo systemctl restart lance-gradio-{image,video}=
-  - [ ] *Download models* – =sudo -u lance LANCE_DATA_DIR=/var/lib/lance lance-download-model=
-    (fetches Lance_3B + Lance_3B_Video + shared components, ~20GB)
-  - [ ] *Verify* – Check =http://dgx-spark.local:7860= and =http://dgx-spark.local:7861=
-  - [ ] *REST API* – Not yet implemented (Section 4.2)
-  - [ ] *Container image* – Not yet implemented (Section 2.3.1)
+  [[https://github.com/Dao-AILab/flash-attention/issues/1969][Flash-attn issue #1969]]
+  - DGX Spark GB10 GPU is compute capability =sm121= (Blackwell)
+  - Flash-attn 2.8.2 only supports up to =sm120=
+  - CUDA 12.9 nvcc CAN target sm121 (=compute_121= is listed in =--list-gpu-arch=)
+  - But flash-attn's cutlass kernels only go up to sm120
+  - sm120 binary kernels do NOT run on sm121 (new instruction set)
+  - Workaround: eager attention (=scaled_dot_product_attention= from PyTorch)
+  - Lance already has fallback paths for non-flash attention (via =isinstance(attention_mask, List)=
+    check at line 122 of =qwen2_navit.py=)
+  - Build flash-attn with sm121 when upstream supports it
 
 ** Build & Deploy Log
 
-  | #  | Hash                          | Duration | Result              | Key issue                              |
-  |----+-------------------------------+----------+---------------------+----------------------------------------|
-  | 1  | =...ncacw2kxs7...=            | timeout  | Build timeout        | torchaudio tests (fixed)               |
-  | 2  | =...xc7rg1af42...=            | 5:52     | Build fail (decord)  | decord source hash mismatch            |
-  | 3  | =...wwvyhyp24...=             | timeout  | Build timeout        | decord no setup.py at root             |
-  | 4  | =...32hv9hvq1v...=            | timeout  | Lance build fail     | =__PYTHON_EXEC__= in wrong script      |
-  | 5  | =...nbbzhbh8a...=             | timeout  | Lance build fail     | substituteInPlace loop (lance didn't   |
-  |    |                               |          |                      | need it)                                |
-  | 6  | =...hr975nvw0...=             | timeout  | Lance build fail     | =mkdir build= Permission denied        |
-  | 7  | =...31qpyvqy...=              | 5:30     | decord build fail    | C++ errors with ffmpeg 8.0             |
-  | 8  | =...is17gcjyr...=             | 5:15     | decord build fail    | C++ errors (int64 + FFmpeg)            |
-  | 9  | =...ighs67pd...=              | 4:00     | Build ok, 203/EXEC   | shebang leading spaces (heredoc indent)|
-  | 10 | =...xl4i9cpf...=              | 3:45     | Build ok, 1/FAILURE  | flash-attn missing at runtime          |
-  | 11 | =...s33f33lz...=              | 4:15     | flash-attn build fail| g++ 15 vs CUDA 12.9 (stdenv)           |
-  | 12 | =...0f93nkgz...=              | 5.5h     | flash-attn OK, OOM   | =cicc= killed by OOM (20 nvcc procs)   |
-  | 13 | =...n27brz4q8...=             | 5.5h     | flash-attn OK, OOM   | MAX_JOBS=4 still OOM (cicc= 6.5GB ea)  |
-  | 14 | =...hvhyk1s8j...=             | 5.5h     | flash-attn OK        | MAX_JOBS=1 + NVCC_THREADS=2 +          |
-  |    |                               |          | system OK (decord lazy)| ds4-server stopped → no OOM            |
-  | 15 | =...1lzlib9d...=              | 3h       | Services run,        | decord missing at runtime (both         |
-  |    |                               |          | no weights           | =lance_gradio= and =inference_lance=   |
-  |    |                               |          |                      | needed lazy patches)                    |
-  | 16 | =...b7cjbak9...=              | timeout  | decord build stuck   | stale lock files from prev attempts;    |
-  |    |                               |          |                      | NUR approach (ffmpeg_4) not yet built   |
+  | #  | Hash                          | Result              | Key issue                              |
+  |----+-------------------------------+---------------------+----------------------------------------|
+  | 1-8| (various)                     | Build failures      | torchaudio, decord, shebang, etc.      |
+  | 9  | =...ighs67pd...=              | Build ok, 203/EXEC  | shebang leading spaces                 |
+  | 10 | =...xl4i9cpf...=              | Build ok, FAILURE   | flash-attn missing at runtime          |
+  | 11 | =...s33f33lz...=              | flash-attn fail     | g++ 15 vs CUDA 12.9                    |
+  | 12 | =...0f93nkgz...=              | OOM (cicc 20 procs) | 20 parallel nvcc → OOM                 |
+  | 13 | =...n27brz4q8...=             | OOM (cicc 6.5GB)    | MAX_JOBS=4 still OOM                   |
+  | 14 | =...hvhyk1s8j...=             | flash-attn OK       | MAX_JOBS=1 + NVCC_THREADS=2 → no OOM  |
+  | 15 | =...1lzlib9d...=              | Services+no weights | decord lazy import, models missing     |
+  | 16 | =...b7cjbak9...=              | decord build stuck  | stale locks from prev attempts         |
+  | 17 | =...rp0z9yhz...=              | MODEL_PATH patch    | Image/video now load correct variants  |
+  | 18 | =...5l83pw1ch...=             | flash-attn rebuild  | sm121 kernel mismatch (blocked)        |
 
 ** Key Findings
 
-  - *flash-attn OOM* – Each =cicc= process uses ~6.5GB RSS. Compiling for 4 GPU
-    architectures (sm_80/90/100/120) spawns 2-4 =cicc= processes per kernel file.
-    DGX Spark has unified memory (121GB shared CPU+GPU). GPU was using ~80GB.
-    Fix: =MAX_JOBS=1= + =NVCC_THREADS=2= + stop =ds4-server=
-  - *g++ version* – PyTorch 2.11.0 (nixpkgs) has =CUDA_GCC_VERSIONS['12.9'] = (6,0,0), (15,0)=
-    (max < 15.0). System g++ is 15.2.0. Fix: =gcc14Stdenv= (g++ 14.3.0).
-    =cudaPackages.backendStdenv= on aarch64-linux was still using default stdenv.
-  - *CUDA 13 alternative* – =CUDA_GCC_VERSIONS['13.0'] = (6,0,0), (16,0)= accepts g++ 15.
-    [[https://github.com/NixOS/nixpkgs/pull/437723][PR #437723]] adds CUDA 13 support to nixpkgs.
-  - *decord FFmpeg compat* – decord 0.6.0 uses FFmpeg 4 API (=channel_layout=,
-    =avcodec_close=, =AVBSFContext=). NUR commit =38f59c34= (PR #301) claims FFmpeg 6 fix.
-    Using =ffmpeg_4= (4.4.6) is safest. Build approach: separate =libdecord= (cmake)
-    + =buildPythonPackage= (copies =.so=, runs setup.py from =python/= dir).
+  - *sm121 not backward compatible* – sm120 binary kernels can't run on sm121 (GB10).
+    Unlike previous architectures where newer GPUs could run older kernels.
+  - *flash-attn OOM* – Each =cicc= process uses ~5-6.5GB RSS. 20 parallel = MAX_JOBS=20 → OOM.
+    Fix: =MAX_JOBS=1= + =NVCC_THREADS=2=
+  - *g++ version* – PyTorch 2.11.0 CUDA_GCC_VERSIONS['12.9'] max = 15.0. System has g++ 15.2.
+    =cudaPackages.backendStdenv= on aarch64-linux doesn't use a compatible compiler.
+  - *CUDA 13* – max = 16.0, accepts g++ 15.2. PR #437723 adds CUDA 13 to nixpkgs.
+  - *decord* – decord2 fork (johnnynunez/decord2) has pre-built ARM64 wheels and FFmpeg8 support.
+  - *DeviceAllow + User=lance bug* – =DeviceAllow=/dev/nvidia*= with =User=lance= causes
+    =torch.cuda.is_available()= to return =False= on DGX Spark (systemd cgroup issue).
+    NVIDIA devices are world-writable (0666), so DeviceAllow is unnecessary.
 
 ** Files created/modified
 
