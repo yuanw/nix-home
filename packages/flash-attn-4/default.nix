@@ -26,8 +26,8 @@ python3.pkgs.buildPythonPackage rec {
   };
 
   preConfigure = ''
-    export MAX_JOBS=1
-    export NVCC_THREADS=2
+    export MAX_JOBS=4
+    export NVCC_THREADS=4
   '';
 
   env = lib.optionalAttrs cudaSupport {
