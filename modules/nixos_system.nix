@@ -28,7 +28,7 @@ with lib;
   # mDNS/Avahi for .local hostname resolution
   services.avahi = {
     enable = true;
-    nssmdns = true;
+    nssmdns4 = true;
     publish = {
       enable = true;
       addresses = true;

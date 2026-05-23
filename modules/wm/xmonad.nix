@@ -103,7 +103,8 @@ in
       ];
 
       # services.caffeine.enable = true;
-      services.blueman-applet.enable = true;
+      # blueman-applet autostarts via its own D-Bus service and .desktop file
+      # services.blueman-applet.enable = true;
       services.network-manager-applet.enable = true;
       services.dunst.enable = true;
       #https://www.jwz.org/xscreensaver/man1.html
