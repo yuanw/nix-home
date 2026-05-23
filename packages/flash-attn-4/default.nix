@@ -1,7 +1,6 @@
 {
   lib,
   python3,
-  gcc14Stdenv,
   fetchFromGitHub,
   ninja,
 }:
@@ -13,7 +12,7 @@ let
   cudaPackages = if cudaSupport then torch.cudaPackages else { };
 in
 
-python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
+python3.pkgs.buildPythonPackage rec {
   pname = "flash-attn-4";
   version = "4.0.0.beta14";
   pyproject = true;
@@ -33,8 +32,8 @@ python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
 
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
-    # Only build for sm121 (DGX Spark GB10). Skip cross-compilation.
-    FLASH_ATTN_CUDA_ARCHS = "121";
+    # Build for all supported arches (ensures best runtime perf)
+    FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
   };
 
   build-system = [

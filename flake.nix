@@ -123,6 +123,10 @@
             config = {
               allowUnfree = true;
             };
+            overlays = inputs.nixpkgs.lib.optionals (system == "aarch64-linux") [
+              inputs.dgx-spark.overlays.fixes
+              (import ./packages)
+            ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;
