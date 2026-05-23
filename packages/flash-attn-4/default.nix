@@ -8,12 +8,11 @@
 
 let
   torch = python3.pkgs.torch;
-  backendStdenv = gcc14Stdenv;
   cudaSupport = torch.cudaSupport or false;
   cudaPackages = if cudaSupport then torch.cudaPackages else { };
 in
 
-python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
+python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
   pname = "flash-attn-4";
   version = "4.0.0.beta14";
   pyproject = true;
@@ -26,7 +25,6 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
     hash = "sha256-T8WBmuydGQrBqT5hXbxMh0DP8UT1ErJTq9+XOAwyivs=";
   };
 
-  # Reduce parallelism to avoid OOM on DGX Spark (unified memory)
   preConfigure = ''
     export MAX_JOBS=2
     export NVCC_THREADS=4
@@ -34,10 +32,9 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
 
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
-    CC = "${backendStdenv.cc}/bin/cc";
-    CXX = "${backendStdenv.cc}/bin/c++";
-    TORCH_CUDA_ARCH_LIST = "13.2";
-    FLASH_ATTN_CUDA_ARCHS = "132";
+    # Let torch decide TORCH_CUDA_ARCH_LIST from CUDA capabilities
+    # FA4 uses FLASH_ATTN_CUDA_ARCHS to determine target architectures
+    FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
   };
 
   build-system = [

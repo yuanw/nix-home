@@ -175,6 +175,7 @@ _final: prev: {
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 
   flash-attn-4 = prev.callPackage ./flash-attn-4 { };
+
   decord = prev.callPackage ./decord { };
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
