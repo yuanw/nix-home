@@ -28,16 +28,16 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
 
   # Reduce parallelism to avoid OOM on DGX Spark (unified memory)
   preConfigure = ''
-    export MAX_JOBS=1
-    export NVCC_THREADS=2
+    export MAX_JOBS=2
+    export NVCC_THREADS=4
   '';
 
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
     CC = "${backendStdenv.cc}/bin/cc";
     CXX = "${backendStdenv.cc}/bin/c++";
-    TORCH_CUDA_ARCH_LIST = "12.1";
-    FLASH_ATTN_CUDA_ARCHS = "121";
+    TORCH_CUDA_ARCH_LIST = "13.2";
+    FLASH_ATTN_CUDA_ARCHS = "132";
   };
 
   build-system = [
