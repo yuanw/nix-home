@@ -1,7 +1,4 @@
-{
-  inputs,
-  ...
-}:
+{ inputs, ... }:
 
 {
   imports = [
@@ -14,4 +11,11 @@
   ];
 
   nixpkgs.overlays = [ (import ../../packages) ];
+
+  # colmena deployment configuration
+  deployment = {
+    targetHost = "dgx-spark.local";
+    targetUser = "yuanw";
+    buildOnTarget = true; # cross-architecture: aarch64-linux target
+  };
 }

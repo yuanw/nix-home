@@ -11,4 +11,10 @@
     ../../modules/caddy.nix
     ./configuration.nix
   ];
+
+  # colmena deployment configuration
+  deployment = {
+    targetHost = "misfit.local";
+    targetUser = "yuanw";
+  };
 }

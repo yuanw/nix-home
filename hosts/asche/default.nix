@@ -15,6 +15,12 @@
     ./configuration.nix
   ];
 
+  # colmena deployment configuration
+  deployment = {
+    # Local laptop — omit targetHost to deploy locally by default
+    targetUser = "yuanw";
+  };
+
   my = {
     username = "yuanw";
     name = "Yuan Wang";
