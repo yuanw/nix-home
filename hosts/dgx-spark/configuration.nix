@@ -54,6 +54,15 @@
       "root"
       "yuanw"
     ];
+    # CUDA binary cache (speeds up torch/flash-attn builds)
+    substituters = [
+      "https://nix-community.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+    ];
+    trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cuda-maintainers.cachix.org-1:Zf5/D7lVH62pV3W4pAzbXFPAtdKBKAZnNj4n1XS85i4="
+    ];
   };
   nix.gc = {
     automatic = true;
