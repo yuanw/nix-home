@@ -48,41 +48,41 @@ update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
 
 # deploy to DGX Spark: sync flake and rebuild remotely
-spark-deploy IP="192.168.1.185":
+spark-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
     @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
 
 # DS4 server management on DGX Spark
-spark-ds4-start IP="192.168.1.185":
+spark-ds4-start IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl start ds4-server"
 
-spark-ds4-stop IP="192.168.1.185":
+spark-ds4-stop IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server"
 
-spark-ds4-restart IP="192.168.1.185":
+spark-ds4-restart IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl restart ds4-server"
 
-spark-ds4-status IP="192.168.1.185":
+spark-ds4-status IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo systemctl status ds4-server"
 
-spark-ds4-logs IP="192.168.1.185":
+spark-ds4-logs IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo journalctl -u ds4-server -f"
 
-spark-ds4-download MODEL="q2-imatrix" IP="192.168.1.185":
+spark-ds4-download MODEL="q2-imatrix" IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo -u ds4 bash -c 'cd /var/lib/ds4 && ds4-download-model {{MODEL}}'"
 
 # build ds4 on DGX Spark (without switching)
-spark-build-ds4 IP="192.168.1.185":
+spark-build-ds4 IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
     @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
 
 # build on DGX Spark using colmena
 colmena-spark-build:
-    @eval $$(ssh-agent -s) && setsid ssh-add ~/.ssh/id_ed25519 < /dev/null && nix run 'github:zhaofengli/colmena' -- build --on dgx-spark
+    @eval `ssh-agent -s` && setsid ssh-add ~/.ssh/id_ed25519 < /dev/null && colmena build --on dgx-spark
 
 # apply (build + switch) on DGX Spark using colmena
 colmena-spark-apply:
-    @eval $$(ssh-agent -s) && setsid ssh-add ~/.ssh/id_ed25519 < /dev/null && nix run 'github:zhaofengli/colmena' -- apply --on dgx-spark
+    @eval `ssh-agent -s` && setsid ssh-add ~/.ssh/id_ed25519 < /dev/null && colmena apply --on dgx-spark
 
 # build and deploy to local host (macOS or NixOS)
 switch:
