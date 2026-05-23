@@ -44,6 +44,7 @@
     ];
 
     linux.imports = [
+      ./ds4.nix
       ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix

@@ -1,97 +1,41 @@
-#+title: NVIDIA DGX Spark (Project DIGITS) — NixOS with Impermanence
+#+title: NVIDIA DGX Spark (Project DIGITS) — NixOS
 
 * Overview
 
 This host configuration targets the [[https://www.nvidia.com/en-us/dgx/dgx-spark/][NVIDIA DGX Spark]] (also sold as the Asus Ascent GX10) — a Grace Blackwell-based AI workstation. It uses:
 
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] for hardware support (NVIDIA kernel, GPU drivers, DGX Dashboard)
-- [[https://github.com/nix-community/preservation][preservation]] for declarative state management (impermanence via tmpfiles.d + mount units instead of activation scripts)
 - [[https://github.com/nix-community/disko][disko]] for declarative disk partitioning
+- [[https://github.com/yuanw/ds4][ds4]] — DS4 DeepSeek V4 Flash inference server
 
 * Disk Layout
 
 #+begin_src
 /dev/nvme0n1
-  ├── ESP (512M)        → /boot        (vfat, UEFI)
-  ├── swap (16G)                       (disk swap + ZRAM)
-  └── persistent (rest) → /persistent  (ext4, all persistent state)
-
-Root (/)               → tmpfs (2G, volatile — erased every boot)
+  ├── ESP (1G)      → /boot   (vfat, UEFI)
+  └── root (rest)   → /       (ext4, all state persistent)
 #+end_src
 
-The root filesystem is =tmpfs=, meaning the system boots from a clean slate
-every time. Everything that must survive reboots lives under =/persistent= and
-is wired in by the preservation module via bind-mounts and symlinks.
-
-* Impermanence Design
-
-We use [[https://github.com/nix-community/preservation][preservation]] instead of the older [[https://github.com/nix-community/impermanence][impermanence]] module. Key differences
-drawn from the [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 impermanence discussion]]:
-
-| Feature                | impermanence                       | preservation                      |
-|------------------------+------------------------------------+-----------------------------------|
-| Mechanism              | Bash activation scripts + helpers | Static systemd tmpfiles.d + mount |
-| initrd-less systems    | Not supported                      | Supported (but we use systemd initrd) |
-| Interpreter-less boot  | No                                 | Yes                               |
-| Per-mount options      | No (=hideMounts= global only)      | Yes (=commonMountOptions= per-level) |
-| =how= per entry        | No                                 | Yes (=bindmount= or =symlink=)      |
-| =configureParent=      | No                                 | Yes (own/group/mode for parents)  |
-
-** Preserved state
-
-*** System directories (bind-mount from =/persistent=)
-
-- =/var/lib/nixos= — NixOS user/group state
-- =/var/lib/systemd/coredump=, =/var/lib/systemd/timers=
-- =/var/log=
-- =/var/lib/fwupd= — firmware update data
-- =/var/lib/podman= — container storage (podman enabled by dgx-spark module)
-- =/var/cache=
-
-*** System files (symlink into =/persistent=)
-
-- =/etc/machine-id= — symlinked in initrd so it's available early
-- =/etc/ssh/ssh_host_*_{key,key}.pub}= — SSH host keys
-
-*** Per-user state
-
-| User  | Path                    | Method    | Notes                          |
-|-------+-------------------------+-----------+--------------------------------|
-| yuanw | =~/.config=             | bindmount | Hidden from GUI (=x-gvfs-hide=) |
-| yuanw | =~/.ssh=                | bindmount | Hidden from GUI                 |
-| yuanw | =~/.cache=              | bindmount | mode 0750                       |
-| yuanw | =~/.local/state/nix=    | bindmount | Nix profile state              |
-| yuanw | =~/.local/share/direnv= | bindmount | direnv cache                   |
-| yuanw | =~/.histfile=           | bindmount | Shell history                  |
-| root  | =/root/.ssh=            | bindmount | mode 0700                       |
-
-To add more persisted directories, edit =preservation.preserveAt."/persistent"=
-in =configuration.nix=.
+Standard ext4 root filesystem — all state survives reboots normally. No tmpfs,
+no special persistence layer needed.
 
 * Networking
 
-The DGX Spark is a headless server, so we use =systemd-networkd= instead of
-NetworkManager. This provides predictable, declarative wired networking without
-requiring a desktop session.
+The DGX Spark is a headless server, so we use =systemd-networkd= via
+=networking.useDHCP = true= instead of NetworkManager. This provides
+predictable, declarative wired networking without requiring a desktop session.
 
-All Ethernet interfaces (=en**=, =eth*=) get DHCP automatically. The interface
-is marked as =RequiredForOnline= so the boot waits for a link before starting
-services like SSH.
+All Ethernet interfaces get DHCP automatically.
+
+mDNS (Avahi) is enabled, so the host is discoverable as =dgx-spark.local= on
+the LAN.
 
 * SSH Access
 
-** How SSH works with impermanence
+** SSH host keys
 
-Because the root filesystem is tmpfs, SSH host keys would be regenerated every
-boot. We avoid this by:
-
-1. Configuring =services.openssh.hostKeys= to generate keys directly into
-   =/persistent/etc/ssh/=
-2. Using preservation to symlink =/etc/ssh/ssh_host_*_key= → =/persistent/etc/ssh/ssh_host_*_key=
-
-On first boot, =sshd= generates the keys into =/persistent/etc/ssh/=, and the
-preservation symlinks point to them. On subsequent boots, the existing keys are
-reused.
+SSH host keys are stored on the ext4 root filesystem like any normal NixOS
+system — they persist across reboots automatically.
 
 ** Connecting
 
@@ -112,8 +56,9 @@ ssh yuanw@<ip-address>
 
 If you don't know the DGX Spark's IP:
 
+- Use =dgx-spark.local= (mDNS/Avahi): =ping dgx-spark.local=
 - Check your router's DHCP client list
-- Use =nixos-fractal= or =arp-scan= on the same subnet
+- Use =arp-scan= on the same subnet
 - Connect a monitor and keyboard for the first boot to get the IP from the console
 
 ** Setting a password (optional)
@@ -138,10 +83,9 @@ Then set =users.users.yuanw.hashedPassword= in =configuration.nix=.
 
 | Symptom                          | Cause                                    | Fix                                              |
 |----------------------------------+------------------------------------------+--------------------------------------------------|
-| =Connection refused=             =sshd= not running or firewall blocking  | Check =systemctl status sshd=, verify port 22   |
-| =Host key changed= warning       Keys regenerated (shouldn't happen)       | Remove old key: =ssh-keygen -R dgx-spark=       |
-| =Permission denied (publickey)=  Key not in authorized_keys                | Verify =~/.ssh/authorized_keys= on the host      |
-| Keys regenerated every boot       =/persistent= not mounted or symlinks broken | Check =ls -la /etc/ssh= and =mount \| grep persistent= |
+| =Connection refused=             | =sshd= not running or firewall blocking  | Check =systemctl status sshd=, verify port 22     |
+| =Host key changed= warning       | Keys regenerated (shouldn't happen)      | Remove old key: =ssh-keygen -R dgx-spark=         |
+| =Permission denied (publickey)=  | Key not in authorized_keys               | Verify =~/.ssh/authorized_keys= on the host       |
 
 * DGX Spark Hardware Module
 
@@ -150,9 +94,34 @@ The =hardware.dgx-spark= module (from =nixos-dgx-spark=) enables:
 - NVIDIA's custom DGX Spark kernel (6.17+nvidia patches, built from source)
 - NVIDIA open GPU driver (=hardware.nvidia.open = true=)
 - Podman with NVIDIA container toolkit
-- DGX Dashboard at =http://localhost:11000=
+- DGX Dashboard at =http://localhost:11000= (proxied from internal port 11001)
 - Flox binary cache for pre-built CUDA packages
 - Security hardening (=module_blacklist= for vulnerable kernel modules)
+
+* DS4 DeepSeek V4 Flash Inference Server
+
+The [[https://github.com/yuanw/ds4][ds4]] service runs the DeepSeek V4 Flash
+inference server as a systemd unit:
+
+- Service: =ds4-server= (systemd, user =ds4=, group =ds4=)
+- Default port: 8000 (open in firewall)
+- Data directory: =/var/lib/ds4=
+- Context size: 100k tokens
+- GPU access via =video= group
+
+To interact with the server:
+
+#+begin_src shell
+# Check status
+systemctl status ds4-server
+
+# View logs
+journalctl -u ds4-server -f
+
+# Chat via HTTP API
+curl http://dgx-spark:8000/v1/chat/completions \
+  -d '{"model":"deepseek-v4","messages":[{"role":"user","content":"Hello"}]}'
+#+end_src
 
 * Installation
 
@@ -176,8 +145,9 @@ Boot from USB, partition with disko, then install.
 sudo nix --extra-experimental-features "nix-command flakes" \
   run 'github:nix-community/disko/latest#disko-install' -- \
   --flake .#dgx-spark \
-  --disk main /dev/vda \
+  --disk main /dev/nvme0n1
 #+end_src
+
 ** Option B: nixos-anywhere (recommended for headless)
 
 #+begin_src shell
@@ -198,15 +168,19 @@ nix run github:nix-community/nixos-anywhere -- \
 
 ** Post-install: first boot checklist
 
-On first boot, =/persistent= will be empty. The system handles most things
-automatically:
-
-- [x] Directories created via systemd-tmpfiles (preservation module)
-- [x] SSH host keys generated into =/persistent/etc/ssh/= and symlinked
-- [x] =machine-id= symlinked from =/persistent/etc/machine-id=
 - [ ] *Set your user password* (optional, SSH keys already work): =passwd yuanw=
 - [ ] *Verify SSH access*: =ssh yuanw@dgx-spark=
 - [ ] *Check GPU*: =nvidia-smi= or visit =http://dgx-spark:11000= (DGX Dashboard)
+- [ ] *Clone the flake config* (one-time):
+
+#+begin_src shell
+ssh yuanw@dgx-spark.local
+
+# One-time setup
+sudo mkdir -p /etc/nixos
+sudo chown yuanw /etc/nixos
+git clone https://github.com/yuanw/nix-home.git /etc/nixos
+#+end_src
 
 * Common Operations
 
@@ -224,47 +198,13 @@ nixos-rebuild switch --flake .#dgx-spark --target-host root@dgx-spark
 nixos-rebuild switch --flake .#dgx-spark --target-host root@<ip>
 #+end_src
 
-** Inspect what's persisted
+** Factory reset
 
-#+begin_src shell
-ls /persistent/
-# etc/ssh/        — SSH host keys
-# home/yuanw/     — user state (bind-mounts from preservation)
-# var/log/        — system logs
-# var/lib/nixos/  — NixOS uid/gid state
-# var/lib/podman/ — container storage
-#+end_src
-
-** Factory reset (destroy all persisted state)
-
-#+begin_src shell
-# WARNING: destroys all persisted state
-rm -rf /persistent/*
-reboot
-# After reboot: SSH keys regenerate, machine-id regenerates,
-# all user data is gone.
-#+end_src
-
-** Add a new persisted directory
-
-Edit =configuration.nix= and add to the =preservation.preserveAt."/persistent"= block:
-
-#+begin_src nix
-# Example: persist Hugging Face model cache
-preservation.preserveAt."/persistent" = {
-  users.yuanw.directories = [
-    ".cache/huggingface"
-  ];
-};
-#+end_src
-
-Then rebuild: =nixos-rebuild switch --flake .#dgx-spark=
+Since this is a standard ext4 root, a factory reset means reinstalling from
+scratch (disko + nixos-anywhere). There is no tmpfs persistence layer to wipe.
 
 * References
 
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] — hardware module and playbooks
-- [[https://github.com/nix-community/preservation][preservation]] — declarative impermanence via tmpfiles.d
-- [[https://github.com/nix-community/impermanence][impermanence]] — older approach (not used here)
-- [[https://www.reddit.com/r/NixOS/comments/1ndo35n/][r/NixOS 2025 impermanence discussion]]
-- [[https://nix-community.github.io/preservation][preservation documentation]]
 - [[https://github.com/nix-community/disko][disko]] — declarative disk partitioning
+- [[https://github.com/yuanw/ds4][ds4]] — DS4 inference server module
