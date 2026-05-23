@@ -184,7 +184,8 @@ in
       };
       programs.eww = {
         enable = false;
-        configDir = ./eww;
+        yuckConfig = builtins.readFile ./eww/eww.yuck;
+        scssConfig = builtins.readFile ./eww/eww.scss;
       };
       programs.xmobar = {
         enable = true;
