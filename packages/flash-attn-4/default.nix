@@ -36,8 +36,8 @@ python3.pkgs.buildPythonPackage.override { stdenv = backendStdenv; } rec {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
     CC = "${backendStdenv.cc}/bin/cc";
     CXX = "${backendStdenv.cc}/bin/c++";
-    TORCH_CUDA_ARCH_LIST = "8.0;9.0;10.0;11.0;12.0;12.1";
-    FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
+    TORCH_CUDA_ARCH_LIST = "12.1";
+    FLASH_ATTN_CUDA_ARCHS = "121";
   };
 
   build-system = [
