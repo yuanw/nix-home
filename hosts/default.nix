@@ -52,6 +52,7 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.colmena.nixosModules.deployment
             inputs.home-manager.nixosModules.home-manager
             {
               home-manager = {
@@ -97,6 +98,7 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.colmena.nixosModules.deployment
             ./misfit
           ];
         }
@@ -129,6 +131,7 @@
                 "12.1"
               ];
             }
+            inputs.colmena.nixosModules.deployment
             inputs.home-manager.nixosModules.home-manager
             {
               home-manager = {

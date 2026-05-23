@@ -87,6 +87,7 @@
       url = "github:nix-community/preservation";
     };
     dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    colmena.url = "github:zhaofengli/colmena";
   };
 
   outputs =
