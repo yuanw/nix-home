@@ -3,15 +3,14 @@
   python3,
   gcc14Stdenv,
   fetchFromGitHub,
-  cudaPackages_13,
   ninja,
 }:
 
 let
   torch = python3.pkgs.torch;
-  # Use CUDA 13 for FA4's nvcc (torch stays on CUDA 12.9 from binary cache)
-  cudaSupport = true;
-  cudaPackages = cudaPackages_13;
+  # Must match torch's CUDA version (12.9). Use gcc14Stdenv for g++ 15 compat.
+  cudaSupport = torch.cudaSupport or false;
+  cudaPackages = if cudaSupport then torch.cudaPackages else { };
 in
 
 python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
