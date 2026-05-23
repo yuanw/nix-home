@@ -78,7 +78,7 @@
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
-    enable = false;
+    enable = true;
     instances = {
       video = {
         enable = true;
