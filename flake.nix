@@ -101,6 +101,7 @@
       imports = [
         ./devshell.nix
         ./hosts
+        ./hosts/colmena.nix
         ./modules
         ./tests/flake-module.nix
         inputs.git-hooks.flakeModule
