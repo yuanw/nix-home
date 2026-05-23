@@ -3,13 +3,15 @@
   python3,
   gcc14Stdenv,
   fetchFromGitHub,
+  cudaPackages_13,
   ninja,
 }:
 
 let
   torch = python3.pkgs.torch;
-  cudaSupport = torch.cudaSupport or false;
-  cudaPackages = if cudaSupport then torch.cudaPackages else { };
+  # Use CUDA 13 for FA4's nvcc (torch stays on CUDA 12.9 from binary cache)
+  cudaSupport = true;
+  cudaPackages = cudaPackages_13;
 in
 
 python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
@@ -26,15 +28,14 @@ python3.pkgs.buildPythonPackage.override { stdenv = gcc14Stdenv; } rec {
   };
 
   preConfigure = ''
-    export MAX_JOBS=2
-    export NVCC_THREADS=4
+    export MAX_JOBS=1
+    export NVCC_THREADS=2
   '';
 
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
-    # Let torch decide TORCH_CUDA_ARCH_LIST from CUDA capabilities
-    # FA4 uses FLASH_ATTN_CUDA_ARCHS to determine target architectures
-    FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
+    # Only build for sm121 (DGX Spark GB10). Skip cross-compilation.
+    FLASH_ATTN_CUDA_ARCHS = "121";
   };
 
   build-system = [
