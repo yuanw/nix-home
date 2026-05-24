@@ -34,7 +34,7 @@ python3.pkgs.buildPythonPackage rec {
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
     # Build for all supported arches including sm121 (GB10 Blackwell)
-    FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
+    FLASH_ATTN_CUDA_ARCHS = "120;121";
   };
 
   nativeBuildInputs = [
