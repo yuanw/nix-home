@@ -3,14 +3,15 @@
   python3,
   fetchFromGitHub,
   ninja,
+
 }:
 
 let
   torch = python3.pkgs.torch;
   # CUDA 13.2 supports g++ 15 (max CUDA_GCC_VERSIONS['13.0'] = 16.0),
   # so no gcc14 workaround needed — the default stdenv (gcc 15) is fine.
-  cudaSupport = torch.cudaSupport or false;
-  cudaPackages = if cudaSupport then torch.cudaPackages else { };
+  inherit (torch) cudaCapabilities cudaPackages cudaSupport;
+  inherit (cudaPackages) backendStdenv;
 in
 
 python3.pkgs.buildPythonPackage rec {
@@ -34,22 +35,20 @@ python3.pkgs.buildPythonPackage rec {
   env = lib.optionalAttrs cudaSupport {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
     # Build for all supported arches including sm121 (GB10 Blackwell)
-    FLASH_ATTN_CUDA_ARCHS = "120;121";
+    CC = "${backendStdenv.cc}/bin/cc";
+    CXX = "${backendStdenv.cc}/bin/c++";
+    TORCH_CUDA_ARCH_LIST = "${lib.concatStringsSep ";" cudaCapabilities}";
   };
 
   nativeBuildInputs = [
     ninja
     python3.pkgs.setuptools
-  ]
-  ++ lib.optionals cudaSupport [
     cudaPackages.cuda_nvcc
   ];
 
   build-system = [
     ninja
     python3.pkgs.setuptools
-  ]
-  ++ lib.optionals cudaSupport [
     cudaPackages.cuda_nvcc
   ];
 
@@ -64,6 +63,7 @@ python3.pkgs.buildPythonPackage rec {
 
   dependencies = [
     torch
+    python3.pkgs.einops
   ];
 
   doCheck = false;
