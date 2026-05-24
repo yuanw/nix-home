@@ -26,6 +26,14 @@
 
     # ── Python package fixes for CUDA 13 ──────────────────────────
     (_final: prev: {
+      # Disable CUDA support in OpenCV (not compatible with CUDA 13)
+      opencv4 = prev.opencv4.override {
+        enableCuda = false;
+      };
+    })
+
+    # ── Python package fixes for CUDA 13 ──────────────────────────
+    (_final: prev: {
       pythonPackagesExtensions = (prev.pythonPackagesExtensions or [ ]) ++ [
         (_python-final: python-prev: {
           # torch is marked broken for CUDA 13 in nixpkgs; unbreak it.
