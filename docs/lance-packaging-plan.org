@@ -113,6 +113,8 @@
   - [[file:./packages/decord/default.nix][packages/decord/default.nix]] – NUR-based decord build (WIP)
   - [[file:./modules/lance.nix][modules/lance.nix]] – NixOS module: systemd service + StateDirectory
   - [[file:./packages/default.nix][packages/default.nix]] – Overlay: =lance=, =lance-download-model=, =decord=, =ffmpeg-full= override
+  - [[file:./packages/flash-attn-4/default.nix][packages/flash-attn-4/default.nix]] – =flash-attn-4= with CUDA 13.2, sm121 support
+  - [[file:./hosts/dgx-spark/default.nix][hosts/dgx-spark/default.nix]] – CUDA 13.2 overlay, =cudaPackages_13_2=, torch unbreak
   - [[file:./hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] – =nixpkgs.config.cudaSupport = true=
   - [[file:./justfile][justfile]] – =spark-lance-*= commands
 
