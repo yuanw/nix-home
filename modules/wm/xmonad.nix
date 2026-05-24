@@ -103,6 +103,7 @@ in
       ];
 
       # services.caffeine.enable = true;
+      # blueman-applet autostarts via its own D-Bus service and .desktop file
       # Broken: HM wraps the service with a duplicate ExecStart=.
       # services.blueman-applet.enable = true;
       services.network-manager-applet.enable = true;
@@ -184,8 +185,9 @@ in
         };
       };
       programs.eww = {
-        enable = true;
-        configDir = ./eww;
+        enable = false;
+        yuckConfig = builtins.readFile ./eww/eww.yuck;
+        scssConfig = builtins.readFile ./eww/eww.scss;
       };
       programs.xmobar = {
         enable = true;

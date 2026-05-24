@@ -87,6 +87,7 @@
       url = "github:nix-community/preservation";
     };
     dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    colmena.url = "github:zhaofengli/colmena";
   };
 
   outputs =
@@ -100,6 +101,7 @@
       imports = [
         ./devshell.nix
         ./hosts
+        ./hosts/colmena.nix
         ./modules
         ./tests/flake-module.nix
         inputs.git-hooks.flakeModule

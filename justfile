@@ -76,6 +76,22 @@ spark-build-ds4 IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
     @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
 
+# unlock SSH key (Linux: GUI passphrase prompt, macOS: uses Keychain)
+_unlock-ssh:
+    @if [ "$(uname)" = "Darwin" ]; then \
+        ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
+    else \
+        eval `ssh-agent -s` && setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
+    fi
+
+# build on DGX Spark using colmena
+colmena-spark-build: _unlock-ssh
+    colmena build --on dgx-spark
+
+# apply (build + switch) on DGX Spark using colmena
+colmena-spark-apply: _unlock-ssh
+    colmena apply --on dgx-spark
+
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \

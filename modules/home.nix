@@ -38,7 +38,6 @@ hm@{ pkgs, ... }:
     mics-skills = {
       enable = true;
       package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-      skillsSrc = inputs.mics-skills;
       skills = [
         "kagi-search"
         "pexpect-cli"
