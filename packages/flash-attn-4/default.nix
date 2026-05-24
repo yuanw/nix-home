@@ -3,11 +3,12 @@
   python3,
   fetchFromGitHub,
   ninja,
+  gcc14,
 }:
 
 let
   torch = python3.pkgs.torch;
-  # Must match torch's CUDA version (12.9). Use gcc14Stdenv for g++ 15 compat.
+  # Must match torch's CUDA version (12.9). Use gcc14 for g++ 15 compat.
   cudaSupport = torch.cudaSupport or false;
   cudaPackages = if cudaSupport then torch.cudaPackages else { };
 in
@@ -34,7 +35,23 @@ python3.pkgs.buildPythonPackage rec {
     FLASH_ATTENTION_SKIP_CUDA_BUILD = "FALSE";
     # Build for all supported arches (ensures best runtime perf)
     FLASH_ATTN_CUDA_ARCHS = "80;90;100;110;120;121";
+    # CUDA 12.9 requires g++ < 15.0; nixpkgs unstable has gcc 15 by default.
+    # Override host compiler to gcc14 so torch's cpp_extension version check
+    # and nvcc both use a compatible compiler.
+    CC = "${gcc14}/bin/gcc";
+    CXX = "${gcc14}/bin/g++";
+    CUDAHOSTCXX = "${gcc14}/bin/g++";
   };
+
+  nativeBuildInputs =
+    lib.optionals cudaSupport [ gcc14 ]
+    ++ [
+      ninja
+      python3.pkgs.setuptools
+    ]
+    ++ lib.optionals cudaSupport [
+      cudaPackages.cuda_nvcc
+    ];
 
   build-system = [
     ninja
