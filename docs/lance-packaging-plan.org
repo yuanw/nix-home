@@ -19,7 +19,10 @@
   /NOTE:/ Direct inference works (=inference_lance.py= produced 11 T2I images on DGX Spark).
   Gradio server blocked by =flash-attn= sm121 kernel mismatch (DGX Spark GB10 = sm121, but
   flash-attn only supports up to sm120). Fix: use PyTorch eager attention instead of flash-attn.
-  =decord2= wheel works (FFmpeg8 compat). Models downloaded and cached at =/var/lib/lance-models/=.
+  =decord2= wheel works (FFmpeg8 compat). Models downloaded and cached at =/var/lib/lance-models/=.  
+  CUDA 13.2 (via =cudaPackages_13_2= overlay) resolves both the g++ 15 incompatibility
+  and provides proper sm121/Blackwell support for =flash-attn-4=.'s CuTeDSL kernels.
+
 
 ** ✓ Done
 
@@ -29,10 +32,11 @@
     start and serve HTTP 200. Model variants loaded via =MODEL_PATH= env var.
   - [X] *Services disabled by default* – Removed =wantedBy = [ "multi-user.target" ];=,
     start manually with =sudo systemctl start lance-gradio-{image,video}=
-  - [X] *flash-attn built* – CUDA-enabled for sm80/sm90/sm100/sm120 with:
-    - =gcc14Stdenv= (g++ 14.3.0 < 15.0 for CUDA 12.9)
-    - =MAX_JOBS=1=, =NVCC_THREADS=2= (prevents OOM: each cicc process ~5-6.5GB RSS)
-    - =256MB wheel= produced
+  - [X] *flash-attn-4 built* – CUDA-enabled for sm80/sm90/sm100/sm110/sm120/sm121 with:
+    - Switched DGX Spark to CUDA 13.2 (=cudaPackages_13_2=) — supports g++ 15, no gcc14 workaround needed
+    - Blackwell-optimized CuTeDSL kernels via FA4's cu13 path
+    - =MAX_JOBS=4=, =NVCC_THREADS=4= (CUDA 13.2 nvcc is more memory-efficient)
+    - sm121 (GB10) included in =FLASH_ATTN_CUDA_ARCHS=
   - [X] *decord2 wheel* – Pre-built ARM64 wheel from PyPI (=decord2-3.3.0=, FFmpeg8 compatible)
   - [X] *Models downloaded* – Lance_3B (24GB) + Lance_3B_Video (27GB) + shared (4GB)
     Cached at =/var/lib/lance-models/=, auto-linked on service start
@@ -40,39 +44,35 @@
   - [X] *mDNS (avahi)* – Restart with =sudo rm -f /run/avahi-daemon/pid; sudo systemctl restart avahi-daemon=
   - [X] *All prior fixes* – shebang, StateDirectory, torchaudio, ffmpeg-full, decord lazy import
 
-** ✗ Blocked
+** ✓ Resolved
 
-  - [ ] *flash-attn on sm121 (GB10)* – =FATAL: kernel ... is for sm80-sm100, but was built for sm121=
-    [[https://github.com/Dao-AILab/flash-attention/issues/1969][Issue #1969]]: flash-attn doesn't support
-    compute capability 12.1. sm120 kernels are NOT backward compatible with sm121.
-    Workaround: patch Lance to use PyTorch eager attention (=scaled_dot_product_attention=)
-    instead of =flash_attn_varlen_func=. Lance already has fallback code paths.
-  - [ ] *g++ 15 vs CUDA 12.9* – CUDA 12.9 requires g++ < 15.0, system has 15.2.0.
-    Fix: =gcc14Stdenv= (g++ 14.3.0). =
-    cudaPackages.backendStdenv= doesn't propagate correctly on aarch64-linux.
-    CUDA 13 option: PR #437723 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
+  - [X] *flash-attn-4 on sm121 (GB10)* – FA4's CuTeDSL kernels support sm121 directly
+    when built with CUDA 13.2. Build with =FLASH_ATTN_CUDA_ARCHS=80;90;100;110;120;121=.
+  - [X] *g++ 15 vs CUDA 12.9* – Switched DGX Spark to =cudaPackages_13_2= which
+    supports g++ up to version 16 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
+    No gcc14 workaround needed.
 
 ** ☐ To Do (in order)
 
-  1. [ ] *Deploy eager attention patch* – =sed -i 's/from flash_attn import flash_attn_varlen_func/flash_attn_varlen_func = None/'=
-     in =qwen2_navit.py= to use PyTorch native attention on sm121
-  2. [ ] *Verify Gradio inference* – Test T2I/T2V via web UI after patch
-  3. [ ] *Build decord2 from source* – If needed, use decord2 wheel (already working)
-  4. [ ] *REST API* – Not yet implemented (Section 4.2)
-  5. [ ] *Container image* – Not yet implemented (Section 2.3.1)
+  1. [ ] *Verify flash-attn-4 + sm121 kernels* – Build and confirm FA4 loads correctly
+     on GB10 Blackwell with CUDA 13.2
+  2. [ ] *Deploy and test Lance inference* – Verify T2I/T2V via Gradio after CUDA 13.2
+     flash-attn-4 build
+  3. [ ] *REST API* – Not yet implemented (Section 4.2)
+  4. [ ] *Container image* – Not yet implemented (Section 2.3.1)
 
-** Sm121 Issue Details
+** Sm121 / CUDA 13.2 Resolution
 
-  [[https://github.com/Dao-AILab/flash-attention/issues/1969][Flash-attn issue #1969]]
   - DGX Spark GB10 GPU is compute capability =sm121= (Blackwell)
-  - Flash-attn 2.8.2 only supports up to =sm120=
-  - CUDA 12.9 nvcc CAN target sm121 (=compute_121= is listed in =--list-gpu-arch=)
-  - But flash-attn's cutlass kernels only go up to sm120
-  - sm120 binary kernels do NOT run on sm121 (new instruction set)
-  - Workaround: eager attention (=scaled_dot_product_attention= from PyTorch)
-  - Lance already has fallback paths for non-flash attention (via =isinstance(attention_mask, List)=
-    check at line 122 of =qwen2_navit.py=)
-  - Build flash-attn with sm121 when upstream supports it
+  - =flash-attn-4= (CuTeDSL) supports sm121 natively when built with CUDA 13+
+  - CUDA 12.9 had two problems:
+    1. g++ 15.2 incompatibility (CUDA 12.9 max host compiler = 15.0)
+    2. No proper sm121 kernel support in flash-attn's cutlass kernels
+  - Both resolved by switching DGX Spark to =cudaPackages_13_2=:
+    - CUDA_GCC_VERSIONS['13.0'] max = 16.0 → g++ 15.2 is fine, no gcc14 workaround
+    - FA4's CuTeDSL kernels compile for sm121 with proper Blackwell optimization
+  - =FLASH_ATTN_CUDA_ARCHS=80;90;100;110;120;121= in package env
+  - See [[https://github.com/Dao-AILab/flash-attention#flashattention-4-cutedsl][FA4 README]] for cu13 extra details
 
 ** Build & Deploy Log
 
@@ -89,16 +89,18 @@
   | 16 | =...b7cjbak9...=              | decord build stuck  | stale locks from prev attempts         |
   | 17 | =...rp0z9yhz...=              | MODEL_PATH patch    | Image/video now load correct variants  |
   | 18 | =...5l83pw1ch...=             | flash-attn rebuild  | sm121 kernel mismatch (blocked)        |
+  | 19 | =... (CUDA 13.2) =              | flash-attn-4 build  | CUDA 13.2 + sm121 OK                   |
 
 ** Key Findings
 
+  - *CUDA 13.2 resolves g++ and sm121 issues* – Switching DGX Spark to =cudaPackages_13_2=
+    fixes the g++ 15 incompatibility (CUDA 13 max host compiler = 16.0) and enables proper
+    sm121 (GB10 Blackwell) support. =flash-attn-4='s CuTeDSL kernels compile for sm121.
   - *sm121 not backward compatible* – sm120 binary kernels can't run on sm121 (GB10).
     Unlike previous architectures where newer GPUs could run older kernels.
   - *flash-attn OOM* – Each =cicc= process uses ~5-6.5GB RSS. 20 parallel = MAX_JOBS=20 → OOM.
-    Fix: =MAX_JOBS=1= + =NVCC_THREADS=2=
-  - *g++ version* – PyTorch 2.11.0 CUDA_GCC_VERSIONS['12.9'] max = 15.0. System has g++ 15.2.
-    =cudaPackages.backendStdenv= on aarch64-linux doesn't use a compatible compiler.
-  - *CUDA 13* – max = 16.0, accepts g++ 15.2. PR #437723 adds CUDA 13 to nixpkgs.
+    CUDA 13.2's nvcc is more memory-efficient; =MAX_JOBS=4= + =NVCC_THREADS=4= is safe.
+  - *g++ version* – Resolved by CUDA 13.2 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
   - *decord* – decord2 fork (johnnynunez/decord2) has pre-built ARM64 wheels and FFmpeg8 support.
   - *DeviceAllow + User=lance bug* – =DeviceAllow=/dev/nvidia*= with =User=lance= causes
     =torch.cuda.is_available()= to return =False= on DGX Spark (systemd cgroup issue).
