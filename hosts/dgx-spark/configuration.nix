@@ -82,10 +82,10 @@
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
-    enable = false;
+    enable = true;
     instances = {
       video = {
-        enable = true;
+        enable = false;
         model = "video";
         gradioTask = "t2v";
         gradioPort = 7860;
