@@ -3,16 +3,38 @@
 {
   imports = [
     ./hardware-configuration.nix
-    # ComfyUI NixOS module from nixified-ai
-    # ComfyUI module needs CUDA 13.2 overlay too (matches what we set in nixpkgs.overlays)
-    (inputs.nixified-ai.nixosModules.comfyui {
-      overlays = [
-        (_final: prev: { cudaPackages = prev.cudaPackages_13_2; })
-        inputs.nixified-ai.overlays.comfyui
-        inputs.nixified-ai.overlays.models
-        inputs.nixified-ai.overlays.fetchers
-      ];
-    })
+
+    # ComfyUI — import module directly with our overlays so kornia-rs fix + CUDA 13.2 apply
+    (
+      { ... }:
+      let
+        overlays = [
+          # CUDA 13.2 must come first so all packages build against it
+          (_final: prev: { cudaPackages = prev.cudaPackages_13_2; })
+          # Unblock kornia-rs for aarch64
+          (_final: prev: {
+            python3Packages = prev.python3Packages.overrideScope (
+              _pyfinal: pyprev: {
+                kornia-rs = pyprev.kornia-rs.overridePythonAttrs (oldAttrs: {
+                  meta = oldAttrs.meta // {
+                    badPlatforms = [ ];
+                  };
+                });
+              }
+            );
+          })
+          inputs.nixified-ai.overlays.comfyui
+          inputs.nixified-ai.overlays.models
+          inputs.nixified-ai.overlays.fetchers
+        ];
+      in
+      {
+        imports = [
+          (import "${inputs.nixified-ai}/flake-modules/projects/comfyui/module.nix" { inherit overlays; })
+        ];
+        nixpkgs.overlays = overlays;
+      }
+    )
   ];
 
   # ─── Bootloader ─────────────────────────────────────────────────────
@@ -26,7 +48,6 @@
   # ─── Networking ─────────────────────────────────────────────────────
   networking.hostName = "dgx-spark";
   networking.useDHCP = true;
-  # networking.networkmanager.enable = true;  # uncomment if wifi is needed later
 
   # ─── Time zone / locale ─────────────────────────────────────────────
   time.timeZone = "America/Regina";
@@ -35,13 +56,10 @@
   # ─── User accounts ──────────────────────────────────────────────────
   users.users.yuanw = {
     isNormalUser = true;
-    #shell = pkgs.zsh;
-    # Temporary password for first-boot console access.
-    # Change it after login with: passwd yuanw
     extraGroups = [
       "wheel"
-      "video" # GPU access
-      "docker" # Podman/docker compat
+      "video"
+      "docker"
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
@@ -50,7 +68,6 @@
   };
 
   # ─── Sudo ────────────────────────────────────────────────────────
-  # Allow wheel group to sudo without password (headless rebuilds)
   security.sudo.wheelNeedsPassword = false;
 
   # ─── Nix settings ──────────────────────────────────────────────────
@@ -64,7 +81,6 @@
       "root"
       "yuanw"
     ];
-    # CUDA binary cache (speeds up torch/flash-attn/comfyui builds)
     substituters = [
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
@@ -98,8 +114,6 @@
     host = "0.0.0.0";
     port = 8188;
     openFirewall = true;
-    # Uncomment to download SD 1.5 model on first build:
-    # models = [ inputs.nixified-ai.legacyPackages.${pkgs.system}.comfyuiModels.sd15-fp16 ];
   };
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
@@ -122,8 +136,7 @@
   };
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
-  # Move dashboard to internal port 11001, then proxy external 11000
-  networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard LAN proxy
+  networking.firewall.allowedTCPPorts = [ 11000 ];
   services.dgx-dashboard = {
     enable = true;
     port = 11001;
@@ -134,7 +147,6 @@
     wantedBy = [ "sockets.target" ];
     listenStreams = [ "11000" ];
   };
-
   systemd.services.dgx-dashboard-lan = {
     description = "DGX Dashboard LAN proxy";
     requires = [ "dgx-dashboard-lan.socket" ];
@@ -149,7 +161,6 @@
   };
 
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
-  # Publish hostname so clients can reach dgx-spark.local
   services.avahi = {
     enable = true;
     publish = {
@@ -188,11 +199,5 @@
     ds4
   ];
 
-  # ─── Zsh ───────────────────────────────────────────────────────────
-  #programs.zsh.enable = true;
-
-  # This value determines the NixOS release from which the default
-  # settings for stateful data were taken. Do NOT change this after
-  # the initial install.
   system.stateVersion = "25.11";
 }

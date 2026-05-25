@@ -32,6 +32,19 @@
       };
     })
 
+    # ── kornia-rs: unblock aarch64 (MUST be before nixified-ai overlays) ─
+    (_final: prev: {
+      python3Packages = prev.python3Packages.overrideScope (
+        _pyfinal: pyprev: {
+          kornia-rs = pyprev.kornia-rs.overridePythonAttrs (oldAttrs: {
+            meta = oldAttrs.meta // {
+              badPlatforms = [ ];
+            };
+          });
+        }
+      );
+    })
+
     # ── nixified-ai overlays (ComfyUI) ────────────────────────────
     inputs.nixified-ai.overlays.comfyui
     inputs.nixified-ai.overlays.models
