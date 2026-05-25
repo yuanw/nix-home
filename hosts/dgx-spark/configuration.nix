@@ -85,13 +85,13 @@
     enable = true;
     instances = {
       video = {
-        enable = false;
+        enable = true;
         model = "video";
         gradioTask = "t2v";
         gradioPort = 7860;
       };
       image = {
-        enable = true;
+        enable = false;
         model = "image";
         gradioTask = "t2i";
         gradioPort = 7861;
