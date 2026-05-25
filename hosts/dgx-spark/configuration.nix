@@ -1,8 +1,18 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
+    # ComfyUI NixOS module from nixified-ai
+    # ComfyUI module needs CUDA 13.2 overlay too (matches what we set in nixpkgs.overlays)
+    (inputs.nixified-ai.nixosModules.comfyui {
+      overlays = [
+        (_final: prev: { cudaPackages = prev.cudaPackages_13_2; })
+        inputs.nixified-ai.overlays.comfyui
+        inputs.nixified-ai.overlays.models
+        inputs.nixified-ai.overlays.fetchers
+      ];
+    })
   ];
 
   # ─── Bootloader ─────────────────────────────────────────────────────
@@ -54,19 +64,20 @@
       "root"
       "yuanw"
     ];
-    # CUDA binary cache (speeds up torch/flash-attn builds)
+    # CUDA binary cache (speeds up torch/flash-attn/comfyui builds)
     substituters = [
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://cache.nixos-cuda.org"
       "https://graham33.cachix.org"
-
+      "https://ai.cachix.org"
     ];
     trusted-public-keys = [
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cuda-maintainers.cachix.org-1:Zf5/D7lVH62pV3W4pAzbXFPAtdKBKAZnNj4n1XS85i4="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       "graham33.cachix.org-1:DqH72VpwSrACa3+L9eqh4bixjWx9IQUaxQtRh4gtkX8="
+      "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
     ];
   };
   nix.gc = {
@@ -79,6 +90,17 @@
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = false;
+
+  # ─── ComfyUI ───────────────────────────────────────────────────────
+  services.comfyui = {
+    enable = true;
+    acceleration = "cuda";
+    host = "0.0.0.0";
+    port = 8188;
+    openFirewall = true;
+    # Uncomment to download SD 1.5 model on first build:
+    # models = [ inputs.nixified-ai.legacyPackages.${pkgs.system}.comfyuiModels.sd15-fp16 ];
+  };
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {

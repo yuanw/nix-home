@@ -87,6 +87,10 @@
       url = "github:nix-community/preservation";
     };
     dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    nixified-ai = {
+      url = "github:nixified-ai/flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     colmena.url = "github:zhaofengli/colmena";
   };
 

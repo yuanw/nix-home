@@ -32,6 +32,11 @@
       };
     })
 
+    # ── nixified-ai overlays (ComfyUI) ────────────────────────────
+    inputs.nixified-ai.overlays.comfyui
+    inputs.nixified-ai.overlays.models
+    inputs.nixified-ai.overlays.fetchers
+
     # ── Python package fixes for CUDA 13 ──────────────────────────
     (_final: prev: {
       pythonPackagesExtensions = (prev.pythonPackagesExtensions or [ ]) ++ [
