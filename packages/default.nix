@@ -182,4 +182,8 @@ _final: prev: {
 
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
+
+  # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
+  # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
+  comfyui = prev.comfyuiPackages.comfyui;
 }

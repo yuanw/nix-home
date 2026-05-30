@@ -1,40 +1,9 @@
-{ pkgs, inputs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
-
-    # ComfyUI — import module directly with our overlays so kornia-rs fix + CUDA 13.2 apply
-    (
-      { ... }:
-      let
-        overlays = [
-          # CUDA 13.2 must come first so all packages build against it
-          (_final: prev: { cudaPackages = prev.cudaPackages_13_2; })
-          # Unblock kornia-rs for aarch64
-          (_final: prev: {
-            python3Packages = prev.python3Packages.overrideScope (
-              _pyfinal: pyprev: {
-                kornia-rs = pyprev.kornia-rs.overridePythonAttrs (oldAttrs: {
-                  meta = oldAttrs.meta // {
-                    badPlatforms = [ ];
-                  };
-                });
-              }
-            );
-          })
-          inputs.nixified-ai.overlays.comfyui
-          inputs.nixified-ai.overlays.models
-          inputs.nixified-ai.overlays.fetchers
-        ];
-      in
-      {
-        imports = [
-          (import "${inputs.nixified-ai}/flake-modules/projects/comfyui/module.nix" { inherit overlays; })
-        ];
-        nixpkgs.overlays = overlays;
-      }
-    )
+    ../../modules/comfyui.nix
   ];
 
   # ─── Bootloader ─────────────────────────────────────────────────────
@@ -107,18 +76,9 @@
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = false;
 
-  # ─── ComfyUI ───────────────────────────────────────────────────────
-  services.comfyui = {
-    enable = true;
-    acceleration = "cuda";
-    host = "0.0.0.0";
-    port = 8188;
-    openFirewall = true;
-  };
-
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
-    enable = false;
+    enable = true;
     instances = {
       video = {
         enable = true;
@@ -136,7 +96,19 @@
   };
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
-  networking.firewall.allowedTCPPorts = [ 11000 ];
+  networking.firewall.allowedTCPPorts = [
+    11000
+    7860
+    7861
+    8188
+  ];
+
+  services.comfyui = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 8188;
+    openFirewall = true;
+  };
   services.dgx-dashboard = {
     enable = true;
     port = 11001;
