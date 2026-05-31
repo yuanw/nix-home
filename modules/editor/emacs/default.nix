@@ -3377,6 +3377,10 @@ with lib;
                   ];
                   defer = true;
                 };
+                ghostel = {
+                  enable = true;
+
+                };
 
                 wm = {
                   enable = false;
