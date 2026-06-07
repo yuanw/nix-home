@@ -104,6 +104,7 @@ in
 
       # services.caffeine.enable = true;
       # blueman-applet autostarts via its own D-Bus service and .desktop file
+      # Broken: HM wraps the service with a duplicate ExecStart=.
       # services.blueman-applet.enable = true;
       services.network-manager-applet.enable = true;
       services.dunst.enable = true;

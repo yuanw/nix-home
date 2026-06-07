@@ -3377,6 +3377,11 @@ with lib;
                   ];
                   defer = true;
                 };
+                ghostel = {
+                  # disabled on darwin because the Zig build requires the macOS SDK
+                  # which isn't accessible inside the Nix sandbox
+                  enable = !isDarwin;
+                };
 
                 wm = {
                   enable = false;
