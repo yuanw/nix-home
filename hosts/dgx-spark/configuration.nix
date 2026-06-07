@@ -74,11 +74,11 @@
   nixpkgs.config.cudaSupport = true;
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = false;
+  services.ds4.enable = true;
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
-    enable = true;
+    enable = false;
     instances = {
       video = {
         enable = true;
@@ -98,8 +98,6 @@
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   networking.firewall.allowedTCPPorts = [
     11000
-    7860
-    7861
     8188
   ];
 
