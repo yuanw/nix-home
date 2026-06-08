@@ -13,6 +13,7 @@
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix
+      ./coding-agents/hermes-agent.nix
       ./coding-agents/pi
       ./common.nix
       ./dev/agda.nix
