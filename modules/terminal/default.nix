@@ -32,6 +32,7 @@ in
         ];
       };
       catppuccin = {
+        autoEnable = true;
         starship.enable = true;
         bat.enable = true;
         # this messed up keybind
