@@ -169,5 +169,12 @@
     ds4
   ];
 
+  # fwupd-refresh.service requires polkit auth and fails during non-interactive
+  # activation (colmena deploy). Disable it — not needed on a headless server.
+  systemd.services.fwupd-refresh = {
+    enable = false;
+    wantedBy = [ ];
+  };
+
   system.stateVersion = "25.11";
 }
