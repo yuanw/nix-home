@@ -125,7 +125,7 @@
     };
     claude-code = {
       enable = true;
-      enableClaudeMem = true;
+      enableClaudeMem = false;
     };
     mouseless.enable = true;
     brew = {
@@ -196,6 +196,8 @@
     work = {
       enable = true;
       includeTrio = true;
+      atlassianMcp.enable = true;
+      atlassianMcp.readOnly = false;
     };
   };
 }
