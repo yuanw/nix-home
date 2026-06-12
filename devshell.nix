@@ -4,6 +4,7 @@
       config,
       inputs',
       pkgs,
+      system,
       ...
     }:
     {
@@ -14,25 +15,23 @@
           nix-tree
           dive
           treefmt
-          #awscli
           lego
-          #terraform
         ];
-        # See https://haskell.flake.page/devshell#composing-devshells
         inputsFrom = [
           config.treefmt.build.devShell
           config.pre-commit.devShell
-          # config.haskellProjects.default.outputs.devShell
-
         ];
       };
-      # devShells.haskell = pkgs.mkShell {
-      #   inputsFrom = [
-      #     config.treefmt.build.devShell
-      #     config.pre-commit.devShell
-      #     #config.haskellProjects.default.outputs.devShell
-      #   ];
-      # };
 
+      # ComfyUI devshell — aarch64-linux only (DGX Spark)
+      # Uses the comfyui package from our overlay (nixified-ai + CUDA 13.2)
+      devShells.comfyui = pkgs.mkShell {
+        packages = pkgs.lib.optionals (system == "aarch64-linux") [
+          pkgs.comfyui
+        ];
+        shellHook = pkgs.lib.optionalString (system == "aarch64-linux") ''
+          echo "ComfyUI — run: comfyui --listen 0.0.0.0"
+        '';
+      };
     };
 }

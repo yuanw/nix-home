@@ -388,6 +388,48 @@
     "flake-parts_10": {
       "inputs": {
         "nixpkgs-lib": [
+          "nixified-ai",
+          "hercules-ci-effects",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768135262,
+        "narHash": "sha256-PVvu7OqHBGWN16zSi6tEmPwwHQ4rLPU9Plvs8/1TUBY=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "80daad04eddbbf5a4d883996a73f3f542fa437ac",
+        "type": "github"
+      },
+      "original": {
+        "id": "flake-parts",
+        "type": "indirect"
+      }
+    },
+    "flake-parts_11": {
+      "inputs": {
+        "nixpkgs-lib": [
+          "nur",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1733312601,
+        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "type": "github"
+      }
+    },
+    "flake-parts_12": {
+      "inputs": {
+        "nixpkgs-lib": [
           "typewell",
           "nixpkgs"
         ]
@@ -551,16 +593,16 @@
     "flake-parts_9": {
       "inputs": {
         "nixpkgs-lib": [
-          "nur",
+          "nixified-ai",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1733312601,
-        "narHash": "sha256-4pDvzqnegAfRkPwO3wmwBhVi/Sye1mzps0zHWYnP88c=",
+        "lastModified": 1768135262,
+        "narHash": "sha256-PVvu7OqHBGWN16zSi6tEmPwwHQ4rLPU9Plvs8/1TUBY=",
         "owner": "hercules-ci",
         "repo": "flake-parts",
-        "rev": "205b12d8b7cd4802fbcb8e8ef6a0f1408781a4f9",
+        "rev": "80daad04eddbbf5a4d883996a73f3f542fa437ac",
         "type": "github"
       },
       "original": {
@@ -808,6 +850,28 @@
         "flake-parts": "flake-parts_4",
         "nixpkgs": [
           "dgx-spark",
+          "nixified-ai",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1768476106,
+        "narHash": "sha256-V0YOJRum50gtKgwavsAfwXc9+XAsJCC7386YZx1sWGQ=",
+        "owner": "hercules-ci",
+        "repo": "hercules-ci-effects",
+        "rev": "c19e263e6e22ec7379d972f19e6a322f943c73fb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "hercules-ci-effects",
+        "type": "github"
+      }
+    },
+    "hercules-ci-effects_2": {
+      "inputs": {
+        "flake-parts": "flake-parts_10",
+        "nixpkgs": [
           "nixified-ai",
           "nixpkgs"
         ]
@@ -1129,6 +1193,28 @@
         "owner": "nixified-ai",
         "repo": "flake",
         "rev": "49c82400f98718f2ddd57c49e03fd4c0e8dde0b3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixified-ai",
+        "repo": "flake",
+        "type": "github"
+      }
+    },
+    "nixified-ai_2": {
+      "inputs": {
+        "flake-parts": "flake-parts_9",
+        "hercules-ci-effects": "hercules-ci-effects_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1781241489,
+        "narHash": "sha256-2HsLf06rypFoZVrsnQEIv1BRRObugb0WRPvX+sMxcBI=",
+        "owner": "nixified-ai",
+        "repo": "flake",
+        "rev": "e5beab2a3eccfd00117e5db6c41a5f09dd747c42",
         "type": "github"
       },
       "original": {
@@ -1489,7 +1575,7 @@
     },
     "nur": {
       "inputs": {
-        "flake-parts": "flake-parts_9",
+        "flake-parts": "flake-parts_11",
         "nixpkgs": "nixpkgs_13"
       },
       "locked": {
@@ -1588,6 +1674,7 @@
         "mono-stretchly-darwin": "mono-stretchly-darwin",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
+        "nixified-ai": "nixified-ai_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_12",
         "nixpkgs-master": "nixpkgs-master",
@@ -1881,7 +1968,7 @@
     },
     "typewell": {
       "inputs": {
-        "flake-parts": "flake-parts_10",
+        "flake-parts": "flake-parts_12",
         "fourmolu-nix": "fourmolu-nix",
         "git-hooks": "git-hooks_2",
         "haskell-flake": "haskell-flake_3",

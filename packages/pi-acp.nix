@@ -6,7 +6,7 @@
 }:
 buildNpmPackage rec {
   pname = "pi-acp";
-  version = "0-unstable-2026-05-13";
+  version = "0.0.27-unstable-2026-05-13";
 
   src = fetchFromGitHub {
     owner = "svkozak";

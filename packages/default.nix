@@ -172,6 +172,30 @@ _final: prev: {
 
   ds4 = prev.callPackage ./ds4 { };
 
+  ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
+
+  flash-attn-4 = prev.callPackage ./flash-attn-4 { };
+
+  decord = prev.callPackage ./decord { };
+  lance = prev.callPackage ./lance { };
+  lance-download-model = prev.callPackage ./lance-download-model { };
+
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
+
+  # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
+  # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
+  # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids
+  # builtins.readDir on the source fetch during evaluation.
+  # The nixified-ai wrapper calls:
+  #   builtins.readDir (comfyui-unwrapped.src + "/models")
+  # in its let-bindings, which forces Nix to realize the fetch derivation
+  # during eval. This fails when colmena evaluates aarch64-linux configs on
+  # aarch64-darwin (cross-architecture). The unwrapped package already wraps
+  # PYTHONPATH via buildPythonApplication's postFixup, so we just join it.
+  comfyui = prev.symlinkJoin {
+    name = "comfyui-wrapped";
+    paths = [ prev.comfyuiPackages.comfyui-unwrapped ];
+    meta.mainProgram = "comfyui";
+  };
 }

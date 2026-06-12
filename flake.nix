@@ -87,6 +87,10 @@
       url = "github:nix-community/preservation";
     };
     dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    nixified-ai = {
+      url = "github:nixified-ai/flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     colmena.url = "github:zhaofengli/colmena";
   };
 
@@ -125,6 +129,10 @@
             config = {
               allowUnfree = true;
             };
+            overlays = inputs.nixpkgs.lib.optionals (system == "aarch64-linux") [
+              inputs.dgx-spark.overlays.fixes
+              (import ./packages)
+            ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;

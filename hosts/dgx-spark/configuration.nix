@@ -3,6 +3,7 @@
 {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/comfyui.nix
   ];
 
   # ─── Bootloader ─────────────────────────────────────────────────────
@@ -16,7 +17,6 @@
   # ─── Networking ─────────────────────────────────────────────────────
   networking.hostName = "dgx-spark";
   networking.useDHCP = true;
-  # networking.networkmanager.enable = true;  # uncomment if wifi is needed later
 
   # ─── Time zone / locale ─────────────────────────────────────────────
   time.timeZone = "America/Regina";
@@ -25,13 +25,10 @@
   # ─── User accounts ──────────────────────────────────────────────────
   users.users.yuanw = {
     isNormalUser = true;
-    #shell = pkgs.zsh;
-    # Temporary password for first-boot console access.
-    # Change it after login with: passwd yuanw
     extraGroups = [
       "wheel"
-      "video" # GPU access
-      "docker" # Podman/docker compat
+      "video"
+      "docker"
     ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
@@ -40,7 +37,6 @@
   };
 
   # ─── Sudo ────────────────────────────────────────────────────────
-  # Allow wheel group to sudo without password (headless rebuilds)
   security.sudo.wheelNeedsPassword = false;
 
   # ─── Nix settings ──────────────────────────────────────────────────
@@ -54,6 +50,20 @@
       "root"
       "yuanw"
     ];
+    substituters = [
+      "https://nix-community.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+      "https://cache.nixos-cuda.org"
+      "https://graham33.cachix.org"
+      "https://ai.cachix.org"
+    ];
+    trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cuda-maintainers.cachix.org-1:Zf5/D7lVH62pV3W4pAzbXFPAtdKBKAZnNj4n1XS85i4="
+      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "graham33.cachix.org-1:DqH72VpwSrACa3+L9eqh4bixjWx9IQUaxQtRh4gtkX8="
+      "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
+    ];
   };
   nix.gc = {
     automatic = true;
@@ -61,13 +71,42 @@
     options = "--delete-older-than 30d";
   };
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.cudaSupport = true;
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = true;
 
+  # ─── Lance Multimodal AI ────────────────────────────────────────────
+  services.lance = {
+    enable = false;
+    instances = {
+      video = {
+        enable = true;
+        model = "video";
+        gradioTask = "t2v";
+        gradioPort = 7860;
+      };
+      image = {
+        enable = false;
+        model = "image";
+        gradioTask = "t2i";
+        gradioPort = 7861;
+      };
+    };
+  };
+
   # ─── DGX Dashboard ─────────────────────────────────────────────────
-  # Move dashboard to internal port 11001, then proxy external 11000
-  networking.firewall.allowedTCPPorts = [ 11000 ]; # DGX Dashboard LAN proxy
+  networking.firewall.allowedTCPPorts = [
+    11000
+    8188
+  ];
+
+  services.comfyui = {
+    enable = true;
+    host = "0.0.0.0";
+    port = 8188;
+    openFirewall = true;
+  };
   services.dgx-dashboard = {
     enable = true;
     port = 11001;
@@ -78,7 +117,6 @@
     wantedBy = [ "sockets.target" ];
     listenStreams = [ "11000" ];
   };
-
   systemd.services.dgx-dashboard-lan = {
     description = "DGX Dashboard LAN proxy";
     requires = [ "dgx-dashboard-lan.socket" ];
@@ -93,7 +131,6 @@
   };
 
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
-  # Publish hostname so clients can reach dgx-spark.local
   services.avahi = {
     enable = true;
     publish = {
@@ -132,11 +169,13 @@
     ds4
   ];
 
-  # ─── Zsh ───────────────────────────────────────────────────────────
-  #programs.zsh.enable = true;
+  # fwupd-refresh.service (fwupdmgr refresh) requires polkit auth and fails during
+  # non-interactive activation (colmena deploy). Tolerate the failure so it doesn't
+  # abort the deployment — manual `fwupdmgr refresh/update` still works.
+  systemd.services.fwupd-refresh.serviceConfig.SuccessExitStatus = [
+    0
+    1
+  ];
 
-  # This value determines the NixOS release from which the default
-  # settings for stateful data were taken. Do NOT change this after
-  # the initial install.
   system.stateVersion = "25.11";
 }

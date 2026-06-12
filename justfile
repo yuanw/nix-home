@@ -71,6 +71,53 @@ spark-ds4-logs IP="dgx-spark.local":
 spark-ds4-download MODEL="q2-imatrix" IP="dgx-spark.local":
     @ssh yuanw@{{IP}} "sudo -u ds4 bash -c 'cd /var/lib/ds4 && ds4-download-model {{MODEL}}'"
 
+# ─── Lance AI Server ────────────────────────────────────────────────
+
+# deploy lance changes to DGX Spark and rebuild
+spark-lance-deploy IP="dgx-spark.local":
+    @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
+
+# download both Lance model variants (Lance_3B + Lance_3B_Video) on DGX Spark
+spark-lance-download-models IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo -u lance bash -c 'export LANCE_DATA_DIR=/var/lib/lance && \$(command -v lance-download-model)'"
+
+# service management (replace INSTANCE with "video" or "image")
+spark-lance-start INSTANCE="video" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl start lance-gradio-{{INSTANCE}}"
+
+spark-lance-stop INSTANCE="video" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl kill --kill-who=main --signal=SIGKILL lance-gradio-{{INSTANCE}} 2>/dev/null; sudo systemctl stop lance-gradio-{{INSTANCE}}"
+
+# start both image & video services (stops ds4-server first)
+spark-lance-start-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server; sudo systemctl start lance-gradio-image lance-gradio-video"
+
+# stop both image & video services (force kill first)
+spark-lance-stop-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl kill --kill-who=main --signal=SIGKILL lance-gradio-image lance-gradio-video 2>/dev/null; sudo systemctl stop lance-gradio-image lance-gradio-video"
+
+# restart both services
+spark-lance-restart-both IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl stop ds4-server; sudo systemctl restart lance-gradio-image lance-gradio-video"
+
+spark-lance-restart INSTANCE="video" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl restart lance-gradio-{{INSTANCE}}"
+
+spark-lance-status INSTANCE="video" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo systemctl status lance-gradio-{{INSTANCE}}"
+
+spark-lance-logs INSTANCE="video" IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "sudo journalctl -u lance-gradio-{{INSTANCE}} -f"
+
+spark-lance-check-models IP="dgx-spark.local":
+    @ssh yuanw@{{IP}} "ls -lh /var/lib/lance/downloads/"
+
+# build lance on DGX Spark (without switching)
+spark-build-lance IP="dgx-spark.local":
+    @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
+
 # build ds4 on DGX Spark (without switching)
 spark-build-ds4 IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
