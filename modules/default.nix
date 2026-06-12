@@ -13,6 +13,7 @@
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix
+      ./coding-agents/hermes-agent.nix
       ./coding-agents/pi
       ./common.nix
       ./dev/agda.nix
@@ -45,6 +46,7 @@
 
     linux.imports = [
       ./ds4.nix
+      ./lance.nix
       ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix

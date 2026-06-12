@@ -9,7 +9,7 @@
 }:
 melpaBuild {
   pname = "ultra-scroll";
-  version = "0-unstable-2026-05-16";
+  version = "0.6.2-unstable-2026-05-16";
   src = fetchFromGitHub {
     owner = "jdtsmith";
     repo = "ultra-scroll";

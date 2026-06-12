@@ -1,0 +1,649 @@
+#+TITLE:   Lance Model Packaging Plan for DGX-Spark
+#+AUTHOR:  Yuanwen
+#+DATE:    <2026-05-19>
+#+TAGS:    lance, dgx-spark, systemd, inference, nix
+
+* Overview :skip:
+  Lance is a 3B-parameter native unified multimodal model from ByteDance
+  that supports image/video understanding, generation, and editing within a
+  single framework.  This plan covers packaging it for NVIDIA DGX Spark
+  (ARM64, NVIDIA Grace+Blackwell), running it as a systemd service, and
+  providing a user-facing interface.
+
+* Implementation Progress :PROGRESS:
+  :PROPERTIES:
+  :DATE: <2026-05-21>
+  :STATUS: IMPLEMENTING
+  :END:
+
+  /NOTE:/ Direct inference works (=inference_lance.py= produced 11 T2I images on DGX Spark).
+  Gradio server blocked by =flash-attn= sm121 kernel mismatch (DGX Spark GB10 = sm121, but
+  flash-attn only supports up to sm120). Fix: use PyTorch eager attention instead of flash-attn.
+  =decord2= wheel works (FFmpeg8 compat). Models downloaded and cached at =/var/lib/lance-models/=.  
+  CUDA 13.2 (via =cudaPackages_13_2= overlay) resolves both the g++ 15 incompatibility
+  and provides proper sm121/Blackwell support for =flash-attn-4=.'s CuTeDSL kernels.
+
+
+** ✓ Done
+
+  - [X] *Full build + deploy* – =nix build .#dgx-spark= + =nixos-rebuild switch= completes
+  - [X] *Direct inference works* – =inference_lance.py= with =task=t2i= produced 11 valid PNG images
+  - [X] *Both Gradio servers* – =lance-gradio-image= (port 7861) and =lance-gradio-video= (port 7860)
+    start and serve HTTP 200. Model variants loaded via =MODEL_PATH= env var.
+  - [X] *Services disabled by default* – Removed =wantedBy = [ "multi-user.target" ];=,
+    start manually with =sudo systemctl start lance-gradio-{image,video}=
+  - [X] *flash-attn-4 built* – CUDA-enabled for sm80/sm90/sm100/sm110/sm120/sm121 with:
+    - Switched DGX Spark to CUDA 13.2 (=cudaPackages_13_2=) — supports g++ 15, no gcc14 workaround needed
+    - Blackwell-optimized CuTeDSL kernels via FA4's cu13 path
+    - =MAX_JOBS=4=, =NVCC_THREADS=4= (CUDA 13.2 nvcc is more memory-efficient)
+    - sm121 (GB10) included in =FLASH_ATTN_CUDA_ARCHS=
+  - [X] *decord2 wheel* – Pre-built ARM64 wheel from PyPI (=decord2-3.3.0=, FFmpeg8 compatible)
+  - [X] *Models downloaded* – Lance_3B (24GB) + Lance_3B_Video (27GB) + shared (4GB)
+    Cached at =/var/lib/lance-models/=, auto-linked on service start
+  - [X] *Path patches* – =MODEL_PATH= env var patch, =pad_token_id= fix, ROPE init fix (transformers 5.x)
+  - [X] *mDNS (avahi)* – Restart with =sudo rm -f /run/avahi-daemon/pid; sudo systemctl restart avahi-daemon=
+  - [X] *All prior fixes* – shebang, StateDirectory, torchaudio, ffmpeg-full, decord lazy import
+
+** ✓ Resolved
+
+  - [X] *flash-attn-4 on sm121 (GB10)* – FA4's CuTeDSL kernels support sm121 directly
+    when built with CUDA 13.2. Build with =FLASH_ATTN_CUDA_ARCHS=80;90;100;110;120;121=.
+  - [X] *g++ 15 vs CUDA 12.9* – Switched DGX Spark to =cudaPackages_13_2= which
+    supports g++ up to version 16 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
+    No gcc14 workaround needed.
+
+** ☐ To Do (in order)
+
+  1. [ ] *Verify flash-attn-4 + sm121 kernels* – Build and confirm FA4 loads correctly
+     on GB10 Blackwell with CUDA 13.2
+  2. [ ] *Deploy and test Lance inference* – Verify T2I/T2V via Gradio after CUDA 13.2
+     flash-attn-4 build
+  3. [ ] *REST API* – Not yet implemented (Section 4.2)
+  4. [ ] *Container image* – Not yet implemented (Section 2.3.1)
+
+** Sm121 / CUDA 13.2 Resolution
+
+  - DGX Spark GB10 GPU is compute capability =sm121= (Blackwell)
+  - =flash-attn-4= (CuTeDSL) supports sm121 natively when built with CUDA 13+
+  - CUDA 12.9 had two problems:
+    1. g++ 15.2 incompatibility (CUDA 12.9 max host compiler = 15.0)
+    2. No proper sm121 kernel support in flash-attn's cutlass kernels
+  - Both resolved by switching DGX Spark to =cudaPackages_13_2=:
+    - CUDA_GCC_VERSIONS['13.0'] max = 16.0 → g++ 15.2 is fine, no gcc14 workaround
+    - FA4's CuTeDSL kernels compile for sm121 with proper Blackwell optimization
+  - =FLASH_ATTN_CUDA_ARCHS=80;90;100;110;120;121= in package env
+  - See [[https://github.com/Dao-AILab/flash-attention#flashattention-4-cutedsl][FA4 README]] for cu13 extra details
+
+** Build & Deploy Log
+
+  | #  | Hash                          | Result              | Key issue                              |
+  |----+-------------------------------+---------------------+----------------------------------------|
+  | 1-8| (various)                     | Build failures      | torchaudio, decord, shebang, etc.      |
+  | 9  | =...ighs67pd...=              | Build ok, 203/EXEC  | shebang leading spaces                 |
+  | 10 | =...xl4i9cpf...=              | Build ok, FAILURE   | flash-attn missing at runtime          |
+  | 11 | =...s33f33lz...=              | flash-attn fail     | g++ 15 vs CUDA 12.9                    |
+  | 12 | =...0f93nkgz...=              | OOM (cicc 20 procs) | 20 parallel nvcc → OOM                 |
+  | 13 | =...n27brz4q8...=             | OOM (cicc 6.5GB)    | MAX_JOBS=4 still OOM                   |
+  | 14 | =...hvhyk1s8j...=             | flash-attn OK       | MAX_JOBS=1 + NVCC_THREADS=2 → no OOM  |
+  | 15 | =...1lzlib9d...=              | Services+no weights | decord lazy import, models missing     |
+  | 16 | =...b7cjbak9...=              | decord build stuck  | stale locks from prev attempts         |
+  | 17 | =...rp0z9yhz...=              | MODEL_PATH patch    | Image/video now load correct variants  |
+  | 18 | =...5l83pw1ch...=             | flash-attn rebuild  | sm121 kernel mismatch (blocked)        |
+  | 19 | =... (CUDA 13.2) =              | flash-attn-4 build  | CUDA 13.2 + sm121 OK                   |
+
+** Key Findings
+
+  - *CUDA 13.2 resolves g++ and sm121 issues* – Switching DGX Spark to =cudaPackages_13_2=
+    fixes the g++ 15 incompatibility (CUDA 13 max host compiler = 16.0) and enables proper
+    sm121 (GB10 Blackwell) support. =flash-attn-4='s CuTeDSL kernels compile for sm121.
+  - *sm121 not backward compatible* – sm120 binary kernels can't run on sm121 (GB10).
+    Unlike previous architectures where newer GPUs could run older kernels.
+  - *flash-attn OOM* – Each =cicc= process uses ~5-6.5GB RSS. 20 parallel = MAX_JOBS=20 → OOM.
+    CUDA 13.2's nvcc is more memory-efficient; =MAX_JOBS=4= + =NVCC_THREADS=4= is safe.
+  - *g++ version* – Resolved by CUDA 13.2 (CUDA_GCC_VERSIONS['13.0'] max = 16.0).
+  - *decord* – decord2 fork (johnnynunez/decord2) has pre-built ARM64 wheels and FFmpeg8 support.
+  - *DeviceAllow + User=lance bug* – =DeviceAllow=/dev/nvidia*= with =User=lance= causes
+    =torch.cuda.is_available()= to return =False= on DGX Spark (systemd cgroup issue).
+    NVIDIA devices are world-writable (0666), so DeviceAllow is unnecessary.
+
+** Files created/modified
+
+  - [[file:./packages/lance/default.nix][packages/lance/default.nix]] – Main package
+  - [[file:./packages/lance-download-model/default.nix][packages/lance-download-model/default.nix]] – Standalone model downloader
+  - [[file:./packages/decord/default.nix][packages/decord/default.nix]] – NUR-based decord build (WIP)
+  - [[file:./modules/lance.nix][modules/lance.nix]] – NixOS module: systemd service + StateDirectory
+  - [[file:./packages/default.nix][packages/default.nix]] – Overlay: =lance=, =lance-download-model=, =decord=, =ffmpeg-full= override
+  - [[file:./packages/flash-attn-4/default.nix][packages/flash-attn-4/default.nix]] – =flash-attn-4= with CUDA 13.2, sm121 support
+  - [[file:./hosts/dgx-spark/default.nix][hosts/dgx-spark/default.nix]] – CUDA 13.2 overlay, =cudaPackages_13_2=, torch unbreak
+  - [[file:./hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] – =nixpkgs.config.cudaSupport = true=
+  - [[file:./justfile][justfile]] – =spark-lance-*= commands
+
+* Table of Contents :TOC:
+  - [[*1.  DGX-Spark Platform & Environment][1. Platform & Environment]]
+  - [[*2.  Packaging the Lance Model][2. Packaging the Lance Model]]
+  - [[*3.  Systemd Service Design][3. Systemd Service Design]]
+  - [[*4.  User-Facing Interface][4. User-Facing Interface]]
+  - [[*5.  Integration with Nix Flake][5. Integration with Nix Flake]]
+  - [[*6.  Operational Runbook][6. Operational Runbook]]
+  - [[*Implementation Progress][Progress]]
+
+* 1.  DGX-Spark Platform & Environment
+
+** 1.1.  Platform Specs
+   - CPU: NVIDIA Grace ARM64 (Neoverse V2)
+   - GPU: NVIDIA Blackwell (GB110) – likely ~96GB VRAM
+   - OS: DGX Spark ships with DGX OS (Ubuntu Server ARM64)
+   - Disk: NVMe SSD, ~2TB
+   - Lance requires ≥40GB VRAM for inference → single GPU suffices
+
+** 1.2.  Software Dependencies
+   Lance's [[file:/tmp/Lance/requirements.txt][requirements.txt]] (condensed):
+
+   - =torch==2.5.1+cu124=  (CUDA 12.4 required)
+   - =transformers==4.49.0=
+   - =diffusers==0.29.1=
+   - =flash-attn==2.6.3=
+   - =accelerate==1.13.0=
+   - =decord==0.6.0=
+   - =einops==0.8.1=
+   - =safetensors==0.4.5=
+   - =bitsandbytes==0.49.2=
+   - =sentencepiece==0.1.99=
+   - =gradio==5.35=
+   - =qwen-vl-utils==0.0.14=
+   - =imageio-ffmpeg==0.5.1=
+   - =triton==3.1.0=
+   - =opencv-python==4.7.0.72=
+
+   /NOTE:/ =torch==2.5.1+cu124= requires CUDA 12.4.  DGX Spark ships with
+   CUDA 12.8; we may need a custom torch build or use the DGX-provided torch
+   wheel.
+
+** 1.3.  ARM64 Compatibility
+   - =bitsandbytes= has ARM64 wheels starting from 0.49.x
+   - =flash-attn= needs ARM64 build → use =xformers= as fallback or build
+     flash-attn from source for ARM64
+   - =triton= 3.1.0 supports ARM64
+   - =decord= (video loading) – ARM64 wheels exist
+   - =torchvision= / =torchaudio= – official ARM64 wheels exist
+
+* 2.  Packaging the Lance Model
+
+** 2.1.  Model Weights on HuggingFace
+   Repository: [[https://huggingface.co/bytedance-research/Lance][bytedance-research/Lance]]
+
+   Two weight variants:
+   | Variant         | Use Case                         | Size (est.) |
+   |-----------------+----------------------------------+-------------|
+   | =Lance_3B=      | Image tasks (t2i, image_edit,    | ~6 GB       |
+   |                 | x2t_image)                       |             |
+   | =Lance_3B_Video=| Video tasks (t2v, video_edit,    | ~6 GB       |
+   |                 | x2t_video)                       |             |
+
+   Weight files inside each variant:
+   - =model.safetensors= or =ema.safetensors= – Lance checkpoint
+   - =llm_config.json= – Qwen2 LLM config
+   - =vit.safetensors= – Qwen2.5-VL Vision Transformer (shared)
+   - =Wan2.2_VAE.pth= – Wan VAE for video/image generation
+
+   Directory structure expected by =inference_lance.py=:
+   #+begin_example
+   downloads/
+   ├── Lance_3B/
+   │   ├── model.safetensors
+   │   ├── ema.safetensors
+   │   ├── llm_config.json
+   │   └── tokenizer files...
+   ├── Lance_3B_Video/
+   │   ├── model.safetensors
+   │   ├── ema.safetensors
+   │   ├── llm_config.json
+   │   └── tokenizer files...
+   ├── Qwen2.5-VL-ViT/
+   │   └── vit.safetensors
+   └── Wan2.2_VAE.pth
+   #+end_example
+
+** 2.2.  Nix Packaging Strategy
+   For a Nix flake, the Lance model can be packaged as a derivation that
+   downloads weights at build time and produces a FHS-compatible environment.
+
+*** 2.2.1.  =lance-model-weights= Derivation
+    #+begin_src nix
+    {
+      lance-model-weights = stdenv.mkDerivation {
+        name = "lance-model-weights";
+        src = fetchurl {
+          # URLs for HuggingFace safetensors
+          # Use HF mirror or direct URLs
+        };
+        installPhase = ''
+          mkdir -p $out/Lance_3B $out/Lance_3B_Video
+          # copy/move weights into $out structure
+        '';
+      };
+    }
+    #+end_src
+
+    /Alternative:/ Use =fetchFromHuggingFace= from =huggingface.nix= or
+    =fetchHuggingFaceModel= if available.
+
+*** 2.2.2.  =lance-python-env= Derivation
+    A Python environment with all dependencies, using =poetry2nix= or
+    =mach-nix= or =python-with-packages= with overrides for ARM64.
+
+    Key overrides needed:
+    - =torch=:  use =torch-bin= for ARM64 CUDA support
+    - =bitsandbytes=:  use =bitsandbytes-bin= or build from source
+    - =flash-attn=:  build from source with ARM64 patches
+    - =triton=:  use =triton-bin= for ARM64
+
+*** 2.2.3.  =lance-app= Combined Derivation
+    Combines model weights + Python env + entry script into a single
+    package that can be run as =lance-app/run.sh=.
+
+    Entry point script (simplified):
+    #+begin_src bash :tangle lance-app/run.sh
+    #!/bin/sh
+    cd "$LANCE_ROOT"
+    exec accelerate launch \
+      --num_machines 1 \
+      --num_processes 1 \
+      --mixed_precision bf16 \
+      inference_lance.py \
+      --model_path "$MODEL_PATH" \
+      --vit_type qwen_2_5_vl_original \
+      ...  # rest of args
+    #+end_src
+
+** 2.3.  DGX-Spark-Specific Packaging
+
+*** 2.3.1.  Container (OCI) Image
+    For DGX Spark, Docker / Podman container is the standard deployment
+    unit.  Use =nix2container= or =dockerTools= to produce a container
+    image.
+
+    Container layers:
+    1. Base: =nvidia/cuda:12.4-runtime-ubuntu24.04-arm64= or DGX-provided
+       base
+    2. Python env (from =lance-python-env=)
+    3. Model weights (from =lance-model-weights=)
+    4. Entry script + Gradio UI
+
+    #+begin_src dockerfile :tangle Dockerfile
+    FROM lance-python-env:latest AS base
+    COPY --from=lance-model-weights /weights /lance/weights
+    COPY lance-app/ /lance/app/
+    WORKDIR /lance/app
+    EXPOSE 7860
+    CMD ["python3", "lance_gradio_t2v_v2t.py", "--gpus", "0"]
+    #+end_src
+
+*** 2.3.2.  FHS User Env (Non-Container)
+    For direct NixOS / nix-darwin deployment without containers, create a
+    FHS-compatible =buildFHSUserEnv= that provides:
+    - CUDA libraries from =cudaPackages=
+    - Python + deps from =lance-python-env=
+    - Model weights symlinked from =lance-model-weights=
+    - =lance.sh= entry script
+
+*** 2.3.3.  Model Variant Selection
+    The user should be able to select between =Lance_3B= (image tasks) and
+    =Lance_3B_Video= (video tasks).  The packaging should expose both as
+    configurable =model_path= arguments.
+
+    Recommended: package both variants, let the service configuration choose.
+
+* 3.  Systemd Service Design
+
+** 3.1.  Service Architecture
+   Two possible service modes:
+
+*** 3.1.1.  Gradio Server (Interactive)
+    Uses [[file:/tmp/Lance/lance_gradio_t2v_v2t.py][lance_gradio_t2v_v2t.py]] – provides a web UI on port 7860.
+
+    Characteristics:
+    - Gradio Blocks interface with text/video/image inputs
+    - Loads model once, keeps in GPU memory
+    - Queue-based request handling (configurable queue size)
+    - Supports t2v, v2t (x2t_video) tasks
+    - Can be extended for all 6 task types
+
+*** 3.1.2.  API Server (Programmatic)
+    A lightweight REST/gRPC server wrapping =inference_lance.py= for
+    programmatic access.  Not provided upstream; must be implemented.
+
+    Proposed API endpoints:
+    - =POST /api/v1/generate= – generation tasks
+    - =POST /api/v1/understand= – understanding tasks
+    - =GET /api/v1/health= – health check
+    - =POST /api/v1/config= – runtime parameter adjustment
+
+** 3.2.  Systemd Unit File
+
+*** 3.2.1.  Gradio Server Unit
+    #+begin_src ini :tangle lance-gradio.service
+    [Unit]
+    Description=Lance Multimodal AI Model – Gradio Server
+    After=network-online.target
+    Wants=network-online.target
+
+    [Service]
+    Type=simple
+    User=lance
+    Group=lance
+    ExecStart=${LANCE_ROOT}/lance-gradio.sh
+    Restart=on-failure
+    RestartSec=10
+    StandardOutput=journal
+    StandardError=journal
+    Environment=PYTHONWARNINGS=ignore
+    Environment=CUDA_LAUNCH_BLOCKING=0
+    Environment=NCCL_DEBUG=VERSION
+    Environment=POSITION_EMBEDDING_3D_VERSION=v2
+
+    # GPU isolation – bind to first GPU
+    PrivateDevices=true
+    # Adjust if using container runtime:
+    # Runtime using cgroup device access for GPU
+    SupplementaryGroups=cuda
+
+    [Install]
+    WantedBy=multi-user.target
+    #+end_src
+
+*** 3.2.2.  Environment File (=/etc/lance/lance.conf=)
+    #+begin_src ini :tangle lance.conf
+    # Lance Model Configuration
+    MODEL_PATH=/nix/store/...lance-3b-video/Lance_3B_Video
+    VIT_TYPE=qwen_2_5_vl_original
+    TASK_NAME=t2v
+    NUM_GPUS=1
+    NUM_FRAMES=50
+    VIDEO_HEIGHT=480
+    VIDEO_WIDTH=848
+    RESOLUTION=video_480p
+    VALIDATION_NUM_TIMESTEPS=30
+    VALIDATION_TIMESTEP_SHIFT=3.5
+    CFG_TEXT_SCALE=4.0
+    USE_KVCACHE=true
+    TEXT_TEMPLATE=true
+    SERVER_PORT=7860
+    GRADIO_TASK=t2v
+    QUEUE_SIZE=32
+    #+end_src
+
+*** 3.2.3.  Entry Script (=lance-gradio.sh=)
+    #+begin_src bash :tangle lance-gradio.sh
+    #!/bin/sh
+    set -e
+    cd "${LANCE_ROOT:-/lance/app}"
+    exec python3 lance_gradio_t2v_v2t.py \
+      --gpus "${GPU_DEVICE:-0}" \
+      --server-port "${SERVER_PORT:-7860}" \
+      --model-path "${MODEL_PATH}" \
+      --vit-type "${VIT_TYPE}" \
+      --task "${GRADIO_TASK}" \
+      --timesteps "${VALIDATION_NUM_TIMESTEPS}" \
+      --timestep-shift "${VALIDATION_TIMESTEP_SHIFT}" \
+      --cfg-text-scale "${CFG_TEXT_SCALE}" \
+      --resolution "${RESOLUTION}" \
+      --height "${VIDEO_HEIGHT}" \
+      --width "${VIDEO_WIDTH}" \
+      --num-frames "${NUM_FRAMES}" \
+      --queue-size "${QUEUE_SIZE}"
+    #+end_src
+
+** 3.3.  Model Loading & Warm-Up
+   The Gradio server pre-loads the model at startup.  To avoid timeout,
+   implement a health check that waits for the model to be ready:
+
+   #+begin_src systemd
+   [Service]
+   # Wait up to 10 minutes for model to load
+   TimeoutStartSec=600
+   # Health check via Gradio's /api/hello endpoint
+   #+end_src
+
+** 3.4.  Multi-GPU / Multi-Instance
+   DGX Spark has a single powerful GPU.  For serving multiple task types
+   concurrently, consider:
+
+   - Instance 1: Gradio server for t2v/v2t (primary)
+   - Instance 2: API server for t2i/image_edit (secondary)
+   - GPU memory sharing via MIG if Blackwell supports it, or sequential
+     task queuing
+
+   For multi-instance, create separate systemd services:
+   - =lance-gradio-t2v.service=
+   - =lance-api-image.service=
+
+** 3.5.  GPU Isolation & Resource Limits
+   #+begin_src systemd
+   [Service]
+   # Prevent OOM kills on model reload
+   OOMScoreAdjust=-500
+   # GPU device access
+   DeviceAllow=/dev/nvidia*
+   # Memory limit (adjust based on VRAM)
+   MemoryMax=96G
+   #+end_src
+
+** 3.6.  Logging & Monitoring
+   - Journald for service logs
+   - =nvidia-smi= metrics via =prometheus-node-exporter= or =dcgmi=
+   - Gradio's built-in request logging
+   - Separate =lance.log= file for inference timings
+
+* 4.  User-Facing Interface
+
+** 4.1.  Gradio Web UI (Provided Upstream)
+   The upstream [[file:/tmp/Lance/lance_gradio_t2v_v2t.py][lance_gradio_t2v_v2t.py]] provides:
+
+   - Text-to-Video generation (t2v)
+   - Video-to-Text understanding (v2t)
+   - Adjustable parameters: timesteps, CFG scale, resolution, seed
+   - File upload for video understanding
+   - Queue management for concurrent users
+
+   To extend to all 6 tasks, modify the Gradio app to include:
+   - Task selector dropdown
+   - Image upload for t2i, image_edit, x2t_image
+   - Video upload for video_edit, x2t_video
+
+** 4.2.  REST API (To Implement)
+   For programmatic access (automation, integration), implement a FastAPI
+   server that wraps =inference_lance.py=.
+
+*** 4.2.1.  API Endpoints
+
+    =POST /api/v1/generate=
+    #+begin_src json
+    {
+      "task": "t2v",
+      "prompt": "A cat wearing a hat",
+      "num_frames": 50,
+      "height": 480,
+      "width": 848,
+      "num_timesteps": 30,
+      "cfg_scale": 4.0,
+      "seed": 42,
+      "resolution": "video_480p"
+    }
+    #+end_src
+    → Returns generated video as MP4 bytes or download URL.
+
+    =POST /api/v1/understand=
+    #+begin_src json
+    {
+      "task": "x2t_video",
+      "media": "base64-encoded-video-or-image",
+      "question": "What is happening in this video?",
+      "num_frames": 50
+    }
+    #+end_src
+    → Returns JSON with answer text.
+
+*** 4.2.2.  Async Job Queue
+    For long-running generation tasks, implement:
+    - =POST /api/v1/jobs= – submit task → returns job_id
+    - =GET /api/v1/jobs/{id}= – poll status & download results
+    - WebSocket for streaming generation progress
+
+** 4.3.  CLI Wrapper
+   Provide a convenience CLI =lance= that wraps =inference_lance.sh=:
+
+   #+begin_src bash
+   lance t2v --prompt "A cat wearing a hat" --output result.mp4
+   lance t2i --prompt "A dragon in a forest" --output result.png
+   lance understand --image photo.jpg --question "What is this?"
+   lance serve --port 7860 --task t2v
+   #+end_src
+
+   Implement using Python =click= or =argparse=.
+
+** 4.4.  NixOS Module
+   A NixOS / nix-darwin module that provides:
+
+   - =programs.lance.enable = true=
+   - =programs.lance.model = "video" # or "image"
+   - =programs.lance.serveGradio = true=
+   - =programs.lance.gradioPort = 7860=
+   - =programs.lance.apiServe = true=
+   - =programs.lance.apiPort = 8080=
+
+   The module auto-configures the systemd service and exposes the CLI.
+
+* 5.  Integration with Nix Flake
+
+** 5.1.  Flake Structure
+   Add to the existing [[file:./flake.nix][flake.nix]] in =nix-home=:
+
+   #+begin_src nix
+   {
+     inputs = {
+       lance-src = github:bytedance/Lance;
+     };
+
+     outputs = {
+       lance = {
+         # Derivation: model weights
+         lance-model-weights = ...;
+         # Derivation: Python env
+         lance-python-env = ...;
+         # Combined app
+         lance-app = ...;
+         # Container image
+         lance-container = ...;
+       };
+     };
+   }
+   #+end_src
+
+** 5.2.  Module Integration
+   Add =modules/ai/lance.nix= as a new shared module:
+
+   - =programs.lance.*= options as described in [[*4.4.  NixOS Module][4.4]]
+   - systemd service generation based on host config
+   - =environment.systemPackages= adds =lance= CLI
+   - =nixpkgs.overlays= for ARM64 torch/flash-attn patches
+
+** 5.3.  Host-Specific Config
+   For =dgx-spark= host (to be added in =hosts/):
+
+   #+begin_src nix
+   {
+     programs.lance = {
+       enable = true;
+       model = "video";
+       serveGradio = true;
+       gradioPort = 7860;
+       apiServe = true;
+       apiPort = 8080;
+     };
+   }
+   #+end_src
+
+* 6.  Operational Runbook
+
+** 6.1.  First-Time Setup
+   1. Build the flake: =nix build .#dgx-spark=
+   2. Copy model weights (or fetch via =nix build .#lance-model-weights=)
+   3. Enable systemd service: =systemctl enable lance-gradio=
+   4. Start service: =systemctl start lance-gradio=
+   5. Check logs: =journalctl -u lance-gradio -f=
+   6. Open UI at =http://<dgx-spark-ip>:7860=
+
+** 6.2.  Model Update
+   1. Update the HuggingFace model reference in flake
+   2. Rebuild: =nix build .#dgx-spark=
+   3. Restart: =systemctl restart lance-gradio=
+   4. Verify new model loads correctly
+
+** 6.3.  Task Switching
+   To switch between image tasks and video tasks:
+   - Change =MODEL_PATH= in =/etc/lance/lance.conf=
+   - Restart service: =systemctl restart lance-gradio=
+   - Or use the API endpoint =POST /api/v1/config= to switch at runtime
+     (if implemented)
+
+** 6.4.  Troubleshooting
+   | Symptom                              | Likely Cause                 | Fix                                                  |
+   |--------------------------------------+------------------------------+------------------------------------------------------|
+   | OOM on startup                      | Insufficient VRAM            | Lower =max_latent_size=, reduce resolution           |
+   | =CUDA error=                       | CUDA version mismatch        | Verify torch+CUDA compatibility on ARM64             |
+   | =FileNotFoundError: model.safetensors=| Missing model weights        | Run =nix build .#lance-model-weights=                |
+   | Gradio UI blank                     | Port conflict                | Change =SERVER_PORT=                                 |
+   | Slow inference                     | No flash-attn on ARM64       | Build flash-attn for ARM64 or use xformers           |
+
+** 6.5.  Benchmarking
+   Use the upstream benchmark scripts in =benchmarks/=:
+   - =benchmarks/video_gen/Vbench/sample_vbench.sh= – video generation
+   - =benchmarks/image_gen/DPG/sample_DPG.sh= – image generation
+   - =benchmarks/image_gen/GEdit/sample_GEdit.sh= – image editing
+
+   Record VRAM usage, latency per sample, throughput.
+
+* Appendix: Lance Architecture Notes
+
+** Model Components
+   Lance ([[file:/tmp/Lance/modeling/lance/lance.py]]) is built from:
+
+   | Component                     | Source                                                       |
+   |-------------------------------+-------------------------------------------------------------|
+   | LLM Backbone (Qwen2ForCausalLM)| [[file:/tmp/Lance/modeling/lance/qwen2_navit.py]] – Qwen2    |
+   |                               | with MoE + NaViT sparse attention                            |
+   | Vision Encoder (ViT)          | [[file:/tmp/Lance/modeling/vit/qwen2_5_vl_vit.py]] –         |
+   |                               | Qwen2.5-VL Vision Transformer                                |
+   | VAE Decoder                   | [[file:/tmp/Lance/modeling/vae/wan/model.py]] – Wan VAE      |
+   | Connector                     | [[file:/tmp/Lance/modeling/lance/modeling_utils.py]] –       |
+   |                               | MLPconnector                                                 |
+   | Position Embedding            | [[file:/tmp/Lance/modeling/lance/modeling_utils.py]] –       |
+   |                               | 3D sinusoidal position embeddings                            |
+   | Timestep Embedder             | [[file:/tmp/Lance/modeling/lance/modeling_utils.py]] –       |
+   |                               | sinusoidal timestep embeddings                               |
+
+** Inference Flow
+   Generation (t2v, t2i, image_edit, video_edit):
+   1. Tokenize prompt, create interleave sequence (text + VAE/ViT tokens)
+   2. Encode condition images via ViT (if editing task)
+   3. Encode condition videos via VAE (if editing task)
+   4. Run flow-matching denoising loop (=num_timesteps= steps)
+   5. CFG-guided sampling (text_scale, vit_scale)
+   6. Decode VAE latent back to pixels → save as PNG/MP4
+
+   Understanding (x2t_image, x2t_video):
+   1. Tokenize prompt with ViT image/video tokens
+   2. Autoregressive text generation (=max_length= tokens)
+   3. Decode generated token IDs → answer text
+
+** Key Parameters
+   | Parameter                 | Default | Range           | Effect                              |
+   |---------------------------+---------+-----------------+-------------------------------------|
+   | =num_timesteps=           | 30      | 10–100          | Quality vs. speed                   |
+   | =timestep_shift=          | 3.5     | 1.0–10.0        | Noise schedule shift                |
+   | =cfg_text_scale=          | 4.0     | 1.0–10.0        | Prompt adherence vs. creativity     |
+   | =num_frames=              | 50      | 1–121           | Video length (max 121 @ ~480p)      |
+   | =resolution=              | 480p    | 192p, 360p, 480p| Spatial resolution                  |
+   | =video_height/width=      | 768     | variable        | Output dimensions                   |
+   | =use_KVcache=             | true    | true/false      | KV cache for understanding speed    |
