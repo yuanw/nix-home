@@ -37,21 +37,16 @@
       };
     };
   };
-  environment.casks =
-    with inputs'.nix-casks.packages;
-    [
-      mouseless_preview
-      betterdisplay
-      ungoogled-chromium
-    ]
-    ++ [ pkgs.vibeproxy ];
+  environment.casks = with inputs'.nix-casks.packages; [
+    mouseless_preview
+    betterdisplay
+    ungoogled-chromium
+  ];
   modules = {
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    ai.enableOllama = true;
-    droid.enable = true;
     cursor.enable = true;
     speak2text = {
       enable = true;

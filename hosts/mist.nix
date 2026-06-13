@@ -50,15 +50,9 @@ in
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    jellyfin.enable = true;
-    ai.enableOllama = true;
     pi.enable = true;
     secrets.agenix = {
       enable = true;
-    };
-    claude-code = {
-      enable = true;
-      enableClaudeMem = false;
     };
     brew = {
       enable = true;
@@ -91,7 +85,6 @@ in
       #lspStyle = "lsp-bridge";
     };
     # health.enable = true;
-    typing.enable = true;
     #jellyfin.enable = true;
     dev = {
       #agda.enable = true;
