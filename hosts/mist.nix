@@ -20,13 +20,10 @@ in
     ../modules/private/jellyfin-darwin.nix
   ];
 
-  environment.casks =
-    with inputs'.nix-casks.packages;
-    [
-      mouseless_preview
-      betterdisplay
-    ]
-    ++ [ pkgs.vibeproxy ];
+  environment.casks = with inputs'.nix-casks.packages; [
+    mouseless_preview
+    betterdisplay
+  ];
   # determinate system
   nix.enable = false;
   my = {
@@ -61,7 +58,6 @@ in
         "godot"
         "firefox"
         "racket"
-        "protonvpn"
         "vlc"
       ];
       masApps = {
