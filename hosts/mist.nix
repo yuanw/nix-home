@@ -111,6 +111,13 @@ in
       #zig.enable = false;
     };
 
+    hermes-agent = {
+      enable = true;
+      environment.DEEPSEEK_BASE_URL = "http://dgx-spark.local:8000/v1";
+      config = {
+        model = "deepseek-v4-flash";
+      };
+    };
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
