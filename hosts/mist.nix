@@ -47,7 +47,24 @@ in
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    pi.enable = true;
+    pi = {
+      enable = true;
+      extensionsPkgs = with pkgs.pi-extensions; [
+        pi-loop
+        pi-review
+        pi-cursor-agent
+        pi-slow-mode
+        pi-mcp-adapter
+        pi-caveman
+        pi-interactive-shell
+      ];
+      extensionFiles = {
+        "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
+        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
+        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
+      };
+
+    };
     secrets.agenix = {
       enable = true;
     };
