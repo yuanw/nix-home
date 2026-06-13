@@ -57,12 +57,7 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    typewell = {
-      url = "github:yuanw/typewell";
-    };
-    mono-stretchly-darwin = {
-      url = "github:yuanw/mono-stretchly";
-    };
+
     shy-fox = {
       url = "github:Naezr/ShyFox";
       flake = false;
