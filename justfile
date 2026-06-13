@@ -22,9 +22,7 @@ nix-update:
     @nix-update -f ./packages/release.nix chroma-mcp --src-only
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
     @nix-update -f ./packages/release.nix pi-acp --src-only --version=branch --override-filename ./packages/pi-acp.nix
-    @nix-update -f ./packages/release.nix claude-mem --src-only --version=branch --override-filename ./packages/claude-plugins/claude-mem.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
-    @nix-update -f ./packages/release.nix cozempic --src-only
     @nix-update -f ./packages/release.nix emacs-skills --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-agent --src-only --version=branch
@@ -33,7 +31,6 @@ nix-update:
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix knockknock --src-only --version=branch
     @nix-update -f ./packages/release.nix lean4-mode --src-only --version=branch
-    @nix-update -f ./packages/release.nix magit-ai --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch --override-filename ./packages/emacs/shell-maker.nix
@@ -150,11 +147,4 @@ switch:
 sys-diff:
     @nix store diff-closures /run/current-system ./result
 
-# clear easysession saved sessions (fixes stale dired/buffer paths after Emacs rebuild)
-clean-easysession:
-    @rm -rf ~/.emacs.d/easysession/
-    @echo "easysession cleared"
 
-# toggle .envrc file
-toggle-envrc:
-    @if [ -f .envrc ]; then mv .envrc .envrc.bk && echo "Moved .envrc to .envrc.bk"; elif [ -f .envrc.bk ]; then mv .envrc.bk .envrc && echo "Moved .envrc.bk to .envrc"; else echo "Neither .envrc nor .envrc.bk exists"; fi
