@@ -111,6 +111,13 @@ in
           mkdir -p "${config.my.homeDirectory}/.hermes/memories"
         '';
 
+        home.activation.hermesEnv = lib.mkIf (cfg.environment != { }) ''
+          cat > "${config.my.homeDirectory}/.hermes/.env" << 'HERMES_EOF'
+          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (n: v: "${n}=${v}") cfg.environment)}
+          HERMES_EOF
+          chmod 600 "${config.my.homeDirectory}/.hermes/.env"
+        '';
+
         mergetools = mkIf (cfg.config != null) {
           "hermes-config" = {
             target = "${config.my.homeDirectory}/.hermes/config.yaml";
