@@ -114,6 +114,7 @@ in
     hermes-agent = {
       enable = true;
       enableGateway = true;
+      enableDashboard = true;
       environment.DEEPSEEK_BASE_URL = "http://dgx-spark.local:8000/v1";
       config = {
         model = "deepseek-v4-flash";

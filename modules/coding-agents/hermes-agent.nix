@@ -17,6 +17,13 @@ let
     mkMerge
     ;
   inherit (lib) literalExpression;
+
+  launchdEnv = {
+    HOME = config.my.homeDirectory;
+    HERMES_HOME = "${config.my.homeDirectory}/.hermes";
+    HERMES_MANAGED = "true";
+  }
+  // cfg.environment;
 in
 {
   options.modules.hermes-agent = {
@@ -121,11 +128,7 @@ in
         KeepAlive = true;
         StandardOutPath = "${config.my.homeDirectory}/.hermes/gateway.log";
         StandardErrorPath = "${config.my.homeDirectory}/.hermes/gateway.err.log";
-        EnvironmentVariables = {
-          HOME = config.my.homeDirectory;
-          HERMES_HOME = "${config.my.homeDirectory}/.hermes";
-          HERMES_MANAGED = "true";
-        };
+        EnvironmentVariables = launchdEnv;
         WorkingDirectory = "${config.my.homeDirectory}/.hermes";
       };
     })
@@ -145,11 +148,7 @@ in
         KeepAlive = true;
         StandardOutPath = "${config.my.homeDirectory}/.hermes/dashboard.log";
         StandardErrorPath = "${config.my.homeDirectory}/.hermes/dashboard.err.log";
-        EnvironmentVariables = {
-          HOME = config.my.homeDirectory;
-          HERMES_HOME = "${config.my.homeDirectory}/.hermes";
-          HERMES_MANAGED = "true";
-        };
+        EnvironmentVariables = launchdEnv;
         WorkingDirectory = "${config.my.homeDirectory}/.hermes";
       };
     })
