@@ -107,6 +107,10 @@ in
 
         home.sessionVariables = cfg.environment;
 
+        home.activation.hermesDirs = ''
+          mkdir -p "${config.my.homeDirectory}/.hermes/memories"
+        '';
+
         mergetools = mkIf (cfg.config != null) {
           "hermes-config" = {
             target = "${config.my.homeDirectory}/.hermes/config.yaml";
