@@ -110,7 +110,6 @@
           humanizer
           emacs-skills
         ])
-        ++ pkgs.codingAgentsAiTools.piCodingAgent.skillPackages
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
           pkgs.codingAgentsSkillPackages.teach

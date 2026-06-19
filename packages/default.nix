@@ -159,7 +159,6 @@ in
   pi-acp = prev.callPackage ./pi-acp.nix { };
   pi-extensions = prev.callPackage ./pi-extensions { };
   claude-plugins = prev.callPackage ./claude-plugins { };
-  codingAgentsAiTools = prev.callPackage ../modules/coding-agents/common/ai-tools/default.nix { };
   inherit codingAgentsCommonSkills;
   codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
