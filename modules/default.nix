@@ -53,6 +53,7 @@
       ./wm/xmonad.nix
     ];
     darwin.imports = [
+      ./coding-agents/hermes-agent-darwin.nix
       ./brew.nix
       ./health.nix
       ./editor/emacs/emacs-macos.nix
