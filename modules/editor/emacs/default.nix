@@ -33,40 +33,7 @@ let
       ++ prev.patches;
 
   });
-  # Ghostel vendors Ghostty's Zig build, which on Darwin shells out to
-  # xcode-select/xcrun. Pure shims pointing at Nixpkgs' SDK let the native module
-  # build in the sandbox (see
-  # https://github.com/mzacuna/zix-zonfig/blob/af9690b4b81f5e4329a0776a340fbdda320cf215/modules/darwin/emacs/emacs.nix
-  # for the same pattern).
-  appleSdkZigShims =
-    if isDarwin then
-      pkgs.runCommand "apple-sdk-zig-shims" { } ''
-        mkdir -p "$out/bin"
-
-        cat > "$out/bin/xcode-select" <<'EOF'
-        #!${pkgs.runtimeShell}
-        if [ "$1" = "--print-path" ]; then
-          echo "${pkgs.apple-sdk}/Platforms/MacOSX.platform/Developer"
-          exit 0
-        fi
-        echo "unsupported xcode-select invocation: $*" >&2
-        exit 1
-        EOF
-
-        cat > "$out/bin/xcrun" <<'EOF'
-        #!${pkgs.runtimeShell}
-        if [ "$1" = "--sdk" ] && [ "$3" = "--show-sdk-path" ]; then
-          echo "${pkgs.apple-sdk.sdkroot}"
-          exit 0
-        fi
-        echo "unsupported xcrun invocation: $*" >&2
-        exit 1
-        EOF
-
-        chmod +x "$out/bin/xcode-select" "$out/bin/xcrun"
-      ''
-    else
-      null;
+  emacsGhostel = import ./ghostel.nix { inherit pkgs isDarwin; };
   packagePath = ../../../packages/emacs;
   emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
 in
@@ -155,82 +122,60 @@ with lib;
               ];
             package = emacsPatched;
             enable = true;
-            overrides = self: _super: {
-              gptel = (
-                pkgs.callPackage "${packagePath}/gptel.nix" {
-                  inherit (pkgs)
-                    fetchFromGitHub
-                    writeText
-                    unstableGitUpdater
-                    ;
-                  inherit lib;
-                  inherit (self)
-                    melpaBuild
-                    transient
-                    compat
-                    ;
-                }
-              );
-              acp = (
-                pkgs.callPackage "${packagePath}/acp.nix" {
-                  inherit (pkgs) fetchFromGitHub writeText;
-                  inherit lib;
-                  inherit (self) melpaBuild;
-                }
-              );
-              shell-maker = (
-                pkgs.callPackage "${packagePath}/shell-maker.nix" {
-                  inherit (pkgs) fetchFromGitHub writeText;
-                  inherit lib;
-                  inherit (self) melpaBuild;
-                }
-              );
-              agent-shell = (
-                pkgs.callPackage "${packagePath}/agent-shell.nix" {
-                  inherit (pkgs) fetchFromGitHub writeText;
-                  inherit lib;
-                  inherit (self) melpaBuild shell-maker acp;
-                }
-              );
-              whisper = (
-                pkgs.callPackage "${packagePath}/whisper-el.nix" {
-                  inherit (pkgs) fetchFromGitHub writeText;
-                  inherit lib;
-                  inherit (self) melpaBuild;
-                }
-              );
-              moonbit-mode = (
-                pkgs.callPackage "${packagePath}/moonbit-mode.nix" {
-                  inherit (pkgs) fetchFromGitHub;
-                  inherit (self) trivialBuild;
-                }
-              );
-              ghostel =
-                if isDarwin then
-                  let
-                    base = _super.ghostel;
-                    ghostelModule = base.module.overrideAttrs (old: {
-                      nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
-                        appleSdkZigShims
-                        pkgs.apple-sdk
-                      ];
-                      env = (old.env or { }) // {
-                        SDKROOT = pkgs.apple-sdk.sdkroot;
-                      };
-                    });
-                  in
-                  base.overrideAttrs (old: {
-                    preBuild = ''
-                      install ${ghostelModule}/lib/libghostel-module${pkgs.stdenv.hostPlatform.extensions.sharedLibrary} \
-                        ghostel-module${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}
-                    '';
-                    passthru = (old.passthru or { }) // {
-                      module = ghostelModule;
-                    };
-                  })
-                else
-                  _super.ghostel;
-            };
+            overrides =
+              self: _super:
+              {
+                gptel = (
+                  pkgs.callPackage "${packagePath}/gptel.nix" {
+                    inherit (pkgs)
+                      fetchFromGitHub
+                      writeText
+                      unstableGitUpdater
+                      ;
+                    inherit lib;
+                    inherit (self)
+                      melpaBuild
+                      transient
+                      compat
+                      ;
+                  }
+                );
+                acp = (
+                  pkgs.callPackage "${packagePath}/acp.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild;
+                  }
+                );
+                shell-maker = (
+                  pkgs.callPackage "${packagePath}/shell-maker.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild;
+                  }
+                );
+                agent-shell = (
+                  pkgs.callPackage "${packagePath}/agent-shell.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild shell-maker acp;
+                  }
+                );
+                whisper = (
+                  pkgs.callPackage "${packagePath}/whisper-el.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild;
+                  }
+                );
+                moonbit-mode = (
+                  pkgs.callPackage "${packagePath}/moonbit-mode.nix" {
+                    inherit (pkgs) fetchFromGitHub;
+                    inherit (self) trivialBuild;
+                  }
+                );
+              }
+              // (emacsGhostel.emacsOverrides self _super);
             init = {
               enable = true;
               packageQuickstart = false;
@@ -3436,9 +3381,7 @@ with lib;
                   ];
                   defer = true;
                 };
-                ghostel = {
-                  enable = true;
-                };
+                ghostel = emacsGhostel.usePackageGhostel;
 
                 wm = {
                   enable = false;
