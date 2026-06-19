@@ -220,7 +220,8 @@
       packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
       packages.dgx-spark = self.nixosConfigurations.dgx-spark.config.system.build.toplevel;
-      packages.yuanw = self.darwinConfigurations.yuanw.system;
+      # darwinConfigurations.yuanw is disabled above; keep this in sync if you re-enable it.
+      # packages.yuanw = self.darwinConfigurations.yuanw.system;
       packages.ci = self.darwinConfigurations.ci.system;
       packages.wk01174 = self.darwinConfigurations.WK01174.system;
       packages.mist = self.darwinConfigurations.mist.system;
