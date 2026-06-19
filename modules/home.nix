@@ -133,7 +133,6 @@ hm@{ pkgs, ... }:
       enable = true;
       git = {
         enable = true;
-        diffToolMode = true;
       };
     };
     git = {
