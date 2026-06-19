@@ -41,6 +41,7 @@
     mouseless_preview
     betterdisplay
     ungoogled-chromium
+    slack
   ];
   modules = {
     # common = {
@@ -49,7 +50,7 @@
     # };
     cursor.enable = true;
     speak2text = {
-      enable = true;
+      enable = false;
       flavor = "parakeet-mlx";
       parakeetServer = true; # ← enables the server
       parakeetServerPort = 5092; # ← default, optional
@@ -129,8 +130,6 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "karabiner-elements"
-        "slack"
-        "sloth"
         "viscosity"
         "firefox"
       ];
