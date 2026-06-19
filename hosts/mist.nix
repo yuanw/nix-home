@@ -20,13 +20,10 @@ in
     ../modules/private/jellyfin-darwin.nix
   ];
 
-  environment.casks =
-    with inputs'.nix-casks.packages;
-    [
-      mouseless_preview
-      betterdisplay
-    ]
-    ++ [ pkgs.vibeproxy ];
+  environment.casks = with inputs'.nix-casks.packages; [
+    mouseless_preview
+    betterdisplay
+  ];
   # determinate system
   nix.enable = false;
   my = {
@@ -50,15 +47,26 @@ in
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    jellyfin.enable = true;
-    ai.enableOllama = true;
-    pi.enable = true;
+    pi = {
+      enable = true;
+      extensionsPkgs = with pkgs.pi-extensions; [
+        pi-loop
+        pi-review
+        pi-cursor-agent
+        pi-slow-mode
+        pi-mcp-adapter
+        pi-caveman
+        pi-interactive-shell
+      ];
+      extensionFiles = {
+        "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
+        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
+        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
+      };
+
+    };
     secrets.agenix = {
       enable = true;
-    };
-    claude-code = {
-      enable = true;
-      enableClaudeMem = false;
     };
     brew = {
       enable = true;
@@ -67,7 +75,6 @@ in
         "godot"
         "firefox"
         "racket"
-        "protonvpn"
         "vlc"
       ];
       masApps = {
@@ -91,7 +98,6 @@ in
       #lspStyle = "lsp-bridge";
     };
     # health.enable = true;
-    typing.enable = true;
     #jellyfin.enable = true;
     dev = {
       #agda.enable = true;
@@ -105,6 +111,24 @@ in
       #zig.enable = false;
     };
 
+    hermes-agent = {
+      enable = true;
+      enableGateway = true;
+      enableDashboard = true;
+      environment = {
+        DEEPSEEK_BASE_URL = "http://dgx-spark.local:8000/v1";
+        DEEPSEEK_API_KEY = "not-needed";
+      };
+      config = {
+        model = "deepseek-v4-flash";
+        custom_providers = [
+          {
+            name = "dgx-spark";
+            base_url = "http://dgx-spark.local:8000/v1";
+          }
+        ];
+      };
+    };
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
