@@ -22,6 +22,46 @@ let
         cp ${pkgs.writeText "SKILL.md" text} $out/SKILL.md
       '';
 
+  # Package a repo-local SKILL.md (path must live under this flake so it is copied to the store).
+  mkSkillFromPath =
+    {
+      pname,
+      src,
+      version ? "0",
+      rev ? "local",
+    }:
+    pkgs.runCommand "${pname}-skill"
+      {
+        inherit pname version;
+        passthru.claudeSkill = {
+          inherit pname version rev;
+        };
+      }
+      ''
+        mkdir -p $out
+        cp ${src} $out/SKILL.md
+      '';
+
+  # Package a repo-local directory (e.g. SKILL.md plus referenced *.md assets).
+  mkSkillFromDir =
+    {
+      pname,
+      src,
+      version ? "0",
+      rev ? "local",
+    }:
+    pkgs.runCommand "${pname}-skill"
+      {
+        inherit pname version;
+        passthru.claudeSkill = {
+          inherit pname version rev;
+        };
+      }
+      ''
+        mkdir -p $out
+        cp -r ${src}/. $out/
+      '';
+
   mkJournalSessionSkill =
     agentName:
     mkSkill {
@@ -66,5 +106,22 @@ let
 
 in
 {
-  inherit mkSkill mkJournalSessionSkill;
+  inherit
+    mkSkill
+    mkSkillFromPath
+    mkSkillFromDir
+    mkJournalSessionSkill
+    ;
+
+  # Skill derivations only (use like `pkgs.codingAgentsSkillPackages.grilling`).
+  packages = {
+    grilling = mkSkillFromPath {
+      pname = "grilling";
+      src = ./grilling/SKILL.md;
+    };
+    teach = mkSkillFromDir {
+      pname = "teach";
+      src = ./teach;
+    };
+  };
 }

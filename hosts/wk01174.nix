@@ -111,7 +111,11 @@
           emacs-skills
         ])
         ++ pkgs.codingAgentsAiTools.piCodingAgent.skillPackages
-        ++ [ pkgs.pi-extensions.pi-interactive-shell ];
+        ++ [
+          pkgs.codingAgentsSkillPackages.grilling
+          pkgs.codingAgentsSkillPackages.teach
+          pkgs.pi-extensions.pi-interactive-shell
+        ];
     };
     secrets.agenix = {
       enable = true;

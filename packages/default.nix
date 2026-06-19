@@ -1,4 +1,8 @@
-_final: prev: {
+_final: prev:
+let
+  codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
+in
+{
   installApplication =
     {
       name,
@@ -156,6 +160,8 @@ _final: prev: {
   pi-extensions = prev.callPackage ./pi-extensions { };
   claude-plugins = prev.callPackage ./claude-plugins { };
   codingAgentsAiTools = prev.callPackage ../modules/coding-agents/common/ai-tools/default.nix { };
+  inherit codingAgentsCommonSkills;
+  codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
