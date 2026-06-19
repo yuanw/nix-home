@@ -1,11 +1,32 @@
 { pkgs }:
 let
-  # Generate a journal-session skill derivation for a specific agent
-  # Returns a derivation with pname "journal-session" that can be used in skillPackages
+  # Build a skill package from inline markdown (Pi / Claude Code / Cursor conventions).
+  # The store path is the skill directory (contains SKILL.md). `pname` becomes the
+  # directory name under ~/.pi/agent/skills/<pname>/ etc.
+  mkSkill =
+    {
+      pname,
+      text,
+      version ? "0",
+      rev ? "local",
+    }:
+    pkgs.runCommand "${pname}-skill"
+      {
+        inherit pname version;
+        passthru.claudeSkill = {
+          inherit pname version rev;
+        };
+      }
+      ''
+        mkdir -p $out
+        cp ${pkgs.writeText "SKILL.md" text} $out/SKILL.md
+      '';
+
   mkJournalSessionSkill =
     agentName:
-    let
-      skillContent = ''
+    mkSkill {
+      pname = "journal-session";
+      text = ''
         Save the current ${agentName} session as a journal entry using emacsclient and denote-journal.
 
         Steps:
@@ -41,23 +62,9 @@ let
         - The denote file for today will have the format: YYYYMMDDTHHMMSS--TITLE__journal.org
         - The C-c n t keybinding also opens today's journal interactively in Emacs
       '';
-    in
-    pkgs.runCommand "journal-session-skill"
-      {
-        pname = "journal-session";
-        passthru = {
-          pname = "journal-session";
-          claudeSkill = {
-            pname = "journal-session";
-          };
-        };
-      }
-      ''
-        mkdir -p $out
-        cp ${pkgs.writeText "SKILL.md" skillContent} $out/SKILL.md
-      '';
+    };
 
 in
 {
-  inherit mkJournalSessionSkill;
+  inherit mkSkill mkJournalSessionSkill;
 }

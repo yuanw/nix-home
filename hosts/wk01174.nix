@@ -62,7 +62,6 @@
         pi-cursor-agent
         pi-slow-mode
         pi-mcp-adapter
-        pi-caveman
         pi-interactive-shell
       ];
       extensionFiles = {
@@ -106,12 +105,12 @@
         };
       };
       skills =
-        with pkgs.claude-plugins;
-        [
+        (with pkgs.claude-plugins; [
           caveman
           humanizer
           emacs-skills
-        ]
+        ])
+        ++ pkgs.codingAgentsAiTools.piCodingAgent.skillPackages
         ++ [ pkgs.pi-extensions.pi-interactive-shell ];
     };
     secrets.agenix = {

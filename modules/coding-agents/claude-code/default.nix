@@ -10,7 +10,7 @@
 let
   cfg = config.modules.claude-code;
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
-  commonSkills = pkgs.callPackage ../common/skills.nix { };
+  commonSkills = pkgs.callPackage ../common/skills { };
   watchdog = import ./hooks/watchdog.nix { inherit pkgs lib; };
 in
 {

@@ -55,7 +55,6 @@ in
         pi-cursor-agent
         pi-slow-mode
         pi-mcp-adapter
-        pi-caveman
         pi-interactive-shell
       ];
       extensionFiles = {
