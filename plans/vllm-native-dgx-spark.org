@@ -1,0 +1,485 @@
+#+TITLE: vLLM Native on DGX Spark — NixOS Implementation Plan
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-06-21
+
+* Overview
+  Replace Docker-based AEON vllm-ultimate with declarative NixOS-native
+  vLLM on DGX Spark (GB10, sm_121a, aarch64-linux).
+
+  Current state:
+  - [[file:../../hosts/dgx-spark/default.nix][hosts/dgx-spark/default.nix]] :: imports dgx-spark upstream modules, CUDA 13.2 fixes
+  - [[file:../../hosts/dgx-spark/cuda-fixes.nix][hosts/dgx-spark/cuda-fixes.nix]] :: CUDA 13.2 + aarch64 workarounds
+  - nixpkgs vllm :: v0.16.0 (too old, no sm_121a patches)
+  - graham33 [[https://github.com/graham33/nixos-dgx-spark/blob/10bc1cfd6e3e2ff593ec1432eb9890d2aa3b1dda/modules/vllm.nix][vllm.nix]] :: systemd service module, vllm from nixpkgs
+
+  Target:
+  - Native vLLM v0.23.0+ built from source for sm_121a
+  - AEON patches integrated (NVFP4 KV, DFlash SWA, prefix-cache, high-concurrency)
+  - Declarative systemd services for model instances
+  - No Docker, no containers — pure Nix
+
+* Architecture
+  :PROPERTIES:
+  :CUSTOM_ID: architecture
+  :END:
+
+  #+BEGIN_SRC text
+  ┌─────────────────────────────────────────────────────────┐
+  │ packages/vllm-aeon.nix                                  │
+  │   vLLM from source (v0.23.0)                            │
+  │   + AEON sm_121a patches                                │
+  │   + DFlash speculative decoding                         │
+  │   + NVFP4 KV cache                                      │
+  │   + sm_121a-aware cmake/CUTLASS flags                   │
+  │   + CUDA 13.2, PyTorch 2.11                             │
+  └─────────────────┬───────────────────────────────────────┘
+                    │ overrideAttrs
+  ┌─────────────────▼───────────────────────────────────────┐
+  │ modules/vllm.nix                                        │
+  │   services.vllm.instances.<name> = { ... }             │
+  │   systemd services (one per model)                      │
+  │   mutual exclusion (single GPU)                         │
+  │   GPU memory tuning, model args, DFlash config          │
+  └─────────────────┬───────────────────────────────────────┘
+                    │ imported by
+  ┌─────────────────▼───────────────────────────────────────┐
+  │ hosts/dgx-spark/configuration.nix                       │
+  │   services.vllm.instances.aeon = { ... }               │
+  │   └─ Qwen3.6-27B NVFP4 + DFlash drafter                │
+  │   └─ Gemma-4-26B-A4B NVFP4                             │
+  │   └─ Qwen3.6-35B-A3B NVFP4                             │
+  └─────────────────────────────────────────────────────────┘
+  #+END_SRC
+
+* Files to Create
+
+** packages/vllm-aeon.nix
+   :PROPERTIES:
+   :CUSTOM_ID: pkg-vllm-aeon
+   :END:
+
+   Custom vLLM derivation that:
+   1. Starts from nixpkgs vllm's build recipe (Python package with CUDA deps)
+   2. Overrides src to v0.23.0 tag from vllm-project/vllm
+   3. Applies AEON patches as patchPhase:
+      - PR #44389 :: Triton NVFP4 KV cache
+      - PR #40898 :: DFlash sliding-window attention
+      - PR #41703 :: Prefix-cache corruption fix
+      - PR #43982 (port) :: DFlash high-concurrency fix
+      - sm_121a boot patches :: RTLD_LAZY _C_stable_libtorch, CUDA-graph alignment
+   4. Sets build env for sm_121a:
+      - TORCH_CUDA_ARCH_LIST="12.1a"
+      - ENABLE_NVFP4_SM100=0
+      - MAX_JOBS=8 (Grace CPU has 20 cores but LPDDR5X bandwidth constraint)
+   5. Depends on flashinfer (sm_121a build), compressed-tensors
+   6. Exposes as pkgs.vllm-aeon or overrides pkgs.vllm
+
+   #+BEGIN_SRC nix :tangle no
+   { pkgs, lib, python3Packages, fetchFromGitHub, fetchpatch }:
+
+   let
+     vllmVersion = "0.23.0";
+     vllmSrc = fetchFromGitHub {
+       owner = "vllm-project";
+       repo = "vllm";
+       rev = "v${vllmVersion}";
+       hash = "...";  # prefetch with nix-prefetch
+     };
+
+     # AEON sm_121a runtime patches
+     sm121aPatches = [
+       # RTLD_LAZY for _C_stable_libtorch (MXFP4 symbols absent on sm_121a)
+       (fetchpatch { ... })
+       # CUDA-graph capture-size alignment for spec-decode partial-acceptance
+       (fetchpatch { ... })
+     ];
+
+     # DFlash + NVFP4 PRs
+     vllmPatches = [
+       (fetchpatch { url = "https://github.com/vllm-project/vllm/pull/44389.patch"; hash = "..."; })
+       (fetchpatch { url = "https://github.com/vllm-project/vllm/pull/40898.patch"; hash = "..."; })
+       (fetchpatch { url = "https://github.com/vllm-project/vllm/pull/41703.patch"; hash = "..."; })
+     ];
+   in
+   pkgs.vllm.overrideAttrs (oldAttrs: {
+     version = "${vllmVersion}-aeon";
+     src = vllmSrc;
+     patches = (oldAttrs.patches or []) ++ vllmPatches ++ sm121aPatches;
+
+     preConfigure = (oldAttrs.preConfigure or "") + ''
+       export TORCH_CUDA_ARCH_LIST="12.1a"
+       export ENABLE_NVFP4_SM100=0
+       export MAX_JOBS=8
+     '';
+
+     # Ensure flashinfer is built for sm_121a
+     propagatedBuildInputs = (oldAttrs.propagatedBuildInputs or []) ++ [
+       # flashinfer with sm_121a support
+     ];
+   })
+   #+END_SRC
+
+   *Challenges:*
+   - vLLM Python deps are deep: transformers HEAD, flashinfer, xgrammar
+   - nixpkgs vllm expression may need significant adaptation for v0.23.0
+   - FlashInfer requires CUTLASS 3.x built for sm_121a
+   - Gigantic build (hours on GB10). Use [[https://graham33.cachix.org][graham33.cachix.org]] or
+     set up own binary cache
+
+** modules/vllm.nix
+   :PROPERTIES:
+   :CUSTOM_ID: module-vllm
+   :END:
+
+   Systemd service module based on graham33's vllm.nix, adapted for
+   DGX Spark specifics and AEON features.
+
+   #+BEGIN_SRC nix :tangle no
+   { config, lib, pkgs, ... }:
+
+   let
+     cfg = config.services.vllm;
+
+     instanceModule = { name, config, ... }: {
+       options = {
+         enable = lib.mkEnableOption "this vLLM instance";
+         model = lib.mkOption { type = lib.types.str; ... };
+         port = lib.mkOption { type = lib.types.port; default = 8000; };
+         host = lib.mkOption { type = lib.types.str; default = "0.0.0.0"; };
+         autoStart = lib.mkOption { type = lib.types.bool; default = false; };
+
+         # DGX Spark specific
+         gpuMemoryUtilization = lib.mkOption {
+           type = lib.types.float;
+           default = 0.78;  # Never exceed 0.88 on Spark
+         };
+         maxModelLen = lib.mkOption {
+           type = lib.types.int;
+           default = 32768;
+         };
+         maxNumSeqs = lib.mkOption {
+           type = lib.types.int;
+           default = 8;
+         };
+
+         # Quantization
+         quantization = lib.mkOption {
+           type = lib.types.nullOr lib.types.str;
+           default = "compressed-tensors";  # NVFP4 = compressed-tensors
+         };
+         kvCacheDtype = lib.mkOption {
+           type = lib.types.str;
+           default = "fp8_e4m3";  # or "nvfp4" once PR #44389 upstreams
+         };
+
+         # Speculative decoding (DFlash)
+         speculative = {
+           enable = lib.mkEnableOption "DFlash speculative decoding";
+           model = lib.mkOption { type = lib.types.str; ... };
+           numSpeculativeTokens = lib.mkOption {
+             type = lib.types.int;
+             default = 12;
+           };
+         };
+
+         # Optimizations
+         enforceEager = lib.mkOption {
+           type = lib.types.bool;
+           default = false;
+           description = "Disable CUDA graphs (default ON for sm_121a)";
+         };
+         enableChunkedPrefill = lib.mkOption {
+           type = lib.types.bool;
+           default = true;
+         };
+         enablePrefixCaching = lib.mkOption {
+           type = lib.types.bool;
+           default = true;
+         };
+         mambaBlockSize = lib.mkOption {
+           type = lib.types.nullOr lib.types.int;
+           default = null;  # 256 for Qwen3.6 hybrid models
+         };
+
+         extraArgs = lib.mkOption {
+           type = lib.types.listOf lib.types.str;
+           default = [];
+         };
+       };
+     };
+
+     enabledInstances = lib.filterAttrs (_: inst: inst.enable) cfg.instances;
+     vllmPkg = pkgs.vllm-aeon or pkgs.vllm;
+
+     mkService = name: inst:
+       let
+         args = [
+           "serve" inst.model
+           "--host" inst.host
+           "--port" (toString inst.port)
+           "--gpu-memory-utilization" (toString inst.gpuMemoryUtilization)
+           "--max-model-len" (toString inst.maxModelLen)
+           "--max-num-seqs" (toString inst.maxNumSeqs)
+         ]
+         ++ lib.optionals (inst.quantization != null) [
+           "--quantization" inst.quantization
+         ]
+         ++ lib.optionals (inst.kvCacheDtype != null) [
+           "--kv-cache-dtype" inst.kvCacheDtype
+         ]
+         ++ lib.optionals inst.enforceEager [ "--enforce-eager" ]
+         ++ lib.optionals inst.enableChunkedPrefill [ "--enable-chunked-prefill" ]
+         ++ lib.optionals inst.enablePrefixCaching [ "--enable-prefix-caching" ]
+         ++ lib.optionals (inst.mambaBlockSize != null) [
+           "--mamba-block-size" (toString inst.mambaBlockSize)
+         ]
+         ++ lib.optionals inst.speculative.enable [
+           "--speculative-config"
+           ''{"method":"dflash","model":"${inst.speculative.model}","num_speculative_tokens":${toString inst.speculative.numSpeculativeTokens}}''
+         ]
+         ++ inst.extraArgs;
+       in
+       {
+         description = "vLLM ${name} (${inst.model})";
+         after = [ "network.target" ];
+         wantedBy = lib.mkIf inst.autoStart [ "multi-user.target" ];
+         conflicts = map (n: "vllm-${n}.service")
+           (lib.filter (n: n != name) (lib.attrNames enabledInstances));
+
+         serviceConfig = {
+           ExecStartPre = [
+             "+${pkgs.bash}/bin/bash -c 'sync; echo 3 > /proc/sys/vm/drop_caches'"
+           ];
+           ExecStart = "${vllmPkg}/bin/vllm ${lib.escapeShellArgs args}";
+           Restart = "on-failure";
+           RestartSec = 10;
+           Environment = [
+             "HF_HOME=/var/lib/vllm/huggingface"
+           ];
+         };
+       };
+   in
+   {
+     options.services.vllm.instances = lib.mkOption {
+       type = lib.types.attrsOf (lib.types.submodule instanceModule);
+       default = {};
+     };
+
+     config = lib.mkIf (enabledInstances != {}) {
+       systemd.services = lib.mapAttrs'
+         (name: inst: lib.nameValuePair "vllm-${name}" (mkService name inst))
+         enabledInstances;
+     };
+   }
+   #+END_SRC
+
+** packages/vllm-models.nix (optional helper)
+   :PROPERTIES:
+   :CUSTOM_ID: pkg-models
+   :END:
+
+   Declarative model downloads via HuggingFace Hub. Not a Nix derivation
+   (models are ~26 GB each, too large for /nix/store). Instead, uses
+   systemd oneshot service or home-manager activation script.
+
+   Options:
+   1. ~pkgs.fetchHuggingFaceModel~ (from nixified-ai) — fetches into /nix/store
+      → too large, use only for small drafters
+   2. Systemd oneshot that runs ~huggingface-cli download~ on first boot
+   3. Manual git-lfs clone (what AEON Docker does) — not declarative
+
+   *Recommended approach:*
+   Systemd oneshot service per model, idempotent, runs before vllm service.
+
+   #+BEGIN_SRC nix :tangle no
+   { config, lib, pkgs, ... }:
+   {
+     options.services.vllm-models = {
+       enable = lib.mkEnableOption "declarative model downloads";
+       cacheDir = lib.mkOption {
+         type = lib.types.str;
+         default = "/var/lib/vllm/models";
+       };
+       models = lib.mkOption {
+         type = lib.types.attrsOf (lib.types.submodule {
+           options = {
+             repo = lib.mkOption { type = lib.types.str; };
+             revision = lib.mkOption { type = lib.types.nullOr lib.types.str; default = null; };
+           };
+         });
+         default = {};
+       };
+     };
+
+     config = lib.mkIf config.services.vllm-models.enable {
+       systemd.services = lib.mapAttrs'
+         (name: model:
+           lib.nameValuePair "vllm-model-${name}" {
+             description = "Download vLLM model: ${name}";
+             wantedBy = [ "multi-user.target" ];
+             serviceConfig = {
+               Type = "oneshot";
+               RemainAfterExit = true;
+               ExecStart = "${pkgs.python3Packages.huggingface-hub}/bin/huggingface-cli download ${model.repo} --local-dir ${config.services.vllm-models.cacheDir}/${name} --local-dir-use-symlinks False";
+             };
+           })
+         config.services.vllm-models.models;
+     };
+   }
+   #+END_SRC
+
+* Files to Modify
+
+** [[file:../../packages/default.nix][packages/default.nix]]
+   Add vllm-aeon to overlay:
+   #+BEGIN_SRC nix
+   vllm-aeon = prev.callPackage ./vllm-aeon.nix { };
+   #+END_SRC
+
+   Note: This only builds on aarch64-linux with CUDA. For other platforms,
+   make it conditional or mark broken.
+
+** [[file:../../hosts/dgx-spark/default.nix][hosts/dgx-spark/default.nix]]
+   Add vllm module import:
+   #+BEGIN_SRC nix
+   imports = [
+     inputs.dgx-spark.nixosModules.dgx-spark
+     inputs.disco.nixosModules.disko
+     ../../modules/vllm.nix          # ← ADD
+     ../../modules/vllm-models.nix   # ← ADD (optional)
+     ./disk-config.nix
+     ./configuration.nix
+   ];
+   #+END_SRC
+
+** [[file:../../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]]
+   Wire vLLM instances:
+   #+BEGIN_SRC nix
+   services.vllm.instances = {
+     aeon = {
+       enable = true;
+       autoStart = true;
+       model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
+       port = 8000;
+       gpuMemoryUtilization = 0.78;
+       maxModelLen = 24576;
+       maxNumSeqs = 8;
+       kvCacheDtype = "fp8_e4m3";
+       quantization = "compressed-tensors";
+       enableChunkedPrefill = true;
+       enablePrefixCaching = true;
+       mambaBlockSize = 256;
+       speculative = {
+         enable = true;
+         model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
+         numSpeculativeTokens = 12;
+       };
+       extraArgs = [ "--trust-remote-code" ];
+     };
+   };
+
+   # Declarative model downloads
+   services.vllm-models = {
+     enable = true;
+     models = {
+       "Qwen3.6-27B-AEON-NVFP4" = {
+         repo = "AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-NVFP4";
+       };
+       "Qwen3.6-27B-DFlash-drafter" = {
+         repo = "z-lab/Qwen3.6-27B-DFlash";
+       };
+     };
+   };
+
+   networking.firewall.allowedTCPPorts = [ 8000 ];
+   #+END_SRC
+
+* Build & Test Workflow
+
+** Phase 1: Package vLLM
+   1. Create ~packages/vllm-aeon.nix~
+   2. Test build: ~nix build .#vllm-aeon~ (on dgx-spark or via remote builder)
+   3. Verify: ~./result/bin/vllm serve --help~
+   4. If build too large, push to cachix:
+      ~cachix push yuanw-nix-home-macos ./result~
+
+** Phase 2: Create Module
+   1. Create ~modules/vllm.nix~ (based on graham33)
+   2. Import in dgx-spark host
+   3. ~nixos-rebuild dry-activate --flake .#dgx-spark~
+
+** Phase 3: Deploy
+   1. Deploy via colmena: ~colmena apply --on dgx-spark~
+   2. Or direct: ~nixos-rebuild switch --flake .#dgx-spark --target-host dgx-spark.local~
+   3. Start service: ~systemctl start vllm-aeon~
+   4. Monitor: ~journalctl -u vllm-aeon -f~
+
+** Phase 4: Smoke Test
+   #+BEGIN_SRC bash
+   curl -s http://dgx-spark.local:8000/v1/chat/completions \
+     -H "Content-Type: application/json" \
+     -d '{
+       "model": "aeon",
+       "messages": [{"role": "user", "content": "Hello!"}],
+       "max_tokens": 64,
+       "temperature": 0.0
+     }' | jq .choices[0].message.content
+   #+END_SRC
+
+* Open Questions / Risks
+
+** Q1: Can we build vLLM v0.23.0 on aarch64-linux?
+   nixpkgs vllm expression is complex (many Python deps, C++ extensions).
+   v0.16→v0.23.0 may break the expression.
+   *Mitigation:* Start with graham33's vllm-container devShell approach
+   (using nixpkgs vllm directly) as baseline, then incrementally upgrade.
+
+** Q2: FlashInfer sm_121a?
+   FlashInfer needs CUTLASS 3.x built for sm_121a. nixpkgs flashinfer may
+   not support this. May need separate ~packages/flashinfer-sm121a.nix~.
+   *Mitigation:* Check if flashinfer 0.6.12+ has sm_121a kernels.
+
+** Q3: Model download — declarative or imperative?
+   Nix-store models impractical (26 GB+). Systemd oneshot is idempotent
+   but not purely declarative (network-dependent).
+   *Decision:* Systemd oneshot for now. Accept network dependency.
+
+** Q4: Build time?
+   vLLM + PyTorch + CUDA deps = multi-hour build on GB10.
+   *Mitigation:* Use graham33 cachix (already in substituters). Push
+   own builds to cachix.
+
+** Q5: AEON patches maintainability?
+   Patches against vllm v0.23.0. Upstream vLLM moves fast. Patches may
+   need rebasing.
+   *Mitigation:* Pin vllm version. Track AEON-7/vllm-ultimate-dgx-spark
+   for patch updates. Eventually drop patches as upstream merges them.
+
+** Q6: Single-instance limitation?
+   vllm.nix uses ~conflicts~ to ensure only one instance runs (shared GPU).
+   For embedding models alongside chat models, vLLM supports multi-model
+   serving natively. Or run a separate llama.cpp for embeddings.
+   *Decision:* One vLLM instance at a time. Embedding model via llama.cpp.
+
+* Timeline
+   | Task                 | Estimate | Dependencies     |
+   |----------------------+----------+------------------|
+   | vllm-aeon package    | 2-4 days | nixpkgs vllm exp |
+   | flashinfer sm_121a   | 1-2 days | CUTLASS compat   |
+   | vllm module          | 1 day    | vllm-aeon pkg    |
+   | model download mod   | 0.5 day  | huggingface-hub  |
+   | DGX Spark wiring     | 0.5 day  | module           |
+   | Build + deploy       | 0.5 day  | all above        |
+   | Smoke test + tune    | 1 day    | deploy           |
+   |----------------------+----------+------------------|
+   | TOTAL                | ~1 week  |                  |
+
+* References
+  - [[https://github.com/AEON-7/vllm-ultimate-dgx-spark][AEON-7/vllm-ultimate-dgx-spark]] — Docker-based, shows required patches + flags
+  - [[https://github.com/graham33/nixos-dgx-spark][graham33/nixos-dgx-spark]] — NixOS module pattern, kernel patches, CUDA 13.2
+  - [[https://github.com/graham33/nixos-dgx-spark/blob/10bc1cfd6e3e2ff593ec1432eb9890d2aa3b1dda/modules/vllm.nix][vllm.nix (graham33)]] — systemd service module
+  - [[https://github.com/graham33/nixos-dgx-spark/blob/10bc1cfd6e3e2ff593ec1432eb9890d2aa3b1dda/playbooks/vllm-nix/shell.nix][vllm-nix shell.nix]] — devShell with vllm from nixpkgs
+  - [[https://nixpk.gs/pr-tracker.html?pr=44389][vllm PR #44389]] — Triton NVFP4 KV cache
+  - [[https://nixpk.gs/pr-tracker.html?pr=40898][vllm PR #40898]] — DFlash sliding-window attention
+  - [[https://nixpk.gs/pr-tracker.html?pr=41703][vllm PR #41703]] — Prefix-cache corruption fix
+  - [[https://nixpk.gs/pr-tracker.html?pr=43982][vllm PR #43982]] — DFlash high-concurrency fix (upstream, needs port)
