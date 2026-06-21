@@ -191,9 +191,9 @@
 
   # Source HF_TOKEN for user shells (systemd services use EnvironmentFile)
   environment.etc."profile.d/hf-token.sh".text = ''
-    # Source HF_TOKEN from agenix-managed secret
-    if [ -f ${config.age.secrets.hf-token.path} ]; then
-      export $(grep -v '^#' ${config.age.secrets.hf-token.path} | xargs)
+    # agenix secret contains: HF_TOKEN=hf_xxx
+    if [ -s ${config.age.secrets.hf-token.path} ]; then
+      set -a; . ${config.age.secrets.hf-token.path}; set +a
     fi
   '';
 
