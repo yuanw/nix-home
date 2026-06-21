@@ -74,7 +74,7 @@
   nixpkgs.config.cudaSupport = true;
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = true;
+  services.ds4.enable = false;
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
@@ -105,7 +105,7 @@
   ];
 
   services.comfyui = {
-    enable = true;
+    enable = false;
     host = "0.0.0.0";
     port = 8188;
     openFirewall = true;
