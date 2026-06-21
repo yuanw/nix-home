@@ -45,6 +45,7 @@
     ];
 
     linux.imports = [
+      ./cockpit.nix
       ./ds4.nix
       ./lance.nix
       ./mullvad.nix
