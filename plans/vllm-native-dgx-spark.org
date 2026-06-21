@@ -253,9 +253,7 @@
            ExecStart = "${vllmPkg}/bin/vllm ${lib.escapeShellArgs args}";
            Restart = "on-failure";
            RestartSec = 10;
-           Environment = [
-             "HF_HOME=/var/lib/vllm/huggingface"
-           ];
+           EnvironmentFile = config.age.secrets.hf-token.path;
          };
        };
    in

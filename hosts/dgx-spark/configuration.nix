@@ -180,5 +180,22 @@
     1
   ];
 
+  # ─── HuggingFace token ─────────────────────────────────────────────
+  # Secret file (secrets/hf-token.age) must contain:
+  #   HF_TOKEN=hf_xxxxxxxxxxxx
+  age.secrets.hf-token = {
+    file = ../../secrets/hf-token.age;
+    owner = "yuanw";
+    group = "users";
+  };
+
+  # Source HF_TOKEN for user shells (systemd services use EnvironmentFile)
+  environment.etc."profile.d/hf-token.sh".text = ''
+    # Source HF_TOKEN from agenix-managed secret
+    if [ -f ${config.age.secrets.hf-token.path} ]; then
+      export $(grep -v '^#' ${config.age.secrets.hf-token.path} | xargs)
+    fi
+  '';
+
   system.stateVersion = "25.11";
 }

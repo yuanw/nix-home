@@ -12,10 +12,12 @@ let
   ashe = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLStUG7iJOYDhS3GLuI0LkvSiY9fqsw2bM5p9JfoUqf";
   adguard = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEvgQaTxQmNGhbmkXYXmeTcbHo6vnpC0h0olTIErZxIC";
   misfit = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDx+Da0GK5PP3hskYnLn1zd/2iPnLMKl0S6Q2o+f/DEQ";
+  dgx-spark = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBlf8iV/U+IO22PGc6yZMbfwZB7Wpk7L7nD9AZApwQBS";
   systems = [
     ashe
     adguard
     misfit
+    dgx-spark
   ];
 in
 {
@@ -42,4 +44,9 @@ in
   "adguard-encryption-key.age".publicKeys = users ++ systems;
   "adguard-encryption-certificate.age".publicKeys = users ++ systems;
   "wireguard-server-private.age".publicKeys = users ++ systems;
+  "hf-token.age".publicKeys = [
+    yuanw_mist
+    yuanwang_ca
+    dgx-spark
+  ];
 }

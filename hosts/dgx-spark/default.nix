@@ -2,6 +2,7 @@
 
 {
   imports = [
+    inputs.agenix.nixosModules.default
     inputs.dgx-spark.nixosModules.dgx-spark
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
