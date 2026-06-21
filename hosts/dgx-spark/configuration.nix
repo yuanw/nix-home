@@ -76,6 +76,9 @@
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = true;
 
+  # ─── Cockpit Web Manager ────────────────────────────────────────────
+  services.cockpit-local.enable = true;
+
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
     enable = false;
