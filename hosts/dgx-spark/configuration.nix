@@ -72,6 +72,10 @@
   };
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
+  # vLLM 0.16 has known CVEs (fixed in 0.23). Permit until vllm-aeon builds.
+  nixpkgs.config.permittedInsecurePackages = [
+    "python3.13-vllm-0.16.0"
+  ];
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
   services.ds4.enable = false;
@@ -100,6 +104,9 @@
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   networking.firewall.allowedTCPPorts = [
+    8000 # vLLM aeon (Qwen3.6-27B)
+    8001 # vLLM gemma
+    8002 # vLLM qwen35b
     11000
     8188
   ];
@@ -110,6 +117,95 @@
     port = 8188;
     openFirewall = true;
   };
+
+  # ─── vLLM Inference ─────────────────────────────────────────────────
+  services.vllm.instances = {
+    # Primary: Qwen3.6-27B NVFP4 + DFlash speculative decoding
+    # Best single-stream throughput on DGX Spark (38-56 tok/s by category)
+    aeon = {
+      enable = true;
+      autoStart = false; # Start manually after model downloads complete
+      model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
+      servedModelName = "aeon";
+      port = 8000;
+      gpuMemoryUtilization = 0.78;
+      maxModelLen = 24576;
+      maxNumSeqs = 8;
+      maxNumBatchedTokens = 8192;
+      dtype = "auto";
+      quantization = "compressed-tensors"; # NVFP4
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256; # Qwen3.6 hybrid GDN+attention
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+
+    # Gemma-4-26B-A4B NVFP4 (fastest single-stream, 155 tok/s coding)
+    gemma = {
+      enable = false;
+      model = "/var/lib/vllm/models/Gemma-4-26B-A4B-NVFP4";
+      servedModelName = "gemma";
+      port = 8001;
+      gpuMemoryUtilization = 0.78;
+      maxModelLen = 32768;
+      maxNumSeqs = 8;
+      quantization = "compressed-tensors";
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Gemma-4-26B-A4B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+
+    # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
+    qwen35b = {
+      enable = false;
+      model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
+      servedModelName = "qwen35b";
+      port = 8002;
+      gpuMemoryUtilization = 0.76; # More conservative for larger model
+      maxModelLen = 24576;
+      maxNumSeqs = 8;
+      quantization = "compressed-tensors";
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+  };
+
+  # Declarative model downloads (oneshot services, idempotent)
+  services.vllm-models = {
+    enable = true;
+    cacheDir = "/var/lib/vllm/models";
+    models = {
+      # Qwen3.6-27B body (NVFP4 compressed-tensors, ~26 GB)
+      "Qwen3.6-27B-AEON-NVFP4" = {
+        repo = "AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-NVFP4";
+      };
+      # DFlash drafter for Qwen3.6-27B (z-lab 5-layer, ~3.3 GB)
+      "Qwen3.6-27B-DFlash-drafter" = {
+        repo = "z-lab/Qwen3.6-27B-DFlash";
+      };
+    };
+  };
+
   services.dgx-dashboard = {
     enable = true;
     port = 11001;

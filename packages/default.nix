@@ -198,4 +198,8 @@ _final: prev: {
     paths = [ prev.comfyuiPackages.comfyui-unwrapped ];
     meta.mainProgram = "comfyui";
   };
+
+  # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
+  # Only builds on aarch64-linux with CUDA 13.2
+  vllm-aeon = prev.callPackage ./vllm-aeon.nix { };
 }
