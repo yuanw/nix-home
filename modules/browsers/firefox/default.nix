@@ -14,6 +14,39 @@ with lib;
 let
   cfg = config.modules.browsers.firefox;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
+  hmUser = config.home-manager.users.${config.my.username} or { };
+  enableBrowserCli =
+    (hmUser.programs.mics-skills.enable or false)
+    && elem "browser-cli" (hmUser.programs.mics-skills.skills or [ ]);
+  micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
+  browserCliAddonId = "browser-cli-controller@thalheim.io";
+  browserCliExtension =
+    pkgs.runCommand "browser-cli-firefox-extension"
+      {
+        passthru.addonId = browserCliAddonId;
+      }
+      ''
+        dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
+        mkdir -p "$dst"
+        ln -s ${micsSkills.browser-cli-extension}/browser-cli-extension.xpi "$dst/${browserCliAddonId}.xpi"
+      '';
+  browserCliServerWrapper = pkgs.writeShellScriptBin "browser-cli-server-wrapper" ''
+    exec ${micsSkills.browser-cli}/bin/browser-cli-server "$@"
+  '';
+  browserCliNativeMessagingHost = pkgs.runCommand "browser-cli-native-messaging-host" { } ''
+    mkdir -p $out/lib/mozilla/native-messaging-hosts
+    cp ${
+      pkgs.writeText "io.thalheim.browser_cli.bridge.json" (
+        builtins.toJSON {
+          name = "io.thalheim.browser_cli.bridge";
+          description = "Browser CLI Bridge Server";
+          path = "${browserCliServerWrapper}/bin/browser-cli-server-wrapper";
+          type = "stdio";
+          allowed_extensions = [ browserCliAddonId ];
+        }
+      )
+    } $out/lib/mozilla/native-messaging-hosts/io.thalheim.browser_cli.bridge.json
+  '';
   # HM creates the profiles.ini at the XDG path on Linux
   # (~/.config/mozilla/firefox/profiles.ini) when xdg.enable = true.
   # Keep this aligned so file paths (chrome, extensions, mergetools)
@@ -172,6 +205,7 @@ in
               enable = true;
               #version = "128.0"; # Set version here, defaults to main branch
             };
+            nativeMessagingHosts = lib.optionals enableBrowserCli [ browserCliNativeMessagingHost ];
           };
 
           # https://mozilla.github.io/policy-templates/
@@ -243,6 +277,7 @@ in
                     userchrome-toggle-extended
                     vimium-c
                   ]
+                  ++ lib.optionals enableBrowserCli [ browserCliExtension ]
                   ++ lib.optionals (hostname != "WK01174") [
                     onepassword-password-manager
                   ];

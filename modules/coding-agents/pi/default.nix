@@ -185,7 +185,11 @@ in
     ];
 
     home-manager.users.${config.my.username} = {
-      programs.mics-skills.skillDirs = lib.mkAfter [ "${cfg.configDir}/skills" ];
+      programs.mics-skills.skillDirs = [
+        ".claude/skills"
+        ".opencode/skills"
+        "${cfg.configDir}/skills"
+      ];
 
       home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
