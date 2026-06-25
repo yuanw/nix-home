@@ -186,6 +186,8 @@ in
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
 
+  librewolf-macos = prev.callPackage ./librewolf-macos { };
+
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
 

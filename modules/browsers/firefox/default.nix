@@ -14,39 +14,6 @@ with lib;
 let
   cfg = config.modules.browsers.firefox;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
-  hmUser = config.home-manager.users.${config.my.username} or { };
-  enableBrowserCli =
-    (hmUser.programs.mics-skills.enable or false)
-    && elem "browser-cli" (hmUser.programs.mics-skills.skills or [ ]);
-  micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-  browserCliAddonId = "browser-cli-controller@thalheim.io";
-  browserCliExtension =
-    pkgs.runCommand "browser-cli-firefox-extension"
-      {
-        passthru.addonId = browserCliAddonId;
-      }
-      ''
-        dst="$out/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-        mkdir -p "$dst"
-        ln -s ${micsSkills.browser-cli-extension}/browser-cli-extension.xpi "$dst/${browserCliAddonId}.xpi"
-      '';
-  browserCliServerWrapper = pkgs.writeShellScriptBin "browser-cli-server-wrapper" ''
-    exec ${micsSkills.browser-cli}/bin/browser-cli-server "$@"
-  '';
-  browserCliNativeMessagingHost = pkgs.runCommand "browser-cli-native-messaging-host" { } ''
-    mkdir -p $out/lib/mozilla/native-messaging-hosts
-    cp ${
-      pkgs.writeText "io.thalheim.browser_cli.bridge.json" (
-        builtins.toJSON {
-          name = "io.thalheim.browser_cli.bridge";
-          description = "Browser CLI Bridge Server";
-          path = "${browserCliServerWrapper}/bin/browser-cli-server-wrapper";
-          type = "stdio";
-          allowed_extensions = [ browserCliAddonId ];
-        }
-      )
-    } $out/lib/mozilla/native-messaging-hosts/io.thalheim.browser_cli.bridge.json
-  '';
   # HM creates the profiles.ini at the XDG path on Linux
   # (~/.config/mozilla/firefox/profiles.ini) when xdg.enable = true.
   # Keep this aligned so file paths (chrome, extensions, mergetools)
@@ -171,8 +138,21 @@ in
               fi
             ''
           );
-          home = {
-            file."${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
+          home.file = {
+            "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
+          }
+          // lib.optionalAttrs (!isDarwin) {
+            ".mozilla/firefox/profiles.ini".text = ''
+              [General]
+              StartWithLastProfile=1
+              Version=2
+
+              [Profile0]
+              Default=1
+              IsRelative=0
+              Name=home
+              Path=${config.my.homeDirectory}/.config/mozilla/firefox/home
+            '';
           };
           # Firefox on Linux reads profiles.ini from the legacy path
           # (~/.mozilla/firefox) but HM writes it to the XDG path
@@ -182,22 +162,6 @@ in
           home.sessionVariables = lib.mkIf (!isDarwin) {
             MOZ_FIREFOX_HOME = "${config.my.homeDirectory}/.config/mozilla/firefox";
           };
-          # Fallback profiles.ini in the legacy path for launchers that don't
-          # inherit the environment (e.g. desktop entries).  Uses an absolute
-          # path so Firefox finds the HM-managed profile at its XDG location
-          # (~/.config/mozilla/firefox/home) even when MOZ_FIREFOX_HOME is
-          # unset (e.g. launched from a desktop entry).
-          home.file.".mozilla/firefox/profiles.ini".text = ''
-            [General]
-            StartWithLastProfile=1
-            Version=2
-
-            [Profile0]
-            Default=1
-            IsRelative=0
-            Name=home
-            Path=${config.my.homeDirectory}/.config/mozilla/firefox/home
-          '';
           programs.firefox = {
             enable = true;
             package = cfg.pkg;
@@ -205,54 +169,53 @@ in
               enable = true;
               #version = "128.0"; # Set version here, defaults to main branch
             };
-            nativeMessagingHosts = lib.optionals enableBrowserCli [ browserCliNativeMessagingHost ];
           };
 
           # https://mozilla.github.io/policy-templates/
           # ~/Applications/Home Manager Apps/Firefox.app/Contents/Resources/distribution/policies.json
-          programs.firefox.policies = {
-            DontCheckDefaultBrowser = true;
-            DisablePocket = true;
-            DisableAppUpdate = true;
-            DisableTelemetry = true;
-            SearchEngines = {
-              PreventInstalls = true;
-              Add = [
-                {
-                  Name = "Kagi";
-                  URLTemplate = "https://kagi.com/search?q={searchTerms}";
-                  Method = "GET";
-                  IconURL = "https://kagi.com/asset/405c65f/favicon-32x32.png?v=49886a9a8f55fd41f83a89558e334f673f9e25cf";
-                  Description = "Kagi Search";
-                }
-                {
-                  Name = "Nix Packages";
-                  Description = "Nix package Search";
-                  URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
-                  Method = "GET";
-                  IconURL = "https://nixos.org/favicon.png";
-                  Alias = "np";
-                }
-              ];
-              # https://github.com/nix-community/home-manager/blob/master/modules/programs/firefox/profiles/search.nix#L212
-              Remove = [
-                "Bing"
-                "eBay"
-                "DuckDuckGo"
-              ];
-              Default = "Kagi";
-            };
-            SearchSuggestEnabled = false;
-          };
-          # TODO: does this work
-          # https://github.com/llakala/nixos/blob/ffc71bb84cb95dd813795d4cb0beb99cebf8a4e0/base/software/home/firefox.nix
-          programs.firefox.policies.Preferences = {
-            "browser.in-content.dark-mode" = true; # Use dark mode
-            "ui.systemUsesDarkTheme" = true;
-            "extensions.autoDisableScopes" = 0; # Automatically enable extensions
-            "extensions.update.enabled" = false;
-            "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
-          };
+          programs.firefox.policies = lib.mkMerge [
+            {
+              DontCheckDefaultBrowser = true;
+              DisablePocket = true;
+              DisableAppUpdate = true;
+              DisableTelemetry = true;
+              SearchEngines = {
+                PreventInstalls = true;
+                Add = [
+                  {
+                    Name = "Kagi";
+                    URLTemplate = "https://kagi.com/search?q={searchTerms}";
+                    Method = "GET";
+                    IconURL = "https://kagi.com/asset/405c65f/favicon-32x32.png?v=49886a9a8f55fd41f83a89558e334f673f9e25cf";
+                    Description = "Kagi Search";
+                  }
+                  {
+                    Name = "Nix Packages";
+                    Description = "Nix package Search";
+                    URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
+                    Method = "GET";
+                    IconURL = "https://nixos.org/favicon.png";
+                    Alias = "np";
+                  }
+                ];
+                # https://github.com/nix-community/home-manager/blob/master/modules/programs/firefox/profiles/search.nix#L212
+                Remove = [
+                  "Bing"
+                  "eBay"
+                  "DuckDuckGo"
+                ];
+                Default = "Kagi";
+              };
+              SearchSuggestEnabled = false;
+              Preferences = {
+                "browser.in-content.dark-mode" = true; # Use dark mode
+                "ui.systemUsesDarkTheme" = true;
+                "extensions.autoDisableScopes" = 0; # Automatically enable extensions
+                "extensions.update.enabled" = false;
+                "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
+              };
+            }
+          ];
           # programs.firefox.nativeMessagingHosts = [
           #   pkgs.tridactyl-native
           # ];
@@ -277,7 +240,6 @@ in
                     userchrome-toggle-extended
                     vimium-c
                   ]
-                  ++ lib.optionals enableBrowserCli [ browserCliExtension ]
                   ++ lib.optionals (hostname != "WK01174") [
                     onepassword-password-manager
                   ];

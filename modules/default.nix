@@ -5,6 +5,7 @@
       ./agenix.nix
       ./ai.nix
       ./browsers/chromium.nix
+      ./browsers/browser-cli-darwin.nix
       ./browsers/firefox
       ./browsers/librewolf.nix
       ./browsers/tor.nix
