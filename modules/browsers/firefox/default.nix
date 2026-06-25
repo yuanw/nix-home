@@ -104,12 +104,7 @@ in
     })
     (mkIf cfg.enable {
       home-manager.users.${config.my.username} =
-        hm@{
-          pkgs,
-          config,
-          osConfig,
-          ...
-        }:
+        hm@{ pkgs, osConfig, ... }:
         let
           micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
           browserCliFirefoxExtension = pkgs.callPackage ../../../packages/browser-cli-firefox-extension.nix {
@@ -117,7 +112,7 @@ in
           };
           browserCliPolicies = pkgs.callPackage ../../../packages/browser-cli-policies.nix {
             inherit (micsSkills) browser-cli-extension;
-            installUrl = "file://${config.home.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
+            installUrl = "file://${osConfig.my.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
           };
 
           # extension-settings.json: each command has precedenceList[].value.{shortcut,...}
