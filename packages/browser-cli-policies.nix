@@ -2,13 +2,14 @@
 # https://github.com/Mic92/dotfiles/blob/6040591/pkgs/librewolf-policies.nix
 {
   browser-cli-extension,
+  installUrl ? "file://${browser-cli-extension}/browser-cli-extension.xpi",
   ...
 }:
 {
   ExtensionSettings = {
     "browser-cli-controller@thalheim.io" = {
       installation_mode = "force_installed";
-      install_url = "file://${browser-cli-extension}/browser-cli-extension.xpi";
+      install_url = installUrl;
     };
   };
 }

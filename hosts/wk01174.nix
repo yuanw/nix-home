@@ -42,6 +42,7 @@
     betterdisplay
     ungoogled-chromium
     slack
+    firefox
   ];
   modules = {
     # common = {
@@ -131,7 +132,6 @@
       casks = [
         "karabiner-elements"
         "viscosity"
-        "firefox"
       ];
       brews = [
         "redis"

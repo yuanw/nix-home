@@ -12,11 +12,16 @@ let
   cfg = config.programs.mics-skills;
   enable = cfg.enable or false && lib.elem "browser-cli" (cfg.skills or [ ]);
   micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-  browserCliPolicies = pkgs.callPackage ../../packages/browser-cli-policies.nix {
-    inherit (micsSkills) browser-cli-extension;
-  };
   firefoxEnabled = osConfig.modules.browsers.firefox.enable or false;
   firefoxPkg = osConfig.modules.browsers.firefox.pkg or null;
+  # Homebrew Firefox on macOS cannot install extensions from nix store paths (sandbox).
+  # Deploy the XPI into the home directory and reference it via file:// policy.
+  extensionPath = "${config.home.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
+  extensionInstallUrl = "file://${extensionPath}";
+  browserCliPolicies = pkgs.callPackage ../../packages/browser-cli-policies.nix {
+    inherit (micsSkills) browser-cli-extension;
+    installUrl = extensionInstallUrl;
+  };
   browserPath =
     if pkgs.stdenv.isDarwin then
       if firefoxEnabled then
@@ -31,6 +36,9 @@ let
 in
 {
   config = lib.mkIf enable {
+    home.file.".browser-cli/browser-cli-extension.xpi".source =
+      "${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
+
     xdg.configFile."browser-cli/config.toml".text = ''
       firefox_path = "${browserPath}"
     '';
