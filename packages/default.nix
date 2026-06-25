@@ -201,5 +201,7 @@ _final: prev: {
 
   # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
   # Only builds on aarch64-linux with CUDA 13.2
-  vllm-aeon = prev.callPackage ./vllm-aeon.nix { };
+  vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
+    cudaPackages = prev.cudaPackages;
+  };
 }
