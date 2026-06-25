@@ -104,8 +104,22 @@ in
     })
     (mkIf cfg.enable {
       home-manager.users.${config.my.username} =
-        hm@{ pkgs, ... }:
+        hm@{
+          pkgs,
+          config,
+          osConfig,
+          ...
+        }:
         let
+          micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
+          browserCliFirefoxExtension = pkgs.callPackage ../../../packages/browser-cli-firefox-extension.nix {
+            inherit (micsSkills) browser-cli-extension;
+          };
+          browserCliPolicies = pkgs.callPackage ../../../packages/browser-cli-policies.nix {
+            inherit (micsSkills) browser-cli-extension;
+            installUrl = "file://${config.home.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
+          };
+
           # extension-settings.json: each command has precedenceList[].value.{shortcut,...}
           buildKeybindings =
             extensionId: commands:
@@ -215,6 +229,9 @@ in
                 "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
               };
             }
+            (lib.mkIf (osConfig.modules.pi.enable or false) {
+              ExtensionSettings = browserCliPolicies.ExtensionSettings;
+            })
           ];
           # programs.firefox.nativeMessagingHosts = [
           #   pkgs.tridactyl-native
@@ -239,6 +256,9 @@ in
                     ublock-origin
                     userchrome-toggle-extended
                     vimium-c
+                  ]
+                  ++ lib.optionals (osConfig.modules.pi.enable or false) [
+                    browserCliFirefoxExtension
                   ]
                   ++ lib.optionals (hostname != "WK01174") [
                     onepassword-password-manager

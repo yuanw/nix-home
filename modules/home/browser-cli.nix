@@ -14,19 +14,13 @@ let
   micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
   firefoxEnabled = osConfig.modules.browsers.firefox.enable or false;
   firefoxPkg = osConfig.modules.browsers.firefox.pkg or null;
-  # Homebrew Firefox on macOS cannot install extensions from nix store paths (sandbox).
-  # Deploy the XPI into the home directory and reference it via file:// policy.
-  extensionPath = "${config.home.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
-  extensionInstallUrl = "file://${extensionPath}";
-  browserCliPolicies = pkgs.callPackage ../../packages/browser-cli-policies.nix {
-    inherit (micsSkills) browser-cli-extension;
-    installUrl = extensionInstallUrl;
-  };
+  nixCasksFirefox = "/Applications/Nix Casks/Firefox.app/Contents/MacOS/firefox";
+  homebrewFirefox = "/Applications/Firefox.app/Contents/MacOS/firefox";
   browserPath =
     if pkgs.stdenv.isDarwin then
       if firefoxEnabled then
         if firefoxPkg == null then
-          "/Applications/Firefox.app/Contents/MacOS/firefox"
+          if builtins.pathExists nixCasksFirefox then nixCasksFirefox else homebrewFirefox
         else
           "${firefoxPkg}/Applications/Firefox.app/Contents/MacOS/firefox"
       else
@@ -36,16 +30,14 @@ let
 in
 {
   config = lib.mkIf enable {
-    home.file.".browser-cli/browser-cli-extension.xpi".source =
-      "${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
-
     xdg.configFile."browser-cli/config.toml".text = ''
       firefox_path = "${browserPath}"
     '';
 
-    programs.firefox.policies = lib.mkIf firefoxEnabled {
-      ExtensionSettings = browserCliPolicies.ExtensionSettings;
-    };
+    home.activation.browserCliExtension = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      mkdir -p "$HOME/.browser-cli"
+      cp -f ${micsSkills.browser-cli-extension}/browser-cli-extension.xpi "$HOME/.browser-cli/browser-cli-extension.xpi"
+    '';
 
     home.activation.installBrowserCliHost = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       $DRY_RUN_CMD ${micsSkills.browser-cli}/bin/browser-cli --install-host
