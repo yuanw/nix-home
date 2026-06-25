@@ -39,6 +39,7 @@ hm@{ pkgs, ... }:
       enable = true;
       package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
       skills = [
+        "browser-cli"
         "kagi-search"
         "pexpect-cli"
         "screenshot-cli"
