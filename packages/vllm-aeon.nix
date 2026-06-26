@@ -156,6 +156,33 @@ let
     hash = "sha256-aG4qd0vlwP+8gudfvHwhtXCFmBOJKQQTvcwahpEqC84=";
   };
 
+  # vllm-flash-attn for v0.23 (Hopper/Blackwell kernels)
+  # Uses CUTLASS v4.2.1 (not v4.4.2) — the flash-attn revision expects older API
+  vllm-flash-attn-src = stdenv.mkDerivation {
+    pname = "vllm-flash-attn";
+    version = "2.7.2.post1";
+    src = fetchFromGitHub {
+      name = "flash-attention-source";
+      owner = "vllm-project";
+      repo = "flash-attention";
+      rev = "dd62dac706b1cf7895bd99b18c6cb7e7e117ee25";
+      hash = "sha256-y6gIgP6a4U0UGzSxP0vjgIzqXoRSdyJei8FYEC6ITNk=";
+    };
+    dontConfigure = true;
+    buildPhase = ''
+      rm -rf csrc/cutlass
+      ln -sf ${
+        fetchFromGitHub {
+          owner = "NVIDIA";
+          repo = "cutlass";
+          rev = "62750a2b75c802660e4894434dc55e839f322277";
+          hash = "sha256-eL64JYiFAqrn6OJDzijpMR4DbEB4El/8yT7++iCZBlE=";
+        }
+      } csrc/cutlass
+    '';
+    installPhase = "cp -rva . $out";
+  };
+
   # DeepGEMM for v0.23
   deepgemm = fetchFromGitHub {
     name = "deepgemm-source";
@@ -339,6 +366,7 @@ buildPythonPackage {
       "-DFLASH_MLA_SRC_DIR=${lib.getDev flashmla}"
       "-DQUTLASS_SRC_DIR=${lib.getDev qutlass}"
       "-DDEEPGEMM_SRC_DIR=${lib.getDev deepgemm}"
+      "-DVLLM_FLASH_ATTN_SRC_DIR=${lib.getDev vllm-flash-attn-src}"
       "-DTORCH_CUDA_ARCH_LIST=${gpuTargetString}"
       "-DCUDA_TOOLKIT_ROOT_DIR=${
         symlinkJoin {
