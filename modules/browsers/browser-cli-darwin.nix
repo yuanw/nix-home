@@ -16,6 +16,7 @@ let
   nixCasksFirefox = inputs'.nix-casks.packages.firefox or null;
 
   librewolfBrowserCliInstallUrl = "file:///Applications/Nix Casks/LibreWolf.app/Contents/Resources/distribution/browser-cli-extension.xpi";
+  librewolfBrowserPath = "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf";
 
   browserCliPolicies = import ../../packages/browser-cli-policies.nix {
     inherit (micsSkills) browser-cli-extension;
@@ -29,6 +30,10 @@ let
 in
 {
   config = lib.mkIf (piEnabled && isDarwin) {
+    modules.pi.environment = {
+      BROWSER_CLI_FIREFOX_PATH = librewolfBrowserPath;
+    };
+
     environment.casks = [
       librewolfWithBrowserCli
     ]
