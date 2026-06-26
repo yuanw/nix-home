@@ -23,8 +23,10 @@ let
     installUrl = librewolfBrowserCliInstallUrl;
   };
 
+  searchPolicies = import ../../packages/gecko-search-policies.nix;
+
   librewolfWithBrowserCli = pkgs.librewolf-macos.override {
-    policies = browserCliPolicies;
+    policies = lib.recursiveUpdate searchPolicies browserCliPolicies;
     inherit (micsSkills) browser-cli-extension;
   };
 in

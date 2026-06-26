@@ -45,6 +45,7 @@ let
   ) { } (lib.attrNames keybindingsCfg.settings);
 
   browserName = if program == "firefox" then "firefox" else "librewolf";
+  searchPolicies = import ../../packages/gecko-search-policies.nix;
 in
 {
 
@@ -114,34 +115,8 @@ in
             DisablePocket = true;
             DisableAppUpdate = true;
             DisableTelemetry = true;
-            SearchEngines = {
-              PreventInstalls = true;
-              Add = [
-                {
-                  Name = "Kagi";
-                  URLTemplate = "https://kagi.com/search?q={searchTerms}";
-                  Method = "GET";
-                  IconURL = "https://kagi.com/asset/405c65f/favicon-32x32.png?v=49886a9a8f55fd41f83a89558e334f673f9e25cf";
-                  Description = "Kagi Search";
-                }
-                {
-                  Name = "Nix Packages";
-                  Description = "Nix package Search";
-                  URLTemplate = "https://search.nixos.org/packages?type=packages&query={searchTerms}";
-                  Method = "GET";
-                  IconURL = "https://nixos.org/favicon.png";
-                  Alias = "np";
-                }
-              ];
-              # https://github.com/nix-community/home-manager/blob/master/modules/programs/firefox/profiles/search.nix#L212
-              Remove = [
-                "Bing"
-                "eBay"
-                "DuckDuckGo"
-              ];
-              Default = "Kagi";
-            };
-            SearchSuggestEnabled = false;
+          }
+          (lib.recursiveUpdate searchPolicies {
             Preferences = {
               "browser.in-content.dark-mode" = true; # Use dark mode
               "ui.systemUsesDarkTheme" = true;
@@ -149,7 +124,7 @@ in
               "extensions.update.enabled" = false;
               "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
             };
-          }
+          })
           (lib.mkIf (osConfig.modules.pi.enable or false && !isDarwin && program == "firefox") {
             ExtensionSettings = browserCliPolicies.ExtensionSettings;
           })
@@ -425,6 +400,9 @@ in
                 bing.metaData.hidden = true;
                 ebay.metaData.hidden = true;
                 Amazon.metaData.hidden = true;
+                ddg.metaData.hidden = true;
+                perplexity.metaData.hidden = true;
+                wikipedia.metaData.hidden = true;
               };
             };
             # # https://github.com/arkenfox/user.js/blob/master/user.js
@@ -538,7 +516,7 @@ in
               "browser.ctrlTab.recentlyUsedOrder" = false;
               "browser.bookmarks.showMobileBookmarks" = true;
               "browser.uidensity" = 1;
-              "browser.urlbar.placeholderName" = "DuckDuckGo";
+              "browser.urlbar.placeholderName" = "Kagi";
               "browser.urlbar.update1" = true;
               "distribution.searchplugins.defaultLocale" = "en-CA";
               "general.useragent.locale" = "en-CA";
