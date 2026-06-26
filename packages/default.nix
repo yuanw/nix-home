@@ -1,4 +1,8 @@
-_final: prev: {
+_final: prev:
+let
+  codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
+in
+{
   installApplication =
     {
       name,
@@ -155,6 +159,8 @@ _final: prev: {
   pi-acp = prev.callPackage ./pi-acp.nix { };
   pi-extensions = prev.callPackage ./pi-extensions { };
   claude-plugins = prev.callPackage ./claude-plugins { };
+  inherit codingAgentsCommonSkills;
+  codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
@@ -179,6 +185,10 @@ _final: prev: {
   decord = prev.callPackage ./decord { };
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
+
+  librewolf-macos = prev.callPackage ./librewolf-macos { };
+
+  firefox-macos = prev.callPackage ./firefox-macos { };
 
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
