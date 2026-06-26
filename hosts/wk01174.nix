@@ -141,6 +141,10 @@
       enable = true;
       pkg = null;
     };
+    browsers.librewolf = {
+      enable = true;
+      pkg = null;
+    };
     editors.emacs = {
       enable = true;
       enableService = true;
