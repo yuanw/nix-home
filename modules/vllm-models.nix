@@ -85,7 +85,7 @@ in
             EnvironmentFile = optionals (config.age.secrets.hf-token or null != null) [
               config.age.secrets.hf-token.path
             ];
-            ExecStart = "${cfg.package}/bin/huggingface-cli download ${model.repo} --local-dir ${targetDir} --local-dir-use-symlinks False ${
+            ExecStart = "${cfg.package}/bin/hf download ${model.repo} --local-dir ${targetDir} ${
               escapeShellArgs (revArg ++ model.extraArgs)
             }";
             TimeoutStartSec = 7200;

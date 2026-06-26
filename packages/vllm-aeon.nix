@@ -1,10 +1,9 @@
 # vLLM v0.23.0 built from source for DGX Spark (aarch64-linux, sm_121a)
 #
-# Clean build — does NOT inherit nixpkgs v0.16 patches.
+# Rust frontend enabled — uses cargo vendoring.
 # AEON/D Flash patches to be added after baseline compiles.
 #
-# Build on DGX Spark:
-#   nix build --impure --expr '(import <nixpkgs> { config = { allowUnfree = true; cudaSupport = true; }; overlays = [(import ./hosts/dgx-spark/cuda-fixes.nix)]; }).python3Packages.callPackage ./packages/vllm-aeon.nix {}'
+# Build on DGX Spark via flake overlay.
 
 {
   lib,
@@ -22,6 +21,10 @@
   packaging,
   setuptools,
   setuptools-scm,
+  setuptools-rust,
+  rustPlatform,
+  cargo,
+  rustc,
   aioprometheus,
   anthropic,
   bitsandbytes,
@@ -88,6 +91,21 @@ let
 
   version = "0.23.0";
 
+  # Source
+  vllmSrc = fetchFromGitHub {
+    owner = "vllm-project";
+    repo = "vllm";
+    tag = "v${version}";
+    hash = "sha256-9mxu2jLchoKmRzD71enPomVJuP5LjbUtQqLMdP5k+Qw=";
+  };
+
+  # Rust dependencies — pre-fetched via fetchCargoVendor
+  cargoDeps = rustPlatform.fetchCargoVendor {
+    src = vllmSrc;
+    sourceRoot = "${vllmSrc.name}/rust";
+    hash = "sha256-mE87Pu0W4rrhjxuSdg2yzITdie7PEd0DVmfiagkH7bg=";
+  };
+
   # CUTLASS v4.4.2 for v0.23
   cutlass = fetchFromGitHub {
     name = "cutlass-source";
@@ -138,22 +156,14 @@ let
     hash = "sha256-aG4qd0vlwP+8gudfvHwhtXCFmBOJKQQTvcwahpEqC84=";
   };
 
-  vllm-flash-attn-src = stdenv.mkDerivation {
-    pname = "vllm-flash-attn";
-    version = "2.7.2.post1";
-    src = fetchFromGitHub {
-      name = "flash-attention-source";
-      owner = "vllm-project";
-      repo = "flash-attention";
-      rev = "dd62dac706b1cf7895bd99b18c6cb7e7e117ee25";
-      hash = "sha256-y6gIgP6a4U0UGzSxP0vjgIzqXoRSdyJei8FYEC6ITNk=";
-    };
-    dontConfigure = true;
-    buildPhase = ''
-      rm -rf csrc/cutlass
-      ln -sf ${cutlass} csrc/cutlass
-    '';
-    installPhase = "cp -rva . $out";
+  # DeepGEMM for v0.23
+  deepgemm = fetchFromGitHub {
+    name = "deepgemm-source";
+    owner = "deepseek-ai";
+    repo = "DeepGEMM";
+    rev = "891d57b4db1071624b5c8fa0d1e51cb317fa709f";
+    hash = "sha256-sQM8SFkcDJmzyvKl1nv+nkwWaHvvo7mOGyNot2oduJg=";
+    fetchSubmodules = true;
   };
 
   gpuTargetString =
@@ -185,67 +195,42 @@ buildPythonPackage {
   inherit version;
   pyproject = true;
 
-  src = fetchFromGitHub {
-    owner = "vllm-project";
-    repo = "vllm";
-    tag = "v${version}";
-    hash = "sha256-9mxu2jLchoKmRzD71enPomVJuP5LjbUtQqLMdP5k+Qw=";
-  };
+  src = vllmSrc;
+
+  # ─── Rust support ───
+  inherit cargoDeps;
+  cargoRoot = "rust";
 
   postPatch = ''
-        # Remove vendored pynvml
-        rm -f vllm/third_party/pynvml.py
-        substituteInPlace tests/utils.py \
-          --replace-fail \
-            "from vllm.third_party.pynvml import" \
-            "from pynvml import" || true
-        substituteInPlace vllm/utils/import_utils.py \
-          --replace-fail \
-            "import vllm.third_party.pynvml as pynvml" \
-            "import pynvml" || true
+    # Remove vendored pynvml
+    rm -f vllm/third_party/pynvml.py
+    substituteInPlace tests/utils.py \
+      --replace-fail \
+        "from vllm.third_party.pynvml import" \
+        "from pynvml import" || true
+    substituteInPlace vllm/utils/import_utils.py \
+      --replace-fail \
+        "import vllm.third_party.pynvml as pynvml" \
+        "import pynvml" || true
 
-        # Relax version pins
-        substituteInPlace pyproject.toml \
-          --replace-fail "torch ==" "torch >=" \
-          --replace-fail "setuptools>=77.0.3,<81.0.0" "setuptools" \
-          --replace-fail "grpcio-tools==1.78.0" "grpcio" || true
+    # Relax version pins
+    substituteInPlace pyproject.toml \
+      --replace-fail "torch ==" "torch >=" \
+      --replace-fail "setuptools>=77.0.3,<81.0.0" "setuptools" \
+      --replace-fail "grpcio-tools==1.78.0" "grpcio" || true
 
-        # Allow our Python version
-        substituteInPlace CMakeLists.txt \
-          --replace-fail \
-            'set(PYTHON_SUPPORTED_VERSIONS' \
-            'set(PYTHON_SUPPORTED_VERSIONS "${lib.versions.majorMinor python.version}"' || true
-
-        # Skip Rust frontend — conditional feature, not needed for inference
-        substituteInPlace pyproject.toml \
-          --replace-fail '"setuptools-rust>=1.9.0",' '"setuptools>=77.0.3",' || true
-
-        # setup.py imports setuptools_rust unconditionally — make it optional
-        substituteInPlace setup.py \
-          --replace-fail \
-            'from setuptools_rust import Binding, RustExtension' \
-            'try: from setuptools_rust import Binding, RustExtension
-    except ImportError: Binding = RustExtension = None' || true
-        substituteInPlace setup.py \
-          --replace-fail \
-            'from setuptools_rust.build import build_rust' \
-            'try: from setuptools_rust.build import build_rust
-    except ImportError: build_rust = None' || true
-        # Guard Rust extension registration for when setuptools_rust is absent
-        substituteInPlace setup.py \
-          --replace-fail \
-            'cmdclass["build_rust"] = precompiled_build_rust' \
-            'if build_rust is not None: cmdclass["build_rust"] = precompiled_build_rust' || true
-        substituteInPlace setup.py \
-          --replace-fail \
-            'rust_extensions = [' \
-            'if RustExtension is not None: rust_extensions = [
-    else: rust_extensions = []
-    _' || true
+    # Allow our Python version
+    substituteInPlace CMakeLists.txt \
+      --replace-fail \
+        'set(PYTHON_SUPPORTED_VERSIONS' \
+        'set(PYTHON_SUPPORTED_VERSIONS "${lib.versions.majorMinor python.version}"' || true
   '';
 
   nativeBuildInputs = [
     which
+    rustPlatform.cargoSetupHook
+    cargo
+    rustc
   ]
   ++ optionals cudaSupport [
     cudaPackages.cuda_nvcc
@@ -260,6 +245,7 @@ buildPythonPackage {
     packaging
     setuptools
     setuptools-scm
+    setuptools-rust
     torch
   ];
 
@@ -340,27 +326,31 @@ buildPythonPackage {
 
   dontUseCmakeConfigure = true;
 
-  cmakeFlags = [
-    (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_CUTLASS" "${lib.getDev cutlass}")
-    (lib.cmakeFeature "FLASH_MLA_SRC_DIR" "${lib.getDev flashmla}")
-    (lib.cmakeFeature "VLLM_FLASH_ATTN_SRC_DIR" "${lib.getDev vllm-flash-attn-src}")
-    (lib.cmakeFeature "QUTLASS_SRC_DIR" "${lib.getDev qutlass}")
-    (lib.cmakeFeature "TORCH_CUDA_ARCH_LIST" gpuTargetString)
-    (lib.cmakeFeature "CUDA_TOOLKIT_ROOT_DIR" "${symlinkJoin {
-      name = "cuda-merged-${cudaPackages.cudaMajorMinorVersion}";
-      paths = builtins.concatMap getAllOutputs mergedCudaLibraries;
-    }}")
-    (lib.cmakeFeature "CAFFE2_USE_CUDNN" "ON")
-    (lib.cmakeFeature "CAFFE2_USE_CUFILE" "ON")
-    (lib.cmakeFeature "CUTLASS_ENABLE_CUBLAS" "ON")
-    (lib.cmakeFeature "ENABLE_NVFP4_SM100" "OFF")
-  ];
+  # cmakeFlags are passed via CMAKE_ARGS env var (v0.23 setup.py convention)
 
   env = {
     VLLM_TARGET_DEVICE = "cuda";
     CUDA_HOME = "${lib.getDev cudaPackages.cuda_nvcc}";
     TRITON_KERNELS_SRC_DIR = "${lib.getDev triton-kernels}/python/triton_kernels/triton_kernels";
-    VLLM_REQUIRE_RUST_FRONTEND = "0";
+    VLLM_REQUIRE_RUST_FRONTEND = "1";
+    # v0.23 reads CMAKE_ARGS env var and appends to cmake command
+    CMAKE_ARGS = toString [
+      "-DVLLM_CUTLASS_SRC_DIR=${lib.getDev cutlass}"
+      "-DFLASH_MLA_SRC_DIR=${lib.getDev flashmla}"
+      "-DQUTLASS_SRC_DIR=${lib.getDev qutlass}"
+      "-DDEEPGEMM_SRC_DIR=${lib.getDev deepgemm}"
+      "-DTORCH_CUDA_ARCH_LIST=${gpuTargetString}"
+      "-DCUDA_TOOLKIT_ROOT_DIR=${
+        symlinkJoin {
+          name = "cuda-merged-${cudaPackages.cudaMajorMinorVersion}";
+          paths = builtins.concatMap getAllOutputs mergedCudaLibraries;
+        }
+      }"
+      "-DCAFFE2_USE_CUDNN=ON"
+      "-DCAFFE2_USE_CUFILE=ON"
+      "-DCUTLASS_ENABLE_CUBLAS=ON"
+      "-DENABLE_NVFP4_SM100=OFF"
+    ];
   };
 
   preConfigure = ''
