@@ -2344,12 +2344,19 @@ with lib;
                   command = [ "magit-project-status" ];
                   config = ''
                     (setq magit-list-refs-sortby "-committerdate")
-                    (setq forge-add-pullreq-refspec 'ask)
                     (add-to-list 'git-commit-style-convention-checks
                     'overlong-summary-line)
                     (setq magit-display-buffer-function
                      #'magit-display-buffer-fullframe-status-v1)
                     (setq magit-bury-buffer-function #'magit-restore-window-configuration)
+                  '';
+                };
+
+                forge = {
+                  enable = true;
+                  after = [ "magit" ];
+                  config = ''
+                    (setq forge-add-pullreq-refspec 'ask)
                   '';
                 };
 
