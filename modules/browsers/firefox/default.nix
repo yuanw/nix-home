@@ -1,4 +1,6 @@
 # https://github.com/hlissner/dotfiles/blob/master/modules/desktop/browsers/firefox.nix
+# should try out this https://github.com/mlyxshi/flake/blob/main/config/firefox/policy.nix
+# https://github.com/mozilla/policy-templates
 {
   config,
   lib,
@@ -12,6 +14,10 @@ with lib;
 let
   cfg = config.modules.browsers.firefox;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
+  # HM creates the profiles.ini at the XDG path on Linux
+  # (~/.config/mozilla/firefox/profiles.ini) when xdg.enable = true.
+  # Keep this aligned so file paths (chrome, extensions, mergetools)
+  # point to the same directory.
   profilesPath =
     if isDarwin then "Library/Application Support/Firefox/Profiles" else ".config/mozilla/firefox";
 in
@@ -29,8 +35,23 @@ in
       settings = mkOption {
         type = types.attrs;
         default = { };
+        example = literalExpression ''
+          {
+            # Extension ID for Sidebery
+            "{3c078156-979c-498b-8990-85f7987dd929}" = {
+              "switch_to_panel_0" = { shortcut = "Ctrl+1"; };
+              "switch_to_panel_1" = { shortcut = "Ctrl+2"; };
+            };
+            # Extension ID for Dark Reader
+            "addon@darkreader.org" = {
+              "toggle" = { shortcut = "Alt+Shift+D"; };
+            };
+          }
+        '';
         description = ''
-          Extension keybindings: { extensionId.commands.commandName = { shortcut = "..."; } }
+          Extension keybindings in format: { extensionId.commands.commandName = { shortcut = "..."; } }
+          (merged into extension-settings.json as each command's precedenceList[].value).
+          Use `about:support` and click "Copy Raw Data to Clipboard" to find extension IDs.
         '';
       };
     };
@@ -38,21 +59,46 @@ in
 
   config = mkMerge [
     (mkIf (cfg.enable && cfg.keybindings.enable) {
+      # Sidebery defaults (same shape as upstream keymaps.nix):
+      # https://github.com/js0ny/nixcfgs/blob/cac17a65f58a2a90a9c0462579042bf79dfa8c46/home/programs/browsers/firefox/addons/sidebery/keymaps.nix
       modules.browsers.firefox.keybindings.settings = mkDefault {
         "{3c078156-979c-498b-8990-85f7987dd929}" = {
-          switch_to_panel_0.shortcut = "Ctrl+1";
-          switch_to_panel_1.shortcut = "Ctrl+2";
-          switch_to_panel_2.shortcut = "Ctrl+3";
-          switch_to_panel_3.shortcut = "Ctrl+4";
-          next_panel.shortcut = "";
-          prev_panel.shortcut = "";
-          switch_to_prev_tab.shortcut = "Alt+H";
-          switch_to_next_tab.shortcut = "Alt+L";
+          switch_to_panel_0 = {
+            shortcut = "Ctrl+1";
+          };
+          switch_to_panel_1 = {
+            shortcut = "Ctrl+2";
+          };
+          switch_to_panel_2 = {
+            shortcut = "Ctrl+3";
+          };
+          switch_to_panel_3 = {
+            shortcut = "Ctrl+4";
+          };
+          next_panel = {
+            shortcut = "";
+          };
+          prev_panel = {
+            shortcut = "";
+          };
+          switch_to_prev_tab = {
+            shortcut = "Alt+H";
+          };
+          switch_to_next_tab = {
+            shortcut = "Alt+L";
+          };
         };
+        # userchrome-toggle-extended: shortcuts as in ~/Library/Application Support/Firefox/Profiles/home/extension-settings.json (macOS).
         "userchrome-toggle-extended@n2ezr.ru" = {
-          "1".shortcut = "MacCtrl+Alt+H";
-          "2".shortcut = "MacCtrl+Alt+T";
-          "3".shortcut = "MacCtrl+Alt+N";
+          "1" = {
+            shortcut = "MacCtrl+Alt+H";
+          };
+          "2" = {
+            shortcut = "MacCtrl+Alt+T";
+          };
+          "3" = {
+            shortcut = "MacCtrl+Alt+N";
+          };
         };
       };
     })
