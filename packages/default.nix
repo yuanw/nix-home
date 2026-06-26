@@ -188,6 +188,8 @@ in
 
   librewolf-macos = prev.callPackage ./librewolf-macos { };
 
+  firefox-macos = prev.callPackage ./firefox-macos { };
+
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
 

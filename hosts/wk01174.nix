@@ -42,7 +42,6 @@
     betterdisplay
     ungoogled-chromium
     slack
-    firefox
   ];
   modules = {
     # common = {

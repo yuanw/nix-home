@@ -6,6 +6,7 @@
   fetchurl,
   undmg,
   policies ? { },
+  browser-cli-extension ? null,
 }:
 let
   srcs = lib.importJSON ./srcs.json;
@@ -28,8 +29,11 @@ stdenv.mkDerivation {
     cp -r LibreWolf.app "$out/Applications/"
 
     mkdir -p "$out/Applications/LibreWolf.app/Contents/Resources/distribution"
+    ${lib.optionalString (browser-cli-extension != null) ''
+      cp ${browser-cli-extension}/browser-cli-extension.xpi         "$out/Applications/LibreWolf.app/Contents/Resources/distribution/browser-cli-extension.xpi"
+    ''}
     echo '${
-      builtins.toJSON { inherit policies; }
+      builtins.toJSON { policies = policies; }
     }' > "$out/Applications/LibreWolf.app/Contents/Resources/distribution/policies.json"
 
     runHook postInstall

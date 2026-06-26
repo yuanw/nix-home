@@ -110,7 +110,7 @@ in
           browserCliFirefoxExtension = pkgs.callPackage ../../../packages/browser-cli-firefox-extension.nix {
             inherit (micsSkills) browser-cli-extension;
           };
-          browserCliPolicies = pkgs.callPackage ../../../packages/browser-cli-policies.nix {
+          browserCliPolicies = import ../../../packages/browser-cli-policies.nix {
             inherit (micsSkills) browser-cli-extension;
             installUrl = "file://${osConfig.my.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
           };
@@ -139,6 +139,15 @@ in
         in
         {
           # https://github.com/Enzime/dotfiles-nix/blob/db460106448ff3d0924dbb89f450b31d539b7e92/modules/firefox.nix#L39
+
+          home.activation.browserCliFirefoxExtension = lib.mkIf (osConfig.modules.pi.enable or false) (
+            hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
+              extDir="$HOME/${profilesPath}/home/extensions"
+              mkdir -p "$extDir"
+              ln -sfn ${browserCliFirefoxExtension}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/browser-cli-controller@thalheim.io.xpi \
+                "$extDir/browser-cli-controller@thalheim.io.xpi"
+            ''
+          );
           home.activation.setDefaultBrowser = lib.mkIf (cfg.enable && isDarwin) (
             hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
               if ! ${lib.getExe pkgs.defaultbrowser} firefox; then
@@ -224,7 +233,7 @@ in
                 "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
               };
             }
-            (lib.mkIf (osConfig.modules.pi.enable or false) {
+            (lib.mkIf (osConfig.modules.pi.enable or false && !isDarwin) {
               ExtensionSettings = browserCliPolicies.ExtensionSettings;
             })
           ];
