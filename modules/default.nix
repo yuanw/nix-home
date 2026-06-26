@@ -4,6 +4,7 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
+      ./browsers/default.nix
       ./browsers/chromium.nix
       ./browsers/browser-cli-darwin.nix
       ./browsers/firefox

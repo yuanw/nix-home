@@ -44,7 +44,6 @@ let
     acc: extId: acc // (buildKeybindings extId keybindingsCfg.settings.${extId})
   ) { } (lib.attrNames keybindingsCfg.settings);
 
-  browserName = if program == "firefox" then "firefox" else "librewolf";
   searchPolicies = import ../../packages/gecko-search-policies.nix;
 in
 {
@@ -71,14 +70,15 @@ in
             "$extDir/browser-cli-controller@thalheim.io.xpi"
         ''
       );
-  home.activation.setDefaultBrowser = lib.mkIf (isDarwin && program == "firefox") (
-    hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
-      if ! ${lib.getExe pkgs.defaultbrowser} ${browserName}; then
-
-        ${lib.getExe pkgs.defaultbrowser} ${browserName}
-      fi
-    ''
-  );
+  home.activation.setDefaultBrowser =
+    lib.mkIf (isDarwin && program == (osConfig.modules.browsers.defaultBrowser or "firefox"))
+      (
+        hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
+          if ! ${lib.getExe pkgs.defaultbrowser} ${osConfig.modules.browsers.defaultBrowser}; then
+            ${lib.getExe pkgs.defaultbrowser} ${osConfig.modules.browsers.defaultBrowser}
+          fi
+        ''
+      );
   home.file = {
     "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
   }

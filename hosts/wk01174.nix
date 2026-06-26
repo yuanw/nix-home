@@ -117,6 +117,7 @@
           pkgs.pi-extensions.pi-interactive-shell
         ];
     };
+    browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;
     };

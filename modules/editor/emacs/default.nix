@@ -14,6 +14,7 @@
 }:
 let
   cfg = config.modules.editors.emacs;
+  browserCfg = config.modules.browsers;
   # inherit (pkgs) fetchurl fetchgit fetchFromGitHub stdenv lib;
   aspell = (
     pkgs.aspellWithDicts (ds: [
@@ -1121,11 +1122,11 @@ with lib;
                   enable = isDarwin;
                   noRequire = true;
                   preface = ''
-                    (defun my-browse-url-firefox-new-tab (url &optional _new-window)
-                        "Open URL in a new Firefox tab."
-                        (call-process "/usr/bin/open" nil 0 nil "-a" "Firefox" url))
+                    (defun my-browse-url-default-browser (url &optional _new-window)
+                        "Open URL in ${browserCfg.darwinAppName}."
+                        (call-process "/usr/bin/open" nil 0 nil "-a" "${browserCfg.darwinOpenTarget}" url))
 
-                    (setq browse-url-browser-function #'my-browse-url-firefox-new-tab)
+                    (setq browse-url-browser-function #'my-browse-url-default-browser)
                     (defun my/darwin-open ()
                         (interactive)
                         (call-process "/usr/bin/open" nil nil nil

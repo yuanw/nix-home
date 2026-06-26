@@ -17,18 +17,13 @@ let
   emacsClient = "emacsclient -c -a 'emacs'";
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
-  brewInstalledFirefox = builtins.isNull config.modules.browsers.firefox.pkg;
-  firefoxCmd =
-    if brewInstalledFirefox then
-      "firefox"
-    else
-      " open -n -a ~/Applications/Home\\ Manager\\ Apps/Firefox.app";
+  defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
-    shift + ctrl + alt - f :${firefoxCmd}
+    shift + ctrl + alt - f :${defaultBrowserCmd}
     shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
