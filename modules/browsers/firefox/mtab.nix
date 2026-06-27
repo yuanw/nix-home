@@ -108,6 +108,14 @@
           iconType = "ri-mail-line";
           iconColor = "#ffffff";
           fill = "";
+        }       {
+          type = "bookmark";
+          name = "fastmail";
+          url = "https://app.fastmail.com/mail/Inbox/";
+          color = "#84cc16";
+          iconType = "ri-mail-line";
+          iconColor = "#ffffff";
+          fill = "";
         }
       ];
       defaultBlockyCols = 4;
