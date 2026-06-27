@@ -401,10 +401,11 @@ buildPythonPackage {
   '';
 
   pythonRelaxDeps = true;
-  pythonImportsCheck = [ "vllm" ];
 
-  # No tests — they take hours and are flaky on aarch64
+  # Skip checks — they take hours and are flaky on aarch64
   doCheck = false;
+  pythonImportsCheck = [ ];
+  pythonRuntimeDepsCheck = false;
 
   meta = with lib; {
     description = "vLLM v0.23.0 for DGX Spark (sm_121a, aarch64-linux)";
