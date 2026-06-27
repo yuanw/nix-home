@@ -202,5 +202,7 @@ _final: prev: {
   # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
   vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
     cudaPackages = prev.cudaPackages;
+    pkg_config = prev.pkg-config;
+    gnumake = prev.gnumake;
   };
 }

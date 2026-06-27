@@ -82,6 +82,10 @@
   cupy,
   flashinfer,
   nvidia-ml-py,
+  openssl,
+  perl,
+  pkg_config,
+  gnumake,
   cudaSupport ? torch.cudaSupport,
   cudaPackages ? { },
 }:
@@ -255,6 +259,9 @@ buildPythonPackage {
 
   nativeBuildInputs = [
     which
+    perl
+    pkg_config
+    gnumake
     rustPlatform.cargoSetupHook
     cargo
     rustc
@@ -276,14 +283,19 @@ buildPythonPackage {
     torch
   ];
 
-  buildInputs = optionals cudaSupport (
-    mergedCudaLibraries
-    ++ (with cudaPackages; [
-      nccl
-      cudnn
-      libcufile
-    ])
-  );
+  buildInputs =
+    optionals cudaSupport (
+      mergedCudaLibraries
+      ++ (with cudaPackages; [
+        nccl
+        cudnn
+        libcufile
+      ])
+    )
+    ++ [
+      openssl
+      openssl.dev
+    ];
 
   dependencies = [
     aioprometheus
@@ -360,6 +372,7 @@ buildPythonPackage {
     CUDA_HOME = "${lib.getDev cudaPackages.cuda_nvcc}";
     TRITON_KERNELS_SRC_DIR = "${lib.getDev triton-kernels}/python/triton_kernels/triton_kernels";
     VLLM_REQUIRE_RUST_FRONTEND = "1";
+    OPENSSL_NO_VENDOR = "1";
     # v0.23 reads CMAKE_ARGS env var and appends to cmake command
     CMAKE_ARGS = toString [
       "-DVLLM_CUTLASS_SRC_DIR=${lib.getDev cutlass}"
