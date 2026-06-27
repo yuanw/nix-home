@@ -10,7 +10,6 @@ let
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   commonPrompts = pkgs.callPackage ../common/prompts.nix { };
-  aiTools = pkgs.codingAgentsAiTools;
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -108,8 +107,7 @@ in
         (with claudePlugins; [
           humanizer
           emacs-skills
-        ])
-        ++ aiTools.piCodingAgent.skillPackages;
+        ]);
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
         name under <configDir>/skills/.

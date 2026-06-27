@@ -60,7 +60,7 @@ in
       firefox_path = "${browserPath}"
     '';
 
-    home.sessionVariables.BROWSER_CLI_FIREFOX_PATH = browserPath;
+    home.sessionVariables.BROWSER_CLI_FIREFOX_PATH = lib.mkDefault browserPath;
 
     home.file = {
       ".local/bin/browser-cli-server-wrapper" = {
