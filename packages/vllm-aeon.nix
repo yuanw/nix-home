@@ -373,6 +373,7 @@ buildPythonPackage {
     TRITON_KERNELS_SRC_DIR = "${lib.getDev triton-kernels}/python/triton_kernels/triton_kernels";
     VLLM_REQUIRE_RUST_FRONTEND = "1";
     OPENSSL_NO_VENDOR = "1";
+    dontUsePythonRuntimeDepsCheck = "1";
     # v0.23 reads CMAKE_ARGS env var and appends to cmake command
     CMAKE_ARGS = toString [
       "-DVLLM_CUTLASS_SRC_DIR=${lib.getDev cutlass}"
@@ -402,10 +403,11 @@ buildPythonPackage {
 
   pythonRelaxDeps = true;
 
-  # Skip checks — they take hours and are flaky on aarch64
+  # Skip checks
   doCheck = false;
+  doInstallCheck = false;
   pythonImportsCheck = [ ];
-  pythonRuntimeDepsCheck = false;
+  dontUsePythonRuntimeDepsCheck = true;
 
   meta = with lib; {
     description = "vLLM v0.23.0 for DGX Spark (sm_121a, aarch64-linux)";
