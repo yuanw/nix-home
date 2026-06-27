@@ -23,6 +23,10 @@ in
   environment.casks = with inputs'.nix-casks.packages; [
     mouseless_preview
     betterdisplay
+    1password
+    godot
+    racket
+    vlc
   ];
   # determinate system
   nix.enable = false;
@@ -69,13 +73,6 @@ in
     };
     brew = {
       enable = true;
-      casks = [
-        "1password"
-        "godot"
-        "firefox"
-        "racket"
-        "vlc"
-      ];
       masApps = {
         "Fresh Eyes" = 6480411697;
         "Keystroke Pro" = 1572206224;
@@ -83,7 +80,7 @@ in
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     mouseless.enable = true;
-    browsers.firefox = {
+    browsers.librewolf = {
       enable = true;
       pkg = null;
     };
