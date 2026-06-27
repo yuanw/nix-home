@@ -396,6 +396,8 @@ buildPythonPackage {
 
   preConfigure = ''
     export MAX_JOBS=''${MAX_JOBS:-8}
+    export CARGO_HOME="$(mktemp -d)"
+    export HF_HOME="$(mktemp -d)"
   '';
 
   pythonRelaxDeps = true;
