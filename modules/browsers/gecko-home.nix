@@ -74,8 +74,12 @@ in
     lib.mkIf (isDarwin && program == (osConfig.modules.browsers.defaultBrowser or "firefox"))
       (
         hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
-          if ! ${lib.getExe pkgs.defaultbrowser} ${osConfig.modules.browsers.defaultBrowser}; then
-            ${lib.getExe pkgs.defaultbrowser} ${osConfig.modules.browsers.defaultBrowser}
+          # Best-effort: the browser must already be registered with macOS
+          # LaunchServices as an HTTP handler, which only happens once its
+          # .app has been launched (or registered via lsregister). Don't fail
+          # the whole activation/switch if it isn't available yet.
+          if ! ${lib.getExe pkgs.defaultbrowser} ${osConfig.modules.browsers.defaultBrowser} 2>/dev/null; then
+            echo "warning: ${osConfig.modules.browsers.defaultBrowser} is not registered as an HTTP handler; launch it once and re-run switch." >&2
           fi
         ''
       );
