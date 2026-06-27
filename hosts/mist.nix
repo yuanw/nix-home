@@ -23,7 +23,7 @@ in
   environment.casks = with inputs'.nix-casks.packages; [
     mouseless_preview
     betterdisplay
-    1password
+    inputs'.nix-casks.packages."1password"
     godot
     racket
     vlc
@@ -80,9 +80,12 @@ in
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     mouseless.enable = true;
-    browsers.librewolf = {
-      enable = true;
-      pkg = null;
+    browsers = {
+      librewolf = {
+        enable = true;
+        pkg = null;
+      };
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;
