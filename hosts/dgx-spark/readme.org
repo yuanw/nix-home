@@ -208,3 +208,5 @@ scratch (disko + nixos-anywhere). There is no tmpfs persistence layer to wipe.
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] — hardware module and playbooks
 - [[https://github.com/nix-community/disko][disko]] — declarative disk partitioning
 - [[https://github.com/yuanw/ds4][ds4]] — DS4 inference server module
+http://dgx-spark.local:9090/metrics
+http://dgx-spark.local:11000/
