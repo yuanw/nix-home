@@ -1,0 +1,384 @@
+#+TITLE: Ornith-1.0-35B AEON Ultimate Uncensored — Container (AEON Image) Plan for DGX Spark
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-06-28
+#+LINK: https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored
+#+LINK: https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md
+
+* Summary
+  Serve [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored][Ornith-1.0-35B AEON Ultimate Uncensored]] on the DGX Spark
+  (GB10 / sm_121a, aarch64-linux) using the official AEON vLLM container
+  =ghcr.io/aeon-7/aeon-vllm-ultimate:latest= — the exact image the
+  [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md][QUICKSTART_DGX_SPARK.md]] benchmarks against (NVFP4 + DFlash n=6 →
+  ~93 tok/s avg decode, 3.05× vs BF16) — but driven *declaratively by
+  NixOS* via systemd rather than ad-hoc =docker run=.
+
+  This is the companion to the native (containerless) plan in
+  [[file:ornith-dgx-spark-native.org][ornith-dgx-spark-native.org]]. The trade-off is the inverse of the native
+  plan: **no multi-hour vLLM-from-source build and no AEON patches to
+  maintain** (the container ships =qwen3_5_moe= + DFlash + sm_121a kernels
+  pre-compiled — Gap A of the native plan *vanishes*), at the cost of
+  introducing an OCI runtime + NVIDIA container toolkit / CDI on the
+  Spark and accepting a non-reproducible third-party image as a runtime
+  dependency.
+
+  *Runtime choice — Podman + CDI, not Docker.* Although the AEON
+  QuickStart and =serve_ornith.sh= write =docker run --gpus all=, the
+  *validated GB10 NixOS path upstream* ([[https://github.com/graham33/nixos-dgx-spark/blob/main/modules/dgx-spark.nix][graham33/nixos-dgx-spark]]) uses
+  **Podman with CDI** (=podman run --device nvidia.com/gpu=all=):
+  =hardware.nvidia-container-toolkit.enable = true= alongside
+  =virtualisation.podman.{enable,dockerCompat,dockerSocket}=. Our repo
+  already leans Podman for dev ([[file:../modules/dev/podman.nix][modules/dev/podman.nix]]). We therefore
+  translate the AEON recipe's =docker run --gpus all= to
+  =podman run --device nvidia.com/gpu=all=. This keeps one runtime on the
+  host, matches the proven GB10 CDI wiring, and lets the existing dev
+  Podman module coexist. Docker remains an opt-out fallback only if an
+  AEON-image quirk blocks Podman.
+
+* Reuse assessment (from existing in-tree artifacts + the native plan)
+  The container path reuses the *management* machinery built for the
+  native plan and skips the *build* entirely. Nix lays down the systemd
+  service and the model on disk; the container is just the executor.
+
+  | Existing artifact | Reuse for the container path |
+  |-------------------+------------------------------|
+  | [[file:../packages/vllm-aeon.nix][packages/vllm-aeon.nix]] (vLLM v0.23.0 from source, sm_121a, multi-hour build) | **Not used** — the AEON container replaces it. Keep the package for the native path / fallback; container instances don't depend on it. |
+  | [[file:../modules/vllm.nix][modules/vllm.nix]] (instance systemd service calling the native =vllm= binary, conflicts, drop-caches, speculative/post-process/extraEnv) | **Reuse the design**, add a =backend= switch (see [[Gap B — container service module][Gap B]]) that calls =podman run … --entrypoint vllm= instead of =${pkgs.vllm-aeon}/bin/vllm=. |
+  | [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] (HF download oneshots, runs before vllm-* units) | **Direct reuse** — container path needs the same NVFP4 model + AEON DFlash drafter on disk, bind-mounted =/var/lib/vllm/models/...= into the container. |
+  | [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] =qwen35b= instance block | **Copy → rename to =ornith=**, swap to container backend, same flags (see [[Phase 3][Phase 3]]). |
+  | GB10 build env in =vllm-aeon.nix= (=ENABLE_NVFP4_SM100=0=, =TORCH_CUDA_ARCH_LIST=12.1a=) | Becomes **runtime env** passed to the container via =-e=. |
+  | [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] (existing Podman dev env, =dockerCompat=) | **Aligned** — the inference runtime uses the same Podman daemon/CDI; this module already wires =dockerCompat=. |
+  | dgx-spark CUDA 13.2 / aarch64 fixes overlay ([[file:../hosts/dgx-spark/cuda-fixes.nix][cuda-fixes.nix]]) | Unchanged; needed for the NVIDIA driver/runtime the container talks to. |
+  | *ref:* [[https://github.com/graham33/nixos-dgx-spark/blob/main/playbooks/speculative-decoding/shell.nix][graham33 playbooks/speculative-decoding/shell.nix]] | **Wiring reference only.** It is a *TRT-LLM* (EAGLE-3 / Draft-Target) devShell, not vLLM DFlash — borrow the =--device nvidia.com/gpu=all --ipc host --network host= + HF-cache bind pattern and the CDI/policy.json/registries.conf guards, *not* the serve command. |
+  | *ref:* [[https://github.com/graham33/nixos-dgx-spark/blob/main/playbooks/vllm-container/shell.nix][graham33 playbooks/vllm-container/shell.nix]] | Closer match — a *vLLM*-in-Podman devShell (=nvcr.io/nvidia/vllm:25.09-py3=, =--device nvidia.com/gpu=all --network host=). Confirms Podman+CDI is the working vLLM-on-GB10 pattern. |
+  | *ref:* [[https://github.com/graham33/nixos-dgx-spark/blob/main/modules/dgx-spark.nix][graham33 modules/dgx-spark.nix]] (lines 138-174) | **The exact enablement block to port** (see [[Gap A][Gap A]]). |
+
+  *Verdict:* ~70% reuse on the management/wiring, ~30% new (Podman + NVIDIA
+  CDI enablement + the thin container service module). The big win:
+  **the vLLM build and AEON-patch maintenance work disappears entirely** —
+  the single largest, longest-tail risk in the native plan (Gap A) is
+  gone. The largest risk *here* is GB10 GPU passthrough into a container
+  (Gap A), but graham33's block substantially de-risks it.
+
+* Gaps to close (the only real work)
+
+** Gap A — Podman + NVIDIA CDI on GB10 (port graham33's block)
+   :PROPERTIES:
+   :CUSTOM_ID: Gap A
+   :END:
+   The Spark currently is *not* an OCI-runtime host for inference:
+   =virtualisation.docker.enable= is off (default in [[file:../modules/nixos_system.nix][modules/nixos_system.nix]] line 107),
+   the [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] module is a *dev* shell aid (not enabled
+   system-wide on =dgx-spark=), and no NVIDIA container toolkit / CDI is
+   wired despite the =docker= group being present on =yuanw=
+   ([[file:../hosts/dgx-spark/configuration.nix][configuration.nix]] line 31). graham33's upstream =modules/dgx-spark.nix=
+   (lines 164-174) is the *validated GB10 enablement* — port it almost
+   verbatim:
+
+   #+BEGIN_SRC nix :tangle no
+   # Port of graham33/nixos-dgx-spark modules/dgx-spark.nix:164-174
+   virtualisation.podman = {
+     enable = true;
+     dockerCompat = true;        # `docker` CLI alias → podman
+     dockerSocket.enable = true; # docker-API socket for tools expecting dockerd
+     defaultNetwork.settings.dns_enabled = true;
+   };
+   networking.firewall.trustedInterfaces = [ "podman+" ]; # reach host services
+   hardware.nvidia-container-toolkit.enable = true;        # generates CDI spec
+   #+END_SRC
+
+   graham33 pairs this (same module, lines 138-153) with
+   =hardware.nvidia = { modesetting.enable=true; open=true;
+   nvidiaPersistenced=true; package = <production, scrubbed> }= — confirm
+   our =dgx-spark= host already has the equivalent NVIDIA driver config
+   (it must, since the native vLLM build already uses CUDA); if not, lift
+   that block too.
+
+   *CDI vs =--gpus all=:* with =hardware.nvidia-container-toolkit.enable=,
+   NixOS generates =/etc/cdi/nvidia.yaml= (or the runtime variant). Use
+   **=--device nvidia.com/gpu=all=** (the CDI form graham33's playbooks
+   all use), *not* =--gpus all=. graham33's playbook shell hooks assert
+   the CDI spec exists and print a fix hint
+   (=sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml=) when
+   missing — mirror those guards in the service =ExecStartPre=.
+
+   *HF cache + image:* bind-mount =/var/lib/vllm/huggingface= (the module
+   already creates it) as the container's HF home so any on-demand pulls
+   inside the container share the host cache. Image pull can be an
+   =ExecStartPre= =podman pull= (idempotent) or a separate oneshot; for
+   reproducibility pin by digest
+   =ghcr.io/aeon-7/aeon-vllm-ultimate@sha256:...=. The image is
+   aarch64-targeted (matches GB10).
+
+   *Forward-compat:* =serve_ornith.sh= already carries
+   =NVIDIA_FORWARD_COMPAT=1= and =NVIDIA_DRIVER_CAPABILITIES=all= — keep
+   both as =-e= env (see Gap B / Phase 3).
+
+** Gap B — container service module
+   :PROPERTIES:
+   :CUSTOM_ID: Gap B
+   :END:
+   The existing [[file:../modules/vllm.nix][modules/vllm.nix]] hardcodes
+   =ExecStart = "${pkgs.vllm-aeon or pkgs.vllm}/bin/vllm ...=.
+   Two clean options:
+
+   - *Option 1 (preferred, less churn):* add a =backend= option to the
+     existing instance submodule (=native= | =podman=), and branch the
+     =ExecStart= to either the binary or a =podman run= invocation. All
+     the other options (=gpuMemoryUtilization=, =speculative=,
+     =reasoningParser=, =extraEnv=, conflicts, drop-caches) carry over
+     unchanged — DFlash, NVFP4, parsers, and env are identical between
+     native and container. Only the entrypoint command differs.
+   - *Option 2:* a sibling =modules/vllm-container.nix= mirroring the
+     option set. More duplication; only justified if the two backends
+     diverge more than expected.
+
+   The =podman run= =ExecStart= shape (AEON QuickStart translated to CDI):
+
+   #+BEGIN_SRC bash :tangle no
+   podman run --rm --name vllm-ornith \
+     --device nvidia.com/gpu=all --ipc host --net host \
+     -e TORCH_CUDA_ARCH_LIST=12.1a \
+     -e ENABLE_NVFP4_SM100=0 \
+     -e VLLM_USE_FLASHINFER_SAMPLER=1 \
+     -e NVIDIA_FORWARD_COMPAT=1 \
+     -e NVIDIA_DRIVER_CAPABILITIES=all \
+     -v /var/lib/vllm/models/Ornith-1.0-35B-NVFP4:/model:ro \
+     -v /var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B:/drafter:ro \
+     --entrypoint vllm \
+     ghcr.io/aeon-7/aeon-vllm-ultimate:latest \
+     serve /model --served-model-name ornith \
+       --quantization compressed-tensors \
+       --speculative-config '{"method":"dflash","model":"/drafter","num_speculative_tokens":6}' \
+       --gpu-memory-utilization 0.6 --max-model-len 262144 \
+       --max-num-seqs 16 --max-num-batched-tokens 16384 \
+       --mamba-cache-dtype float32 --reasoning-parser qwen3 \
+       --enable-auto-tool-choice --tool-call-parser qwen3_coder \
+       --enable-prefix-caching --trust-remote-code \
+       --host 0.0.0.0 --port 8003
+   #+END_SRC
+
+   Container-module specifics vs the native branch:
+   - =podman run= (not =docker run=); =--device nvidia.com/gpu=all= (CDI,
+     not =--gpus all=), =--ipc host --net host= — copied verbatim from
+     graham33's validated GB10 playbooks.
+   - Bind-mount model dirs rather than referencing host paths in args.
+   - Pass GB10 env via =-e= (the native branch sets process =Environment=).
+   - =--network host= means =--port= inside the container binds the host
+     port directly — no =-p= mapping needed (matches the QUICKSTART).
+   - Use =--rm= with the systemd unit owning lifecycle (=Restart=on-failure=);
+     do *not* =-d= (systemd is the foreground supervisor).
+   - =ExecStartPre=: guard that the CDI spec exists (mirror graham33's
+     shellHook check) and =podman pull ${image}= (idempotent, cheap when
+     cached).
+   - Reuse the existing model oneshot instances; the vLLM unit =requires=
+     =vllm-model-Ornith-1.0-35B-NVFP4.service= etc. so files exist before
+     =podman run=.
+
+** Gap C — KV cache + Drafter choice (same as native, restated)
+   - **BF16 KV** (vision tower forces non-causal attn). Do NOT pass
+     =--kv-cache-dtype fp8=. Either omit it or pass =--kv-cache-dtype= off.
+   - **AEON all-full-attention drafter** =AEON-7/AEON-DFlash-Qwen3.6-35B-A3B=
+     so the SWA KV-page assert (issue #1) never fires and the
+     =hotfixes/ornith_dflash_kvfix/= patch is *not needed*. Higher
+     acceptance than the z-lab drafter (3.71 vs 3.35 tok/step).
+
+* Phase 1 — Stand up Podman + NVIDIA CDI on the Spark
+  1. Add the enablement block (ported from graham33 =modules/dgx-spark.nix=
+     lines 164-174) to a new [[file:../modules/dgx-inference-container.nix][modules/dgx-inference-container.nix]]
+     (or inline in [[file:../hosts/dgx-spark/configuration.nix][configuration.nix]]):
+
+     #+BEGIN_SRC nix :tangle no
+     virtualisation.podman = {
+       enable = true;
+       dockerCompat = true;
+       dockerSocket.enable = true;
+       defaultNetwork.settings.dns_enabled = true;
+     };
+     networking.firewall.trustedInterfaces = [ "podman+" ];
+     hardware.nvidia-container-toolkit.enable = true;
+     #+END_SRC
+
+     This supersedes the dev-only [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] for the
+     dgx-spark host (or just enables its prerequisite system-side). Verify
+     the host already sets =hardware.nvidia.*= (driver) — graham33's block
+     does; our dgx-spark must too since the native vLLM CUDA build works.
+
+  2. =nixos-rebuild switch --flake .#dgx-spark=; verify (mirroring
+     graham33's playbook guards):
+     - =systemctl is-active podman= (and the docker-compat socket)
+     - CDI spec present: =test -f /etc/cdi/nvidia.yaml || test -f
+       /var/run/cdi/nvidia-container-toolkit.json= (else
+       =sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml=)
+     - =podman run --rm --device nvidia.com/gpu=all ubuntu nvidia-smi=
+       shows GB10 sm_121a
+     - =podman pull ghcr.io/aeon-7/aeon-vllm-ultimate:latest= and
+       =podman run --rm --device nvidia.com/gpu=all --entrypoint python
+       ghcr.io/aeon-7/aeon-vllm-ultimate:latest -c "import torch;
+       print(torch.cuda.get_device_capability())"= → =(12, 1)=
+     - =podman image inspect ghcr.io/aeon-7/aeon-vllm-ultimate:latest
+       --format '{{.Architecture}}' = =arm64= (matches GB10)
+  3. (Fallback only) if the AEON image misbehaves under Podman, enable
+     =virtualisation.docker.enable=true= and use =docker run --gpus all=
+     per the literal QuickStart. Podman+CDI is the default aim.
+
+* Phase 2 — Thin container backend in the instance module
+  1. Add =backend= option to [[file:../modules/vllm.nix][modules/vllm.nix]] instance submodule (default =native=):
+     #+BEGIN_SRC nix :tangle no
+     backend = mkOption {
+       type = types.enum [ "native" "podman" ];
+       default = "native";
+       description = "Run the native vllm-aeon binary or the AEON OCI image via podman.";
+     };
+     containerImage = mkOption {
+       type = types.nullOr types.str;
+       default = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+       description = "Image used when backend=podman.";
+     };
+     #+END_SRC
+  2. In =mkService=, branch =ExecStart=:
+     - =native= → unchanged (=${pkgs.vllm-aeon or pkgs.vllm}/bin/vllm ${args}=).
+     - =podman= → =${pkgs.podman}/bin/podman run --rm --name vllm-${name}
+       --device nvidia.com/gpu=all --ipc host --net host= + =-e= for each
+       =extraEnv= entry + =-v ${inst.model}:/model:ro= (and =/drafter= for
+       the speculative model) + =--entrypoint vllm ${inst.containerImage}
+       serve /model ...=, with the host model path stripped from args
+       (replaced by =/model=).
+  3. Reuse everything else verbatim: =conflicts= (single GPU), =drop_caches=
+     =ExecStartPre=, =Restart=on-failure=, =requires= model-oneshot units.
+  4. Container =ExecStartPre=: =podman pull ${inst.containerImage}= (idempotent,
+     cheap when cached) and a CDI-spec existence guard (mirror graham33).
+  5. Keep the =mambaCacheDtype= / GB10-env-default additions from the
+     native plan's Gap B — they apply to both backends (the container
+     ignores host env when =-e= is supplied, so set them via =-e=).
+
+* Phase 3 — Wire the =ornith= instance + downloads
+  In [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]]:
+
+  #+BEGIN_SRC nix :tangle no
+  services.vllm.instances = {
+    ornith = {
+      enable = false;            # flip after Phase 1 + downloads succeed
+      autoStart = false;
+      backend = "podman";        # ← container path
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
+      servedModelName = "ornith";
+      port = 8003;               # host port = container port (net=host)
+      # Validated DGX Spark envelope (QUICKSTART §3/§4):
+      gpuMemoryUtilization = 0.6;
+      maxModelLen = 262144;
+      maxNumSeqs = 16;           # HARD CAP w/ DFlash on Spark
+      maxNumBatchedTokens = 16384;
+      quantization = "compressed-tensors";   # NVFP4
+      kvCacheDtype = null;        # BF16 KV (vision tower) — do NOT pass fp8
+      mambaCacheDtype = "float32";
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_coder";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
+        numSpeculativeTokens = 6;
+      };
+      extraEnv = {
+        TORCH_CUDA_ARCH_LIST = "12.1a";
+        ENABLE_NVFP4_SM100 = "0";
+        VLLM_USE_FLASHINFER_SAMPLER = "1";
+        NVIDIA_FORWARD_COMPAT = "1";
+        NVIDIA_DRIVER_CAPABILITIES = "all";
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+  };
+
+  services.vllm-models.models = {
+    "Ornith-1.0-35B-NVFP4"        = { repo = "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4"; };
+    "AEON-DFlash-Qwen3.6-35B-A3B" = { repo = "AEON-7/AEON-DFlash-Qwen3.6-35B-A3B"; };
+  };
+
+  networking.firewall.allowedTCPPorts = [ 8003 # vLLM ornith
+    ... ];
+  #+END_SRC
+
+* Phase 4 — Deploy + smoke test (identical to the native plan's Phase 3)
+  1. ~nixos-rebuild switch --flake .#dgx-spark~ (Phase 1 enablement).
+  2. Pull the image: ~podman pull ghcr.io/aeon-7/aeon-vllm-ultimate:latest~.
+  3. Trigger downloads: ~systemctl start vllm-model-Ornith-1.0-35B-NVFP4~
+     and ~...AEON-DFlash-Qwen3.6-35B-A3B~.
+  4. ~systemctl start vllm-ornith~ (other instances =conflicts= off).
+     Tail with ~journalctl -u vllm-ornith -f~ — you should see vLLM v0.23
+     boot, DFlash drafter load, NVFP4 weights, then "Application startup complete".
+  5. Smoke test (QUICKSTART §5); reasoning model opens = STDMETHODCALLTYPE=:
+     #+BEGIN_SRC bash :tangle no
+     curl -s http://dgx-spark.local:8003/v1/chat/completions \
+       -H 'content-type: application/json' \
+       -d '{"model":"ornith","messages":[{"role":"user","content":"Write a Rust function returning the median of a slice."}],"max_tokens":400,"temperature":0.6,"top_p":0.95,"top_k":20}' \
+       | python3 -m json.tool
+     #+END_SRC
+     Expect ~70 tok/s single-stream (QUICKSTART c=1 figure).
+  6. Concurrency sanity c=16 aggregate ≈ 456 tok/s, no =NVRM
+     NV_ERR_NO_MEMORY=. Don't exceed =--max-num-seqs 16= w/ DFlash.
+
+* Operating notes (from QUICKSTART + container specifics)
+  - DFlash acceptance decays over many hours; =systemctl restart
+    vllm-ornith= periodically (or a timer) restores it.
+  - For higher batch throughput: run **plain NVFP4, DFlash off** and
+    raise =max-num-seqs= — never raise it above ~16 with DFlash on.
+  - Image drift: =latest= is convenient but non-reproducible. Pin by
+    digest (=ghcr.io/aeon-7/aeon-vllm-ultimate@sha256:...=) once a known-
+    good build is validated; bump deliberately.
+  - Disk: keep ~30 GB free for the image + Drafter; the NVFP4 model lives
+    under =/var/lib/vllm/models= (bind-mounted, not copied into the
+    container layer) so it is shared with the native path.
+  - Podman vs Docker: stay on Podman+CDI to match graham33's validated GB10
+    wiring and the existing [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] lean. Only flip to
+    Docker if an AEON-image quirk blocks Podman (note it in R1).
+  - Uncensored model (0/80 refusals): keep port 8003 off public ingress;
+    use existing wireguard/age-secret-managed HF token for downloads.
+
+* Native vs Container — quick decision matrix
+  | Aspect | Native ([[file:ornith-dgx-spark-native.org][native plan]]) | Container (this plan) |
+  |---------------------------------------+-----------------------------+------------------------------------|
+  | Largest risk / work | vLLM-from-source build + AEON patch maintenance (Gap A) | GB10 GPU passthrough / CDI (Gap A) — largely de-risked by graham33's block |
+  | Reproducibility | High (pinned nixpkgs + patches) | Medium (image =latest= by tag; pin digest to fix) |
+  | First-time time-to-serve | Multi-hour vLLM build | ~image pull time (~minutes once Podman + CDI work) |
+  | Patch upkeep | Rebase AEON patches on each vLLM bump | Pull new AEON image; zero local patch work |
+  | Binary-cache dependency | Cachix (graham33 / own) | ghcr.io (AEON) |
+  | OCI runtime | none | Podman + CDI (graham33-validated); Docker as fallback |
+  | Service shape | systemd → native binary | systemd → =podman run= |
+  | Model on disk (=vllm-models= module) | Reused | Reused (bind-mounted) |
+  | Validated perf envelope (NVFP4 + DFlash n=6, 0.6, seqs≤16) | Identical | Identical (same flags, same image QuickStart used) |
+
+* Risks / open questions
+  | # | Question | Mitigation |
+  |---+----------+------------|
+  | R1 | =podman --device nvidia.com/gpu=all= seeing GB10 on aarch64 NixOS | De-risked: graham33 ships the exact enablement (Phase 1) and uses it across all playbooks; fallback to Docker =--gpus all= if an AEON-image quirk blocks Podman |
+  | R2 | reproducibility of =latest= tag | Pin image by SHA256 digest after first known-good validation |
+  | R3 | Podman dev module vs inference runtime double-enable | Inference enables Podman system-wide on dgx-spark; the dev module becomes redundant on that host (disable it for dgx-spark, keep for others) |
+  | R4 | =max-num-seqs > 16= + DFlash hard-crashes the box | Module assertion (native plan's Gap B.3, shared); instance pins 16 |
+  | R5 | Tool-call parser =qwen3_coder= (QUICKSTART) vs =qwen3_xml= (=serve_ornith.sh=) | Start =qwen3_coder=; flip if tool calls malformed |
+  | R6 | Image is aarch64-targeted — confirm platform on pull | =podman image inspect … --format '{{.Architecture}}' = should be =arm64=; matches GB10 |
+
+* Timeline
+  | Task | Estimate | Depends on |
+  |--------------------------------------------------+----------+----------------|
+  | Gap A: Podman + NVIDIA CDI enablement (port graham33) + verify | 0.25-0.5 d | — (block is known-good) |
+  | Gap B: container =backend= branch in [[file:../modules/vllm.nix][modules/vllm.nix]] | 0.5 d | — |
+  | Phase 3: instance + downloads wiring | 0.5 d | Gap B |
+  | Deploy + smoke test + concurrency sanity | 0.5 d | all above |
+  |--------------------------------------------------+----------+----------------|
+  | TOTAL | ~1.5-2 d | (no vLLM build; fastest path) |
+
+* References
+  - [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored][Ornith repo]] · [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md][DGX Spark QuickStart]] · [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/issues/1][issue #1 (kvfix)]]
+  - Container image: =ghcr.io/aeon-7/aeon-vllm-ultimate:latest= (vLLM 0.23.0, GB10 / sm_121a build, =qwen3_5_moe= + DFlash compiled in)
+  - Models: [[https://huggingface.co/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4][NVFP4]] (~23.7 GB) · [[https://huggingface.co/AEON-7/AEON-DFlash-Qwen3.6-35B-A3B][AEON DFlash drafter]]
+  - [[file:ornith-dgx-spark-native.org][ornith-dgx-spark-native.org]] — native (containerless) companion plan
+  - graham33 references (proven GB10 NixOS wiring, ported into this plan):
+    - [[https://github.com/graham33/nixos-dgx-spark/blob/main/modules/dgx-spark.nix][modules/dgx-spark.nix]] (lines 138-174: NVIDIA driver + Podman + CDI enablement — *the* source for Gap A)
+    - [[https://github.com/graham33/nixos-dgx-spark/blob/main/playbooks/speculative-decoding/shell.nix][playbooks/speculative-decoding/shell.nix]] (TRT-LLM EAGLE-3/Draft-Target; *wiring* ref: =--device nvidia.com/gpu=all --ipc host --network host=, CDI guards)
+    - [[https://github.com/graham33/nixos-dgx-spark/blob/main/playbooks/vllm-container/shell.nix][playbooks/vllm-container/shell.nix]] (vLLM-in-Podman on GB10; closest analogue to this plan)
+    - [[https://github.com/graham33/nixos-dgx-spark/blob/main/playbooks/nvfp4/shell.nix][playbooks/nvfp4/shell.nix]] (NVFP4 quantization/serve via Podman+CDI)
+  - In-tree: [[file:../modules/vllm.nix][modules/vllm.nix]] · [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] · [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] (existing Podman dev env) · [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]]
