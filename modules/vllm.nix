@@ -301,8 +301,6 @@ let
         "host"
         "--network"
         "host"
-        "--shm-size"
-        "16g"
       ]
       ++ concatLists (
         mapAttrsToList (k: v: [
