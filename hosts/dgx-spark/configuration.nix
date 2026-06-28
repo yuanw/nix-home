@@ -136,7 +136,7 @@
       enable = true;
       autoStart = false; # Start manually after model downloads complete
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
       servedModelName = "aeon";
       port = 8000;
@@ -162,7 +162,7 @@
     gemma = {
       enable = false;
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Gemma-4-26B-A4B-NVFP4";
       servedModelName = "gemma";
       port = 8001;
@@ -185,7 +185,7 @@
     qwen35b = {
       enable = false;
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
@@ -214,7 +214,7 @@
       enable = true; # Phase 1 verified 2026-06-28 (CDI + AEON image OK)
       autoStart = false; # one-shot start after model downloads complete
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
       servedModelName = "ornith";
       port = 8003; # host port == container port (podman --network host)
