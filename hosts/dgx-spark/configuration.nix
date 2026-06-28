@@ -132,7 +132,7 @@
     # Primary: Qwen3.6-27B NVFP4 + DFlash speculative decoding
     # Best single-stream throughput on DGX Spark (38-56 tok/s by category)
     aeon = {
-      enable = true;
+      enable = false;
       autoStart = false; # Start manually after model downloads complete
       model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
       servedModelName = "aeon";
