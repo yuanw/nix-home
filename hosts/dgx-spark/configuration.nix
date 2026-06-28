@@ -90,7 +90,7 @@
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
-  services.cockpit-local.enableGpu = true; # GPU panel via nvidia-smi on DGX Spark
+  services.cockpit-local.enableGpu = false; # GPU panel via nvidia-smi on DGX Spark
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {

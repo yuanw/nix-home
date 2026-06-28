@@ -33,7 +33,7 @@ in
 
     enableGpu = mkOption {
       type = types.bool;
-      default = config.hardware.nvidia.enable or false;
+      default = false;
       description = ''
         Enable the cockpit-gpu NVIDIA monitoring plugin.
         Requires nvidia-smi on the host (e.g. hardware.nvidia.enable
