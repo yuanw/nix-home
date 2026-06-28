@@ -39,6 +39,9 @@ _final: prev: {
       peft = python-prev.peft.overridePythonAttrs { doCheck = false; };
       compressed-tensors = python-prev.compressed-tensors.overridePythonAttrs { doCheck = false; };
       torchaudio = python-prev.torchaudio.overridePythonAttrs { doCheck = false; };
+      # bitsandbytes CUDA compilation fails on aarch64 (missing crt/host_config.h).
+      # Not needed for NVFP4 inference — disable CUDA backend.
+      bitsandbytes = python-prev.bitsandbytes.override { cudaSupport = false; };
     })
   ];
 }

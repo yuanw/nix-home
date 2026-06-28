@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 
 {
   imports = [
@@ -12,6 +12,14 @@
   boot.loader.systemd-boot.configurationLimit = 10;
 
   # ─── DGX Spark hardware ─────────────────────────────────────────────
+  # Enabling this upstream module (inputs.dgx-spark.nixosModules.dgx-[
+  # spark) ALSO turns on the OCI inference runtime this host uses for the
+  # AEON vLLM container (services.vllm.instances.* with backend = "podman"):
+  # virtualisation.podman.{enable,dockerCompat,dockerSocket} +
+  # networking.firewall.trustedInterfaces = [ "podman+" ] and
+  # hardware.nvidia-container-toolkit.enable (which generates the CDI spec
+  # consumed by `podman run --device nvidia.com/gpu=all`). See graham33
+  # modules/dgx-spark.nix:164-174 and plans/ornith-dgx-spark-docker.org.
   hardware.dgx-spark.enable = true;
 
   # ─── Networking ─────────────────────────────────────────────────────
@@ -72,9 +80,13 @@
   };
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
+  # vLLM 0.16 has known CVEs (fixed in 0.23). Permit until vllm-aeon builds.
+  nixpkgs.config.permittedInsecurePackages = [
+    "python3.13-vllm-0.16.0"
+  ];
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = true;
+  services.ds4.enable = false;
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
@@ -100,16 +112,163 @@
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   networking.firewall.allowedTCPPorts = [
+    8000 # vLLM aeon (Qwen3.6-27B)
+    8001 # vLLM gemma
+    8002 # vLLM qwen35b
+    8003 # vLLM ornith (AEON container, NVFP4 + DFlash)
     11000
     8188
   ];
 
   services.comfyui = {
-    enable = true;
+    enable = false;
     host = "0.0.0.0";
     port = 8188;
     openFirewall = true;
   };
+
+  # ─── vLLM Inference ─────────────────────────────────────────────────
+  services.vllm.instances = {
+    # Primary: Qwen3.6-27B NVFP4 + DFlash speculative decoding
+    # Best single-stream throughput on DGX Spark (38-56 tok/s by category)
+    aeon = {
+      enable = false;
+      autoStart = false; # Start manually after model downloads complete
+      model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
+      servedModelName = "aeon";
+      port = 8000;
+      gpuMemoryUtilization = 0.78;
+      maxModelLen = 24576;
+      maxNumSeqs = 8;
+      maxNumBatchedTokens = 8192;
+      dtype = "auto";
+      quantization = "compressed-tensors"; # NVFP4
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256; # Qwen3.6 hybrid GDN+attention
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+
+    # Gemma-4-26B-A4B NVFP4 (fastest single-stream, 155 tok/s coding)
+    gemma = {
+      enable = false;
+      model = "/var/lib/vllm/models/Gemma-4-26B-A4B-NVFP4";
+      servedModelName = "gemma";
+      port = 8001;
+      gpuMemoryUtilization = 0.78;
+      maxModelLen = 32768;
+      maxNumSeqs = 8;
+      quantization = "compressed-tensors";
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Gemma-4-26B-A4B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+
+    # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
+    qwen35b = {
+      enable = false;
+      model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
+      servedModelName = "qwen35b";
+      port = 8002;
+      gpuMemoryUtilization = 0.76; # More conservative for larger model
+      maxModelLen = 24576;
+      maxNumSeqs = 8;
+      quantization = "compressed-tensors";
+      kvCacheDtype = "fp8_e4m3";
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-DFlash-drafter";
+        numSpeculativeTokens = 12;
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+
+    # Ornith-1.0-35B AEON Ultimate Uncensored — NVFP4 + DFlash via the AEON
+    # container (ghcr.io/aeon-7/aeon-vllm-ultimate), which ships the
+    # qwen3_5_moe arch + DFlash pre-compiled for GB10 / sm_121a (the runtime
+    # gap that the native path still hits, see native-plan Verification).
+    # Validated DGX Spark envelope from QUICKSTART_DGX_SPARK.md § 3/§ 4.
+    ornith = {
+      enable = true; # Phase 1 verified 2026-06-28 (CDI + AEON image OK)
+      autoStart = false; # one-shot start after model downloads complete
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
+      servedModelName = "ornith";
+      port = 8003; # host port == container port (podman --network host)
+      # DFlash stability margin on unified memory (peak 80/121 GB).
+      gpuMemoryUtilization = 0.6;
+      maxModelLen = 262144; # full 256K fits thanks to NVFP4 (~23.7 GB)
+      maxNumSeqs = 16; # HARD CAP w/ DFlash on Spark (assertion enforces)
+      maxNumBatchedTokens = 16384;
+      dtype = "auto";
+      quantization = "compressed-tensors"; # NVFP4 = nvfp4-pack-quantized
+      kvCacheDtype = null; # BF16 KV (vision tower) — do NOT pass fp8
+      mambaCacheDtype = "float32"; # GatedDeltaNet (SSM) state precision
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_coder"; # QUICKSTART value (serve_ornith.sh uses qwen3_xml)
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        # AEON all-full-attention drafter: no SWA → no kvfix patch (issue #1),
+        # and higher acceptance than z-lab (3.71 vs 3.35 tok/step).
+        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
+        numSpeculativeTokens = 6; # QUICKSTART optimum; n>6 wastes on low-accept pos
+      };
+      extraEnv = {
+        TORCH_CUDA_ARCH_LIST = "12.1a";
+        ENABLE_NVFP4_SM100 = "0";
+        VLLM_USE_FLASHINFER_SAMPLER = "1";
+        NVIDIA_FORWARD_COMPAT = "1";
+        NVIDIA_DRIVER_CAPABILITIES = "all";
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+  };
+
+  # Declarative model downloads (oneshot services, idempotent)
+  services.vllm-models = {
+    enable = true;
+    cacheDir = "/var/lib/vllm/models";
+    models = {
+      # Qwen3.6-27B body (NVFP4 compressed-tensors, ~26 GB)
+      "Qwen3.6-27B-AEON-NVFP4" = {
+        repo = "AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-NVFP4";
+      };
+      # DFlash drafter for Qwen3.6-27B (z-lab 5-layer, ~3.3 GB)
+      "Qwen3.6-27B-DFlash-drafter" = {
+        repo = "z-lab/Qwen3.6-27B-DFlash";
+      };
+
+      # ── Ornith-1.0-35B AEON Ultimate Uncensored (container path) ──
+      # NVFP4 model (~23.7 GB, Blackwell-only) + AEON all-full-attention
+      # DFlash drafter (no SWA, so no kvfix patch needed).
+      "Ornith-1.0-35B-NVFP4" = {
+        repo = "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4";
+      };
+      "AEON-DFlash-Qwen3.6-35B-A3B" = {
+        repo = "AEON-7/AEON-DFlash-Qwen3.6-35B-A3B";
+      };
+    };
+  };
+
   services.dgx-dashboard = {
     enable = true;
     port = 11001;
@@ -179,6 +338,23 @@
     0
     1
   ];
+
+  # ─── HuggingFace token ─────────────────────────────────────────────
+  # Secret file (secrets/hf-token.age) must contain:
+  #   HF_TOKEN=hf_xxxxxxxxxxxx
+  age.secrets.hf-token = {
+    file = ../../secrets/hf-token.age;
+    owner = "yuanw";
+    group = "users";
+  };
+
+  # Source HF_TOKEN for user shells (systemd services use EnvironmentFile)
+  environment.etc."profile.d/hf-token.sh".text = ''
+    # agenix secret contains: HF_TOKEN=hf_xxx
+    if [ -s ${config.age.secrets.hf-token.path} ]; then
+      set -a; . ${config.age.secrets.hf-token.path}; set +a
+    fi
+  '';
 
   system.stateVersion = "25.11";
 }

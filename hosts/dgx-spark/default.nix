@@ -2,13 +2,21 @@
 
 {
   imports = [
+    inputs.agenix.nixosModules.default
     inputs.dgx-spark.nixosModules.dgx-spark
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
     ../../modules/ds4.nix
     ../../modules/lance.nix
+    ../../modules/vllm.nix
+    ../../modules/vllm-models.nix
     ./disk-config.nix
     ./configuration.nix
+  ];
+
+  # graham33's dgx-spark.nix imports his vllm.nix — disable it in favor of ours
+  disabledModules = [
+    "${inputs.dgx-spark}/modules/vllm.nix"
   ];
 
   nixpkgs.overlays = [
