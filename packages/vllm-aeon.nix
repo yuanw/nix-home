@@ -373,6 +373,7 @@ buildPythonPackage {
     TRITON_KERNELS_SRC_DIR = "${lib.getDev triton-kernels}/python/triton_kernels/triton_kernels";
     VLLM_REQUIRE_RUST_FRONTEND = "1";
     OPENSSL_NO_VENDOR = "1";
+    SETUPTOOLS_SCM_PRETEND_VERSION = "${version}";
     # v0.23 reads CMAKE_ARGS env var and appends to cmake command
     CMAKE_ARGS = toString [
       "-DVLLM_CUTLASS_SRC_DIR=${lib.getDev cutlass}"
