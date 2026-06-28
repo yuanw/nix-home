@@ -146,7 +146,7 @@
       maxNumBatchedTokens = 8192;
       dtype = "auto";
       quantization = "compressed-tensors"; # NVFP4
-      kvCacheDtype = "fp8_e4m3";
+      kvCacheDtype = null; # auto/BF16 (DFlash non-causal + fp8_e4m3 unsupported on sm_121a)
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
       mambaBlockSize = 256; # Qwen3.6 hybrid GDN+attention
