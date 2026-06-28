@@ -221,6 +221,24 @@
      =virtualisation.docker.enable=true= and use =docker run --gpus all=
      per the literal QuickStart. Podman+CDI is the default aim.
 
+  *VERIFIED 2026-06-28 on =dgx-spark.local= (no rebuild needed — the upstream
+  =dgx-spark= module already enabled Podman+CDI on prior rebuilds):*
+  | Check | Result |
+  |-------+--------|
+  | =podman --version= | ✅ podman 5.8.2 (in /run/current-system) |
+  | =podman.socket= / docker-compat | ✅ active; =/var/run/docker.sock → podman.sock= |
+  | CDI spec present | ✅ =/var/run/cdi/nvidia-container-toolkit.json= (runtime path, NOT =/etc/cdi/nvidia.yaml= — both are accepted by the module guard) |
+  | =nvidia-ctk= on PATH | ⚠️ not in =sw/bin=; resolves to =/nix/store/...-nvidia-container-toolkit-1.18.2/bin/nvidia-ctk= (only needed if CDI ever needs regeneration) |
+  | GPU (host) | ✅ NVIDIA GB10, compute_cap 12.1 (sm_121a), driver 595.80, CUDA 13.2 |
+  | CDI GPU passthrough (Gap A / R1) | ✅ =podman run --rm --device nvidia.com/gpu=all ubuntu nvidia-smi= sees the GB10 |
+  | AEON image pull | ✅ =ghcr.io/aeon-7/aeon-vllm-ultimate:latest=, =arm64/linux=, ~40.9 GB (larger than the ~25 GB model estimate — full vLLM+CUDA image) |
+  | torch in image sees GB10 | ✅ =cap= (12, 1)=, =name= NVIDIA GB10= |
+  | vLLM in image | ✅ =0.23.0+aeon.sm121a.dflash= (confirms =qwen3_5_moe= arch + DFlash pre-compiled — the gap the native path still hits) |
+
+  *Image and ubuntu are now cached on the host.* The AEON image is ~41 GB, not
+  ~25 GB — keep ~50 GB free on =/var/lib/containers= (currently 3.3 TB free).
+  Gap A is CLOSED; Risk R1 is de-risked.
+
 * Phase 2 — Thin container backend in the instance module
   1. Add =backend= option to [[file:../modules/vllm.nix][modules/vllm.nix]] instance submodule (default =native=):
      #+BEGIN_SRC nix :tangle no

@@ -204,8 +204,8 @@
     # gap that the native path still hits, see native-plan Verification).
     # Validated DGX Spark envelope from QUICKSTART_DGX_SPARK.md § 3/§ 4.
     ornith = {
-      enable = false; # flip on after Phase 1 + downloads succeed
-      autoStart = false;
+      enable = true; # Phase 1 verified 2026-06-28 (CDI + AEON image OK)
+      autoStart = false; # one-shot start after model downloads complete
       backend = "podman";
       containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
       model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
