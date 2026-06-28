@@ -12,6 +12,14 @@
   boot.loader.systemd-boot.configurationLimit = 10;
 
   # ─── DGX Spark hardware ─────────────────────────────────────────────
+  # Enabling this upstream module (inputs.dgx-spark.nixosModules.dgx-[
+  # spark) ALSO turns on the OCI inference runtime this host uses for the
+  # AEON vLLM container (services.vllm.instances.* with backend = "podman"):
+  # virtualisation.podman.{enable,dockerCompat,dockerSocket} +
+  # networking.firewall.trustedInterfaces = [ "podman+" ] and
+  # hardware.nvidia-container-toolkit.enable (which generates the CDI spec
+  # consumed by `podman run --device nvidia.com/gpu=all`). See graham33
+  # modules/dgx-spark.nix:164-174 and plans/ornith-dgx-spark-docker.org.
   hardware.dgx-spark.enable = true;
 
   # ─── Networking ─────────────────────────────────────────────────────
@@ -107,6 +115,7 @@
     8000 # vLLM aeon (Qwen3.6-27B)
     8001 # vLLM gemma
     8002 # vLLM qwen35b
+    8003 # vLLM ornith (AEON container, NVFP4 + DFlash)
     11000
     8188
   ];
@@ -188,6 +197,50 @@
       };
       extraArgs = [ "--trust-remote-code" ];
     };
+
+    # Ornith-1.0-35B AEON Ultimate Uncensored — NVFP4 + DFlash via the AEON
+    # container (ghcr.io/aeon-7/aeon-vllm-ultimate), which ships the
+    # qwen3_5_moe arch + DFlash pre-compiled for GB10 / sm_121a (the runtime
+    # gap that the native path still hits, see native-plan Verification).
+    # Validated DGX Spark envelope from QUICKSTART_DGX_SPARK.md § 3/§ 4.
+    ornith = {
+      enable = false; # flip on after Phase 1 + downloads succeed
+      autoStart = false;
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
+      servedModelName = "ornith";
+      port = 8003; # host port == container port (podman --network host)
+      # DFlash stability margin on unified memory (peak 80/121 GB).
+      gpuMemoryUtilization = 0.6;
+      maxModelLen = 262144; # full 256K fits thanks to NVFP4 (~23.7 GB)
+      maxNumSeqs = 16; # HARD CAP w/ DFlash on Spark (assertion enforces)
+      maxNumBatchedTokens = 16384;
+      dtype = "auto";
+      quantization = "compressed-tensors"; # NVFP4 = nvfp4-pack-quantized
+      kvCacheDtype = null; # BF16 KV (vision tower) — do NOT pass fp8
+      mambaCacheDtype = "float32"; # GatedDeltaNet (SSM) state precision
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_coder"; # QUICKSTART value (serve_ornith.sh uses qwen3_xml)
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        # AEON all-full-attention drafter: no SWA → no kvfix patch (issue #1),
+        # and higher acceptance than z-lab (3.71 vs 3.35 tok/step).
+        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
+        numSpeculativeTokens = 6; # QUICKSTART optimum; n>6 wastes on low-accept pos
+      };
+      extraEnv = {
+        TORCH_CUDA_ARCH_LIST = "12.1a";
+        ENABLE_NVFP4_SM100 = "0";
+        VLLM_USE_FLASHINFER_SAMPLER = "1";
+        NVIDIA_FORWARD_COMPAT = "1";
+        NVIDIA_DRIVER_CAPABILITIES = "all";
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
   };
 
   # Declarative model downloads (oneshot services, idempotent)
@@ -202,6 +255,16 @@
       # DFlash drafter for Qwen3.6-27B (z-lab 5-layer, ~3.3 GB)
       "Qwen3.6-27B-DFlash-drafter" = {
         repo = "z-lab/Qwen3.6-27B-DFlash";
+      };
+
+      # ── Ornith-1.0-35B AEON Ultimate Uncensored (container path) ──
+      # NVFP4 model (~23.7 GB, Blackwell-only) + AEON all-full-attention
+      # DFlash drafter (no SWA, so no kvfix patch needed).
+      "Ornith-1.0-35B-NVFP4" = {
+        repo = "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4";
+      };
+      "AEON-DFlash-Qwen3.6-35B-A3B" = {
+        repo = "AEON-7/AEON-DFlash-Qwen3.6-35B-A3B";
       };
     };
   };
