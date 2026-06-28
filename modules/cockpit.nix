@@ -30,6 +30,25 @@ in
       default = true;
       description = "Open firewall for Cockpit web UI.";
     };
+
+    enableGpu = mkOption {
+      type = types.bool;
+      default = config.hardware.nvidia.enable or false;
+      description = ''
+        Enable the cockpit-gpu NVIDIA monitoring plugin.
+        Requires nvidia-smi on the host (e.g. hardware.nvidia.enable
+        or hardware.dgx-spark.enable).
+      '';
+    };
+
+    nvidiaPackage = mkOption {
+      type = types.nullOr types.package;
+      default = config.hardware.nvidia.package;
+      description = ''
+        Package providing nvidia-smi, injected into cockpit.service
+        PATH. Defaults to config.hardware.nvidia.package when non-null.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -40,10 +59,20 @@ in
       openFirewall = cfg.openFirewall;
 
       # Add cockpit plugins
-      plugins = with pkgs; [
-        cockpit-machines
-        cockpit-podman
-      ];
+      plugins =
+        with pkgs;
+        [
+          cockpit-machines
+          cockpit-podman
+        ]
+        ++ lib.optional cfg.enableGpu (
+          let
+            drv = pkgs.cockpit-gpu.override {
+              nvidiaDriverPkg = cfg.nvidiaPackage or (config.hardware.nvidia.package or null);
+            };
+          in
+          drv
+        );
     };
 
     # Allow access from LAN hostnames (merges with nixpkgs default localhost origin)
