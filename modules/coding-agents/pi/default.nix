@@ -103,14 +103,13 @@ in
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default = with claudePlugins; [
-        caveman
-        humanizer
-        emacs-skills
-      ];
+      default =
+        (with claudePlugins; [
+          humanizer
+          emacs-skills
+        ]);
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
-        name under <configDir>/skills/.
         name under <configDir>/skills/.
       '';
     };
@@ -184,6 +183,12 @@ in
     ];
 
     home-manager.users.${config.my.username} = {
+      programs.mics-skills.skillDirs = [
+        ".claude/skills"
+        ".opencode/skills"
+        "${cfg.configDir}/skills"
+      ];
+
       home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
       home.file =

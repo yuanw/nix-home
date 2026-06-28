@@ -41,6 +41,7 @@
     mouseless_preview
     betterdisplay
     ungoogled-chromium
+    slack
   ];
   modules = {
     # common = {
@@ -49,7 +50,7 @@
     # };
     cursor.enable = true;
     speak2text = {
-      enable = true;
+      enable = false;
       flavor = "parakeet-mlx";
       parakeetServer = true; # ← enables the server
       parakeetServerPort = 5092; # ← default, optional
@@ -62,7 +63,6 @@
         pi-cursor-agent
         pi-slow-mode
         pi-mcp-adapter
-        pi-caveman
         pi-interactive-shell
       ];
       extensionFiles = {
@@ -106,14 +106,18 @@
         };
       };
       skills =
-        with pkgs.claude-plugins;
-        [
+        (with pkgs.claude-plugins; [
           caveman
           humanizer
           emacs-skills
-        ]
-        ++ [ pkgs.pi-extensions.pi-interactive-shell ];
+        ])
+        ++ [
+          pkgs.codingAgentsSkillPackages.grilling
+          pkgs.codingAgentsSkillPackages.teach
+          pkgs.pi-extensions.pi-interactive-shell
+        ];
     };
+    browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;
     };
@@ -127,10 +131,7 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "karabiner-elements"
-        "slack"
-        "sloth"
         "viscosity"
-        "firefox"
       ];
       brews = [
         "redis"
@@ -138,6 +139,10 @@
       ];
     };
     browsers.firefox = {
+      enable = true;
+      pkg = null;
+    };
+    browsers.librewolf = {
       enable = true;
       pkg = null;
     };

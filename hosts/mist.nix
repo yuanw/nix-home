@@ -23,6 +23,10 @@ in
   environment.casks = with inputs'.nix-casks.packages; [
     mouseless_preview
     betterdisplay
+    inputs'.nix-casks.packages."1password"
+    godot
+    racket
+    vlc
   ];
   # determinate system
   nix.enable = false;
@@ -55,7 +59,6 @@ in
         pi-cursor-agent
         pi-slow-mode
         pi-mcp-adapter
-        pi-caveman
         pi-interactive-shell
       ];
       extensionFiles = {
@@ -70,13 +73,6 @@ in
     };
     brew = {
       enable = true;
-      casks = [
-        "1password"
-        "godot"
-        "firefox"
-        "racket"
-        "vlc"
-      ];
       masApps = {
         "Fresh Eyes" = 6480411697;
         "Keystroke Pro" = 1572206224;
@@ -84,9 +80,12 @@ in
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     mouseless.enable = true;
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
+    browsers = {
+      librewolf = {
+        enable = true;
+        pkg = null;
+      };
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;

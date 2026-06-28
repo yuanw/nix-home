@@ -44,6 +44,9 @@ nix-update:
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
 
+update-librewolf:
+	@nix shell nixpkgs#python3 nixpkgs#nix -c bash -c 'PYTHONPATH=packages python3 packages/librewolf-macos/update.py'
+
 # deploy to DGX Spark: sync flake and rebuild remotely
 spark-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
