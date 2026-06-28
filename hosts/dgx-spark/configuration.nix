@@ -135,6 +135,8 @@
     aeon = {
       enable = false;
       autoStart = false; # Start manually after model downloads complete
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
       model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
       servedModelName = "aeon";
       port = 8000;
@@ -159,6 +161,8 @@
     # Gemma-4-26B-A4B NVFP4 (fastest single-stream, 155 tok/s coding)
     gemma = {
       enable = false;
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
       model = "/var/lib/vllm/models/Gemma-4-26B-A4B-NVFP4";
       servedModelName = "gemma";
       port = 8001;
@@ -180,6 +184,8 @@
     # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
     qwen35b = {
       enable = false;
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
