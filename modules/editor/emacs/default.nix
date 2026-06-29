@@ -3407,7 +3407,7 @@ with lib;
                     };
                 };
 
-                alert = {
+                alert = lib.mkIf pkgs.stdenv.isDarwin {
                   enable = true;
                   extraConfig = ''
                     :autoload (alert alert-add-rule)

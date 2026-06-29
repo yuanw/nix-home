@@ -73,8 +73,8 @@ in
     }
     // nativeMessagingHosts;
 
-    home.activation.clearBrowserCliDefaultsPolicy = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-      lib.mkIf pkgs.stdenv.isDarwin ''
+    home.activation.clearBrowserCliDefaultsPolicy = lib.mkIf pkgs.stdenv.isDarwin (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         /usr/bin/defaults delete org.mozilla.firefox ExtensionSettings 2>/dev/null || true
       ''
     );
