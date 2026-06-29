@@ -150,6 +150,7 @@
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
       mambaBlockSize = 256; # Qwen3.6 hybrid GDN+attention
+      toolCallParser = "qwen3_coder";
       speculative = {
         enable = true;
         model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
