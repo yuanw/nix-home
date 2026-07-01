@@ -183,30 +183,46 @@
     };
 
     # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
+    # Uses official NVIDIA recommended config from model card:
+    # https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4#usage
     qwen35b = {
       enable = true;
       autoStart = false; # Start manually after model downloads complete
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
+      containerImage = "vllm/vllm-openai:nightly";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
-      gpuMemoryUtilization = 0.76; # More conservative for larger model
-      maxModelLen = 24576;
-      maxNumSeqs = 8;
-      quantization = "compressed-tensors";
-      kvCacheDtype = "fp8_e4m3";
+      # NVIDIA-recommended DGX Spark params (GB10 / sm_121a)
+      gpuMemoryUtilization = 0.4;
+      maxModelLen = 262144; # full 256K context
+      maxNumSeqs = 4;
+      maxNumBatchedTokens = 8192;
+      dtype = "auto";
+      quantization = "modelopt"; # NVFP4 via Model Optimizer
+      kvCacheDtype = "fp8";
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
-      mambaBlockSize = 256;
+      # MTP speculative decoding (built-in, no separate drafter)
       speculative = {
-        enable = true;
-        # Share the same AEON all-full-attention DFlash drafter as ornith
-        # (same Qwen3.6-35B-A3B architecture)
-        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
-        numSpeculativeTokens = 6; # match QUICKSTART optimum for this drafter
+        enable = false; # handoff via extraArgs for MTP config
       };
-      extraArgs = [ "--trust-remote-code" ];
+      # NVIDIA-recommended parsers
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_xml";
+      extraArgs = [
+        "--trust-remote-code"
+        "--attention-backend"
+        "flashinfer"
+        "--moe-backend"
+        "marlin"
+        "--async-scheduling"
+        "--load-format"
+        "fastsafetensors"
+        "--enable-auto-tool-choice"
+        "--speculative-config"
+        ''{"method":"mtp","num_speculative_tokens":3,"moe_backend":"triton"}''
+      ];
     };
 
     # Ornith-1.0-35B AEON Ultimate Uncensored — NVFP4 + DFlash via the AEON
