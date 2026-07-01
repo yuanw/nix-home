@@ -133,7 +133,7 @@
     # Primary: Qwen3.6-27B NVFP4 + DFlash speculative decoding
     # Best single-stream throughput on DGX Spark (38-56 tok/s by category)
     aeon = {
-      enable = true;
+      enable = false;
       autoStart = false; # Start manually after model downloads complete
       backend = "podman";
       containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
@@ -219,7 +219,6 @@
         "--async-scheduling"
         "--load-format"
         "fastsafetensors"
-        "--enable-auto-tool-choice"
         "--speculative-config"
         ''{"method":"mtp","num_speculative_tokens":3,"moe_backend":"triton"}''
       ];
