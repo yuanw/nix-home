@@ -189,27 +189,34 @@
       enable = true;
       autoStart = false; # Start manually after model downloads complete
       backend = "podman";
-      containerImage = "vllm/vllm-openai:nightly";
+      # spark-vllm-docker build (vllm-node) — custom vLLM built for DGX Spark
+      # with DeepGEMM, FlashInfer, and sm_121a support. Prebuilt wheels from:
+      #   https://github.com/eugr/spark-vllm-docker/releases
+      # Benchmark: 109 tok/s on spark-arena.com/benchmark/sub1782724431960
+      containerImage = "localhost/vllm-node:latest";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
-      # NVIDIA-recommended DGX Spark params (GB10 / sm_121a)
-      gpuMemoryUtilization = 0.4;
-      maxModelLen = 262144; # full 256K context
+      # spark-arena-tested DGX Spark params (from sparkrun recipe)
+      gpuMemoryUtilization = 0.65;
+      maxModelLen = 262144;
       maxNumSeqs = 4;
-      maxNumBatchedTokens = 8192;
+      maxNumBatchedTokens = 32768;
       dtype = "auto";
       quantization = "modelopt"; # NVFP4 via Model Optimizer
       kvCacheDtype = "fp8";
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
-      # MTP speculative decoding (built-in, no separate drafter)
+      # No speculative decoding — MTP requires the built-in MTP heads but
+      # the spark-vllm-docker image doesn't include DFlash.
       speculative = {
-        enable = false; # handoff via extraArgs for MTP config
+        enable = false;
       };
-      # NVIDIA-recommended parsers
       reasoningParser = "qwen3";
       toolCallParser = "qwen3_xml";
+      extraEnv = {
+        VLLM_MARLIN_USE_ATOMIC_ADD = "1";
+      };
       extraArgs = [
         "--trust-remote-code"
         "--attention-backend"
@@ -219,8 +226,7 @@
         "--async-scheduling"
         "--load-format"
         "fastsafetensors"
-        "--speculative-config"
-        ''{"method":"mtp","num_speculative_tokens":3,"moe_backend":"triton"}''
+        "--enable-auto-tool-choice"
       ];
     };
 
