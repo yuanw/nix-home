@@ -184,7 +184,8 @@
 
     # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
     qwen35b = {
-      enable = false;
+      enable = true;
+      autoStart = false; # Start manually after model downloads complete
       backend = "podman";
       containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
@@ -200,8 +201,10 @@
       mambaBlockSize = 256;
       speculative = {
         enable = true;
-        model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-DFlash-drafter";
-        numSpeculativeTokens = 12;
+        # Share the same AEON all-full-attention DFlash drafter as ornith
+        # (same Qwen3.6-35B-A3B architecture)
+        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
+        numSpeculativeTokens = 6; # match QUICKSTART optimum for this drafter
       };
       extraArgs = [ "--trust-remote-code" ];
     };
@@ -263,6 +266,13 @@
       # DFlash drafter for Qwen3.6-27B (z-lab 5-layer, ~3.3 GB)
       "Qwen3.6-27B-DFlash-drafter" = {
         repo = "z-lab/Qwen3.6-27B-DFlash";
+      };
+
+      # ── NVIDIA Qwen3.6-35B-A3B NVFP4 (official release) ──
+      # Official NVIDIA release of Qwen3.6-35B in NVFP4 compressed-tensors format.
+      # Base model (no drafter bundled); shares the AEON DFlash drafter above.
+      "Qwen3.6-35B-A3B-NVFP4" = {
+        repo = "nvidia/Qwen3.6-35B-A3B-NVFP4";
       };
 
       # ── Ornith-1.0-35B AEON Ultimate Uncensored (container path) ──
