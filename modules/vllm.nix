@@ -353,6 +353,8 @@ let
         ExecStart = execStart;
         Restart = "on-failure";
         RestartSec = 10;
+        # Container image pull can take several minutes for multi-GB images
+        TimeoutStartSec = if inst.backend == "podman" then 600 else 90;
 
         # Environment (native backend reads these directly; podman backend
         # receives them via -e from containerEnv).
