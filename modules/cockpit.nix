@@ -10,8 +10,9 @@ let
     mkIf
     mkEnableOption
     mkOption
-    types
     mkDefault
+    optional
+    types
     ;
   cfg = config.services.cockpit-local;
 in
@@ -31,22 +32,17 @@ in
       description = "Open firewall for Cockpit web UI.";
     };
 
-    enableGpu = mkOption {
-      type = types.bool;
-      default = false;
-      description = ''
-        Enable the cockpit-gpu NVIDIA monitoring plugin.
-        Requires nvidia-smi on the host (e.g. hardware.nvidia.enable
-        or hardware.dgx-spark.enable).
-      '';
-    };
+    enableGpu = mkEnableOption "NVIDIA GPU monitoring plugin";
 
     nvidiaPackage = mkOption {
       type = types.nullOr types.package;
-      default = config.hardware.nvidia.package;
+      default = null;
       description = ''
-        Package providing nvidia-smi, injected into cockpit.service
-        PATH. Defaults to config.hardware.nvidia.package when non-null.
+        Package providing nvidia-smi, injected into cockpit.service PATH.
+        When unset, the module tries to auto-detect the driver package
+        from common attrpaths (`hardware.nvidia.package` or
+        `hardware.dgx-spark.package`). If auto-detection fails, set this
+        explicitly.
       '';
     };
   };
@@ -58,21 +54,30 @@ in
       port = cfg.port;
       openFirewall = cfg.openFirewall;
 
+      # cockpit-session needs cockpit-bridge in PATH (nixpkgs module
+      # no longer adds it)
+      environmentPaths = [ "${pkgs.cockpit}/bin/cockpit-bridge" ];
+
       # Add cockpit plugins
-      plugins =
-        with pkgs;
-        [
-          cockpit-machines
-          cockpit-podman
-        ]
-        ++ lib.optional cfg.enableGpu (
-          let
-            drv = pkgs.cockpit-gpu.override {
-              nvidiaDriverPkg = cfg.nvidiaPackage or (config.hardware.nvidia.package or null);
-            };
-          in
-          drv
-        );
+      plugins = [
+        pkgs.cockpit-machines
+        pkgs.cockpit-podman
+      ]
+      ++ optional cfg.enableGpu (
+        let
+          # Resolve the NVIDIA driver package for nvidia-smi in PATH.
+          # cfg.nvidiaPackage is explicit override, or we try common
+          # attrpaths.  The nvidia package may be a set (open/mod) so
+          # fall back to the .mod variant.
+          nvidiaPkgTry = config.hardware.nvidia.package or null;
+          nvidiaDrv = cfg.nvidiaPackage or nvidiaPkgTry;
+          nvidiaPkg =
+            if lib.isDerivation nvidiaDrv then nvidiaDrv else (nvidiaDrv.mod or nvidiaDrv.open or null);
+        in
+        pkgs.cockpit-gpu.override {
+          nvidiaDriverPkg = nvidiaPkg;
+        }
+      );
     };
 
     # Allow access from LAN hostnames (merges with nixpkgs default localhost origin)

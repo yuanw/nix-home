@@ -212,6 +212,9 @@ in
     meta.mainProgram = "comfyui";
   };
 
+  # vllm-node: reproducible Docker image build from prebuilt wheels
+  vllm-node = prev.callPackage ./vllm-node { };
+
   # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
   vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
     cudaPackages = prev.cudaPackages;

@@ -90,7 +90,7 @@
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
-  services.cockpit-local.enableGpu = false; # GPU panel via nvidia-smi on DGX Spark
+  services.cockpit-local.enableGpu = true;
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
@@ -377,6 +377,29 @@
     0
     1
   ];
+
+  # ─── vllm-node image build ──────────────────────────────────────
+  # Builds the spark-vllm-docker Docker image from pinned inputs
+  # when the package changes (new source commit or wheel hashes).
+  systemd.services.vllm-node-build = {
+    description = "Build vllm-node Docker image from pinned inputs";
+    after = [ "network.target" ];
+    wants = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [ podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.vllm-node}/bin/build-vllm-node";
+      TimeoutStartSec = 1800; # 30 min for first build
+    };
+  };
+
+  # The qwen35b instance requires the vllm-node image to be built first
+  systemd.services.vllm-qwen35b = {
+    requires = [ "vllm-node-build.service" ];
+    after = [ "vllm-node-build.service" ];
+  };
 
   # ─── HuggingFace token ─────────────────────────────────────────────
   # Secret file (secrets/hf-token.age) must contain:

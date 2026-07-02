@@ -12,7 +12,8 @@ from pathlib import Path
 
 def add(text, key, value):
     """Append value to the array identified by key.  Skips if already present."""
-    pat = rf'({key}\s*:\s*\[)([^\]]*?)(\n\s*\],)'
+    # [\s\S] matches across newlines (critical — files.js arrays are multi-line)
+    pat = rf'({key}\s*:\s*\[)([\s\S]*?)(\n\s*\],)'
     m = re.search(pat, text)
     if not m or value in m.group(2):
         return text
@@ -25,8 +26,9 @@ jsx_entry, html_entry = sys.argv[2], sys.argv[3]
 text = p.read_text()
 orig = text
 
-text = add(text, "entries", f'        "{{path": "{jsx_entry}"}}"')
-text = add(text, "files",   f'        "{html_entry}"')
+# entries and files are plain string arrays (not objects with "path" keys)
+text = add(text, "entries", f'"{jsx_entry}"')
+text = add(text, "files",   f'"{html_entry}"')
 
 if text != orig:
     p.write_text(text)
