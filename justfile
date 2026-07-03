@@ -34,6 +34,9 @@ nix-update:
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch --override-filename ./packages/emacs/shell-maker.nix
+    @nix-update -f ./packages/release.nix pi-coding-agent --src-only --version=branch --override-filename ./packages/emacs/pi-coding-agent.nix
+    @nix-update -f ./packages/release.nix md-ts-mode --src-only --version=branch --override-filename ./packages/emacs/md-ts-mode.nix
+    @nix-update -f ./packages/release.nix markdown-table-wrap --src-only --version=branch --override-filename ./packages/emacs/markdown-table-wrap.nix
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
     @nix-update -f ./packages/release.nix vibeproxy --src-only
