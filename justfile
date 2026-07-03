@@ -4,8 +4,13 @@ host := `hostname -s`
 default:
     @just --list
 
+# prefetch Workiva git sources (needed before build on work hosts)
+prefetch-work-sources:
+    @{{justfile_directory()}}/scripts/prefetch-work-sources.sh
+
 # build os
 build:
+    @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
     @nix build --quiet ".#{{lowercase(host)}}"
 
 update-all:
@@ -46,6 +51,7 @@ nix-update:
 
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
+	just prefetch-work-sources
 
 update-librewolf:
 	@nix shell nixpkgs#python3 nixpkgs#nix -c bash -c 'PYTHONPATH=packages python3 packages/librewolf-macos/update.py'
