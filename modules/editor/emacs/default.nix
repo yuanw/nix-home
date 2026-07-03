@@ -3393,6 +3393,13 @@ with lib;
                   ];
                   defer = true;
                 };
+
+                pi-coding-agent = {
+                  enable = true;
+                  extraConfig = ''
+                    :init (defalias 'pi 'pi-coding-agent)
+                  '';
+                };
                 ghostel = emacsGhostel.usePackageGhostel;
 
                 wm = {
