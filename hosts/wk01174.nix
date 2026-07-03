@@ -48,6 +48,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
+    agent-deck.enable = true;
     cursor.enable = true;
     speak2text = {
       enable = false;
