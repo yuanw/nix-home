@@ -69,6 +69,7 @@ in
       { ... }:
       {
         imports = [
+          ../../modules/default.nix
           inputs.home-manager.nixosModules.home-manager
           ./dgx-spark
         ];
