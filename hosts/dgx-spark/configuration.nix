@@ -92,6 +92,9 @@
   services.cockpit-local.enable = true;
   services.cockpit-local.enableGpu = true;
 
+  # ─── PCP (Performance Co-Pilot) — required by cockpit
+  services.pcp.enable = true;
+
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
     enable = false;

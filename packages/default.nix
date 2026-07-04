@@ -221,4 +221,8 @@ in
     pkg_config = prev.pkg-config;
     gnumake = prev.gnumake;
   };
+
+  # Performance Co-Pilot — system performance monitoring toolkit
+  # Re-adds pcp removed from nixpkgs (PR #495646)
+  pcp = prev.callPackage ./pcp/package.nix { };
 }
