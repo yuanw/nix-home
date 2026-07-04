@@ -7,10 +7,9 @@
   fetchFromGitHub,
   jq,
   nvidiaDriverPkg ? null,
-  runCommand,
 }:
 
-stdenv.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (_finalAttrs: {
   pname = "cockpit-gpu";
 
   src = fetchFromGitHub {
@@ -20,23 +19,10 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-w8eH630TZabH1uZF6CU+v2g04m9TmdkKAY4fifKk4lE=";
   };
 
-  # Extract version from the plugin's manifest.json via jq.
-  version =
-    let
-      versionFile =
-        runCommand "cockpit-gpu-version.txt"
-          {
-            nativeBuildInputs = [ jq ];
-          }
-          ''
-            jq -r '.version' ${finalAttrs.src}/plugin/manifest.json > $out
-          '';
-    in
-    lib.fileContents versionFile;
-
-  # Build against the *parent* cockpit tree (provides build.js,
-  # pkg/lib, patternfly, esbuild config, files.js registry).
-  cockpitSrc = cockpit.src;
+  # Version hardcoded to avoid eager derivation realization during eval.
+  # (lib.fileContents would force the derivation to be built at eval time,
+  # which fails when colmena evaluates aarch64-linux on aarch64-darwin.)
+  version = "0.0.0";
 
   nativeBuildInputs = [
     nodejs
@@ -44,25 +30,24 @@ stdenv.mkDerivation (finalAttrs: {
     jq
   ];
 
-  postPatch = ''
-    # Make build.js (a perl+node script) executable and patch its shebang.
-    patchShebangs "$cockpitSrc/build.js"
-
-    # Register the plugin in cockpit's files.js so build.js picks it up.
-    # This mirrors install.sh's patch_cockpit_files_js step.
-    python3 "${./register-plugin.py}" "$cockpitSrc/files.js" \
-        "cockpit-gpu/cockpit-gpu.jsx" "cockpit-gpu/index.html"
-  '';
-
   buildPhase = ''
     runHook preBuild
+
+    # The cockpit source is in the Nix store which is mounted read-only on the
+    # target system. Copy it to a writable working directory, then modify it.
+    workingCockpit="$TMPDIR/cockpit-build"
+    cp -R ${cockpit.src} "$workingCockpit"
+    chmod -R u+w "$workingCockpit"
+
+    # Register the plugin in cockpit's files.js so build.js picks it up.
+    python3 "${./register-plugin.py}" "$workingCockpit/files.js" \
+        "cockpit-gpu/cockpit-gpu.jsx" "cockpit-gpu/index.html"
+
     export NODE_ENV=production
-    # Sync the plugin source into the cockpit build tree (mirrors
-    # install.sh's build_dist_from_plugin_source → rsync step).
-    rsync -a --delete plugin/ "$cockpitSrc/pkg/cockpit-gpu/"
-    # Run the cockpit build pipeline (esbuild bundling) from the
-    # cockpit source directory.
-    ( cd "$cockpitSrc" && ./build.js cockpit-gpu )
+    # Sync the plugin source into the cockpit build tree.
+    cp -a --remove-destination plugin/ "$workingCockpit/pkg/cockpit-gpu/"
+    # Run the cockpit build pipeline from the working directory.
+    ( cd "$workingCockpit" && node build.js cockpit-gpu )
     runHook postBuild
   '';
 
@@ -71,8 +56,8 @@ stdenv.mkDerivation (finalAttrs: {
     dest="$out/share/cockpit/gpus"
     mkdir -p "$dest"
 
-    # Copy the built dist artifacts from the cockpit build tree.
-    cp -r "$cockpitSrc/dist/cockpit-gpu/." "$dest/"
+    # Copy the built dist artifacts from the working directory.
+    cp -r "$TMPDIR/cockpit-build/dist/cockpit-gpu/." "$dest/"
 
     # install.sh also copies a few static files from the plugin dir
     # when they are not present in the dist output.
