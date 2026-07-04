@@ -15,7 +15,7 @@ in
         dgx-spark = import inputs.nixpkgs {
           system = "aarch64-linux";
           config.allowUnfree = true;
-          overlays = [ ];
+          overlays = [ (import ../packages) ];
         };
       };
       specialArgs = {
@@ -69,7 +69,7 @@ in
       { ... }:
       {
         imports = [
-          ../../modules/default.nix
+          ../modules/services/monitoring/pcp.nix
           inputs.home-manager.nixosModules.home-manager
           ./dgx-spark
         ];
