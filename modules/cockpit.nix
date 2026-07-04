@@ -54,10 +54,6 @@ in
       port = cfg.port;
       openFirewall = cfg.openFirewall;
 
-      # cockpit-session needs cockpit-bridge in PATH (nixpkgs module
-      # no longer adds it)
-      environmentPaths = [ "${pkgs.cockpit}/bin/cockpit-bridge" ];
-
       # Add cockpit plugins
       plugins = [
         pkgs.cockpit-machines
