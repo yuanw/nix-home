@@ -44,6 +44,9 @@ in
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username} = {
+    home.packages = with pkgs; [
+      llama-benchy
+    ];
     programs.git.settings.github.user = "yuanw";
   };
   modules = {

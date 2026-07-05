@@ -125,15 +125,11 @@
               allowUnfree = true;
             };
             overlays =
-              inputs.nixpkgs.lib.optionals
-                (builtins.elem system [
-                  "aarch64-linux"
-                  "x86_64-linux"
-                ])
-                [
-                  inputs.dgx-spark.overlays.fixes
-                  (import ./packages)
-                ];
+              (inputs.nixpkgs.lib.optionals (builtins.elem system [
+                "aarch64-linux"
+                "x86_64-linux"
+              ]) [ inputs.dgx-spark.overlays.fixes ])
+              ++ [ (import ./packages) ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;
@@ -148,6 +144,9 @@
           #   };
           # };
 
+          packages = {
+            llama-benchy = pkgs.llama-benchy;
+          };
           treefmt.imports = [ ./treefmt.nix ];
           pre-commit.settings.hooks.treefmt.enable = true;
           pre-commit.settings.package = pkgs.prek;
