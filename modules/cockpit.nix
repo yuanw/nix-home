@@ -15,6 +15,15 @@ let
     types
     ;
   cfg = config.services.cockpit-local;
+
+  # Resolve the NVIDIA driver package for nvidia-smi.
+  # cfg.nvidiaPackage is explicit override, or we try common
+  # attrpaths.  The nvidia package may be a set (open/mod) so
+  # fall back to the .mod variant.
+  nvidiaPkgTry = config.hardware.nvidia.package or null;
+  nvidiaDrv = cfg.nvidiaPackage or nvidiaPkgTry;
+  nvidiaPkg =
+    if lib.isDerivation nvidiaDrv then nvidiaDrv else (nvidiaDrv.mod or nvidiaDrv.open or null);
 in
 {
   options.services.cockpit-local = {
@@ -58,23 +67,8 @@ in
       plugins = [
         pkgs.cockpit-machines
         pkgs.cockpit-podman
-        pkgs.cockpit-metrics-nav
       ]
-      ++ optional cfg.enableGpu (
-        let
-          # Resolve the NVIDIA driver package for nvidia-smi in PATH.
-          # cfg.nvidiaPackage is explicit override, or we try common
-          # attrpaths.  The nvidia package may be a set (open/mod) so
-          # fall back to the .mod variant.
-          nvidiaPkgTry = config.hardware.nvidia.package or null;
-          nvidiaDrv = cfg.nvidiaPackage or nvidiaPkgTry;
-          nvidiaPkg =
-            if lib.isDerivation nvidiaDrv then nvidiaDrv else (nvidiaDrv.mod or nvidiaDrv.open or null);
-        in
-        pkgs.cockpit-gpu.override {
-          nvidiaDriverPkg = nvidiaPkg;
-        }
-      );
+      ++ optional cfg.enableGpu (pkgs.cockpit-gpu.override { nvidiaDriverPkg = nvidiaPkg; });
     };
 
     # Allow access from LAN hostnames (merges with nixpkgs default localhost origin)
@@ -90,6 +84,16 @@ in
 
     # cockpit-session needs cockpit-bridge in PATH (nixpkgs module no longer adds it)
     environment.systemPackages = [ pkgs.cockpit ];
+
+    # cockpit-gpu manifest.json checks /usr/bin/nvidia-smi via path-exists
+    # condition. Create the symlink via systemd tmpfiles since /usr/bin is
+    # a real directory on NixOS (unlike /bin which is a symlink).
+    # We use config.system.path which is the system profile derivation, and
+    # reference nvidia-smi from there. This works because the nvidia driver
+    # is always included in the system profile on dgx-spark.
+    systemd.tmpfiles.rules = mkIf cfg.enableGpu [
+      "L+ /usr/bin/nvidia-smi - - - - ${config.system.path}/bin/nvidia-smi"
+    ];
 
     # Advertise via mDNS so spark.local:9090 is discoverable
     services.avahi = {

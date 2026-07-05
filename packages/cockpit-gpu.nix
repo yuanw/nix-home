@@ -39,6 +39,11 @@ stdenv.mkDerivation (_finalAttrs: {
     cp -R ${cockpit.src} "$workingCockpit"
     chmod -R u+w "$workingCockpit"
 
+    # Copy pkg/lib from the Cockpit source (build templates, boot script generation).
+    # This mirrors what cockpit-machines does in its postPatch.
+    mkdir -p "$workingCockpit/pkg"
+    cp -r ${cockpit.src}/pkg/lib "$workingCockpit/pkg/lib"
+
     # Register the plugin in cockpit's files.js so build.js picks it up.
     python3 "${./register-plugin.py}" "$workingCockpit/files.js" \
         "cockpit-gpu/cockpit-gpu.jsx" "cockpit-gpu/index.html"
@@ -52,20 +57,34 @@ stdenv.mkDerivation (_finalAttrs: {
   '';
 
   installPhase = ''
-    runHook preInstall
-    dest="$out/share/cockpit/gpus"
-    mkdir -p "$dest"
+        runHook preInstall
+        dest="$out/share/cockpit/gpus"
+        mkdir -p "$dest"
 
-    # Copy the built dist artifacts from the working directory.
-    cp -r "$TMPDIR/cockpit-build/dist/cockpit-gpu/." "$dest/"
+        # Copy the built dist artifacts from the working directory.
+        cp -r "$TMPDIR/cockpit-build/dist/cockpit-gpu/." "$dest/"
 
-    # install.sh also copies a few static files from the plugin dir
-    # when they are not present in the dist output.
-    for f in index.html po.js; do
-      [ -f "$dest/$f" ] || cp "plugin/$f" "$dest/"
-    done
+        # install.sh also copies a few static files from the plugin dir
+        # when they are not present in the dist output.
+        for f in index.html po.js; do
+          [ -f "$dest/$f" ] || cp "plugin/$f" "$dest/"
+        done
 
-    runHook postInstall
+        # The dist build sometimes omits cockpit-gpu-boot.js (which the plugin's
+        # index.html references). Create a minimal boot script that loads the
+        # main bundle via script tag injection (avoids ESM import issues with
+        # Cockpit's .js.gz transparent serving).
+        if [ ! -f "$dest/cockpit-gpu-boot.js" ]; then
+          cat > "$dest/cockpit-gpu-boot.js" << 'EOF'
+    (function() {
+      var s = document.createElement('script');
+      s.src = 'cockpit-gpu.js';
+      document.head.appendChild(s);
+    })();
+    EOF
+        fi
+
+        runHook postInstall
   '';
 
   passthru = {

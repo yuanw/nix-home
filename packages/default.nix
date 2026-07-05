@@ -226,6 +226,4 @@ in
   # Re-adds pcp removed from nixpkgs (PR #495646)
   pcp = prev.callPackage ./pcp/package.nix { };
 
-  # Cockpit plugin: add "Performance" sidebar entry pointing to /metrics
-  cockpit-metrics-nav = prev.callPackage ./cockpit-metrics-nav/package.nix { };
 }

@@ -86,7 +86,7 @@
   ];
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = false;
+  services.ds4.enable = true;
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
