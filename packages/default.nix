@@ -215,6 +215,10 @@ in
   # vllm-node: reproducible Docker image build from prebuilt wheels
   vllm-node = prev.callPackage ./vllm-node { };
 
+  # sm121-vllm-nvfp4: SM121-optimized vLLM v0.24.0 NVFP4 KV Docker image
+  # Builds from source (vLLM + FlashInfer patches) — ~60 min on DGX Spark
+  sm121-vllm-nvfp4 = prev.callPackage ./sm121-vllm-nvfp4 { };
+
   # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
   vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
     cudaPackages = prev.cudaPackages;

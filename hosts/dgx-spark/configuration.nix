@@ -192,11 +192,11 @@
       enable = true;
       autoStart = false; # Start manually after model downloads complete
       backend = "podman";
-      # spark-vllm-docker build (vllm-node) — custom vLLM built for DGX Spark
-      # with DeepGEMM, FlashInfer, and sm_121a support. Prebuilt wheels from:
-      #   https://github.com/eugr/spark-vllm-docker/releases
-      # Benchmark: 109 tok/s on spark-arena.com/benchmark/sub1782724431960
-      containerImage = "localhost/vllm-node:latest";
+      # sm121-vllm-nvfp4 build — NVIDIA-optimized vLLM v0.24.0 for DGX Spark
+      # with NVFP4 KV cache, FlashInfer PR #3684, and vLLM PR #46329 patches.
+      #   https://github.com/r0b0tlab/nvidia-qwen-3.6-27B-sm121-nvfp4
+      # Benchmark: 248 tok/s (32 concurrency), GSM8K 81.88% 0-shot
+      containerImage = "localhost/sm121-vllm-v0240-nvfp4:kv-exp";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
@@ -210,8 +210,11 @@
       kvCacheDtype = "fp8";
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
-      # No speculative decoding — MTP requires the built-in MTP heads but
-      # the spark-vllm-docker image doesn't include DFlash.
+      # MTP speculative decoding: the sm121-vllm-nvfp4 image includes vLLM
+      # v0.24.0 with built-in MTP heads (88–93% acceptance rate, 1 spec token).
+      # Enable via speculative config after model download confirms MTP support:
+      #   speculative.enable = true;
+      #   speculative.numSpeculativeTokens = 1;
       speculative = {
         enable = false;
       };
@@ -398,10 +401,29 @@
     };
   };
 
-  # The qwen35b instance requires the vllm-node image to be built first
+  # ─── sm121-vllm-nvfp4 image build ────────────────────────────────
+  # Builds the NVIDIA-optimized vLLM v0.24.0 Docker image from pinned source
+  # (https://github.com/r0b0tlab/nvidia-qwen-3.6-27B-sm121-nvfp4) with NVFP4 KV
+  # cache, MTP speculative decoding, and FlashInfer PR #3684 + vLLM PR #46329.
+  # Builds vLLM from source — expect ~60 min on first run.
+  systemd.services.vllm-sm121-build = {
+    description = "Build sm121-vllm-nvfp4 Docker image from pinned source";
+    after = [ "network.target" ];
+    wants = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [ podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.sm121-vllm-nvfp4}/bin/build-sm121-vllm-image";
+      TimeoutStartSec = 7200; # 2 hours for first build (vLLM from source)
+    };
+  };
+
+  # The qwen35b instance requires the sm121-vllm-nvfp4 image to be built first
   systemd.services.vllm-qwen35b = {
-    requires = [ "vllm-node-build.service" ];
-    after = [ "vllm-node-build.service" ];
+    requires = [ "vllm-sm121-build.service" ];
+    after = [ "vllm-sm121-build.service" ];
   };
 
   # ─── HuggingFace token ─────────────────────────────────────────────
