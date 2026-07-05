@@ -58,6 +58,7 @@ in
       plugins = [
         pkgs.cockpit-machines
         pkgs.cockpit-podman
+        pkgs.cockpit-metrics-nav
       ]
       ++ optional cfg.enableGpu (
         let
