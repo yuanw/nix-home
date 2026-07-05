@@ -189,6 +189,8 @@ in
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
 
+  llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
+
   librewolf-macos = prev.callPackage ./librewolf-macos { };
 
   firefox-macos = prev.callPackage ./firefox-macos { };

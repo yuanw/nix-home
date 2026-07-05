@@ -18,7 +18,7 @@ let
     owner = "r0b0tlab";
     repo = "nvidia-qwen-3.6-27B-sm121-nvfp4";
     rev = "2991336643f43f95eedf163d236bff4f95ee808d";
-    hash = "sha256-0wg49rf1dr05bbnsm1h20gl9jsaykaz8098pvbw4453lifsswc56";
+    hash = "sha256-EwNHkyjbDL78isQOpR5C/EiisbVDL2bMxVTLBbwff/s=";
   };
 
 in
