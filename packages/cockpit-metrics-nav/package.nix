@@ -1,8 +1,6 @@
-{
-  stdenv,
-}:
+{ pkgs }:
 
-stdenv.mkDerivation {
+pkgs.stdenv.mkDerivation {
   pname = "cockpit-metrics-nav";
   version = "1.0.0";
 
@@ -17,7 +15,7 @@ stdenv.mkDerivation {
 
   meta = {
     description = "Cockpit plugin to add Performance navigation entry pointing to PCP metrics";
-    license = stdenv.lib.licenses.mit;
+    license = pkgs.lib.licenses.mit;
     platform = "all";
   };
 }
