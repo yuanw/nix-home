@@ -18,8 +18,6 @@ fi
 
 cd "$root"
 
-sources_expr="let pkgs = import <nixpkgs> {}; in pkgs.callPackage ${generated_nix} {}"
-
 sources_json="$(
   nix eval --impure --json --expr "
     let
@@ -28,13 +26,14 @@ sources_json="$(
       entries = builtins.fromJSON (builtins.readFile ./modules/private/_sources/generated.json);
       names = builtins.attrNames entries;
     in pkgs.lib.genAttrs names (name: {
+      url = entries.\${name}.src.url;
       rev = entries.\${name}.src.rev;
       path = builtins.unsafeDiscardStringContext (toString sources.\${name}.src);
     })
   "
 )"
 
-while IFS=$'\t' read -r name rev store_path; do
+while IFS=$'\t' read -r name url rev store_path; do
   [[ -z $name ]] && continue
 
   if nix path-info "$store_path" &>/dev/null; then
@@ -43,14 +42,11 @@ while IFS=$'\t' read -r name rev store_path; do
   fi
 
   echo "prefetch-work-sources: $name @ ${rev:0:12} (fetching)"
-  nix build --impure --no-link --expr "
-    let sources = ${sources_expr};
-    in sources.\"${name}\".src
-  "
+  nix-prefetch-git "$url" --rev "$rev" >/dev/null
 done < <(
   jq -r '
     to_entries[]
-    | [.key, .value.rev, .value.path]
+    | [.key, .value.url, .value.rev, .value.path]
     | @tsv
   ' <<<"$sources_json"
 )
