@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Populate the nix store with private git sources before build.
+# Populate the nix store with Workiva private git sources before build.
 #
 # Nix fetchgit fixed-output derivations cannot use the host SSH agent inside
 # the builder (no /usr/bin/ssh on PATH). Prefetching here uses your normal
@@ -9,30 +9,48 @@ set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 generated="$root/modules/private/_sources/generated.json"
+generated_nix="./modules/private/_sources/generated.nix"
 
 if [[ ! -f $generated ]]; then
   echo "prefetch-work-sources: $generated not found, skipping" >&2
   exit 0
 fi
 
-prefetch_git() {
-  local name="$1" url="$2" rev="$3" root_dir="${4:-}"
+cd "$root"
 
-  echo "prefetch-work-sources: $name @ ${rev:0:12}"
-  if [[ -n $root_dir ]]; then
-    nix-prefetch-git "$url" --rev "$rev" --root-dir "$root_dir" >/dev/null
-  else
-    nix-prefetch-git "$url" --rev "$rev" >/dev/null
-  fi
-}
+sources_expr="let pkgs = import <nixpkgs> {}; in pkgs.callPackage ${generated_nix} {}"
 
-while IFS=$'\t' read -r name url rev; do
+sources_json="$(
+  nix eval --impure --json --expr "
+    let
+      pkgs = import <nixpkgs> {};
+      sources = pkgs.callPackage ${generated_nix} {};
+      entries = builtins.fromJSON (builtins.readFile ./modules/private/_sources/generated.json);
+      names = builtins.attrNames entries;
+    in pkgs.lib.genAttrs names (name: {
+      rev = entries.\${name}.src.rev;
+      path = builtins.unsafeDiscardStringContext (toString sources.\${name}.src);
+    })
+  "
+)"
+
+while IFS=$'\t' read -r name rev store_path; do
   [[ -z $name ]] && continue
-  prefetch_git "$name" "$url" "$rev"
+
+  if nix path-info "$store_path" &>/dev/null; then
+    echo "prefetch-work-sources: $name @ ${rev:0:12} (cached)"
+    continue
+  fi
+
+  echo "prefetch-work-sources: $name @ ${rev:0:12} (fetching)"
+  nix build --impure --no-link --expr "
+    let sources = ${sources_expr};
+    in sources.\"${name}\".src
+  "
 done < <(
   jq -r '
     to_entries[]
-    | [.key, .value.src.url, .value.src.rev]
+    | [.key, .value.rev, .value.path]
     | @tsv
-  ' "$generated"
+  ' <<<"$sources_json"
 )
