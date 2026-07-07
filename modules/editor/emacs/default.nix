@@ -155,6 +155,32 @@ with lib;
                     inherit (self) melpaBuild;
                   }
                 );
+                md-ts-mode = (
+                  pkgs.callPackage "${packagePath}/md-ts-mode.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild;
+                  }
+                );
+                markdown-table-wrap = (
+                  pkgs.callPackage "${packagePath}/markdown-table-wrap.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self) melpaBuild;
+                  }
+                );
+                pi-coding-agent = (
+                  pkgs.callPackage "${packagePath}/pi-coding-agent.nix" {
+                    inherit (pkgs) fetchFromGitHub writeText;
+                    inherit lib;
+                    inherit (self)
+                      melpaBuild
+                      transient
+                      md-ts-mode
+                      markdown-table-wrap
+                      ;
+                  }
+                );
                 agent-shell = (
                   pkgs.callPackage "${packagePath}/agent-shell.nix" {
                     inherit (pkgs) fetchFromGitHub writeText;
@@ -3247,16 +3273,48 @@ with lib;
 
                 consult-dir = {
                   enable = true;
+                  after = [
+                    "consult"
+                    "dired"
+                  ];
+                  preface = ''
+                    (defun my/dired-consult-dir ()
+                      "Pick a directory with consult and open it in Dired."
+                      (interactive)
+                      (let ((consult-dir-default-command #'consult-dir-dired))
+                        (consult-dir)))
+
+                    (defun my/consult-dired (&optional dir)
+                      "Open Dired using consult directory sources."
+                      (interactive)
+                      (if dir
+                          (dired (expand-file-name dir))
+                        (my/dired-consult-dir)))
+                  '';
                   bind = {
                     "M-g d" = "consult-dir";
+                    "C-x d" = "my/consult-dired";
                   };
 
                   bindLocal = {
+                    dired-mode-map = {
+                      "M-g d" = "my/dired-consult-dir";
+                      "C-c f" = "consult-dir-jump-file";
+                      "M-s f" = "consult-fd";
+                      "M-s g" = "consult-grep";
+                      "M-s G" = "consult-git-grep";
+                      "M-s r" = "consult-ripgrep";
+                      "M-s l" = "consult-line";
+                    };
                     minibuffer-local-filename-completion-map = {
                       "M-g d" = "consult-dir";
                       "M-s f" = "consult-dir-jump-file";
                     };
                   };
+                  config = ''
+                    (setq consult-dir-jump-file-command #'consult-fd)
+                    (define-key global-map [remap dired] #'my/consult-dired)
+                  '';
                 };
 
                 consult-dir-vertico = {
@@ -3266,11 +3324,11 @@ with lib;
                     "consult-dir"
                     "vertico"
                   ];
-                  # :defines (vertico-map)
-                  # :bind (:map vertico-map
-                  #             ("C-x C-j" . consult-dir)
-                  #             ("M-g d"   . consult-dir)
-                  #             ("M-s f"   . consult-dir-jump-file)))
+                  bindLocal.vertico-map = {
+                    "C-x C-j" = "consult-dir-jump-file";
+                    "M-g d" = "consult-dir";
+                    "M-s f" = "consult-dir-jump-file";
+                  };
                 };
                 kind-icon = {
                   enable = true;
@@ -3392,6 +3450,14 @@ with lib;
                     "multi-vterm-project"
                   ];
                   defer = true;
+                };
+
+                pi-coding-agent = {
+                  enable = true;
+                  package = epkgs: epkgs.pi-coding-agent;
+                  extraConfig = ''
+                    :init (defalias 'pi 'pi-coding-agent)
+                  '';
                 };
                 ghostel = emacsGhostel.usePackageGhostel;
 

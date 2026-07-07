@@ -100,6 +100,23 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText;
   };
 
+  md-ts-mode = pkgs.callPackage ./emacs/md-ts-mode.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  markdown-table-wrap = pkgs.callPackage ./emacs/markdown-table-wrap.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  pi-coding-agent = pkgs.callPackage ./emacs/pi-coding-agent.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit md-ts-mode markdown-table-wrap;
+    transient = pkgs.emacs.pkgs.elpaPackages.transient;
+  };
+
   agent-shell = pkgs.callPackage ./emacs/agent-shell.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;

@@ -4,8 +4,13 @@ host := `hostname -s`
 default:
     @just --list
 
+# prefetch Workiva git sources (needed before build on work hosts)
+prefetch-work-sources:
+    @{{justfile_directory()}}/scripts/prefetch-work-sources.sh
+
 # build os
 build:
+    @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
     @nix build --quiet ".#{{lowercase(host)}}"
 
 update-all:
@@ -34,6 +39,9 @@ nix-update:
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-racket --src-only --version=branch
     @nix-update -f ./packages/release.nix shell-maker --src-only --version=branch --override-filename ./packages/emacs/shell-maker.nix
+    @nix-update -f ./packages/release.nix pi-coding-agent --src-only --version=branch --override-filename ./packages/emacs/pi-coding-agent.nix
+    @nix-update -f ./packages/release.nix md-ts-mode --src-only --version=branch --override-filename ./packages/emacs/md-ts-mode.nix
+    @nix-update -f ./packages/release.nix markdown-table-wrap --src-only --version=branch --override-filename ./packages/emacs/markdown-table-wrap.nix
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
     @nix-update -f ./packages/release.nix vibeproxy --src-only
@@ -43,6 +51,7 @@ nix-update:
 
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
+	just prefetch-work-sources
 
 update-librewolf:
 	@nix shell nixpkgs#python3 nixpkgs#nix -c bash -c 'PYTHONPATH=packages python3 packages/librewolf-macos/update.py'
