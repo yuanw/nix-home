@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Populate the nix store with Workiva private git sources before build.
+# Populate the nix store with private git sources before build.
 #
 # Nix fetchgit fixed-output derivations cannot use the host SSH agent inside
 # the builder (no /usr/bin/ssh on PATH). Prefetching here uses your normal
@@ -36,10 +36,3 @@ done < <(
     | @tsv
   ' "$generated"
 )
-
-# Hard-coded in modules/private/work.nix (not nvfetcher-managed).
-prefetch_git \
-  mcp-atlassian \
-  ssh://git@github.com/Workiva/mcp_tools.git \
-  d5ddb35a22a3319d0e68468e0eb5686bc7d3ef3e \
-  servers/atlassian
