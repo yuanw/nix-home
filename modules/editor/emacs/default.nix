@@ -3273,16 +3273,48 @@ with lib;
 
                 consult-dir = {
                   enable = true;
+                  after = [
+                    "consult"
+                    "dired"
+                  ];
+                  preface = ''
+                    (defun my/dired-consult-dir ()
+                      "Pick a directory with consult and open it in Dired."
+                      (interactive)
+                      (let ((consult-dir-default-command #'consult-dir-dired))
+                        (consult-dir)))
+
+                    (defun my/consult-dired (&optional dir)
+                      "Open Dired using consult directory sources."
+                      (interactive)
+                      (if dir
+                          (dired (expand-file-name dir))
+                        (my/dired-consult-dir)))
+                  '';
                   bind = {
                     "M-g d" = "consult-dir";
+                    "C-x d" = "my/consult-dired";
                   };
 
                   bindLocal = {
+                    dired-mode-map = {
+                      "M-g d" = "my/dired-consult-dir";
+                      "C-c f" = "consult-dir-jump-file";
+                      "M-s f" = "consult-fd";
+                      "M-s g" = "consult-grep";
+                      "M-s G" = "consult-git-grep";
+                      "M-s r" = "consult-ripgrep";
+                      "M-s l" = "consult-line";
+                    };
                     minibuffer-local-filename-completion-map = {
                       "M-g d" = "consult-dir";
                       "M-s f" = "consult-dir-jump-file";
                     };
                   };
+                  config = ''
+                    (setq consult-dir-jump-file-command #'consult-fd)
+                    (define-key global-map [remap dired] #'my/consult-dired)
+                  '';
                 };
 
                 consult-dir-vertico = {
@@ -3292,11 +3324,11 @@ with lib;
                     "consult-dir"
                     "vertico"
                   ];
-                  # :defines (vertico-map)
-                  # :bind (:map vertico-map
-                  #             ("C-x C-j" . consult-dir)
-                  #             ("M-g d"   . consult-dir)
-                  #             ("M-s f"   . consult-dir-jump-file)))
+                  bindLocal.vertico-map = {
+                    "C-x C-j" = "consult-dir-jump-file";
+                    "M-g d" = "consult-dir";
+                    "M-s f" = "consult-dir-jump-file";
+                  };
                 };
                 kind-icon = {
                   enable = true;
