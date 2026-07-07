@@ -754,6 +754,16 @@ in
         betterfox.enable = true;
       }
     ]
+    ++ lib.optionals (program == "librewolf") [
+      {
+        profiles.home.settings = {
+          # Enable WebGL (disabled by LibreWolf by default for security)
+          "webgl.disabled" = false;
+          # Don't prompt for WebGL; not a significant attack vector nowadays
+          "librewolf.webgl.prompt" = false;
+        };
+      }
+    ]
   );
 
   # Writable extension-settings.json: merge declarative commands after HM (see helper/mergetools.nix).

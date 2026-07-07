@@ -10,10 +10,20 @@ let
     mkIf
     mkEnableOption
     mkOption
-    types
     mkDefault
+    optional
+    types
     ;
   cfg = config.services.cockpit-local;
+
+  # Resolve the NVIDIA driver package for nvidia-smi.
+  # cfg.nvidiaPackage is explicit override, or we try common
+  # attrpaths.  The nvidia package may be a set (open/mod) so
+  # fall back to the .mod variant.
+  nvidiaPkgTry = config.hardware.nvidia.package or null;
+  nvidiaDrv = cfg.nvidiaPackage or nvidiaPkgTry;
+  nvidiaPkg =
+    if lib.isDerivation nvidiaDrv then nvidiaDrv else (nvidiaDrv.mod or nvidiaDrv.open or null);
 in
 {
   options.services.cockpit-local = {
@@ -30,6 +40,20 @@ in
       default = true;
       description = "Open firewall for Cockpit web UI.";
     };
+
+    enableGpu = mkEnableOption "NVIDIA GPU monitoring plugin";
+
+    nvidiaPackage = mkOption {
+      type = types.nullOr types.package;
+      default = null;
+      description = ''
+        Package providing nvidia-smi, injected into cockpit.service PATH.
+        When unset, the module tries to auto-detect the driver package
+        from common attrpaths (`hardware.nvidia.package` or
+        `hardware.dgx-spark.package`). If auto-detection fails, set this
+        explicitly.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -40,10 +64,11 @@ in
       openFirewall = cfg.openFirewall;
 
       # Add cockpit plugins
-      plugins = with pkgs; [
-        cockpit-machines
-        cockpit-podman
-      ];
+      plugins = [
+        pkgs.cockpit-machines
+        pkgs.cockpit-podman
+      ]
+      ++ optional cfg.enableGpu (pkgs.cockpit-gpu.override { nvidiaDriverPkg = nvidiaPkg; });
     };
 
     # Allow access from LAN hostnames (merges with nixpkgs default localhost origin)
@@ -59,6 +84,16 @@ in
 
     # cockpit-session needs cockpit-bridge in PATH (nixpkgs module no longer adds it)
     environment.systemPackages = [ pkgs.cockpit ];
+
+    # cockpit-gpu manifest.json checks /usr/bin/nvidia-smi via path-exists
+    # condition. Create the symlink via systemd tmpfiles since /usr/bin is
+    # a real directory on NixOS (unlike /bin which is a symlink).
+    # We use config.system.path which is the system profile derivation, and
+    # reference nvidia-smi from there. This works because the nvidia driver
+    # is always included in the system profile on dgx-spark.
+    systemd.tmpfiles.rules = mkIf cfg.enableGpu [
+      "L+ /usr/bin/nvidia-smi - - - - ${config.system.path}/bin/nvidia-smi"
+    ];
 
     # Advertise via mDNS so spark.local:9090 is discoverable
     services.avahi = {

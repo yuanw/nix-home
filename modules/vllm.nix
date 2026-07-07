@@ -290,8 +290,11 @@ let
       ]
       ++ optionals inst.speculative.enable [ "${inst.speculative.model}:/drafter:ro" ]
       ++ [ "/var/lib/vllm/huggingface:/root/.cache/huggingface" ];
+      pullPolicy =
+        if lib.hasPrefix "localhost/" inst.containerImage then "--pull=never" else "--pull=missing";
       podmanArgs = [
         "run"
+        pullPolicy
         "--rm"
         "--name"
         "vllm-${name}"
@@ -327,7 +330,8 @@ let
         # CDI spec is what makes --device nvidia.com/gpu=all work. Mirrors
         # graham33's playbook shellHook guard.
         "+${pkgs.bash}/bin/bash -c 'test -f /etc/cdi/nvidia.yaml -o -f /var/run/cdi/nvidia-container-toolkit.json || { echo \"CDI spec missing — run: sudo nvidia-ctk cdi generate --output=/etc/cdi/nvidia.yaml\"; exit 1; }'"
-        "${pkgs.podman}/bin/podman pull ${escapeShellArg inst.containerImage}"
+        # Only pull remote images; skip for localhost images (built locally)
+        "${pkgs.bash}/bin/bash -c 'case ${escapeShellArg inst.containerImage} in localhost/*) ;; *) ${pkgs.podman}/bin/podman pull ${escapeShellArg inst.containerImage} ;; esac'"
         "${pkgs.bash}/bin/bash -c '${pkgs.podman}/bin/podman rm -f vllm-${name} || true'"
       ];
 
@@ -353,6 +357,8 @@ let
         ExecStart = execStart;
         Restart = "on-failure";
         RestartSec = 10;
+        # Container image pull can take several minutes for multi-GB images
+        TimeoutStartSec = if inst.backend == "podman" then 600 else 90;
 
         # Environment (native backend reads these directly; podman backend
         # receives them via -e from containerEnv).

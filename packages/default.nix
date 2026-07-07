@@ -183,8 +183,13 @@ in
   flash-attn-4 = prev.callPackage ./flash-attn-4 { };
 
   decord = prev.callPackage ./decord { };
+
+  cockpit-gpu = prev.callPackage ./cockpit-gpu.nix { };
+
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
+
+  llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
 
   librewolf-macos = prev.callPackage ./librewolf-macos { };
 
@@ -209,10 +214,22 @@ in
     meta.mainProgram = "comfyui";
   };
 
+  # vllm-node: reproducible Docker image build from prebuilt wheels
+  vllm-node = prev.callPackage ./vllm-node { };
+
+  # sm121-vllm-nvfp4: SM121-optimized vLLM v0.24.0 NVFP4 KV Docker image
+  # Builds from source (vLLM + FlashInfer patches) — ~60 min on DGX Spark
+  sm121-vllm-nvfp4 = prev.callPackage ./sm121-vllm-nvfp4 { };
+
   # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
   vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
     cudaPackages = prev.cudaPackages;
     pkg_config = prev.pkg-config;
     gnumake = prev.gnumake;
   };
+
+  # Performance Co-Pilot — system performance monitoring toolkit
+  # Re-adds pcp removed from nixpkgs (PR #495646)
+  pcp = prev.callPackage ./pcp/package.nix { };
+
 }
