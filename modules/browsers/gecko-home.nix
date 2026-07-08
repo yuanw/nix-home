@@ -760,17 +760,13 @@ in
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
           "browser.sessionstore.privacy_level" = 0;
-          "webgl.disabled" = false;
-          "privacy.resistFingerprinting" = false;
         };
         profiles.home.settings = {
           # LibreWolf mozilla.cfg sanitizes on shutdown and sets privacy_level=2.
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
           "browser.sessionstore.privacy_level" = 0;
-          # RFP restricts WebGL even when webgl.disabled is false.
-          "webgl.disabled" = false;
-          "privacy.resistFingerprinting" = false;
+          # WebGL: use LibreWolf's per-site permission prompt (issues#2772).
         };
       }
     ]
