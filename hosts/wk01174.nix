@@ -114,6 +114,7 @@
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
           pkgs.codingAgentsSkillPackages.teach
+          pkgs.codingAgentsSkillPackages.disk-space
           pkgs.pi-extensions.pi-interactive-shell
         ];
     };
