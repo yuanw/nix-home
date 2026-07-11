@@ -862,6 +862,21 @@
         "type": "github"
       }
     },
+    "nix-darwin-login-items": {
+      "locked": {
+        "lastModified": 1763528199,
+        "narHash": "sha256-8LQ5Wp3AJUp71Elax1R9lNkuEbO2Mrnpq+o8qpbhQyc=",
+        "owner": "yuanw",
+        "repo": "nix-darwin-login-items",
+        "rev": "ab75c315893ca206ddf9529e6e3aac6cb01b2f1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yuanw",
+        "repo": "nix-darwin-login-items",
+        "type": "github"
+      }
+    },
     "nix-fast-build": {
       "inputs": {
         "flake-parts": "flake-parts",
@@ -1272,6 +1287,7 @@
         "mics-skills": "mics-skills",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
+        "nix-darwin-login-items": "nix-darwin-login-items",
         "nixified-ai": "nixified-ai_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_8",

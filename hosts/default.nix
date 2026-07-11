@@ -182,6 +182,7 @@
                 {
                   nixpkgs.hostPlatform = system;
                 }
+                inputs.nix-darwin-login-items.darwinModules.default
                 inputs.home-manager.darwinModules.home-manager
                 {
                   home-manager = {

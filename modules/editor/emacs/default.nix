@@ -3272,7 +3272,7 @@ with lib;
                 };
 
                 consult-dir = {
-                  enable = true;
+                  enable = false;
                   after = [
                     "consult"
                     "dired"
@@ -3318,7 +3318,7 @@ with lib;
                 };
 
                 consult-dir-vertico = {
-                  enable = true;
+                  enable = false;
                   noRequire = true;
                   after = [
                     "consult-dir"
