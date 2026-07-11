@@ -1,16 +1,6 @@
 {
-  packagePath,
-  pkgs,
   modalEditing,
 }:
-
-let
-  helPackage =
-    epkgs:
-    pkgs.callPackage "${packagePath}/hel.nix" {
-      inherit (epkgs) melpaBuild;
-    };
-in
 
 {
   my-meow = {
@@ -34,7 +24,6 @@ in
   hel = {
     enable = modalEditing == "hel";
     demand = true;
-    package = helPackage;
     config = ''
       (require 'hel)
       (hel-mode 1)
@@ -61,5 +50,13 @@ in
              (define-key meow-insert-state-keymap (kbd "C-'") 'repeat-fu-execute)))
       ''
     ];
+  };
+
+  # Extend prot-modeline with the meow state indicator.
+  # Loaded after prot-modeline so it can modify the mode-line-format.
+  prot-modeline-meow = {
+    enable = modalEditing == "meow";
+    after = [ "prot-modeline" ];
+    config = ../configs/prot-modeline-meow.el;
   };
 }
