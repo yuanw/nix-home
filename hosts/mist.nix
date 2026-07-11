@@ -92,6 +92,8 @@ in
       enableLatex = false;
       enableService = true;
 
+      modalEditing = "hel";
+
       # enableAider = true;
       # enableCopilot = true;
       #lspStyle = "lsp-bridge";

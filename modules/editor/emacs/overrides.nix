@@ -87,7 +87,20 @@ self: _super:
     pkgs.callPackage "${packagePath}/hel.nix" {
       inherit (pkgs) fetchFromGitHub writeText;
       inherit lib;
-      inherit (self) melpaBuild pcre2el;
+      inherit (self)
+        melpaBuild
+        pcre2el
+        dash
+        avy
+        ultra-scroll
+        ;
+    }
+  );
+  ultra-scroll = (
+    pkgs.callPackage "${packagePath}/ultra-scroll.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit lib;
+      inherit (self) melpaBuild;
     }
   );
 }

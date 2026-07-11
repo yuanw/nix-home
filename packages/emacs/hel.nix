@@ -3,12 +3,20 @@
   melpaBuild,
   writeText,
   lib,
+  pcre2el,
+  dash,
+  avy,
+  ultra-scroll,
   ...
 }:
 
+let
+  version = "0.12.0";
+in
+
 melpaBuild {
   pname = "hel";
-  version = "0.12.0";
+  inherit version;
 
   src = fetchFromGitHub {
     owner = "anuvyklack";
@@ -18,7 +26,10 @@ melpaBuild {
   };
 
   packageRequires = [
+    dash
     pcre2el
+    avy
+    ultra-scroll
   ];
 
   recipe = writeText "recipe" ''

@@ -814,16 +814,6 @@ with lib;
 
                   ultra-scroll = {
                     enable = true;
-                    package =
-                      epkgs:
-                      (pkgs.callPackage "${packagePath}/ultra-scroll.nix" {
-                        inherit (pkgs)
-                          fetchFromGitHub
-                          writeText
-                          ;
-                        inherit (epkgs) melpaBuild;
-                      });
-
                     hook = [
                       "(after-init . ultra-scroll-mode)"
                     ];
