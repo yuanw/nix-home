@@ -3293,7 +3293,7 @@ with lib;
                   '';
                   bind = {
                     "M-g d" = "consult-dir";
-                    "C-x d" = "my/consult-dired";
+                    "M-x d" = "my/consult-dired";
                   };
 
                   bindLocal = {
