@@ -25,6 +25,18 @@
     enable = modalEditing == "hel";
     demand = true;
     config = ''
+      ;; Prepend unbind handlers (t = prepend) so they run BEFORE hel's own
+      ;; with-eval-after-load handlers, avoiding "key sequence z j starts
+      ;; with non-prefix key z" errors in hel-integration.el.
+      (eval-after-load 'compile
+        '(progn
+           (keymap-set compilation-mode-map "z" nil)
+           (keymap-set compilation-minor-mode-map "z" nil))
+        t)
+      (eval-after-load 'xref
+        '(keymap-set xref--xref-buffer-mode-map "z" nil)
+        t)
+
       (require 'hel)
       (hel-mode 1)
     '';
