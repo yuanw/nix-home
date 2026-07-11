@@ -61,6 +61,7 @@
       ./health.nix
       ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
+      ./login-items.nix
       ./macintosh.nix
       ./mouseless
       ./nix-casks.nix
