@@ -87,7 +87,7 @@ self: _super:
     pkgs.callPackage "${packagePath}/hel.nix" {
       inherit (pkgs) fetchFromGitHub writeText;
       inherit lib;
-      inherit (self) melpaBuild;
+      inherit (self) melpaBuild pcre2el;
     }
   );
 }

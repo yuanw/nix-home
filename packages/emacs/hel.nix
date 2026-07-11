@@ -17,7 +17,9 @@ melpaBuild {
     sha256 = "sha256-1YXo9QXIxrvUa09Fh7zSMyIsxrFpFdizP4fWyBdDtbs=";
   };
 
-  packageRequires = [ ];
+  packageRequires = [
+    pcre2el
+  ];
 
   recipe = writeText "recipe" ''
     (hel

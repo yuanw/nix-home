@@ -54,8 +54,11 @@
 
   # Extend prot-modeline with the meow state indicator.
   # Loaded after prot-modeline so it can modify the mode-line-format.
+  # noRequire prevents use-package from trying to install a package named
+  # prot-modeline-meow — it's just a config fragment.
   prot-modeline-meow = {
     enable = modalEditing == "meow";
+    noRequire = true;
     after = [ "prot-modeline" ];
     config = ../configs/prot-modeline-meow.el;
   };
