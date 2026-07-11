@@ -25,6 +25,10 @@ melpaBuild {
     sha256 = "sha256-1YXo9QXIxrvUa09Fh7zSMyIsxrFpFdizP4fWyBdDtbs=";
   };
 
+  patches = [
+    ./patches/hel-integration-z-prefix.patch
+  ];
+
   packageRequires = [
     dash
     pcre2el
