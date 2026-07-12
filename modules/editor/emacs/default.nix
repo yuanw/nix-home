@@ -739,6 +739,7 @@ with lib;
                 (import ./configs/modal-edit.nix {
                   modalEditing = cfg.modalEditing;
                 })
+                // (import ./configs/direnv.nix)
                 // {
                   # pratice emacs-fu
                   disable-mouse = {
@@ -2502,47 +2503,12 @@ with lib;
                       (popper-mode)
                     '';
                   };
-                  direnv = {
-                    enable = true;
-                    functions = [ "direnv--maybe-update-environment" ];
-                    preface = ''
-                       (defconst emacs-binary-path (directory-file-name
-                                                   (file-name-directory
-                                                    (executable-find "emacsclient"))))
-
-                      (defun patch-direnv-environment (&rest _args)
-                        (let ((dir (file-name-as-directory emacs-binary-path)))
-                          (unless (member dir exec-path)
-                            (setenv "PATH" (concat emacs-binary-path ":" (getenv "PATH")))
-                            (setq exec-path (cons dir exec-path)))))
-
-                      (defvar my-direnv-idle-timer nil)
-
-                      (defun my-direnv-maybe-update (&rest _ignore)
-                        (when my-direnv-idle-timer
-                          (cancel-timer my-direnv-idle-timer))
-                        (setq my-direnv-idle-timer
-                              (run-with-idle-timer 0.3 nil #'direnv--maybe-update-environment)))
-                    '';
-                    init = ''
-                      (advice-add 'direnv-update-directory-environment
-                                  :after #'patch-direnv-environment)
-                      (add-hook 'change-major-mode-hook #'my-direnv-maybe-update)
-                      ;; (add-hook 'buffer-list-update-hook #'my-direnv-maybe-update)
-                      (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
-                    '';
-                  };
                   editorconfig = {
                     enable = true;
                     config = ''
                       (editorconfig-mode 1)
                     '';
                   };
-                  envrc = {
-                    enable = false;
-                    hook = [ "(after-init . envrc-global-mode)" ];
-                  };
-
                   just-mode.enable = true;
                   justl = {
                     enable = true;
