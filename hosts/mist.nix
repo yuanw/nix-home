@@ -94,9 +94,6 @@ in
 
       modalEditing = "hel";
 
-      # enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
     };
     # health.enable = true;
     #jellyfin.enable = true;

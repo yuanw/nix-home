@@ -151,10 +151,7 @@
       enable = true;
       enableService = true;
       enableLatex = true;
-
-      #enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
     };
     # health.enable = true;
     dev = {
