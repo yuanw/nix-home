@@ -115,6 +115,7 @@
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
           pkgs.codingAgentsSkillPackages.teach
+          pkgs.codingAgentsSkillPackages.disk-space
           pkgs.pi-extensions.pi-interactive-shell
         ];
     };
@@ -151,10 +152,7 @@
       enable = true;
       enableService = true;
       enableLatex = true;
-
-      #enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
     };
     # health.enable = true;
     dev = {

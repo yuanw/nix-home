@@ -1,0 +1,22 @@
+Ensure `z` is treated as a prefix key in compilation and xref mode maps
+before binding "z j" / "z k", avoiding "key sequence starts with non-prefix
+key" errors on Emacs 30.
+
+--- a/hel-integration.el
++++ b/hel-integration.el
+@@ -446,6 +446,7 @@
+       "}"    'compilation-next-file
+       "{"    'compilation-previous-file
+       "] p"  'compilation-next-file
++      "z"    nil
+       "[ p"  'compilation-previous-file
+       "z j"  'compilation-next-file
+       "z k"  'compilation-previous-file))
+@@ -820,6 +821,7 @@
+     "}"   'xref-next-group
+     "{"   'xref-prev-group
+     "] p" 'xref-next-group
++    "z"   nil
+     "[ p" 'xref-prev-group
+     "z j" 'xref-next-group
+     "z k" 'xref-prev-group))

@@ -123,5 +123,9 @@ in
       pname = "teach";
       src = ./teach;
     };
+    disk-space = mkSkillFromPath {
+      pname = "disk-space";
+      src = ./disk-space/SKILL.md;
+    };
   };
 }

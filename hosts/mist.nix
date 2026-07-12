@@ -92,9 +92,8 @@ in
       enableLatex = false;
       enableService = true;
 
-      # enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
+
     };
     # health.enable = true;
     #jellyfin.enable = true;
