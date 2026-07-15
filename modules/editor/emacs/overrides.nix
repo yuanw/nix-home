@@ -96,6 +96,18 @@ self: _super:
         ;
     }
   );
+  hel-leader = (
+    pkgs.callPackage "${packagePath}/hel-leader.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit lib;
+      inherit (self)
+        melpaBuild
+        hel
+        dash
+        s
+        ;
+    }
+  );
   ultra-scroll = (
     pkgs.callPackage "${packagePath}/ultra-scroll.nix" {
       inherit (pkgs) fetchFromGitHub writeText;

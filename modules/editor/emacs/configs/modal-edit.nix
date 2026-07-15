@@ -30,6 +30,30 @@
     '';
   };
 
+  hel-leader = {
+    enable = modalEditing == "hel";
+    after = [
+      "hel"
+      "which-key"
+    ];
+    demand = true;
+    config = ''
+      (require 'hel-leader)
+    '';
+  };
+
+  hel-consult = {
+    enable = modalEditing == "hel";
+    noRequire = true;
+    after = [
+      "hel"
+      "hel-leader"
+      "consult"
+      "embark-consult"
+    ];
+    config = ../configs/hel-consult.el;
+  };
+
   repeat-fu = {
     enable = modalEditing == "meow";
     command = [
