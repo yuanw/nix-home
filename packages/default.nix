@@ -193,6 +193,8 @@ in
   # opensessions - tmux session sidebar and command-table plugin
   opensessions = prev.callPackage ./opensessions { };
 
+  spectral = prev.callPackage ./spectral { };
+
   # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
   # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
   # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids

@@ -1,0 +1,8 @@
+{
+  "name": "spectral-nix",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@stoplight/spectral-cli": "6.15.0"
+  }
+}
