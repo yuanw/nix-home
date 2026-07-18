@@ -16,6 +16,7 @@
           treefmt
           lego
           just
+          git
         ];
         inputsFrom = [
           config.treefmt.build.devShell
