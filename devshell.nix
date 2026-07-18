@@ -15,6 +15,7 @@
           dive
           treefmt
           lego
+          just
         ];
         inputsFrom = [
           config.treefmt.build.devShell
