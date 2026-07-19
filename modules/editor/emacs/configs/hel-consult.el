@@ -14,7 +14,7 @@
                           "--hidden --exclude .git")
         consult-async-input-throttle 0.2
         consult-async-input-debounce 0.1
-        consult-async-refresh-delay 0.15)
+        consult-async-refresh-delay 0.15))
 
 (with-eval-after-load 'consult
   (setq register-preview-delay 0.5

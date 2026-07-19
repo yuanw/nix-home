@@ -17,7 +17,7 @@ in
   imports = [
     inputs.self.myModules.common
     inputs.self.myModules.darwin
-    ../modules/private/jellyfin-darwin.nix
+    # ../modules/private/jellyfin-darwin.nix
   ];
 
   environment.casks = with inputs'.nix-casks.packages; [
@@ -31,11 +31,11 @@ in
   # determinate system
   nix.enable = false;
   my = {
-    username = "yuanw";
+    username = "yuan";
     name = "Yuan Wang";
     hostname = "mist";
     workspaceDirectory = "workspaces";
-    homeDirectory = "/Users/yuanw";
+    homeDirectory = "/Users/yuan";
   };
 
   environment.etc."nix/nix.custom.conf".source = nixCustomConf;
