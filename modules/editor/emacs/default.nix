@@ -2083,8 +2083,8 @@ with lib;
                       });
                   };
                   org-noter = {
-                    # enable = !(isDarwin);
-                    enable = true;
+                    enable = !(isDarwin);
+                    #enable = true;
                     config = ''
                       (require 'org-noter-pdftools)
                     '';
