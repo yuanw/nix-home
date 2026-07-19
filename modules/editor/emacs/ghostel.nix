@@ -64,6 +64,6 @@ in
   };
 
   usePackageGhostel = {
-    enable = true;
+    enable = false;
   };
 }
