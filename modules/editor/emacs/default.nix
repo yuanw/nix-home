@@ -2090,7 +2090,7 @@ with lib;
                     '';
                   };
                   org-noter-pdftools = {
-                    enable = true;
+                    enable =false;
 
                     after = [ "org-noter" ];
                     config = ''
