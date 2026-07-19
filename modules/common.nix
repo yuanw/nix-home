@@ -81,7 +81,7 @@
         inputs.emacs.overlay
         inputs.nur.overlays.default
         inputs.mcp-servers-nix.overlays.default
-        inputs.llm-agents.overlays.default
+        inputs.llm-agents.overlays.shared-nixpkgs
         inputs.agenix.overlays.default
         (_final: _prev: {
           stable = inputs'.nixpkgs-stable.legacyPackages;
