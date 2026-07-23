@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Bump Workiva git sources whose tags need semver ordering (nvfetcher use_max_tag is lexical).
+# parsimony is excluded: pinned to PR branch in nvfetcher.toml.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -7,7 +8,6 @@ generated_json="$root/modules/private/_sources/generated.json"
 render_nix="$root/scripts/render-work-generated-nix.py"
 
 declare -A packages=(
-  [parsimony]="ssh://git@github.com/Workiva/parsimony.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
   [frugal]="ssh://git@github.com/Workiva/frugal.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 )
 
