@@ -51,6 +51,7 @@ nix-update:
 
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
+	{{justfile_directory()}}/scripts/bump-semver-git-sources.sh
 	just prefetch-work-sources
 
 update-librewolf:
