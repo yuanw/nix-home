@@ -192,6 +192,7 @@
 
     work = {
       enable = true;
+      datadogMcp.enabled = true;
       includeTrio = true;
       atlassianMcp.enable = true;
       atlassianMcp.readOnly = false;
