@@ -16,6 +16,8 @@ let
     "${config.my.homeDirectory}/.nix-profile/bin"
     "${config.my.homeDirectory}/.pi/agent/bin"
     "${config.my.homeDirectory}/.local/bin"
+    "${pkgs.cargo}/bin"
+    "${pkgs.rustc}/bin"
     "/opt/homebrew/bin"
     "/usr/local/bin"
     "/usr/bin"
@@ -287,7 +289,7 @@ in
     marketplacePlugins = {
       enable = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = "Install common Herdr marketplace plugins on activation.";
       };
     };
@@ -301,7 +303,7 @@ in
 
       claude.enable = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = "Install Herdr's Claude Code integration when modules.claude-code is enabled.";
       };
     };
@@ -384,7 +386,7 @@ in
 
           ${pkgs.coreutils}/bin/chmod u+w "$target" 2>/dev/null || true
 
-          ${pkgs.python3}/bin/python3 ${configBootstrapScript} "$target" ${lib.escapeShellArg cfg.prefix} ${lib.escapeShellArg herdrTheme.name} ${lib.escapeShellArg (builtins.toJSON herdrTheme.custom)}
+          ${pkgs.python3}/bin/python3 ${configBootstrapScript} "$target" ${lib.escapeShellArg cfg.prefix} ${lib.escapeShellArg herdrTheme.name} ${lib.escapeShellArg (builtins.toJSON herdrTheme.custom)} ${lib.boolToString cfg.marketplacePlugins.enable}
         '';
 
         home.activation.herdr-marketplace-plugins = hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
@@ -413,7 +415,7 @@ in
                 echo "herdr: installing $spec plugin"
                 if ! install_output=$("$herdr_cmd" plugin install "$spec" --yes 2>&1); then
                   printf '%s\n' "$install_output" >&2
-                  if [ "$mode" = optional ] && printf '%s\n' "$install_output" | ${pkgs.gnugrep}/bin/grep -Eqi "not found|404|private|permission|could not read Username|authentication"; then
+                  if [ "$mode" = optional ] && printf '%s\n' "$install_output" | ${pkgs.gnugrep}/bin/grep -Eqi "not found|404|private|permission|could not read Username|authentication|plugin build failed|Unrecognized archive format"; then
                     echo "herdr: warning: optional $spec plugin unavailable; continuing" >&2
                   else
                     return 1
@@ -428,7 +430,7 @@ in
             install_plugin wyattjoh herdr-plugin-gh-pr
             install_plugin kkckkc herdr-plugin-gh-workflow
             install_plugin alon-z herdr-command-palette
-            install_plugin 0x5c0f herdr-insight
+            install_plugin 0x5c0f herdr-insight "" optional
           ''}
         '';
 
@@ -439,24 +441,36 @@ in
               "herdr-marketplace-plugins"
             ]
             ''
-              export PATH=$PATH:${lib.escapeShellArg launchPath}
-              herdr_cmd=${lib.escapeShellArg cfg.command}
+              ${lib.optionalString
+                ((cfg.integrations.pi.enable && piEnabled) || (cfg.integrations.claude.enable && claudeEnabled))
+                ''
+                  export PATH=$PATH:${lib.escapeShellArg launchPath}
+                  herdr_cmd=${lib.escapeShellArg cfg.command}
 
-              install_integration() {
-                target="$1"
-                echo "herdr: installing $target integration"
-                "$herdr_cmd" integration install "$target" >/dev/null
+                  install_integration() {
+                    target="$1"
+                    echo "herdr: installing $target integration"
+                    if ! output=$("$herdr_cmd" integration install "$target" 2>&1); then
+                      if printf '%s\n' "$output" | ${pkgs.gnugrep}/bin/grep -Eqi "Connection refused|Permission denied|os error 13"; then
+                        echo "herdr: warning: deferred $target integration install; run 'herdr integration install $target' after Herdr is up" >&2
+                      else
+                        printf '%s\n' "$output" >&2
+                        return 1
+                      fi
+                    fi
+                  }
+
+                  ${lib.optionalString (cfg.integrations.pi.enable && piEnabled) ''
+                    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent/extensions"
+                    PI_CODING_AGENT_DIR="$HOME/.pi/agent" install_integration pi
+                  ''}
+
+                  ${lib.optionalString (cfg.integrations.claude.enable && claudeEnabled) ''
+                    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
+                    install_integration claude
+                  ''}
+                ''
               }
-
-              ${lib.optionalString (cfg.integrations.pi.enable && piEnabled) ''
-                ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent/extensions"
-                PI_CODING_AGENT_DIR="$HOME/.pi/agent" install_integration pi
-              ''}
-
-              ${lib.optionalString (cfg.integrations.claude.enable && claudeEnabled) ''
-                ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
-                install_integration claude
-              ''}
             '';
       };
 

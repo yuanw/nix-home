@@ -6,6 +6,7 @@ path = pathlib.Path(sys.argv[1])
 prefix = sys.argv[2]
 theme_name = sys.argv[3]
 theme_custom = json.loads(sys.argv[4])
+plugin_commands = len(sys.argv) > 5 and sys.argv[5].lower() == "true"
 lines = path.read_text().splitlines()
 managed_commands = {
     "alonz.command-palette.open",
@@ -118,60 +119,65 @@ if not saw_keys:
     for key, value in managed_keys.items():
         out.append(f'{key} = "{value}"')
 
-command_block = [
-    "",
-    "[[keys.command]]",
-    'key = "prefix+m"',
-    'type = "plugin_action"',
-    'command = "alonz.command-palette.open"',
-    'description = "open command palette"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+f"',
-    'type = "plugin_action"',
-    'command = "herdr-file-viewer.open-file-viewer"',
-    'description = "open file viewer in a split"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+F"',
-    'type = "plugin_action"',
-    'command = "herdr-file-viewer.open-file-viewer-tab"',
-    'description = "open file viewer in a tab"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+T"',
-    'type = "plugin_action"',
-    'command = "herdr-insight.open-timeline-right"',
-    'description = "open agent timeline"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+R"',
-    'type = "plugin_action"',
-    'command = "gh-pr.refresh"',
-    'description = "refresh GitHub PR status"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+P"',
-    'type = "plugin_action"',
-    'command = "dutifuldev.ghzinga.open"',
-    'description = "open issue or PR in ghzinga"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+I"',
-    'type = "plugin_action"',
-    'command = "kkckkchosts.herdr-plugin-gh-workflow.gh-issue-develop"',
-    'description = "start GitHub issue workflow"',
-    "",
-    "[[keys.command]]",
-    'key = "prefix+O"',
-    'type = "plugin_action"',
-    'command = "ogulcancelik.github-start.open"',
-    'description = "start from GitHub item"',
-]
+command_block = (
+    [
+        "",
+        "[[keys.command]]",
+        'key = "prefix+m"',
+        'type = "plugin_action"',
+        'command = "alonz.command-palette.open"',
+        'description = "open command palette"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+f"',
+        'type = "plugin_action"',
+        'command = "herdr-file-viewer.open-file-viewer"',
+        'description = "open file viewer in a split"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+F"',
+        'type = "plugin_action"',
+        'command = "herdr-file-viewer.open-file-viewer-tab"',
+        'description = "open file viewer in a tab"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+T"',
+        'type = "plugin_action"',
+        'command = "herdr-insight.open-timeline-right"',
+        'description = "open agent timeline"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+R"',
+        'type = "plugin_action"',
+        'command = "gh-pr.refresh"',
+        'description = "refresh GitHub PR status"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+P"',
+        'type = "plugin_action"',
+        'command = "dutifuldev.ghzinga.open"',
+        'description = "open issue or PR in ghzinga"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+I"',
+        'type = "plugin_action"',
+        'command = "kkckkchosts.herdr-plugin-gh-workflow.gh-issue-develop"',
+        'description = "start GitHub issue workflow"',
+        "",
+        "[[keys.command]]",
+        'key = "prefix+O"',
+        'type = "plugin_action"',
+        'command = "ogulcancelik.github-start.open"',
+        'description = "start from GitHub item"',
+    ]
+    if plugin_commands
+    else []
+)
 
-if out and out[-1].strip():
-    out.append("")
-out.extend(command_block[1:])
+if command_block:
+    if out and out[-1].strip():
+        out.append("")
+    out.extend(command_block[1:])
 
 
 def upsert_worktree_directory(lines):
