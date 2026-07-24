@@ -8,6 +8,7 @@ generated_json="$root/modules/private/_sources/generated.json"
 render_nix="$root/scripts/render-work-generated-nix.py"
 
 declare -A packages=(
+  [wk]="ssh://git@github.com/Workiva/wk.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
   [frugal]="ssh://git@github.com/Workiva/frugal.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 )
 
