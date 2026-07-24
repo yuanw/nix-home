@@ -12,34 +12,6 @@ let
   temacs = pkgs.writeShellScriptBin "temacs" ''(tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacsclient -c -a 'emacs'" "C-m" )'';
   tkill = pkgs.writeShellScriptBin "tkill" "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 
-  # Opensessions source and version (from patched package)
-  opensessionsSrc = "${pkgs.opensessions}/share/opensessions";
-  opensessionsVersion = pkgs.opensessions.version;
-
-  opensessionsConfigJson = builtins.toJSON {
-    mux = "tmux";
-    plugins = [ ];
-    theme = {
-      palette = {
-        base = "#1e1e2e";
-        mantle = "#1e1e2e";
-        crust = "#1e1e2e";
-        surface0 = "#313244";
-        surface1 = "#45475a";
-        surface2 = "#585b70";
-        text = "#cdd6f4";
-        subtext0 = "#a6adc8";
-        subtext1 = "#bac2de";
-        mauve = "#cba6f7";
-        lavender = "#b4befe";
-        teal = "#94e2d5";
-        blue = "#89b4fa";
-      };
-    };
-    sidebarWidth = cfg.opensessions.width;
-    inherit (cfg.opensessions) sidebarPosition showWindowDetails;
-  };
-
   # tmux-which-key integration
   tmuxWhichKeyYaml = builtins.replaceStrings [ "__OPENSESSIONS_DIR__" ] [ cfg.opensessions.dataDir ] (
     builtins.readFile ./tmux-which-key.yaml
@@ -81,64 +53,6 @@ with lib;
       };
     };
 
-    opensessions = {
-      enable = mkOption {
-        type = types.bool;
-        default = false;
-        description = "Enable opensessions sidebar integration";
-      };
-      dataDir = mkOption {
-        type = types.str;
-        default = "${config.my.homeDirectory}/.local/share/opensessions/plugin";
-        defaultText = "~/.local/share/opensessions/plugin";
-        description = "Directory for opensessions plugin data";
-      };
-      key = mkOption {
-        type = types.str;
-        default = "";
-        example = "M-s";
-        description = "Direct toggle key for sidebar (no prefix required, e.g. 'M-s' for Alt+s, empty to disable)";
-      };
-      focusKey = mkOption {
-        type = types.str;
-        default = "";
-        example = "M-S";
-        description = "Direct focus key for sidebar (no prefix required, empty to disable)";
-      };
-      width = mkOption {
-        type = types.int;
-        default = 26;
-        description = "Sidebar width in columns";
-      };
-      sidebarPosition = mkOption {
-        type = types.enum [
-          "left"
-          "right"
-        ];
-        default = "left";
-        description = "Position of the sidebar";
-      };
-      theme = mkOption {
-        type = types.str;
-        default = "catppuccin-mocha";
-        description = "Theme for opensessions sidebar (unused - theme set in config)";
-      };
-      showWindowDetails = mkOption {
-        type = types.bool;
-        default = true;
-        description = "Show window/pane details in sidebar";
-      };
-      host = mkOption {
-        type = types.str;
-        default = "127.0.0.1";
-        description = "Host for opensessions server";
-      };
-      port = mkOption {
-        type = types.int;
-        default = 7391;
-        description = "Port for opensessions server";
-      };
-    };
   };
 
   config = mkIf cfg.enable {
@@ -151,107 +65,8 @@ with lib;
           tkill
           temacs
         ]
-        ++ optionals cfg.opensessions.enable [
-          pkgs.bun
-          pkgs.curl
-          pkgs.fzf
-        ];
-      };
 
-      # Declarative config file (shekohex approach)
-      xdg.configFile."opensessions/config.json".text = opensessionsConfigJson;
-
-      xdg.configFile."tmux/opensessions.sh" = mkIf cfg.opensessions.enable {
-        source = pkgs.writeShellScript "opensessions-init.sh" ''
-          set -euo pipefail
-          export PATH="${pkgs.coreutils}/bin:${pkgs.bun}/bin:$PATH"
-
-          src="${opensessionsSrc}"
-          target="${cfg.opensessions.dataDir}"
-          version="${opensessionsVersion}"
-          stamp="$target/.version"
-
-          mkdir -p "$(dirname "$target")"
-
-          # Only copy if version changed
-          if [[ ! -f "$stamp" || "$(cat "$stamp" 2>/dev/null)" != "$version" ]]; then
-            tmp="$(mktemp -d "${cfg.opensessions.dataDir}.tmp.XXXXXX")"
-            cp -R "$src/." "$tmp/"
-            chmod -R u+w "$tmp"
-            if [[ -d "$target" ]]; then
-              chmod -R u+w "$target" || true
-              rm -rf "$target"
-            fi
-            mv "$tmp" "$target"
-            printf '%s' "$version" > "$stamp"
-          fi
-
-          # Run bun install if node_modules missing or lock file changed
-          if [[ ! -d "$target/node_modules" ]] || [[ "$target/bun.lock" -nt "$target/node_modules" ]]; then
-            echo "Installing opensessions dependencies..." >&2
-            (cd "$target" && ${pkgs.bun}/bin/bun install --silent) || true
-          fi
-
-          exec "$target/opensessions.tmux"
-        '';
-        executable = true;
-      };
-
-      xdg.configFile."tmux/restart-opensessions.sh" = mkIf cfg.opensessions.enable {
-        source = pkgs.writeShellScript "restart-opensessions.sh" ''
-          #!/usr/bin/env sh
-          set -eu
-
-          target="${cfg.opensessions.dataDir}"
-          SCRIPTS_DIR="$target/integrations/tmux-plugin/scripts"
-          HOST="${cfg.opensessions.host}"
-          PORT="${toString cfg.opensessions.port}"
-
-          if [ ! -d "$SCRIPTS_DIR" ]; then
-            tmux display-message "opensessions: missing scripts at $SCRIPTS_DIR"
-            exit 0
-          fi
-
-          # Best-effort graceful shutdown
-          ${pkgs.curl}/bin/curl -s -o /dev/null -X POST "http://''${HOST}:''${PORT}/shutdown" 2>/dev/null || true
-
-          # Kill stale pid if still present
-          PID_FILE="/tmp/opensessions.pid"
-          if [ -f "$PID_FILE" ]; then
-            kill "$(cat "$PID_FILE")" 2>/dev/null || true
-            rm -f "$PID_FILE"
-          fi
-
-          # If server still bound on port, force-kill listener pids
-          if ${pkgs.curl}/bin/curl -s -m 1 "http://''${HOST}:''${PORT}/" 2>/dev/null | grep -q '^opensessions server$'; then
-            for pid in $(${pkgs.lsof}/bin/lsof -tiTCP:"$PORT" -sTCP:LISTEN 2>/dev/null || true); do
-              kill "$pid" 2>/dev/null || true
-            done
-          fi
-
-          # Ensure fresh server is up
-          if [ -f "$SCRIPTS_DIR/ensure-sidebar.sh" ]; then
-            sh "$SCRIPTS_DIR/ensure-sidebar.sh"
-          fi
-
-          ready=0
-          attempt=0
-          while [ "$attempt" -lt 30 ]; do
-            if ${pkgs.curl}/bin/curl -s -m 1 "http://''${HOST}:''${PORT}/" 2>/dev/null | grep -q '^opensessions server$'; then
-              ready=1
-              break
-            fi
-            sleep 0.1
-            attempt=$((attempt + 1))
-          done
-
-          if [ "$ready" -eq 1 ]; then
-            tmux display-message "opensessions: restarted"
-          else
-            tmux display-message "opensessions: restart failed"
-          fi
-        '';
-        executable = true;
+        ;
       };
 
       # tmux-which-key config
@@ -317,32 +132,7 @@ with lib;
                  fzf --reverse --header join-pane --preview 'tmux capture-pane -pt {}'  |\
                  xargs tmux join-pane -v -s"
 
-            # Opensessions keybindings
-            ${lib.optionalString cfg.opensessions.enable ''
-              # Sidebar controls (prefix + key)
-              bind S run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"
-              bind o run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"
-              #bind O run-shell '$XDG_CONFIG_HOME/tmux/restart-opensessions.sh'
 
-              # Direct keybindings (no prefix required)
-              ${lib.optionalString (cfg.opensessions.key != "")
-                ''bind-key -n ${cfg.opensessions.key} run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh' \; display-message "opensessions: toggled sidebar"''
-              }
-              ${lib.optionalString (cfg.opensessions.focusKey != "")
-                ''bind-key -n ${cfg.opensessions.focusKey} run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh' \; display-message "opensessions: focused sidebar"''
-              }
-
-              # Environment for opensessions
-              set-environment -g OPENSESSIONS_DIR "${cfg.opensessions.dataDir}"
-              set-environment -g BUN_PATH "${pkgs.bun}/bin/bun"
-              set-environment -g OPENSESSIONS_HOST "${cfg.opensessions.host}"
-              set-environment -g OPENSESSIONS_PORT "${toString cfg.opensessions.port}"
-              set -g @opensessions-width "${toString cfg.opensessions.width}"
-              set -g allow-passthrough on
-
-              # Load opensessions on startup
-              run-shell '$XDG_CONFIG_HOME/tmux/opensessions.sh'
-            ''}
 
             # tmux-which-key
             ${lib.optionalString cfg.whichKey.enable ''
@@ -355,8 +145,7 @@ with lib;
             bind-key Tab display-menu -T "#[align=centre]Sessions" "Switch" . 'choose-session -Zw' Last l "switch-client -l" ${tmuxMenuSeperator} \
               "Open Main Workspace" m "display-popup -E \" td ${cfg.mainWorkspaceDir} \"" ${tmuxMenuSeperator} \
               "Kill Current Session" k "run-shell 'tmux switch-client -n \; tmux kill-session -t #{session_name}'"  "Kill Other Sessions" o "display-popup -E \"tkill \"" ${tmuxMenuSeperator} \
-              Random r "run-shell 'tat random'" Ollama a "run-shell 'tat ollama'" ${tmuxMenuSeperator} \
-              ${lib.optionalString cfg.opensessions.enable ''"Toggle Sidebar" s "run-shell 'sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh'" ${tmuxMenuSeperator}''} \
+              Random r "run-shell 'tat random'" org a "run-shell 'tat org'" ${tmuxMenuSeperator} \
               Exit q detach"
           '';
         };
@@ -364,15 +153,8 @@ with lib;
           sessionVariables = {
             ZSH_TMUX_AUTOSTART = "false";
             ZSH_TMUX_CONFIG = "$XDG_CONFIG_HOME/tmux/tmux.conf";
-          }
-          // lib.optionalAttrs cfg.opensessions.enable {
-            OPENSESSIONS_DIR = cfg.opensessions.dataDir;
           };
-          shellAliases = lib.optionalAttrs cfg.opensessions.enable {
-            osr = "$XDG_CONFIG_HOME/tmux/restart-opensessions.sh";
-            osf = "sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/focus.sh";
-            ost = "sh ${cfg.opensessions.dataDir}/integrations/tmux-plugin/scripts/toggle.sh";
-          };
+
           initContent = mkAfter ''
             # Auto-start tmux only in Alacritty
             if [ -n "$ALACRITTY_WINDOW_ID" ] && [ -z "$TMUX" ]; then

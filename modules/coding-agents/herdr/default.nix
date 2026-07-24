@@ -8,7 +8,6 @@ let
   cfg = config.modules.herdr;
   tmuxEnabled = config.modules.tmux.enable or false;
   piEnabled = config.modules.pi.enable or false;
-  claudeEnabled = config.modules.claude-code.enable or false;
 
   launchPath = lib.concatStringsSep ":" [
     "/etc/profiles/per-user/${config.my.username}/bin"
@@ -441,36 +440,29 @@ in
               "herdr-marketplace-plugins"
             ]
             ''
-              ${lib.optionalString
-                ((cfg.integrations.pi.enable && piEnabled) || (cfg.integrations.claude.enable && claudeEnabled))
-                ''
-                  export PATH=$PATH:${lib.escapeShellArg launchPath}
-                  herdr_cmd=${lib.escapeShellArg cfg.command}
+              ${lib.optionalString ((cfg.integrations.pi.enable && piEnabled)) ''
+                export PATH=$PATH:${lib.escapeShellArg launchPath}
+                herdr_cmd=${lib.escapeShellArg cfg.command}
 
-                  install_integration() {
-                    target="$1"
-                    echo "herdr: installing $target integration"
-                    if ! output=$("$herdr_cmd" integration install "$target" 2>&1); then
-                      if printf '%s\n' "$output" | ${pkgs.gnugrep}/bin/grep -Eqi "Connection refused|Permission denied|os error 13"; then
-                        echo "herdr: warning: deferred $target integration install; run 'herdr integration install $target' after Herdr is up" >&2
-                      else
-                        printf '%s\n' "$output" >&2
-                        return 1
-                      fi
+                install_integration() {
+                  target="$1"
+                  echo "herdr: installing $target integration"
+                  if ! output=$("$herdr_cmd" integration install "$target" 2>&1); then
+                    if printf '%s\n' "$output" | ${pkgs.gnugrep}/bin/grep -Eqi "Connection refused|Permission denied|os error 13"; then
+                      echo "herdr: warning: deferred $target integration install; run 'herdr integration install $target' after Herdr is up" >&2
+                    else
+                      printf '%s\n' "$output" >&2
+                      return 1
                     fi
-                  }
+                  fi
+                }
 
-                  ${lib.optionalString (cfg.integrations.pi.enable && piEnabled) ''
-                    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent/extensions"
-                    PI_CODING_AGENT_DIR="$HOME/.pi/agent" install_integration pi
-                  ''}
+                ${lib.optionalString (cfg.integrations.pi.enable && piEnabled) ''
+                  ${pkgs.coreutils}/bin/mkdir -p "$HOME/.pi/agent/extensions"
+                  PI_CODING_AGENT_DIR="$HOME/.pi/agent" install_integration pi
+                ''}
 
-                  ${lib.optionalString (cfg.integrations.claude.enable && claudeEnabled) ''
-                    ${pkgs.coreutils}/bin/mkdir -p "$HOME/.claude"
-                    install_integration claude
-                  ''}
-                ''
-              }
+              ''}
             '';
       };
 
