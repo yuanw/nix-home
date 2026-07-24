@@ -127,5 +127,9 @@ in
       pname = "disk-space";
       src = ./disk-space/SKILL.md;
     };
+    explain-diff-html = mkSkillFromPath {
+      pname = "explain-diff-html";
+      src = ./explain-diff-html/SKILL.md;
+    };
   };
 }

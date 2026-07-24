@@ -115,6 +115,7 @@
           pkgs.codingAgentsSkillPackages.grilling
           pkgs.codingAgentsSkillPackages.teach
           pkgs.codingAgentsSkillPackages.disk-space
+          pkgs.codingAgentsSkillPackages.explain-diff-html
           pkgs.pi-extensions.pi-interactive-shell
         ];
     };
