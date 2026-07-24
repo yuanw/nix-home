@@ -49,6 +49,7 @@
     #   supportLocalVirtualBuilder = true;
     # };
     cursor.enable = true;
+    herdr.enable = true;
     speak2text = {
       enable = false;
       flavor = "parakeet-mlx";

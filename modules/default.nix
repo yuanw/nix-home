@@ -15,6 +15,7 @@
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix
+      ./coding-agents/herdr
       ./coding-agents/hermes-agent.nix
       ./coding-agents/pi
       ./common.nix
