@@ -90,7 +90,7 @@ in
       default = { };
       example = lib.literalExpression ''
         {
-          "permission-gate.ts" = ./extensions/permission-gate.ts;
+          "notify.ts" = ./extensions/notify.ts;
           "my-tool.ts" = ./extensions/my-tool.ts;
         }
       '';
@@ -98,16 +98,19 @@ in
         Local .ts files to link directly into <configDir>/extensions/.
         Keys are the filenames (must include .ts suffix); values are paths to
         the source files. No packaging step required.
+        Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
       '';
     };
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default =
-        (with claudePlugins; [
+      default = (
+        with claudePlugins;
+        [
           humanizer
           emacs-skills
-        ]);
+        ]
+      );
       description = ''
         Pi skill packages. Each package's pname is used as the skill directory
         name under <configDir>/skills/.

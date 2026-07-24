@@ -28,7 +28,7 @@ let
 
   # Package a local .ts file as a pi extension.
   # pname must include the .ts suffix (used as the filename in extensions/).
-  # Example: mkLocalPiExtension "permission-gate.ts" ./extensions/permission-gate.ts
+  # Example: mkLocalPiExtension "notify.ts" ./extensions/notify.ts
   mkLocalPiExtension =
     pname: src:
     pkgs.runCommand pname
@@ -50,6 +50,7 @@ in
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
   pi-cursor-agent = callExtension ./pi-cursor-agent;
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
+  pi-permission-gate = callExtension ./pi-permission-gate.nix;
   pi-tutorial = callExtension ./pi-tutorial.nix;
   earendil-pi-review = callExtension ./earendil-pi-review.nix;
   pi-caveman = callExtension ./pi-caveman.nix;
