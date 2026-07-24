@@ -13,9 +13,7 @@ let
   tkill = pkgs.writeShellScriptBin "tkill" "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 
   # tmux-which-key integration
-  tmuxWhichKeyYaml = builtins.replaceStrings [ "__OPENSESSIONS_DIR__" ] [ cfg.opensessions.dataDir ] (
-    builtins.readFile ./tmux-which-key.yaml
-  );
+  tmuxWhichKeyYaml = builtins.readFile ./tmux-which-key.yaml;
 
   tmuxWhichKeyInit =
     pkgs.runCommand "tmux-which-key-init.tmux"

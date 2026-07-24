@@ -177,12 +177,6 @@
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
       whichKey.enable = true;
-      opensessions = {
-        enable = true;
-        width = 34;
-        sidebarPosition = "right";
-        showWindowDetails = true;
-      };
     };
     terminal = {
       enable = true;
