@@ -219,43 +219,6 @@ items:
       - name: Rename
         key: r
         command: rename
-  - name: +OpenSessions
-    key: o
-    menu:
-      - name: Focus sidebar
-        key: s
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/focus.sh"
-      - name: Toggle sidebar
-        key: t
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/toggle.sh"
-      - separator: true
-      - name: Session 1
-        key: "1"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 1"
-      - name: Session 2
-        key: "2"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 2"
-      - name: Session 3
-        key: "3"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 3"
-      - name: Session 4
-        key: "4"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 4"
-      - name: Session 5
-        key: "5"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 5"
-      - name: Session 6
-        key: "6"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 6"
-      - name: Session 7
-        key: "7"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 7"
-      - name: Session 8
-        key: "8"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/witch-index.sh 8"
-      - name: Session 9
-        key: "9"
-        command: run-shell "sh __OPENSESSIONS_DIR__/integrations/tmux-plugin/scripts/switch-index.sh 9"
   - name: +Client
     key: C
     menu:

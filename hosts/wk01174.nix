@@ -49,6 +49,7 @@
     #   supportLocalVirtualBuilder = true;
     # };
     cursor.enable = true;
+    herdr.enable = true;
     speak2text = {
       enable = false;
       flavor = "parakeet-mlx";
@@ -176,12 +177,6 @@
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
       whichKey.enable = true;
-      opensessions = {
-        enable = true;
-        width = 34;
-        sidebarPosition = "right";
-        showWindowDetails = true;
-      };
     };
     terminal = {
       enable = true;
