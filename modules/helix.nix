@@ -19,7 +19,7 @@
           true-color = true;
           lsp.display-messages = true;
         };
-        theme = "charm";
+        theme = "tokyonight";
         keys.insert.esc = [
           "collapse_selection"
           "normal_mode"

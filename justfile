@@ -51,6 +51,7 @@ nix-update:
 
 update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
+	{{justfile_directory()}}/scripts/bump-semver-git-sources.sh
 	just prefetch-work-sources
 
 update-librewolf:
@@ -155,6 +156,10 @@ switch:
     else \
         nixos-rebuild switch --flake '.#' --quiet --sudo; \
     fi
+
+# build devshell + system and push both closures to cachix
+push-all:
+    nix build --no-link --print-out-paths .#devShells.aarch64-darwin.default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result

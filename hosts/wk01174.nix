@@ -38,7 +38,7 @@
     };
   };
   environment.casks = with inputs'.nix-casks.packages; [
-    mouseless_preview
+    mouseless
     betterdisplay
     ungoogled-chromium
     slack
@@ -49,6 +49,7 @@
     #   supportLocalVirtualBuilder = true;
     # };
     cursor.enable = true;
+    herdr.enable = true;
     speak2text = {
       enable = false;
       flavor = "parakeet-mlx";
@@ -62,11 +63,11 @@
         pi-review
         pi-cursor-agent
         pi-slow-mode
+        pi-permission-gate
         pi-mcp-adapter
         pi-interactive-shell
       ];
       extensionFiles = {
-        "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
@@ -114,6 +115,8 @@
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
           pkgs.codingAgentsSkillPackages.teach
+          pkgs.codingAgentsSkillPackages.disk-space
+          pkgs.codingAgentsSkillPackages.explain-diff-html
           pkgs.pi-extensions.pi-interactive-shell
         ];
     };
@@ -150,10 +153,7 @@
       enable = true;
       enableService = true;
       enableLatex = true;
-
-      #enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
     };
     # health.enable = true;
     dev = {
@@ -177,12 +177,6 @@
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
       whichKey.enable = true;
-      opensessions = {
-        enable = true;
-        width = 34;
-        sidebarPosition = "right";
-        showWindowDetails = true;
-      };
     };
     terminal = {
       enable = true;
@@ -194,6 +188,7 @@
 
     work = {
       enable = true;
+      datadogMcp.enable = true;
       includeTrio = true;
       atlassianMcp.enable = true;
       atlassianMcp.readOnly = false;

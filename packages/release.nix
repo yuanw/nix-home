@@ -132,7 +132,6 @@ rec {
   chroma-mcp = pkgs.python3Packages.callPackage ./chroma-mcp.nix { };
   tccutil = pkgs.python3Packages.callPackage ./tccutil { };
   vibeproxy = pkgs.callPackage ./vibeproxy { };
-  aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
   caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
   claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
   emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;

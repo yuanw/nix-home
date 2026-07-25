@@ -90,7 +90,7 @@ in
       default = { };
       example = lib.literalExpression ''
         {
-          "permission-gate.ts" = ./extensions/permission-gate.ts;
+          "notify.ts" = ./extensions/notify.ts;
           "my-tool.ts" = ./extensions/my-tool.ts;
         }
       '';
@@ -98,6 +98,7 @@ in
         Local .ts files to link directly into <configDir>/extensions/.
         Keys are the filenames (must include .ts suffix); values are paths to
         the source files. No packaging step required.
+        Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
       '';
     };
 

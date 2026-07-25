@@ -17,7 +17,7 @@ in
   imports = [
     inputs.self.myModules.common
     inputs.self.myModules.darwin
-    ../modules/private/jellyfin-darwin.nix
+    # ../modules/private/jellyfin-darwin.nix
   ];
 
   environment.casks = with inputs'.nix-casks.packages; [
@@ -31,11 +31,11 @@ in
   # determinate system
   nix.enable = false;
   my = {
-    username = "yuanw";
+    username = "yuan";
     name = "Yuan Wang";
     hostname = "mist";
     workspaceDirectory = "workspaces";
-    homeDirectory = "/Users/yuanw";
+    homeDirectory = "/Users/yuan";
   };
 
   environment.etc."nix/nix.custom.conf".source = nixCustomConf;
@@ -61,11 +61,11 @@ in
         pi-review
         pi-cursor-agent
         pi-slow-mode
+        pi-permission-gate
         pi-mcp-adapter
         pi-interactive-shell
       ];
       extensionFiles = {
-        "permission-gate.ts" = ../modules/coding-agents/pi/extensions/permission-gate.ts;
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
@@ -95,9 +95,8 @@ in
       enableLatex = false;
       enableService = true;
 
-      # enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
+
     };
     # health.enable = true;
     #jellyfin.enable = true;

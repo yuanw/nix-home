@@ -75,6 +75,7 @@ with pkgs;
   pkg-config
   protobuf
   sioyek
+  spectral
 
   nix-prefetch-github
   poppler-utils

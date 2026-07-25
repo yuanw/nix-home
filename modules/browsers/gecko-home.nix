@@ -761,6 +761,17 @@ in
           "webgl.disabled" = false;
           # Don't prompt for WebGL; not a significant attack vector nowadays
           "librewolf.webgl.prompt" = false;
+        policies.Preferences = {
+          "privacy.sanitize.sanitizeOnShutdown" = false;
+          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
+          "browser.sessionstore.privacy_level" = 0;
+        };
+        profiles.home.settings = {
+          # LibreWolf mozilla.cfg sanitizes on shutdown and sets privacy_level=2.
+          "privacy.sanitize.sanitizeOnShutdown" = false;
+          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
+          "browser.sessionstore.privacy_level" = 0;
+          # WebGL: use LibreWolf's per-site permission prompt (issues#2772).
         };
       }
     ]

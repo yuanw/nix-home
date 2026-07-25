@@ -49,3 +49,6 @@ ssh_host_ed25519_key.pub
 diff.json
 .aider*
 .env
+
+# Python bytecode cache
+__pycache__/
