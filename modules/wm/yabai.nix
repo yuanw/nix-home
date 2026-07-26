@@ -172,16 +172,11 @@ in
         enable = true;
         enableScriptingAddition = true;
         config = {
-          window_border = "off";
-          window_border_width = 2;
-          active_window_border_color = "0xff81a1c1";
-          normal_window_border_color = "0xff3b4252";
           focus_follows_mouse = "autoraise";
           mouse_follows_focus = "on";
           mouse_drop_action = "stack";
           window_placement = "second_child";
           window_opacity = "off";
-          window_topmost = "off";
           split_ratio = "0.50";
           auto_balance = "on";
           mouse_modifier = "fn";
