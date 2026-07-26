@@ -18,13 +18,15 @@ let
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
+  alacrittyApp = "~/Applications/Home\\ Manager\\ Apps/Alacritty.app";
+  herdrCmd = "${config.modules.herdr.package}/bin/${config.modules.herdr.command}";
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
     shift + ctrl + alt - f :${defaultBrowserCmd}
-    shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
+    shift + ctrl + alt - t : open -n -a ${alacrittyApp} --args -e ${pkgs.tmux}/bin/tmux new-session -A -s main
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
@@ -32,8 +34,8 @@ let
                             ${pkgs.sketchybar}/bin/sketchybar --reload && osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
-    # display current configuration
-    shift + ctrl + alt - h: open /etc/skhdrc
+    # start Herdr
+    shift + ctrl + alt - h: open -n -a ${alacrittyApp} --args -e ${herdrCmd}
     shift + ctrl + alt - y : choose-pass
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
