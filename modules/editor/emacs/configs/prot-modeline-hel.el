@@ -18,17 +18,15 @@ Shows the Hel state when `hel-mode' is active, otherwise shows nothing."
       (propertize (format " %s " state-name) 'face face))))
 
 (with-eval-after-load 'hel
-  ;; Suppress hel's own mode-line-misc-info entry (multiple cursors / search)
-  ;; since we display the state here instead. Users can still see search
-  ;; progress via the built-in mechanism if desired.
   (setq hel-mode-line-info nil)
 
-  ;; Insert the hel state indicator into the mode-line format
-  ;; (replacing the empty string placeholder from prot-modeline.el).
-  (setq-default mode-line-format
-                (cl-substitute
-                 '(:eval (prot-modeline--hel-state)) ""
-                 (default-value 'mode-line-format)
-                 :test 'equal :count 1)))
+  ;; Insert the hel state indicator into the graphical mode-line format only.
+  (setq my/graphical-mode-line-format
+        (cl-substitute '(:eval (prot-modeline--hel-state)) ""
+                       my/graphical-mode-line-format
+                       :test 'equal :count 1))
+
+  (when-let ((frame (selected-frame)))
+    (my/ensure-mode-line-for-frame frame)))
 
 ;;; prot-modeline-hel.el ends here

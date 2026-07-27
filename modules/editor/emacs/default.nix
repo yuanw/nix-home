@@ -159,13 +159,19 @@ with lib;
                                                       (push '(vertical-scroll-bars . nil) default-frame-alist)
                                                       ;; no title bar
                                                       (add-to-list 'default-frame-alist '(undecorated-round . t))
-                                                      ;; Set up fonts early.
-                                                      ;;--------------------
-                                                      (let ((mono-spaced-font "${config.my.monoFont}")
-                                                       (proportionately-spaced-font "${config.my.font}"))
-                                                       (set-face-attribute 'default nil :family mono-spaced-font :height 180)
-                                                       (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
-                                                       (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+                                                      ;; Set up fonts on graphical frames only.
+                                                      ;; Never set the default (nil) face: tty frames inherit it and break.
+                                                      (defun my/set-frame-fonts (&optional frame)
+                                                        (when-let ((frame (or frame (selected-frame))))
+                                                          (when (display-graphic-p frame)
+                                                            (let ((mono-spaced-font "${config.my.monoFont}")
+                                                                  (proportionately-spaced-font "${config.my.font}"))
+                                                              (set-face-attribute 'default frame :family mono-spaced-font :height 180)
+                                                              (set-face-attribute 'fixed-pitch frame :family mono-spaced-font :height 1.0)
+                                                              (set-face-attribute 'variable-pitch frame :family proportionately-spaced-font :height 1.0)))))
+                                                      (when-let ((frame (selected-frame)))
+                                                        (my/set-frame-fonts frame))
+                                                      (add-hook 'server-after-make-frame-hook #'my/set-frame-fonts)
 
                                                       ;; auto-save might handle this already 
                                                       (setq make-backup-files nil)
@@ -435,7 +441,34 @@ with lib;
                                   (editorconfig-mode 1)
 
                  (autoload #'nerd-icons-set-font "nerd-icons" "Modify nerd font charsets to use FONT-FAMILY for FRAME." nil)
-                (add-hook 'server-after-make-frame-hook #'nerd-icons-set-font)
+                (defun my/nerd-icons-set-font (&optional frame)
+                  (when-let ((frame (or frame (selected-frame))))
+                    (when (display-graphic-p frame)
+                      (nerd-icons-set-font frame))))
+                (add-hook 'server-after-make-frame-hook #'my/nerd-icons-set-font)
+
+                ;; Some packages add frame hooks expecting a frame argument; Emacs
+                ;; occasionally calls them with none on tty frames (emacsclient -nw).
+                (defun my/wrap-frame-hook (fn)
+                  (if (and (symbolp fn) (get fn 'my/safe-frame-hook))
+                      (get fn 'my/safe-frame-hook)
+                    (let ((wrapper
+                           (lambda (&rest args)
+                             (condition-case-unless-debug err
+                                 (apply fn args)
+                               (wrong-number-of-arguments
+                                (if args
+                                    (signal (car err) (cdr err))
+                                  (funcall fn (selected-frame))))))))
+                      (when (symbolp fn)
+                        (put fn 'my/safe-frame-hook wrapper))
+                      wrapper)))
+
+                (defun my/install-safe-frame-hooks ()
+                  (setq server-after-make-frame-hook
+                        (mapcar #'my/wrap-frame-hook server-after-make-frame-hook)))
+
+                (add-hook 'after-init-hook #'my/install-safe-frame-hooks 999)
 
                 (setq treesit-font-lock-level 4)
 
@@ -1326,6 +1359,12 @@ with lib;
                     after = [ "corfu" ];
                     config = ''
                       (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+                      (remove-hook 'server-after-make-frame-hook #'nerd-icons-corfu--refresh-space)
+                      (add-hook 'server-after-make-frame-hook
+                                (lambda (frame)
+                                  (when (display-graphic-p frame)
+                                    (with-selected-frame frame
+                                      (nerd-icons-corfu--refresh-space)))))
                     '';
                   };
                   nerd-icons-dired = {
@@ -2090,7 +2129,7 @@ with lib;
                     '';
                   };
                   org-noter-pdftools = {
-                    enable =false;
+                    enable = false;
 
                     after = [ "org-noter" ];
                     config = ''
@@ -3007,8 +3046,14 @@ with lib;
                        (ef-themes-select 'ef-owl))
                     '';
                     config = ''
-                      ;; Load theme after display initialization (fixes Emacs 31 color-name-to-rgb issue)
-                      (load-theme 'ef-owl :no-confirm)
+                      ;; Load theme on graphical frames only (ef-themes breaks tty frames).
+                      (defun my/load-graphical-theme (&optional frame)
+                        (when-let ((frame (or frame (selected-frame))))
+                          (when (display-graphic-p frame)
+                            (load-theme 'ef-owl :no-confirm))))
+                      (when-let ((frame (selected-frame)))
+                        (my/load-graphical-theme frame))
+                      (add-hook 'server-after-make-frame-hook #'my/load-graphical-theme)
                     '';
                     bind = {
                       "C-c t l" = "my/select-light-theme";
@@ -3370,7 +3415,19 @@ with lib;
                           :scroll-bar-width 8
                           :fringe-width 8))
                     '';
-                    config = "(spacious-padding-mode 1)";
+                    config = ''
+                      (defun my/enable-spacious-padding (&optional frame)
+                        (when-let ((frame (or frame (selected-frame))))
+                          (when (display-graphic-p frame)
+                            (with-selected-frame frame
+                              (unless spacious-padding-mode
+                                (spacious-padding-mode 1))
+                              (spacious-padding-set-parameters-of-selected-frame)))))
+                      (when-let ((frame (selected-frame)))
+                        (my/enable-spacious-padding frame))
+                      (remove-hook 'server-after-make-frame-hook #'spacious-padding-set-parameters-of-selected-frame)
+                      (add-hook 'server-after-make-frame-hook #'my/enable-spacious-padding)
+                    '';
                   };
 
                   toggle-term = {

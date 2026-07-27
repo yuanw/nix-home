@@ -16,31 +16,32 @@ Shows the Meow state when `meow-mode' is active, otherwise shows EMACS."
    (t nil)))
 
 (with-eval-after-load 'meow
-  ;; Style meow's state indicator faces to match prot-modeline's look.
-  ;; Each state gets a colored background using prot-modeline indicator faces.
-  (set-face-attribute 'meow-normal-indicator nil
-                      :inherit 'prot-modeline-indicator-green-bg)
-  (set-face-attribute 'meow-insert-indicator nil
-                      :inherit 'prot-modeline-indicator-yellow-bg)
-  (set-face-attribute 'meow-motion-indicator nil
-                      :inherit 'prot-modeline-indicator-blue-bg)
-  (set-face-attribute 'meow-keypad-indicator nil
-                      :inherit 'prot-modeline-indicator-red-bg)
-  (set-face-attribute 'meow-beacon-indicator nil
-                      :inherit 'prot-modeline-indicator-magenta-bg)
+  (when (display-graphic-p)
+    ;; Style meow's state indicator faces to match prot-modeline's look.
+    (set-face-attribute 'meow-normal-indicator nil
+                        :inherit 'prot-modeline-indicator-green-bg)
+    (set-face-attribute 'meow-insert-indicator nil
+                        :inherit 'prot-modeline-indicator-yellow-bg)
+    (set-face-attribute 'meow-motion-indicator nil
+                        :inherit 'prot-modeline-indicator-blue-bg)
+    (set-face-attribute 'meow-keypad-indicator nil
+                        :inherit 'prot-modeline-indicator-red-bg)
+    (set-face-attribute 'meow-beacon-indicator nil
+                        :inherit 'prot-modeline-indicator-magenta-bg))
 
   ;; Suppress meow's built-in minor mode lighters (" [N]", " [I]", etc.)
-  ;; since we display the state via `prot-modeline--meow-or-emacs'.
   (dolist (mode '(meow-normal-mode meow-insert-mode meow-motion-mode
                   meow-keypad-mode meow-beacon-mode))
     (when-let* ((entry (assq mode minor-mode-alist)))
       (setcdr entry (list nil))))
 
-  ;; Insert the meow indicator into the mode-line format (replacing the empty string)
-  (setq-default mode-line-format
-                (cl-substitute
-                 '(:eval (prot-modeline--meow-or-emacs)) ""
-                 (default-value 'mode-line-format)
-                 :test 'equal :count 1)))
+  ;; Insert the meow indicator into the graphical mode-line format only.
+  (setq my/graphical-mode-line-format
+        (cl-substitute '(:eval (prot-modeline--meow-or-emacs)) ""
+                       my/graphical-mode-line-format
+                       :test 'equal :count 1))
+
+  (when-let ((frame (selected-frame)))
+    (my/ensure-mode-line-for-frame frame)))
 
 ;;; prot-modeline-meow.el ends here
