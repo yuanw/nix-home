@@ -18,6 +18,52 @@ The current local generator lives in:
 
 The target direction is to let =nima= own the final configured Emacs package and gradually migrate the existing =programs.emacs.init.usePackage= declarations into =nima= features.
 
+* Nix pipe operator requirement
+
+Current =nima= uses Nix's experimental pipe operator syntax in its own flake and module implementation.
+
+The pipe operator lets Nix code pass a value through a sequence of functions, similar to shell pipelines. For example, =nima= code can write something shaped like this:
+
+#+begin_src nix
+./.
+|> filter
+|> remove ./tests/test-data
+|> fs.toList
+#+end_src
+
+which means roughly:
+
+#+begin_src nix
+fs.toList (remove ./tests/test-data (filter ./.))
+#+end_src
+
+This is only syntax. It does not change what =nima= does; it only changes how parts of =nima='s Nix code are written.
+
+Because this repository uses =nima= as a normal flake input, Nix must be able to parse =nima='s flake. Therefore the local Nix installation needs the =pipe-operator= experimental feature enabled.
+
+In this repository that is configured in =modules/common.nix=:
+
+#+begin_src nix
+experimental-features = nix-command flakes auto-allocate-uids pipe-operator
+#+end_src
+
+For one-off commands, it can also be enabled explicitly:
+
+#+begin_src sh
+nix --extra-experimental-features pipe-operator flake update nima
+nix --extra-experimental-features pipe-operator eval .#darwinConfigurations.ci.pkgs.mkNima --apply 'f: builtins.isFunction f'
+#+end_src
+
+Do not use =flake = false= for =nima= unless we deliberately want to vendor or reimplement =mkNima=. The preferred setup follows [[https://github.com/jian-lin/wonima/blob/master/flake.nix][wonima]] and uses =nima= as a normal flake input:
+
+#+begin_src nix
+nima = {
+  url = "github:jian-lin/nima";
+  inputs.nixpkgs.follows = "nixpkgs";
+  inputs.flake-parts.follows = "flake-parts";
+};
+#+end_src
+
 * Important constraint: avoid double wrapping Emacs
 
 =nima= is itself a wrapper around =emacs.pkgs.withPackages=. Home Manager's =programs.emacs= also wraps Emacs.
