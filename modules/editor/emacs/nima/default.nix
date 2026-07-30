@@ -5,7 +5,9 @@
 # should install the result directly via `home.packages` or `services.emacs.package`.
 {
   pkgs,
-  emacsPackage ? pkgs.emacs,
+  # Use emacs-overlay's development build by default, matching the current
+  # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
+  emacsPackage ? pkgs.emacs-git,
   earlyDefaultEl ? "",
   featureOverrides ? { },
   extraModule ? { },

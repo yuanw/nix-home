@@ -170,16 +170,16 @@ nima-emacs-build:
 
 # run the staged nima Emacs package with a temporary HOME
 nima-emacs-run: nima-emacs-build
-    @tmp_home=$$(mktemp -d); \
-    echo "Using temporary HOME: $$tmp_home"; \
-    HOME="$$tmp_home" ./result/bin/emacs
+    @tmp_home=$(mktemp -d); \
+    echo "Using temporary HOME: $tmp_home"; \
+    HOME="$tmp_home" ./result/bin/emacs
 
 # run the staged nima Emacs package as an isolated daemon
 nima-emacs-daemon: nima-emacs-build
-    @tmp_home=$$(mktemp -d); \
-    echo "Using temporary HOME: $$tmp_home"; \
-    echo "Connect with: HOME=$$tmp_home ./result/bin/emacsclient -s nima-test -c"; \
-    HOME="$$tmp_home" ./result/bin/emacs --fg-daemon=nima-test
+    @tmp_home=$(mktemp -d); \
+    echo "Using temporary HOME: $tmp_home"; \
+    echo "Connect with: HOME=$tmp_home ./result/bin/emacsclient -s nima-test -c"; \
+    HOME="$tmp_home" ./result/bin/emacs --fg-daemon=nima-test
 
 # print the generated nima default.el content
 nima-emacs-print-config:
