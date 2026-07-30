@@ -155,7 +155,41 @@ switch:
         sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake .; \
     else \
         env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo; \
+        sudo systemctl try-restart emacs.service || true; \
     fi
+
+# build the staged nima Emacs package without switching the active service
+nima-emacs-build:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        pkgs_expr='flake.darwinConfigurations."{{host}}".pkgs'; \
+    else \
+        pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
+    fi; \
+    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; in import {{justfile_directory()}}/modules/editor/emacs/nima { inherit pkgs; }"
+
+# run the staged nima Emacs package with a temporary HOME
+nima-emacs-run: nima-emacs-build
+    @tmp_home=$$(mktemp -d); \
+    echo "Using temporary HOME: $$tmp_home"; \
+    HOME="$$tmp_home" ./result/bin/emacs
+
+# run the staged nima Emacs package as an isolated daemon
+nima-emacs-daemon: nima-emacs-build
+    @tmp_home=$$(mktemp -d); \
+    echo "Using temporary HOME: $$tmp_home"; \
+    echo "Connect with: HOME=$$tmp_home ./result/bin/emacsclient -s nima-test -c"; \
+    HOME="$$tmp_home" ./result/bin/emacs --fg-daemon=nima-test
+
+# print the generated nima default.el content
+nima-emacs-print-config:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        pkgs_expr='flake.darwinConfigurations."{{host}}".pkgs'; \
+    else \
+        pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
+    fi; \
+    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = pkgs.mkNima { rawOutput = true; featuresDir = {{justfile_directory()}}/modules/editor/emacs/nima/features; }; in nima.config.defaultEl.content"
 
 # build devshell + system and push both closures to cachix
 push-all:
