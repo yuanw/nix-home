@@ -11,7 +11,7 @@ prefetch-work-sources:
 # build os
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
-    @nix build --quiet ".#{{lowercase(host)}}"
+    @nix --extra-experimental-features pipe-operator build --quiet ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
