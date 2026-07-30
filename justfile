@@ -152,9 +152,9 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild switch --flake .; \
+        sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake .; \
     else \
-        nixos-rebuild switch --flake '.#' --quiet --sudo; \
+        env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo; \
     fi
 
 # build devshell + system and push both closures to cachix
