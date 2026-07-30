@@ -2090,7 +2090,7 @@ with lib;
                     '';
                   };
                   org-noter-pdftools = {
-                    enable =false;
+                    enable = false;
 
                     after = [ "org-noter" ];
                     config = ''
@@ -2409,11 +2409,28 @@ with lib;
                                               ))
                            (revert-buffer-quick)
                                               )
+
+                      (defun my/clear-jdtls-cache ()
+                        "Delete the jdtls workspace cache (${
+                          if isDarwin then "~/Library/Caches/jdtls/" else "~/.cache/jdtls/"
+                        })."
+                        (interactive)
+                        (let ((cache-dir (expand-file-name ${
+                          if isDarwin then ''"~/Library/Caches/jdtls/"'' else ''"~/.cache/jdtls/"''
+                        })))
+                          (when (yes-or-no-p (format "Delete jdtls cache at %s? " cache-dir))
+                            (when (file-directory-p cache-dir)
+                              (delete-directory cache-dir t))
+                            (message "Cleared jdtls cache: %s" cache-dir)
+                            (when (and (fboundp 'eglot-current-server)
+                                       (eglot-current-server))
+                              (eglot-reconnect)))))
                     '';
 
                     bindLocal = {
                       java-mode-map = {
                         "C-c C-f" = "my/format-java";
+                        "C-c C-j" = "my/clear-jdtls-cache";
                       };
                     };
                     mode = [
