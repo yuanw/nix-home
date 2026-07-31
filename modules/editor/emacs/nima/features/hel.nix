@@ -1,0 +1,23 @@
+{ lib, pkgs, ... }:
+
+let
+  packagePath = ../../../../../packages/emacs;
+in
+{
+  enable = lib.mkDefault false;
+
+  overlay = import ../../overrides.nix {
+    inherit pkgs lib packagePath;
+    emacsGhostel = null;
+  };
+
+  epkgs = epkgs: [
+    epkgs.hel
+    epkgs.hel-leader
+    epkgs.consult
+    epkgs.embark-consult
+    epkgs.which-key
+  ];
+
+  elispFile = ./hel.el;
+}
