@@ -50,6 +50,8 @@
   ;; (add-hook 'buffer-list-update-hook #'my-direnv-maybe-update)
   (add-hook 'window-selection-change-functions #'my-direnv-maybe-update)
 
+  (direnv-mode 1)
+
   (with-eval-after-load 'magit-worktree
     (advice-add #'magit-worktree-checkout
                 :around #'my-magit-worktree-after-create-copy-envrc)
