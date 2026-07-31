@@ -232,7 +232,6 @@ hm@{ pkgs, ... }:
 
     gpg = {
       enable = true;
-      pinentry.package = lib.mkIf pkgs.stdenvNoCC.isDarwin pkgs.pinentry-mac;
     };
     fastfetch = {
       enable = true;
