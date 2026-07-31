@@ -3,16 +3,10 @@
 let
   up = import ../lib/use-package.nix { inherit lib; };
 in
-{
-  epkgs = epkgs: [
-    epkgs.markdown-mode
+up.mkUsePackageFeature "markdown-mode" {
+  mode = [
+    ''"\\.mdwn\\'"''
+    ''"\\.markdown\\'"''
+    ''"\\.md\\'"''
   ];
-
-  elisp = up.mkUsePackage "markdown-mode" {
-    mode = [
-      ''"\\.mdwn\\'"''
-      ''"\\.markdown\\'"''
-      ''"\\.md\\'"''
-    ];
-  };
 }
