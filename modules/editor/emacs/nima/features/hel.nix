@@ -8,7 +8,7 @@ in
 
   overlay = import ../../overrides.nix {
     inherit pkgs lib packagePath;
-    emacsGhostel = null;
+    emacsGhostel.emacsOverrides = _self: _super: { };
   };
 
   epkgs = epkgs: [
