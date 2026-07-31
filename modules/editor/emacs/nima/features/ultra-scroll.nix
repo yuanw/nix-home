@@ -9,13 +9,13 @@ in
     emacsGhostel.emacsOverrides = _self: _super: { };
   };
 
-  epkgs = epkgs: [
-    epkgs.hel
-    epkgs.hel-leader
-    epkgs.consult
-    epkgs.embark-consult
-    epkgs.which-key
-  ];
+  epkgs = epkgs: [ epkgs.ultra-scroll ];
 
-  elispFile = ./hel.el;
+  elisp = ''
+    (use-package ultra-scroll
+      :hook (after-init . ultra-scroll-mode)
+      :custom
+      (scroll-conservatively 101)
+      (scroll-margin 0))
+  '';
 }
