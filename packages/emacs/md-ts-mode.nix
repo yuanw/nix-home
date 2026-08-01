@@ -8,7 +8,7 @@
 
 melpaBuild {
   pname = "md-ts-mode";
-  version = "0.3.0-unstable-2026-07-03";
+  version = "0.3.0-unstable-2026-05-30";
 
   src = fetchFromGitHub {
     owner = "dnouri";

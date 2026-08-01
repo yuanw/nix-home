@@ -8,7 +8,7 @@
 
 melpaBuild {
   pname = "markdown-table-wrap";
-  version = "0.2.0-unstable-2026-07-03";
+  version = "0.2.0-unstable-2026-03-18";
 
   src = fetchFromGitHub {
     owner = "dnouri";

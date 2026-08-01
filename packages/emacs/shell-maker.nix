@@ -8,13 +8,13 @@
 
 melpaBuild {
   pname = "shell-maker";
-  version = "0.93.1-unstable-2026-06-09";
+  version = "0.93.5-unstable-2026-07-27";
 
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "shell-maker";
-    rev = "43ee9e1862994cbaa89715d324edb7a424181f22";
-    sha256 = "sha256-nJNZBZKmzEVn5gNEL0DT4S09Hfd8hk6DLaZTtoRksS0=";
+    rev = "679cfbc02e206e0a702048cfd7c663eb5c9d1059";
+    sha256 = "sha256-oy5nS/6/pnghwk44bW+75oaaVMX4JqMsxcU5hunDoNc=";
   };
 
   packageRequires = [ ];

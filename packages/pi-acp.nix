@@ -6,13 +6,13 @@
 }:
 buildNpmPackage rec {
   pname = "pi-acp";
-  version = "0.0.31-unstable-2026-06-17";
+  version = "0.0.33-unstable-2026-07-30";
 
   src = fetchFromGitHub {
     owner = "svkozak";
     repo = "pi-acp";
-    rev = "49d6ec804d40b52317d873360654054c5d2387a3";
-    hash = "sha256-Psqz4VWCAqmg9uuLjiVq9D2ROvp9cTb8CYJxglnWBH4=";
+    rev = "d1cffc047ab37a096ee70ca39cfc1de463db8d12";
+    hash = "sha256-y8QE91ZbRxzoaV8ITw95OqUEpsxkTI9eicygEF1GUFc=";
   };
 
   npmDepsHash = "sha256-qN+b/tMbnJLkWjotl3XrA0nfZ3KT/mT6gM+n3Qiz8Wk=";
