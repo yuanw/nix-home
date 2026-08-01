@@ -115,5 +115,17 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  ask-mode = (
+    pkgs.callPackage "${packagePath}/ask-mode" {
+      inherit (pkgs) haskellPackages;
+      inherit (self) melpaBuild;
+    }
+  );
+  auto-save = (
+    pkgs.callPackage "${packagePath}/auto-save.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self) melpaBuild;
+    }
+  );
 }
 // (emacsGhostel.emacsOverrides self _super)

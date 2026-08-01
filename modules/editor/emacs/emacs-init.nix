@@ -17,6 +17,21 @@ let
     merge = mergeOneOption;
   };
 
+  elispLinesOrFileType = types.coercedTo types.path builtins.readFile types.lines;
+
+  elispLiteral =
+    value:
+    if builtins.isBool value then
+      if value then "t" else "nil"
+    else if builtins.isString value then
+      builtins.toJSON value
+    else
+      toString value;
+
+  mkDefvars =
+    vars:
+    concatStringsSep "\n" (mapAttrsToList (name: value: "(defvar ${name} ${elispLiteral value})") vars);
+
   usePackageType = types.submodule (
     { name, config, ... }:
     {
@@ -244,10 +259,10 @@ let
         };
 
         earlyInit = mkOption {
-          type = types.lines;
+          type = elispLinesOrFileType;
           default = "";
           description = ''
-            Lines to add to <option>programs.emacs.init.earlyInit</option> when
+            Lines or a file to add to <option>programs.emacs.init.earlyInit</option> when
             this package is enabled.
             </para><para>
             Note, the package is not automatically loaded so you will have to
@@ -458,6 +473,8 @@ let
     ;;
     ;;; Code:
 
+    ${mkDefvars cfg.defvar}
+
     ${cfg.earlyInit}
 
     (provide 'hm-early-init)
@@ -576,28 +593,51 @@ in
     startupTimer = mkEnableOption "Emacs startup duration timer";
 
     earlyInit = mkOption {
-      type = types.lines;
+      type = elispLinesOrFileType;
       default = "";
       description = ''
-        Configuration lines to add in <filename>early-init.el</filename>.
+        Configuration lines, or a file containing configuration lines, to add in
+        <filename>early-init.el</filename>.
+      '';
+    };
+
+    defvar = mkOption {
+      type = types.attrsOf (
+        types.oneOf [
+          types.str
+          types.bool
+          types.int
+          types.float
+        ]
+      );
+      default = { };
+      example = literalExpression ''
+        {
+          my-mono-font = config.my.monoFont;
+          my-font = config.my.font;
+        }
+      '';
+      description = ''
+        Attribute set of Elisp variables to define with <literal>defvar</literal>
+        before <option>programs.emacs.init.earlyInit</option> is emitted.
       '';
     };
 
     prelude = mkOption {
-      type = types.lines;
+      type = elispLinesOrFileType;
       default = "";
       description = ''
-        Configuration lines to add in the beginning of
-        <filename>init.el</filename>.
+        Configuration lines, or a file containing configuration lines, to add in
+        the beginning of <filename>init.el</filename>.
       '';
     };
 
     postlude = mkOption {
-      type = types.lines;
+      type = elispLinesOrFileType;
       default = "";
       description = ''
-        Configuration lines to add in the end of
-        <filename>init.el</filename>.
+        Configuration lines, or a file containing configuration lines, to add in
+        the end of <filename>init.el</filename>.
       '';
     };
 
