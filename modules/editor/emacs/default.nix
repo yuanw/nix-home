@@ -257,14 +257,6 @@ with lib;
                 };
                 ask-mode = {
                   enable = config.modules.dev.ask.enable;
-                  package =
-                    epkgs:
-                    (pkgs.callPackage ./packages/ask-mode {
-                      inherit (pkgs) haskellPackages;
-                      inherit (epkgs)
-                        melpaBuild
-                        ;
-                    });
                   mode = [
                     ''"\\.ask\\'"'' # \
                   ];
@@ -295,14 +287,6 @@ with lib;
                 auto-save = {
                   #enable = hostname == "WK01174";
                   enable = true;
-                  package =
-                    epkgs:
-                    (pkgs.callPackage "${packagePath}/auto-save.nix" {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        ;
-                      inherit (epkgs) melpaBuild;
-                    });
 
                   config = ''
                     (auto-save-enable)
