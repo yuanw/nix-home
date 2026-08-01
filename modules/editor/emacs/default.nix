@@ -1378,37 +1378,6 @@ with lib;
                     pkgs.mermaid-cli-wrapped
                   ];
                 };
-                claude-code-ide = {
-                  enable = true;
-                  bind = {
-                    "C-x c c" = "claude-code-ide-menu";
-                  };
-
-                  package =
-                    epkgs:
-                    (pkgs.callPackage "${packagePath}/claude-code-ide" {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        replaceVars
-                        writeText
-                        unstableGitUpdater
-                        ;
-                      inherit lib;
-                      inherit (epkgs)
-                        melpaBuild
-                        websocket
-                        transient
-                        web-server
-                        vterm
-                        eat
-                        flycheck
-                        ;
-
-                    });
-                  config = ''
-                    (claude-code-ide-emacs-tools-setup)
-                  '';
-                };
 
                 org-modern = {
                   enable = true;
