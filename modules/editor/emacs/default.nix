@@ -1409,30 +1409,7 @@ with lib;
                     (claude-code-ide-emacs-tools-setup)
                   '';
                 };
-                aider = {
-                  enable = cfg.enableAider;
-                  package =
-                    epkgs:
-                    (pkgs.callPackage ./packages/aider.nix {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        replaceVars
-                        writeText
-                        unstableGitUpdater
-                        ;
-                      inherit lib;
-                      inherit (epkgs) melpaBuild;
-                    });
-                  extraPackages = [
-                    pkgs.aider-chat
-                  ];
-                  config = ''
-                    (setq aider-args '("--no-auto-commits" "--model" "openrouter/deepseek/deepseek-coder"))
-                    (setenv "OPENROUTER_API_KEY" (with-temp-buffer
-                                 (insert-file-contents "~/.config/openrouter/key.txt")
-                                 (string-trim (buffer-string))))
-                  '';
-                };
+
                 org-modern = {
                   enable = true;
                   after = [ "org" ];
