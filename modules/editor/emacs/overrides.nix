@@ -127,5 +127,25 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  gptel-quick = (
+    pkgs.callPackage "${packagePath}/gptel-quick.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self)
+        melpaBuild
+        compat
+        gptel
+        ;
+    }
+  );
+  knockknock = (
+    pkgs.callPackage "${packagePath}/knockknock.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self)
+        melpaBuild
+        posframe
+        nerd-icons
+        ;
+    }
+  );
 }
 // (emacsGhostel.emacsOverrides self _super)

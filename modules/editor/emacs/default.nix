@@ -2814,28 +2814,6 @@ with lib;
                   '';
                 };
 
-                gptel-claude-oauth = {
-                  enable = true;
-                  after = [ "gptel" ];
-                  demand = true;
-                  #https://github.com/jwiegley/dot-emacs/blob/master/lisp/gptel-claude-oauth.elA
-                  package =
-                    epkgs:
-                    epkgs.trivialBuild {
-                      pname = "gptel-claude-oauth";
-                      version = "0.0.1";
-                      src = ./packages/gptel-claude-oauth.el;
-                      packageRequires = [
-
-                        epkgs.gptel
-                      ];
-                    };
-                  config = ''
-                    (setq gptel-model 'claude-opus-4-5-20251101
-                      gptel-backend (gptel-make-claude-oauth "Claude-OAuth" :stream t))
-                  '';
-                };
-
                 agent-shell = {
                   enable = true;
                   after = [ "gptel-claude-oauth" ];
@@ -2916,19 +2894,6 @@ with lib;
                     "gptel"
                     "embark"
                   ];
-                  package =
-                    epkgs:
-                    (pkgs.callPackage "${packagePath}/gptel-quick.nix" {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        ;
-                      inherit (epkgs)
-                        melpaBuild
-                        compat
-                        gptel
-                        ;
-
-                    });
                   extraConfig = ''
                     :bind (:map embark-general-map
                                ("?" . gptel-quick))
@@ -2938,18 +2903,6 @@ with lib;
 
                 knockknock = {
                   enable = true;
-                  package =
-                    epkgs:
-                    (pkgs.callPackage "${packagePath}/knockknock.nix" {
-                      inherit (pkgs)
-                        fetchFromGitHub
-                        ;
-                      inherit (epkgs)
-                        melpaBuild
-                        posframe
-                        nerd-icons
-                        ;
-                    });
                 };
 
                 mcp = {
@@ -3094,8 +3047,6 @@ with lib;
             file.".emacs.d/external".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/configs";
             packages = with pkgs; [
-              texinfoInteractive # For makeinfo command to convert .texi to EPUB
-              perlPackages.ArchiveZip # Required by makeinfo for EPUB generation
               (pkgs.writeShellScriptBin "app-launcher" ''
                 ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
               '')
