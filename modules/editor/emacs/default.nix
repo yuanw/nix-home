@@ -1761,6 +1761,7 @@ with lib;
                 };
                 java-mode = {
                   enable = true;
+                  noRequire = true;
                   preface = ''
                     (defun my/format-java ()
                         (interactive)
