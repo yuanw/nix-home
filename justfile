@@ -189,7 +189,7 @@ nima-emacs-print-config:
     else \
         pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
     fi; \
-    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = pkgs.mkNima { rawOutput = true; featuresDir = {{justfile_directory()}}/modules/editor/emacs/nima/features; }; in nima.config.defaultEl.content"
+    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = import {{justfile_directory()}}/modules/editor/emacs/nima { inherit pkgs; rawOutput = true; }; in nima.config.defaultEl.content"
 
 # build devshell + system and push both closures to cachix
 push-all:

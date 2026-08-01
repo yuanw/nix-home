@@ -19,6 +19,13 @@ let
       epkgs.other
     ];
   };
+  groupedFeatures = up.mkUsePackageFeatures {
+    sample = { };
+    disabled = {
+      enable = false;
+      config = "(ignore)";
+    };
+  };
 in
 assert up.packageToList fakeEpkgs "sample" == [ "sample-package" ];
 assert up.packageToList fakeEpkgs "missing" == [ ];
@@ -31,6 +38,8 @@ assert
   ];
 assert lib.hasInfix "(use-package sample" defaultFeature.elisp;
 assert lib.hasInfix ":no-require t" overriddenFeature.elisp;
+assert groupedFeatures.features.sample.epkgs fakeEpkgs == [ "sample-package" ];
+assert groupedFeatures.features.disabled.enable == false;
 pkgs.runCommand "nima-use-package-helper-test"
   { meta.description = "Regression tests for nima use-package helper"; }
   ''

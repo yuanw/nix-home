@@ -11,9 +11,12 @@
   earlyDefaultEl ? "",
   featureOverrides ? { },
   extraModule ? { },
+  rawOutput ? false,
 }:
 
 pkgs.mkNima {
+  inherit rawOutput;
+
   featuresDir = ./features;
 
   module =

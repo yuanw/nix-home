@@ -8,6 +8,7 @@ let
     isFunction
     isList
     isString
+    mapAttrs
     mapAttrsToList
     optional
     optionalString
@@ -32,7 +33,7 @@ let
     else
       [ package ];
 in
-{
+rec {
   inherit packageToList;
 
   mkUsePackage =
@@ -99,6 +100,10 @@ in
             "extraPackages"
           ];
         in
-        (import ./use-package.nix { inherit lib; }).mkUsePackage name usePackageArgs;
+        mkUsePackage name usePackageArgs;
     };
+
+  mkUsePackageFeatures = attrs: {
+    features = mapAttrs mkUsePackageFeature attrs;
+  };
 }
