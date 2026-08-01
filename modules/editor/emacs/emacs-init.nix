@@ -624,20 +624,20 @@ in
     };
 
     prelude = mkOption {
-      type = types.lines;
+      type = elispLinesOrFileType;
       default = "";
       description = ''
-        Configuration lines to add in the beginning of
-        <filename>init.el</filename>.
+        Configuration lines, or a file containing configuration lines, to add in
+        the beginning of <filename>init.el</filename>.
       '';
     };
 
     postlude = mkOption {
-      type = types.lines;
+      type = elispLinesOrFileType;
       default = "";
       description = ''
-        Configuration lines to add in the end of
-        <filename>init.el</filename>.
+        Configuration lines, or a file containing configuration lines, to add in
+        the end of <filename>init.el</filename>.
       '';
     };
 
