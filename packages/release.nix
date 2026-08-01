@@ -15,11 +15,6 @@ rec {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
   };
-  claude-code-ide = pkgs.callPackage ./emacs/claude-code-ide {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
-  };
-
   consult-omni = pkgs.callPackage ./emacs/consult-omni {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
