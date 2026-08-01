@@ -63,7 +63,6 @@
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
-                  inputs.git-ai.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
