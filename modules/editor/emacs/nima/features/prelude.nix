@@ -1,9 +1,13 @@
 {
-  # We can use `elispFile` when we do not need to access the Nix world in our
-  # Elisp config. This is also nima's default for ./prelude.nix, but keeping it
-  # explicit documents the pattern from nima's simple example.
-  elispFile = ./prelude.el;
+  lib,
+  myDefvar,
+  ...
+}:
 
+let
+  vars = import ../lib/elisp-vars.nix { inherit lib; };
+in
+{
   # Make this Elisp config come first in generated default.el.
   order = -100;
 
@@ -11,4 +15,12 @@
   epkgs = epkgs: [
     epkgs.use-package
   ];
+
+  # This feature needs access to Nix values, so use `elisp` instead of
+  # `elispFile`.  nima forbids setting both for one feature.
+  elisp = ''
+    ${vars.mkDefvars myDefvar}
+
+    ${builtins.readFile ./prelude.el}
+  '';
 }

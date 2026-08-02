@@ -161,7 +161,6 @@ Create a new =nima= area under the existing Emacs module directory:
 modules/editor/emacs/nima/
   default.nix
   lib/
-    use-package.nix
     elisp-vars.nix
   features/
     prelude.nix
@@ -184,11 +183,11 @@ Suggested conventions:
 - use a shared variable helper when Nix needs to emit Elisp =defvar= or =setq= forms
 - local Elisp packages can stay in =modules/editor/emacs/packages/=
 
-* Keep =use-package= with a small helper
+* Keep =use-package= directly in feature Elisp
 
-=nima= does not prevent using =use-package=. The simplest migration path is to emit =use-package= forms from each feature.
+=nima= does not prevent using =use-package=. The simplest migration path is to write normal =use-package= forms directly in each feature's =elisp= or companion =.el= file.
 
-For small packages, handwritten =use-package= is enough:
+For small packages, handwritten =use-package= keeps the Nix feature easy to read:
 
 #+begin_src nix
 {
@@ -202,72 +201,18 @@ For small packages, handwritten =use-package= is enough:
 }
 #+end_src
 
-For a more declarative style, add a helper:
-
-#+begin_src nix
-# modules/editor/emacs/nima/lib/use-package.nix
-{ lib }:
-
-let
-  inherit (lib) optionalString concatStringsSep mapAttrsToList;
-in
-{
-  mkUsePackage =
-    name:
-    {
-      enable ? true,
-      defer ? false,
-      demand ? false,
-      after ? [ ],
-      hook ? [ ],
-      bind ? { },
-      init ? "",
-      config ? "",
-      extraConfig ? "",
-    }:
-    optionalString enable ''
-      (use-package ${name}
-        ${optionalString defer ":defer t"}
-        ${optionalString demand ":demand t"}
-        ${optionalString (after != [ ]) ":after (${concatStringsSep " " after})"}
-        ${optionalString (hook != [ ]) ''
-          :hook ${concatStringsSep "\n  " hook}
-        ''}
-        ${optionalString (bind != { }) ''
-          :bind (${concatStringsSep "\n        "
-            (mapAttrsToList (k: v: ''("${k}" . ${v})'') bind)})
-        ''}
-        ${optionalString (init != "") ''
-          :init
-          ${init}
-        ''}
-        ${optionalString (config != "") ''
-          :config
-          ${config}
-        ''}
-        ${extraConfig})
-    '';
-}
-#+end_src
-
-Then a feature can remain compact and declarative:
+Avoid adding a separate Nix DSL for =use-package= unless it solves a real repeated problem. Direct Elisp is easier to compare with upstream Emacs examples and avoids maintaining a second configuration language.
 
 #+begin_src nix
 # features/magit.nix
-{ lib, ... }:
-
-let
-  up = import ../lib/use-package.nix { inherit lib; };
-in
 {
   epkgs = epkgs: [ epkgs.magit ];
 
-  elisp = up.mkUsePackage "magit" {
-    defer = true;
-    bind = {
-      "C-x g" = "magit-status";
-    };
-  };
+  elisp = ''
+    (use-package magit
+      :defer t
+      :bind (("C-x g" . magit-status)))
+  '';
 }
 #+end_src
 
@@ -484,7 +429,7 @@ Guidelines:
 - Apply =nima.overlays.default= to Nixpkgs.
 - Add =modules/editor/emacs/nima/default.nix=.
 - Add =modules/editor/emacs/nima/features/=.
-- Add helper files under =modules/editor/emacs/nima/lib/=, especially =use-package.nix= and =elisp-vars.nix=.
+- Add helper files under =modules/editor/emacs/nima/lib/= only when useful; currently =elisp-vars.nix= handles Nix-to-Elisp variables.
 - Keep the existing =emacs-init.nix= path working while the migration starts.
 
 Example flake input:

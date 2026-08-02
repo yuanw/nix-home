@@ -43,12 +43,14 @@
 (when (fboundp 'scroll-bar-mode)
   (scroll-bar-mode -1))
 
-;; Set up fonts. These mirror the repository defaults from `config.my.*`.
-(let ((mono-spaced-font "PragmataPro VF Mono Liga")
-      (proportionately-spaced-font "PragmataPro Liga"))
-  (set-face-attribute 'default nil :family mono-spaced-font :height 180)
-  (set-face-attribute 'fixed-pitch nil :family mono-spaced-font :height 1.0)
-  (set-face-attribute 'variable-pitch nil :family proportionately-spaced-font :height 1.0))
+;; Set up fonts. These are defined from Nix in prelude.nix.
+(defvar my-mono-font "PragmataPro VF Mono Liga"
+  "Monospace font family selected from Nix.")
+(defvar my-font "PragmataPro Liga"
+  "Proportional font family selected from Nix.")
+(set-face-attribute 'default nil :family my-mono-font :height 180)
+(set-face-attribute 'fixed-pitch nil :family my-mono-font :height 1.0)
+(set-face-attribute 'variable-pitch nil :family my-font :height 1.0)
 
 ;; Disable startup message.
 (setq inhibit-startup-screen t

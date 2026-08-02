@@ -9,6 +9,9 @@
   # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
   emacsPackage ? pkgs.emacs-git,
   earlyDefaultEl ? "",
+  monoFont ? "PragmataPro VF Mono Liga",
+  font ? "PragmataPro Liga",
+  defvar ? { },
   featureOverrides ? { },
   extraModule ? { },
   rawOutput ? false,
@@ -25,6 +28,20 @@ pkgs.mkNima {
       package = emacsPackage;
 
       earlyDefaultEl.elisp = earlyDefaultEl;
+
+      _module.args = {
+        myDefvar = {
+          my-mono-font = {
+            value = monoFont;
+            doc = "Monospace font family selected from Nix.";
+          };
+          my-font = {
+            value = font;
+            doc = "Proportional font family selected from Nix.";
+          };
+        }
+        // defvar;
+      };
 
       features = featureOverrides;
     }
