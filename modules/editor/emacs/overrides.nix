@@ -115,5 +115,37 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  ask-mode = (
+    pkgs.callPackage "${packagePath}/ask-mode" {
+      inherit (pkgs) haskellPackages;
+      inherit (self) melpaBuild;
+    }
+  );
+  auto-save = (
+    pkgs.callPackage "${packagePath}/auto-save.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self) melpaBuild;
+    }
+  );
+  gptel-quick = (
+    pkgs.callPackage "${packagePath}/gptel-quick.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self)
+        melpaBuild
+        compat
+        gptel
+        ;
+    }
+  );
+  knockknock = (
+    pkgs.callPackage "${packagePath}/knockknock.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit (self)
+        melpaBuild
+        posframe
+        nerd-icons
+        ;
+    }
+  );
 }
 // (emacsGhostel.emacsOverrides self _super)

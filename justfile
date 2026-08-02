@@ -1,4 +1,5 @@
 host := `hostname -s`
+substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
 
 # list all commands
 default:
@@ -11,7 +12,7 @@ prefetch-work-sources:
 # build os
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
-    @nix --extra-experimental-features pipe-operator build --quiet ".#{{lowercase(host)}}"
+    @nix --extra-experimental-features pipe-operator build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"
 
 update-all:
     @nix flake update
@@ -152,9 +153,9 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake .; \
+        sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
     else \
-        env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo; \
+        env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
         sudo systemctl try-restart emacs.service || true; \
     fi
 
