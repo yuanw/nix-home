@@ -9,6 +9,7 @@
   # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
   emacsPackage ? pkgs.emacs-git,
   earlyDefaultEl ? "",
+  earlyDefaultElFile ? null,
   monoFont ? "PragmataPro VF Mono Liga",
   font ? "PragmataPro Liga",
   defvar ? { },
@@ -17,6 +18,23 @@
   rawOutput ? false,
 }:
 
+let
+  inherit (pkgs.lib) optionalString;
+
+  vars = import ./lib/elisp-vars.nix { lib = pkgs.lib; };
+
+  myDefvar = {
+    my-mono-font = {
+      value = monoFont;
+      doc = "Monospace font family selected from Nix.";
+    };
+    my-font = {
+      value = font;
+      doc = "Proportional font family selected from Nix.";
+    };
+  }
+  // defvar;
+in
 pkgs.mkNima {
   inherit rawOutput;
 
@@ -27,20 +45,14 @@ pkgs.mkNima {
     {
       package = emacsPackage;
 
-      earlyDefaultEl.elisp = earlyDefaultEl;
+      earlyDefaultEl.elisp = ''
+        ${vars.mkDefvars myDefvar}
+        ${optionalString (earlyDefaultElFile != null) (builtins.readFile earlyDefaultElFile)}
+        ${earlyDefaultEl}
+      '';
 
       _module.args = {
-        myDefvar = {
-          my-mono-font = {
-            value = monoFont;
-            doc = "Monospace font family selected from Nix.";
-          };
-          my-font = {
-            value = font;
-            doc = "Proportional font family selected from Nix.";
-          };
-        }
-        // defvar;
+        inherit myDefvar;
       };
 
       features = featureOverrides;
