@@ -1,5 +1,5 @@
-;;; direnv.el --- Direnv integration -*- lexical-binding: t; -*-
-
+;;; Commentary: direnv.el --- Direnv integration -*- lexical-binding: t; -*-
+;;; Code:
 (use-package direnv
   :functions (direnv--maybe-update-environment)
   :preface
@@ -60,3 +60,4 @@
 
 (provide 'nima-feature-direnv)
 ;;; direnv.el ends here
+
