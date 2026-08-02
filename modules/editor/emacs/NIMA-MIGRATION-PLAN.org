@@ -9,6 +9,8 @@ Combine [[https://github.com/jian-lin/nima][nima]] with the current Emacs setup 
 - declaratively
 - modularly
 - with per-module =enable= flags
+- using =nima='s existing per-feature boolean =enable= flag to enable or disable a feature from Nix
+- with Nix-provided Elisp variables emitted as =defvar= and/or =setq= forms
 - while still using =use-package=
 - with larger Elisp kept in separate =.el= files when useful
 
@@ -160,6 +162,7 @@ modules/editor/emacs/nima/
   default.nix
   lib/
     use-package.nix
+    elisp-vars.nix
   features/
     prelude.nix
     prelude.el
@@ -177,6 +180,8 @@ Suggested conventions:
 - optional large Elisp in =features/<name>.el=
 - small feature config can stay inline in =elisp=
 - shared helper functions in =lib/=
+- use =nima='s existing feature =enable= flag as the top-level switch for each feature
+- use a shared variable helper when Nix needs to emit Elisp =defvar= or =setq= forms
 - local Elisp packages can stay in =modules/editor/emacs/packages/=
 
 * Keep =use-package= with a small helper
@@ -342,6 +347,135 @@ pkgs.mkNima {
 }
 #+end_src
 
+* Existing feature =enable= flag convention
+
+=nima= already provides a boolean =enable= flag for features, as shown in upstream examples such as =wonima/features/embark.nix=. Use that existing flag as the public switch for every feature. Optional features should default to disabled unless they are part of the base Emacs profile.
+
+#+begin_src nix
+# features/gptel.nix
+{ lib, ... }:
+
+{
+  enable = lib.mkDefault false;
+
+  epkgs = epkgs: [ epkgs.gptel ];
+
+  elisp = ''
+    (use-package gptel
+      :defer t)
+  '';
+}
+#+end_src
+
+Hosts and profiles should only toggle the feature through =features.<name>.enable=:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = { config, ... }: {
+    features.gptel.enable = !config.my.privacyMode;
+  };
+}
+#+end_src
+
+Guidelines:
+
+- use =features.<name>.enable= as the only top-level feature switch
+- avoid secondary flags like =features.<name>.disabled= or =useFoo=
+- keep feature-local options for behavior only, not for whether the feature exists
+- put package installation, =use-package= setup, and companion =.el= loading behind the same feature
+
+* Pass Nix variables to Elisp
+
+Some features need values computed in Nix, such as host-specific paths, booleans, API backend choices, or UI defaults. Add a small helper that renders Nix values into Elisp =defvar= and =setq= forms.
+
+#+begin_src nix
+# modules/editor/emacs/nima/lib/elisp-vars.nix
+{ lib }:
+
+let
+  inherit (lib) concatStringsSep mapAttrsToList optionalString;
+
+  raw = expr: { __elispRaw = expr; };
+  sym = name: raw "'${name}";
+
+  toElisp = value:
+    if value == null then "nil"
+    else if builtins.isBool value then (if value then "t" else "nil")
+    else if builtins.isInt value || builtins.isFloat value then toString value
+    else if builtins.isString value then builtins.toJSON value
+    else if builtins.isList value then
+      "'("
+      + concatStringsSep " " (map toElisp value)
+      + ")"
+    else if builtins.isAttrs value && value ? __elispRaw then value.__elispRaw
+    else throw "Unsupported Elisp value: ${builtins.toJSON value}";
+in
+{
+  inherit raw sym toElisp;
+
+  mkDefvar = name: { value, doc ? null }:
+    ''
+      (defvar ${name} ${toElisp value}${optionalString (doc != null) " ${builtins.toJSON doc}"})
+    '';
+
+  mkSetq = attrs:
+    concatStringsSep "\n"
+      (mapAttrsToList (name: value: "(setq ${name} ${toElisp value})") attrs);
+}
+#+end_src
+
+Example feature using both =defvar= and =setq=:
+
+#+begin_src nix
+# features/prelude.nix
+{ config, lib, pkgs, ... }:
+
+let
+  vars = import ../lib/elisp-vars.nix { inherit lib; };
+in
+{
+  enable = lib.mkDefault true;
+
+  elisp = ''
+    ${vars.mkDefvar "my/cache-directory" {
+      value = "${config.xdg.cacheHome}/emacs";
+      doc = "Directory used by local Emacs cache files.";
+    }}
+
+    ${vars.mkDefvar "my/work-machine-p" {
+      value = config.my.isWorkMachine or false;
+      doc = "Non-nil when this Emacs profile is built for a work machine.";
+    }}
+
+    ${vars.mkSetq {
+      "user-full-name" = "Yuan Wang";
+      "create-lockfiles" = false;
+      "backup-by-copying" = true;
+      "my/default-consult-ripgrep-args" = vars.raw "consult-ripgrep-args";
+    }}
+  '';
+}
+#+end_src
+
+Elisp code can then read those values normally:
+
+#+begin_src elisp
+(when my/work-machine-p
+  (message "Work profile enabled"))
+
+(file-name-as-directory my/cache-directory)
+#+end_src
+
+Guidelines:
+
+- use =defvar= for feature inputs that companion =.el= files may read
+- use =setq= for normal Emacs/custom variable assignment
+- use strings, numbers, booleans, =null=, and simple lists directly
+- use =vars.raw= only for trusted Elisp expressions that should not be quoted
+- prefer passing data this way over string-concatenating ad hoc Elisp throughout feature files
+
 * Migration phases
 
 ** Phase 1: add =nima= infrastructure
@@ -350,6 +484,7 @@ pkgs.mkNima {
 - Apply =nima.overlays.default= to Nixpkgs.
 - Add =modules/editor/emacs/nima/default.nix=.
 - Add =modules/editor/emacs/nima/features/=.
+- Add helper files under =modules/editor/emacs/nima/lib/=, especially =use-package.nix= and =elisp-vars.nix=.
 - Keep the existing =emacs-init.nix= path working while the migration starts.
 
 Example flake input:
@@ -477,6 +612,7 @@ After this migration, the Emacs setup should have:
 - no double wrapping through Home Manager =programs.emacs=
 - modular feature files
 - per-feature =enable= flags
+- feature behavior configurable from Nix through generated =defvar= and =setq= Elisp
 - package installation through Nix
 - continued use of =use-package=
 - large Elisp moved to normal =.el= files
