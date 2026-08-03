@@ -21,9 +21,7 @@
 let
   inherit (pkgs.lib) optionalString;
 
-  vars = import ./lib/elisp-vars.nix { lib = pkgs.lib; };
-
-  myDefvar = {
+  earlyDefvar = {
     my-mono-font = {
       value = monoFont;
       doc = "Monospace font family selected from Nix.";
@@ -45,14 +43,12 @@ pkgs.mkNima {
     {
       package = emacsPackage;
 
-      earlyDefaultEl.elisp = ''
-        ${vars.mkDefvars myDefvar}
-        ${optionalString (earlyDefaultElFile != null) (builtins.readFile earlyDefaultElFile)}
-        ${earlyDefaultEl}
-      '';
-
-      _module.args = {
-        inherit myDefvar;
+      earlyDefaultEl = {
+        defvar = earlyDefvar;
+        elisp = ''
+          ${optionalString (earlyDefaultElFile != null) (builtins.readFile earlyDefaultElFile)}
+          ${earlyDefaultEl}
+        '';
       };
 
       features = featureOverrides;
