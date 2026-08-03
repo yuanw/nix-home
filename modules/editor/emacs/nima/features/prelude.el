@@ -1,3 +1,17 @@
+;; Apply fonts defined from Nix in prelude.nix/default.nix.
+(defun my-apply-fonts (&optional frame)
+  "Apply repository font settings to FRAME or the selected frame."
+  (let ((frame (or frame (selected-frame))))
+    (when (display-graphic-p frame)
+      (set-face-attribute 'default frame :family my-mono-font :height 180)
+      (set-face-attribute 'fixed-pitch frame :family my-mono-font :height 1.0)
+      (set-face-attribute 'variable-pitch frame :family my-font :height 1.0))))
+
+(add-to-list 'default-frame-alist `(font . ,(format "%s-18" my-mono-font)))
+(my-apply-fonts)
+(add-hook 'after-make-frame-functions #'my-apply-fonts)
+(add-hook 'server-after-make-frame-hook #'my-apply-fonts)
+
 ;; Disable startup message.
 (setq inhibit-startup-screen t
 
