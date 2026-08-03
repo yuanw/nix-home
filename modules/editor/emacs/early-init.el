@@ -18,6 +18,15 @@
 (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
 (setq create-lockfiles nil)
 
+;; Disable startup message.
+(setq inhibit-startup-screen t
+      inhibit-splash-screen t
+      inhibit-startup-message t
+      inhibit-startup-echo-area-message (user-login-name))
+(setq-default inhibit-startup-screen t)
+
+(setq initial-major-mode 'fundamental-mode
+      initial-scratch-message nil)
 ;; Make native compilation silent and prune its cache.
 (when (native-comp-available-p)
   (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation

@@ -120,3 +120,5 @@
     (add-to-list var elem)))
 ;; I rarely close Emacs, It's annoying to accidentally close Emacs, so warn first.
 (setq confirm-kill-emacs #'y-or-n-p)
+
+(provide 'prelude)
