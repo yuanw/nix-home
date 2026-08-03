@@ -787,11 +787,11 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1785764729,
-        "narHash": "sha256-5Ozbe667Gc8EhIikFpdQFMqVEMiwVQD0YGZVnjVN+As=",
+        "lastModified": 1785778562,
+        "narHash": "sha256-LxrpzhhqyjjrCioV5GtGg8IHNeXyUOTkhdiTMZ/sR80=",
         "owner": "yuanw",
         "repo": "nima",
-        "rev": "7c3f562e08e3c47ed0c900d7d21af9dfb2286ae5",
+        "rev": "dff65ecb87c48487d4dd9a36e2861c96f8a55c96",
         "type": "github"
       },
       "original": {
