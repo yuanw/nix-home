@@ -1,10 +1,16 @@
+;; Marker for checking whether the nima prelude feature has been loaded.
+(defvar my-nima-prelude-loaded-p t
+  "Non-nil when modules/editor/emacs/nima/features/prelude.el has loaded.")
+
 ;; Apply fonts defined from Nix in prelude.nix/default.nix.
 
 
 ;; Disable startup message.
 (setq inhibit-startup-screen t
-
+      inhibit-splash-screen t
+      inhibit-startup-message t
       inhibit-startup-echo-area-message (user-login-name))
+(setq-default inhibit-startup-screen t)
 
 (setq initial-major-mode 'fundamental-mode
       initial-scratch-message nil)
