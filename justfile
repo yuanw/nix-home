@@ -192,6 +192,27 @@ nima-emacs-print-config:
     fi; \
     nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = import {{justfile_directory()}}/modules/editor/emacs/nima { inherit pkgs; rawOutput = true; }; in nima.config.defaultEl.content"
 
+# remove local byte/native-compiled cache files that can hide rebuilt nima config
+nima-emacs-clean:
+    @set -e; \
+    echo "Cleaning local Emacs byte/native compilation artifacts for nima config..."; \
+    for dir in "$HOME/.emacs.d" "$HOME/.config/emacs"; do \
+        if [ -d "$dir" ]; then \
+            find "$dir" -type f \( \
+                -name 'default.elc' -o \
+                -name 'early-default.elc' -o \
+                -name 'prelude.elc' -o \
+                -name 'default-*.eln' -o \
+                -name 'early-default-*.eln' -o \
+                -name 'prelude-*.eln' \
+            \) -print -exec rm -f {} \;; \
+        fi; \
+    done; \
+    if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then \
+        find "$TMPDIR" -path '*/emacs-snippet-lint-*/*.elc' -type f -print -exec rm -f {} \; || true; \
+        find "$TMPDIR" -maxdepth 1 -type d -name 'emacs-snippet-lint-*' -empty -print -exec rmdir {} \; || true; \
+    fi
+
 # build devshell + system and push both closures to cachix
 push-all:
     nix build --no-link --print-out-paths .#devShells.aarch64-darwin.default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos
