@@ -161,7 +161,7 @@ Create a new =nima= area under the existing Emacs module directory:
 modules/editor/emacs/nima/
   default.nix
   lib/
-    elisp-vars.nix
+    feature.nix
   features/
     prelude.nix
     prelude.el
@@ -178,9 +178,9 @@ Suggested conventions:
 - one feature per =features/<name>.nix=
 - optional large Elisp in =features/<name>.el=
 - small feature config can stay inline in =elisp=
-- shared helper functions in =lib/=
+- shared helper functions in =lib/= only when they add repository-specific value
 - use =nima='s existing feature =enable= flag as the top-level switch for each feature
-- use a shared variable helper when Nix needs to emit Elisp =defvar= or =setq= forms
+- use =nima='s native =defvar=, =setq=, and =setopt= options when Nix needs to pass values to Elisp
 - local Elisp packages can stay in =modules/editor/emacs/packages/=
 
 * Keep =use-package= directly in feature Elisp
@@ -333,78 +333,41 @@ Guidelines:
 
 * Pass Nix variables to Elisp
 
-Some features need values computed in Nix, such as host-specific paths, booleans, API backend choices, or UI defaults. Add a small helper that renders Nix values into Elisp =defvar= and =setq= forms.
+=nima= now supports Nix-defined Elisp variables directly on both =earlyDefaultEl= and each feature. Use =defvar= for values that companion =.el= files should read, =setq= for normal variable assignment, and =setopt= for user options.
 
-#+begin_src nix
-# modules/editor/emacs/nima/lib/elisp-vars.nix
-{ lib }:
-
-let
-  inherit (lib) concatStringsSep mapAttrsToList optionalString;
-
-  raw = expr: { __elispRaw = expr; };
-  sym = name: raw "'${name}";
-
-  toElisp = value:
-    if value == null then "nil"
-    else if builtins.isBool value then (if value then "t" else "nil")
-    else if builtins.isInt value || builtins.isFloat value then toString value
-    else if builtins.isString value then builtins.toJSON value
-    else if builtins.isList value then
-      "'("
-      + concatStringsSep " " (map toElisp value)
-      + ")"
-    else if builtins.isAttrs value && value ? __elispRaw then value.__elispRaw
-    else throw "Unsupported Elisp value: ${builtins.toJSON value}";
-in
-{
-  inherit raw sym toElisp;
-
-  mkDefvar = name: { value, doc ? null }:
-    ''
-      (defvar ${name} ${toElisp value}${optionalString (doc != null) " ${builtins.toJSON doc}"})
-    '';
-
-  mkSetq = attrs:
-    concatStringsSep "\n"
-      (mapAttrsToList (name: value: "(setq ${name} ${toElisp value})") attrs);
-}
-#+end_src
-
-Example feature using both =defvar= and =setq=:
+Example feature using an =elispFile= companion:
 
 #+begin_src nix
 # features/prelude.nix
-{ config, lib, pkgs, ... }:
+{ config, lib, ... }:
 
-let
-  vars = import ../lib/elisp-vars.nix { inherit lib; };
-in
 {
   enable = lib.mkDefault true;
 
-  elisp = ''
-    ${vars.mkDefvar "my/cache-directory" {
+  defvar = {
+    my/cache-directory = {
       value = "${config.xdg.cacheHome}/emacs";
       doc = "Directory used by local Emacs cache files.";
-    }}
+    };
 
-    ${vars.mkDefvar "my/work-machine-p" {
-      value = config.my.isWorkMachine or false;
-      doc = "Non-nil when this Emacs profile is built for a work machine.";
-    }}
+    my/work-machine-p = config.my.isWorkMachine or false;
+  };
 
-    ${vars.mkSetq {
-      "user-full-name" = "Yuan Wang";
-      "create-lockfiles" = false;
-      "backup-by-copying" = true;
-      "my/default-consult-ripgrep-args" = vars.raw "consult-ripgrep-args";
-    }}
-  '';
+  setq = {
+    user-full-name = "Yuan Wang";
+    create-lockfiles = false;
+    backup-by-copying = true;
+  };
+
+  setopt = {
+    use-short-answers = true;
+  };
+
+  elispFile = ./prelude.el;
 }
 #+end_src
 
-Elisp code can then read those values normally:
+=nima= renders those forms before the feature's =elisp= or =elispFile= content, so Elisp code can read them normally:
 
 #+begin_src elisp
 (when my/work-machine-p
@@ -413,13 +376,34 @@ Elisp code can then read those values normally:
 (file-name-as-directory my/cache-directory)
 #+end_src
 
+Early-startup values use the same options under =earlyDefaultEl=:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = { ... }: {
+    earlyDefaultEl = {
+      defvar = {
+        my-mono-font = "PragmataPro VF Mono Liga";
+        my-font = "PragmataPro Liga";
+      };
+
+      setq = {
+        inhibit-startup-screen = true;
+      };
+    };
+  };
+}
+#+end_src
+
 Guidelines:
 
 - use =defvar= for feature inputs that companion =.el= files may read
-- use =setq= for normal Emacs/custom variable assignment
+- use =setq= for normal variable assignment
+- use =setopt= for user options
 - use strings, numbers, booleans, =null=, and simple lists directly
-- use =vars.raw= only for trusted Elisp expressions that should not be quoted
-- prefer passing data this way over string-concatenating ad hoc Elisp throughout feature files
+- avoid a repository-local variable rendering helper now that =nima= supports this directly
 
 * Migration phases
 
@@ -429,13 +413,13 @@ Guidelines:
 - Apply =nima.overlays.default= to Nixpkgs.
 - Add =modules/editor/emacs/nima/default.nix=.
 - Add =modules/editor/emacs/nima/features/=.
-- Add helper files under =modules/editor/emacs/nima/lib/= only when useful; currently =elisp-vars.nix= handles Nix-to-Elisp variables.
+- Add helper files under =modules/editor/emacs/nima/lib/= only when useful; Nix-to-Elisp variables are handled by =nima= directly.
 - Keep the existing =emacs-init.nix= path working while the migration starts.
 
 Example flake input:
 
 #+begin_src nix
-inputs.nima.url = "github:jian-lin/nima";
+inputs.nima.url = "github:yuanw/nima/set-and-vars";
 #+end_src
 
 Example overlay:
