@@ -787,15 +787,16 @@
         "treefmt-nix": "treefmt-nix_5"
       },
       "locked": {
-        "lastModified": 1785183046,
-        "narHash": "sha256-GzY2hWGWiNEEnnKx25hz0O5h1jmQ1YyTQ8VpKxdVQ1Q=",
-        "owner": "jian-lin",
+        "lastModified": 1785764729,
+        "narHash": "sha256-5Ozbe667Gc8EhIikFpdQFMqVEMiwVQD0YGZVnjVN+As=",
+        "owner": "yuanw",
         "repo": "nima",
-        "rev": "15f350de754d51cbdfbb5ca47860a3ba0a9c7a8a",
+        "rev": "7c3f562e08e3c47ed0c900d7d21af9dfb2286ae5",
         "type": "github"
       },
       "original": {
-        "owner": "jian-lin",
+        "owner": "yuanw",
+        "ref": "set-and-vars",
         "repo": "nima",
         "type": "github"
       }

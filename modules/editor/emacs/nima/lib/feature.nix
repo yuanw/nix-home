@@ -22,6 +22,7 @@ in
       footer ? true,
       defvar ? { },
       setq ? { },
+      setopt ? { },
       extraElisp ? "",
     }:
     {
@@ -37,6 +38,7 @@ in
 
         ${vars.mkDefvars defvar}
         ${vars.mkSetq setq}
+        ${vars.mkSetopt setopt}
 
         ${builtins.readFile file}
 

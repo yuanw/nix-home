@@ -44,7 +44,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nima = {
-      url = "github:jian-lin/nima";
+      url = "github:yuanw/nima/set-and-vars";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
     };
