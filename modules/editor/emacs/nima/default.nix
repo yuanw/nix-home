@@ -9,7 +9,7 @@
   # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
   emacsPackage ? pkgs.emacs-git,
   earlyDefaultEl ? "",
-  earlyDefaultElFile ? null,
+  earlyDefaultElFile ? ../early-init.el,
   monoFont ? "PragmataPro VF Mono Liga",
   font ? "PragmataPro Liga",
   defvar ? { },
