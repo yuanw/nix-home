@@ -110,9 +110,9 @@ in
     };
 
     hermes-agent = {
-      enable = true;
-      enableGateway = true;
-      enableDashboard = true;
+      enable = false;
+      enableGateway = false;
+      enableDashboard = false;
       environment = {
         DEEPSEEK_BASE_URL = "http://dgx-spark.local:8000/v1";
         DEEPSEEK_API_KEY = "not-needed";
