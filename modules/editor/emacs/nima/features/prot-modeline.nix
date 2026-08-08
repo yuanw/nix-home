@@ -57,6 +57,10 @@
     ;; branch segment.
     (use-package keycast
       :after prot-modeline
+      ;; `:commands' made this deferred in the nima-generated config, so none
+      ;; of the mode-line setup ran until `keycast-mode-line-mode' was invoked
+      ;; manually.  Load it at startup and enable the mode-line display.
+      :demand t
       :commands (keycast-mode-line-mode
                  keycast-header-line-mode
                  keycast-tab-bar-mode
@@ -73,6 +77,7 @@
                        mouse-movement-p
                        mwheel-scroll handle-select-window
                        mouse-set-point mouse-drag-region))
-        (add-to-list 'keycast-substitute-alist `(,event nil))))
+        (add-to-list 'keycast-substitute-alist `(,event nil)))
+      (keycast-mode-line-mode 1))
   '';
 }
