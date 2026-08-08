@@ -3012,6 +3012,7 @@ with lib;
             file.".emacs.d/early-init.el".text = import ./early-init.nix {
               monoFont = config.my.monoFont;
               font = config.my.font;
+              inherit isDarwin;
             };
 
             file.".emacs.d/snippets".source =

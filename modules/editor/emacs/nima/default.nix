@@ -29,6 +29,7 @@ let
     if earlyDefaultEl == null then
       import ../early-init.nix {
         inherit monoFont font;
+        isDarwin = pkgs.stdenv.isDarwin;
       }
     else
       earlyDefaultEl;
