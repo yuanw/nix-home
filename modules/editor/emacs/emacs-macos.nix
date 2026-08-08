@@ -6,12 +6,10 @@
 }:
 let
   cfg = config.modules.editors.emacs;
-  emacsPackage = import ./package.nix {
-    inherit
-      config
-      pkgs
-      lib
-      ;
+  emacsPackage = import ./nima.nix {
+    inherit pkgs lib;
+    myConfig = config.my;
+    emacsConfig = cfg;
   };
 in
 with lib;

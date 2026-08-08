@@ -163,11 +163,11 @@ switch:
 nima-emacs-build:
     @set -e; \
     if [ "$(uname)" = "Darwin" ]; then \
-        pkgs_expr='flake.darwinConfigurations."{{host}}".pkgs'; \
+        host_expr='flake.darwinConfigurations."{{host}}"'; \
     else \
-        pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
+        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
     fi; \
-    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; in import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; }"
+    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; in import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; }"
 
 # run the staged nima Emacs package with a temporary HOME
 nima-emacs-run: nima-emacs-build
@@ -186,11 +186,11 @@ nima-emacs-daemon: nima-emacs-build
 nima-emacs-print-config:
     @set -e; \
     if [ "$(uname)" = "Darwin" ]; then \
-        pkgs_expr='flake.darwinConfigurations."{{host}}".pkgs'; \
+        host_expr='flake.darwinConfigurations."{{host}}"'; \
     else \
-        pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
+        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
     fi; \
-    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; rawOutput = true; }; in nima.config.defaultEl.content"
+    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
 
 # remove local byte/native-compiled cache files that can hide rebuilt nima config
 nima-emacs-clean:

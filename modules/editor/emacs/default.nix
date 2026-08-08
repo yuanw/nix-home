@@ -24,15 +24,12 @@ let
     ])
   );
   emacsclient = "${emacsPackage}/bin/emacsclient -c -a '${emacsPackage}/bin/emacs'";
-  emacsPatched = cfg.pkg;
   emacsGhostel = import ./ghostel.nix { inherit pkgs isDarwin; };
   packagePath = ../../../packages/emacs;
-  emacsPackage = import ./package.nix {
-    inherit
-      config
-      pkgs
-      lib
-      ;
+  emacsPackage = import ./nima.nix {
+    inherit pkgs lib;
+    myConfig = config.my;
+    emacsConfig = cfg;
   };
   emacsConfigNixFiles = map (name: ./configs + "/${name}") (
     lib.filter (lib.hasSuffix ".nix") (builtins.attrNames (builtins.readDir ./configs))
@@ -150,7 +147,7 @@ with lib;
                   src = ./packages/prot-common.el;
                 })
               ];
-            package = emacsPatched;
+            package = cfg.pkg;
             overrides = import ./overrides.nix {
               inherit
                 pkgs

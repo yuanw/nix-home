@@ -5,30 +5,85 @@
 # should install the result directly via `home.packages` or `services.emacs.package`.
 {
   pkgs,
-  # Use emacs-overlay's development build by default, matching the current
-  # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
-  emacsPackage ? pkgs.emacs-git,
+  lib ? pkgs.lib,
+  # Pass only the small module config slices this builder needs.
+  myConfig ? null,
+  emacsConfig ? null,
+  # Standalone/testing overrides.
+  emacsPackage ? null,
   earlyDefaultEl ? null,
   earlyDefaultElFile ? null,
-  monoFont ? "PragmataPro VF Mono Liga",
-  font ? "PragmataPro Liga",
+  monoFont ? null,
+  font ? null,
   defvar ? { },
-  homeDirectory ? builtins.getEnv "HOME",
-  workspaceDirectory ? "workspaces",
-  lspStyle ? "eglot",
+  homeDirectory ? null,
+  workspaceDirectory ? null,
+  lspStyle ? null,
   featureOverrides ? { },
   extraModule ? { },
   rawOutput ? false,
 }:
 
 let
-  inherit (pkgs.lib) optionalString;
+  inherit (lib) optionalString;
+
+  emacsPackage' =
+    if emacsPackage != null then
+      emacsPackage
+    else if emacsConfig != null then
+      emacsConfig.pkg.overrideAttrs (prev: {
+        patches =
+          (lib.optionals pkgs.stdenv.isDarwin [
+            ./patches/system-appearance.patch
+            ./patches/fix-ns-x-colors.patch
+            ./patches/round-undecorated-frame.patch
+          ])
+          ++ prev.patches;
+      })
+    else
+      pkgs.emacs-git;
+  monoFont' =
+    if monoFont != null then
+      monoFont
+    else if myConfig != null then
+      myConfig.monoFont
+    else
+      "PragmataPro VF Mono Liga";
+  font' =
+    if font != null then
+      font
+    else if myConfig != null then
+      myConfig.font
+    else
+      "PragmataPro Liga";
+  homeDirectory' =
+    if homeDirectory != null then
+      homeDirectory
+    else if myConfig != null then
+      myConfig.homeDirectory
+    else
+      builtins.getEnv "HOME";
+  workspaceDirectory' =
+    if workspaceDirectory != null then
+      workspaceDirectory
+    else if myConfig != null then
+      myConfig.workspaceDirectory
+    else
+      "workspaces";
+  lspStyle' =
+    if lspStyle != null then
+      lspStyle
+    else if emacsConfig != null then
+      emacsConfig.lspStyle
+    else
+      "eglot";
 
   earlyDefvar = defvar;
   earlyDefaultElContent =
     if earlyDefaultEl == null then
       import ./early-init.nix {
-        inherit monoFont font;
+        monoFont = monoFont';
+        font = font';
         isDarwin = pkgs.stdenv.isDarwin;
       }
     else
@@ -42,7 +97,7 @@ pkgs.mkNima {
   module =
     { ... }:
     {
-      package = emacsPackage;
+      package = emacsPackage';
 
       earlyDefaultEl = {
         defvar = earlyDefvar;
@@ -53,11 +108,9 @@ pkgs.mkNima {
       };
 
       _module.args = {
-        inherit
-          homeDirectory
-          workspaceDirectory
-          lspStyle
-          ;
+        homeDirectory = homeDirectory';
+        workspaceDirectory = workspaceDirectory';
+        lspStyle = lspStyle';
       };
 
       features = featureOverrides;
