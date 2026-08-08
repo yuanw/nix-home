@@ -8,8 +8,8 @@
   # Use emacs-overlay's development build by default, matching the current
   # repository preference for a newer Emacs than nixpkgs' stable `pkgs.emacs`.
   emacsPackage ? pkgs.emacs-git,
-  earlyDefaultEl ? "",
-  earlyDefaultElFile ? ../early-init.el,
+  earlyDefaultEl ? null,
+  earlyDefaultElFile ? null,
   monoFont ? "PragmataPro VF Mono Liga",
   font ? "PragmataPro Liga",
   defvar ? { },
@@ -24,17 +24,14 @@
 let
   inherit (pkgs.lib) optionalString;
 
-  earlyDefvar = {
-    my-mono-font = {
-      value = monoFont;
-      doc = "Monospace font family selected from Nix.";
-    };
-    my-font = {
-      value = font;
-      doc = "Proportional font family selected from Nix.";
-    };
-  }
-  // defvar;
+  earlyDefvar = defvar;
+  earlyDefaultElContent =
+    if earlyDefaultEl == null then
+      import ../early-init.nix {
+        inherit monoFont font;
+      }
+    else
+      earlyDefaultEl;
 in
 pkgs.mkNima {
   inherit rawOutput;
@@ -50,7 +47,7 @@ pkgs.mkNima {
         defvar = earlyDefvar;
         elisp = ''
           ${optionalString (earlyDefaultElFile != null) (builtins.readFile earlyDefaultElFile)}
-          ${earlyDefaultEl}
+          ${earlyDefaultElContent}
         '';
       };
 

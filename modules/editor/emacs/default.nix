@@ -3009,6 +3009,11 @@ with lib;
           };
 
           home = {
+            file.".emacs.d/early-init.el".text = import ./early-init.nix {
+              monoFont = config.my.monoFont;
+              font = config.my.font;
+            };
+
             file.".emacs.d/snippets".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
             # Hot-reloadable external config files — symlink the configs/ directory

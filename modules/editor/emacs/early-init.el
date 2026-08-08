@@ -1,10 +1,11 @@
 ;; Disable some GUI distractions. We set these manually to avoid starting
 ;; the corresponding minor modes.
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . nil) default-frame-alist)
-(push '(vertical-scroll-bars . nil) default-frame-alist)
-;; no title bar
-(add-to-list 'default-frame-alist '(undecorated-round . t))
+(dolist (parameter '((menu-bar-lines . 0)
+                     (tool-bar-lines . nil)
+                     (vertical-scroll-bars . nil)
+                     (undecorated-round . t)))
+  (add-to-list 'default-frame-alist parameter)
+  (add-to-list 'initial-frame-alist parameter))
 
 ;; Set up fonts early.
 ;; `my-mono-font' and `my-font' are defined from Nix in default.nix.
