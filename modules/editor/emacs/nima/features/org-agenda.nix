@@ -28,6 +28,6 @@
               ("n" "Next actions"
                ((todo "NEXT" ((org-agenda-overriding-header "All Next Actions")))))
               ("W" "Waiting"
-               ((todo "WAITING" ((org-agenda-overriding-header "All Waiting Items")))))))
+               ((todo "WAITING" ((org-agenda-overriding-header "All Waiting Items"))))))))
   '';
 }
