@@ -6,21 +6,12 @@
 }:
 let
   cfg = config.modules.editors.emacs;
-  emacsPatched = cfg.pkg.overrideAttrs (prev: {
-    patches = [
-      ./patches/system-appearance.patch
-      ./patches/round-undecorated-frame.patch
-    ]
-    ++ prev.patches;
-  });
-  emacsPackage = import ./nima {
-    inherit pkgs;
-    emacsPackage = emacsPatched;
-    monoFont = config.my.monoFont;
-    font = config.my.font;
-    homeDirectory = config.my.homeDirectory;
-    workspaceDirectory = config.my.workspaceDirectory;
-    lspStyle = cfg.lspStyle;
+  emacsPackage = import ./package.nix {
+    inherit
+      config
+      pkgs
+      lib
+      ;
   };
 in
 with lib;

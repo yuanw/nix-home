@@ -24,26 +24,15 @@ let
     ])
   );
   emacsclient = "${emacsPackage}/bin/emacsclient -c -a '${emacsPackage}/bin/emacs'";
-  emacsPatched = cfg.pkg.overrideAttrs (prev: {
-    patches =
-      (lib.optionals pkgs.stdenv.isDarwin [
-        ./patches/system-appearance.patch
-        ./patches/round-undecorated-frame.patch
-
-      ])
-      ++ prev.patches;
-
-  });
+  emacsPatched = cfg.pkg;
   emacsGhostel = import ./ghostel.nix { inherit pkgs isDarwin; };
   packagePath = ../../../packages/emacs;
-  emacsPackage = import ./nima {
-    inherit pkgs;
-    emacsPackage = emacsPatched;
-    monoFont = config.my.monoFont;
-    font = config.my.font;
-    homeDirectory = config.my.homeDirectory;
-    workspaceDirectory = config.my.workspaceDirectory;
-    lspStyle = cfg.lspStyle;
+  emacsPackage = import ./package.nix {
+    inherit
+      config
+      pkgs
+      lib
+      ;
   };
   emacsConfigNixFiles = map (name: ./configs + "/${name}") (
     lib.filter (lib.hasSuffix ".nix") (builtins.attrNames (builtins.readDir ./configs))
