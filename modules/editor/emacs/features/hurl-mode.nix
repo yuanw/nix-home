@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 let
-  packagePath = ../../../../../packages/emacs;
+  packagePath = ../../../../packages/emacs;
 in
 {
   epkgs = epkgs: [

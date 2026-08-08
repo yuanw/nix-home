@@ -6,17 +6,17 @@
     (epkgs.trivialBuild {
       pname = "prot-common";
       version = "0.0.1";
-      src = ../../packages/prot-common.el;
+      src = ../packages/prot-common.el;
     })
     (epkgs.trivialBuild {
       pname = "prot-modeline";
       version = "0.0.1";
-      src = ../../packages/prot-modeline.el;
+      src = ../packages/prot-modeline.el;
       packageRequires = [
         (epkgs.trivialBuild {
           pname = "prot-common";
           version = "0.0.1";
-          src = ../../packages/prot-common.el;
+          src = ../packages/prot-common.el;
         })
       ];
     })
@@ -30,7 +30,7 @@
     ;; branch information.
     (require 'prot-modeline)
 
-    ${builtins.readFile ../../configs/prot-modeline.el}
+    ${builtins.readFile ../configs/prot-modeline.el}
 
     ;; Display current time/date through `mode-line-misc-info', consumed by
     ;; `prot-modeline-misc-info' on the right side of the modeline.

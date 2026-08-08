@@ -16,7 +16,7 @@ let
       ++ prev.patches;
   });
 in
-import ./nima {
+import ./nima.nix {
   inherit pkgs;
   emacsPackage = emacsPatched;
   monoFont = config.my.monoFont;

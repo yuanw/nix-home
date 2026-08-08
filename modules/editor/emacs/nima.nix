@@ -27,7 +27,7 @@ let
   earlyDefvar = defvar;
   earlyDefaultElContent =
     if earlyDefaultEl == null then
-      import ../early-init.nix {
+      import ./early-init.nix {
         inherit monoFont font;
         isDarwin = pkgs.stdenv.isDarwin;
       }

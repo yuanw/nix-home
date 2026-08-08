@@ -167,7 +167,7 @@ nima-emacs-build:
     else \
         pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
     fi; \
-    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; in import {{justfile_directory()}}/modules/editor/emacs/nima { inherit pkgs; }"
+    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; in import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; }"
 
 # run the staged nima Emacs package with a temporary HOME
 nima-emacs-run: nima-emacs-build
@@ -190,7 +190,7 @@ nima-emacs-print-config:
     else \
         pkgs_expr='flake.nixosConfigurations."{{lowercase(host)}}".pkgs'; \
     fi; \
-    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = import {{justfile_directory()}}/modules/editor/emacs/nima { inherit pkgs; rawOutput = true; }; in nima.config.defaultEl.content"
+    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; pkgs = ${pkgs_expr}; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; rawOutput = true; }; in nima.config.defaultEl.content"
 
 # remove local byte/native-compiled cache files that can hide rebuilt nima config
 nima-emacs-clean:

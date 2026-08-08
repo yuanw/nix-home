@@ -13,7 +13,7 @@
       (setq treesit-extra-load-path
             '((eval-when-compile (expand-file-name "grammars" user-emacs-directory))
               "${pkgs.emacsPackages.treesit-grammars.with-all-grammars}/lib"
-              "${pkgs.callPackage ../../../../../packages/tree-sitter-moonbit.nix { }}/lib"))
+              "${pkgs.callPackage ../../../../packages/tree-sitter-moonbit.nix { }}/lib"))
       (global-tree-sitter-mode)
       (add-hook 'tree-sitter-mode-hook #'tree-sitter-hl-mode)
       (setq major-mode-remap-alist

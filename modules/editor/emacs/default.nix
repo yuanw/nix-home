@@ -136,7 +136,7 @@ with lib;
           ];
 
           programs.emacs = {
-            # Emacs is now provided by `./nima` and installed directly via
+            # Emacs is now provided by `./nima.nix` and installed directly via
             # `home.packages` below.  Keep the old Home Manager init tree here
             # while the migration is in progress, but do not let Home Manager
             # wrap/install its own Emacs package.
