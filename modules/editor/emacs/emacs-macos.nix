@@ -1,10 +1,31 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
-  emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+  cfg = config.modules.editors.emacs;
+  emacsPatched = cfg.pkg.overrideAttrs (prev: {
+    patches = [
+      ./patches/system-appearance.patch
+      ./patches/round-undecorated-frame.patch
+    ]
+    ++ prev.patches;
+  });
+  emacsPackage = import ./nima {
+    inherit pkgs;
+    emacsPackage = emacsPatched;
+    monoFont = config.my.monoFont;
+    font = config.my.font;
+    homeDirectory = config.my.homeDirectory;
+    workspaceDirectory = config.my.workspaceDirectory;
+    lspStyle = cfg.lspStyle;
+  };
 in
 with lib;
 {
-  config = mkIf config.modules.editors.emacs.enableService {
+  config = mkIf cfg.enableService {
     launchd.user.agents.emacs.path = [
       config.environment.systemPath
       "${config.my.homeDirectory}/.nix-profile/bin"

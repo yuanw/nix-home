@@ -13,6 +13,9 @@
   monoFont ? "PragmataPro VF Mono Liga",
   font ? "PragmataPro Liga",
   defvar ? { },
+  homeDirectory ? builtins.getEnv "HOME",
+  workspaceDirectory ? "workspaces",
+  lspStyle ? "eglot",
   featureOverrides ? { },
   extraModule ? { },
   rawOutput ? false,
@@ -49,6 +52,14 @@ pkgs.mkNima {
           ${optionalString (earlyDefaultElFile != null) (builtins.readFile earlyDefaultElFile)}
           ${earlyDefaultEl}
         '';
+      };
+
+      _module.args = {
+        inherit
+          homeDirectory
+          workspaceDirectory
+          lspStyle
+          ;
       };
 
       features = featureOverrides;

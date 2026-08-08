@@ -23,7 +23,7 @@ let
       ds.en-science
     ])
   );
-  emacsclient = "emacsclient -c -a 'emacs'";
+  emacsclient = "${emacsPackage}/bin/emacsclient -c -a '${emacsPackage}/bin/emacs'";
   emacsPatched = cfg.pkg.overrideAttrs (prev: {
     patches =
       (lib.optionals pkgs.stdenv.isDarwin [
@@ -36,7 +36,15 @@ let
   });
   emacsGhostel = import ./ghostel.nix { inherit pkgs isDarwin; };
   packagePath = ../../../packages/emacs;
-  emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+  emacsPackage = import ./nima {
+    inherit pkgs;
+    emacsPackage = emacsPatched;
+    monoFont = config.my.monoFont;
+    font = config.my.font;
+    homeDirectory = config.my.homeDirectory;
+    workspaceDirectory = config.my.workspaceDirectory;
+    lspStyle = cfg.lspStyle;
+  };
   emacsConfigNixFiles = map (name: ./configs + "/${name}") (
     lib.filter (lib.hasSuffix ".nix") (builtins.attrNames (builtins.readDir ./configs))
   );
@@ -139,6 +147,11 @@ with lib;
           ];
 
           programs.emacs = {
+            # Emacs is now provided by `./nima` and installed directly via
+            # `home.packages` below.  Keep the old Home Manager init tree here
+            # while the migration is in progress, but do not let Home Manager
+            # wrap/install its own Emacs package.
+            enable = false;
             extraPackages =
               epkgs: with epkgs; [
                 epkgs.treesit-grammars.with-all-grammars
@@ -149,7 +162,6 @@ with lib;
                 })
               ];
             package = emacsPatched;
-            enable = true;
             overrides = import ./overrides.nix {
               inherit
                 pkgs
@@ -3017,6 +3029,7 @@ with lib;
             file.".emacs.d/external".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/configs";
             packages = with pkgs; [
+              emacsPackage
               (pkgs.writeShellScriptBin "app-launcher" ''
                 ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
               '')
