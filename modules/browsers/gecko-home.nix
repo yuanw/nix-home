@@ -756,6 +756,11 @@ in
     ]
     ++ lib.optionals (program == "librewolf") [
       {
+        profiles.home.settings = {
+          # Enable WebGL (disabled by LibreWolf by default for security)
+          "webgl.disabled" = false;
+          # Don't prompt for WebGL; not a significant attack vector nowadays
+          "librewolf.webgl.prompt" = false;
         policies.Preferences = {
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;

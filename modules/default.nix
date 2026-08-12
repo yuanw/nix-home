@@ -54,6 +54,7 @@
       ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix
+      ./services/monitoring/pcp.nix
       ./wm/xmonad.nix
     ];
     darwin.imports = [

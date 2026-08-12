@@ -10,6 +10,7 @@
     ../../modules/lance.nix
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
+    ../../modules/services/monitoring/pcp.nix
     ./disk-config.nix
     ./configuration.nix
   ];
