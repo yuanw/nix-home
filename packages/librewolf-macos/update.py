@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update librewolf-macos to the latest release from GitLab."""
+"""Update librewolf-macos to the latest release from Codeberg."""
 
 import json
 import sys
@@ -11,22 +11,14 @@ from updater import update_srcs
 
 
 def get_latest_release() -> dict:
-    """Fetch latest release info from GitLab API."""
-    api_url = "https://gitlab.com/api/v4/projects/44042130/releases"
+    """Fetch latest release info from the Codeberg API."""
+    api_url = "https://codeberg.org/api/v1/repos/librewolf/source/releases/latest"
 
     with urllib.request.urlopen(api_url) as response:  # noqa: S310
-        releases = json.loads(response.read().decode())
+        release = json.loads(response.read().decode())
 
-    for release in releases:
-        tag = release["tag_name"]
-        version = tag.lstrip("v")
-
-        for link in release.get("assets", {}).get("links", []):
-            if "macos-arm64-package.dmg" in link.get("url", ""):
-                return {"version": version}
-
-    msg = "No suitable release found"
-    raise ValueError(msg)
+    version = release["tag_name"].lstrip("v")
+    return {"version": version}
 
 
 def main() -> None:
@@ -37,7 +29,7 @@ def main() -> None:
     version = release["version"]
     print(f"Latest version: {version}")
 
-    url = f"https://gitlab.com/api/v4/projects/44042130/packages/generic/librewolf/{version}/librewolf-{version}-macos-arm64-package.dmg"
+    url = f"https://librewolf.dev/api/packages/librewolf/generic/librewolf/{version}/librewolf-{version}-macos-arm64-package.dmg"
 
     update_srcs(pkg_dir, version, url)
 
