@@ -27,7 +27,7 @@
             overlays = [
               (
                 _final: prev:
-                prev.lib.optionalAttrs (prev.stdenv.isDarwin && prev.stdenv.isAarch64) {
+                prev.lib.optionalAttrs (prev.stdenv.hostPlatform.isDarwin && prev.stdenv.hostPlatform.isAarch64) {
                   pythonPackagesExtensions = (prev.pythonPackagesExtensions or [ ]) ++ [
                     (pfinal: pprev: {
                       mlx = pprev.mlx.overridePythonAttrs (

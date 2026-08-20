@@ -12,7 +12,7 @@ let
   micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
   piEnabled = config.modules.pi.enable or false;
   firefoxEnabled = config.modules.browsers.firefox.enable or false;
-  isDarwin = pkgs.stdenv.isDarwin;
+  isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   nixCasksFirefox = inputs'.nix-casks.packages.firefox or null;
 
   librewolfBrowserCliInstallUrl = "file:///Applications/Nix Casks/LibreWolf.app/Contents/Resources/distribution/browser-cli-extension.xpi";

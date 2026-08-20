@@ -102,7 +102,10 @@
           #     _prev.batgrep;
           #https://github.com/NixOS/nixpkgs/pull/476210
           yt-dlp =
-            if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
+            if _prev.stdenv.hostPlatform.isDarwin then
+              inputs'.nixpkgs-stable.legacyPackages.yt-dlp
+            else
+              _prev.yt-dlp;
 
           #https://github.com/NixOS/nixpkgs/pull/476003/files
           #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;
