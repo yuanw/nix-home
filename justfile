@@ -11,8 +11,12 @@ prefetch-work-sources:
 
 # build os
 build:
-    @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
-    @{{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"
+    @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
+        {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
+        {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+    else \
+        nix build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
+    fi
 
 update-all:
     @nix flake update
