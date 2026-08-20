@@ -1,10 +1,20 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 let
-  emacsPackage = config.home-manager.users.${config.my.username}.programs.emacs.finalPackage;
+  cfg = config.modules.editors.emacs;
+  emacsPackage = import ./nima.nix {
+    inherit pkgs lib;
+    myConfig = config.my;
+    emacsConfig = cfg;
+  };
 in
 with lib;
 {
-  config = mkIf config.modules.editors.emacs.enableService {
+  config = mkIf cfg.enableService {
     launchd.user.agents.emacs.path = [
       config.environment.systemPath
       "${config.my.homeDirectory}/.nix-profile/bin"

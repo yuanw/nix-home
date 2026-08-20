@@ -1,10 +1,11 @@
 ;; Disable some GUI distractions. We set these manually to avoid starting
 ;; the corresponding minor modes.
-(push '(menu-bar-lines . 0) default-frame-alist)
-(push '(tool-bar-lines . nil) default-frame-alist)
-(push '(vertical-scroll-bars . nil) default-frame-alist)
-;; no title bar
-(add-to-list 'default-frame-alist '(undecorated-round . t))
+(dolist (parameter '((menu-bar-lines . 0)
+                     (tool-bar-lines . nil)
+                     (vertical-scroll-bars . nil)
+                     (undecorated-round . t)))
+  (add-to-list 'default-frame-alist parameter)
+  (add-to-list 'initial-frame-alist parameter))
 
 ;; Set up fonts early.
 ;; `my-mono-font' and `my-font' are defined from Nix in default.nix.
@@ -18,6 +19,15 @@
 (setq backup-inhibited nil) ; Not sure if needed, given `make-backup-files'
 (setq create-lockfiles nil)
 
+;; Disable startup message.
+(setq inhibit-startup-screen t
+      inhibit-splash-screen t
+      inhibit-startup-message t
+      inhibit-startup-echo-area-message (user-login-name))
+(setq-default inhibit-startup-screen t)
+
+(setq initial-major-mode 'fundamental-mode
+      initial-scratch-message nil)
 ;; Make native compilation silent and prune its cache.
 (when (native-comp-available-p)
   (setq native-comp-async-report-warnings-errors 'silent) ; Emacs 28 with native compilation
@@ -85,32 +95,7 @@
 ;; Fix for Emacs 31: prefer .el files over potentially incompatible .elc files
 (setq load-prefer-newer t)
 
-(require 'ef-themes)
 
-;; If you like two specific themes and want to switch between them, you
-;; can specify them in `ef-themes-to-toggle' and then invoke the command
-;; `ef-themes-toggle'.  All the themes are included in the variable
-;; `ef-themes-collection'.
-(setq ef-themes-to-toggle '(ef-day ef-owl))
-(ef-themes-take-over-modus-themes-mode 1)
-(setq modus-themes-mixed-fonts t)
-(setq ef-themes-headings ; read the manual's entry or the doc string
-      '((0 variable-pitch light 1.9)
-        (1 variable-pitch light 1.8)
-        (2 variable-pitch regular 1.7)
-        (3 variable-pitch regular 1.6)
-        (4 variable-pitch regular 1.5)
-        (5 variable-pitch 1.4) ; absence of weight means `bold'
-        (6 variable-pitch 1.3)
-        (7 variable-pitch 1.2)
-        (t variable-pitch 1.1)))
-
-;; They are nil by default...
-(setq ef-themes-mixed-fonts t
-      ef-themes-variable-pitch-ui t)
-
-;; Disable all other themes to avoid awkward blending:
-(mapc #'disable-theme custom-enabled-themes)
 (setq org-startup-with-inline-images t)
 
 ;; Theme loading moved to init (after display initialization)

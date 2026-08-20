@@ -16,6 +16,11 @@
 
 ;;;;; minibuffer completion
 
+(defvar wonima-emacs-state-directory
+  (expand-file-name "state/" user-emacs-directory)
+  "Fallback state directory used by the imported wonima completion config.")
+(make-directory wonima-emacs-state-directory t)
+
 (setopt savehist-file (expand-file-name "history" wonima-emacs-state-directory))
 (savehist-mode)
 (setopt history-length 200

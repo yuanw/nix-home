@@ -13,9 +13,9 @@ prefetch-work-sources:
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
         {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
-        {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        NIX_CONFIG="extra-experimental-features = nix-command flakes pipe-operator" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
-        nix build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
+        nix --extra-experimental-features pipe-operator build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
     fi
 
 update-all:
@@ -157,9 +157,64 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
+        sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
     else \
-        nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
+        env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
+        sudo systemctl try-restart emacs.service || true; \
+    fi
+
+# build the staged nima Emacs package without switching the active service
+nima-emacs-build:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        host_expr='flake.darwinConfigurations."{{host}}"'; \
+    else \
+        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
+    fi; \
+    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; in import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; }"
+
+# run the staged nima Emacs package with a temporary HOME
+nima-emacs-run: nima-emacs-build
+    @tmp_home=$(mktemp -d); \
+    echo "Using temporary HOME: $tmp_home"; \
+    HOME="$tmp_home" ./result/bin/emacs
+
+# run the staged nima Emacs package as an isolated daemon
+nima-emacs-daemon: nima-emacs-build
+    @tmp_home=$(mktemp -d); \
+    echo "Using temporary HOME: $tmp_home"; \
+    echo "Connect with: HOME=$tmp_home ./result/bin/emacsclient -s nima-test -c"; \
+    HOME="$tmp_home" ./result/bin/emacs --fg-daemon=nima-test
+
+# print the generated nima default.el content
+nima-emacs-print-config:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        host_expr='flake.darwinConfigurations."{{host}}"'; \
+    else \
+        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
+    fi; \
+    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
+
+# remove local byte/native-compiled cache files that can hide rebuilt nima config
+nima-emacs-clean:
+    @set -e; \
+    echo "Cleaning local Emacs byte/native compilation artifacts for nima config..."; \
+    for dir in "$HOME/.emacs.d" "$HOME/.config/emacs"; do \
+        if [ -d "$dir" ]; then \
+            find "$dir" -type f \( \
+                -name 'default.elc' -o \
+                -name 'early-default.elc' -o \
+                -name 'prelude.elc' -o \
+                -name 'default-*.eln' -o \
+                -name 'early-default-*.eln' -o \
+                -name 'prelude-*.eln' \
+            \) -print -exec rm -f {} \;; \
+        fi; \
+    done; \
+    if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then \
+        find "$TMPDIR" -path '*/emacs-snippet-lint-*/*.elc' -type f -print -exec rm -f {} \; || true; \
+        find "$TMPDIR" -maxdepth 1 -type d -name 'emacs-snippet-lint-*' -empty -print -exec rmdir {} \; || true; \
     fi
 
 # build devshell + system and push both closures to cachix

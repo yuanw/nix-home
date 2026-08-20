@@ -1,0 +1,548 @@
+#+TITLE: Nima Migration Plan for Declarative Modular Emacs
+#+AUTHOR: yuanw
+#+STARTUP: overview
+
+* Goal
+
+Combine [[https://github.com/jian-lin/nima][nima]] with the current Emacs setup in this repository so that Emacs can be configured:
+
+- declaratively
+- modularly
+- with per-module =enable= flags
+- using =nima='s existing per-feature boolean =enable= flag to enable or disable a feature from Nix
+- with Nix-provided Elisp variables emitted as =defvar= and/or =setq= forms
+- while still using =use-package=
+- with larger Elisp kept in separate =.el= files when useful
+
+The current local generator lives in:
+
+- =modules/editor/emacs/emacs-init.nix=
+
+The target direction is to let =nima= own the final configured Emacs package and gradually migrate the existing =programs.emacs.init.usePackage= declarations into =nima= features.
+
+* Nix pipe operator requirement
+
+Current =nima= uses Nix's experimental pipe operator syntax in its own flake and module implementation.
+
+The pipe operator lets Nix code pass a value through a sequence of functions, similar to shell pipelines. For example, =nima= code can write something shaped like this:
+
+#+begin_src nix
+./.
+|> filter
+|> remove ./tests/test-data
+|> fs.toList
+#+end_src
+
+which means roughly:
+
+#+begin_src nix
+fs.toList (remove ./tests/test-data (filter ./.))
+#+end_src
+
+This is only syntax. It does not change what =nima= does; it only changes how parts of =nima='s Nix code are written.
+
+Because this repository uses =nima= as a normal flake input, Nix must be able to parse =nima='s flake. Therefore the local Nix installation needs the =pipe-operator= experimental feature enabled.
+
+In this repository that is configured in =modules/common.nix=:
+
+#+begin_src nix
+experimental-features = nix-command flakes auto-allocate-uids pipe-operator
+#+end_src
+
+For one-off commands, it can also be enabled explicitly:
+
+#+begin_src sh
+nix --extra-experimental-features pipe-operator flake update nima
+nix --extra-experimental-features pipe-operator eval .#darwinConfigurations.ci.pkgs.mkNima --apply 'f: builtins.isFunction f'
+#+end_src
+
+Do not use =flake = false= for =nima= unless we deliberately want to vendor or reimplement =mkNima=. The preferred setup follows [[https://github.com/jian-lin/wonima/blob/master/flake.nix][wonima]] and uses =nima= as a normal flake input:
+
+#+begin_src nix
+nima = {
+  url = "github:jian-lin/nima";
+  inputs.nixpkgs.follows = "nixpkgs";
+  inputs.flake-parts.follows = "flake-parts";
+};
+#+end_src
+
+* Important constraint: avoid double wrapping Emacs
+
+=nima= is itself a wrapper around =emacs.pkgs.withPackages=. Home Manager's =programs.emacs= also wraps Emacs.
+
+Therefore, avoid this pattern:
+
+#+begin_src nix
+programs.emacs.package = pkgs.mkNima { ... };
+#+end_src
+
+That can wrap Emacs twice and cause package or load-path issues.
+
+Instead, create the configured Emacs once with =pkgs.mkNima= and use that package directly via =home.packages= and/or =services.emacs.package=.
+
+#+begin_src nix
+let
+  myEmacs = pkgs.mkNima {
+    module = { pkgs, ... }: {
+      package = emacsPatched;
+      earlyDefaultEl.elisp = ''
+        ;; early-init equivalent
+      '';
+    };
+
+    featuresDir = ./features;
+  };
+in
+{
+  home.packages = [ myEmacs ];
+
+  services.emacs = {
+    enable = true;
+    package = myEmacs;
+    client.enable = true;
+  };
+}
+#+end_src
+
+* Concept mapping
+
+The existing =emacs-init.nix= module provides declarations like this:
+
+#+begin_src nix
+programs.emacs.init.usePackage.foo = {
+  enable = true;
+  package = "foo";
+  bind = {
+    "C-c f" = "foo-command";
+  };
+  config = ''
+    ...
+  '';
+};
+#+end_src
+
+A corresponding =nima= feature would look like this:
+
+#+begin_src nix
+# features/foo.nix
+{ ... }:
+
+{
+  enable = true;
+
+  epkgs = epkgs: [
+    epkgs.foo
+  ];
+
+  elisp = ''
+    (use-package foo
+      :bind (("C-c f" . foo-command))
+      :config
+      ...)
+  '';
+}
+#+end_src
+
+| Existing =emacs-init.nix= concept | =nima= equivalent |
+|-----------------------------------+--------------------|
+| =usePackage.<name>.enable=        | =features.<name>.enable= |
+| =package=                         | =epkgs = epkgs: [ epkgs.<pkg> ]= |
+| =extraPackages=                   | add non-Elisp packages to =epkgs= list |
+| =init=, =config=, =preface=       | =elisp= or =elispFile= |
+| =earlyInit=                       | =earlyDefaultEl.elisp= or a dedicated early feature |
+| package overrides                 | =features.<name>.overlay= |
+| ordering                          | =features.<name>.order= |
+
+* Proposed repository layout
+
+Create a new =nima= area under the existing Emacs module directory:
+
+#+begin_example
+modules/editor/emacs/nima/
+  default.nix
+  lib/
+    feature.nix
+  features/
+    prelude.nix
+    prelude.el
+    meow.nix
+    meow.el
+    consult.nix
+    org.nix
+    gptel.nix
+    direnv.nix
+#+end_example
+
+Suggested conventions:
+
+- one feature per =features/<name>.nix=
+- optional large Elisp in =features/<name>.el=
+- small feature config can stay inline in =elisp=
+- shared helper functions in =lib/= only when they add repository-specific value
+- use =nima='s existing feature =enable= flag as the top-level switch for each feature
+- use =nima='s native =defvar=, =setq=, and =setopt= options when Nix needs to pass values to Elisp
+- local Elisp packages can stay in =modules/editor/emacs/packages/=
+
+* Keep =use-package= directly in feature Elisp
+
+=nima= does not prevent using =use-package=. The simplest migration path is to write normal =use-package= forms directly in each feature's =elisp= or companion =.el= file.
+
+For small packages, handwritten =use-package= keeps the Nix feature easy to read:
+
+#+begin_src nix
+{
+  epkgs = epkgs: [ epkgs.direnv ];
+
+  elisp = ''
+    (use-package direnv
+      :config
+      (direnv-mode))
+  '';
+}
+#+end_src
+
+Avoid adding a separate Nix DSL for =use-package= unless it solves a real repeated problem. Direct Elisp is easier to compare with upstream Emacs examples and avoids maintaining a second configuration language.
+
+#+begin_src nix
+# features/magit.nix
+{
+  epkgs = epkgs: [ epkgs.magit ];
+
+  elisp = ''
+    (use-package magit
+      :defer t
+      :bind (("C-x g" . magit-status)))
+  '';
+}
+#+end_src
+
+* Put larger Elisp in =.el= files
+
+=nima= supports =elispFile=. When using =featuresDir=, a feature file can have a same-name =.el= companion.
+
+#+begin_example
+features/meow.nix
+features/meow.el
+#+end_example
+
+#+begin_src nix
+# features/meow.nix
+{ ... }:
+
+{
+  epkgs = epkgs: [
+    epkgs.meow
+  ];
+
+  # Optional when using featuresDir, because ./meow.el is the default.
+  elispFile = ./meow.el;
+}
+#+end_src
+
+#+begin_src elisp
+;; features/meow.el
+(use-package meow
+  :init
+  (meow-global-mode 1)
+  :config
+  ...)
+#+end_src
+
+Use this rule of thumb:
+
+- inline =elisp= for small config
+- =elispFile= for larger config
+- =packages/*.el= for reusable local libraries
+
+* Preserve module-level =enable= flags
+
+=nima= features already have an =enable= option.
+
+Host-level or profile-level config can override features like this:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = {
+    features = {
+      meow.enable = true;
+      gptel.enable = false;
+      org.enable = true;
+    };
+  };
+}
+#+end_src
+
+Dynamic flags can use existing repository config:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = { pkgs, ... }: {
+    package = emacsPatched;
+
+    features = {
+      work.enable = config.my.isWorkMachine;
+      gptel.enable = !config.my.privacyMode;
+      macos.enable = pkgs.stdenv.isDarwin;
+    };
+  };
+}
+#+end_src
+
+* Existing feature =enable= flag convention
+
+=nima= already provides a boolean =enable= flag for features, as shown in upstream examples such as =wonima/features/embark.nix=. Use that existing flag as the public switch for every feature. Optional features should default to disabled unless they are part of the base Emacs profile.
+
+#+begin_src nix
+# features/gptel.nix
+{ lib, ... }:
+
+{
+  enable = lib.mkDefault false;
+
+  epkgs = epkgs: [ epkgs.gptel ];
+
+  elisp = ''
+    (use-package gptel
+      :defer t)
+  '';
+}
+#+end_src
+
+Hosts and profiles should only toggle the feature through =features.<name>.enable=:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = { config, ... }: {
+    features.gptel.enable = !config.my.privacyMode;
+  };
+}
+#+end_src
+
+Guidelines:
+
+- use =features.<name>.enable= as the only top-level feature switch
+- avoid secondary flags like =features.<name>.disabled= or =useFoo=
+- keep feature-local options for behavior only, not for whether the feature exists
+- put package installation, =use-package= setup, and companion =.el= loading behind the same feature
+
+* Pass Nix variables to Elisp
+
+=nima= now supports Nix-defined Elisp variables directly on both =earlyDefaultEl= and each feature. Use =defvar= for values that companion =.el= files should read, =setq= for normal variable assignment, and =setopt= for user options.
+
+Example feature using an =elispFile= companion:
+
+#+begin_src nix
+# features/prelude.nix
+{ config, lib, ... }:
+
+{
+  enable = lib.mkDefault true;
+
+  defvar = {
+    my/cache-directory = {
+      value = "${config.xdg.cacheHome}/emacs";
+      doc = "Directory used by local Emacs cache files.";
+    };
+
+    my/work-machine-p = config.my.isWorkMachine or false;
+  };
+
+  setq = {
+    user-full-name = "Yuan Wang";
+    create-lockfiles = false;
+    backup-by-copying = true;
+  };
+
+  setopt = {
+    use-short-answers = true;
+  };
+
+  elispFile = ./prelude.el;
+}
+#+end_src
+
+=nima= renders those forms before the feature's =elisp= or =elispFile= content, so Elisp code can read them normally:
+
+#+begin_src elisp
+(when my/work-machine-p
+  (message "Work profile enabled"))
+
+(file-name-as-directory my/cache-directory)
+#+end_src
+
+Early-startup values use the same options under =earlyDefaultEl=:
+
+#+begin_src nix
+pkgs.mkNima {
+  featuresDir = ./features;
+
+  module = { ... }: {
+    earlyDefaultEl = {
+      defvar = {
+        my-mono-font = "PragmataPro VF Mono Liga";
+        my-font = "PragmataPro Liga";
+      };
+
+      setq = {
+        inhibit-startup-screen = true;
+      };
+    };
+  };
+}
+#+end_src
+
+Guidelines:
+
+- use =defvar= for feature inputs that companion =.el= files may read
+- use =setq= for normal variable assignment
+- use =setopt= for user options
+- use strings, numbers, booleans, =null=, and simple lists directly
+- avoid a repository-local variable rendering helper now that =nima= supports this directly
+
+* Migration phases
+
+** Phase 1: add =nima= infrastructure
+
+- Add =nima= as a flake input.
+- Apply =nima.overlays.default= to Nixpkgs.
+- Add =modules/editor/emacs/nima/default.nix=.
+- Add =modules/editor/emacs/nima/features/=.
+- Add helper files under =modules/editor/emacs/nima/lib/= only when useful; Nix-to-Elisp variables are handled by =nima= directly.
+- Keep the existing =emacs-init.nix= path working while the migration starts.
+
+Example flake input:
+
+#+begin_src nix
+inputs.nima.url = "github:yuanw/nima/set-and-vars";
+#+end_src
+
+Example overlay:
+
+#+begin_src nix
+nixpkgs.overlays = [
+  inputs.nima.overlays.default
+];
+#+end_src
+
+** Phase 2: migrate simple packages first
+
+Start with small =usePackage= declarations that have little inline Elisp.
+
+Old style:
+
+#+begin_src nix
+programs.emacs.init.usePackage.direnv = {
+  enable = true;
+  package = "direnv";
+  config = ''
+    (direnv-mode)
+  '';
+};
+#+end_src
+
+New style:
+
+#+begin_src nix
+# features/direnv.nix
+{
+  epkgs = epkgs: [ epkgs.direnv ];
+
+  elisp = ''
+    (use-package direnv
+      :config
+      (direnv-mode))
+  '';
+}
+#+end_src
+
+** Phase 3: move large inline Elisp to =.el= files
+
+Large config blocks currently embedded in Nix should become pairs like:
+
+#+begin_example
+features/foo.nix
+features/foo.el
+#+end_example
+
+This keeps Nix responsible for package selection and module flags, while Elisp stays readable and editable as Elisp.
+
+** Phase 4: move local Elisp packages deliberately
+
+Existing local packages under:
+
+#+begin_example
+modules/editor/emacs/packages/
+#+end_example
+
+can be handled in one of two ways:
+
+1. Keep them as local package builds in =epkgs=.
+2. Load them from feature =elispFile= if they are configuration-only.
+
+For true libraries that are required by multiple features, prefer packaging them with =epkgs.trivialBuild= or an overlay.
+
+** Phase 5: remove =emacs-init.nix= once fully migrated
+
+After all packages and config are migrated:
+
+- remove =./emacs-init.nix= imports
+- remove =programs.emacs.init.*= usage
+- remove =programs.emacs.extraPackages= usage where possible
+- install/use only the =pkgs.mkNima= result
+  
+* Recommended final shape
+
+#+begin_src nix
+# modules/editor/emacs/nima/default.nix
+{ config, lib, pkgs, ... }:
+
+let
+  myEmacs = pkgs.mkNima {
+    featuresDir = ./features;
+
+    module = { pkgs, ... }: {
+      package = emacsPatched;
+
+      earlyDefaultEl.elisp = ''
+        (setq package-enable-at-startup nil)
+        (setq frame-inhibit-implied-resize t)
+      '';
+
+      features = {
+        meow.enable = true;
+        gptel.enable = !config.my.privacyMode;
+        macos.enable = pkgs.stdenv.isDarwin;
+      };
+    };
+  };
+in
+{
+  home.packages = [ myEmacs ];
+
+  services.emacs = {
+    enable = true;
+    package = myEmacs;
+    client.enable = true;
+  };
+}
+#+end_src
+
+* Outcome
+
+After this migration, the Emacs setup should have:
+
+- one configured Emacs package produced by =nima=
+- no double wrapping through Home Manager =programs.emacs=
+- modular feature files
+- per-feature =enable= flags
+- feature behavior configurable from Nix through generated =defvar= and =setq= Elisp
+- package installation through Nix
+- continued use of =use-package=
+- large Elisp moved to normal =.el= files
+- a clearer path for host-specific and profile-specific Emacs features

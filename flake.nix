@@ -43,6 +43,11 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nima = {
+      url = "github:yuanw/nima/set-and-vars";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.darwin.follows = "nix-darwin";

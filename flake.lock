@@ -551,6 +551,52 @@
         "type": "github"
       }
     },
+    "git-hooks-nix": {
+      "inputs": {
+        "flake-compat": [
+          "nima"
+        ],
+        "nixpkgs": [
+          "nima",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784288435,
+        "narHash": "sha256-ReRHaLgr/uVqdD8afFSn+myXIfpHeOhP0yYe0TJqAA8=",
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "rev": "43b3c1ab9d40fb1dbb008f451988a91e375825e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "type": "github"
+      }
+    },
+    "gitignore": {
+      "inputs": {
+        "nixpkgs": [
+          "dgx-spark",
+          "pre-commit-hooks",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1709087332,
+        "narHash": "sha256-HG2cCnktfHsKV0s4XW83gU3F57gaTljL9KNSuG6bnQs=",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "rev": "637db329424fd7e46cf4185293b9cc8c88c95394",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
     "haskell-flake": {
       "locked": {
         "lastModified": 1785340889,
@@ -728,6 +774,33 @@
         "type": "github"
       }
     },
+    "nima": {
+      "inputs": {
+        "flake-parts": [
+          "flake-parts"
+        ],
+        "git-hooks-nix": "git-hooks-nix",
+        "nix-unit": "nix-unit",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "treefmt-nix": "treefmt-nix_5"
+      },
+      "locked": {
+        "lastModified": 1785778562,
+        "narHash": "sha256-LxrpzhhqyjjrCioV5GtGg8IHNeXyUOTkhdiTMZ/sR80=",
+        "owner": "yuanw",
+        "repo": "nima",
+        "rev": "dff65ecb87c48487d4dd9a36e2861c96f8a55c96",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yuanw",
+        "ref": "set-and-vars",
+        "repo": "nima",
+        "type": "github"
+      }
+    },
     "nix-casks": {
       "inputs": {
         "flake-parts": [
@@ -853,6 +926,33 @@
       "original": {
         "owner": "numtide",
         "repo": "nix-gl-host",
+        "type": "github"
+      }
+    },
+    "nix-unit": {
+      "inputs": {
+        "nix-github-actions": [
+          "nima"
+        ],
+        "nixpkgs": [
+          "nima",
+          "nixpkgs"
+        ],
+        "treefmt-nix": [
+          "nima"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784925540,
+        "narHash": "sha256-11IOL5tyJbB3vMQzzhIULuPtoHJpkLFz4BaKApm6t0Q=",
+        "owner": "nix-community",
+        "repo": "nix-unit",
+        "rev": "b3d16367c54621fd073aa8c1dd510042f771f624",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nix-unit",
         "type": "github"
       }
     },
@@ -1181,6 +1281,7 @@
         "llm-agents": "llm-agents",
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",
+        "nima": "nima",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nix-darwin-login-items": "nix-darwin-login-items",
@@ -1192,7 +1293,7 @@
         "nur": "nur",
         "preservation": "preservation",
         "shy-fox": "shy-fox",
-        "treefmt-nix": "treefmt-nix_5"
+        "treefmt-nix": "treefmt-nix_6"
       }
     },
     "shy-fox": {
@@ -1387,6 +1488,27 @@
       }
     },
     "treefmt-nix_5": {
+      "inputs": {
+        "nixpkgs": [
+          "nima",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784369104,
+        "narHash": "sha256-47cxbcZODibHv3rELFQ9vZly0vUNkND/atn/U7HLeb0=",
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "rev": "df3c0640565d04a0261253cdd89fce78ec50168a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "treefmt-nix_6": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"

@@ -111,6 +111,15 @@ in
 
         ];
 
+        # CoreText on some macOS installs does not reliably pick up fonts that
+        # nix-darwin links as whole packages under /Library/Fonts/Nix Fonts.
+        # The sketchybar app icons are ligatures from this font, so expose it
+        # directly in the user's Fonts directory as well.
+        home.file."Library/Fonts/sketchybar-app-font.ttf" = {
+          source = "${pkgs.sketchybar-app-font}/share/fonts/truetype/sketchybar-app-font.ttf";
+          force = true;
+        };
+
         xdg.configFile."sketchybar".source = ./sketchybar;
 
       };

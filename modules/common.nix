@@ -54,7 +54,7 @@
       max-free = 17179870000
       log-lines = 128
 
-      experimental-features = nix-command flakes auto-allocate-uids
+      experimental-features = nix-command flakes auto-allocate-uids pipe-operator
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true
@@ -76,6 +76,7 @@
 
       [
         inputs.emacs.overlay
+        inputs.nima.overlays.default
         inputs.nur.overlays.default
         inputs.mcp-servers-nix.overlays.default
         inputs.llm-agents.overlays.shared-nixpkgs
