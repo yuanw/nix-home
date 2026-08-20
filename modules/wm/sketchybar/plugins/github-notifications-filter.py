@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Filter GitHub notifications: drop closed/merged PRs, log and dismiss via gh.
 
-Reads notifications JSON from stdin, writes filtered JSON to stdout.
+Fetches all notification pages from GitHub (not limited to the API default of 50).
+Optional: pipe notifications JSON on stdin to filter a fixed list instead.
 
 Env:
   GITHUB_NOTIFICATIONS_LOG_DIR  log directory (default: ~/.local/state/sketchybar)
   GITHUB_NOTIFICATIONS_DISMISS  dismiss closed/merged PRs (default: 1)
-  GITHUB_NOTIFICATIONS_DRY_RUN  log only, do not PATCH (default: 0)
+  GITHUB_NOTIFICATIONS_DRY_RUN    log only, do not PATCH (default: 0)
 """
 
 from __future__ import annotations
@@ -25,6 +26,29 @@ def env_bool(name: str, default: bool) -> bool:
     if value is None:
         return default
     return value not in {"0", "false", "False", "no", "NO"}
+
+
+def fetch_all_notifications() -> list[dict]:
+    try:
+        result = subprocess.run(
+            ["gh", "api", "--paginate", "notifications?per_page=100"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        data = json.loads(result.stdout)
+        return data if isinstance(data, list) else []
+    except (subprocess.CalledProcessError, json.JSONDecodeError):
+        return []
+
+
+def load_notifications() -> list[dict]:
+    if not sys.stdin.isatty():
+        raw = sys.stdin.read()
+        if raw.strip():
+            data = json.loads(raw)
+            return data if isinstance(data, list) else []
+    return fetch_all_notifications()
 
 
 def gh_get(endpoint: str) -> dict | None:
@@ -65,6 +89,10 @@ def process_notification(
     pr = gh_get(subject["url"]) or {}
     state = pr.get("state", "unknown")
     if state == "open":
+        if html_url := pr.get("html_url"):
+            enriched = json.loads(json.dumps(notification))
+            enriched.setdefault("subject", {})["html_url"] = html_url
+            return enriched, None
         return notification, None
 
     log_entry = {
@@ -98,7 +126,7 @@ def main() -> int:
     dry_run = env_bool("GITHUB_NOTIFICATIONS_DRY_RUN", False)
 
     try:
-        notifications = json.load(sys.stdin)
+        notifications = load_notifications()
     except json.JSONDecodeError:
         print("[]")
         return 1

@@ -4,7 +4,7 @@
 . "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
 update() {
-  NOTIFICATIONS="$(gh api notifications | python3 "$PLUGIN_DIR/github-notifications-filter.py")"
+  NOTIFICATIONS="$(python3 "$CONFIG_DIR/plugins/github-notifications-filter.py")"
   COUNT="$(echo "$NOTIFICATIONS" | jq 'length')"
   args=()
   if [ "$NOTIFICATIONS" = "[]" ]; then
@@ -23,7 +23,25 @@ update() {
   COLOR=$BLUE
   args+=(--set github.bell icon.color="$COLOR")
 
-  while read -r repo url type title; do
+  strip() {
+    echo "$1" | sed -e "s/^'//" -e "s/'$//" -e 's/^null$//' -e 's/^$//'
+  }
+
+  resolve_url() {
+    local html_url="$1"
+    local api_url="$2"
+    html_url="$(strip "$html_url")"
+    api_url="$(strip "$api_url")"
+    if [ -n "$html_url" ]; then
+      echo "$html_url"
+      return
+    fi
+    if [ -n "$api_url" ]; then
+      gh api "$api_url" --jq .html_url 2>/dev/null
+    fi
+  }
+
+  while read -r repo api_url html_url type title; do
     COUNTER=$((COUNTER + 1))
     IMPORTANT="$(echo "$title" | grep -iE "(deprecat|break|broke)")"
     COLOR=$BLUE
@@ -37,7 +55,7 @@ update() {
     "'Issue'")
       COLOR=$GREEN
       ICON=$GIT_ISSUE
-      URL="$(gh api "$(echo "${url}" | sed -e "s/^'//" -e "s/'$//")" | jq .html_url)"
+      URL="$(resolve_url "$html_url" "$api_url")"
       ;;
     "'Discussion'")
       COLOR=$WHITE
@@ -47,12 +65,12 @@ update() {
     "'PullRequest'")
       COLOR=$MAGENTA
       ICON=$GIT_PULL_REQUEST
-      URL="$(gh api "$(echo "${url}" | sed -e "s/^'//" -e "s/'$//")" | jq .html_url)"
+      URL="$(resolve_url "$html_url" "$api_url")"
       ;;
     "'Commit'")
       COLOR=$WHITE
       ICON=$GIT_COMMIT
-      URL="$(gh api "$(echo "${url}" | sed -e "s/^'//" -e "s/'$//")" | jq .html_url)"
+      URL="$(resolve_url "$html_url" "$api_url")"
       ;;
     esac
 
@@ -76,7 +94,7 @@ update() {
 
     args+=(--clone github.notification."$COUNTER" github.template
       --set github.notification."$COUNTER" "${notification[@]}")
-  done <<<"$(echo "$NOTIFICATIONS" | jq -r '.[] | [.repository.name, .subject.latest_comment_url, .subject.type, .subject.title] | @sh')"
+  done <<<"$(echo "$NOTIFICATIONS" | jq -r '.[] | [.repository.name, .subject.url, (.subject.html_url // ""), .subject.type, .subject.title] | @sh')"
 
   sketchybar -m "${args[@]}" >/dev/null
 
