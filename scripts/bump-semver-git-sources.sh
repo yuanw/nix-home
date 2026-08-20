@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 # Bump Workiva git sources whose tags need semver ordering (nvfetcher use_max_tag is lexical).
-# parsimony is excluded: pinned to PR branch in nvfetcher.toml.
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -10,6 +9,10 @@ render_nix="$root/scripts/render-work-generated-nix.py"
 declare -A packages=(
   [wk]="ssh://git@github.com/Workiva/wk.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
   [frugal]="ssh://git@github.com/Workiva/frugal.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+  [parsimony]="ssh://git@github.com/Workiva/parsimony.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
+  [antenna]="ssh://git@github.com/Workiva/antenna.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  [wk - plugin - mcp]="ssh://git@github.com/Workiva/wk-plugin-mcp.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  [mcp - atlassian]="ssh://git@github.com/Workiva/mcp_tools.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
 )
 
 latest_tag() {
@@ -42,12 +45,12 @@ commit_date() {
   git -C "$tmp" init -q
   git -C "$tmp" remote add origin "$url"
   git -C "$tmp" fetch -q --depth 1 origin "$rev"
-  git -C "$tmp" log -1 --format=%cs
+  git -C "$tmp" show -s --format=%cs FETCH_HEAD
 }
 
 prefetch_sri() {
   local url=$1 rev=$2
-  nix-prefetch-git "$url" --rev "$rev" 2>/dev/null | jq -r .sha256
+  nix-prefetch-git "$url" --rev "$rev" 2>/dev/null | jq -r .hash
 }
 
 changed=0
@@ -86,7 +89,13 @@ for name in "${!packages[@]}"; do
       | .[$name].src.sha256 = $sha256
       | .[$name].version = $rev
       | .[$name].date = $date
-      | .[$name].passthru = ((.[$name].passthru // {}) + { tag: $tag })
+      | .[$name].passthru = (
+          if $name == "wk" then
+            ((.[$name].passthru // {}) + { tag: $tag })
+          else
+            { tag: $tag }
+          end
+        )
     ' \
     "$generated_json" >"$tmp"
   mv "$tmp" "$generated_json"

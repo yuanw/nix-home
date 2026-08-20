@@ -2,11 +2,6 @@
 
 (require 'cl-lib)
 
-(defvar wonima-emacs-state-directory
-  (expand-file-name "state/" user-emacs-directory)
-  "Fallback state directory used by the imported wonima completion config.")
-(make-directory wonima-emacs-state-directory t)
-
 ;; 'basic is needed by dynamic completion tables
 (setopt completion-styles '(orderless basic))
 

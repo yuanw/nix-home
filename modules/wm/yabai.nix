@@ -149,6 +149,7 @@ in
       services.sketchybar = {
         extraPackages = [
           pkgs.jq
+          pkgs.python3
           pkgs.gh
           pkgs.ripgrep
           pkgs.sketchybar-cpu-helper
