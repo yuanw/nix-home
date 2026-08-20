@@ -53,13 +53,13 @@
                'help-echo (format-time-string "%a %b %e, %Y" now))
               " ")))
 
-    ;; Keycast integrates with the modeline by inserting itself after the VC
-    ;; branch segment.
+    ;; Start Keycast at startup.  The old Home Manager config did this from
+    ;; postlude.el with `(keycast-header-line-mode)', so keep the same visible
+    ;; header-line behaviour in the nima setup.
     (use-package keycast
       :after prot-modeline
       ;; `:commands' made this deferred in the nima-generated config, so none
-      ;; of the mode-line setup ran until `keycast-mode-line-mode' was invoked
-      ;; manually.  Load it at startup and enable the mode-line display.
+      ;; of the setup ran until a keycast mode was invoked manually.
       :demand t
       :commands (keycast-mode-line-mode
                  keycast-header-line-mode
@@ -78,6 +78,6 @@
                        mwheel-scroll handle-select-window
                        mouse-set-point mouse-drag-region))
         (add-to-list 'keycast-substitute-alist `(,event nil)))
-      (keycast-mode-line-mode 1))
+      (keycast-header-line-mode 1))
   '';
 }
