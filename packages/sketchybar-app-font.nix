@@ -14,7 +14,7 @@ stdenv.mkDerivation rec {
   };
 
   buildCommand = ''
-    install -m444 -Dt $out/share/fonts/truetype ${src}
+    install -Dm444 ${src} $out/share/fonts/truetype/sketchybar-app-font.ttf
   '';
 
   meta = with lib; {
