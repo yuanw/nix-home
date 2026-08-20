@@ -33,8 +33,6 @@
 
   modules = {
     claude-code = {
-      enableClaudeMem = true;
-      # llm-agent.claude-code doesn't work in garnix ci
       pkg = pkgs.claude-code;
     };
     pi.enable = true;
@@ -46,8 +44,6 @@
     editors.emacs = {
       enable = true;
       enableService = true;
-      # TODO fix this
-      enableAider = false;
       enableLatex = false;
     };
 

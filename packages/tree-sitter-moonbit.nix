@@ -5,7 +5,7 @@
 }:
 
 let
-  soExt = if stdenv.isDarwin then "dylib" else "so";
+  soExt = if stdenv.hostPlatform.isDarwin then "dylib" else "so";
 in
 stdenv.mkDerivation {
   pname = "tree-sitter-moonbit";

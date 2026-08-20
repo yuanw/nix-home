@@ -34,6 +34,8 @@
         (eglot-execute (eglot-current-server) (list :command command)))
       :config
       (setq eglot-autoshutdown t)
+      ;; jdtls initialize on large Gradle monorepos exceeds the default 30s.
+      (setq eglot-connect-timeout 180)
       (add-to-list 'eglot-server-programs
                    '((java-mode java-ts-mode) . ("jdtls"
                                                  "--jvm-arg=-javaagent:${pkgs.lombok}/share/java/lombok.jar")))

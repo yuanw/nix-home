@@ -23,7 +23,7 @@ let
 
   # browser-cli uses firefox_path / BROWSER_CLI_FIREFOX_PATH for LibreWolf too.
   browserPath =
-    if librewolfCfg.enable or false && pkgs.stdenv.isDarwin then
+    if librewolfCfg.enable or false && pkgs.stdenv.hostPlatform.isDarwin then
       "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf"
     else if librewolfCfg.enable or false then
       lib.getExe librewolfPkg
@@ -39,7 +39,7 @@ let
   };
 
   nativeMessagingHosts =
-    if pkgs.stdenv.isDarwin then
+    if pkgs.stdenv.hostPlatform.isDarwin then
       {
         "Library/Application Support/LibreWolf/NativeMessagingHosts/io.thalheim.browser_cli.bridge.json".text =
           builtins.toJSON nativeMessagingManifest;
@@ -74,7 +74,7 @@ in
     // nativeMessagingHosts;
 
     home.activation.clearBrowserCliDefaultsPolicy = lib.hm.dag.entryAfter [ "writeBoundary" ] (
-      lib.mkIf pkgs.stdenv.isDarwin ''
+      lib.mkIf pkgs.stdenv.hostPlatform.isDarwin ''
         /usr/bin/defaults delete org.mozilla.firefox ExtensionSettings 2>/dev/null || true
       ''
     );

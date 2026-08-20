@@ -15,8 +15,12 @@ hm@{ pkgs, ... }:
   home.stateVersion = "26.05";
   home.packages =
     (import ./packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isDarwin (import ./macos_packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isLinux (import ./linux_packages.nix { inherit pkgs; });
+    ++ lib.optionals pkgs.stdenvNoCC.hostPlatform.isDarwin (
+      import ./macos_packages.nix { inherit pkgs; }
+    )
+    ++ lib.optionals pkgs.stdenvNoCC.hostPlatform.isLinux (
+      import ./linux_packages.nix { inherit pkgs; }
+    );
   home.sessionPath = [
     "/usr/local/bin"
     "/usr/local/sbin"
@@ -197,7 +201,10 @@ hm@{ pkgs, ... }:
         };
         credential = {
           helper =
-            if pkgs.stdenvNoCC.isDarwin then "osxkeychain" else "!${pkgs.gh}/bin/gh auth git-credential";
+            if pkgs.stdenvNoCC.hostPlatform.isDarwin then
+              "osxkeychain"
+            else
+              "!${pkgs.gh}/bin/gh auth git-credential";
           useHttpPath = true;
         };
       };
@@ -317,6 +324,11 @@ hm@{ pkgs, ... }:
         setopt COMPLETE_IN_WORD      # complete from cursor position
         setopt GLOB_DOTS             # include dotfiles in globbing
         setopt NO_BEEP               # disable beeping
+
+        # Required for gpg pinentry in terminal sessions
+        if tty -s; then
+          export GPG_TTY=$(tty)
+        fi
       '';
 
       oh-my-zsh = {
