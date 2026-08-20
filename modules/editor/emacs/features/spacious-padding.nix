@@ -2,7 +2,9 @@
   epkgs = epkgs: [ epkgs.spacious-padding ];
   elisp = ''
     (use-package spacious-padding
-      :commands (spacious-padding-mode)
+      ;; Load eagerly so the header-line padding is active before/with
+      ;; `keycast-header-line-mode', matching the old Home Manager setup.
+      :demand t
       :init
       ;; Same padding as the old/main-branch Home Manager use-package config.
       (setq spacious-padding-widths
