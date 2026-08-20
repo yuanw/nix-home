@@ -4,7 +4,7 @@
 . "$CONFIG_DIR/icons.sh"  # Loads all defined icons
 
 update() {
-  NOTIFICATIONS="$(gh api notifications)"
+  NOTIFICATIONS="$(gh api notifications | python3 "$PLUGIN_DIR/github-notifications-filter.py")"
   COUNT="$(echo "$NOTIFICATIONS" | jq 'length')"
   args=()
   if [ "$NOTIFICATIONS" = "[]" ]; then
