@@ -1,6 +1,7 @@
 host := `hostname -s`
 substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
-export NIX_CONFIG := "extra-experimental-features = nix-command flakes pipe-operator"
+nix_config := "extra-experimental-features = nix-command flakes pipe-operator"
+nix := "env NIX_CONFIG='extra-experimental-features = nix-command flakes pipe-operator' nix"
 
 # list all commands
 default:
@@ -14,16 +15,16 @@ prefetch-work-sources:
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
         {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
-        {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
-        nix build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
+        {{nix}} build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
     fi
 
 update-all:
-    @nix flake update
+    @{{nix}} flake update
 
 update INPUT:
-    @nix flake update {{INPUT}}
+    @{{nix}} flake update {{INPUT}}
 
 # update ad-hoc packages upstream references 
 nix-update:
@@ -171,12 +172,12 @@ nima-emacs-print-config:
     else \
         host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
     fi; \
-    nix eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
+    {{nix}} eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
 
 
 # build devshell + system and push both closures to cachix
 push-all:
-    @bash -o pipefail -c 'nix build --no-link --print-out-paths .#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
+    @bash -o pipefail -c 'env NIX_CONFIG="{{nix_config}}" nix build --no-link --print-out-paths .#devShells.$(env NIX_CONFIG="{{nix_config}}" nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
