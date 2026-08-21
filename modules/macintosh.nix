@@ -103,10 +103,8 @@ in
     enableCompletion = true;
     enable = true;
   };
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
+  # GPG agent is managed by home-manager (modules/home/gpg.nix).
+  programs.gnupg.agent.enable = false;
   time.timeZone = "America/Regina";
   system.primaryUser = config.my.username;
   users.users.${config.my.username} = {

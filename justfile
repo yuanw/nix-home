@@ -1,7 +1,7 @@
 host := `hostname -s`
 substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
-nix_config := "extra-experimental-features = nix-command flakes pipe-operator"
-nix := "env NIX_CONFIG='extra-experimental-features = nix-command flakes pipe-operator' nix"
+nix_config := "extra-experimental-features = nix-command flakes pipe-operators"
+nix := "env NIX_CONFIG='extra-experimental-features = nix-command flakes pipe-operators' nix"
 
 # list all commands
 default:
@@ -158,9 +158,9 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo env NIX_CONFIG="$$NIX_CONFIG" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
+        sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
     else \
-        nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
+        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
         sudo systemctl try-restart emacs.service || true; \
     fi
 

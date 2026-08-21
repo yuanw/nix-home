@@ -102,7 +102,8 @@ with lib;
     shells = [ pkgs.zsh ];
   };
   programs.zsh.enable = true;
-  programs.gnupg.agent.enable = true;
+  # GPG agent is managed by home-manager (modules/home/gpg.nix).
+  programs.gnupg.agent.enable = false;
   time.timeZone = "America/Regina";
   virtualisation.docker.enable = false;
   #home-manager.backupFileExtension = "backup";

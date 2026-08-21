@@ -7,7 +7,10 @@
 hm@{ pkgs, ... }:
 
 {
-  imports = [ ./home/browser-cli.nix ];
+  imports = [
+    ./home/browser-cli.nix
+    ./home/gpg.nix
+  ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
   # https://github.com/nix-community/home-manager/blob/c1e671036224089937e111e32ea899f59181c383/modules/misc/version.nix#L14
@@ -324,11 +327,6 @@ hm@{ pkgs, ... }:
         setopt COMPLETE_IN_WORD      # complete from cursor position
         setopt GLOB_DOTS             # include dotfiles in globbing
         setopt NO_BEEP               # disable beeping
-
-        # Required for gpg pinentry in terminal sessions
-        if tty -s; then
-          export GPG_TTY=$(tty)
-        fi
       '';
 
       oh-my-zsh = {
