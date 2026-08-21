@@ -175,7 +175,7 @@ nima-emacs-print-config:
 
 # build devshell + system and push both closures to cachix
 push-all:
-    nix build --no-link --print-out-paths .#devShells.aarch64-darwin.default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos
+    @bash -o pipefail -c 'nix --extra-experimental-features pipe-operator build --no-link --print-out-paths .#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
