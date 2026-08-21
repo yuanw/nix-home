@@ -29,7 +29,6 @@ nix-update:
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
-    @nix-update -f ./packages/release.nix chroma-mcp --src-only
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
     @nix-update -f ./packages/release.nix pi-acp --src-only --version=branch --override-filename ./packages/pi-acp.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
