@@ -19,10 +19,10 @@ build:
     fi
 
 update-all:
-    @nix flake update
+    @nix --extra-experimental-features pipe-operator flake update
 
 update INPUT:
-    @nix flake update lock --update-input {{INPUT}}
+    @nix --extra-experimental-features pipe-operator flake update lock --update-input {{INPUT}}
 
 # update ad-hoc packages upstream references 
 nix-update:
@@ -163,29 +163,6 @@ switch:
         sudo systemctl try-restart emacs.service || true; \
     fi
 
-# build the staged nima Emacs package without switching the active service
-nima-emacs-build:
-    @set -e; \
-    if [ "$(uname)" = "Darwin" ]; then \
-        host_expr='flake.darwinConfigurations."{{host}}"'; \
-    else \
-        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
-    fi; \
-    nix --extra-experimental-features pipe-operator build --impure --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; in import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; }"
-
-# run the staged nima Emacs package with a temporary HOME
-nima-emacs-run: nima-emacs-build
-    @tmp_home=$(mktemp -d); \
-    echo "Using temporary HOME: $tmp_home"; \
-    HOME="$tmp_home" ./result/bin/emacs
-
-# run the staged nima Emacs package as an isolated daemon
-nima-emacs-daemon: nima-emacs-build
-    @tmp_home=$(mktemp -d); \
-    echo "Using temporary HOME: $tmp_home"; \
-    echo "Connect with: HOME=$tmp_home ./result/bin/emacsclient -s nima-test -c"; \
-    HOME="$tmp_home" ./result/bin/emacs --fg-daemon=nima-test
-
 # print the generated nima default.el content
 nima-emacs-print-config:
     @set -e; \
@@ -196,26 +173,6 @@ nima-emacs-print-config:
     fi; \
     nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
 
-# remove local byte/native-compiled cache files that can hide rebuilt nima config
-nima-emacs-clean:
-    @set -e; \
-    echo "Cleaning local Emacs byte/native compilation artifacts for nima config..."; \
-    for dir in "$HOME/.emacs.d" "$HOME/.config/emacs"; do \
-        if [ -d "$dir" ]; then \
-            find "$dir" -type f \( \
-                -name 'default.elc' -o \
-                -name 'early-default.elc' -o \
-                -name 'prelude.elc' -o \
-                -name 'default-*.eln' -o \
-                -name 'early-default-*.eln' -o \
-                -name 'prelude-*.eln' \
-            \) -print -exec rm -f {} \;; \
-        fi; \
-    done; \
-    if [ -n "${TMPDIR:-}" ] && [ -d "$TMPDIR" ]; then \
-        find "$TMPDIR" -path '*/emacs-snippet-lint-*/*.elc' -type f -print -exec rm -f {} \; || true; \
-        find "$TMPDIR" -maxdepth 1 -type d -name 'emacs-snippet-lint-*' -empty -print -exec rmdir {} \; || true; \
-    fi
 
 # build devshell + system and push both closures to cachix
 push-all:
