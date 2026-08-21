@@ -8,6 +8,8 @@ let
   inherit (builtins) toJSON;
 in
 ''
+  ;; -*- lexical-binding: t; -*-
+
   (defvar my-mono-font ${toJSON monoFont}
     "Monospace font family selected from Nix.")
   (defvar my-font ${toJSON font}

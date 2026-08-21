@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;; Disable some GUI distractions. We set these manually to avoid starting
 ;; the corresponding minor modes.
 (dolist (parameter '((menu-bar-lines . 0)
