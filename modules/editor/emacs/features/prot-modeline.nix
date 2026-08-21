@@ -30,7 +30,7 @@
     ;; branch information.
     (require 'prot-modeline)
 
-    ${builtins.readFile ../configs/prot-modeline.el}
+    ${builtins.readFile ./prot-modeline-config.el}
 
     ;; Display current time/date through `mode-line-misc-info', consumed by
     ;; `prot-modeline-misc-info' on the right side of the modeline.

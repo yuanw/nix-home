@@ -1,6 +1,4 @@
 ;;; prot-modeline-hel.el --- Hel state indicator for prot-modeline -*- lexical-binding: t; -*-
-;;
-;; Loaded conditionally by modal-edit.nix when modalEditing == "hel".
 
 (defvar prot-modeline--hel-state-colors
   '((normal . prot-modeline-indicator-green-bg)
@@ -24,7 +22,7 @@ Shows the Hel state when `hel-mode' is active, otherwise shows nothing."
   (setq hel-mode-line-info nil)
 
   ;; Insert the hel state indicator into the mode-line format
-  ;; (replacing the empty string placeholder from prot-modeline.el).
+  ;; (replacing the empty string placeholder from prot-modeline-config.el).
   (setq-default mode-line-format
                 (cl-substitute
                  '(:eval (prot-modeline--hel-state)) ""

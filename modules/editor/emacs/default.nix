@@ -125,12 +125,6 @@ with lib;
 
             file.".emacs.d/snippets".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
-            # Hot-reloadable external config files — symlink the configs/ directory
-            # so that Emacs can load files from ~/.emacs.d/external/ at runtime.
-            # When `hm-hot-reload-mode' is active, changes to these files are
-            # auto-reloaded without rebuilding.
-            file.".emacs.d/external".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/configs";
             packages = with pkgs; [
               emacsPackage
               (pkgs.writeShellScriptBin "app-launcher" ''

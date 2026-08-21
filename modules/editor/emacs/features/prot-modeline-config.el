@@ -1,16 +1,9 @@
 ;;; prot-modeline-config.el --- Prot Modeline configuration -*- lexical-binding: t; -*-
-;;
-;; Hot-reloadable prot-modeline config — edit this file and reload with:
-;;   M-x hm/reload-config
-;; or enable auto-reload with:
-;;   M-x hm-hot-reload-mode
 
 (setq mode-line-compact nil) ; Emacs 28
 (setq mode-line-right-align-edge 'right-margin) ; Emacs 30
 
 ;; ── Mode-line format ───────────────────────────────────────────────
-;; The meow indicator is added separately by prot-modeline-meow.el
-;; when modal editing is set to "meow".
 (setq-default mode-line-format
      '("%e"
        ""
