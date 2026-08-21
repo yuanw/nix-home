@@ -54,7 +54,7 @@
       max-free = 17179870000
       log-lines = 128
 
-      experimental-features = nix-command flakes auto-allocate-uids pipe-operator
+      experimental-features = nix-command flakes auto-allocate-uids pipe-operators
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true
