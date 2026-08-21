@@ -1,5 +1,6 @@
 host := `hostname -s`
 substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
+export NIX_CONFIG := "extra-experimental-features = nix-command flakes pipe-operator"
 
 # list all commands
 default:
@@ -13,16 +14,16 @@ prefetch-work-sources:
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
         {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
-        NIX_CONFIG="extra-experimental-features = nix-command flakes pipe-operator" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
-        nix --extra-experimental-features pipe-operator build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
+        nix build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
     fi
 
 update-all:
-    @nix --extra-experimental-features pipe-operator flake update
+    @nix flake update
 
 update INPUT:
-    @nix --extra-experimental-features pipe-operator flake update lock --update-input {{INPUT}}
+    @nix flake update {{INPUT}}
 
 # update ad-hoc packages upstream references 
 nix-update:
@@ -156,9 +157,9 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo env NIX_CONFIG="extra-experimental-features = pipe-operator" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
+        sudo env NIX_CONFIG="$$NIX_CONFIG" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
     else \
-        env NIX_CONFIG="extra-experimental-features = pipe-operator" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
+        nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
         sudo systemctl try-restart emacs.service || true; \
     fi
 
@@ -170,12 +171,12 @@ nima-emacs-print-config:
     else \
         host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
     fi; \
-    nix --extra-experimental-features pipe-operator eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
+    nix eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
 
 
 # build devshell + system and push both closures to cachix
 push-all:
-    @bash -o pipefail -c 'nix --extra-experimental-features pipe-operator build --no-link --print-out-paths .#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
+    @bash -o pipefail -c 'nix build --no-link --print-out-paths .#devShells.$(nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result
