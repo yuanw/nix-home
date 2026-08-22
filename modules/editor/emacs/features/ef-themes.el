@@ -1,7 +1,6 @@
 ;;; ef-themes.el --- Ef themes configuration -*- lexical-binding: t; -*-
 
 (use-package ef-themes
-  :demand t
   :init
   (ef-themes-take-over-modus-themes-mode)
   :preface
