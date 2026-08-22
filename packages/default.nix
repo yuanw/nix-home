@@ -186,8 +186,6 @@ in
   lance = prev.callPackage ./lance { };
   lance-download-model = prev.callPackage ./lance-download-model { };
 
-  librewolf-macos = prev.callPackage ./librewolf-macos { };
-
   # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
   # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
   # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids
