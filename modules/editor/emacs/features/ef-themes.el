@@ -21,7 +21,7 @@
   (modus-themes-italic-constructs t)
   (modus-themes-mixed-fonts t)
   (modus-themes-bold-constructs t)
-  (modus-themes-to-toggle '(ef-owl ef-spring)))
+  (modus-themes-to-toggle '(ef-owl ef-spring))
   :bind (("C-c t l" . my/select-light-theme)
          ("C-c t d" . my/select-dark-theme)
          ("C-c t t" . modus-themes-toggle))
