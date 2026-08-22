@@ -378,6 +378,10 @@ in
               };
             };
 
+            # Firefox/LibreWolf rewrite containers.json on launch.  Force only
+            # LibreWolf's managed containers file so Home Manager does not need
+            # a global overwriteBackup policy for stale *.hm-bak files.
+            containersForce = program == "librewolf";
             containers = {
               "Banking" = {
                 id = 3;

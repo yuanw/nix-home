@@ -67,7 +67,6 @@
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
                 ];
-                # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
                 extraSpecialArgs = { inherit inputs; };
               };
