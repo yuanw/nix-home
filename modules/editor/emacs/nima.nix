@@ -110,7 +110,10 @@ pkgs.mkNima {
       overlay = import ./overrides.nix {
         inherit pkgs lib;
         packagePath = ../../../packages/emacs;
-        emacsGhostel.emacsOverrides = _self: _super: { };
+        emacsGhostel = import ./ghostel.nix {
+          inherit pkgs;
+          isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+        };
       };
 
       _module.args = {
