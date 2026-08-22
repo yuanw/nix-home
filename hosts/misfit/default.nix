@@ -9,7 +9,9 @@
     inputs.declarative-jellyfin.nixosModules.default
     ../../modules/isponsorblocktv.nix
     ../../modules/caddy.nix
+    ../../modules/motion.nix
     ./configuration.nix
+    ./motion.nix
   ];
 
   # colmena deployment configuration
