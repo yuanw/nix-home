@@ -51,6 +51,8 @@
   (setq org-startup-with-inline-images t)
 
   ;; Load theme after display initialization.
-  ;;(load-theme 'ef-owl :no-confirm))
+  ;;(load-theme 'ef-owl :no-confirm)
+  )
 
+(provide 'nima-feature-ef-themes)
 ;;; ef-themes.el ends here
