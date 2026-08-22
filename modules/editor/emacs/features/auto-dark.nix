@@ -1,3 +1,5 @@
+{ lib, pkgs, ... }:
+
 {
   epkgs = epkgs: [ epkgs.auto-dark ];
   elisp = ''
@@ -9,7 +11,7 @@
       ;; first list is dark themes, second list is light themes.
       (setq auto-dark-themes '((ef-owl) (ef-spring)))
       :config
-      (setq auto-dark-allow-osascript t)
+      ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin "(setq auto-dark-allow-osascript t)"}
       (auto-dark-mode 1))
   '';
 }
