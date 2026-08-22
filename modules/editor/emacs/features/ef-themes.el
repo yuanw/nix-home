@@ -2,6 +2,8 @@
 
 (use-package ef-themes
   :demand t
+  :init
+  (ef-themes-take-over-modus-themes-mode)
   :preface
   (defun my/select-light-theme ()
     "Select the light Ef theme."
@@ -23,7 +25,6 @@
   ;; If you like two specific themes and want to switch between them, specify
   ;; them in `ef-themes-to-toggle' and invoke `ef-themes-toggle'.
   (setq ef-themes-to-toggle '(ef-day ef-owl))
-  (ef-themes-take-over-modus-themes-mode 1)
   (setq modus-themes-mixed-fonts t)
   (setq ef-themes-headings
         '((0 variable-pitch light 1.9)
@@ -46,5 +47,4 @@
   ;; Load theme after display initialization.
   (load-theme 'ef-owl :no-confirm))
 
-(provide 'nima-feature-ef-themes)
 ;;; ef-themes.el ends here
