@@ -15,17 +15,23 @@
     (interactive)
     (ef-themes-select 'ef-owl))
 
+  :custom
+  (custom-safe-themes t)
+  (modus-themes-common-palette-overrides '((fringe unspecified)))
+  (modus-themes-italic-constructs t)
+  (modus-themes-mixed-fonts t)
+  (modus-themes-bold-constructs t)
+  (modus-themes-to-toggle '(ef-owl ef-spring)))
   :bind (("C-c t l" . my/select-light-theme)
          ("C-c t d" . my/select-dark-theme)
-         ("C-c t t" . ef-themes-toggle))
+         ("C-c t t" . modus-themes-toggle))
   :config
   ;; Fix for newer Emacs: prefer .el files over potentially incompatible .elc files.
   (setq load-prefer-newer t)
 
   ;; If you like two specific themes and want to switch between them, specify
   ;; them in `ef-themes-to-toggle' and invoke `ef-themes-toggle'.
-  (setq ef-themes-to-toggle '(ef-day ef-owl))
-  (setq modus-themes-mixed-fonts t)
+  ;;(setq ef-themes-to-toggle '(ef-day ef-owl))
   (setq ef-themes-headings
         '((0 variable-pitch light 1.9)
           (1 variable-pitch light 1.8)
@@ -41,10 +47,10 @@
         ef-themes-variable-pitch-ui t)
 
   ;; Disable all other themes to avoid awkward blending.
-  (mapc #'disable-theme custom-enabled-themes)
+  ;;(mapc #'disable-theme custom-enabled-themes)
   (setq org-startup-with-inline-images t)
 
   ;; Load theme after display initialization.
-  (load-theme 'ef-owl :no-confirm))
+  ;;(load-theme 'ef-owl :no-confirm))
 
 ;;; ef-themes.el ends here
