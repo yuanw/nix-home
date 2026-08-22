@@ -30,6 +30,7 @@ update INPUT:
 # update ad-hoc packages upstream references 
 nix-update:
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
+    @nix-update -f ./packages/release.nix acp --src-only --version=branch --override-filename ./packages/emacs/acp.nix
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
