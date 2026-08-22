@@ -1,6 +1,5 @@
 # Home Manager side of browser-cli (config.toml + native messaging host).
 # macOS: LibreWolf carries the extension (modules/browsers/browser-cli-darwin.nix).
-# LibreWolf HM config mirrors Firefox via modules/browsers/gecko-home.nix.
 # https://github.com/Mic92/mics-skills/tree/main/browser-cli#configuring-the-browser-path
 {
   config,
@@ -18,17 +17,14 @@ let
   wrapperPath = "${config.home.homeDirectory}/.local/bin/browser-cli-server-wrapper";
 
   librewolfCfg = osConfig.modules.browsers.librewolf or { enable = false; };
-  firefoxPkg = osConfig.modules.browsers.firefox.pkg or null;
   librewolfPkg = librewolfCfg.pkg or pkgs.librewolf;
 
   # browser-cli uses firefox_path / BROWSER_CLI_FIREFOX_PATH for LibreWolf too.
   browserPath =
     if librewolfCfg.enable or false && pkgs.stdenv.hostPlatform.isDarwin then
       "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf"
-    else if librewolfCfg.enable or false then
-      lib.getExe librewolfPkg
     else
-      lib.getExe (if firefoxPkg != null then firefoxPkg else pkgs.firefox);
+      lib.getExe librewolfPkg;
 
   nativeMessagingManifest = {
     name = "io.thalheim.browser_cli.bridge";
@@ -43,13 +39,9 @@ let
       {
         "Library/Application Support/LibreWolf/NativeMessagingHosts/io.thalheim.browser_cli.bridge.json".text =
           builtins.toJSON nativeMessagingManifest;
-        "Library/Application Support/Mozilla/NativeMessagingHosts/io.thalheim.browser_cli.bridge.json".text =
-          builtins.toJSON nativeMessagingManifest;
       }
     else
       {
-        ".mozilla/native-messaging-hosts/io.thalheim.browser_cli.bridge.json".text =
-          builtins.toJSON nativeMessagingManifest;
         ".librewolf/native-messaging-hosts/io.thalheim.browser_cli.bridge.json".text =
           builtins.toJSON nativeMessagingManifest;
       };

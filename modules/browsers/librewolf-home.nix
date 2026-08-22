@@ -1,4 +1,4 @@
-# Shared Home Manager config for Firefox and LibreWolf.
+# Home Manager config for LibreWolf.
 {
   lib,
   pkgs,
@@ -19,11 +19,6 @@ let
   browserCliFirefoxExtension = pkgs.callPackage ../../packages/browser-cli-firefox-extension.nix {
     inherit (micsSkills) browser-cli-extension;
   };
-  browserCliPolicies = import ../../packages/browser-cli-policies.nix {
-    inherit (micsSkills) browser-cli-extension;
-    installUrl = "file://${osConfig.my.homeDirectory}/.browser-cli/browser-cli-extension.xpi";
-  };
-
   buildKeybindings =
     extensionId: commands:
     lib.mapAttrs' (cmdName: cmdValue: {
@@ -44,7 +39,7 @@ let
     acc: extId: acc // (buildKeybindings extId keybindingsCfg.settings.${extId})
   ) { } (lib.attrNames keybindingsCfg.settings);
 
-  searchPolicies = import ../../packages/gecko-search-policies.nix;
+  searchPolicies = import ../../packages/librewolf-search-policies.nix;
 in
 {
 
@@ -52,24 +47,12 @@ in
     hm.config.lib.dag.entryBefore [ "checkLinkTargets" ] ''
       profile="$HOME/${profilesPath}/home"
       if [ -d "$profile" ] && [ -L "$profile/.keep" ] && readlink "$profile/.keep" 2>/dev/null | grep -q 'Firefox/Profiles'; then
-        echo "gecko-home: removing rsynced Firefox profile from LibreWolf" >&2
+        echo "librewolf-home: removing rsynced Firefox profile from LibreWolf" >&2
         rm -rf "$profile"
       fi
     ''
   );
 
-  # https://github.com/Enzime/dotfiles-nix/blob/db460106448ff3d0924dbb89f450b31d539b7e92/modules/firefox.nix#L39
-
-  home.activation.browserCliFirefoxExtension =
-    lib.mkIf (osConfig.modules.pi.enable or false && !isDarwin && program == "firefox")
-      (
-        hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
-          extDir="$HOME/${profilesPath}/home/extensions"
-          mkdir -p "$extDir"
-          ln -sfn ${browserCliFirefoxExtension}/share/mozilla/extensions/{ec8030f7-c20a-464f-9b0e-13a3a9e97384}/browser-cli-controller@thalheim.io.xpi \
-            "$extDir/browser-cli-controller@thalheim.io.xpi"
-        ''
-      );
   home.activation.setDefaultBrowser =
     lib.mkIf (isDarwin && program == (osConfig.modules.browsers.defaultBrowser or "firefox"))
       (
@@ -85,27 +68,6 @@ in
       );
   home.file = {
     "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
-  }
-  // lib.optionalAttrs (!isDarwin) {
-    ".mozilla/firefox/profiles.ini".text = ''
-      [General]
-      StartWithLastProfile=1
-      Version=2
-
-      [Profile0]
-      Default=1
-      IsRelative=0
-      Name=home
-      Path=${config.my.homeDirectory}/.config/mozilla/firefox/home
-    '';
-  };
-  # Firefox on Linux reads profiles.ini from the legacy path
-  # (~/.mozilla/firefox) but HM writes it to the XDG path
-  # (~/.config/mozilla/firefox).  Tell it to use the XDG path so
-  # the HM-managed `home` profile (user.js, extensions, etc.)
-  # takes effect.
-  home.sessionVariables = lib.mkIf (!isDarwin && program == "firefox") {
-    MOZ_FIREFOX_HOME = "${config.my.homeDirectory}/.config/mozilla/firefox";
   };
   programs.${program} = lib.mkMerge (
     [
@@ -129,12 +91,9 @@ in
               "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
             };
           })
-          (lib.mkIf (osConfig.modules.pi.enable or false && !isDarwin && program == "firefox") {
-            ExtensionSettings = browserCliPolicies.ExtensionSettings;
-          })
         ];
         profiles = {
-          #~/Library/Application Support/Firefox
+          # ~/Library/Application Support/LibreWolf/Profiles/home
           home = {
             name = "home";
             extensions = {
@@ -366,22 +325,26 @@ in
                 #   ];
                 # };
                 # {3c078156-979c-498b-8990-85f7987dd929}
-                "${sidebery.addonId}".settings = import ./firefox/sidebery.nix;
+                "${sidebery.addonId}".settings = import ./librewolf-config/sidebery.nix;
                 "${mtab.addonId}".settings =
-                  if hostname == "WK01174" then import ../private/workMtab.nix else import ./firefox/mtab.nix;
+                  if hostname == "WK01174" then
+                    import ../private/workMtab.nix
+                  else
+                    import ./librewolf-config/mtab.nix;
 
                 "${vimium-c.addonId}".settings = {
                   keyMappings = "#!no-check\nunmap x";
                 };
 
-                "${userchrome-toggle-extended.addonId}".settings = import ./firefox/userchrome-toggle-extended.nix;
+                "${userchrome-toggle-extended.addonId}".settings =
+                  import ./librewolf-config/userchrome-toggle-extended.nix;
               };
             };
 
-            # Firefox/LibreWolf rewrite containers.json on launch.  Force only
-            # LibreWolf's managed containers file so Home Manager does not need
-            # a global overwriteBackup policy for stale *.hm-bak files.
-            containersForce = program == "librewolf";
+            # LibreWolf rewrites containers.json on launch. Force the managed
+            # containers file so Home Manager does not need a global
+            # overwriteBackup policy for stale *.hm-bak files.
+            containersForce = true;
             containers = {
               "Banking" = {
                 id = 3;
@@ -571,8 +534,6 @@ in
               # http://www.thewindowsclub.com/disable-remove-ad-tiles-from-firefox
               # http://forums.mozillazine.org/viewtopic.php?p=13876331#p13876331
               # https://wiki.mozilla.org/Tiles/Technical_Documentation#Ping
-              # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-source
-              # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-ping
               # "browser.newtabpage.directory.source" = "data:text/plain,{}";
               # Reduce search engine noise in the urlbar's completion window. The
               # shortcuts and suggestions will still work, but Firefox won't clutter
@@ -586,8 +547,6 @@ in
               # http://www.thewindowsclub.com/disable-remove-ad-tiles-from-firefox
               # http://forums.mozillazine.org/viewtopic.php?p=13876331#p13876331
               # https://wiki.mozilla.org/Tiles/Technical_Documentation#Ping
-              # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-source
-              # https://gecko.readthedocs.org/en/latest/browser/browser/DirectoryLinksProvider.html#browser-newtabpage-directory-ping
               "browser.newtabpage.enhanced" = false;
               "browser.newtabpage.introShown" = true;
               "browser.newtab.preload" = false;
@@ -673,7 +632,6 @@ in
               # https://www.mozilla.org/en-US/legal/privacy/firefox.html#telemetry
               # https://support.mozilla.org/t5/Firefox-crashes/Mozilla-Crash-Reporter/ta-p/1715
               # https://wiki.mozilla.org/Security/Reviews/Firefox6/ReviewNotes/telemetry
-              # https://gecko.readthedocs.io/en/latest/browser/experiments/experiments/manifest.html
               # https://wiki.mozilla.org/Telemetry/Experiments
               # https://support.mozilla.org/en-US/questions/1197144
               # https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/telemetry/internals/preferences.html#id1
@@ -701,7 +659,6 @@ in
 
               # Disable health reports (basically more telemetry)
               # https://support.mozilla.org/en-US/kb/firefox-health-report-understand-your-browser-perf
-              # https://gecko.readthedocs.org/en/latest/toolkit/components/telemetry/telemetry/preferences.html
               "datareporting.healthreport.uploadEnabled" = false;
               "datareporting.healthreport.service.enabled" = false;
               "datareporting.policy.dataSubmissionEnabled" = false;
@@ -753,12 +710,7 @@ in
         };
       }
     ]
-    ++ lib.optionals (program == "firefox") [
-      {
-        betterfox.enable = true;
-      }
-    ]
-    ++ lib.optionals (program == "librewolf") [
+    ++ [
       {
         policies.Preferences = {
           "privacy.sanitize.sanitizeOnShutdown" = false;

@@ -107,7 +107,7 @@
     terminal.enable = true;
     typing.enable = true;
     wm.xmonad.enable = true;
-    browsers.firefox.enable = true;
+    browsers.librewolf.enable = true;
     browsers.tor.enable = true;
   };
 }

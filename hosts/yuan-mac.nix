@@ -37,9 +37,12 @@
     };
     pi.enable = true;
 
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
+    browsers = {
+      librewolf = {
+        enable = true;
+        pkg = null;
+      };
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;
@@ -56,7 +59,6 @@
       #   "homebrew/cask"
       # ];
       casks = [
-        "firefox"
         "1password"
       ];
     };

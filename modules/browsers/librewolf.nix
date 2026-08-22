@@ -1,4 +1,4 @@
-# LibreWolf — shares Home Manager config with Firefox (gecko-home.nix).
+# LibreWolf browser configuration.
 {
   config,
   lib,
@@ -98,7 +98,7 @@ in
     (mkIf cfg.enable {
       home-manager.users.${config.my.username} =
         hm@{ pkgs, osConfig, ... }:
-        import ./gecko-home.nix {
+        import ./librewolf-home.nix {
           inherit
             lib
             pkgs

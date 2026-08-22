@@ -27,9 +27,7 @@ in
     };
     extraConfig = mkOption {
       type = types.lines;
-      default = ''
-        cask "firefox", args: { language: "en-CA" }
-      '';
+      default = "";
     };
   };
 

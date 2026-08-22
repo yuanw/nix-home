@@ -10,7 +10,6 @@ let
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
 
   appDisplayNames = {
-    firefox = "Firefox";
     librewolf = "LibreWolf";
     chromium = "Chromium";
     safari = "Safari";
@@ -18,9 +17,7 @@ let
 
   pkgFor =
     browser:
-    if browser == "firefox" then
-      config.modules.browsers.firefox.pkg or null
-    else if browser == "librewolf" then
+    if browser == "librewolf" then
       config.modules.browsers.librewolf.pkg or null
     else if browser == "chromium" then
       config.modules.browsers.chromium.pkg or null
@@ -49,15 +46,14 @@ in
   options.modules.browsers = {
     defaultBrowser = lib.mkOption {
       type = lib.types.enum [
-        "firefox"
         "librewolf"
         "chromium"
         "safari"
       ];
-      default = "firefox";
+      default = "librewolf";
       description = ''
         Default GUI browser for macOS integrations: yabai launcher, Emacs
-        browse-url, and `defaultbrowser` registration via gecko-home.
+        browse-url, and `defaultbrowser` registration via librewolf-home.
       '';
     };
 
