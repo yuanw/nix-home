@@ -1,14 +1,6 @@
-{ lib, pkgs, ... }:
+{ ... }:
 
-let
-  packagePath = ../../../../packages/emacs;
-in
 {
-  overlay = import ../overrides.nix {
-    inherit pkgs lib packagePath;
-    emacsGhostel.emacsOverrides = _self: _super: { };
-  };
-
   epkgs = epkgs: [ epkgs.ultra-scroll ];
 
   elisp = ''

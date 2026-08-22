@@ -147,5 +147,43 @@ self: _super:
         ;
     }
   );
+  consult-omni = (
+    pkgs.callPackage "${packagePath}/consult-omni" {
+      inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+      inherit lib;
+      inherit (self)
+        browser-hist
+        consult
+        consult-notes
+        elfeed
+        embark
+        melpaBuild
+        yequake
+        ;
+    }
+  );
+  hurl-mode = (
+    pkgs.callPackage "${packagePath}/hurl-mode.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit (self) melpaBuild;
+    }
+  );
+  ob-racket = (
+    pkgs.callPackage "${packagePath}/ob-racket.nix" {
+      inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
+      inherit (self) melpaBuild;
+    }
+  );
+  prot-common = self.trivialBuild {
+    pname = "prot-common";
+    version = "0.0.1";
+    src = ./packages/prot-common.el;
+  };
+  prot-modeline = self.trivialBuild {
+    pname = "prot-modeline";
+    version = "0.0.1";
+    src = ./packages/prot-modeline.el;
+    packageRequires = [ self.prot-common ];
+  };
 }
 // (emacsGhostel.emacsOverrides self _super)

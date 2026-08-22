@@ -1,15 +1,9 @@
-{ pkgs, ... }:
+{ ... }:
 
-let
-  packagePath = ../../../../packages/emacs;
-in
 {
   epkgs = epkgs: [
     epkgs.org
-    (pkgs.callPackage "${packagePath}/ob-racket.nix" {
-      inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
-      inherit (epkgs) melpaBuild;
-    })
+    epkgs.ob-racket
   ];
 
   elisp = ''

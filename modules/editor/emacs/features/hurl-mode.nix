@@ -1,14 +1,8 @@
 { pkgs, ... }:
 
-let
-  packagePath = ../../../../packages/emacs;
-in
 {
   epkgs = epkgs: [
-    (pkgs.callPackage "${packagePath}/hurl-mode.nix" {
-      inherit (pkgs) fetchFromGitHub writeText;
-      inherit (epkgs) melpaBuild;
-    })
+    epkgs.hurl-mode
     pkgs.stable.hurl
   ];
 

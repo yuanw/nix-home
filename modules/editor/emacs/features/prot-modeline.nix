@@ -3,23 +3,8 @@
 {
   epkgs = epkgs: [
     epkgs.keycast
-    (epkgs.trivialBuild {
-      pname = "prot-common";
-      version = "0.0.1";
-      src = ../packages/prot-common.el;
-    })
-    (epkgs.trivialBuild {
-      pname = "prot-modeline";
-      version = "0.0.1";
-      src = ../packages/prot-modeline.el;
-      packageRequires = [
-        (epkgs.trivialBuild {
-          pname = "prot-common";
-          version = "0.0.1";
-          src = ../packages/prot-common.el;
-        })
-      ];
-    })
+    epkgs.prot-common
+    epkgs.prot-modeline
   ];
 
   elisp = ''
