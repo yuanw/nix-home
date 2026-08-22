@@ -4,6 +4,11 @@
   config,
   ...
 }:
+let
+  # Nix and Lix use different names for the same pipe-operator parser feature.
+  pipeOperatorFeature =
+    if builtins.elem config.my.hostname [ "mist" ] then "pipe-operator" else "pipe-operators";
+in
 {
   nix = {
     # configureBuildUsers = true;
@@ -54,7 +59,7 @@
       max-free = 17179870000
       log-lines = 128
 
-      experimental-features = nix-command flakes auto-allocate-uids pipe-operators
+      experimental-features = nix-command flakes auto-allocate-uids ${pipeOperatorFeature}
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true

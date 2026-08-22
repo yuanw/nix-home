@@ -1,7 +1,8 @@
 host := `hostname -s`
 substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
-nix_config := "extra-experimental-features = nix-command flakes pipe-operators"
-nix := "env NIX_CONFIG='extra-experimental-features = nix-command flakes pipe-operators' nix"
+pipe_feature := `nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators`
+nix_config := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf 'extra-experimental-features = nix-command flakes %s' "$feature"`
+nix := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf "env NIX_CONFIG='extra-experimental-features = nix-command flakes %s' nix" "$feature"`
 
 # list all commands
 default:
