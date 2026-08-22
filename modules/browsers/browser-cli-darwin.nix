@@ -12,7 +12,7 @@ let
   piEnabled = config.modules.pi.enable or false;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 
-  librewolfBrowserCliInstallUrl = "file:///Applications/Nix Casks/LibreWolf.app/Contents/Resources/distribution/browser-cli-extension.xpi";
+  librewolfBrowserCliInstallUrl = "file://${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
   librewolfBrowserPath = "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf";
 
   browserCliPolicies = import ../../packages/browser-cli-policies.nix {
@@ -22,9 +22,9 @@ let
 
   searchPolicies = import ../../packages/librewolf-search-policies.nix;
 
-  librewolfWithBrowserCli = pkgs.librewolf-macos.override {
-    policies = lib.recursiveUpdate searchPolicies browserCliPolicies;
-    inherit (micsSkills) browser-cli-extension;
+  # Use nixpkgs' source-built LibreWolf instead of our binary DMG wrapper.
+  librewolfWithBrowserCli = pkgs.librewolf.override {
+    extraPolicies = lib.recursiveUpdate searchPolicies browserCliPolicies;
   };
 in
 {
