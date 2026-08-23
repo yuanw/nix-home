@@ -98,7 +98,10 @@ adapted from Karthink's Consult setup."
         xref-show-definitions-function #'consult-xref)
   :config
   (keymap-set search-map "l" #'my/consult-ripgrep-or-line)
-  (keymap-set consult-narrow-map (concat consult-narrow-key "?") #'consult-narrow-help)
+  ;; `consult-narrow-map' is active after `consult-narrow-key', so bind the
+  ;; help key inside that map rather than trying to bind the invalid key string
+  ;; "<?".
+  (keymap-set consult-narrow-map "?" #'consult-narrow-help)
   (use-package consult-xref)
   (consult-customize
    consult-theme
