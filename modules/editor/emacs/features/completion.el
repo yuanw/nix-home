@@ -7,24 +7,32 @@
 ;; - Omar Antolín's config: small, focused Orderless/Vertico/Cape setup.
 ;; - Karthink's setup: practical dabbrev/hippie-expand defaults.
 
-;; Keep completion predictable: Orderless for most categories, with `basic' as a
-;; fallback for dynamic completion tables.  File completion keeps partial
-;; completion so wildcards and path components keep working.
-(setopt completion-styles '(orderless basic)
-        completion-category-defaults nil
-        completion-category-overrides '((file (styles basic partial-completion))
-                                        (eglot (styles orderless basic)))
-        completion-ignore-case t
-        read-buffer-completion-ignore-case t
-        read-file-name-completion-ignore-case t)
-(setq-default case-fold-search t)
-
-(with-eval-after-load 'orderless
-  (setopt orderless-matching-styles '(orderless-prefixes orderless-regexp)
-          orderless-smart-case nil)
-  (defvar orderless-style-dispatchers)
+(use-package orderless
+  :demand t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-defaults nil)
+  (completion-category-overrides
+   '((file (styles basic partial-completion))
+     (eglot (styles orderless basic))))
+  (completion-ignore-case t)
+  (read-buffer-completion-ignore-case t)
+  (read-file-name-completion-ignore-case t)
+  (orderless-matching-styles '(orderless-prefixes orderless-regexp))
+  (orderless-smart-case nil)
+  (orderless-style-dispatchers
+   '(orderless-affix-dispatch prefixes-for-separators))
+  :config
+  (setq-default case-fold-search t)
+  (defun prefixes-for-separators (pattern _index _total)
+    "Use prefix matching for path-like Orderless components."
+    (when (string-match-p "^[^][^\\+*]*[./-][^][\\+*$]*$" pattern)
+      (cons 'orderless-prefixes pattern)))
+  (cl-pushnew '(?` . orderless-regexp) orderless-affix-dispatch-alist)
   (when (fboundp 'orderless-kwd-dispatch)
-    (cl-pushnew #'orderless-kwd-dispatch orderless-style-dispatchers)))
+    (cl-pushnew #'orderless-kwd-dispatch orderless-style-dispatchers))
+  (when (>= emacs-major-version 31)
+    (setq completion-pcm-leading-wildcard t)))
 
 ;;;;; minibuffer completion
 
