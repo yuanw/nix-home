@@ -1,5 +1,31 @@
 ;;; consult.el --- Consult configuration -*- lexical-binding: t; -*-
 
+(defcustom my/consult-ripgrep-or-line-limit 300000
+  "Buffer size threshold for `my/consult-ripgrep-or-line'."
+  :group 'consult
+  :type 'integer)
+
+(defun my/consult-ripgrep-or-line (&optional arg)
+  "Call `consult-line' for small buffers, `consult-ripgrep' for large files.
+With prefix ARG, forward to `consult-line-multi' for small buffers.  This is
+adapted from Karthink's Consult setup."
+  (interactive "p")
+  (if (or (not buffer-file-name)
+          (buffer-narrowed-p)
+          (file-remote-p buffer-file-name)
+          (and (fboundp 'jka-compr-get-compression-info)
+               (jka-compr-get-compression-info buffer-file-name))
+          (<= (buffer-size)
+              (/ my/consult-ripgrep-or-line-limit
+                 (if (eq major-mode 'org-mode) 4 1))))
+      (pcase arg
+        (4 (consult-line-multi nil))
+        (16 (consult-line-multi t))
+        (_ (consult-line)))
+    (when (file-writable-p buffer-file-name)
+      (save-buffer))
+    (consult-ripgrep)))
+
 (use-package consult
   :hook (completion-list-mode . consult-preview-at-point-mode)
   :bind (;; C-c bindings in `mode-specific-map'
@@ -39,7 +65,7 @@
          ("M-s g" . consult-grep)
          ("M-s G" . consult-git-grep)
          ("M-s r" . consult-ripgrep)
-         ("M-s l" . consult-line)
+         ("M-s l" . my/consult-ripgrep-or-line)
          ("M-s L" . consult-line-multi)
          ("M-s k" . consult-keep-lines)
          ("M-s u" . consult-focus-lines)
@@ -56,20 +82,28 @@
          ("M-r" . consult-history))
   :custom
   (consult-narrow-key "<")
+  (consult-line-numbers-widen t)
+  (consult-async-min-input 3)
+  (consult-async-input-debounce 0.5)
+  (consult-async-input-throttle 0.8)
   :init
   ;; Tweak register preview for `consult-register-load',
   ;; `consult-register-store' and built-in commands.
   (advice-add #'register-preview :override #'consult-register-window)
   (setq register-preview-delay 0.5)
 
-  ;; Use Consult to select xref locations with preview.
-  (setq xref-show-xrefs-function #'consult-xref
+  ;; Use Consult to select xref locations with preview and completion-in-region.
+  (setq completion-in-region-function #'consult-completion-in-region
+        xref-show-xrefs-function #'consult-xref
         xref-show-definitions-function #'consult-xref)
   :config
+  (keymap-set search-map "l" #'my/consult-ripgrep-or-line)
+  (keymap-set consult-narrow-map (concat consult-narrow-key "?") #'consult-narrow-help)
   (use-package consult-xref)
   (consult-customize
    consult-theme
    :preview-key '(:debounce 0.2 any)
+   my/consult-ripgrep-or-line
    consult-ripgrep
    consult-git-grep
    consult-grep
