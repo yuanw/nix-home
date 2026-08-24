@@ -9,10 +9,6 @@
 
 with pkgs.stdenv;
 with lib;
-let
-  nixPackage =
-    if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix;
-in
 {
   imports = [
     inputs.agenix.darwinModules.age
@@ -124,33 +120,33 @@ in
       ;
   };
 
-  launchd.daemons.nix-gc = {
-    serviceConfig.KeepAlive.SuccessfulExit = false;
-    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-    serviceConfig.RunAtLoad = false;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Hour = 3;
-        Minute = 15;
-      }
-    ];
-    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
-    serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
-  };
+  # launchd.daemons.nix-gc = {
+  #   serviceConfig.KeepAlive.SuccessfulExit = false;
+  #   command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
+  #   serviceConfig.RunAtLoad = false;
+  #   serviceConfig.StartCalendarInterval = [
+  #     {
+  #       Hour = 3;
+  #       Minute = 15;
+  #     }
+  #   ];
+  #   serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
+  #   serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
+  # };
 
-  launchd.daemons.nix-store-optimise = {
-    serviceConfig.KeepAlive.SuccessfulExit = false;
-    command = "${nixPackage}/bin/nix-store --optimise";
-    serviceConfig.RunAtLoad = false;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Hour = 3;
-        Minute = 45;
-      }
-    ];
-    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
-    serviceConfig.StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
-  };
+  # launchd.daemons.nix-store-optimise = {
+  #   serviceConfig.KeepAlive.SuccessfulExit = false;
+  #   command = "${nixPackage}/bin/nix-store --optimise";
+  #   serviceConfig.RunAtLoad = false;
+  #   serviceConfig.StartCalendarInterval = [
+  #     {
+  #       Hour = 3;
+  #       Minute = 45;
+  #     }
+  #   ];
+  #   serviceConfig.StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
+  #   serviceConfig.StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
+  # };
 
   #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
   #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
@@ -160,22 +156,22 @@ in
   #   EOF
   # '';
 
-  launchd.user.agents.user-nix-gc = {
-    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
-    serviceConfig.RunAtLoad = false;
-    environment.NIX_REMOTE = "daemon";
-    serviceConfig.KeepAlive = false;
-    serviceConfig.ProcessType = "Background";
-    #serviceConfig.StartInterval = 3600;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Hour = 2;
-        Minute = 15;
-      }
-    ];
-    serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
-    serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
-  };
+  # launchd.user.agents.user-nix-gc = {
+  #   command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
+  #   serviceConfig.RunAtLoad = false;
+  #   environment.NIX_REMOTE = "daemon";
+  #   serviceConfig.KeepAlive = false;
+  #   serviceConfig.ProcessType = "Background";
+  #   #serviceConfig.StartInterval = 3600;
+  #   serviceConfig.StartCalendarInterval = [
+  #     {
+  #       Hour = 2;
+  #       Minute = 15;
+  #     }
+  #   ];
+  #   serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
+  #   serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
+  # };
 
   fonts.packages = with pkgs; [
     fira-code
