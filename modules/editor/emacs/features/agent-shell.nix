@@ -4,6 +4,7 @@
   epkgs = epkgs: [
     epkgs.agent-shell
     epkgs.agent-shell-knockknock
+    epkgs.agent-shell-manager
     epkgs.knockknock
     pkgs.pi-acp
   ];
@@ -29,5 +30,9 @@
     (use-package agent-shell-knockknock
       :after (agent-shell knockknock)
       :hook (agent-shell-mode . agent-shell-knockknock-mode))
+
+    (use-package agent-shell-manager
+      :after agent-shell
+      :commands (agent-shell-manager-toggle))
   '';
 }

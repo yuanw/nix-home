@@ -124,6 +124,12 @@ rec {
     inherit agent-shell knockknock;
   };
 
+  agent-shell-manager = pkgs.callPackage ./emacs/agent-shell-manager.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell;
+  };
+
   magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;

@@ -77,6 +77,13 @@ self: _super:
       inherit (self) melpaBuild agent-shell knockknock;
     }
   );
+  agent-shell-manager = (
+    pkgs.callPackage "${packagePath}/agent-shell-manager.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit lib;
+      inherit (self) melpaBuild agent-shell;
+    }
+  );
   whisper = (
     pkgs.callPackage "${packagePath}/whisper-el.nix" {
       inherit (pkgs) fetchFromGitHub writeText;

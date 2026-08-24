@@ -130,7 +130,6 @@ in
     serviceConfig.RunAtLoad = false;
     serviceConfig.StartCalendarInterval = [
       {
-        Weekday = 7;
         Hour = 3;
         Minute = 15;
       }
@@ -156,7 +155,6 @@ in
     #serviceConfig.StartInterval = 3600;
     serviceConfig.StartCalendarInterval = [
       {
-        Weekday = 5;
         Hour = 3;
         Minute = 15;
       }
