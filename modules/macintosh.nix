@@ -138,6 +138,20 @@ in
     serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
   };
 
+  launchd.daemons.nix-store-optimise = {
+    serviceConfig.KeepAlive.SuccessfulExit = false;
+    command = "${nixPackage}/bin/nix-store --optimise";
+    serviceConfig.RunAtLoad = false;
+    serviceConfig.StartCalendarInterval = [
+      {
+        Hour = 3;
+        Minute = 45;
+      }
+    ];
+    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
+    serviceConfig.StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
+  };
+
   #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
   #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
   #   SHASUM=$(sha256sum "$YABAI_BIN" | cut -d' ' -f1)
@@ -155,7 +169,7 @@ in
     #serviceConfig.StartInterval = 3600;
     serviceConfig.StartCalendarInterval = [
       {
-        Hour = 3;
+        Hour = 2;
         Minute = 15;
       }
     ];
