@@ -4,7 +4,13 @@
   :demand t
   :config
   (require 'hel)
-  (hel-mode 1))
+  (hel-mode 1)
+
+  ;; Magit uses "z" as a prefix; Hel binds "z*" globally in normal state.
+  (add-hook 'magit-status-mode-hook
+            (defun hel--disable-in-magit-status ()
+              (when hel-local-mode
+                (hel-local-mode -1)))))
 
 (use-package hel-leader
   :after (hel which-key)
