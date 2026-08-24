@@ -716,13 +716,18 @@ in
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
           "browser.sessionstore.privacy_level" = 0;
+          # LibreWolf defaults disable WebGL (mozilla.cfg). Re-enable without turning
+          # off RFP globally — fingerprintingProtection also blocks WebGL on FF 128+.
+          "webgl.disabled" = false;
+          "privacy.fingerprintingProtection" = false;
         };
         profiles.home.settings = {
           # LibreWolf mozilla.cfg sanitizes on shutdown and sets privacy_level=2.
           "privacy.sanitize.sanitizeOnShutdown" = false;
           "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
           "browser.sessionstore.privacy_level" = 0;
-          # WebGL: use LibreWolf's per-site permission prompt (issues#2772).
+          "webgl.disabled" = false;
+          "privacy.fingerprintingProtection" = false;
         };
       }
     ]
