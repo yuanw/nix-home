@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  impurity,
 
   ...
 }:
@@ -187,52 +186,54 @@ in
       (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
     ];
 
-    home-manager.users.${config.my.username} = {
-      programs.mics-skills.skillDirs = [
-        ".claude/skills"
-        ".opencode/skills"
-        "${cfg.configDir}/skills"
-      ];
+    home-manager.users.${config.my.username} =
+      hm@{ ... }:
+      {
+        programs.mics-skills.skillDirs = [
+          ".claude/skills"
+          ".opencode/skills"
+          "${cfg.configDir}/skills"
+        ];
 
-      home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
+        home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
-      home.file =
-        lib.listToAttrs (
-          (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-          ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
-          ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
-        )
-        // lib.mapAttrs' (
-          name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
-        ) cfg.extensionFiles
-        // lib.optionalAttrs (cfg.nodeDeps != null) {
-          "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
-        }
-        // lib.optionalAttrs (cfg.skillsDir != null) {
-          "${cfg.configDir}/skills".source = cfg.skillsDir;
-        }
-        // lib.mapAttrs' (
-          name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-        ) cfg.prompts
-        // lib.optionalAttrs hasPermissionGate {
-          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-            impurity.link ./permission-gate-rules.ts;
-        };
+        home.file =
+          lib.listToAttrs (
+            (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
+            ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
+            ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
+          )
+          // lib.mapAttrs' (
+            name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
+          ) cfg.extensionFiles
+          // lib.optionalAttrs (cfg.nodeDeps != null) {
+            "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
+          }
+          // lib.optionalAttrs (cfg.skillsDir != null) {
+            "${cfg.configDir}/skills".source = cfg.skillsDir;
+          }
+          // lib.mapAttrs' (
+            name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
+          ) cfg.prompts
+          // lib.optionalAttrs hasPermissionGate {
+            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+          };
 
-      home.sessionVariables =
-        cfg.environment
-        // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
-          PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
-        };
+        home.sessionVariables =
+          cfg.environment
+          // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
+            PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
+          };
 
-      mergetools = lib.mkIf (cfg.models != { }) {
-        "pi-models" = {
-          target = "${config.my.homeDirectory}/${cfg.configDir}/models.json";
-          format = "json";
-          force = true;
-          settings = cfg.models;
+        mergetools = lib.mkIf (cfg.models != { }) {
+          "pi-models" = {
+            target = "${config.my.homeDirectory}/${cfg.configDir}/models.json";
+            format = "json";
+            force = true;
+            settings = cfg.models;
+          };
         };
       };
-    };
   };
 }

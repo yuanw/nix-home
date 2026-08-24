@@ -118,6 +118,12 @@ rec {
     inherit shell-maker acp;
   };
 
+  agent-shell-knockknock = pkgs.callPackage ./emacs/agent-shell-knockknock.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell knockknock;
+  };
+
   magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;

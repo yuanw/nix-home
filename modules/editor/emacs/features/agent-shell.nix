@@ -3,6 +3,8 @@
 {
   epkgs = epkgs: [
     epkgs.agent-shell
+    epkgs.agent-shell-knockknock
+    epkgs.knockknock
     pkgs.pi-acp
   ];
 
@@ -23,5 +25,9 @@
       :commands (agent-shell-pi-start-agent)
       :init
       (setq agent-shell-pi-acp-command '("${pkgs.pi-acp}/bin/pi-acp")))
+
+    (use-package agent-shell-knockknock
+      :after (agent-shell knockknock)
+      :hook (agent-shell-mode . agent-shell-knockknock-mode))
   '';
 }

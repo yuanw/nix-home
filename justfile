@@ -163,14 +163,6 @@ switch:
         sudo systemctl try-restart emacs.service || true; \
     fi
 
-# deploy with impurity symlinks (live-edit permission-gate rules.ts in the repo)
-switch-impure:
-    @if [ "$(uname)" = "Darwin" ]; then \
-        IMPURITY_PATH="{{justfile_directory()}}" sudo --preserve-env=IMPURITY_PATH env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake .#{{host}}-impure --impure --fallback --option substituters "{{substituters_without_garnix}}"; \
-    else \
-        echo "switch-impure is darwin-only for now"; exit 1; \
-    fi
-
 # print the generated nima default.el content
 nima-emacs-print-config:
     @set -e; \
