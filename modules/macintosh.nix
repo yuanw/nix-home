@@ -9,6 +9,10 @@
 
 with pkgs.stdenv;
 with lib;
+let
+  nixPackage =
+    if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix;
+in
 {
   imports = [
     inputs.agenix.darwinModules.age
