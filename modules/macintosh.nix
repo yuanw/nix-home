@@ -120,33 +120,39 @@ with lib;
       ;
   };
 
-  # launchd.daemons.nix-gc = {
-  #   serviceConfig.KeepAlive.SuccessfulExit = false;
-  #   command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-  #   serviceConfig.RunAtLoad = false;
-  #   serviceConfig.StartCalendarInterval = [
-  #     {
-  #       Hour = 3;
-  #       Minute = 15;
-  #     }
-  #   ];
-  #   serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
-  #   serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
-  # };
+  launchd.daemons.nix-gc = {
+    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 15;
+        }
+      ];
+      StandardErrorPath = "/tmp/daemons-nix-gc.log";
+      StandardOutPath = "/tmp/daemons-nix-gc.log";
+    };
+  };
 
-  # launchd.daemons.nix-store-optimise = {
-  #   serviceConfig.KeepAlive.SuccessfulExit = false;
-  #   command = "${nixPackage}/bin/nix-store --optimise";
-  #   serviceConfig.RunAtLoad = false;
-  #   serviceConfig.StartCalendarInterval = [
-  #     {
-  #       Hour = 3;
-  #       Minute = 45;
-  #     }
-  #   ];
-  #   serviceConfig.StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
-  #   serviceConfig.StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
-  # };
+  launchd.daemons.nix-store-optimise = {
+    command = "${nixPackage}/bin/nix-store --optimise";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 45;
+        }
+      ];
+      StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
+      StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
+    };
+  };
 
   #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
   #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
@@ -156,27 +162,29 @@ with lib;
   #   EOF
   # '';
 
-  # launchd.user.agents.user-nix-gc = {
-  #   command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
-  #   serviceConfig.RunAtLoad = false;
-  #   environment.NIX_REMOTE = "daemon";
-  #   serviceConfig.KeepAlive = false;
-  #   serviceConfig.ProcessType = "Background";
-  #   #serviceConfig.StartInterval = 3600;
-  #   serviceConfig.StartCalendarInterval = [
-  #     {
-  #       Hour = 2;
-  #       Minute = 15;
-  #     }
-  #   ];
-  #   serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
-  #   serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
-  # };
+  launchd.user.agents.user-nix-gc = {
+    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
+    environment.NIX_REMOTE = "daemon";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      ProcessType = "Background";
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 4;
+          Minute = 0;
+        }
+      ];
+      StandardErrorPath = "/tmp/user-nix-gc.log";
+      StandardOutPath = "/tmp/user-nix-gc.log";
+    };
+  };
 
   fonts.packages = with pkgs; [
     fira-code
     font-awesome
-    #iosevka
+    aporetic
     roboto
     roboto-mono
   ];
