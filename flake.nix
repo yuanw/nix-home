@@ -92,6 +92,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
+    impurity.url = "github:outfoxxed/impurity.nix";
   };
 
   outputs =

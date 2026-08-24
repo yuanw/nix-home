@@ -52,6 +52,10 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.impurity.nixosModules.impurity
+            {
+              impurity.configRoot = self;
+            }
             inputs.colmena.nixosModules.deploymentOptions
             inputs.home-manager.nixosModules.home-manager
             {
@@ -129,6 +133,10 @@
                 "12.1"
               ];
             }
+            inputs.impurity.nixosModules.impurity
+            {
+              impurity.configRoot = self;
+            }
             inputs.colmena.nixosModules.deploymentOptions
             inputs.home-manager.nixosModules.home-manager
             {
@@ -179,6 +187,10 @@
                 {
                   nixpkgs.hostPlatform = system;
                 }
+                inputs.impurity.nixosModules.impurity
+                {
+                  impurity.configRoot = self;
+                }
                 inputs.nix-darwin-login-items.darwinModules.default
                 inputs.home-manager.darwinModules.home-manager
                 {
@@ -203,12 +215,27 @@
               ];
             }
           );
+        impure =
+          cfg:
+          cfg.extendModules {
+            modules = [
+              {
+                impurity.enable = true;
+              }
+            ];
+          };
+        pure = {
+          ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
+          # yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
+          mist = configure "mist" "aarch64-darwin" true ./mist.nix;
+          WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
+        };
       in
-      {
-        ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
-        # yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
-        mist = configure "mist" "aarch64-darwin" true ./mist.nix;
-        WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
+      pure
+      // {
+        ci-impure = impure pure.ci;
+        mist-impure = impure pure.mist;
+        WK01174-impure = impure pure.WK01174;
       };
   };
   perSystem =

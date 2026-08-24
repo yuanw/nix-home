@@ -2,11 +2,13 @@
   config,
   lib,
   pkgs,
+  impurity,
 
   ...
 }:
 let
   cfg = config.modules.pi;
+  hasPermissionGate = lib.any (p: p.pname == "permission-gate") cfg.extensionsPkgs;
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   commonPrompts = pkgs.callPackage ../common/prompts.nix { };
@@ -211,7 +213,11 @@ in
         }
         // lib.mapAttrs' (
           name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-        ) cfg.prompts;
+        ) cfg.prompts
+        // lib.optionalAttrs hasPermissionGate {
+          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+            impurity.link ./permission-gate-rules.ts;
+        };
 
       home.sessionVariables =
         cfg.environment
