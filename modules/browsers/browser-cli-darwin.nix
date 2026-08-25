@@ -20,12 +20,6 @@ let
     installUrl = librewolfBrowserCliInstallUrl;
   };
 
-  searchPolicies = import ../../packages/librewolf-search-policies.nix;
-
-  # Use nixpkgs' source-built LibreWolf instead of our binary DMG wrapper.
-  librewolfWithBrowserCli = pkgs.librewolf.override {
-    extraPolicies = lib.recursiveUpdate searchPolicies browserCliPolicies;
-  };
 in
 {
   config = lib.mkIf (piEnabled && isDarwin) {
@@ -33,8 +27,6 @@ in
       BROWSER_CLI_FIREFOX_PATH = librewolfBrowserPath;
     };
 
-    environment.casks = [
-      librewolfWithBrowserCli
-    ];
+    modules.browsers.librewolf.darwinExtraPolicies = browserCliPolicies;
   };
 }

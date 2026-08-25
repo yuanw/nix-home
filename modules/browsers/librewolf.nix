@@ -21,6 +21,14 @@ in
       type = with types; nullOr package;
       default = pkgs.librewolf;
     };
+    darwinExtraPolicies = mkOption {
+      type = types.attrs;
+      default = { };
+      description = ''
+        Extra enterprise policies merged into the macOS Nix cask build
+        (see modules/browsers/librewolf-darwin.nix).
+      '';
+    };
     keybindings = {
       enable = mkEnableOption "LibreWolf extension keybindings management" // {
         default = true;
