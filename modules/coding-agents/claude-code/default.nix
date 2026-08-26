@@ -61,23 +61,25 @@ in
                 emacs-skills
               ]
               ++ [ (commonSkills.mkJournalSessionSkill "Claude") ];
-            plugins =
-              with claudePlugins;
-              lib.optionals cfg.enableClaudeMem [
-                claude-mem
-              ]
-              ++ lib.optional cfg.enableCozempic [
-                cozempic
-              ]
-              ++ [
-                code-review
-                commit-commands
-                explanatory-output-style
-                frontend-design
-                learning-output-style
-                pr-review-toolkit
-                security-guidance
-              ];
+            plugins = lib.mkMerge [
+              (lib.optionalAttrs cfg.enableClaudeMem {
+                claude-mem = claudePlugins.claude-mem;
+              })
+              (lib.optionalAttrs cfg.enableCozempic {
+                cozempic = claudePlugins.cozempic;
+              })
+              {
+                inherit (claudePlugins)
+                  code-review
+                  commit-commands
+                  explanatory-output-style
+                  frontend-design
+                  learning-output-style
+                  pr-review-toolkit
+                  security-guidance
+                  ;
+              }
+            ];
             settings = {
               includeCoAuthoredBy = false;
               alwaysThinkingEnabled = true;
@@ -90,7 +92,7 @@ in
                 includeCoAuthor = false;
                 includePRFooter = false;
               };
-              # enabledPlugins auto-generated from programs.claude-code.plugins list
+              # enabledPlugins auto-generated from programs.claude-code.plugins
               hooks = import ./hooks/notification.nix { inherit pkgs lib; };
             };
           };
