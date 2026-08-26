@@ -25,7 +25,7 @@ in
       type = types.attrs;
       default = { };
       description = ''
-        Extra enterprise policies merged into the macOS nixpkgs cask
+        Extra enterprise policies merged into the macOS Home Manager app
         (see modules/browsers/librewolf-darwin.nix).
       '';
     };

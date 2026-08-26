@@ -13,7 +13,9 @@ let
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
 
   librewolfBrowserCliInstallUrl = "file://${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
-  librewolfBrowserPath = "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf";
+  librewolfBrowserPath =
+    config.modules.browsers.librewolf.darwinBrowserExe
+      or "${config.my.homeDirectory}/Applications/Home Manager Apps/LibreWolf.app/Contents/MacOS/librewolf";
 
   browserCliPolicies = import ../../packages/browser-cli-policies.nix {
     inherit (micsSkills) browser-cli-extension;

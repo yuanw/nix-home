@@ -1,4 +1,4 @@
-# macOS: nixpkgs LibreWolf synced to /Applications/Nix Casks with enterprise policies.
+# macOS: nixpkgs LibreWolf via Home Manager Apps with enterprise policies.
 {
   config,
   lib,
@@ -27,9 +27,20 @@ let
   librewolfPkg = pkgs.librewolf.override {
     extraPolicies = enterprisePolicies;
   };
+
+  hmLibrewolfApp = "${config.my.homeDirectory}/Applications/Home Manager Apps/LibreWolf.app";
+  hmLibrewolfExe = "${hmLibrewolfApp}/Contents/MacOS/librewolf";
 in
 {
+  options.modules.browsers.librewolf.darwinBrowserExe = lib.mkOption {
+    type = lib.types.str;
+    readOnly = true;
+    visible = false;
+    description = "LibreWolf Mach-O binary when installed via Home Manager on macOS.";
+  };
+
   config = lib.mkIf (cfg.enable && isDarwin) {
-    environment.casks = [ librewolfPkg ];
+    modules.browsers.librewolf.pkg = librewolfPkg;
+    modules.browsers.librewolf.darwinBrowserExe = hmLibrewolfExe;
   };
 }
