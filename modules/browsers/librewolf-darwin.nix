@@ -1,8 +1,9 @@
-# macOS: Nix cask LibreWolf with shared enterprise policies.
+# macOS: upstream LibreWolf DMG (nix-casks) with enterprise policies.
 {
   config,
   lib,
   pkgs,
+  inputs',
   ...
 }:
 let
@@ -12,16 +13,21 @@ let
   searchPolicies = import ../../packages/librewolf-search-policies.nix;
   privacyPolicies = import ../../packages/librewolf-privacy-policies.nix;
 
-  librewolfWithPolicies = pkgs.librewolf.override {
-    extraPolicies = lib.foldl' lib.recursiveUpdate { } [
-      searchPolicies
-      privacyPolicies
-      cfg.darwinExtraPolicies
-    ];
-  };
+  enterprisePolicies = lib.foldl' lib.recursiveUpdate { } [
+    {
+      DontCheckDefaultBrowser = true;
+      DisablePocket = true;
+      DisableAppUpdate = true;
+      DisableTelemetry = true;
+    }
+    searchPolicies
+    privacyPolicies
+    cfg.darwinExtraPolicies
+  ];
 
-  librewolfPkg = pkgs.callPackage ../../packages/librewolf-darwin-signed.nix {
-    librewolf = librewolfWithPolicies;
+  librewolfPkg = pkgs.callPackage ../../packages/librewolf-macos {
+    librewolf = inputs'.nix-casks.packages.librewolf;
+    policies = enterprisePolicies;
   };
 in
 {
