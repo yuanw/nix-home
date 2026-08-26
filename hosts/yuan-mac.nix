@@ -38,10 +38,7 @@
     pi.enable = true;
 
     browsers = {
-      librewolf = {
-        enable = true;
-        pkg = null;
-      };
+      librewolf.enable = true;
       defaultBrowser = "librewolf";
     };
     editors.emacs = {

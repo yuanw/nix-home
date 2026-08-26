@@ -19,10 +19,10 @@ let
   librewolfCfg = osConfig.modules.browsers.librewolf or { enable = false; };
   librewolfPkg = librewolfCfg.pkg or pkgs.librewolf;
 
-  # browser-cli uses firefox_path / BROWSER_CLI_FIREFOX_PATH for LibreWolf too.
   browserPath =
     if librewolfCfg.enable or false && pkgs.stdenv.hostPlatform.isDarwin then
-      "/Applications/Nix Casks/LibreWolf.app/Contents/MacOS/librewolf"
+      librewolfCfg.darwinBrowserExe
+        or "${osConfig.my.homeDirectory}/Applications/Home Manager Apps/LibreWolf.app/Contents/MacOS/librewolf"
     else
       lib.getExe librewolfPkg;
 

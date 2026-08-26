@@ -40,6 +40,7 @@ let
   ) { } (lib.attrNames keybindingsCfg.settings);
 
   searchPolicies = import ../../packages/librewolf-search-policies.nix;
+  privacyPolicies = import ../../packages/librewolf-privacy-policies.nix;
 in
 {
 
@@ -712,23 +713,8 @@ in
     ]
     ++ [
       {
-        policies.Preferences = {
-          "privacy.sanitize.sanitizeOnShutdown" = false;
-          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
-          "browser.sessionstore.privacy_level" = 0;
-          # LibreWolf defaults disable WebGL (mozilla.cfg). Re-enable without turning
-          # off RFP globally — fingerprintingProtection also blocks WebGL on FF 128+.
-          "webgl.disabled" = false;
-          "privacy.fingerprintingProtection" = false;
-        };
-        profiles.home.settings = {
-          # LibreWolf mozilla.cfg sanitizes on shutdown and sets privacy_level=2.
-          "privacy.sanitize.sanitizeOnShutdown" = false;
-          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
-          "browser.sessionstore.privacy_level" = 0;
-          "webgl.disabled" = false;
-          "privacy.fingerprintingProtection" = false;
-        };
+        policies = privacyPolicies;
+        profiles.home.settings = privacyPolicies.Preferences;
       }
     ]
   );

@@ -55,6 +55,7 @@
       ./wm/xmonad.nix
     ];
     darwin.imports = [
+      ./browsers/librewolf-darwin.nix
       ./browsers/browser-cli-darwin.nix
       ./coding-agents/hermes-agent-darwin.nix
       ./brew.nix

@@ -141,10 +141,7 @@
         #"go"
       ];
     };
-    browsers.librewolf = {
-      enable = true;
-      pkg = null;
-    };
+    browsers.librewolf.enable = true;
     editors.emacs = {
       enable = true;
       enableService = true;
