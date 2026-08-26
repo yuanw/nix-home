@@ -1,5 +1,4 @@
 host := `hostname -s`
-substituters_without_garnix := "https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.iog.io https://cache.nixos.org/"
 pipe_feature := `nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators`
 nix_config := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf 'extra-experimental-features = nix-command flakes %s' "$feature"`
 nix := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf "env NIX_CONFIG='extra-experimental-features = nix-command flakes %s' nix" "$feature"`
@@ -18,7 +17,7 @@ build:
         {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
         NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
-        {{nix}} build --quiet --fallback --option substituters "{{substituters_without_garnix}}" ".#{{lowercase(host)}}"; \
+        {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \
     fi
 
 update-all:
@@ -157,9 +156,9 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback --option substituters "{{substituters_without_garnix}}"; \
+        sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback; \
     else \
-        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback --option substituters "{{substituters_without_garnix}}"; \
+        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback; \
         sudo systemctl try-restart emacs.service || true; \
     fi
 

@@ -1,4 +1,4 @@
-# macOS: upstream LibreWolf DMG with enterprise policies.
+# macOS: nixpkgs LibreWolf synced to /Applications/Nix Casks with enterprise policies.
 {
   config,
   lib,
@@ -24,8 +24,8 @@ let
     cfg.darwinExtraPolicies
   ];
 
-  librewolfPkg = pkgs.callPackage ../../packages/librewolf-macos {
-    policies = enterprisePolicies;
+  librewolfPkg = pkgs.librewolf.override {
+    extraPolicies = enterprisePolicies;
   };
 in
 {
