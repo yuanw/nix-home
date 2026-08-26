@@ -1,9 +1,8 @@
-# macOS: upstream LibreWolf DMG (nix-casks) with enterprise policies.
+# macOS: upstream LibreWolf DMG with enterprise policies.
 {
   config,
   lib,
   pkgs,
-  inputs',
   ...
 }:
 let
@@ -26,7 +25,6 @@ let
   ];
 
   librewolfPkg = pkgs.callPackage ../../packages/librewolf-macos {
-    librewolf = inputs'.nix-casks.packages.librewolf;
     policies = enterprisePolicies;
   };
 in

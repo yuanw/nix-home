@@ -1,29 +1,45 @@
-# macOS LibreWolf from upstream DMG (nix-casks) with enterprise policies.
-# https://github.com/Mic92/dotfiles/blob/b5cfe872ef997444cab57776389f7e54570f1cd3/pkgs/librewolf-macos/default.nix
+# macOS LibreWolf from upstream Codeberg DMG with enterprise policies.
+# Update: python3 packages/librewolf-macos/update.py
 {
+  lib,
   stdenv,
-  librewolf,
+  fetchurl,
+  undmg,
   policies ? { },
 }:
+let
+  srcs = lib.importJSON ./srcs.json;
+in
 stdenv.mkDerivation {
-  pname = "${librewolf.pname}-configured";
-  inherit (librewolf) version;
+  pname = "librewolf-configured";
+  inherit (srcs) version;
 
-  dontUnpack = true;
+  src = fetchurl {
+    inherit (srcs) url hash;
+  };
+
+  nativeBuildInputs = [ undmg ];
+
+  sourceRoot = ".";
 
   installPhase = ''
     runHook preInstall
-    mkdir -p $out
-    cp -R ${librewolf}/Applications $out/
-    chmod -R u+w $out
-    mkdir -p $out/Applications/LibreWolf.app/Contents/Resources/distribution
+    mkdir -p "$out/Applications"
+    cp -r LibreWolf.app "$out/Applications/"
+
+    mkdir -p "$out/Applications/LibreWolf.app/Contents/Resources/distribution"
     echo '${
       builtins.toJSON { inherit policies; }
     }' > "$out/Applications/LibreWolf.app/Contents/Resources/distribution/policies.json"
+
     runHook postInstall
   '';
 
-  meta = librewolf.meta // {
+  meta = {
     description = "LibreWolf macOS app from upstream DMG with enterprise policies";
+    homepage = "https://librewolf.net/";
+    license = lib.licenses.mpl20;
+    platforms = lib.platforms.darwin;
+    mainProgram = "librewolf";
   };
 }
