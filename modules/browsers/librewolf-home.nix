@@ -19,6 +19,10 @@ let
   browserCliFirefoxExtension = pkgs.callPackage ../../packages/browser-cli-firefox-extension.nix {
     inherit (micsSkills) browser-cli-extension;
   };
+  hmUser = osConfig.home-manager.users.${osConfig.my.username} or { };
+  micsSkillsCfg = hmUser.programs.mics-skills or { };
+  browserCliEnabled =
+    (micsSkillsCfg.enable or false) && lib.elem "browser-cli" (micsSkillsCfg.skills or [ ]);
   buildKeybindings =
     extensionId: commands:
     lib.mapAttrs' (cmdName: cmdValue: {
@@ -114,7 +118,7 @@ in
                   userchrome-toggle-extended
                   vimium-c
                 ]
-                ++ lib.optionals (osConfig.modules.pi.enable or false && !isDarwin) [
+                ++ lib.optionals browserCliEnabled [
                   browserCliFirefoxExtension
                 ]
                 ++ lib.optionals (hostname != "WK01174") [

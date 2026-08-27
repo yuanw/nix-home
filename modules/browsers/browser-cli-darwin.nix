@@ -9,8 +9,11 @@
 }:
 let
   micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-  piEnabled = config.modules.pi.enable or false;
   isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  hmCfg = config.home-manager.users.${config.my.username} or { };
+  micsSkillsCfg = hmCfg.programs.mics-skills or { };
+  browserCliEnabled =
+    (micsSkillsCfg.enable or false) && lib.elem "browser-cli" (micsSkillsCfg.skills or [ ]);
 
   librewolfBrowserCliInstallUrl = "file://${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
   librewolfBrowserPath =
@@ -24,7 +27,7 @@ let
 
 in
 {
-  config = lib.mkIf (piEnabled && isDarwin) {
+  config = lib.mkIf (browserCliEnabled && isDarwin) {
     modules.pi.environment = {
       BROWSER_CLI_FIREFOX_PATH = librewolfBrowserPath;
     };
