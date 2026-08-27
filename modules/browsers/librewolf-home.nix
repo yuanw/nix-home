@@ -19,10 +19,13 @@ let
   browserCliFirefoxExtension = pkgs.callPackage ../../packages/browser-cli-firefox-extension.nix {
     inherit (micsSkills) browser-cli-extension;
   };
-  hmUser = osConfig.home-manager.users.${osConfig.my.username} or { };
-  micsSkillsCfg = hmUser.programs.mics-skills or { };
+  micsSkillsCfg = hm.config.programs.mics-skills or { };
   browserCliEnabled =
     (micsSkillsCfg.enable or false) && lib.elem "browser-cli" (micsSkillsCfg.skills or [ ]);
+  browserCliPolicies = import ../../packages/browser-cli-policies.nix {
+    inherit (micsSkills) browser-cli-extension;
+    installUrl = "file://${micsSkills.browser-cli-extension}/browser-cli-extension.xpi";
+  };
   buildKeybindings =
     extensionId: commands:
     lib.mapAttrs' (cmdName: cmdValue: {
@@ -719,6 +722,12 @@ in
       {
         policies = privacyPolicies;
         profiles.home.settings = privacyPolicies.Preferences;
+      }
+    ]
+    ++ lib.optionals browserCliEnabled [
+      {
+        policies = browserCliPolicies;
+        profiles.home.settings = browserCliPolicies.Preferences;
       }
     ]
   );
