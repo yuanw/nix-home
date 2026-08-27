@@ -1,7 +1,10 @@
 { ... }:
 
 {
-  epkgs = epkgs: [ epkgs.ghostel ];
+  epkgs = epkgs: [
+    epkgs.ghostel
+    epkgs.hel-ghostel
+  ];
 
   elisp = ''
     (use-package ghostel
@@ -16,5 +19,8 @@
       :custom
       (ghostel-shell-integration t)
       (ghostel-enable-osc52 t))
+
+    (use-package hel-ghostel
+      :after (ghostel hel))
   '';
 }

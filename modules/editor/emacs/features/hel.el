@@ -12,6 +12,12 @@
               (when hel-local-mode
                 (hel-local-mode -1)))))
 
+(use-package hel-collection
+  :after hel
+  :demand t
+  :config
+  (hel-collection-init))
+
 (use-package hel-leader
   :after (hel which-key)
   :demand t

@@ -122,6 +122,29 @@ self: _super:
         ;
     }
   );
+  hel-ghostel = (
+    pkgs.callPackage "${packagePath}/hel-ghostel.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit lib;
+      inherit (self)
+        melpaBuild
+        hel
+        ghostel
+        dash
+        ;
+    }
+  );
+  hel-collection = (
+    pkgs.callPackage "${packagePath}/hel-collection.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit lib;
+      inherit (self)
+        melpaBuild
+        hel
+        dash
+        ;
+    }
+  );
   ultra-scroll = (
     pkgs.callPackage "${packagePath}/ultra-scroll.nix" {
       inherit (pkgs) fetchFromGitHub writeText;
