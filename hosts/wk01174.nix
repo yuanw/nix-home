@@ -66,6 +66,7 @@
         pi-permission-gate
         pi-mcp-adapter
         pi-interactive-shell
+        pi-ponytail
       ];
       extensionFiles = {
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
@@ -118,7 +119,8 @@
           pkgs.codingAgentsSkillPackages.disk-space
           pkgs.codingAgentsSkillPackages.explain-diff-html
           pkgs.pi-extensions.pi-interactive-shell
-        ];
+        ]
+        ++ (pkgs.lib.attrValues pkgs.pi-extensions.pi-ponytail.passthru.skills);
     };
     browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
