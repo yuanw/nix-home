@@ -75,6 +75,7 @@ in
   emacs-skills = callPlugin ./emacs-skills.nix;
   cozempic = callPlugin ./cozempic.nix;
   humanizer = callPlugin ./humanizer.nix;
+  i-have-adhd = callPlugin ./i-have-adhd.nix;
   inherit (claudeCodePlugins)
     code-review
     commit-commands

@@ -112,6 +112,7 @@
           caveman
           humanizer
           emacs-skills
+          i-have-adhd
         ])
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
