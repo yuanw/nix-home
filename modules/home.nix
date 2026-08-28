@@ -10,6 +10,7 @@ hm@{ pkgs, ... }:
   imports = [
     ./home/browser-cli.nix
     ./home/gpg.nix
+    ./home/nix.nix
   ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
