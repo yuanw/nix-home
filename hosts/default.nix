@@ -63,12 +63,10 @@
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
-                  inputs.git-ai.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
                 ];
-                # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
                 extraSpecialArgs = { inherit inputs; };
               };
@@ -142,7 +140,6 @@
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
-                  inputs.git-ai.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
@@ -193,7 +190,6 @@
                       inputs.catppuccin.homeModules.catppuccin
                       inputs.direnv-instant.homeModules.direnv-instant
                       inputs.mics-skills.homeModules.default
-                      inputs.git-ai.homeManagerModules.default
                       inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
                       (import ../modules/helpers/mergetools.nix)

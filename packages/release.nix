@@ -15,11 +15,6 @@ rec {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
   };
-  claude-code-ide = pkgs.callPackage ./emacs/claude-code-ide {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
-  };
-
   consult-omni = pkgs.callPackage ./emacs/consult-omni {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
@@ -123,6 +118,18 @@ rec {
     inherit shell-maker acp;
   };
 
+  agent-shell-knockknock = pkgs.callPackage ./emacs/agent-shell-knockknock.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell knockknock;
+  };
+
+  agent-shell-manager = pkgs.callPackage ./emacs/agent-shell-manager.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell;
+  };
+
   magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
@@ -138,5 +145,6 @@ rec {
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
   pi-mcp-adapter = pkgs.callPackage ./pi-extensions/pi-mcp-adapter.nix { };
+  pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
   ds4 = pkgs.callPackage ./ds4 { };
 }

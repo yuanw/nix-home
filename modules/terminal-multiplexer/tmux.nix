@@ -154,11 +154,6 @@ with lib;
           };
 
           initContent = mkAfter ''
-            # Auto-start tmux only in Alacritty
-            if [ -n "$ALACRITTY_WINDOW_ID" ] && [ -z "$TMUX" ]; then
-              tmux attach 2>/dev/null || tmux new-session
-              exit
-            fi
 
             function zt {
                z $1 && tat

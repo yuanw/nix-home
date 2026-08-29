@@ -6,7 +6,7 @@
 
 {
   config = lib.mkMerge [
-    (lib.mkIf pkgs.stdenv.isDarwin { imports = [ ./yabai.nix ]; })
+    (lib.mkIf pkgs.stdenv.hostPlatform.isDarwin { imports = [ ./yabai.nix ]; })
 
   ];
 }

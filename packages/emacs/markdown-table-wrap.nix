@@ -8,13 +8,13 @@
 
 melpaBuild {
   pname = "markdown-table-wrap";
-  version = "0.2.0-unstable-2026-07-03";
+  version = "0.2.0-unstable-2026-08-06";
 
   src = fetchFromGitHub {
     owner = "dnouri";
     repo = "markdown-table-wrap";
-    rev = "afc8214c6a2109891c5adf5ee7f75b8d8a2c4a35";
-    sha256 = "sha256-b1DuNOoWp7U8w3iJt/SYPJOSb6Q4nRqCkde2NbK5QVg=";
+    rev = "f846b77d13f34fba57c80214c1a61e00c94048a3";
+    sha256 = "sha256-MEP7sxDpiOYbEms8MVRYr91TjpVj+PMdRTSDptUjqM4=";
   };
 
   packageRequires = [ ];

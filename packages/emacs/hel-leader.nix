@@ -18,7 +18,7 @@ melpaBuild {
   inherit version;
 
   src = fetchFromGitHub {
-    owner = "anuvyklack";
+    owner = "helheim-emacs";
     repo = "hel-leader";
     rev = "v${version}";
     sha256 = "sha256-uJ684ik1hUeRQv6uQPQx7urKfo3yqqt4X3dHwnUxGlI=";
@@ -32,14 +32,14 @@ melpaBuild {
 
   recipe = writeText "recipe" ''
     (hel-leader
-     :repo "anuvyklack/hel-leader"
+     :repo "helheim-emacs/hel-leader"
      :fetcher github
      :files ("*.el"))
   '';
 
   meta = with lib; {
     description = "Leader key for Hel";
-    homepage = "https://github.com/anuvyklack/hel-leader";
+    homepage = "https://github.com/helheim-emacs/hel-leader";
     license = licenses.gpl3Only;
     platforms = platforms.all;
   };

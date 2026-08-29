@@ -17,7 +17,7 @@
 
 let
   pname = "consult-omni";
-  version = "0.1-unstable-2025-12-04";
+  version = "0.1-unstable-2026-06-25";
 
 in
 melpaBuild {
@@ -26,9 +26,9 @@ melpaBuild {
   src = fetchFromGitHub {
     owner = "armindarvish";
     repo = "consult-omni";
-    rev = "bdcd5a065340dce9906ac5c5f359906d31877963";
+    rev = "3a126ee54479755408faed10da945dbc2366303b";
     # sha256 = lib.fakeSha256;
-    sha256 = "sha256-vmKKEmZpzHQ8RDbTuoTCWGRypLfMiHrEv9Zw0G6K1pg=";
+    sha256 = "sha256-8Koe6IO2+/HvDb2IE1dc/DY3hGmNWcEMAfz6d0gdT7k=";
   };
 
   dontConfigure = true;

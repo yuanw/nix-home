@@ -103,10 +103,8 @@ in
     enableCompletion = true;
     enable = true;
   };
-  programs.gnupg.agent = {
-    enable = true;
-    enableSSHSupport = true;
-  };
+  # GPG agent is managed by home-manager (modules/home/gpg.nix).
+  programs.gnupg.agent.enable = false;
   time.timeZone = "America/Regina";
   system.primaryUser = config.my.username;
   users.users.${config.my.username} = {
@@ -127,18 +125,37 @@ in
   };
 
   launchd.daemons.nix-gc = {
-    serviceConfig.KeepAlive.SuccessfulExit = false;
     command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-    serviceConfig.RunAtLoad = false;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Weekday = 7;
-        Hour = 3;
-        Minute = 15;
-      }
-    ];
-    serviceConfig.StandardErrorPath = "/tmp/daemons-nix-gc.log";
-    serviceConfig.StandardOutPath = "/tmp/daemons-nix-gc.log";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 15;
+        }
+      ];
+      StandardErrorPath = "/tmp/daemons-nix-gc.log";
+      StandardOutPath = "/tmp/daemons-nix-gc.log";
+    };
+  };
+
+  launchd.daemons.nix-store-optimise = {
+    command = "${nixPackage}/bin/nix-store --optimise";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 3;
+          Minute = 45;
+        }
+      ];
+      StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
+      StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
+    };
   };
 
   #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
@@ -150,27 +167,28 @@ in
   # '';
 
   launchd.user.agents.user-nix-gc = {
-    command = "${nixPackage}/bin/nix-collect-garbage  --delete-older-than 3d";
-    serviceConfig.RunAtLoad = false;
+    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
     environment.NIX_REMOTE = "daemon";
-    serviceConfig.KeepAlive = false;
-    serviceConfig.ProcessType = "Background";
-    #serviceConfig.StartInterval = 3600;
-    serviceConfig.StartCalendarInterval = [
-      {
-        Weekday = 5;
-        Hour = 3;
-        Minute = 15;
-      }
-    ];
-    serviceConfig.StandardErrorPath = "/tmp/user-nix-gc.log";
-    serviceConfig.StandardOutPath = "/tmp/user-nix-gc.log";
+    serviceConfig = {
+      RunAtLoad = false;
+      KeepAlive = false;
+      ProcessType = "Background";
+      StartCalendarInterval = [
+        {
+          Weekday = 0;
+          Hour = 4;
+          Minute = 0;
+        }
+      ];
+      StandardErrorPath = "/tmp/user-nix-gc.log";
+      StandardOutPath = "/tmp/user-nix-gc.log";
+    };
   };
 
   fonts.packages = with pkgs; [
     fira-code
     font-awesome
-    #iosevka
+    aporetic
     roboto
     roboto-mono
   ];

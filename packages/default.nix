@@ -191,12 +191,6 @@ in
 
   llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
 
-  librewolf-macos = prev.callPackage ./librewolf-macos { };
-
-  firefox-macos = prev.callPackage ./firefox-macos { };
-
-  spectral = prev.callPackage ./spectral { };
-
   # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
   # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
   # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids

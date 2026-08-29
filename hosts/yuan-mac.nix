@@ -33,21 +33,17 @@
 
   modules = {
     claude-code = {
-      enableClaudeMem = true;
-      # llm-agent.claude-code doesn't work in garnix ci
       pkg = pkgs.claude-code;
     };
     pi.enable = true;
 
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
+    browsers = {
+      librewolf.enable = true;
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;
       enableService = true;
-      # TODO fix this
-      enableAider = false;
       enableLatex = false;
     };
 
@@ -60,7 +56,6 @@
       #   "homebrew/cask"
       # ];
       casks = [
-        "firefox"
         "1password"
       ];
     };

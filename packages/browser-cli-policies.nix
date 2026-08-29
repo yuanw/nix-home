@@ -28,5 +28,7 @@ in
     # Required for unsigned local XPI on release Firefox (ERROR_SIGNEDSTATE_REQUIRED).
     "xpinstall.signatures.required" = false;
     "extensions.autoDisableScopes" = 0;
+    # browser-cli is still manifest v2; Firefox/LibreWolf 136+ disables MV2 by default.
+    "extensions.manifestV2.enabled" = true;
   };
 }

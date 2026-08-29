@@ -1,7 +1,6 @@
-# Emacs `ghostel`: Darwin needs pure shims for Zig’s xcode-select/xcrun calls and an
-# overridden `ghostel.module` build so the native module compiles in the Nix sandbox.
-# Same idea as:
-# https://github.com/mzacuna/zix-zonfig/blob/af9690b4b81f5e4329a0776a340fbdda320cf215/modules/darwin/emacs/emacs.nix
+# Emacs `ghostel`: Darwin needs an SDK for libghostty's Zig build.
+# Modeled after nixpkgs' ghostel package plus the apple-sdk addition from:
+# https://github.com/AndrewBastin/nixos-config/blob/f6fca4e83703816a742955874651b08d3e684114/packages/ghostel/package.nix#L45
 { pkgs, isDarwin }:
 let
   appleSdkZigShims =
@@ -41,19 +40,19 @@ in
         let
           base = super.ghostel;
           ghostelModule = base.module.overrideAttrs (old: {
-            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [
-              appleSdkZigShims
-              pkgs.apple-sdk
-            ];
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ appleSdkZigShims ];
+            buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.apple-sdk ];
             env = (old.env or { }) // {
+              DEVELOPER_DIR = "${pkgs.apple-sdk}/Platforms/MacOSX.platform/Developer";
               SDKROOT = pkgs.apple-sdk.sdkroot;
             };
           });
         in
         base.overrideAttrs (old: {
           preBuild = ''
-            install ${ghostelModule}/lib/libghostel-module${pkgs.stdenv.hostPlatform.extensions.sharedLibrary} \
+            install ${ghostelModule}/ghostel-module${pkgs.stdenv.hostPlatform.extensions.sharedLibrary} \
               ghostel-module${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}
+            install --mode=444 ${ghostelModule}/ghostel-module.version ghostel-module.version
           '';
           passthru = (old.passthru or { }) // {
             module = ghostelModule;
@@ -63,7 +62,4 @@ in
         super.ghostel;
   };
 
-  usePackageGhostel = {
-    enable = false;
-  };
 }

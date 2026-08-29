@@ -1,0 +1,2 @@
+https://github.com/Mic92/dotfiles/tree/9953585da9685e60be8864529f654e132596831e/home-manager/modules/herdr
+https://github.com/edmundmiller/dotfiles/tree/84074ff2cd8821c5ac6bc8a1a91b62b90b49416e/modules/shell/herdr

@@ -18,13 +18,15 @@ let
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
+  alacrittyApp = "~/Applications/Home\\ Manager\\ Apps/Alacritty.app";
+  herdrCmd = "${config.modules.herdr.package}/bin/${config.modules.herdr.command}";
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
     shift + ctrl + alt - f :${defaultBrowserCmd}
-    shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app
+    shift + ctrl + alt - t : open -n -a ${alacrittyApp} --args -e ${pkgs.tmux}/bin/tmux new-session -A -s main
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
@@ -32,8 +34,8 @@ let
                             ${pkgs.sketchybar}/bin/sketchybar --reload && osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
-    # display current configuration
-    shift + ctrl + alt - h: open /etc/skhdrc
+    # start Herdr
+    shift + ctrl + alt - h: open -n -a ${alacrittyApp} --args -e ${herdrCmd}
     shift + ctrl + alt - y : choose-pass
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
@@ -109,6 +111,15 @@ in
 
         ];
 
+        # CoreText on some macOS installs does not reliably pick up fonts that
+        # nix-darwin links as whole packages under /Library/Fonts/Nix Fonts.
+        # The sketchybar app icons are ligatures from this font, so expose it
+        # directly in the user's Fonts directory as well.
+        home.file."Library/Fonts/sketchybar-app-font.ttf" = {
+          source = "${pkgs.sketchybar-app-font}/share/fonts/truetype/sketchybar-app-font.ttf";
+          force = true;
+        };
+
         xdg.configFile."sketchybar".source = ./sketchybar;
 
       };
@@ -147,6 +158,7 @@ in
       services.sketchybar = {
         extraPackages = [
           pkgs.jq
+          pkgs.python3
           pkgs.gh
           pkgs.ripgrep
           pkgs.sketchybar-cpu-helper
@@ -172,16 +184,11 @@ in
         enable = true;
         enableScriptingAddition = true;
         config = {
-          window_border = "off";
-          window_border_width = 2;
-          active_window_border_color = "0xff81a1c1";
-          normal_window_border_color = "0xff3b4252";
           focus_follows_mouse = "autoraise";
           mouse_follows_focus = "on";
           mouse_drop_action = "stack";
           window_placement = "second_child";
           window_opacity = "off";
-          window_topmost = "off";
           split_ratio = "0.50";
           auto_balance = "on";
           mouse_modifier = "fn";
@@ -198,8 +205,7 @@ in
         # https://felixkratz.github.io/SketchyBar/config/events#triggering-custom-events
         # https://github.com/koekeishiya/yabai/wiki/Installing-yabai-(from-HEAD)
         extraConfig = ''
-          yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
-          sudo yabai --load-sa
+          yabai -m signal --add event=dock_did_restart action="sudo ${pkgs.yabai}/bin/yabai --load-sa"
           # rules
           yabai -m rule --add label="About This Mac" app="System Information" title="About This Mac" manage=off
           yabai -m rule --add app='System Preferences' manage=off

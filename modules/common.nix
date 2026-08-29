@@ -4,6 +4,11 @@
   config,
   ...
 }:
+let
+  # Nix and Lix use different names for the same pipe-operator parser feature.
+  pipeOperatorFeature =
+    if builtins.elem config.my.hostname [ "mist" ] then "pipe-operator" else "pipe-operators";
+in
 {
   nix = {
     # configureBuildUsers = true;
@@ -18,7 +23,6 @@
         "https://yuanw-nix-home-macos.cachix.org"
         "https://cachix.org/api/v1/cache/yuanwang-wf"
         "https://cachix.org/api/v1/cache/devenv"
-        "https://cache.garnix.io"
         "https://cache.iog.io"
         "https://numtide.cachix.org"
         "https://cache.numtide.com"
@@ -27,7 +31,6 @@
         "https://cache.nixos.org"
         "https://nix-community.cachix.org"
         "https://yuanw-nix-home-macos.cachix.org"
-        "https://cache.garnix.io"
         "https://cache.iog.io"
         "https://numtide.cachix.org"
         "https://cache.numtide.com"
@@ -38,7 +41,6 @@
         "yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80="
         "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
         "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ="
-        "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
         "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
         "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
         "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
@@ -57,7 +59,7 @@
       max-free = 17179870000
       log-lines = 128
 
-      experimental-features = nix-command flakes auto-allocate-uids
+      experimental-features = nix-command flakes auto-allocate-uids ${pipeOperatorFeature}
       keep-outputs          = true
       keep-derivations      = true
       fallback              = true
@@ -79,6 +81,7 @@
 
       [
         inputs.emacs.overlay
+        inputs.nima.overlays.default
         inputs.nur.overlays.default
         inputs.mcp-servers-nix.overlays.default
         inputs.llm-agents.overlays.shared-nixpkgs
@@ -105,7 +108,10 @@
           #     _prev.batgrep;
           #https://github.com/NixOS/nixpkgs/pull/476210
           yt-dlp =
-            if _prev.stdenv.isDarwin then inputs'.nixpkgs-stable.legacyPackages.yt-dlp else _prev.yt-dlp;
+            if _prev.stdenv.hostPlatform.isDarwin then
+              inputs'.nixpkgs-stable.legacyPackages.yt-dlp
+            else
+              _prev.yt-dlp;
 
           #https://github.com/NixOS/nixpkgs/pull/476003/files
           #pasystray = inputs'.nixpkgs-master.legacyPackages.pasystray;

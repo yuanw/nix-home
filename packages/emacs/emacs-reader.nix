@@ -39,7 +39,7 @@ let
     # Darwin: upstream disables pkg-config and expects Homebrew MuPDF; Nix has mupdf via pkg-config.
     # Also, HAVE_NIX=yes runs before the Darwin branch and forces USE_PKGCONFIG=no, which then
     # incorrectly selects the Homebrew MuPDF branch — skip that assignment on Darwin.
-    postPatch = lib.optionalString stdenv.isDarwin ''
+    postPatch = lib.optionalString stdenv.hostPlatform.isDarwin ''
             substituteInPlace Makefile \
               --replace-fail 'else ifeq ($(HAVE_NIX),yes)
         $(info Nix detected: skipping pkg-config checks.)

@@ -66,6 +66,7 @@
         pi-permission-gate
         pi-mcp-adapter
         pi-interactive-shell
+        pi-ponytail
       ];
       extensionFiles = {
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
@@ -111,6 +112,7 @@
           caveman
           humanizer
           emacs-skills
+          i-have-adhd
         ])
         ++ [
           pkgs.codingAgentsSkillPackages.grilling
@@ -118,7 +120,8 @@
           pkgs.codingAgentsSkillPackages.disk-space
           pkgs.codingAgentsSkillPackages.explain-diff-html
           pkgs.pi-extensions.pi-interactive-shell
-        ];
+        ]
+        ++ (pkgs.lib.attrValues pkgs.pi-extensions.pi-ponytail.passthru.skills);
     };
     browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
@@ -141,14 +144,7 @@
         #"go"
       ];
     };
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
-    };
-    browsers.librewolf = {
-      enable = true;
-      pkg = null;
-    };
+    browsers.librewolf.enable = true;
     editors.emacs = {
       enable = true;
       enableService = true;

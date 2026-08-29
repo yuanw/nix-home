@@ -1,4 +1,7 @@
 host := `hostname -s`
+pipe_feature := `nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators`
+nix_config := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf 'extra-experimental-features = nix-command flakes %s' "$feature"`
+nix := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf "env NIX_CONFIG='extra-experimental-features = nix-command flakes %s' nix" "$feature"`
 
 # list all commands
 default:
@@ -10,21 +13,25 @@ prefetch-work-sources:
 
 # build os
 build:
-    @if [ "{{lowercase(host)}}" = "wk01174" ]; then {{justfile_directory()}}/scripts/prefetch-work-sources.sh; fi
-    @nix build --quiet ".#{{lowercase(host)}}"
+    @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
+        {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
+        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+    else \
+        {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \
+    fi
 
 update-all:
-    @nix flake update
+    @{{nix}} flake update
 
 update INPUT:
-    @nix flake update lock --update-input {{INPUT}}
+    @{{nix}} flake update {{INPUT}}
 
 # update ad-hoc packages upstream references 
 nix-update:
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
+    @nix-update -f ./packages/release.nix acp --src-only --version=branch --override-filename ./packages/emacs/acp.nix
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
     @nix-update -f ./packages/release.nix caveman --src-only --version=branch
-    @nix-update -f ./packages/release.nix chroma-mcp --src-only
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
     @nix-update -f ./packages/release.nix pi-acp --src-only --version=branch --override-filename ./packages/pi-acp.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
@@ -53,9 +60,6 @@ update-wk:
 	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
 	{{justfile_directory()}}/scripts/bump-semver-git-sources.sh
 	just prefetch-work-sources
-
-update-librewolf:
-	@nix shell nixpkgs#python3 nixpkgs#nix -c bash -c 'PYTHONPATH=packages python3 packages/librewolf-macos/update.py'
 
 # deploy to DGX Spark: sync flake and rebuild remotely
 spark-deploy IP="dgx-spark.local":
@@ -152,14 +156,26 @@ colmena-spark-apply: _unlock-ssh
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo darwin-rebuild switch --flake .; \
+        sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback; \
     else \
-        nixos-rebuild switch --flake '.#' --quiet --sudo; \
+        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback; \
+        sudo systemctl try-restart emacs.service || true; \
     fi
+
+# print the generated nima default.el content
+nima-emacs-print-config:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        host_expr='flake.darwinConfigurations."{{host}}"'; \
+    else \
+        host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
+    fi; \
+    {{nix}} eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; rawOutput = true; }; in nima.config.defaultEl.content"
+
 
 # build devshell + system and push both closures to cachix
 push-all:
-    nix build --no-link --print-out-paths .#devShells.aarch64-darwin.default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos
+    @bash -o pipefail -c 'env NIX_CONFIG="{{nix_config}}" nix build --no-link --print-out-paths .#devShells.$(env NIX_CONFIG="{{nix_config}}" nix eval --impure --raw --expr builtins.currentSystem).default .#{{lowercase(host)}} | xargs -n1 cachix push yuanw-nix-home-macos'
 
 sys-diff:
     @nix store diff-closures /run/current-system ./result

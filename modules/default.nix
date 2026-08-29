@@ -6,8 +6,6 @@
       ./ai.nix
       ./browsers/default.nix
       ./browsers/chromium.nix
-      ./browsers/browser-cli-darwin.nix
-      ./browsers/firefox
       ./browsers/librewolf.nix
       ./browsers/tor.nix
       ./catppuccin.nix
@@ -58,6 +56,8 @@
       ./wm/xmonad.nix
     ];
     darwin.imports = [
+      ./browsers/librewolf-darwin.nix
+      ./browsers/browser-cli-darwin.nix
       ./coding-agents/hermes-agent-darwin.nix
       ./brew.nix
       ./health.nix
