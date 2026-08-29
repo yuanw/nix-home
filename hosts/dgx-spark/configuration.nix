@@ -86,10 +86,14 @@
   ];
 
   # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = false;
+  services.ds4.enable = true;
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
+  services.cockpit-local.enableGpu = true;
+
+  # ─── PCP (Performance Co-Pilot) — required by cockpit
+  services.pcp.enable = true;
 
   # ─── Lance Multimodal AI ────────────────────────────────────────────
   services.lance = {
@@ -134,6 +138,8 @@
     aeon = {
       enable = false;
       autoStart = false; # Start manually after model downloads complete
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
       servedModelName = "aeon";
       port = 8000;
@@ -143,10 +149,11 @@
       maxNumBatchedTokens = 8192;
       dtype = "auto";
       quantization = "compressed-tensors"; # NVFP4
-      kvCacheDtype = "fp8_e4m3";
+      kvCacheDtype = null; # auto/BF16 (DFlash non-causal + fp8_e4m3 unsupported on sm_121a)
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
       mambaBlockSize = 256; # Qwen3.6 hybrid GDN+attention
+      toolCallParser = "qwen3_coder";
       speculative = {
         enable = true;
         model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
@@ -158,6 +165,8 @@
     # Gemma-4-26B-A4B NVFP4 (fastest single-stream, 155 tok/s coding)
     gemma = {
       enable = false;
+      backend = "podman";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Gemma-4-26B-A4B-NVFP4";
       servedModelName = "gemma";
       port = 8001;
@@ -177,25 +186,54 @@
     };
 
     # Qwen3.6-35B-A3B NVFP4 (largest MoE model that fits)
+    # Uses official NVIDIA recommended config from model card:
+    # https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4#usage
     qwen35b = {
-      enable = false;
+      enable = true;
+      autoStart = false; # Start manually after model downloads complete
+      backend = "podman";
+      # sm121-vllm-nvfp4 build — NVIDIA-optimized vLLM v0.24.0 for DGX Spark
+      # with NVFP4 KV cache, FlashInfer PR #3684, and vLLM PR #46329 patches.
+      #   https://github.com/r0b0tlab/nvidia-qwen-3.6-27B-sm121-nvfp4
+      # Benchmark: 248 tok/s (32 concurrency), GSM8K 81.88% 0-shot
+      containerImage = "localhost/sm121-vllm-v0240-nvfp4:kv-exp";
       model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-NVFP4";
       servedModelName = "qwen35b";
       port = 8002;
-      gpuMemoryUtilization = 0.76; # More conservative for larger model
-      maxModelLen = 24576;
-      maxNumSeqs = 8;
-      quantization = "compressed-tensors";
-      kvCacheDtype = "fp8_e4m3";
+      # spark-arena-tested DGX Spark params (from sparkrun recipe)
+      gpuMemoryUtilization = 0.65;
+      maxModelLen = 262144;
+      maxNumSeqs = 4;
+      maxNumBatchedTokens = 32768;
+      dtype = "auto";
+      quantization = "modelopt"; # NVFP4 via Model Optimizer
+      kvCacheDtype = "fp8";
       enableChunkedPrefill = true;
       enablePrefixCaching = true;
-      mambaBlockSize = 256;
+      # MTP speculative decoding: the sm121-vllm-nvfp4 image includes vLLM
+      # v0.24.0 with built-in MTP heads (88–93% acceptance rate, 1 spec token).
+      # Enable via speculative config after model download confirms MTP support:
+      #   speculative.enable = true;
+      #   speculative.numSpeculativeTokens = 1;
       speculative = {
-        enable = true;
-        model = "/var/lib/vllm/models/Qwen3.6-35B-A3B-DFlash-drafter";
-        numSpeculativeTokens = 12;
+        enable = false;
       };
-      extraArgs = [ "--trust-remote-code" ];
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_xml";
+      extraEnv = {
+        VLLM_MARLIN_USE_ATOMIC_ADD = "1";
+      };
+      extraArgs = [
+        "--trust-remote-code"
+        "--attention-backend"
+        "flashinfer"
+        "--moe-backend"
+        "marlin"
+        "--async-scheduling"
+        "--load-format"
+        "fastsafetensors"
+        "--enable-auto-tool-choice"
+      ];
     };
 
     # Ornith-1.0-35B AEON Ultimate Uncensored — NVFP4 + DFlash via the AEON
@@ -207,7 +245,7 @@
       enable = true; # Phase 1 verified 2026-06-28 (CDI + AEON image OK)
       autoStart = false; # one-shot start after model downloads complete
       backend = "podman";
-      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+      containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:2026-06-18-v0.23.0-dflashfix";
       model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
       servedModelName = "ornith";
       port = 8003; # host port == container port (podman --network host)
@@ -255,6 +293,13 @@
       # DFlash drafter for Qwen3.6-27B (z-lab 5-layer, ~3.3 GB)
       "Qwen3.6-27B-DFlash-drafter" = {
         repo = "z-lab/Qwen3.6-27B-DFlash";
+      };
+
+      # ── NVIDIA Qwen3.6-35B-A3B NVFP4 (official release) ──
+      # Official NVIDIA release of Qwen3.6-35B in NVFP4 compressed-tensors format.
+      # Base model (no drafter bundled); shares the AEON DFlash drafter above.
+      "Qwen3.6-35B-A3B-NVFP4" = {
+        repo = "nvidia/Qwen3.6-35B-A3B-NVFP4";
       };
 
       # ── Ornith-1.0-35B AEON Ultimate Uncensored (container path) ──
@@ -338,6 +383,48 @@
     0
     1
   ];
+
+  # ─── vllm-node image build ──────────────────────────────────────
+  # Builds the spark-vllm-docker Docker image from pinned inputs
+  # when the package changes (new source commit or wheel hashes).
+  systemd.services.vllm-node-build = {
+    description = "Build vllm-node Docker image from pinned inputs";
+    after = [ "network.target" ];
+    wants = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [ podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.vllm-node}/bin/build-vllm-node";
+      TimeoutStartSec = 1800; # 30 min for first build
+    };
+  };
+
+  # ─── sm121-vllm-nvfp4 image build ────────────────────────────────
+  # Builds the NVIDIA-optimized vLLM v0.24.0 Docker image from pinned source
+  # (https://github.com/r0b0tlab/nvidia-qwen-3.6-27B-sm121-nvfp4) with NVFP4 KV
+  # cache, MTP speculative decoding, and FlashInfer PR #3684 + vLLM PR #46329.
+  # Builds vLLM from source — expect ~60 min on first run.
+  systemd.services.vllm-sm121-build = {
+    description = "Build sm121-vllm-nvfp4 Docker image from pinned source";
+    after = [ "network.target" ];
+    wants = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+    path = with pkgs; [ podman ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.sm121-vllm-nvfp4}/bin/build-sm121-vllm-image";
+      TimeoutStartSec = 7200; # 2 hours for first build (vLLM from source)
+    };
+  };
+
+  # The qwen35b instance requires the sm121-vllm-nvfp4 image to be built first
+  systemd.services.vllm-qwen35b = {
+    requires = [ "vllm-sm121-build.service" ];
+    after = [ "vllm-sm121-build.service" ];
+  };
 
   # ─── HuggingFace token ─────────────────────────────────────────────
   # Secret file (secrets/hf-token.age) must contain:

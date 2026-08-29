@@ -724,6 +724,25 @@ in
         profiles.home.settings = privacyPolicies.Preferences;
       }
     ]
+    ++ lib.optionals (program == "librewolf") [
+      {
+        policies.Preferences = {
+          "privacy.sanitize.sanitizeOnShutdown" = false;
+          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
+          "browser.sessionstore.privacy_level" = 0;
+        };
+        profiles.home.settings = {
+          # Enable WebGL (disabled by LibreWolf by default for security)
+          "webgl.disabled" = false;
+          # Don't prompt for WebGL; not a significant attack vector nowadays
+          "librewolf.webgl.prompt" = false;
+          # LibreWolf mozilla.cfg sanitizes on shutdown and sets privacy_level=2.
+          "privacy.sanitize.sanitizeOnShutdown" = false;
+          "privacy.clearOnShutdown_v2.cookiesAndStorage" = false;
+          "browser.sessionstore.privacy_level" = 0;
+        };
+      }
+    ]
     ++ lib.optionals browserCliEnabled [
       {
         policies = browserCliPolicies;
