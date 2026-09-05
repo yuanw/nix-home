@@ -31,13 +31,29 @@ let
     "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
   ];
 
+  trustedSubstituters = cacheSubstituters ++ extraTrustedSubstituters;
+  trustedUsers = [
+    "root"
+    config.my.username
+  ];
+
   toLine = key: values: "${key} = ${lib.concatStringsSep " " values}";
 in
 {
+  nix.settings = {
+    trusted-users = trustedUsers;
+    substituters = cacheSubstituters;
+    trusted-substituters = trustedSubstituters;
+    trusted-public-keys = trustedPublicKeys;
+  };
+
+  # Lix/Determinate installs on Darwin include /etc/nix/nix.custom.conf from
+  # /etc/nix/nix.conf. Keep the same cache settings there for hosts where the
+  # daemon config is not owned by nix-darwin.
   environment.etc."nix/nix.custom.conf".text = ''
-    trusted-users = root ${config.my.username}
+    ${toLine "trusted-users" trustedUsers}
     ${toLine "substituters" cacheSubstituters}
-    ${toLine "trusted-substituters" (cacheSubstituters ++ extraTrustedSubstituters)}
+    ${toLine "trusted-substituters" trustedSubstituters}
     ${toLine "trusted-public-keys" trustedPublicKeys}
   '';
 }

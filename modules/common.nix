@@ -13,38 +13,6 @@ in
   nix = {
     # configureBuildUsers = true;
     settings = {
-      trusted-users = [
-        "root"
-        config.my.username
-      ];
-      substituters = [
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-        "https://yuanw-nix-home-macos.cachix.org"
-        "https://cachix.org/api/v1/cache/yuanwang-wf"
-        "https://cachix.org/api/v1/cache/devenv"
-        "https://cache.iog.io"
-        "https://numtide.cachix.org"
-        "https://cache.numtide.com"
-      ];
-      trusted-substituters = [
-        "https://cache.nixos.org"
-        "https://nix-community.cachix.org"
-        "https://yuanw-nix-home-macos.cachix.org"
-        "https://cache.iog.io"
-        "https://numtide.cachix.org"
-        "https://cache.numtide.com"
-      ];
-      trusted-public-keys = [
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-        "yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80="
-        "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw="
-        "yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ="
-        "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-        "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
-        "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
-      ];
       # https://github.com/NixOS/nix/issues/7273
       # auto-optimise-store = true;
       max-jobs = 12;

@@ -17,6 +17,7 @@
       ./coding-agents/hermes-agent.nix
       ./coding-agents/pi
       ./common.nix
+      ./nix-custom-conf.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
@@ -66,7 +67,6 @@
       ./login-items.nix
       ./macintosh.nix
       ./mouseless
-      ./nix-custom-conf.nix
       ./nix-casks.nix
     ];
   };
