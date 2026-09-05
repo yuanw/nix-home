@@ -66,6 +66,7 @@
       ./login-items.nix
       ./macintosh.nix
       ./mouseless
+      ./nix-custom-conf.nix
       ./nix-casks.nix
     ];
   };
