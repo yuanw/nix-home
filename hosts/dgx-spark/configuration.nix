@@ -3,7 +3,6 @@
 {
   imports = [
     ./hardware-configuration.nix
-    ../../modules/comfyui.nix
   ];
 
   # ─── Bootloader ─────────────────────────────────────────────────────
@@ -126,9 +125,11 @@
 
   services.comfyui = {
     enable = false;
-    host = "0.0.0.0";
+    listen = [
+      "0.0.0.0"
+      "::"
+    ];
     port = 8188;
-    openFirewall = true;
   };
 
   # ─── vLLM Inference ─────────────────────────────────────────────────
