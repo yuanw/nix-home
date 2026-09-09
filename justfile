@@ -41,6 +41,10 @@ nix-update:
     @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
     @nix-update -f ./packages/release.nix humanizer --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
+    @nix-update -f ./packages/release.nix hel --src-only --version=branch --override-filename ./packages/emacs/hel.nix
+    @nix-update -f ./packages/release.nix hel-leader --src-only --version=branch --override-filename ./packages/emacs/hel-leader.nix
+    @nix-update -f ./packages/release.nix hel-ghostel --src-only --version=branch --override-filename ./packages/emacs/hel-ghostel.nix
+    @nix-update -f ./packages/release.nix hel-collection --src-only --version=branch --override-filename ./packages/emacs/hel-collection.nix
     @nix-update -f ./packages/release.nix knockknock --src-only --version=branch
     @nix-update -f ./packages/release.nix lean4-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ob-gptel --src-only --version=branch

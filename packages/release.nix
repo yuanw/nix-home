@@ -80,6 +80,34 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
 
+  hel = pkgs.callPackage ./emacs/hel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit ultra-scroll;
+    inherit (pkgs.emacsPackages) avy dash pcre2el;
+  };
+
+  hel-leader = pkgs.callPackage ./emacs/hel-leader.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash s;
+  };
+
+  hel-ghostel = pkgs.callPackage ./emacs/hel-ghostel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash ghostel;
+  };
+
+  hel-collection = pkgs.callPackage ./emacs/hel-collection.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash;
+  };
+
   home-row-expreg = pkgs.callPackage ./emacs/expreg.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;

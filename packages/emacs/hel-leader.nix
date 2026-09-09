@@ -11,6 +11,7 @@
 
 let
   version = "2.1";
+  rev = "9e7bd67d6e1ce0915bfd5f2341eb0b9ea5217bbf";
 in
 
 melpaBuild {
@@ -20,7 +21,7 @@ melpaBuild {
   src = fetchFromGitHub {
     owner = "helheim-emacs";
     repo = "hel-leader";
-    rev = "v${version}";
+    inherit rev;
     sha256 = "sha256-uJ684ik1hUeRQv6uQPQx7urKfo3yqqt4X3dHwnUxGlI=";
   };
 
