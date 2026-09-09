@@ -168,6 +168,8 @@ with lib;
               stylelint
               # :lang yaml
               yaml-language-server
+              # hurl-mode / org-babel-hurl
+              stable.hurl
               tree-sitter
               # emacsWithDeps
               (vale.withStyles (s: [
