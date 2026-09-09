@@ -1,5 +1,14 @@
 ;; Late init tweaks loaded after other nima features.
 
+;; On macOS, `browse-url-default-browser' can ask LaunchServices to open a
+;; browser tab without reliably handing the URL to LibreWolf.  Route Org links
+;; through `open -b org.nixos.librewolf URL' instead.
+(when (eq system-type 'darwin)
+  (require 'browse-url)
+  (setq browse-url-browser-function #'browse-url-generic
+        browse-url-generic-program "open"
+        browse-url-generic-args '("-b" "org.nixos.librewolf")))
+
 (repeat-mode 1)
 
 ;; add smerge-basic-map to repeat-map
