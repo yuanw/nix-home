@@ -33,7 +33,12 @@ in
           home.packages = with pkgs; [
             agnix
           ];
-          mcp-servers.programs.sequential-thinking.enable = true;
+          mcp-servers.programs.sequential-thinking = {
+            enable = true;
+            # mcp-servers-nix HM module resolves defaults from its own `servers`
+            # overlay, not nixpkgs; use our fixed package from common.nix.
+            package = pkgs.mcp-server-sequential-thinking;
+          };
 
           programs.mcp.enable = true;
           # When a background Bash task (run_in_background: true) hangs due to an external dependency failure, Claude Code respawns the command infinitely, creating a fork bomb. In our case this consumed 1,300+ bash processes, 41GB of 64GB RAM, and would have triggered the Linux OOM killer and required a hard reboot if not caught manually.

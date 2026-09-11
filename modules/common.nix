@@ -94,6 +94,23 @@ in
             };
           });
 
+          # mcp-servers-nix generic-ts.nix puts nixpkgs typescript on PATH; tsc then
+          # cannot see workspace @types/node. Defer build until dev deps are installed.
+          mcp-server-sequential-thinking = _prev.mcp-server-sequential-thinking.overrideAttrs (old: {
+            postPatch = (old.postPatch or "") + ''
+              for pkg in src/*/package.json; do
+                substituteInPlace "$pkg" --replace '"prepare": "npm run build",' "" || true
+              done
+            '';
+            nativeBuildInputs = _final.lib.filter (x: x != _prev.typescript) (old.nativeBuildInputs or [ ]);
+            buildPhase = ''
+              runHook preBuild
+              npm install --include=dev -w src/sequentialthinking
+              npm run build -w src/sequentialthinking
+              runHook postBuild
+            '';
+          });
+
           # Override jiratui to use current master
           jiratui = _prev.jiratui.overrideAttrs (_oldAttrs: {
             version = "unstable-2025-11-27";
