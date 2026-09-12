@@ -14,7 +14,6 @@
   ];
 
   environment.casks = with inputs'.nix-casks.packages; [
-    mouseless_preview
     betterdisplay
     inputs'.nix-casks.packages."1password"
     godot
@@ -71,7 +70,7 @@
       };
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
-    mouseless.enable = true;
+    neru.enable = true;
     browsers = {
       librewolf.enable = true;
       defaultBrowser = "librewolf";

@@ -6,7 +6,6 @@
     enable = true;
     items = [
       "/Applications/Nix Casks/BetterDisplay.app"
-      "/Applications/Nix Casks/Mouseless.app"
       "/Applications/Fresh Eyes.app"
     ];
   };

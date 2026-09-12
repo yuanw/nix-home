@@ -38,7 +38,6 @@
     };
   };
   environment.casks = with inputs'.nix-casks.packages; [
-    mouseless
     betterdisplay
     ungoogled-chromium
     slack

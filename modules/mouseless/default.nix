@@ -1,4 +1,10 @@
-{ config, lib, ... }:
+{
+  config,
+  inputs',
+  lib,
+  options,
+  ...
+}:
 
 with lib;
 let
@@ -21,6 +27,14 @@ in
       }
 
     ];
+
+    environment.casks = mkIf (options ? environment.casks) (mkAfter [
+      inputs'.nix-casks.packages.mouseless
+    ]);
+
+    environment.loginItems.items = mkIf (options ? environment.loginItems.items) (mkAfter [
+      "/Applications/Nix Casks/Mouseless.app"
+    ]);
 
     home-manager.users.${config.my.username} =
       hm@{
