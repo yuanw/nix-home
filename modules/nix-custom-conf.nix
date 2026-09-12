@@ -38,11 +38,13 @@ let
   toLine = key: values: "${key} = ${lib.concatStringsSep " " values}";
 in
 {
+  # nix-darwin appends https://cache.nixos.org/ via mkAfter by default; mkForce
+  # keeps our explicit lists without duplicates.
   nix.settings = {
-    trusted-users = trustedUsers;
-    substituters = cacheSubstituters;
-    trusted-substituters = trustedSubstituters;
-    trusted-public-keys = trustedPublicKeys;
+    trusted-users = lib.mkForce trustedUsers;
+    substituters = lib.mkForce cacheSubstituters;
+    trusted-substituters = lib.mkForce trustedSubstituters;
+    trusted-public-keys = lib.mkForce trustedPublicKeys;
   };
 
   # Lix/Determinate installs on Darwin include /etc/nix/nix.custom.conf from
