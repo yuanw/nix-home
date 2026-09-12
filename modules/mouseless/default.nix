@@ -15,6 +15,10 @@ in
         assertion = config.modules.brew.enable;
         message = "need homebrew to install mouseless (for now)";
       }
+      {
+        assertion = !config.modules.neru.enable;
+        message = "modules.mouseless and modules.neru cannot both be enabled on the same host";
+      }
 
     ];
 

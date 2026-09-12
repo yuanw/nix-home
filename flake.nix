@@ -82,6 +82,10 @@
       inputs.flake-parts.follows = "flake-parts";
     };
     nix-darwin-login-items.url = "github:yuanw/nix-darwin-login-items";
+    neru = {
+      url = "github:y3owk1n/neru";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     preservation = {
       url = "github:nix-community/preservation";

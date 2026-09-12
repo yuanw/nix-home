@@ -753,6 +753,26 @@
         "type": "github"
       }
     },
+    "neru": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789138113,
+        "narHash": "sha256-kkejARamA9+SR4BS8QNGUqyvapZ/tv934Pm+x/39HAQ=",
+        "owner": "y3owk1n",
+        "repo": "neru",
+        "rev": "5d4ff53377becb1c25674be3ae8110e042145884",
+        "type": "github"
+      },
+      "original": {
+        "owner": "y3owk1n",
+        "repo": "neru",
+        "type": "github"
+      }
+    },
     "nima": {
       "inputs": {
         "flake-parts": [
@@ -1260,6 +1280,7 @@
         "llm-agents": "llm-agents",
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",
+        "neru": "neru",
         "nima": "nima",
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
