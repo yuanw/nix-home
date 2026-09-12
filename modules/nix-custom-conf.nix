@@ -13,8 +13,6 @@ let
     "https://cache.iog.io"
     "https://numtide.cachix.org"
     "https://cache.numtide.com"
-  ];
-  extraTrustedSubstituters = [
     "https://cache.zw3rk.com"
   ];
   trustedPublicKeys = [
@@ -26,10 +24,11 @@ let
     "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
     "numtide.cachix.org-1:2ps1kLBUWjxIneOy1Ik6cQjb41X0iXVXeHigGmycPPE="
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+    # https://cache.zw3rk.com
     "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
   ];
 
-  trustedSubstituters = cacheSubstituters ++ extraTrustedSubstituters;
+  trustedSubstituters = cacheSubstituters;
   trustedUsers = [
     "root"
     config.my.username
