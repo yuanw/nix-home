@@ -18,6 +18,7 @@
   # graham33's dgx-spark.nix imports his vllm.nix — disable it in favor of ours
   disabledModules = [
     "${inputs.dgx-spark}/modules/vllm.nix"
+    "services/misc/comfyui.nix"
   ];
 
   nixpkgs.overlays = [

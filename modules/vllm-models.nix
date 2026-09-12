@@ -95,13 +95,28 @@ in
     }
 
     (mkIf (cfg.models != { } && (config.services.vllm.instances or { }) != { }) {
-      # Add model download dependencies to vLLM instances
+      # Add only the matching model download dependencies to each vLLM instance.
+      # Instances that use HuggingFace repo IDs directly (rather than a local
+      # /var/lib/vllm/models/<name> path) should not wait for every declared
+      # model download on the host.
       systemd.services =
         let
-          modelServiceNames = mapAttrsToList (modelName: _: "vllm-model-${modelName}.service") cfg.models;
+          matchingModelServices =
+            inst:
+            mapAttrsToList (
+              modelName: _:
+              let
+                targetDir = "${cfg.cacheDir}/${modelName}";
+                usesTarget = inst.model == targetDir || (inst.speculative.model or null) == targetDir;
+              in
+              optionalString usesTarget "vllm-model-${modelName}.service"
+            ) cfg.models;
         in
         mapAttrs' (
-          instanceName: _:
+          instanceName: inst:
+          let
+            modelServiceNames = filter (name: name != "") (matchingModelServices inst);
+          in
           nameValuePair "vllm-${instanceName}" {
             requires = modelServiceNames;
             after = modelServiceNames;
