@@ -1,0 +1,208 @@
+#+title: Nix binary cache settings (substituters)
+#+date: 2026-09-12
+#+filetags: :nix:
+
+* Overview
+
+Binary caches let Nix download pre-built store paths instead of building locally.
+This note documents how cache settings are declared in =nix-home=, the difference
+between =substituters= / =trusted-substituters= / =extra-substituters=, fixes
+applied in Sep 2026, and how to verify the live daemon config.
+
+Source of truth: =modules/nix-custom-conf.nix= (imported from =modules/default.nix=
+→ =myModules.common=).
+
+Home Manager must *not* set substituters in user =nix.conf= — see
+=modules/home/nix.nix=.
+
+* substituters vs trusted-substituters vs extra-substituters
+
+| Setting | Where set | When it applies | Who uses it |
+|---------+-----------+-----------------+-------------|
+| =substituters= | =nix.conf= / =nix.settings= | Every build (=substitute = true=) | Everyone via the daemon |
+| =trusted-substituters= | =nix.conf= / =nix.settings= | Extra URLs trusted for the daemon; trusted users can also pass them on the CLI | Primarily =trusted-users= |
+| =extra-substituters= | =flake.nix= → =nixConfig= | Only when running Nix commands *on that flake* | Flake consumers (may prompt to accept) |
+
+**substituters** — default cache list queried on every build. Paths must be signed
+by a key listed in =trusted-public-keys= when =require-sigs = true=.
+
+**trusted-substituters** — additional cache URLs the daemon is allowed to use.
+In practice, put anything you want queried automatically into =substituters=;
+keep =trusted-substituters= in sync or as a superset. A URL only in
+=trusted-substituters= may not be hit on normal builds.
+
+**extra-substituters** — flake metadata, not system config. Example in this repo:
+
+#+begin_src nix
+# flake.nix
+nixConfig.extra-substituters = [ "https://cache.numtide.com" ];
+nixConfig.extra-trusted-public-keys = [ "niks3.numtide.com-1:…" ];
+#+end_src
+
+=cache.numtide.com= is already in =nix-custom-conf.nix=, so the flake entry is
+redundant but harmless.
+
+* Signing keys and cache URLs
+
+The key *name* in =trusted-public-keys= does not have to match the cache hostname.
+Nix checks the signer name embedded in each =.narinfo= file.
+
+Example: =https://cache.zw3rk.com= is signed with the =loony-tools= key:
+
+#+begin_example
+loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk=
+#+end_example
+
+* Current cache list (WK01174 / darwin)
+
+Substituters (=modules/nix-custom-conf.nix=):
+
+1. =https://cache.nixos.org=
+2. =https://nix-community.cachix.org=
+3. =https://yuanw-nix-home-macos.cachix.org=  ← =just push-all= target
+4. =https://cachix.org/api/v1/cache/yuanwang-wf=
+5. =https://cachix.org/api/v1/cache/devenv=
+6. =https://cache.iog.io=
+7. =https://numtide.cachix.org=
+8. =https://cache.numtide.com=
+9. =https://cache.zw3rk.com=
+
+=trusted-users=: =root=, =config.my.username= (e.g. =yuanwang= on WK01174).
+
+* Fixes applied (Sep 2026)
+
+** 1. Duplicate trusted-users
+
+*Problem:* =trusted-users= showed =root root yuanwang yuanwang=.
+
+*Cause:* =modules/nix-custom-conf.nix= set =trusted-users= and
+=modules/common.nix= also had =extra-trusted-users = ${config.my.username}= in
+=nix.extraOptions=.
+
+*Fix:* Removed =extra-trusted-users= from =modules/common.nix=.
+
+** 2. Duplicate cache.nixos.org and cache.nixos.org-1 key
+
+*Problem:* =substituters= ended with a second =https://cache.nixos.org=;
+=trusted-public-keys= listed =cache.nixos.org-1= twice.
+
+*Cause:* nix-darwin defaults append via =mkAfter=:
+
+#+begin_src nix
+# nix-darwin/modules/nix/default.nix
+substituters = mkAfter [ "https://cache.nixos.org/" ];
+trusted-public-keys = [ "cache.nixos.org-1:…" ];
+#+end_src
+
+Our =nix-custom-conf.nix= already included those entries, so module merge
+duplicated them.
+
+*Fix:* Wrap cache settings in =lib.mkForce= in =nix-custom-conf.nix=:
+
+#+begin_src nix
+nix.settings = {
+  trusted-users = lib.mkForce trustedUsers;
+  substituters = lib.mkForce cacheSubstituters;
+  trusted-substituters = lib.mkForce trustedSubstituters;
+  trusted-public-keys = lib.mkForce trustedPublicKeys;
+};
+#+end_src
+
+** 3. Removed garnix
+
+Removed =https://cache.garnix.io= and =cache.garnix.io:…= from
+=nix-custom-conf.nix=.
+
+** 4. zw3rk cache + loony-tools key
+
+Added =https://cache.zw3rk.com= to the main =substituters= list (not only
+=trusted-substituters=). The =loony-tools:…= public key was already present; it
+signs zw3rk paths.
+
+** 5. bash associative-array keys (separate issue)
+
+In =scripts/bump-semver-git-sources.sh=, hyphenated keys must be quoted for
+=shfmt=: =["wk-plugin-mcp"]= not =[wk-plugin-mcp]=.
+
+* Apply changes
+
+#+begin_src shell
+just switch    # darwin: sudo darwin-rebuild switch --flake .
+#+end_src
+
+On NixOS hosts, use =nixos-rebuild switch= instead.
+
+* Verify nix settings
+
+** Live daemon (after switch)
+
+#+begin_src shell
+nix config show | rg -i 'substituters|trusted-public-keys|trusted-users|require-sigs|substitute '
+#+end_src
+
+Expected on WK01174:
+
+- =substitute = true=, =require-sigs = true=
+- =trusted-users = root yuanwang= (no duplicates)
+- 9 substituters, =cache.nixos.org= appears *once*
+- =cache.nixos.org-1= appears *once* in =trusted-public-keys=
+- No =garnix=; =loony-tools:…= present for zw3rk
+
+** Generated nix.conf
+
+#+begin_src shell
+rg 'substituters|trusted-public|trusted-users|extra-trusted|garnix' /etc/nix/nix.conf
+#+end_src
+
+On nix-darwin hosts, =/etc/nix/nix.conf= is generated — do not edit by hand.
+
+** Expected config from flake (before switch)
+
+Compare evaluated module output to the live daemon:
+
+#+begin_src shell
+nix eval --impure --json --expr '
+  let
+    flake = builtins.getFlake (toString ./.);
+    cfg = flake.darwinConfigurations.WK01174.config;
+  in {
+    substituters = cfg.nix.settings.substituters;
+    trusted-public-keys = cfg.nix.settings.trusted-public-keys;
+    trusted-users = cfg.nix.settings.trusted-users;
+  }
+' | jq .
+#+end_src
+
+Replace =WK01174= with your =darwinConfigurations= name, or use the matching
+=NixOS= configuration on Linux.
+
+** Duplicate sanity checks
+
+#+begin_src shell
+# should print 1 each
+nix config show | rg '^substituters' | tr ' ' '\n' | rg -c 'cache.nixos.org'
+nix config show | rg '^trusted-public-keys' | tr ' ' '\n' | rg -c 'cache.nixos.org-1'
+#+end_src
+
+** Cache reachability (optional)
+
+#+begin_src shell
+curl -sf https://cache.zw3rk.com/nix-cache-info | head -5
+curl -sf https://yuanw-nix-home-macos.cachix.org/nix-cache-info | head -5
+#+end_src
+
+* Related files
+
+- =modules/nix-custom-conf.nix= — substituters, keys, =mkForce=
+- =modules/common.nix= — GC, =max-jobs=, experimental features (no substituters)
+- =modules/home/nix.nix= — user =nix.package= only
+- =flake.nix= — =nixConfig.extra-substituters= for numtide
+- =justfile= — =push-all= pushes to =yuanw-nix-home-macos=
+
+* TIL
+
+- nix-darwin always =mkAfter= appends =cache.nixos.org= unless you =mkForce=.
+- A cache URL without a matching =trusted-public-keys= entry will never substitute
+  signed paths when =require-sigs = true=.
+- =trusted-substituters= alone is not enough for automatic use — prefer
+  =substituters= for caches you want on every build.
