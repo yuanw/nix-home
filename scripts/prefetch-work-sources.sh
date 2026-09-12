@@ -3,11 +3,13 @@
 #
 # Nix fetchgit fixed-output derivations cannot use the host SSH agent inside
 # the builder (no /usr/bin/ssh on PATH). Prefetching here uses your normal
-# shell environment, then nix build reuses the cached store paths.
+# shell environment, then nix build reuses the cached store paths. Each source
+# is pinned under ~/.local/state/nix/gcroots/work-sources so nix-gc keeps it.
 
 set -euo pipefail
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+pin="$root/scripts/pin-store-gc-root.sh"
 generated="$root/modules/private/_sources/generated.json"
 generated_nix="$root/modules/private/_sources/generated.nix"
 
@@ -42,13 +44,16 @@ while IFS=$'\t' read -r name url rev store_path; do
   [[ -z $name ]] && continue
 
   if nix path-info "$store_path" &>/dev/null; then
-    echo "prefetch-work-sources: $name @ ${rev:0:12} (cached)"
+    "$pin" "$name" "$store_path"
+    echo "prefetch-work-sources: $name @ ${rev:0:12} (cached, pinned)"
     continue
   fi
 
   missing=1
   echo "prefetch-work-sources: $name @ ${rev:0:12} (fetching)"
   nix-prefetch-git "$url" --rev "$rev" >/dev/null
+  "$pin" "$name" "$store_path"
+  echo "prefetch-work-sources: $name @ ${rev:0:12} (pinned)"
 done < <(
   jq -r '
     to_entries[]

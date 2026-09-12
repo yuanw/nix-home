@@ -11,8 +11,8 @@ declare -A packages=(
   [frugal]="ssh://git@github.com/Workiva/frugal.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
   [parsimony]="ssh://git@github.com/Workiva/parsimony.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
   [antenna]="ssh://git@github.com/Workiva/antenna.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
-  [wk - plugin - mcp]="ssh://git@github.com/Workiva/wk-plugin-mcp.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
-  [mcp - atlassian]="ssh://git@github.com/Workiva/mcp_tools.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  ["wk-plugin-mcp"]="ssh://git@github.com/Workiva/wk-plugin-mcp.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  ["mcp-atlassian"]="ssh://git@github.com/Workiva/mcp_tools.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
 )
 
 latest_tag() {
