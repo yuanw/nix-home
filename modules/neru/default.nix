@@ -28,6 +28,14 @@ in
     services.neru = {
       enable = true;
       package = inputs'.neru.packages.default;
+      configFile = "${config.my.homeDirectory}/.config/neru/config.toml";
     };
+
+    home-manager.users.${config.my.username} =
+      hm@{ ... }:
+      {
+        xdg.configFile."neru/config.toml".source =
+          hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/neru/config.toml";
+      };
   };
 }
