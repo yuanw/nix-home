@@ -132,8 +132,8 @@ in
       StartCalendarInterval = [
         {
           Weekday = 0;
-          Hour = 3;
-          Minute = 15;
+          Hour = 14;
+          Minute = 0;
         }
       ];
       StandardErrorPath = "/tmp/daemons-nix-gc.log";
@@ -149,8 +149,8 @@ in
       StartCalendarInterval = [
         {
           Weekday = 0;
-          Hour = 3;
-          Minute = 45;
+          Hour = 15;
+          Minute = 0;
         }
       ];
       StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
@@ -176,8 +176,8 @@ in
       StartCalendarInterval = [
         {
           Weekday = 0;
-          Hour = 4;
-          Minute = 0;
+          Hour = 14;
+          Minute = 30;
         }
       ];
       StandardErrorPath = "/tmp/user-nix-gc.log";
