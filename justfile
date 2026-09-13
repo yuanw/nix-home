@@ -150,12 +150,30 @@ _unlock-ssh:
     fi
 
 # build on DGX Spark using colmena
-colmena-spark-build: _unlock-ssh
-    colmena build --on dgx-spark
+colmena-spark-build:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
+        colmena build --on dgx-spark; \
+    else \
+        eval `ssh-agent -s`; \
+        trap 'ssh-agent -k >/dev/null' EXIT; \
+        setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
+        colmena build --on dgx-spark; \
+    fi
 
 # apply (build + switch) on DGX Spark using colmena
-colmena-spark-apply: _unlock-ssh
-    colmena apply --on dgx-spark
+colmena-spark-apply:
+    @set -e; \
+    if [ "$(uname)" = "Darwin" ]; then \
+        ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
+        colmena apply --on dgx-spark; \
+    else \
+        eval `ssh-agent -s`; \
+        trap 'ssh-agent -k >/dev/null' EXIT; \
+        setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
+        colmena apply --on dgx-spark; \
+    fi
 
 # build and deploy to local host (macOS or NixOS)
 switch:
