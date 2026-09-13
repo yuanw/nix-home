@@ -2,6 +2,7 @@
 #
 # Builds the spark-vllm-docker runner image using prebuilt wheels pinned by
 # hash. All inputs (source commit, wheel hashes) are pinned for reproducibility.
+# Wheel set updated to the current upstream release artifacts.
 #
 # Source: https://github.com/eugr/spark-vllm-docker
 # Benchmark: https://spark-arena.com/benchmark/sub1782724431960 (109 tok/s)
@@ -25,24 +26,24 @@ let
   # Prebuilt wheels — pinned by hash for reproducibility
   wheelSrcs = [
     (fetchurl {
-      name = "vllm-0.23.1rc1.dev701+g00eb7cefa.d20260701-cp312-cp312-linux_aarch64.whl";
-      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-vllm-current/vllm-0.23.1rc1.dev701%2Bg00eb7cefa.d20260701-cp312-cp312-linux_aarch64.whl";
-      hash = "sha256-KIBU98ySKRBLGuGCglAqDM1SR+cNMtCr3Z34DLpIUSs=";
+      name = "vllm-0.28.1rc1.dev441+g2902ca17e.d20260905-cp312-cp312-linux_aarch64.whl";
+      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-vllm-current/vllm-0.28.1rc1.dev441%2Bg2902ca17e.d20260905-cp312-cp312-linux_aarch64.whl";
+      hash = "sha256-YQRiXosnwMDbRCUQM3pBPfynP3QXTe5T12flH1pRsRk=";
     })
     (fetchurl {
-      name = "flashinfer_cubin-0.6.14-py3-none-any.whl";
-      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_cubin-0.6.14-py3-none-any.whl";
-      hash = "sha256-X2uqTkPU8j7fN2WGfxmrHRm83sUy5GzzWj72HNg1pN4=";
+      name = "flashinfer_cubin-0.6.18-py3-none-any.whl";
+      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_cubin-0.6.18-py3-none-any.whl";
+      hash = "sha256-uLngup/lBtUdhfMqgYrr6zzZoOxTFfs1mt6pKfjtAyw=";
     })
     (fetchurl {
-      name = "flashinfer_jit_cache-0.6.14-cp39-abi3-manylinux_2_28_aarch64.whl";
-      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_jit_cache-0.6.14-cp39-abi3-manylinux_2_28_aarch64.whl";
-      hash = "sha256-K8HreX7Y922Tkt2ehzbRwxly3iHbFAy1CqeD0MxAlq0=";
+      name = "flashinfer_jit_cache-0.6.18-cp39-abi3-manylinux_2_28_aarch64.whl";
+      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_jit_cache-0.6.18-cp39-abi3-manylinux_2_28_aarch64.whl";
+      hash = "sha256-Ow8g0vsaTuQ4qwq7MxGmSA6m6WEF4WMhnfXOZrIusX8=";
     })
     (fetchurl {
-      name = "flashinfer_python-0.6.14-py3-none-any.whl";
-      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_python-0.6.14-py3-none-any.whl";
-      hash = "sha256-MaIfJnu2WH0jdaxnsKh+AUuBXBXRRheWmU7x6TqTD60=";
+      name = "flashinfer_python-0.6.18-py3-none-any.whl";
+      url = "https://github.com/eugr/spark-vllm-docker/releases/download/prebuilt-flashinfer-current/flashinfer_python-0.6.18-py3-none-any.whl";
+      hash = "sha256-yLFLfR3GLhVicpuxzsFxuUUErt3WHmvTaAKyHCYx6TQ=";
     })
   ];
 
@@ -55,7 +56,7 @@ in
 
 stdenv.mkDerivation {
   name = "vllm-node-image";
-  version = "0.23.1rc1.dev701";
+  version = "0.28.1rc1.dev441";
 
   dontUnpack = true;
 
