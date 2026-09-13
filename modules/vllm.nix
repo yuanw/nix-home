@@ -204,10 +204,15 @@ let
     let
       otherNames = filter (n: n != name) instanceNames;
 
-      # Resolve paths: native uses host paths; podman uses container mount
-      # points (bind-mounted below), so serve args reference /model and /drafter.
-      modelArg = if inst.backend == "podman" then "/model" else inst.model;
-      drafterArg = if inst.backend == "podman" then "/drafter" else inst.speculative.model;
+      # Resolve paths: native uses host paths/HF IDs directly. For podman,
+      # local absolute paths are bind-mounted and referenced as /model and
+      # /drafter; HuggingFace repo IDs (e.g. Qwen/Qwen3.6-35B-A3B) are passed
+      # through and downloaded into the shared HF cache by vLLM.
+      modelIsPath = hasPrefix "/" inst.model;
+      drafterIsPath = inst.speculative.model != null && hasPrefix "/" inst.speculative.model;
+      modelArg = if inst.backend == "podman" && modelIsPath then "/model" else inst.model;
+      drafterArg =
+        if inst.backend == "podman" && drafterIsPath then "/drafter" else inst.speculative.model;
 
       vllmArgs = [
         "serve"
@@ -285,11 +290,12 @@ let
       containerEnv = removeAttrs (envDefaults // inst.extraEnv) [ "HF_TOKEN_PATH" ] // {
         HF_HOME = "/root/.cache/huggingface";
       };
-      containerMounts = [
-        "${inst.model}:/model:ro"
-      ]
-      ++ optionals inst.speculative.enable [ "${inst.speculative.model}:/drafter:ro" ]
-      ++ [ "/var/lib/vllm/huggingface:/root/.cache/huggingface" ];
+      containerMounts =
+        optionals modelIsPath [
+          "${inst.model}:/model:ro"
+        ]
+        ++ optionals (inst.speculative.enable && drafterIsPath) [ "${inst.speculative.model}:/drafter:ro" ]
+        ++ [ "/var/lib/vllm/huggingface:/root/.cache/huggingface" ];
       pullPolicy =
         if lib.hasPrefix "localhost/" inst.containerImage then "--pull=never" else "--pull=missing";
       podmanArgs = [
@@ -311,6 +317,12 @@ let
           "${k}=${v}"
         ]) containerEnv
       )
+      # If the agenix EnvironmentFile defines HF_TOKEN, propagate it into the
+      # container without embedding the secret value in the Nix store.
+      ++ optionals (config.age.secrets.hf-token or null != null) [
+        "-e"
+        "HF_TOKEN"
+      ]
       ++ concatMap (m: [
         "-v"
         m
