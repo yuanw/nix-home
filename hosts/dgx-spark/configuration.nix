@@ -139,7 +139,7 @@
       enable = true;
       autoStart = false;
       backend = "podman";
-      containerImage = "vllm/vllm-openai:v0.23.0";
+      containerImage = "docker.io/vllm/vllm-openai:v0.23.0";
       model = "Qwen/Qwen3.6-35B-A3B";
       servedModelName = "Qwen/Qwen3.6-35B-A3B";
       port = 8000;
