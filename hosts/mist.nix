@@ -56,6 +56,7 @@
       extensionFiles = {
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
+        "web-fetch.ts" = ../modules/coding-agents/pi/extensions/web-fetch.ts;
       };
       models = {
         providers = {
