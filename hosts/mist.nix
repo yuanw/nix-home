@@ -57,6 +57,42 @@
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
+      models = {
+        providers = {
+          dgx-spark = {
+            api = "openai-completions";
+            apiKey = "not-needed";
+            baseUrl = "http://dgx-spark.local:8000/v1";
+            compat = {
+              supportsDeveloperRole = false;
+              supportsReasoningEffort = false;
+              supportsStore = false;
+              thinkingFormat = "qwen-chat-template";
+              thinkingTokenBudgetField = "thinking_token_budget";
+            };
+            models = [
+              {
+                _launch = true;
+                contextWindow = 262144;
+                id = "Qwen/Qwen3.6-35B-A3B";
+                input = [ "text" ];
+                maxTokens = 32768;
+                name = "Qwen3.6 35B A3B (DGX Spark)";
+                reasoning = true;
+                thinkingLevelMap = {
+                  off = "off";
+                  minimal = "minimal";
+                  low = "low";
+                  medium = "medium";
+                  high = "high";
+                  xhigh = "xhigh";
+                  max = "max";
+                };
+              }
+            ];
+          };
+        };
+      };
 
     };
     secrets.agenix = {
