@@ -130,7 +130,7 @@
       enable = true;
       enableClaudeMem = false;
     };
-    mouseless.enable = true;
+    neru.enable = true;
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
