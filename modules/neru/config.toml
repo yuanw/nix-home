@@ -378,6 +378,7 @@ invert_scroll = false
 "v" = "action scroll_right"
 "u" = "action page_up"
 "Shift+G" = "action page_down"
+"gg" = "__disabled__"
 
 "Space" = ["action left_click", "idle"]
 "c" = "action middle_click"
