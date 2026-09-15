@@ -225,7 +225,8 @@ border_width = 1
 enabled = true
 grid_cols = 4                               # Number of columns (>= 1)
 grid_rows = 3                               # Number of rows (>= 1)
-keys = "ldpzhtnsmgfv"                          # Cell selection keys (must be grid_cols * grid_rows chars)
+# Left hand 4×3 (QYOU / CIAE / ',.;) — keeps right hand free for mouseless nav
+keys = "qyouciae',.;"
 min_size_width = 1                          # Stop subdividing below this width (px)
 min_size_height = 1                         # Stop subdividing below this height (px)
 max_depth = 10                              # Maximum recursion levels (1–20)
@@ -238,30 +239,29 @@ duration_ms = 50                            # Recursive-grid animation duration 
 "Escape" = "idle"
 "`" = "toggle-cursor-follow-selection"
 "Tab" = "toggle-cursor-follow-selection"
-"," = "action move_mouse --center"
-"." = "action reset"
+"x" = "action move_mouse --center"
+"z" = "action reset"
 
+# right hand: move (D=up T=down H=left N=right)
+"d" = "action move_mouse_relative --dx=0 --dy=-25"
+"t" = "action move_mouse_relative --dx=0 --dy=25"
 "h" = "action move_mouse_relative --dx=-25 --dy=0"
-"t" = "action move_mouse_relative --dx=25 --dy=0"
-"l" = "action move_mouse_relative --dx=0 --dy=-25"
-"m" = "action move_mouse_relative --dx=0 --dy=25"
+"n" = "action move_mouse_relative --dx=25 --dy=0"
 
+"Shift+D" = "action move_mouse_relative --dx=0 --dy=-5"
+"Shift+T" = "action move_mouse_relative --dx=0 --dy=5"
 "Shift+H" = "action move_mouse_relative --dx=-5 --dy=0"
-"Shift+T" = "action move_mouse_relative --dx=5 --dy=0"
-"Shift+K" = "action move_mouse_relative --dx=0 --dy=-5"
-"Shift+J" = "action move_mouse_relative --dx=0 --dy=5"
+"Shift+N" = "action move_mouse_relative --dx=5 --dy=0"
 
-"e" = "action move_mouse_relative --dx=0 --dy=-10"
-"i" = "action move_mouse_relative --dx=0 --dy=-10"
-"s" = "action move_mouse_relative --dx=-10 --dy=0"
-"j" = "action move_mouse_relative --dx=-10 --dy=0"
+# right hand: subgrid nudge (after cell selection)
+"m" = "action move_mouse_relative --dx=-10 --dy=0"
 "f" = "action move_mouse_relative --dx=10 --dy=0"
-"d" = "action move_mouse_relative --dx=0 --dy=10"
-"k" = "action move_mouse_relative --dx=0 --dy=10"
+"k" = "action move_mouse_relative --dx=0 --dy=-10"
+"j" = "action move_mouse_relative --dx=0 --dy=10"
 
 "Space" = ["action left_click", "idle"]
 "Shift+Space" = "action left_click"
-"c" = "action middle_click"
+"p" = "action middle_click"
 "v" = "action right_click"
 
 "Ctrl+D" = "action scroll_up"
@@ -367,12 +367,12 @@ invert_scroll = false
 [scroll.hotkeys]
 "Escape" = "idle"
 
+"d" = "action move_mouse_relative --dx=0 --dy=-25"
+"t" = "action move_mouse_relative --dx=0 --dy=25"
 "h" = "action move_mouse_relative --dx=-25 --dy=0"
-"t" = "action move_mouse_relative --dx=25 --dy=0"
-"l" = "action move_mouse_relative --dx=0 --dy=-25"
-"m" = "action move_mouse_relative --dx=0 --dy=25"
+"n" = "action move_mouse_relative --dx=25 --dy=0"
 
-"d" = "action scroll_up"
+"l" = "action scroll_up"
 "g" = "action scroll_down"
 "b" = "action scroll_left"
 "v" = "action scroll_right"
@@ -381,9 +381,10 @@ invert_scroll = false
 "gg" = "__disabled__"
 
 "Space" = ["action left_click", "idle"]
-"c" = "action middle_click"
+"p" = "action middle_click"
 "f" = "recursive_grid --cursor-selection-mode hold"
-"." = "action move_mouse --center"
+"x" = "action move_mouse --center"
+"z" = "action reset"
 
 "Shift+L" = "__disabled__"
 "Shift+R" = "__disabled__"

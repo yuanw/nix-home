@@ -1,0 +1,240 @@
+#+title: Neru Tutor
+#+date: [2026-09-14 Sun]
+
+Practice with a browser or TextEdit open. Hands on keyboard — *left = aim*, *right = steer*.
+
+Config: =modules/neru/config.toml= on host =wk01174=.
+
+* Lesson 0 — Three modes
+
+Like Vim's Normal / Visual / Insert:
+
+| Mode   | Enter         | Exit                      | Your hands              |
+|--------+---------------+---------------------------+-------------------------|
+| *idle* | (default)     | —                         | Normal typing           |
+| *grid* | =Cmd+S=       | =Escape= or =Space= click | Left picks, right acts  |
+| *scroll* | =Cmd+Shift+S= | =Escape=                | Right moves + scrolls   |
+
+*Rule:* In grid mode, *left hand = where on screen*. *Right hand = pointer actions*.
+
+#+begin_example
+LEFT (aim 4×3)           RIGHT (actions 4×3)
+┌───┬───┬───┬───┐        ┌───┬───┬───┬───┐
+│ Q │ Y │ O │ U │        │ L │ D │ P │ Z │  scr↑  ↑         ↺
+├───┼───┼───┼───┤        ├───┼───┼───┼───┤
+│ C │ I │ A │ E │        │ H │ T │ N │ S │  ←     ↓     →
+├───┼───┼───┼───┤        ├───┼───┼───┼───┤
+│ ' │ , │ . │ ; │        │ M │ G │ F │ V │  ←     ↓     →    R
+└───┴───┴───┴───┘        └───┴───┴───┴───┘
+                         P = mid · Space = click · J↓ K↑ nudge · X = center
+#+end_example
+
+* Lesson 1 — Enter and leave grid mode
+
+*Goal:* Open the overlay, then bail out without clicking.
+
+1. Press =Cmd+S= → screen splits into a 4×3 grid (labels hidden; use muscle memory).
+2. Do nothing. Press =Escape= → back to idle.
+
+*Repeat until reflexive:* =Cmd+S= … =Escape=.
+
+*Note:* With =passthrough_unbounded_keys=, =Cmd+S= in idle opens Neru. In other apps,
+Save may still work when Neru is idle.
+
+* Lesson 2 — Recursive aim (the core skill)
+
+The grid *subdivides*. Each left-hand key zooms into that cell. A small target usually
+needs *2–4 keys*.
+
+*Goal:* Move the pointer to the *top-left* of the screen.
+
+1. =Cmd+S=
+2. Press =Q= (top-left quadrant)
+3. Press =Q= again (top-left of that region)
+4. Press =C= (top-left of that sub-region)
+5. Pointer should be near the corner. Press =Escape=.
+
+*Drill — aim at four corners:*
+
+| Target       | Key sequence (approx.) |
+|--------------+------------------------|
+| Top-left     | =Q= =Q= =C=            |
+| Top-right    | =U= =U= =E=            |
+| Bottom-left  | ='= ='= =,=            |
+| Bottom-right | =;= =;= =.=            |
+
+Do each corner *5 times*. You want to *feel* the layout, not hunt keys.
+
+*Mnemonic:* Same rows as your Charybdis left hand — you're aiming with the hand that
+isn't driving the trackball.
+
+* Lesson 3 — Click something
+
+*Goal:* Click a link or button.
+
+1. =Cmd+S=
+2. Drill in with left hand (e.g. =O= =I= for “upper-middle-ish”)
+3. =Space= → *left click + exit* (one shot)
+
+*Variant — click without exiting:*
+
+- =Shift+Space= → click, stay in grid
+
+*Right-click a file / link:*
+
+1. Aim as above
+2. =V= → right click (stay in grid; =Escape= when done)
+
+* Lesson 4 — Aim, then nudge (precision)
+
+Big cells are fast; the last mile is *right-hand nudge* after drilling.
+
+*Goal:* Hit a small checkbox or icon.
+
+1. =Cmd+S=
+2. Left hand: 2–3 keys to get close (e.g. =A= =I=)
+3. Right hand nudge:
+   - =K= / =J= — up / down
+   - =M= / =F= — left / right
+4. =Space= to click
+
+*Fine movement:*
+
+| Key              | Effect     |
+|------------------+------------|
+| =D= =T= =H= =N=  | Move 25px  |
+| =Shift+D/T/H/N= | Move 5px   |
+
+*Drill:* Open System Settings. Toggle any switch using only: grid → nudge → =Space=.
+
+* Lesson 5 — Reset when you drill wrong
+
+*Goal:* Recover without exiting.
+
+1. =Cmd+S=
+2. Press random left-hand keys (wrong region)
+3. =Z= → *reset* selection to full screen
+4. Start over with =Q= or =U= …
+5. =Escape= when done
+
+*=X=* = jump pointer to *center* of current selection (useful after a deep drill).
+
+* Lesson 6 — Scroll mode (reading long pages)
+
+*Goal:* Scroll a long article without the grid.
+
+1. Open a long page (README, news article)
+2. =Cmd+Shift+S= → scroll mode
+3. Scroll:
+   - =L= — up
+   - =G= — down
+   - =B= / =V= — left / right (horizontal scroll)
+   - =U= — page up
+   - =Shift+G= — page down
+4. Reposition if needed: =D= =T= =H= =N=
+5. =Space= — click link, exit
+6. =Escape= — exit without clicking
+
+*Drill:* Scroll to the bottom, then back to top using only =G= and =L=.
+
+* Lesson 7 — Grid → scroll (one workflow)
+
+*Goal:* Find text, then read.
+
+1. =Cmd+S= → drill to a heading
+2. =Ctrl+S= → *move to selection + enter scroll mode* (=move_and_scroll= macro)
+3. =G= =G= =G= to read downward
+4. =F= → back to grid (from scroll mode)
+5. =Escape= if you're done
+
+Or from grid without the macro:
+
+1. Aim close
+2. =Ctrl+G= / =Ctrl+D= — scroll while still in grid
+3. =Ctrl+C= or =Escape= — idle
+
+* Lesson 8 — Real-world combos
+
+** Click menu bar item
+#+begin_example
+Cmd+S → U → E → Space
+#+end_example
+(top-right-ish, twice, then top row of subgrid)
+
+** Close a dialog button ("Cancel")
+#+begin_example
+Cmd+S → drill to button → Space
+#+end_example
+
+** Select text in a doc (rough)
+#+begin_example
+Cmd+S → aim at word start → Space (click)
+#+end_example
+(trackball or Shift+click for drag — or use keyboard from here)
+
+** Middle-click paste (where supported)
+#+begin_example
+Cmd+S → aim → P
+#+end_example
+
+** Browsing: scroll, click, scroll
+#+begin_example
+Cmd+Shift+S → G G G → Space (click)
+Cmd+Shift+S → G G → ...
+#+end_example
+
+* Lesson 9 — When stuck
+
+| Problem                          | Fix                                    |
+|----------------------------------+----------------------------------------|
+| Wrong region                     | =Z= reset, drill again                 |
+| Pointer lost                     | =X= center of selection                |
+| Grid won't go away               | =Escape= or =Ctrl+C=                   |
+| Clicked wrong thing              | =Cmd+Z= (app undo) — Neru is idle now  |
+| Need trackball                   | =Escape= — Charybdis PNT layer works   |
+| =Cmd+S= opened Neru, wanted Save | =Escape= first, then Save              |
+
+* Cheat sheet
+
+#+begin_example
+GLOBAL
+  Cmd+S          grid (recursive aim)
+  Cmd+Shift+S    scroll mode
+  Escape         idle
+
+GRID — left hand (aim, repeat to zoom)
+  Q Y O U
+  C I A E
+  ' , . ;
+
+GRID — right hand (after aiming)
+  D T H N        move (25px)
+  Shift+D/T/H/N  move (5px)
+  M F K J        nudge (10px)
+  Space          left click + exit
+  Shift+Space    left click
+  P / V          middle / right click
+  X / Z          center / reset
+  Ctrl+D/G/B/V   scroll
+  Ctrl+S         aim → scroll mode
+  Ctrl+C         idle
+
+SCROLL — right hand
+  L G            scroll up / down
+  B V            scroll left / right
+  U  Shift+G     page up / down
+  D T H N        move pointer
+  Space          click + exit
+  F              back to grid
+  X Z            center / reset
+#+end_example
+
+* 5-minute daily practice
+
+- *Day 1–2:* Lesson 1–2 (corners)
+- *Day 3:* Lesson 3–4 (click + nudge)
+- *Day 4:* Lesson 6 (scroll only)
+- *Day 5:* Lesson 7–8 (combined)
+
+*Speed test:* Open https://example.com, click "More information" using only Neru, under 10
+seconds.
