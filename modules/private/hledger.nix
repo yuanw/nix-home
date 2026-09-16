@@ -19,7 +19,7 @@ in
       "hls"  = "hledger -f ${ledgerFile} summary";
       "hreg" = "hledger -f ${ledgerFile} register";
       "hbal" = "hledger -f ${ledgerFile} balance";
-      "hw"   = "hledger-web -p 20299";
+      "hw"   = "hledger-web -f ${ledgerFile} -p 20299";
     };
   };
 }
