@@ -236,7 +236,7 @@ invert_scroll = false
 "n" = "action move_mouse_relative --dx=25 --dy=0"
 
 "l" = "action scroll_up"
-"g" = "action scroll_down"
+"p" = "action scroll_down"
 "b" = "action scroll_left"
 "v" = "action scroll_right"
 "u" = "action page_up"
@@ -244,7 +244,6 @@ invert_scroll = false
 "gg" = "__disabled__"
 
 "Space" = ["action left_click", "idle"]
-"p" = "action middle_click"
 "f" = "recursive_grid --cursor-selection-mode hold"
 "x" = "action move_mouse --center"
 "z" = "action reset"
