@@ -125,7 +125,7 @@ duration_ms = 50                            # Recursive-grid animation duration 
 "Space" = ["action left_click", "idle"]
 "Shift+Space" = "action left_click"
 "p" = "action middle_click"
-"v" = "action right_click"
+"r" = "action right_click"
 
 "Ctrl+D" = "action scroll_up"
 "Ctrl+G" = "action scroll_down"
