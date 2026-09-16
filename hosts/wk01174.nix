@@ -156,6 +156,7 @@
       # ask.enable = true;
       dart.enable = true;
       java.enable = true;
+      gcloud.enable = true;
       go.enable = true;
       playwright.enable = true;
       podman.enable = true;

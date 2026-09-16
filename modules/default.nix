@@ -21,6 +21,7 @@
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
+      ./dev/gcloud.nix
       ./dev/go.nix
       ./dev/haskell.nix
       ./dev/haxe.nix

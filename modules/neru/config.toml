@@ -72,161 +72,24 @@ move_and_scroll = ["action move_mouse --selection", "scroll"]
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#hints
 [hints]
 enabled = false
-strategy = "axtree"                         # Element detection: "axtree" (AX API), "vision" (screen recognition) or "contour" (edge detection)
-capture_scope = "window"                    # Region the vision and contour strategies scan: "window" (focused window) or "screen"
-hint_characters = "asdfghjkl"               # Characters used for hint labels
-label_direction = "normal"                  # Hint label algorithm: "normal" (default) or "reverse"
-max_depth = 50                              # Max accessibility tree depth (0 = unlimited)
-include_menubar_hints = false
-additional_menubar_hints_targets = [
-    "com.apple.TextInputMenuAgent",
-    "com.apple.controlcenter",
-    "com.apple.systemuiserver",
-    "com.y3owk1n.neru",
-]
-include_dock_hints = false
-include_nc_hints = false
-include_stage_manager_hints = false
-include_pip_hints = false
-include_screen_capture_hints = false
-detect_mission_control = false
-# Actions to run when Mission Control opens and closes. Left commented out
-# because they have no default: an empty value here would claim one.
-# on_mission_control_activated = "idle"     # A single action, or an array of them
-# on_mission_control_deactivated = ["hints"]
-clickable_roles = [
-    ## Semantic role names. They resolve to each platform's native
-    ## accessibility vocabulary, so this list works on macOS, Linux and Windows.
-    ## Run `neru roles` for the full vocabulary and how it resolves here.
-    "button",
-    "menu_button",
-    "popup_button",
-    "combo_box",
-    "checkbox",
-    "radio",
-    "switch",
-    "disclosure",
-    "link",
-    "text_field",
-    "text_area",
-    "slider",
-    "tab",
-    "menu_item",
-    "cell",
-    "row",
-    ## Native roles are addressed through their vocabulary prefix
-    ## (`ax:` macOS, `atspi:` Linux, `uia:` Windows). Entries for other
-    ## platforms are ignored rather than rejected.
-    "ax:AXGenericElement",
-]
-ignore_clickable_check = false
-visible_check_enabled = false
-
-[hints.hotkeys]
-"Escape" = "idle"
-"/" = "action search_hints"
-"Backspace" = "action backspace"
-"Tab" = "action cycle_hint"
-"Shift+Tab" = "action cycle_hint --backward"
-"Shift+L" = "action left_click"
-"Shift+R" = "action right_click"
-"Shift+M" = "action middle_click"
-"Shift+I" = "action left_click --state down"
-"Shift+U" = "action left_click --state up"
-"Up" = "action move_mouse_relative --dx=0 --dy=-10"
-"Down" = "action move_mouse_relative --dx=0 --dy=10"
-"Left" = "action move_mouse_relative --dx=-10 --dy=0"
-"Right" = "action move_mouse_relative --dx=10 --dy=0"
-
-[hints.ui]
-font_size = 10
-font_family = ""                            # Empty = the platform's sans, per the aliases above
-border_radius = -1                          # -1 = auto pill
-padding_x = -1                              # -1 = auto based on font size
-padding_y = -1                              # -1 = auto based on font size
-border_width = 1
-placement = "bottom"                        # top, center, bottom
-
-[hints.search_input_ui]
-font_size = 10
-font_family = ""                            # Empty = the platform's sans, per the aliases above
-border_radius = -1                          # -1 = auto pill
-padding_x = -1                              # -1 = auto based on font size
-padding_y = -1                              # -1 = auto based on font size
-border_width = 1
-position = "bottom_center"                     # top_left, top_center, top_right, center, bottom_left, bottom_center, bottom_right
-x_offset = 0                                # Offset from the selected position on the active screen
-y_offset = 24                               # Offset from the selected position on the active screen
-width = 320                                 # Search input width in pixels
 
 [hints.boundary_highlight]
 enabled = false                             # Draw a subtle outline around each target element
-border_width = 1
-border_radius = -1                          # -1 = auto pill
 
-[hints.vision]
-detect_text = true                           # Enable text detection via Vision framework
-detect_rectangles = true                     # Enable rectangle detection via Vision framework
-request_timeout_ms = 5000                    # Timeout for Vision requests in milliseconds
-minimum_confidence = 0.0                     # Minimum confidence threshold for keeping vision observations
-merge_iou_threshold = 0.5                    # Overlap threshold (Intersection over Union) for merging redundant boxes
-rectangle_max_candidates = 100               # Maximum number of rectangle candidate observations to track
-rectangle_min_size = 0.01                    # Minimum size of detected rectangles (0.01 = 1% of screen/window width/height)
-rectangle_min_aspect = 0.3                   # Minimum aspect ratio (width/height) for rectangles
-rectangle_max_aspect = 10.0                  # Maximum aspect ratio (width/height) for rectangles
-button_min_confidence = 0.3                  # Minimum confidence for button classification
-button_min_aspect = 0.8                      # Minimum aspect ratio for button elements
-button_max_aspect = 8.0                      # Maximum aspect ratio for button elements
-button_icon_max_size = 48                    # Maximum width/height for square button/icon elements (px)
-link_min_aspect = 5.0                        # Minimum aspect ratio for text link elements
-link_max_height = 40                         # Maximum height for link elements (px)
-link_min_width = 50                          # Minimum width for link elements (px)
-image_min_size = 48                          # Minimum width/height for image elements (px)
-checkbox_max_size = 32                       # Maximum width/height for checkbox elements (px)
-generic_clickable_min_confidence = 0.5       # Minimum confidence for generic clickable classification
 
 # Grid mode
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#grid
 [grid]
 enabled = false
-characters = "abcdefghijklmnpqrstuvwxyz"    # Primary grid labels
-sublayer_keys = "abcdefghijklmnpqrstuvwxyz" # Subgrid labels, first 9 used (empty = infer from characters)
-max_label_length = 4                        # Maximum coarse label length (2–4); 4 keeps the legacy automatic layout
-row_labels = ""                             # Custom row labels (empty = infer from characters)
-col_labels = ""                             # Custom column labels (empty = infer from characters)
-live_match_update = true                    # Highlight cells as you type
-hide_unmatched = true                       # Hide non-matching cells
-prewarm_enabled = true                      # Pre-compute grid on startup (~1.5MB RAM)
-enable_gc = false                           # Periodic memory cleanup (adds CPU overhead)
-
-[grid.hotkeys]
-"Escape" = "idle"
-"`" = "toggle-cursor-follow-selection"
-"Space" = "action reset"
-"Backspace" = "action backspace"
-"Shift+L" = "action left_click"
-"Shift+R" = "action right_click"
-"Shift+M" = "action middle_click"
-"Shift+I" = "action left_click --state down"
-"Shift+U" = "action left_click --state up"
-"Up" = "action move_mouse_relative --dx=0 --dy=-10"
-"Down" = "action move_mouse_relative --dx=0 --dy=10"
-"Left" = "action move_mouse_relative --dx=-10 --dy=0"
-"Right" = "action move_mouse_relative --dx=10 --dy=0"
-
-[grid.ui]
-font_size = 10
-font_family = ""
-border_width = 1
 
 # Recursive grid mode (recommended)
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#recursive_grid
 [recursive_grid]
 enabled = true
-grid_cols = 4                               # Number of columns (>= 1)
+grid_cols = 5                               # Number of columns (>= 1)
 grid_rows = 3                               # Number of rows (>= 1)
 # Left hand 4×3 (QYOU / CIAE / ',.;) — keeps right hand free for mouseless nav
-keys = "qyouciae',.;"
+keys = "qyou=ciae-',.;/"
 min_size_width = 1                          # Stop subdividing below this width (px)
 min_size_height = 1                         # Stop subdividing below this height (px)
 max_depth = 10                              # Maximum recursion levels (1–20)
