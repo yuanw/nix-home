@@ -162,7 +162,7 @@
       podman.enable = true;
       #scheme.enable = true;
       #haskell.enable = true;
-      lean.enable = true;
+      # lean.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;
