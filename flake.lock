@@ -513,6 +513,27 @@
         "type": "indirect"
       }
     },
+    "flake-prompt": {
+      "inputs": {
+        "home-manager": "home-manager_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1788217730,
+        "narHash": "sha256-m6M23AVZGUjIWi2N51DyZt8TJvgM51fF7T0M7LFADFc=",
+        "owner": "fresheyeball",
+        "repo": "flake-prompt",
+        "rev": "72f073c8d0de6a27a04344d7e012156782877e00",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "fresheyeball",
+        "repo": "flake-prompt",
+        "type": "gitlab"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems_3"
@@ -658,6 +679,27 @@
       }
     },
     "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
+          "flake-prompt",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784129366,
+        "narHash": "sha256-N5JiyICSeQF14x+OQebNyPpYowOT9Rs1iKyeCylSzOA=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "165228b0efefc3e635e5174020c40ea64271dc25",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_3": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -1274,9 +1316,10 @@
         "disko": "disko_2",
         "emacs": "emacs",
         "flake-parts": "flake-parts_6",
+        "flake-prompt": "flake-prompt",
         "git-hooks": "git-hooks",
         "haskell-flake": "haskell-flake",
-        "home-manager": "home-manager_2",
+        "home-manager": "home-manager_3",
         "llm-agents": "llm-agents",
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",

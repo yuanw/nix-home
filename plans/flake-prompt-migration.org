@@ -1,0 +1,352 @@
+#+title: Migrate coding-agent skills and commands to flake-prompt
+#+author: Yuan nix-home
+#+date: 2026-09-19
+
+* Goal
+
+Migrate this repository's coding-agent skills, commands, prompt templates, and shared instructions to [[https://gitlab.com/fresheyeball/flake-prompt][flake-prompt]], using =../incite= as the reference design.
+
+The target state is one declarative Nix prompt inventory that renders to native tool layouts for Claude Code, Codex, pi, and later other supported tools.
+
+* Reference: =../incite=
+
+=../incite= already uses flake-prompt as intended:
+
+- It declares =flake-prompt= as a flake input.
+- It keeps one authoritative =prompts = [ ... ]= inventory in =flake.nix=.
+- The inventory includes all prompt kinds:
+  - =instructions=
+  - =agent=
+  - =command=
+  - =skill=
+- It builds a standalone prompt package with =flake-prompt.lib.mkPromptsPackage=.
+- It documents the authoring rules in =docs/prompt-authoring.md=.
+- It handles degradation collisions explicitly with =degradation = "skip"=.
+
+Important pattern to copy: prompt bodies live in Markdown files; Nix holds metadata, composition, and source selection.
+
+* Current state in =nix-home=
+
+** Manual skill package model
+
+Current skills are packaged as derivations and linked manually.
+
+Examples:
+
+- =modules/coding-agents/common/skills/default.nix=
+- =packages/claude-plugins/default.nix=
+- =packages/claude-plugins/humanizer.nix=
+- =packages/claude-plugins/emacs-skills.nix=
+
+** Manual pi linking
+
+=modules/coding-agents/pi/default.nix= links skill packages into pi with =home.file= under:
+
+- =~/.pi/agent/skills=
+- =~/.pi/agent/prompts=
+
+** Manual Claude skill linking
+
+=modules/home/claude-code-plugins.nix= links =programs.claude-code.skillPackages= into:
+
+- =~/.claude/skills/<name>=
+
+This should eventually be replaced by flake-prompt / agent-pm rendering.
+
+* Desired architecture
+
+** One prompt inventory
+
+Add one shared prompt inventory, for example:
+
+#+begin_src text
+modules/coding-agents/prompts/default.nix
+#+end_src
+
+It returns a list of prompt records:
+
+#+begin_src nix
+{ lib, inputs, pkgs, ... }:
+[
+  {
+    type = "skill";
+    name = "journal-session";
+    description = "Save the current agent session as a journal entry.";
+    body = builtins.readFile ./skills/journal-session/SKILL.md;
+  }
+
+  {
+    type = "command";
+    name = "journal-session";
+    description = "Journal this session.";
+    body = builtins.readFile ./commands/journal-session.md;
+  }
+]
+#+end_src
+
+** Render targets
+
+Enable flake-prompt tools for at least:
+
+- Claude Code
+- Codex
+- pi
+
+Later we can enable opencode, Crush, or Droid if useful.
+
+** Home-manager owns installation
+
+Use flake-prompt's Home Manager module instead of custom =home.file= trees where possible:
+
+#+begin_src nix
+imports = [ inputs.flake-prompt.homeManagerModules.default ];
+
+programs.agent-pm = {
+  enable = true;
+  tools = {
+    claude.enable = config.modules.claude-code.enable;
+    codex.enable = true;
+    pi.enable = config.modules.pi.enable;
+  };
+  prompts = import ./prompts/default.nix { inherit lib inputs pkgs; };
+};
+#+end_src
+
+* Migration phases
+
+** Phase 1: Add flake-prompt input
+
+Add to =flake.nix= inputs:
+
+#+begin_src nix
+flake-prompt = {
+  url = "gitlab:fresheyeball/flake-prompt";
+  inputs.nixpkgs.follows = "nixpkgs";
+};
+#+end_src
+
+Then update the lock file:
+
+#+begin_src sh
+nix flake lock --update-input flake-prompt
+#+end_src
+
+** Phase 2: Add standalone render package
+
+Before installing anything, add a package that renders the prompt tree only:
+
+#+begin_src nix
+packages.agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
+  prompts = import ./modules/coding-agents/prompts/default.nix {
+    inherit lib inputs pkgs;
+  };
+  tools.claude.enable = true;
+  tools.codex.enable = true;
+  tools.pi.enable = true;
+};
+#+end_src
+
+Validate with:
+
+#+begin_src sh
+nix build .#agent-prompts
+find result -maxdepth 5 -type f | sort
+#+end_src
+
+** Phase 3: Migrate local skills first
+
+Move local skills from =modules/coding-agents/common/skills/default.nix= into prompt records.
+
+Initial candidates:
+
+- =journal-session=
+- =grilling=
+- =teach=
+- =disk-space=
+- =explain-diff-html=
+
+For a single =SKILL.md=:
+
+#+begin_src nix
+{
+  type = "skill";
+  name = "disk-space";
+  description = "Investigate disk usage and suggest safe cleanup steps.";
+  body = builtins.readFile ./skills/disk-space/SKILL.md;
+}
+#+end_src
+
+For a directory skill with references, use =flake-prompt.lib.skillFromDir=:
+
+#+begin_src nix
+inputs.flake-prompt.lib.skillFromDir {
+  dir = ./skills/teach;
+  name = "teach";
+  description = "Teach a topic through structured lessons and practice.";
+}
+#+end_src
+
+** Phase 4: Migrate pi prompt templates into commands
+
+Current pi prompt templates should become =type = "command"= records when they are user-invoked slash prompts.
+
+Example:
+
+#+begin_src nix
+{
+  type = "command";
+  name = "journal-session";
+  description = "Save the current session to the denote journal.";
+  body = builtins.readFile ./commands/journal-session.md;
+}
+#+end_src
+
+This renders to:
+
+- Claude: =~/.claude/commands/journal-session.md=
+- Codex: =~/.codex/prompts/journal-session.md=
+- pi: =~/.pi/agent/prompts/journal-session.md=
+
+** Phase 5: Enable installation for pi only
+
+After the standalone render package looks correct, enable =programs.agent-pm= for pi.
+
+Keep Claude on the existing path temporarily.
+
+Validation:
+
+#+begin_src sh
+ls -la ~/.pi/agent/skills
+ls -la ~/.pi/agent/prompts
+#+end_src
+
+Open pi and confirm skills and prompts are visible.
+
+** Phase 6: Remove pi manual links
+
+Once pi works through agent-pm, remove or deprecate from =modules/coding-agents/pi/default.nix=:
+
+- =skills= option, or mark it compatibility-only
+- =skillsDir= if unused
+- manual =home.file= entries for =skills/<pname>=
+- manual =home.file= entries for =prompts/<name>=
+
+Keep extension, theme, model, and node dependency management in the pi module. flake-prompt only replaces prompts/skills/instructions, not pi extensions.
+
+** Phase 7: Enable Claude through agent-pm
+
+Enable =tools.claude.enable = true= through =programs.agent-pm=.
+
+Then migrate away from:
+
+- =programs.claude-code.skillPackages=
+- manual =home.file.".claude/skills/..."= links
+
+Keep Claude plugin management separate. Claude plugins are mutable plugin installs; flake-prompt should manage skills, commands, agents, and instructions, not plugin cache state.
+
+** Phase 8: Migrate external skills
+
+After local skills and commands are stable, migrate upstream skills one by one:
+
+- =humanizer=
+- =emacs-skills=
+- =ponytail= skills from pi extension packages
+- any future upstream prompt packs
+
+Prefer the Incite style:
+
+- add upstream repositories as flake inputs with =flake = false= when only Markdown is needed;
+- explicitly allowlist the files used;
+- do not copy upstream prompt text into this repo;
+- use =skillFromDir= for skills with references.
+
+* Degradation rules
+
+Tools differ in native support.
+
+Important cases:
+
+- pi has skills, commands, and instructions, but no native subagents.
+- Codex has skills, prompt templates, and instructions, but no native agents.
+- Commands may degrade to skills on tools without native commands.
+
+Use =degradation = "skip"= when degradation would create a collision or misleading surface.
+
+Known collision pattern from =../incite=:
+
+#+begin_src nix
+{
+  type = "agent";
+  name = "code-review";
+  degradation = "skip";
+  body = builtins.readFile ./agents/code-review.md;
+}
+#+end_src
+
+Reason: a =code-review= command may degrade to a skill on some tools, so a =code-review= agent degrading to a skill would collide.
+
+* Validation checklist
+
+For each migration step:
+
+- [ ] =nix flake check= passes.
+- [ ] =nix build .#agent-prompts= passes.
+- [ ] Rendered files exist in =result= for Claude, Codex, and pi.
+- [ ] No duplicate skill names.
+- [ ] No command/skill/agent degradation collision.
+- [ ] pi sees expected skills under =~/.pi/agent/skills=.
+- [ ] pi sees expected commands under =~/.pi/agent/prompts=.
+- [ ] Claude sees expected skills under =~/.claude/skills=.
+- [ ] Claude sees expected commands under =~/.claude/commands=.
+- [ ] Existing Claude plugin management still works.
+- [ ] Existing pi extension management still works.
+
+* Open decisions
+
+** Where should the shared inventory live?
+
+Candidate:
+
+#+begin_src text
+modules/coding-agents/prompts/default.nix
+#+end_src
+
+Alternative:
+
+#+begin_src text
+packages/agent-prompts/default.nix
+#+end_src
+
+Recommendation: keep it under =modules/coding-agents/prompts= because it is configuration for agent tools, not a normal package.
+
+** Should mics-skills stay?
+
+Current config uses =mics-skills= and declares skill dirs for Claude, opencode, and pi. Decide whether mics-skills remains for browser-cli and unrelated capabilities, or whether flake-prompt should become the only prompt/skill deployment mechanism.
+
+Recommendation: keep =mics-skills= initially. Do not combine migrations.
+
+** Should commands be global for all tools?
+
+Some pi prompt templates may not make sense in Claude or Codex. Use per-target controls if needed:
+
+#+begin_src nix
+{
+  type = "command";
+  name = "pi-only-command";
+  targets.claude.enable = false;
+  targets.codex.enable = false;
+  targets.pi.enable = true;
+}
+#+end_src
+
+* Acceptance criteria
+
+The migration is complete when:
+
+- One prompt inventory declares local skills and commands.
+- flake-prompt renders that inventory for Claude, Codex, and pi.
+- pi no longer manually links skill packages or prompt templates.
+- Claude no longer manually links =skillPackages=.
+- Claude plugin management remains separate and functional.
+- External skills are either migrated or explicitly left on the old path with a reason.
+- Documentation says that prompt metadata lives in Nix and substantive prompt text lives in Markdown.

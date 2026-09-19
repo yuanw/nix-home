@@ -11,6 +11,11 @@
 
     mics-skills.url = "github:Mic92/mics-skills";
 
+    flake-prompt = {
+      url = "gitlab:fresheyeball/flake-prompt";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     llm-agents.url = "github:numtide/llm-agents.nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
@@ -127,6 +132,12 @@
       };
       perSystem =
         { system, pkgs, ... }:
+        let
+          agentPrompts = import ./modules/coding-agents/prompts {
+            inherit pkgs;
+            lib = inputs.nixpkgs.lib;
+          };
+        in
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
@@ -155,6 +166,10 @@
 
           packages = {
             llama-benchy = pkgs.llama-benchy;
+            agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
+              prompts = agentPrompts;
+              tools.pi.enable = true;
+            };
           };
           treefmt.imports = [ ./treefmt.nix ];
           pre-commit.settings.hooks.treefmt.enable = true;
