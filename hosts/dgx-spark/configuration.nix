@@ -121,15 +121,6 @@
     8188
   ];
 
-  services.comfyui = {
-    enable = false;
-    listen = [
-      "0.0.0.0"
-      "::"
-    ];
-    port = 8188;
-  };
-
   # ─── vLLM Inference ─────────────────────────────────────────────────
   services.vllm.instances = {
     # Qwen3.6-35B-A3B original/full-weight local.ai recipe.
