@@ -85,7 +85,7 @@
           dgx-spark = {
             api = "openai-completions";
             apiKey = "not-needed";
-            baseUrl = "http://127.0.0.1:18000/v1";
+            baseUrl = "http://dgx-spark.local:8000/v1";
             compat = {
               supportsDeveloperRole = false;
               supportsReasoningEffort = false;
