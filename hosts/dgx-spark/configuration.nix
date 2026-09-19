@@ -189,6 +189,7 @@
         git
         gnugrep
         gnused
+        inetutils
         procps
         python3
         util-linux
@@ -250,7 +251,8 @@
   services.vllm-models.enable = false;
 
   services.dgx-dashboard = {
-    enable = false;
+    enable = true;
+    port = 11001;
   };
 
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
