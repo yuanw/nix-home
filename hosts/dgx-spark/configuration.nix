@@ -190,6 +190,7 @@
         gnugrep
         gnused
         procps
+        python3
         util-linux
       ];
 
