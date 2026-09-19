@@ -55,7 +55,6 @@ nix-update:
     @nix-update -f ./packages/release.nix markdown-table-wrap --src-only --version=branch --override-filename ./packages/emacs/markdown-table-wrap.nix
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
-    @nix-update -f ./packages/release.nix vibeproxy --src-only
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch

@@ -145,7 +145,6 @@ in
   chroma-mcp = prev.python3Packages.callPackage ./chroma-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   tccutil-manage = prev.python3Packages.callPackage ./tccutil { };
-  vibeproxy = prev.callPackage ./vibeproxy { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
