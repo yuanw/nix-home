@@ -10,7 +10,6 @@ let
   hasPermissionGate = lib.any (p: p.pname == "permission-gate") cfg.extensionsPkgs;
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
-  commonPrompts = pkgs.callPackage ../common/prompts.nix { };
   agentPmManagedSkillNames = [
     "disk-space"
     "explain-diff-html"
@@ -21,12 +20,6 @@ let
   agentPmManagedPromptNames = [
     "journal-session.md"
   ];
-  manuallyLinkedSkills = lib.filter (
-    skill: !(lib.elem skill.pname agentPmManagedSkillNames)
-  ) cfg.skills;
-  manuallyLinkedPrompts = lib.filterAttrs (
-    name: _: !(lib.elem name agentPmManagedPromptNames)
-  ) cfg.prompts;
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -145,12 +138,12 @@ in
 
     prompts = lib.mkOption {
       type = lib.types.attrsOf lib.types.path;
-      default = {
-        "journal-session.md" = commonPrompts.mkJournalSessionPrompt "pi";
-      };
+      default = { };
       description = ''
-        Prompt templates to install under <configDir>/prompts/.
-        Keys are filenames (must include .md suffix); values are paths to the template files.
+        Legacy pi-only prompt templates to install under <configDir>/prompts/.
+        Shared prompts should be declared in modules/coding-agents/prompts and
+        rendered through programs.agent-pm instead. Keys are filenames (must
+        include .md suffix); values are paths to the template files.
       '';
     };
 
@@ -200,6 +193,20 @@ in
       }
       (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
       (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
+      {
+        assertion = lib.intersectLists (map (s: s.pname) cfg.skills) agentPmManagedSkillNames == [ ];
+        message = ''
+          These pi skills are managed by programs.agent-pm, not modules.pi.skills:
+          ${lib.concatStringsSep ", " agentPmManagedSkillNames}
+        '';
+      }
+      {
+        assertion = lib.intersectLists (lib.attrNames cfg.prompts) agentPmManagedPromptNames == [ ];
+        message = ''
+          These pi prompts are managed by programs.agent-pm, not modules.pi.prompts:
+          ${lib.concatStringsSep ", " agentPmManagedPromptNames}
+        '';
+      }
     ];
 
     home-manager.users.${config.my.username} =
@@ -216,7 +223,7 @@ in
         home.file =
           lib.listToAttrs (
             (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-            ++ (mkEntries manuallyLinkedSkills (skill: "skills/${skill.pname}") (x: x))
+            ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
             ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
           )
           // lib.mapAttrs' (
@@ -230,7 +237,7 @@ in
           }
           // lib.mapAttrs' (
             name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-          ) manuallyLinkedPrompts
+          ) cfg.prompts
           // lib.optionalAttrs hasPermissionGate {
             ".config/pi-agent-extensions/permission-gate/rules.ts".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
