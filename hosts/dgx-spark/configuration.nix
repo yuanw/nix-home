@@ -197,7 +197,7 @@
         HF_HOME = "/var/lib/vllm/huggingface";
         HOME = "/var/lib/qwen38-flash-next";
 
-        IMAGE = "vllm/vllm-openai:qwen38-flash-next";
+        IMAGE = "docker.io/vllm/vllm-openai:qwen38-flash-next";
         SERVED_MODEL_NAME = "qwen3.8-flash-next";
         TP1_CONTAINER_NAME = "vllm-qwen38";
 
