@@ -243,6 +243,55 @@
     1
   ];
 
+  # ─── Retired vLLM model cache cleanup ──────────────────────────────
+  # Commit 422cbfd1 switched the DGX Spark vLLM service to serve Qwen3.6
+  # directly from HuggingFace into /var/lib/vllm/huggingface. Prune the old
+  # declarative /var/lib/vllm/models downloads once after deployment.
+  systemd.services.vllm-prune-obsolete-models =
+    let
+      obsoleteModels = [
+        "Qwen3.6-27B-AEON-NVFP4"
+        "Qwen3.6-27B-DFlash-drafter"
+        "Qwen3.6-35B-A3B-NVFP4"
+        "Ornith-1.0-35B-NVFP4"
+        "AEON-DFlash-Qwen3.6-35B-A3B"
+      ];
+      stamp = "/var/lib/vllm/.pruned-obsolete-models-422cbfd1";
+      pruneScript = pkgs.writeShellScript "vllm-prune-obsolete-models" ''
+        set -eu
+
+        if [ -e ${stamp} ]; then
+          exit 0
+        fi
+
+        ${pkgs.coreutils}/bin/mkdir -p /var/lib/vllm/models
+        for model in ${toString obsoleteModels}; do
+          path="/var/lib/vllm/models/$model"
+          case "$path" in
+            /var/lib/vllm/models/*) ;;
+            *) echo "Refusing to remove unexpected path: $path" >&2; exit 1 ;;
+          esac
+
+          if [ -e "$path" ]; then
+            echo "Removing obsolete vLLM model cache: $path"
+            ${pkgs.coreutils}/bin/rm -rf --one-file-system -- "$path"
+          fi
+        done
+
+        ${pkgs.coreutils}/bin/touch ${stamp}
+      '';
+    in
+    {
+      description = "Prune obsolete vLLM model downloads retired by 422cbfd1";
+      after = [ "local-fs.target" ];
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pruneScript;
+      };
+    };
+
   # ─── HuggingFace token ─────────────────────────────────────────────
   # Secret file (secrets/hf-token.age) must contain:
   #   HF_TOKEN=hf_xxxxxxxxxxxx
