@@ -116,61 +116,101 @@
 
   # ─── DGX Dashboard ─────────────────────────────────────────────────
   networking.firewall.allowedTCPPorts = [
-    8000 # vLLM qwen36 (local.ai original Qwen3.6 recipe)
+    8000 # vLLM qwen38 (MiaAI-Lab Qwen3.8 Flash Next single-Spark recipe)
     11000
     8188
   ];
 
   # ─── vLLM Inference ─────────────────────────────────────────────────
-  services.vllm.instances = {
-    # Qwen3.6-35B-A3B original/full-weight local.ai recipe.
-    # Uses the official vLLM OpenAI image rather than nixpkgs#vllm because
-    # nixpkgs currently marks CUDA vLLM broken and aarch64-linux unsupported.
-    # Start manually with: systemctl start vllm-qwen36
-    qwen36 = {
-      enable = true;
-      autoStart = false;
-      backend = "podman";
-      containerImage = "docker.io/vllm/vllm-openai:v0.23.0";
-      model = "Qwen/Qwen3.6-35B-A3B";
-      servedModelName = "Qwen/Qwen3.6-35B-A3B";
-      port = 8000;
-      gpuMemoryUtilization = 0.88;
-      maxModelLen = 262144;
-      maxNumSeqs = 64;
-      maxNumBatchedTokens = 8192;
-      dtype = "auto";
-      kvCacheDtype = null;
-      enableChunkedPrefill = true;
-      enablePrefixCaching = true;
-      reasoningParser = "qwen3";
-      toolCallParser = "qwen3_xml";
-      extraArgs = [
-        "--tensor-parallel-size"
-        "1"
-        "--pipeline-parallel-size"
-        "1"
-        "--trust-remote-code"
-        "--enable-prompt-tokens-details"
-        "--enable-force-include-usage"
-        "--enable-request-id-headers"
-        "--enable-log-requests"
-        "--block-size"
-        "1024"
-        "--kv-cache-memory-bytes"
-        "32212254720"
-        "--async-scheduling"
-        "--language-model-only"
-        "--mamba-cache-mode"
-        "align"
-        "--speculative-config"
-        ''{"method":"mtp","num_speculative_tokens":4,"moe_backend":"triton","rejection_sample_method":"standard"}''
-      ];
-    };
-  };
+  # Qwen3.8-Flash-Next does not fit the generic services.vllm.instances
+  # wrapper cleanly: the single-DGX-Spark recipe relies on its launcher to
+  # prepare PLE offload patches, build/use the packed PLE mmap table, mount a
+  # reduced MTP draft vocabulary, and run the watchdog. Keep the service
+  # manual; first populate the HF cache with:
+  #   cd /var/lib/qwen38-flash-next/repo && ./download.sh
+  systemd.services.vllm-qwen38 =
+    let
+      repoDir = "/var/lib/qwen38-flash-next/repo";
+      prepare = pkgs.writeShellScript "prepare-qwen38-flash-next" ''
+        set -eu
 
-  # Qwen3.6 is served from its HuggingFace repo ID directly inside the
-  # vLLM container, using /var/lib/vllm/huggingface as the shared HF cache.
+        install -d -m 0755 /var/lib/qwen38-flash-next
+        install -d -o yuanw -g users -m 0755 /var/lib/vllm/huggingface
+
+        if [ ! -d ${repoDir}/.git ]; then
+          rm -rf ${repoDir}
+          git clone --depth 1 https://github.com/MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark ${repoDir}
+        else
+          git -C ${repoDir} fetch --depth 1 origin main
+          git -C ${repoDir} reset --hard origin/main
+        fi
+
+        cat > ${repoDir}/.env <<'EOF'
+        IMAGE="vllm/vllm-openai:qwen38-flash-next"
+        SERVED_MODEL_NAME="qwen3.8-flash-next"
+        TP1_CONTAINER_NAME="vllm-qwen38"
+
+        # Keep the old local API port while switching the served model.
+        PORT=8000
+        BIND=0.0.0.0
+
+        # MiaAI-Lab measured default profile for one DGX Spark.
+        YARN=0
+        MAX_MODEL_LEN=262144
+        YARN_MAX_MODEL_LEN=524288
+        MTP_NUM_SPECULATIVE_TOKENS=3
+        KV_TARGET_GIB=20
+        HOST_RESERVE_GIB=26
+        KV_CACHE_DTYPE=fp8
+        MAMBA_SSM_CACHE_DTYPE=bfloat16
+        MAX_NUM_SEQS=4
+        MAX_NUM_BATCHED_TOKENS=2048
+        CUDAGRAPH_CAPTURE_SIZES=auto
+        MTP_DRAFT_VOCAB=files/draft_vocab_en_code_47k.txt
+        EXTRA_DOCKER_ARGS="-e VLLM_USE_V2_MODEL_RUNNER=1"
+
+        PLE_OFFLOAD=true
+        REQUIRE_IDLE_GPU=true
+        READY_TIMEOUT_S=1800
+        EOF
+        sed -i 's/^        //' ${repoDir}/.env
+        chmod 0600 ${repoDir}/.env
+      '';
+    in
+    {
+      description = "vLLM Qwen3.8 Flash Next single-DGX-Spark server";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      conflicts = [ "vllm-qwen36.service" ];
+      wantedBy = [ ]; # start manually: systemctl start vllm-qwen38
+
+      environment = {
+        HF_HOME = "/var/lib/vllm/huggingface";
+        HOME = "/var/lib/qwen38-flash-next";
+        PATH = "/run/current-system/sw/bin:/run/wrappers/bin";
+      };
+
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        WorkingDirectory = "/var/lib/qwen38-flash-next";
+        EnvironmentFile = [ config.age.secrets.hf-token.path ];
+        ExecStartPre = prepare;
+        ExecStart = "${pkgs.bash}/bin/bash ${repoDir}/start.sh";
+        ExecStop = "${pkgs.bash}/bin/bash ${repoDir}/stop.sh";
+        TimeoutStartSec = 2400;
+        TimeoutStopSec = 120;
+      };
+    };
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/qwen38-flash-next 0755 root root - -"
+    "d /var/lib/vllm 0755 root root - -"
+    "d /var/lib/vllm/huggingface 0755 yuanw users - -"
+  ];
+
+  # Qwen3.8 is served from its HuggingFace repo ID through the upstream
+  # launcher, using /var/lib/vllm/huggingface as the shared HF cache.
   services.vllm-models.enable = false;
 
   services.dgx-dashboard = {

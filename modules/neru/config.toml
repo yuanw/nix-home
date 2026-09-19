@@ -44,8 +44,8 @@ text = "#E8EEFF"
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#hotkeys
 # See https://github.com/y3owk1n/neru/blob/main/docs/CLI.md
 [hotkeys]
-"Cmd+S" = "recursive_grid --cursor-selection-mode hold"
-"Cmd+Shift+S" = "scroll"
+"F11" = "recursive_grid --cursor-selection-mode hold"
+"F12" = "scroll"
 "Cmd+Shift+G" = "__disabled__"
 "Cmd+Shift+C" = "__disabled__"
 
