@@ -184,10 +184,22 @@
       conflicts = [ "vllm-qwen36.service" ];
       wantedBy = [ ]; # start manually: systemctl start vllm-qwen38
 
+      path = with pkgs; [
+        bash
+        coreutils
+        curl
+        docker-client
+        gawk
+        git
+        gnugrep
+        gnused
+        procps
+        util-linux
+      ];
+
       environment = {
         HF_HOME = "/var/lib/vllm/huggingface";
         HOME = "/var/lib/qwen38-flash-next";
-        PATH = "/run/current-system/sw/bin:/run/wrappers/bin";
       };
 
       serviceConfig = {
