@@ -30,6 +30,7 @@ hm@{ pkgs, ... }:
     "/usr/local/sbin"
     "${config.my.homeDirectory}/.local/bin"
   ];
+
   xdg = {
     enable = true;
     configFile = {
@@ -40,6 +41,14 @@ hm@{ pkgs, ... }:
   catppuccin.flavor = "mocha";
   manual.manpages.enable = false;
   programs = {
+    agent-pm = lib.mkIf config.modules.pi.enable {
+      enable = true;
+      tools.pi.enable = true;
+      prompts = import ./coding-agents/prompts {
+        inherit pkgs lib;
+      };
+    };
+
     bat = {
       enable = true;
     };

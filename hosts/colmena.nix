@@ -48,6 +48,7 @@ in
             inputs.catppuccin.homeModules.catppuccin
             inputs.direnv-instant.homeModules.direnv-instant
             inputs.mics-skills.homeModules.default
+            inputs.flake-prompt.homeManagerModules.default
             inputs.git-ai.homeManagerModules.default
             inputs.mcp-servers-nix.homeManagerModules.default
           ];
@@ -83,6 +84,7 @@ in
             inputs.catppuccin.homeModules.catppuccin
             inputs.direnv-instant.homeModules.direnv-instant
             inputs.mics-skills.homeModules.default
+            inputs.flake-prompt.homeManagerModules.default
             inputs.git-ai.homeManagerModules.default
             inputs.mcp-servers-nix.homeManagerModules.default
           ];

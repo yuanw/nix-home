@@ -63,6 +63,7 @@
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
+                  inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
@@ -140,6 +141,7 @@
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
+                  inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
                   (import ../modules/helpers/mergetools.nix)
@@ -190,6 +192,7 @@
                       inputs.catppuccin.homeModules.catppuccin
                       inputs.direnv-instant.homeModules.direnv-instant
                       inputs.mics-skills.homeModules.default
+                      inputs.flake-prompt.homeManagerModules.default
                       inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
                       (import ../modules/helpers/mergetools.nix)

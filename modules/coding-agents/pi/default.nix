@@ -11,6 +11,22 @@ let
   defaultConfigDir = ".pi/agent";
   claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   commonPrompts = pkgs.callPackage ../common/prompts.nix { };
+  agentPmManagedSkillNames = [
+    "disk-space"
+    "explain-diff-html"
+    "grilling"
+    "journal-session"
+    "teach"
+  ];
+  agentPmManagedPromptNames = [
+    "journal-session.md"
+  ];
+  manuallyLinkedSkills = lib.filter (
+    skill: !(lib.elem skill.pname agentPmManagedSkillNames)
+  ) cfg.skills;
+  manuallyLinkedPrompts = lib.filterAttrs (
+    name: _: !(lib.elem name agentPmManagedPromptNames)
+  ) cfg.prompts;
   mkEntries =
     items: nameOf: sourceOf:
     map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
@@ -200,7 +216,7 @@ in
         home.file =
           lib.listToAttrs (
             (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-            ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
+            ++ (mkEntries manuallyLinkedSkills (skill: "skills/${skill.pname}") (x: x))
             ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
           )
           // lib.mapAttrs' (
@@ -214,7 +230,7 @@ in
           }
           // lib.mapAttrs' (
             name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-          ) cfg.prompts
+          ) manuallyLinkedPrompts
           // lib.optionalAttrs hasPermissionGate {
             ".config/pi-agent-extensions/permission-gate/rules.ts".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
