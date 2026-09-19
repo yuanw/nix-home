@@ -10,8 +10,8 @@
 }:
 
 let
-  version = "0.2.0-unstable-2026-08-26";
-  rev = "b8926eccfad6c4184186b6936d244acb9653f3d3";
+  version = "0-unstable-2026-08-31";
+  rev = "7d0d050fd555b3ac187e2754c0b2d327256a58ab";
 in
 
 melpaBuild {
@@ -22,7 +22,7 @@ melpaBuild {
     owner = "helheim-emacs";
     repo = "hel-collection";
     inherit rev;
-    hash = "sha256-jwBe+V8FHNV6gqz4RBbWV0kLtsjuYeJJgV53qi0w0c0=";
+    hash = "sha256-TeTyoWSeUur9LaTYWJ/w1CE1Ze+yuwVGBl1wzCICTd0=";
   };
 
   packageRequires = [
