@@ -38,6 +38,27 @@
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
   };
+
+  launchd.user.agents.dgx-spark-vllm-tunnel.serviceConfig = {
+    Label = "ca.yuanwang.dgx-spark-vllm-tunnel";
+    ProgramArguments = [
+      "/usr/bin/ssh"
+      "-N"
+      "-L"
+      "18000:127.0.0.1:8000"
+      "-o"
+      "ExitOnForwardFailure=yes"
+      "-o"
+      "ServerAliveInterval=30"
+      "-o"
+      "ServerAliveCountMax=3"
+      "yuanw@dgx-spark.local"
+    ];
+    KeepAlive = true;
+    RunAtLoad = true;
+    StandardOutPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.log";
+    StandardErrorPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.err.log";
+  };
   modules = {
     # common = {
     #   enable = true;
@@ -64,7 +85,7 @@
           dgx-spark = {
             api = "openai-completions";
             apiKey = "not-needed";
-            baseUrl = "http://dgx-spark.local:8000/v1";
+            baseUrl = "http://127.0.0.1:18000/v1";
             compat = {
               supportsDeveloperRole = false;
               supportsReasoningEffort = false;
@@ -76,10 +97,13 @@
               {
                 _launch = true;
                 contextWindow = 262144;
-                id = "Qwen/Qwen3.6-35B-A3B";
-                input = [ "text" ];
+                id = "qwen3.8-flash-next";
+                input = [
+                  "text"
+                  "image"
+                ];
                 maxTokens = 32768;
-                name = "Qwen3.6 35B A3B (DGX Spark)";
+                name = "Qwen3.8 Flash Next (DGX Spark)";
                 reasoning = true;
                 thinkingLevelMap = {
                   off = "off";
