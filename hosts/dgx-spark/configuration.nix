@@ -30,18 +30,29 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # ─── User accounts ──────────────────────────────────────────────────
-  users.users.yuanw = {
-    isNormalUser = true;
-    extraGroups = [
-      "wheel"
-      "video"
-      "docker"
-    ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpYgmWwtRG7vlRbtWheYrtHl9E9qx84sdU+YlE8w+CZ me@yuanwang.ca"
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
-    ];
+  users.groups.qwen38 = { };
+  users.users = {
+    yuanw = {
+      isNormalUser = true;
+      extraGroups = [
+        "wheel"
+        "video"
+        "docker"
+      ];
+      openssh.authorizedKeys.keys = [
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpYgmWwtRG7vlRbtWheYrtHl9E9qx84sdU+YlE8w+CZ me@yuanwang.ca"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+      ];
+    };
+
+    qwen38 = {
+      isSystemUser = true;
+      group = "qwen38";
+      home = "/var/lib/qwen38-flash-next";
+      createHome = false;
+      description = "Qwen3.8 Flash Next vLLM state owner";
+    };
   };
 
   # ─── Sudo ────────────────────────────────────────────────────────
@@ -131,50 +142,35 @@
   systemd.services.vllm-qwen38 =
     let
       repoDir = "/var/lib/qwen38-flash-next/repo";
+      qwen38User = "qwen38";
+      qwen38Group = "qwen38";
+      qwen38SingleSparkRev = "6b5086458023474a7809ea30e1bcf42f03dcd75f";
+      qwen38SingleSpark = pkgs.fetchFromGitHub {
+        owner = "MiaAI-Lab";
+        repo = "Qwen3.8-Flash-Next-Single-DGX-Spark";
+        rev = qwen38SingleSparkRev;
+        hash = "sha256-MvZVmFUFDsvPLtyky9I81uK6Dj40qumPdst5yfTlxlc=";
+      };
       prepare = pkgs.writeShellScript "prepare-qwen38-flash-next" ''
         set -eu
 
-        install -d -m 0755 /var/lib/qwen38-flash-next
-        install -d -o yuanw -g users -m 0755 /var/lib/vllm/huggingface
-
-        if [ ! -d ${repoDir}/.git ]; then
+        if [ ! -e ${repoDir}/.nix-source-rev ] || [ "$(cat ${repoDir}/.nix-source-rev)" != "${qwen38SingleSparkRev}" ]; then
           rm -rf ${repoDir}
-          git clone --depth 1 https://github.com/MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark ${repoDir}
-        else
-          git -C ${repoDir} fetch --depth 1 origin main
-          git -C ${repoDir} reset --hard origin/main
+          install -d -o ${qwen38User} -g ${qwen38Group} -m 0755 ${repoDir}
+          cp -a ${qwen38SingleSpark}/. ${repoDir}/
+          chmod -R u+w ${repoDir}
+          chown -R ${qwen38User}:${qwen38Group} ${repoDir}
+          printf '%s\n' '${qwen38SingleSparkRev}' > ${repoDir}/.nix-source-rev
+          chown ${qwen38User}:${qwen38Group} ${repoDir}/.nix-source-rev
         fi
 
         cat > ${repoDir}/.env <<'EOF'
-        IMAGE="vllm/vllm-openai:qwen38-flash-next"
-        SERVED_MODEL_NAME="qwen3.8-flash-next"
-        TP1_CONTAINER_NAME="vllm-qwen38"
-
-        # Keep the old local API port while switching the served model.
-        PORT=8000
-        BIND=0.0.0.0
-
-        # MiaAI-Lab measured default profile for one DGX Spark.
-        YARN=0
-        MAX_MODEL_LEN=262144
-        YARN_MAX_MODEL_LEN=524288
-        MTP_NUM_SPECULATIVE_TOKENS=3
-        KV_TARGET_GIB=20
-        HOST_RESERVE_GIB=26
-        KV_CACHE_DTYPE=fp8
-        MAMBA_SSM_CACHE_DTYPE=bfloat16
-        MAX_NUM_SEQS=4
-        MAX_NUM_BATCHED_TOKENS=2048
-        CUDAGRAPH_CAPTURE_SIZES=auto
-        MTP_DRAFT_VOCAB=files/draft_vocab_en_code_47k.txt
-        EXTRA_DOCKER_ARGS="-e VLLM_USE_V2_MODEL_RUNNER=1"
-
-        PLE_OFFLOAD=true
-        REQUIRE_IDLE_GPU=true
-        READY_TIMEOUT_S=1800
+        # Managed by Nix. Runtime configuration is supplied by
+        # systemd.services.vllm-qwen38.environment.
         EOF
         sed -i 's/^        //' ${repoDir}/.env
         chmod 0600 ${repoDir}/.env
+        chown ${qwen38User}:${qwen38Group} ${repoDir}/.env
       '';
     in
     {
@@ -200,6 +196,33 @@
       environment = {
         HF_HOME = "/var/lib/vllm/huggingface";
         HOME = "/var/lib/qwen38-flash-next";
+
+        IMAGE = "vllm/vllm-openai:qwen38-flash-next";
+        SERVED_MODEL_NAME = "qwen3.8-flash-next";
+        TP1_CONTAINER_NAME = "vllm-qwen38";
+
+        # Keep the old local API port while switching the served model.
+        PORT = "8000";
+        BIND = "0.0.0.0";
+
+        # MiaAI-Lab measured default profile for one DGX Spark.
+        YARN = "0";
+        MAX_MODEL_LEN = "262144";
+        YARN_MAX_MODEL_LEN = "524288";
+        MTP_NUM_SPECULATIVE_TOKENS = "3";
+        KV_TARGET_GIB = "20";
+        HOST_RESERVE_GIB = "26";
+        KV_CACHE_DTYPE = "fp8";
+        MAMBA_SSM_CACHE_DTYPE = "bfloat16";
+        MAX_NUM_SEQS = "4";
+        MAX_NUM_BATCHED_TOKENS = "2048";
+        CUDAGRAPH_CAPTURE_SIZES = "auto";
+        MTP_DRAFT_VOCAB = "files/draft_vocab_en_code_47k.txt";
+        EXTRA_DOCKER_ARGS = "-e VLLM_USE_V2_MODEL_RUNNER=1";
+
+        PLE_OFFLOAD = "true";
+        REQUIRE_IDLE_GPU = "true";
+        READY_TIMEOUT_S = "1800";
       };
 
       serviceConfig = {
@@ -216,9 +239,9 @@
     };
 
   systemd.tmpfiles.rules = [
-    "d /var/lib/qwen38-flash-next 0755 root root - -"
+    "d /var/lib/qwen38-flash-next 0755 qwen38 qwen38 - -"
     "d /var/lib/vllm 0755 root root - -"
-    "d /var/lib/vllm/huggingface 0755 yuanw users - -"
+    "d /var/lib/vllm/huggingface 0755 qwen38 qwen38 - -"
   ];
 
   # Qwen3.8 is served from its HuggingFace repo ID through the upstream
