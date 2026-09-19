@@ -188,7 +188,7 @@ in
   fonts.packages = with pkgs; [
     fira-code
     font-awesome
-    aporetic
+    stable.aporetic
     roboto
     roboto-mono
   ];
