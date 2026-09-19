@@ -11,7 +11,7 @@
 }:
 
 let
-  version = "0.3.0-unstable-2026-08-26";
+  version = "0.3.0-unstable-2026-07-09";
   rev = "999df8dfa84cb0074e8ae739262c1cbba9e3d3f3";
 in
 
