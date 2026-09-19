@@ -249,26 +249,7 @@
   services.vllm-models.enable = false;
 
   services.dgx-dashboard = {
-    enable = true;
-    port = 11001;
-  };
-
-  systemd.sockets.dgx-dashboard-lan = {
-    description = "DGX Dashboard LAN socket";
-    wantedBy = [ "sockets.target" ];
-    listenStreams = [ "11000" ];
-  };
-  systemd.services.dgx-dashboard-lan = {
-    description = "DGX Dashboard LAN proxy";
-    requires = [ "dgx-dashboard-lan.socket" ];
-    after = [
-      "dgx-dashboard-lan.socket"
-      "dgx-dashboard.service"
-    ];
-    serviceConfig = {
-      ExecStart = "${pkgs.systemd}/lib/systemd/systemd-socket-proxyd 127.0.0.1:11001";
-      PrivateTmp = true;
-    };
+    enable = false;
   };
 
   # ─── mDNS (Avahi) ──────────────────────────────────────────────────
