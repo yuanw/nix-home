@@ -40,6 +40,49 @@ hm@{ pkgs, ... }:
   };
   catppuccin.flavor = "mocha";
   manual.manpages.enable = false;
+
+  home.activation.agentPmRemoveLegacyPiLinks = lib.mkIf config.modules.pi.enable (
+    hm.config.lib.dag.entryBefore [ "checkLinkTargets" ] ''
+      for skill in \
+        caveman \
+        d2 \
+        describe \
+        disk-space \
+        dired \
+        emacs-skills \
+        emacsclient \
+        explain-diff-html \
+        file-links \
+        gnuplot \
+        grilling \
+        highlight \
+        humanizer \
+        i-have-adhd \
+        journal-session \
+        mermaid \
+        open \
+        plantuml \
+        ponytail \
+        ponytail-audit \
+        ponytail-debt \
+        ponytail-gain \
+        ponytail-help \
+        ponytail-review \
+        select \
+        teach; do
+        path="$HOME/.pi/agent/skills/$skill"
+        if [ -L "$path" ]; then
+          rm "$path"
+        fi
+      done
+
+      prompt="$HOME/.pi/agent/prompts/journal-session.md"
+      if [ -L "$prompt" ]; then
+        rm "$prompt"
+      fi
+    ''
+  );
+
   programs = {
     agent-pm = lib.mkIf config.modules.pi.enable {
       enable = true;
