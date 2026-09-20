@@ -45,6 +45,97 @@ let
     body = skillBody "${ponytailSkills.${name}}/SKILL.md";
   };
 
+  orgJournalTodoBody = ''
+    # Add TODO items to org journal files
+
+    Add a TODO item to the user's `~/org/journal/` directory using `emacsclient`.
+
+    Use this when the user asks to add a todo, task, reminder, action item, or invokes `/org-journal-todo`.
+
+    ## Filing rule
+
+    - If the user gives no category argument, file the TODO in `~/org/journal/inbox.org`.
+    - If the user gives a category argument, normalize it to a safe lowercase filename and file the TODO in `~/org/journal/<category>.org`.
+    - Examples: `work` -> `~/org/journal/work.org`; `home errands` -> `~/org/journal/home-errands.org`.
+
+    ## TODO text
+
+    Extract the TODO text from the user's request or recent context. Keep it short, concrete, and actionable. Do not include the category in the TODO text unless it is part of the task.
+
+    ## Command template
+
+    Use `emacsclient --eval` so Emacs owns the file update. This preserves Org buffers correctly if they are already open.
+
+    ```sh
+    category="" # empty means inbox; otherwise use the user-provided category argument
+    todo="Actionable TODO text"
+
+    emacsclient --eval "
+    (let* ((raw-category \"$category\")
+           (todo \"$todo\")
+           (slug (if (string-empty-p raw-category)
+                     \"inbox\"
+                   (replace-regexp-in-string
+                    \"-+\" \"-\"
+                    (replace-regexp-in-string
+                     \"[^[:alnum:]]+\" \"-\"
+                     (downcase (string-trim raw-category))))))
+           (dir (expand-file-name \"~/org/journal/\"))
+           (file (expand-file-name (concat slug \".org\") dir)))
+      (require 'org)
+      (make-directory dir t)
+      (with-current-buffer (find-file-noselect file)
+        (goto-char (point-max))
+        (unless (bolp) (insert \"\\n\"))
+        (insert \"* TODO \" todo \"\\n  Added: \" (format-time-string \"[%Y-%m-%d %a %H:%M]\") \"\\n\")
+        (save-buffer))
+      file)"
+    ```
+
+    ## Safe quoting
+
+    If the TODO text contains quotes, newlines, or shell-sensitive characters, write it to a temporary file and read it from Elisp instead of interpolating it directly.
+
+    ```sh
+    todo_file=$(mktemp /tmp/org-journal-todo.XXXXXX)
+    cat > "$todo_file" <<'EOF'
+    Actionable TODO text
+    EOF
+
+    emacsclient --eval "
+    (let* ((raw-category \"work\")
+           (todo-file \"$todo_file\")
+           (todo (string-trim
+                  (with-temp-buffer
+                    (insert-file-contents todo-file)
+                    (buffer-string))))
+           (slug (if (string-empty-p raw-category)
+                     \"inbox\"
+                   (replace-regexp-in-string
+                    \"-+\" \"-\"
+                    (replace-regexp-in-string
+                     \"[^[:alnum:]]+\" \"-\"
+                     (downcase (string-trim raw-category))))))
+           (dir (expand-file-name \"~/org/journal/\"))
+           (file (expand-file-name (concat slug \".org\") dir)))
+      (require 'org)
+      (make-directory dir t)
+      (with-current-buffer (find-file-noselect file)
+        (goto-char (point-max))
+        (unless (bolp) (insert \"\\n\"))
+        (insert \"* TODO \" todo \"\\n  Added: \" (format-time-string \"[%Y-%m-%d %a %H:%M]\") \"\\n\")
+        (save-buffer))
+      file)"
+    ```
+
+    ## Rules
+
+    - Never edit the journal files with shell redirection while Emacs may have them open; use `emacsclient`.
+    - Always create `~/org/journal/` if it does not exist.
+    - Always report the file path that received the TODO.
+    - If `emacsclient` fails, tell the user to start the Emacs server with `M-x server-start`.
+  '';
+
   denoteNoteBody = ''
     # Create Denote notes from the current context
 
@@ -245,6 +336,18 @@ in
       license = "MIT";
     };
     body = skillBody "${claudeSkills.i-have-adhd}/SKILL.md";
+  }
+
+  {
+    type = "skill";
+    name = "org-journal-todo";
+    description = "Add a TODO item to ~/org/journal/inbox.org or ~/org/journal/<category>.org using emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+      "argument-hint" = "[category] TODO text";
+    };
+    body = orgJournalTodoBody;
   }
 
   {
