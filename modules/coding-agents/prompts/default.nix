@@ -45,18 +45,18 @@ let
     body = skillBody "${ponytailSkills.${name}}/SKILL.md";
   };
 
-  orgJournalTodoBody = ''
-    # Add TODO items to org journal files
+  orgAgendaTodoBody = ''
+    # Add TODO items to org agenda files
 
-    Add a TODO item to the user's `~/org/journal/` directory using `emacsclient`.
+    Add a TODO item to the user's `~/org/agenda/` directory using `emacsclient`.
 
-    Use this when the user asks to add a todo, task, reminder, action item, or invokes `/org-journal-todo`.
+    Use this when the user asks to add a todo, task, reminder, action item, or invokes `/org-agenda-todo`.
 
     ## Filing rule
 
-    - If the user gives no category argument, file the TODO in `~/org/journal/inbox.org`.
-    - If the user gives a category argument, normalize it to a safe lowercase filename and file the TODO in `~/org/journal/<category>.org`.
-    - Examples: `work` -> `~/org/journal/work.org`; `home errands` -> `~/org/journal/home-errands.org`.
+    - If the user gives no category argument, file the TODO in `~/org/agenda/inbox.org`.
+    - If the user gives a category argument, normalize it to a safe lowercase filename and file the TODO in `~/org/agenda/<category>.org`.
+    - Examples: `work` -> `~/org/agenda/work.org`; `home errands` -> `~/org/agenda/home-errands.org`.
 
     ## TODO text
 
@@ -80,7 +80,7 @@ let
                     (replace-regexp-in-string
                      \"[^[:alnum:]]+\" \"-\"
                      (downcase (string-trim raw-category))))))
-           (dir (expand-file-name \"~/org/journal/\"))
+           (dir (expand-file-name \"~/org/agenda/\"))
            (file (expand-file-name (concat slug \".org\") dir)))
       (require 'org)
       (make-directory dir t)
@@ -97,7 +97,7 @@ let
     If the TODO text contains quotes, newlines, or shell-sensitive characters, write it to a temporary file and read it from Elisp instead of interpolating it directly.
 
     ```sh
-    todo_file=$(mktemp /tmp/org-journal-todo.XXXXXX)
+    todo_file=$(mktemp /tmp/org-agenda-todo.XXXXXX)
     cat > "$todo_file" <<'EOF'
     Actionable TODO text
     EOF
@@ -116,7 +116,7 @@ let
                     (replace-regexp-in-string
                      \"[^[:alnum:]]+\" \"-\"
                      (downcase (string-trim raw-category))))))
-           (dir (expand-file-name \"~/org/journal/\"))
+           (dir (expand-file-name \"~/org/agenda/\"))
            (file (expand-file-name (concat slug \".org\") dir)))
       (require 'org)
       (make-directory dir t)
@@ -131,7 +131,7 @@ let
     ## Rules
 
     - Never edit the journal files with shell redirection while Emacs may have them open; use `emacsclient`.
-    - Always create `~/org/journal/` if it does not exist.
+    - Always create `~/org/agenda/` if it does not exist.
     - Always report the file path that received the TODO.
     - If `emacsclient` fails, tell the user to start the Emacs server with `M-x server-start`.
   '';
@@ -340,14 +340,14 @@ in
 
   {
     type = "skill";
-    name = "org-journal-todo";
-    description = "Add a TODO item to ~/org/journal/inbox.org or ~/org/journal/<category>.org using emacsclient.";
+    name = "org-agenda-todo";
+    description = "Add a TODO item to ~/org/agenda/inbox.org or ~/org/agenda/<category>.org using emacsclient.";
     extraFrontmatter = {
       tools = "Bash";
       "disable-model-invocation" = true;
       "argument-hint" = "[category] TODO text";
     };
-    body = orgJournalTodoBody;
+    body = orgAgendaTodoBody;
   }
 
   {

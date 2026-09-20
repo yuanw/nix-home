@@ -28,7 +28,7 @@ let
     "journal-session"
     "mermaid"
     "open"
-    "org-journal-todo"
+    "org-agenda-todo"
     "plantuml"
     "ponytail"
     "ponytail-audit"
