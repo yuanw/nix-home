@@ -15,6 +15,12 @@
     ./configuration.nix
   ];
 
+  # colmena deployment configuration
+  deployment = {
+    # Local laptop — omit targetHost to deploy locally by default
+    targetUser = "yuanw";
+  };
+
   my = {
     username = "yuanw";
     name = "Yuan Wang";
@@ -32,6 +38,7 @@
         target=github
       '';
     };
+    home.packages = with pkgs; [ iperf ];
     programs = {
       password-store = {
         enable = true;
@@ -80,6 +87,9 @@
   my.mullvad.enable = true;
 
   modules = {
+
+    ai.enableOllama = true;
+    pi.enable = true;
     secrets.agenix = {
       enable = true;
     };
@@ -97,7 +107,7 @@
     terminal.enable = true;
     typing.enable = true;
     wm.xmonad.enable = true;
-    browsers.firefox.enable = true;
+    browsers.librewolf.enable = true;
     browsers.tor.enable = true;
   };
 }

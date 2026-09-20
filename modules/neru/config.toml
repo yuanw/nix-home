@@ -1,0 +1,348 @@
+# Neru default configuration
+# Copy to ~/.config/neru/config.toml to customize.
+
+# Full config reference: https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md
+# Full CLI reference: https://github.com/y3owk1n/neru/blob/main/docs/CLI.md
+
+# Every font_family option below takes a generic alias as well as an installed
+# family name; the accepted aliases are listed here:
+# https://github.com/y3owk1n/neru/blob/main/docs/CROSS_PLATFORM.md#capability-matrix
+
+# General settings
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#general
+[general]
+excluded_apps = []                           # Bundle IDs to ignore (e.g. "com.apple.Terminal")
+kb_layout_to_use = ""                        # Force a keyboard layout InputSourceID (empty = auto)
+passthrough_unbounded_keys = true            # Let unbound Cmd/Ctrl/Alt shortcuts reach macOS
+should_exit_after_passthrough = false        # Exit the current mode after a shortcut is passed through
+passthrough_unbounded_keys_blacklist = []    # Shortcuts to still consume when passthrough is on
+hide_overlay_in_screen_share = true          # Hide overlay from screen sharing apps
+# Shell used for exec commands. Left unset so the platform default applies:
+# /bin/bash -lc on macOS and Linux, %SystemRoot%\System32\cmd.exe /c on Windows.
+# Setting an absolute path here overrides that on every platform, so a value
+# valid on one will fail validation on another.
+# exec_shell = "/bin/bash"                   # e.g. "/bin/dash", "/bin/zsh"
+# exec_shell_args = ["-lc"]                  # last argument receives the command string
+
+# Theme palette
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#theme
+[theme.light]
+surface = "#EEF2FF"
+accent = "#465FBC"
+accent_alt = "#0B2377"
+on_accent_alt = "#F8FAFF"
+text = "#17327A"
+
+[theme.dark]
+surface = "#0A1338"
+accent = "#6E82D6"
+accent_alt = "#8FA2F0"
+on_accent_alt = "#081022"
+text = "#E8EEFF"
+
+# Hotkeys
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#hotkeys
+# See https://github.com/y3owk1n/neru/blob/main/docs/CLI.md
+[hotkeys]
+"F11" = "recursive_grid --cursor-selection-mode hold"
+"F12" = "scroll"
+"Cmd+Shift+G" = "__disabled__"
+"Cmd+Shift+C" = "__disabled__"
+
+[macros]
+move_and_scroll = ["action move_mouse --selection", "scroll"]
+
+# Declared modes — a keymap with a name and an indicator, no logic of its own.
+# Enter one with "mode <name>" from a hotkey, a sequence step, or `neru mode
+# <name>`. Escape returns to idle unless the mode rebinds it.
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#modes
+#
+# [modes.window]
+# indicator = "Window"
+#
+# [modes.window.hotkeys]
+# "h" = "exec yabai -m window --focus west"
+# "l" = "exec yabai -m window --focus east"
+# "s" = "scroll"
+#
+# [hotkeys]
+# "Primary+Shift+W" = "mode window"
+
+# Hint mode
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#hints
+[hints]
+enabled = false
+
+[hints.boundary_highlight]
+enabled = false                             # Draw a subtle outline around each target element
+
+
+# Grid mode
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#grid
+[grid]
+enabled = false
+
+# Recursive grid mode (recommended)
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#recursive_grid
+[recursive_grid]
+enabled = true
+grid_cols = 5                               # Number of columns (>= 1)
+grid_rows = 3                               # Number of rows (>= 1)
+# Left hand 4×3 (QYOU / CIAE / ',.;) — keeps right hand free for mouseless nav
+keys = "qyou=ciae-',.;/"
+min_size_width = 1                          # Stop subdividing below this width (px)
+min_size_height = 1                         # Stop subdividing below this height (px)
+max_depth = 10                              # Maximum recursion levels (1–20)
+
+[recursive_grid.animation]
+enabled = true                              # Opt out from native depth transition animation on supported platforms
+duration_ms = 50                            # Recursive-grid animation duration in milliseconds
+
+[recursive_grid.hotkeys]
+"Escape" = "idle"
+"`" = "toggle-cursor-follow-selection"
+"Tab" = "toggle-cursor-follow-selection"
+"x" = "action move_mouse --center"
+"z" = "action reset"
+
+# right hand: move (D=up T=down H=left N=right)
+"d" = "action move_mouse_relative --dx=0 --dy=-25"
+"t" = "action move_mouse_relative --dx=0 --dy=25"
+"h" = "action move_mouse_relative --dx=-25 --dy=0"
+"n" = "action move_mouse_relative --dx=25 --dy=0"
+
+"Shift+D" = "action move_mouse_relative --dx=0 --dy=-5"
+"Shift+T" = "action move_mouse_relative --dx=0 --dy=5"
+"Shift+H" = "action move_mouse_relative --dx=-5 --dy=0"
+"Shift+N" = "action move_mouse_relative --dx=5 --dy=0"
+
+# right hand: subgrid nudge (after cell selection)
+"m" = "action move_mouse_relative --dx=-10 --dy=0"
+"f" = "action move_mouse_relative --dx=10 --dy=0"
+"k" = "action move_mouse_relative --dx=0 --dy=-10"
+"j" = "action move_mouse_relative --dx=0 --dy=10"
+
+"Space" = ["action left_click", "idle"]
+"Shift+Space" = "action left_click"
+"p" = "action middle_click"
+"r" = "action right_click"
+
+"Ctrl+D" = "action scroll_up"
+"Ctrl+G" = "action scroll_down"
+"Ctrl+B" = "action scroll_left"
+"Ctrl+V" = "action scroll_right"
+"Ctrl+U" = "action page_up"
+"Ctrl+Shift+D" = "action page_down"
+"Ctrl+S" = "macro move_and_scroll"
+"Ctrl+C" = "idle"
+
+"Shift+L" = "__disabled__"
+"Shift+R" = "__disabled__"
+"Shift+M" = "__disabled__"
+"Shift+I" = "__disabled__"
+"Shift+U" = "__disabled__"
+
+[recursive_grid.ui]
+line_width = 1
+font_size = 10
+font_family = "PragmataProMonoLiga-Bold"
+text_color = "#00000000"
+highlight_color = "#33FFFFFF"
+label_background = false                    # Add rounded backgrounds behind cell labels
+label_background_padding_x = -1
+label_background_padding_y = -1
+label_background_border_radius = -1
+label_background_border_width = 1
+label_char = ""                             # Override cell labels with a single character (e.g. "·"); empty = use key
+label_autohide_multiplier = 1.5             # Hide labels when cell < fontSize × multiplier (0 = disable)
+sub_key_preview = false                     # Draw miniature key grid inside each cell
+sub_key_preview_font_size = 8
+sub_key_preview_autohide_multiplier = 1.5   # Hide the preview when a sub-cell < fontSize × multiplier (0 = disable)
+sub_key_preview_label_char = ""             # Override sub-key preview labels with a single character (e.g. "·"); empty = use key
+
+# Virtual pointer
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#virtual_pointer
+[virtual_pointer.ui]
+char = "●"             # Character to display (e.g. "•", "●", "◉", "⬤") or anything you like
+font_size = 8
+font_family = ""
+
+# Mouse action indicator (macOS)
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#mouse_action_indicator
+[mouse_action_indicator]
+enabled = true
+actions = [
+  "left_click",
+  "right_click",
+  "middle_click",
+  "left_mouse_down",
+  "left_mouse_up",
+  "right_mouse_down",
+  "right_mouse_up",
+  "middle_mouse_down",
+  "middle_mouse_up",
+  "left_mouse_toggle",
+  "right_mouse_toggle",
+  "middle_mouse_toggle",
+]
+
+[mouse_action_indicator.ui]
+size = 36
+border_width = 2
+shape = "circle"                            # circle or square
+
+[mouse_action_indicator.animation]
+duration_ms = 260
+start_scale = 0.55
+end_scale = 1.35
+start_opacity = 0.85
+end_opacity = 0.0
+easing = "ease_out"                         # linear, ease_in, ease_out, ease_in_out
+
+# Monitor select mode
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#monitor_select
+[monitor_select]
+enabled = false                                # Enable interactive monitor picking mode
+characters = "123456789"                       # Characters used for monitor labels
+
+[monitor_select.ui]
+font_size = 96                                 # Badge label font size
+font_family = ""                               # Badge label font family
+subtitle_font_size = 18                        # Monitor name subtitle font size
+subtitle_font_family = ""                      # Subtitle font family (empty = the badge label's)
+border_radius = -1                             # Badge corner radius (-1 = auto)
+padding_x = -1                                 # Badge horizontal padding (-1 = auto)
+padding_y = -1                                 # Badge vertical padding (-1 = auto)
+border_width = 0                               # Badge border width
+backdrop_color = ""                            # Per-monitor tint backdrop
+
+[monitor_select.hotkeys]
+"Escape" = "idle"
+
+# Scroll mode
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#scroll
+[scroll]
+scroll_step = 100
+scroll_step_half = 500
+scroll_step_full = 1000000
+invert_scroll = false
+
+[scroll.hotkeys]
+"Escape" = "idle"
+
+"d" = "action move_mouse_relative --dx=0 --dy=-25"
+"t" = "action move_mouse_relative --dx=0 --dy=25"
+"h" = "action move_mouse_relative --dx=-25 --dy=0"
+"n" = "action move_mouse_relative --dx=25 --dy=0"
+
+"l" = "action scroll_up"
+"p" = "action scroll_down"
+"b" = "action scroll_left"
+"v" = "action scroll_right"
+"u" = "action page_up"
+"Shift+G" = "action page_down"
+"gg" = "__disabled__"
+
+"Space" = ["action left_click", "idle"]
+"f" = "recursive_grid --cursor-selection-mode hold"
+"x" = "action move_mouse --center"
+"z" = "action reset"
+
+"Shift+L" = "__disabled__"
+"Shift+R" = "__disabled__"
+"Shift+M" = "__disabled__"
+"Shift+I" = "__disabled__"
+"Shift+U" = "__disabled__"
+
+# Mode indicator
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#mode_indicator
+[mode_indicator]
+
+[mode_indicator.scroll]
+enabled = true
+text = "Scroll"
+
+[mode_indicator.hints]
+enabled = false
+text = "Hints"
+
+[mode_indicator.grid]
+enabled = false
+text = "Grid"
+
+[mode_indicator.recursive_grid]
+enabled = false
+text = "Recursive Grid"
+
+[mode_indicator.monitor_select]
+enabled = false
+text = "Monitor Select"
+
+[mode_indicator.ui]
+font_size = 10
+font_family = ""
+border_width = 1
+padding_x = -1
+padding_y = -1
+border_radius = -1
+indicator_x_offset = 20
+indicator_y_offset = 20
+
+# Sticky modifiers
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#sticky_modifiers
+[sticky_modifiers]
+enabled = true
+tap_max_duration = 300
+
+[sticky_modifiers.ui]
+font_size = 10
+font_family = ""
+border_width = 1
+padding_x = -1
+padding_y = -1
+border_radius = -1
+indicator_x_offset = -40
+indicator_y_offset = 20
+
+# Smooth cursor (animates cursor movement between positions)
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#smooth_cursor
+[smooth_cursor]
+move_mouse_enabled = true
+steps = 30
+max_duration = 100
+duration_per_pixel = 0.1                    # Ms per pixel for adaptive duration
+relative_movement_duration = 50             # Fixed duration per relative (hjkl) move in ms (macOS/Linux)
+
+# Smooth scroll (animates scroll actions with eased chunking)
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#smooth_scroll
+[smooth_scroll]
+enabled = true
+steps = 300
+max_duration = 300
+duration_per_pixel = 20.00
+
+# Held-key repeat (fires scroll/page/mouse-move actions repeatedly while held)
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#held_repeat
+[held_repeat]
+enabled = true
+initial_delay_ms = 50
+interval_ms = 50
+accel_enabled = true
+accel_ramp_ms = 500
+accel_max_multiplier = 10.0
+accel_targets = ["move_mouse_relative"] # Action names eligible for acceleration
+
+# Systray
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#systray
+[systray]
+enabled = false
+
+# Logging
+# See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#logging
+[logging]
+log_level = "info"                          # debug, info, warn, error
+log_file = ""                               # Custom log path (empty = default location)
+disable_file_logging = true                 # Console only (no file); file logs use JSON
+max_file_size = 10                          # MB before rotation
+max_backups = 5                             # Old log files to keep
+max_age = 30                                # Days to retain old logs

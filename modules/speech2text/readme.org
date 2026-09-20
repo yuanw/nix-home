@@ -1,0 +1,8 @@
+
+* TODO
+
+look into
+
+https://codeberg.org/sachac/speech-input/src/branch/main/speech-input.el
+
+** another local model

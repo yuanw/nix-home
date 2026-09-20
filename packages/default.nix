@@ -1,4 +1,8 @@
-_final: prev: {
+_final: prev:
+let
+  codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
+in
+{
   installApplication =
     {
       name,
@@ -101,13 +105,123 @@ _final: prev: {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
     };
   };
+  agnix =
+    with prev;
+    rustPlatform.buildRustPackage rec {
+      pname = "agnix";
+      version = "0.16.5";
+
+      src = fetchFromGitHub {
+        owner = "avifenesh";
+        repo = "agnix";
+        tag = "v${version}";
+        hash = "sha256-VUd+i1vogfLMkoJ/hzYR6besxlnKWSyH4LBYPfs1h0o=";
+      };
+
+      cargoHash = "sha256-amLDxWS4kIMeMsgAlhqECuixXd8xuYLVCzi3K9mEg1M=";
+
+      cargoBuildFlags = [
+        "--package"
+        "agnix-cli"
+        "--package"
+        "agnix-lsp"
+        "--package"
+        "agnix-mcp"
+      ];
+
+      doCheck = false;
+
+      meta = with lib; {
+        description = "Linter and LSP for AI coding assistant config files (CLAUDE.md, AGENTS.md, hooks, MCP)";
+        homepage = "https://github.com/avifenesh/agnix";
+        license = with licenses; [
+          mit
+          asl20
+        ];
+        mainProgram = "agnix";
+      };
+    };
+  claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
+  chroma-mcp = prev.python3Packages.callPackage ./chroma-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
+  tccutil-manage = prev.python3Packages.callPackage ./tccutil { };
   bandcamp-dl = prev.python3Packages.callPackage ./bandcamp { };
   choose-mac = prev.callPackage ./choose-mac.nix { };
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
+  cozempic = prev.python3Packages.callPackage ./cozempic { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };
+  cursor-agent-acp = prev.callPackage ./cursor-agent-acp.nix { };
+  pi-acp = prev.callPackage ./pi-acp.nix { };
+  pi-extensions = prev.callPackage ./pi-extensions { };
+  claude-plugins = prev.callPackage ./claude-plugins { };
+  inherit codingAgentsCommonSkills;
+  codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
+  cohere-transcribe = prev.callPackage ./cohere-transcribe { };
+  parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
+  parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
+  parakeet-mlx-server = prev.callPackage ./parakeet-mlx-server.nix {
+    inherit (prev) writers;
+    parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
+  };
+  parakeet-mlx-server-test = prev.callPackage ./parakeet-mlx-server-test.nix {
+    inherit (prev)
+      curl
+      ffmpeg
+      python3
+      ;
+  };
+
+  ds4 = prev.callPackage ./ds4 { };
+
+  ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
+
+  flash-attn-4 = prev.callPackage ./flash-attn-4 { };
+
+  decord = prev.callPackage ./decord { };
+
+  cockpit-gpu = prev.callPackage ./cockpit-gpu.nix { };
+
+  lance = prev.callPackage ./lance { };
+  lance-download-model = prev.callPackage ./lance-download-model { };
+
+  llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
+
+  # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
+  # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
+  # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids
+  # builtins.readDir on the source fetch during evaluation.
+  # The nixified-ai wrapper calls:
+  #   builtins.readDir (comfyui-unwrapped.src + "/models")
+  # in its let-bindings, which forces Nix to realize the fetch derivation
+  # during eval. This fails when colmena evaluates aarch64-linux configs on
+  # aarch64-darwin (cross-architecture). The unwrapped package already wraps
+  # PYTHONPATH via buildPythonApplication's postFixup, so we just join it.
+  comfyui = prev.symlinkJoin {
+    name = "comfyui-wrapped";
+    paths = [ prev.comfyuiPackages.comfyui-unwrapped ];
+    meta.mainProgram = "comfyui";
+  };
+
+  # vllm-node: reproducible Docker image build from prebuilt wheels
+  vllm-node = prev.callPackage ./vllm-node { };
+
+  # sm121-vllm-nvfp4: SM121-optimized vLLM v0.24.0 NVFP4 KV Docker image
+  # Builds from source (vLLM + FlashInfer patches) — ~60 min on DGX Spark
+  sm121-vllm-nvfp4 = prev.callPackage ./sm121-vllm-nvfp4 { };
+
+  # vLLM v0.23.0 with AEON sm_121a patches for DGX Spark
+  vllm-aeon = prev.python3Packages.callPackage ./vllm-aeon.nix {
+    cudaPackages = prev.cudaPackages;
+    pkg_config = prev.pkg-config;
+    gnumake = prev.gnumake;
+  };
+
+  # Performance Co-Pilot — system performance monitoring toolkit
+  # Re-adds pcp removed from nixpkgs (PR #495646)
+  pcp = prev.callPackage ./pcp/package.nix { };
+
 }

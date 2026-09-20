@@ -1,0 +1,461 @@
+#+TITLE: Cockpit GPU Plugin for DGX Spark — NixOS Implementation Plan
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-06-28
+
+* Overview
+  Add NVIDIA GPU monitoring to the existing Cockpit web UI on DGX Spark
+  by packaging the community [[https://github.com/binbinsh/cockpit-gpu][binbinsh/cockpit-gpu]] plugin as a
+  nixpkgs-style derivation and wiring it into =modules/cockpit.nix=.
+
+  Current state:
+  - [[file:../../modules/cockpit.nix][modules/cockpit.nix]] :: local =cockpit-local= module wrapping
+    =services.cockpit=; loads =cockpit-machines= + =cockpit-podman= only.
+    No GPU plugin exists in nixpkgs (verified: =nix search nixpkgs cockpit=
+    returns =cockpit-files/machines/podman/zfs= — no =cockpit-nvidia= / =cockpit-gpu=).
+  - [[file:../../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] :: already runs
+    =services.cockpit-local.enable = true= and NVIDIA's own
+    =services.dgx-dashboard= (port 11001, proxied to 11000) via the
+    =graham33/nixos-dgx-spark= flake input. =nvidia-smi= is on PATH
+    through =hardware.dgx-spark.enable=.
+  - [[https://github.com/binbinsh/cockpit-gpu][cockpit-gpu]] :: React/PatternFly plugin. Polls =nvidia-smi=
+    (=--query-gpu=, =-q -x=) every 2 s; ships optional
+    =cockpit-gpu-usage-collector= systemd unit for historical 30-day
+    usage summary. Build model: relies on the *parent* Cockpit
+    project's =build.js= + =files.js= (no per-plugin build script),
+    exactly the pattern nixpkgs' =cockpit-machines= uses.
+
+  Target:
+  - =pkgs.cockpit-gpu= derivation that builds against =cockpit.src=
+    (same =postPatch= trick as =cockpit-machines=) and installs to
+    =$out/share/cockpit/gpus=.
+  - =passthru.cockpitPath= carrying the NVIDIA driver package so
+    =nvidia-smi= lands in the =cockpit.service= PATH via the nixpkgs
+    module's =depsEnv= mechanism.
+  - =modules/cockpit.nix= gains an =enableGpu= option (defaulting to
+    =config.hardware.nvidia.enable= or an explicit toggle), appending
+    =pkgs.cockpit-gpu= to =services.cockpit.plugins=.
+  - Optional =services.cockpit-gpu.collector.enable= for the historical
+    usage systemd unit (off by default; live page works without it).
+
+* Why this approach (vs. alternatives)
+
+  | Option | Cost | Result |
+  |--------+------+--------|
+  | [[https://github.com/binbinsh/cockpit-gpu][cockpit-gpu]] packaged as a nix derivation (this plan) | ~1 derivation + 1 module option | Native GPU panel inside Cockpit, polling =nvidia-smi= |
+  | iframe =dgx-dashboard= into Cockpit | ~30 lines | Reuses NVIDIA's dashboard but Cockpit nav just hosts an iframe; no Cockpit-native UX |
+  | Upstream =cockpit-nvidia= (marcosprado) | similar packaging effort, older, less maintained | Same shape, fewer features |
+  | Hand-rolled =nvidia-smi= page | ~1 derivation | Reinvents CSV parsing / charts that cockpit-gpu already does well |
+
+  =cockpit-gpu= is the most feature-complete community option (per-GPU
+  utilisation / memory / temperature graphs, running process table,
+  PCIe link info, optional 30-day usage collector) and matches the
+  build contract nixpkgs already supports for =cockpit-machines=.
+
+* Architecture
+  :PROPERTIES:
+  :CUSTOM_ID: architecture
+  :END:
+
+  #+BEGIN_SRC text
+  ┌─────────────────────────────────────────────────────────┐
+  │ packages/cockpit-gpu.nix                                │
+  │   stdenv.mkDerivation                                   │
+  │   src = fetchFromGitHub binbinsh/cockpit-gpu            │
+  │   cockpitSrc = cockpit.src  (build.js, pkg/lib, esbuild)│
+  │   postPatch:                                            │
+  │     cp -r $cockpitSrc/pkg/lib pkg/                      │
+  │     register entry in cockpit's files.js                │
+  │     patchShebangs build.js (from cockpit.src)           │
+  │   buildPhase:  ./build.js cockpit-gpu                   │
+  │   installPhase: dest=dist/cockpit-gpu → $out/share/cockpit/gpus │
+  │   passthru.cockpitPath = [ nvidiaDriverPkg ]            │
+  └─────────────────┬───────────────────────────────────────┘
+                    │ added to
+  ┌─────────────────▼───────────────────────────────────────┐
+  │ modules/cockpit.nix                                     │
+  │   services.cockpit-local.enableGpu (bool, default =     │
+  │     config.hardware.nvidia.enable or false)             │
+  │   → services.cockpit.plugins ++ [ pkgs.cockpit-gpu ]    │
+  │   (nixpkgs module merges passthru.cockpitPath into      │
+  │    cockpit.service PATH via depsEnv)                    │
+  └─────────────────┬───────────────────────────────────────┘
+                    │ imported by
+  ┌─────────────────▼───────────────────────────────────────┐
+  │ hosts/dgx-spark/configuration.nix                       │
+  │   services.cockpit-local = {                            │
+  │     enable = true;                                      │
+  │     enableGpu = true;  # nvidia-smi present via dgx-spark │
+  │   };                                                    │
+  └─────────────────────────────────────────────────────────┘
+  #+END_SRC
+
+  /Optional collector (phase 2):/
+
+  #+BEGIN_SRC text
+  ┌─────────────────────────────────────────────────────────┐
+  │ modules/cockpit.nix (extended)                          │
+  │   services.cockpit-gpu.collector.enable (bool, def=f)   │
+  │   → systemd.services.cockpit-gpu-usage-collector        │
+  │     ExecStart = ${pkgs.cockpit-gpu}/share/cockpit/gpus/ │
+  │                 cockpit-gpu-usage-collector.py          │
+  │     python3 + nvidia-smi in PATH                        │
+  └─────────────────────────────────────────────────────────┘
+  #+END_SRC
+
+* Files to Create / Modify
+
+** packages/cockpit-gpu.nix  (new)
+   :PROPERTIES:
+   :CUSTOM_ID: pkg-cockpit-gpu
+   :END:
+
+   Modelled on [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/co/cockpit-machines/package.nix][cockpit-machines/package.nix]]. Sketch:
+
+   #+BEGIN_SRC nix
+     {
+       lib,
+       stdenv,
+       cockpit,
+       nodejs,
+       python3,
+       fetchFromGitHub,
+       nvidiaDriverPkg ? null, # e.g. linuxPackages.nvidia_x11 (for nvidia-smi)
+     }:
+
+     stdenv.mkDerivation (finalAttrs: {
+       pname = "cockpit-gpu";
+       version = "26.0217.2232"; # from plugin/manifest.json
+
+       src = fetchFromGitHub {
+         owner = "binbinsh";
+         repo = "cockpit-gpu";
+         tag = "main"; # pin to a tag/commit once we vendor
+         hash = lib.fakeSha256; # fill after first build
+       };
+
+       # Plugin source lives under ./plugin in the repo; flatten it.
+       sourceRoot = "${finalAttrs.src.name}/plugin";
+
+       # Build against the *parent* cockpit tree (provides build.js,
+       # pkg/lib, patternfly, esbuild config, files.js registry).
+       cockpitSrc = cockpit.src;
+
+       buildInputs = [ nodejs python3 ];
+
+       postPatch = ''
+         # Drop the plugin source into the cockpit build tree, mirroring
+         # install.sh's build_dist_from_plugin_source().
+         pluginDir="$NIX_BUILD_TOP/cockpit-build/pkg/cockpit-gpu"
+         mkdir -p "$(dirname "$pluginDir")"
+         cp -r "$PWD" "$pluginDir"
+
+         cp -r "$cockpitSrc" "$NIX_BUILD_TOP/cockpit-build"   # tmp copy
+         cb="$NIX_BUILD_TOP/cockpit-build"
+         chmod -R u+w "$cb"
+
+         # Register the plugin in cockpit's files.js so build.js picks it up
+         # (same effect as install.sh patch_cockpit_files_js).
+         python3 "${./register-plugin.py}" "$cb/files.js" \
+             "cockpit-gpu/cockpit-gpu.jsx" "cockpit-gpu/index.html"
+
+         patchShebangs "$cb/build.js"
+       '';
+
+       buildPhase = ''
+         runHook preBuild
+         cb="$NIX_BUILD_TOP/cockpit-build"
+         ( cd "$cb" && NODE_ENV=production ./build.js cockpit-gpu )
+         runHook postBuild
+       '';
+
+       installPhase = ''
+         runHook preInstall
+         cb="$NIX_BUILD_TOP/cockpit-build"
+         dest="$out/share/cockpit/gpus"
+         mkdir -p "$(dirname "$dest")"
+         cp -r "$cb/dist/cockpit-gpu" "$dest"
+         # Copy static assets that install.sh copies even when absent from dist
+         [ -f "$dest/index.html" ] || cp "$NIX_BUILD_TOP/.../plugin/index.html" "$dest/"
+         runHook postInstall
+       '';
+
+       passthru = {
+         # Injected into cockpit.service PATH by the nixpkgs module's depsEnv.
+         cockpitPath = lib.optional (nvidiaDriverPkg != null) nvidiaDriverPkg;
+       };
+
+       meta = {
+         description = "Cockpit plugin for monitoring NVIDIA GPUs (nvidia-smi)";
+         homepage = "https://github.com/binbinsh/cockpit-gpu";
+         platforms = lib.platforms.linux;
+         license = [ lib.licenses.lgpl21Plus ];
+       };
+     })
+   #+END_SRC
+
+   Notes / risks:
+   - =build.js= is a Perl/Python-assisted esbuild pipeline; it expects
+     =package-lock.json= next to the cockpit tree. =cockpit-machines=
+     side-steps this by using the plugin's own =package-lock.json=
+     (=fetchSubmodules= + =postFetch=). For cockpit-gpu we may need to
+     either vendor =package-lock.json= from a one-off =npm install= in
+     the plugin dir, or reuse =$cockpitSrc='s lock file. *Action:*
+     try the =cockpit-machines= pattern first; if =build.js= refuses,
+     run =npm install --package-lock-only= in =postPatch= and pin the
+     resulting lock file in the nix store.
+   - =register-plugin.py= is a ~15-line helper (regex-append to the
+     =entries= and =files= arrays in =files.js=). Equivalently, we can
+     inline the same Perl one-liners =install.sh= uses; keeping it as
+     a separate file is cleaner. *Alternative:* skip =files.js=
+     patching and call =esbuild= directly on =cockpit-gpu.jsx= with
+     the same flags =build.js= would compute — more brittle, avoid.
+   - =version=: =manifest.json= currently uses a CalVer-ish
+     =26.0217.2232= with no git tag. Pin to a fixed commit SHA in
+     =fetchFromGitHub= and set =version= from =manifest.json= via a
+     =prePatch= =jq= substitution, or just hardcode and bump manually.
+   - =nvidiaDriverPkg=: on the dgx-spark host this should be whatever
+     =hardware.dgx-spark.enable= brings in. *Investigate:*
+     =graham33/nixos-dgx-spark= sets =hardware.nvidia.package= (or
+     equivalent). Default the package argument to
+     =config.hardware.nvidia.package= via =callPackage= override at
+     the module level, falling back to =linuxPackages.nvidia_x11=.
+
+** packages/register-plugin.py  (new, helper)
+   :PROPERTIES:
+   :CUSTOM_ID: register-plugin-py
+   :END:
+
+   #+BEGIN_SRC python
+     import re, sys
+     from pathlib import Path
+
+     p = Path(sys.argv[1])
+     jsx_entry, html_entry = sys.argv[2], sys.argv[3]
+     text = p.read_text()
+     orig = text
+
+     def add(src, key, value):
+         pat = rf"({key}\s*:\s*\[)([\s\S]*?)(\n\s*\],)"
+         m = re.search(pat, src)
+         if not m or value in m.group(2):
+             return src
+         head, body, tail = m.group(1), m.group(2).rstrip(), m.group(3)
+         return src[:m.start()] + head + body + f"\n        {value}," + tail + src[m.end():]
+
+     text = add(text, "entries", f'"{jsx_entry}"')
+     text = add(text, "files",   f'"{html_entry}"')
+     if text != orig:
+         p.write_text(text)
+   #+END_SRC
+
+   (Equivalent to =install.sh='s =patch_cockpit_files_js= inline Python.)
+
+** packages/default.nix  (modify)
+   :PROPERTIES:
+   :CUSTOM_ID: packages-default
+   :END:
+
+   Add =cockpit-gpu= to the overlay so it is callable as =pkgs.cockpit-gpu=:
+
+   #+BEGIN_SRC nix
+     cockpit-gpu = callPackage ./cockpit-gpu.nix {
+       # nvidiaDriverPkg left null here; module supplies it via callPackage
+       # override using config.hardware.nvidia.package at enable time.
+       nvidiaDriverPkg = null;
+     };
+   #+END_SRC
+
+   Verify existing overlay structure in
+   [[file:../../packages/default.nix][packages/default.nix]] before editing.
+
+** modules/cockpit.nix  (modify)
+   :PROPERTIES:
+   :CUSTOM_ID: module-cockpit
+   :END:
+
+   Add option + plugin wiring. Minimal diff sketch:
+
+   #+BEGIN_SRC nix
+     options.services.cockpit-local = {
+       # … existing …
+
+       enableGpu = mkOption {
+         type = types.bool;
+         default = false;
+         description = ''
+           Enable the cockpit-gpu NVIDIA monitoring plugin.
+           Requires nvidia-smi on the host (e.g. hardware.nvidia.enable
+           or hardware.dgx-spark.enable).
+         '';
+       };
+
+       nvidiaPackage = mkOption {
+         type = types.nullOr types.package;
+         default = null;
+         description = ''
+           Package providing nvidia-smi, injected into cockpit.service
+           PATH. Defaults to config.hardware.nvidia.package when non-null.
+         '';
+       };
+     };
+
+     config = mkIf cfg.enable (mkMerge [
+       { /* existing config */ }
+
+       (mkIf cfg.enableGpu {
+         services.cockpit.plugins =
+           let
+             drv = pkgs.cockpit-gpu.override {
+               nvidiaDriverPkg = cfg.nvidiaPackage
+                 or config.hardware.nvidia.package or null;
+             };
+           in [ drv ];
+       })
+     ]);
+   #+END_SRC
+
+   Caveats:
+   - =config.hardware.nvidia.package= only exists when the nixpkgs
+     nvidia module is in scope. On dgx-spark, =graham33='s module may
+     use a different attrpath — *check* before relying on it; otherwise
+     require the operator to pass =nvidiaPackage= explicitly.
+   - =services.cockpit.plugins= already contains =cockpit-machines=
+     and =cockpit-podman= from the existing module; =++= via =mkMerge=
+     is fine because the nixpkgs option is a list and merges.
+
+** hosts/dgx-spark/configuration.nix  (modify)
+   :PROPERTIES:
+   :CUSTOM_ID: host-config
+   :END:
+
+   Flip the flag:
+
+   #+BEGIN_SRC nix
+     services.cockpit-local = {
+       enable = true;
+       enableGpu = true;
+       # nvidiaPackage auto-detected from hardware.dgx-spark; set
+       # explicitly if the auto-detection path differs.
+     };
+   #+END_SRC
+
+   Confirm =nvidia-smi= is on PATH for the *cockpit bridge* user, not
+   just interactive shells. The nixpkgs module's =depsEnv= mechanism
+   (=environment.etc."cockpit/bin".source= + =lib=) is what makes
+   =nvidia-smi= discoverable to =cockpit.spawn= calls — that's why
+   =passthru.cockpitPath= on the derivation is essential.
+
+* Implementation steps
+
+  1. *Vendor cockpit-gpu source pin.*
+     Decide between =fetchFromGitHub tag=main= (rolling) vs. a fixed
+     commit. Recommend: pin to the current HEAD SHA, file the hash,
+     revisit upstream tagging later.
+
+  2. *Stand up =packages/cockpit-gpu.nix= skeleton.*
+     Copy the =cockpit-machines= postPatch shape; swap in the
+     =build_dist_from_plugin_source= logic (copy plugin into
+     =$cockpitSrc/pkg/=, patch =files.js=, run =./build.js cockpit-gpu=).
+
+  3. *Resolve the npm/lockfile question.*
+     Try building with =$cockpitSrc='s existing =package-lock.json=
+     first. If =build.js= needs plugin-local deps, run
+     =npm install --package-lock-only= inside =postPatch= and vendor
+     the resulting lock. Watch for network access during build — must
+     be =fetchurl=-only to stay sandboxed.
+
+  4. *Run a local build on aarch64-linux (dgx-spark target).*
+     =nix build .#cockpit-gpu= under =hosts/dgx-spark='s pkgs
+     cross-set. Inspect =$out/share/cockpit/gpus= for
+     =manifest.json=, =cockpit-gpu.js=, =cockpit-gpu.css=,
+     =cockpit-gpu-boot.js=, =index.html=. Match the
+     =is_installable_dist_dir= checklist from =install.sh=.
+
+  5. *Wire =passthru.cockpitPath= to the NVIDIA driver package.*
+     Locate which attr provides =nvidia-smi= on dgx-spark:
+     =nix eval --raw inputs.dgx-spark#nixosModules.dgx-spark= then
+     grep for =hardware.nvidia= / =boot.extraModulePackages=.
+     Confirm =nvidia-smi= binary path. Set =nvidiaDriverPkg=
+     accordingly (likely =config.hardware.nvidia.package= or
+     =linuxPackages.nvidia_x11=).
+
+  6. *Add =enableGpu= option to =modules/cockpit.nix= and flip on
+     in =hosts/dgx-spark/configuration.nix=.*
+
+  7. *Build the full host config:* =nix build .#dgx-spark=. Apply on
+     the box: =colmena apply dgx-spark= (per existing deployment flow
+     in [[file:../../hosts/dgx-spark/default.nix][hosts/dgx-spark/default.nix]]).
+
+  8. *Verify end-to-end.*
+     - Browse =https://dgx-spark.local:9090/cockpit/@localhost/gpus/=.
+     - Confirm the GPUs menu item appears (manifest =menu.index=).
+     - Confirm live utilisation / memory / temp update every 2 s
+       (driven by =cockpit.spawn(['nvidia-smi', ...])=).
+     - Confirm the running-processes table populates (this validates
+       =nvidia-smi= is reachable from the cockpit bridge, not just
+       the login shell).
+
+  9. *(Phase 2) Optional usage collector.*
+     Ship =cockpit-gpu-usage-collector.py= inside the package and add
+     a =systemd.services.cockpit-gpu-usage-collector= block in
+     =modules/cockpit.nix=, gated by =services.cockpit-local.collector.enable=.
+     The collector writes to =/var/lib/cockpit/gpus/usage-summary.json=
+     and needs =python3= + =nvidia-smi= in =serviceConfig.Path=.
+
+* Risks / open questions
+
+  - *Build-time npm fetches.* Cockpit's =build.js= may want to pull
+    node modules from the network. =cockpit-machines= avoids this by
+    shipping =package-lock.json= via =fetchSubmodules= + =postFetch=.
+    cockpit-gpu has no such lock committed. Mitigation: vendor a lock
+    file generated once offline, or reuse =$cockpitSrc='s lock and
+    hope the plugin's deps are a subset. Need to attempt and observe.
+  - *Cockpit version skew.* cockpit-gpu's =manifest.json= targets
+    PatternFly 6 / cockpit ~363+. The nixpkgs =cockpit= version on
+    the dgx-spark host's nixpkgs-unstable input must be compatible.
+    *Check:* =nix eval nixpkgs#cockpit.version= against the plugin's
+    declared =26.0217.2232= build target. If the API has drifted,
+    pin =cockpit-gpu= to a compatible commit or bump nixpkgs.
+  - *nvidia-smi path on dgx-spark.* graham33's module might not set
+    =hardware.nvidia.package= (DGX Spark uses the GB10 Grace Blackwell
+    superchip with a vendor driver). If =nvidia-smi= lives under a
+    non-standard prefix (e.g. =/run/nvidia/= or =/opt/nvidia/=), the
+    =passthru.cockpitPath= package must wrap that path. *Investigate
+    first* — this is the most likely snag.
+  - *aarch64 build.* =cockpit-machines= builds on =lib.platforms.linux=
+    including aarch64; cockpit-gpu is pure JS/React so should be
+    arch-agnostic, but esbuild needs to fetch its platform binary.
+    nixpkgs' =buildNpmPackage= / cockpit's =build.js= usually handle
+    this; verify on a real aarch64-linux builder.
+  - *License.* cockpit-gpu declares =LGPL-2.1-or-later= in source
+    headers; README says MIT. Reconcile in =meta.license= (prefer the
+    SPDX header in =cockpit-gpu.jsx=).
+
+* Acceptance criteria
+
+  - [ ] =nix build .#cockpit-gpu= succeeds on aarch64-linux with no
+        network access during build (sandboxed).
+  - [ ] =$out/share/cockpit/gpus= contains all five required files
+        (=manifest.json=, =index.html=, =cockpit-gpu.js=,
+        =cockpit-gpu.css=, =cockpit-gpu-boot.js=).
+  - [ ] =nix build .#dgx-spark= succeeds with =enableGpu = true=.
+  - [ ] Cockpit UI at =:9090= shows a "GPUs" menu entry on dgx-spark.
+  - [ ] Live GPU utilisation / memory / temperature update without
+        manual =PATH= hacking (proves =passthru.cockpitPath= wiring).
+  - [ ] Running-processes table lists vLLM PIDs when an inference
+        service is active.
+  - [ ] (Phase 2) =systemctl status cockpit-gpu-usage-collector=
+        shows active with =usage-summary.json= being written.
+
+* References
+
+  - Upstream plugin: [[https://github.com/binbinsh/cockpit-gpu][binbinsh/cockpit-gpu]]
+  - Install script (build contract reference):
+    [[https://github.com/binbinsh/cockpit-gpu/blob/main/install.sh][install.sh]]
+  - nixpkgs analogue: [[https://github.com/NixOS/nixpkgs/blob/master/pkgs/by-name/co/cockpit-machines/package.nix][cockpit-machines/package.nix]]
+  - nixpkgs cockpit module (plugin/cockpitPath mechanism):
+    =nixos/modules/services/monitoring/cockpit.nix=
+  - Local module to extend: [[file:../../modules/cockpit.nix][modules/cockpit.nix]]
+  - Host to enable on: [[file:../../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]]
+  - Existing GPU surface on the box (NVIDIA's own dashboard):
+    =services.dgx-dashboard= at port 11001 / proxied 11000.

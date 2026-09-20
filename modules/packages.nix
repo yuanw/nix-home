@@ -50,7 +50,6 @@ with pkgs;
   #mu
   #offlineimap
   #notmuch
-  google-cloud-sdk
   # qutebrowser
   # productivity
   pandoc

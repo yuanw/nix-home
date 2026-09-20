@@ -4,56 +4,72 @@
     common.imports = [
       ./agenix.nix
       ./ai.nix
-      ./claude-code.nix
-      ./catppuccin.nix
-      ./common.nix
+      ./browsers/default.nix
       ./browsers/chromium.nix
-      ./browsers/firefox.nix
       ./browsers/librewolf.nix
       ./browsers/tor.nix
+      ./catppuccin.nix
+      ./coding-agents/claude-code
+      ./coding-agents/cursor
+      ./coding-agents/droid.nix
+      ./coding-agents/forge.nix
+      ./coding-agents/herdr
+      ./coding-agents/hermes-agent.nix
+      ./coding-agents/pi
+      ./common.nix
+      ./nix-custom-conf.nix
       ./dev/agda.nix
       ./dev/ask.nix
       ./dev/dart.nix
+      ./dev/gcloud.nix
+      ./dev/go.nix
       ./dev/haskell.nix
       ./dev/haxe.nix
       ./dev/idris2.nix
-      ./dev/go.nix
-      ./dev/podman.nix
-
-      ./dev/lean.nix
       ./dev/java.nix
       ./dev/julia.nix
       ./dev/kotlin.nix
+      ./dev/lean.nix
       ./dev/node.nix
       ./dev/playwright.nix
+      ./dev/podman.nix
       ./dev/python.nix
       ./dev/racket.nix
-      ./dev/zig.nix
       ./dev/scheme.nix
-      ./helix.nix
-
-      ./terminal-multiplexer/zellij.nix
-      ./terminal-multiplexer/tmux.nix
+      ./dev/zig.nix
       ./editor/emacs
+      ./helix.nix
       ./settings.nix
+      ./speech2text/speak2text.nix
       ./terminal
+      ./terminal-multiplexer/tmux.nix
+      ./terminal-multiplexer/zellij.nix
       ./typing
     ];
 
     linux.imports = [
+      ./cockpit.nix
+      ./ds4.nix
+      ./lance.nix
       ./mullvad.nix
       ./qmk.nix
       ./nixos_system.nix
+      ./services/monitoring/pcp.nix
       ./wm/xmonad.nix
     ];
     darwin.imports = [
+      ./browsers/librewolf-darwin.nix
+      ./browsers/browser-cli-darwin.nix
+      ./coding-agents/hermes-agent-darwin.nix
       ./brew.nix
       ./health.nix
       ./editor/emacs/emacs-macos.nix
       ./wm/yabai.nix
+      ./login-items.nix
       ./macintosh.nix
       ./mouseless
-
+      ./neru
+      ./nix-casks.nix
     ];
   };
 }

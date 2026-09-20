@@ -1,0 +1,220 @@
+#+TITLE: Ornith-1.0-35B AEON Ultimate Uncensored — Native (Containerless) DGX Spark Plan
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-06-28
+#+LINK: https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored
+#+LINK: https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md
+
+* Summary
+  Serve [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored][Ornith-1.0-35B AEON Ultimate Uncensored]] on the DGX Spark
+  (GB10 / sm_121a, aarch64-linux) with vLLM *built natively under NixOS*
+  — no Docker, no =ghcr.io/aeon-7/aeon-vllm-ultimate= image — while
+  matching the validated DGX Spark settings from
+  [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md][QUICKSTART_DGX_SPARK.md]] (NVFP4 + DFlash n=6 = ~93 tok/s avg decode, 3.05× vs BF16).
+
+  Ornith is a *light RL post-train* of =deepreinforce-ai/Ornith-1.0-35B=
+  whose true lineage is =Qwen3.6-35B-A3B= — same =qwen3_5_moe= hybrid arch
+  (40 layers: 30 GatedDeltaNet + 10 full-attn, 256 fused experts + shared,
+  vision tower, 256K ctx, thinking model). Same the existing =qwen35b=
+  instanceserves. The job is therefore mostly wiring + Ornith-specific
+  flag/model swaps, not new infrastructure.
+
+* Reuse assessment from [[file:vllm-native-dgx-spark.org][vllm-native-dgx-spark.org]]
+  That plan has already been substantially *implemented* in-tree, so
+  reuse is very high — the machinery is built and battle-shaped for
+  exactly this family of models.
+
+  | Existing artifact | Status | Reuse for Ornith |
+  |-------------------+--------+------------------|
+  | [[file:../packages/vllm-aeon.nix][packages/vllm-aeon.nix]] (vLLM v0.23.0 from source, sm_121a, CUTLASS 4.4.2, flash-attn, FlashMLA, DeepGEMM, Rust frontend, =ENABLE_NVFP4_SM100=0=) | Compiles (pinned upstream only — *no AEON patches yet*, per file comment) | **Direct reuse**, BUT see [[*Gap A — AEON patches][Gap A]]: must add DFlash + qwen3_5_moe + sm_121a runtime patches |
+  | [[file:../modules/vllm.nix][modules/vllm.nix]] (instance module, conflicts, drop-caches, prefix/chunked/prefill, speculative, reasoning/tool parser, extraEnv) | Live | **Direct reuse**, with [[*Gap B — module gaps][Gap B]] additions: =mambaCacheDtype= option + runtime env defaults |
+  | [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] (HF download oneshot, ordering before vllm-* services) | Live | **Direct reuse** — just add Ornith + AEON-drafter repos |
+  | [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] =qwen35b= instance | Live template (same arch) | **Copy → rename to =ornith=**, swap model/dir + flags (see [[*Phase 2][Phase 2]]) |
+  | GB10 build env (=TORCH_CUDA_ARCH_LIST=12.1a=, CUDA 13.2 fixes, =ENABLE_NVFP4_SM100=0=) | Done in =vllm-aeon.nix= | **Direct reuse** (build-time); runtime env goes in instance =extraEnv= |
+
+  *Verdict:* ~90% of the infrastructure is reusable as-is. The remaining
+  ~10% is (1) the AEON runtime/DFlash patches the package deliberately
+  deferred, (2) two small module option additions, and (3) the
+  Ornith-specific instance + model-download entries.
+
+* Gaps to close (the only real work)
+
+** Gap A — AEON patches in [[file:../packages/vllm-aeon.nix][vllm-aeon.nix]]
+   The QUICKSTART explicitly says *"stock vLLM is not recommended on the
+   Spark for this arch"*. The package file itself still notes
+   "AEON/D Flash patches to be added after baseline compiles." Verify,
+   then add what's missing against vLLM v0.23.0:
+
+   1. *=qwen3_5_moe= arch support* — confirm upstream v0.23 recognizes the
+      hybrid GDN+full-attn arch; if not, port AEON's model definition
+      patch. **Single biggest unknown/risk.**
+   2. DFlash spec-decode method — PR [[https://github.com/vllm-project/vllm/pull/40898][#40898]] (SWA) and
+      PR [[https://github.com/vllm-project/vllm/pull/43982][#43982]] (high-concurrency). NOTE: with the AEON
+      all-full-attention drafter (chosen below) the SWA assert in
+      [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/issues/1][issue #1]] does not fire, so the =hotfixes/ornith_dflash_kvfix/= is
+      *not* required — but the base =dflash= method still needs to be present.
+   3. Prefix-cache corruption fix — PR [[https://github.com/vllm-project/vllm/pull/41703][#41703]].
+   4. sm_121a runtime boot patches — =RTLD_LAZY= for =_C_stable_libtorch=
+      (MXFP4 symbols absent on sm_121a) + CUDA-graph capture-alignment for
+      spec-decode partial-acceptance.
+
+   *SKU to skip:* PR [[https://github.com/vllm-project/vllm/pull/44389][#44389]] (Triton NVFP4 *KV* cache) is explicitly
+   NOT needed — Ornith's vision tower forces BF16 KV (see [[Gap C — KV cache][Gap C]]).
+
+   *Mitigation:* pin vLLM to v0.23.0 (already done), apply patches as
+   =fetchpatch= in =postPatch=/=patches=, push to Cachix (per the original
+   plan's Q4) since these rebuilds are multi-hour on GB10.
+
+** Gap B — module gaps in [[file:../modules/vllm.nix][vllm.nix]]
+   Two small additions, both backward-compatible:
+
+   1. Add =mambaCacheDtype= option (=types.nullOr types.str=, default
+      =null=) → emits =--mamba-cache-dtype <val>=. Both =serve_ornith.sh=
+      and the QUICKSTART require =--mamba-cache-dtype float32=. The current
+      module has =mambaBlockSize= but *no* =mambaCacheDtype=.
+   2. Bake GB10 runtime env defaults into the service (not just HF_HOME):
+      =TORCH_CUDA_ARCH_LIST=12.1a=, =VLLM_USE_FLASHINFER_SAMPLER=1=,
+      =NVIDIA_FORWARD_COMPAT=1=. Per-instance =extraEnv= already can
+      override; good defaults spare repetition.
+   3. (Nicety) guard against the DFlash + Spark =max-num-seqs > 16=
+      hard-crash (kernel =NVRM NV_ERR_NO_MEMORY=) with an =mkIf=
+      assertion when =speculative.enable && maxNumSeqs > 16=.
+
+** Gap C — KV cache
+   Ornith keeps **BF16 KV** (vision tower → non-causal attn → FA2-only →
+   no FP4/FP8 KV backend). The module defaults =kvCacheDtype = "fp8_e4m3"=
+   which the existing =qwen35b= instance inherits — that is *wrong* for
+   Ornith. Set =kvCacheDtype = null= (so no =--kv-cache-dtype= is emitted)
+   *or* add =--kv-cache-dtype auto/bfloat16= explicitly. Do NOT pass
+   =--kv-cache-dtype fp8=.
+
+* Phase 1 — Verify vLLM arch + DFlash support (decides Gap A scope)
+  1. =nix develop .#vllm-aeon= (or build =.#vllm-aeon=) on/for the Spark.
+  2. Smoke-load the BF16 Ornith repo (small enough test via the 66 GB BF16
+     variant, or go straight to NVFP4 — see Phase 2):
+     =vllm serve <model> --dtype bfloat16 --max-model-len 4096
+     --reasoning-parser qwen3 --trust-remote-code --enforce-eager=
+     Confirm the =qwen3_5_moe= arch loads. If it errors on unknown arch
+     / GatedDeltaNet state → implement Gap A.1.
+  3. Add =--speculative-config '{"method":"dflash",...}'= → if "unknown
+     method: dflash", implement Gap A.2.
+
+* Phase 2 — Wire the =ornith= instance + downloads
+  In [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]], clone the =qwen35b= block and
+  apply the QUICKSTART-validated deltas:
+
+  #+BEGIN_SRC nix :tangle no
+  services.vllm.instances = {
+    # ...existing aeon / gemma / qwen35b...
+
+    # Ornith-1.0-35B AEON Ultimate Uncensored — NVFP4 + DFlash (AEON drafter)
+    # Validated DGX Spark envelope: 0.6 util, max-num-seqs 16, n=6.
+    ornith = {
+      enable = false;          # flip to true once downloads + Gap A verified
+      autoStart = false;
+      model = "/var/lib/vllm/models/Ornith-1.0-35B-NVFP4";
+      servedModelName = "ornith";
+      port = 8003;
+      # QUICKSTART §3 / §4 — DFlash stability margin on unified memory:
+      gpuMemoryUtilization = 0.6;   # validated-stable (peak 80/121 GB)
+      maxModelLen = 262144;          # full 256K fits thanks to NVFP4 (~23.7 GB)
+      maxNumSeqs = 16;               # HARD CAP w/ DFlash on Spark (see Gap B.3)
+      maxNumBatchedTokens = 16384;
+      dtype = "auto";
+      quantization = "compressed-tensors";   # NVFP4 = nvfp4-pack-quantized
+      kvCacheDtype = null;            # BF16 KV (vision tower) — do NOT pass fp8
+      mambaCacheDtype = "float32";   # ← needs Gap B.1
+      reasoningParser = "qwen3";
+      toolCallParser = "qwen3_coder"; # QUICKSTART value (serve_ornith.sh uses qwen3_xml)
+      enableChunkedPrefill = true;
+      enablePrefixCaching = true;
+      mambaBlockSize = 256;
+      speculative = {
+        enable = true;
+        # AEON all-full-attention drafter: no SWA, no kvfix patch needed (issue #1)
+        model = "/var/lib/vllm/models/AEON-DFlash-Qwen3.6-35B-A3B";
+        numSpeculativeTokens = 6;     # QUICKSTART optimum; n>6 wastes on low-accept pos
+      };
+      extraEnv = {
+        TORCH_CUDA_ARCH_LIST = "12.1a";
+        VLLM_USE_FLASHINFER_SAMPLER = "1";
+        NVIDIA_FORWARD_COMPAT = "1";
+        ENABLE_NVFP4_SM100 = "0";
+        VLLM_NVFP4_GEMM_BACKEND = "flashinfer-cutlass";
+      };
+      extraArgs = [ "--trust-remote-code" ];
+    };
+  };
+
+  services.vllm-models.models = {
+    "Ornith-1.0-35B-NVFP4"        = { repo = "AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4"; };
+    "AEON-DFlash-Qwen3.6-35B-A3B" = { repo = "AEON-7/AEON-DFlash-Qwen3.6-35B-A3B"; };
+  };
+  #+END_SRC
+
+  Add firewall port:
+  #+BEGIN_SRC nix
+  networking.firewall.allowedTCPPorts = [ 8003 # vLLM ornith
+    ... ];
+  #+END_SRC
+
+  *Drafter choice rationale:* the QUICKSTART recommends the AEON
+  all-full-attention drafter over =z-lab/Qwen3.6-35B-A3B-DFlash= because
+  it needs *no patch* (the z-lab SWA layers trip the KV page-size assert
+  on this hybrid arch — issue #1). Picking it lets us *skip*
+  =hotfixes/ornith_dflash_kvfix/= entirely. It also benchmarks higher
+  acceptance (3.71 vs 3.35 tok/step).
+
+* Phase 3 — Build, deploy, smoke-test
+  1. ~nix build .#vllm-aeon~ (push to Cachix if rebuilt for Gap A).
+  2. ~colmena apply --on dgx-spark~ (or
+     ~nixos-rebuild switch --flake '.#dgx-spark' --target-host dgx-spark.local~).
+  3. Trigger downloads: ~systemctl start vllm-model-Ornith-1.0-35B-NVFP4~
+     and ~...AEON-DFlash-Qwen3.6-35B-A3B~.
+  4. ~systemctl start vllm-ornith~ (disable the others; =conflicts= enforces).
+  5. Smoke test (QUICKSTART §5); reasoning opens = STDMETHODCALLTYPE…=, so
+     parse =.choices[0].message.reasoning_content=:
+     #+BEGIN_SRC bash
+     curl -s http://dgx-spark.local:8003/v1/chat/completions \
+       -H 'content-type: application/json' \
+       -d '{"model":"ornith","messages":[{"role":"user","content":"Write a Rust function returning the median of a slice."}],"max_tokens":400,"temperature":0.6,"top_p":0.95,"top_k":20}' \
+       | python3 -m json.tool
+     #+END_SRC
+  6. Concurrency sanity: confirm c=16 aggregate ≈ 456 tok/s without
+     watchdog kills or =NVRM NV_ERR_NO_MEMORY=. Do **not** raise
+     =--max-num-seqs= above ~16 with DFlash.
+
+* Operating notes (from QUICKSTART)
+  - Long-running DFlash acceptance *decays* over many hours of traffic;
+    restart the unit (or run a health-check that does) periodically:
+    ~systemctl restart vllm-ornith~.
+  - For higher batch throughput prefer **plain NVFP4, DFlash off**
+    (raise =max-num-seqs= freely) — never raise the cap with DFlash on.
+  - Uncensored model: refusals removed (0/80); usage responsibility rests
+    with the operator. Keep port 8003 off public ingress; use the
+    existing wireguard/age secrets for HF token.
+
+* Risks / open questions
+  | # | Question | Mitigation |
+  |---+----------+------------|
+  | R1 | Does upstream vLLM v0.23 ship =qwen3_5_moe= + =dflash= natively? | Phase 1 smoke load (BF16) before any patching |
+  | R2 | Multi-hour rebuild after adding Gap A patches on GB10 | Cachix (~graham33~ + own); accept one-time cost |
+  | R3 | =max-num-seqs > 16= + DFlash hard-crashes the box | Gap B.3 assertion; instance pins 16 |
+  | R4 | Tool-call parser choice (=qwen3_coder= vs =qwen3_xml=) differs between QUICKSTART and =serve_ornith.sh= | Start with =qwen3_coder= (QUICKSTART); flip if tool-calls malformed |
+  | R5 | NVFP4 quantized on B200 → "identical" on GB10 per README, but native fp4 GEMM path on sm_121a must use =VLLM_NVFP4_GEMM_BACKEND=flashinfer-cutlass= | Set in =extraEnv= (done above); verify lossless on the small coding probe |
+
+* Timeline
+  | Task | Estimate | Depends on |
+  |-----------------------------+----------+---------------------------|
+  | Gap B module additions | 0.5 d | — |
+  | Phase 1 arch/DFlash verify | 0.5 d | vllm-aeon builds |
+  | Gap A patches (if needed) | 1-3 d | Phase 1 result |
+  | Phase 2 instance + downloads | 0.5 d | Gap B |
+  | Build + deploy + smoke test | 1 d | all above |
+  |-----------------------------+----------+---------------------------|
+  | TOTAL | ~2-5 d | (top end only if Gap A needed) |
+
+* References
+  - [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored][Ornith repo]] · [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/blob/main/QUICKSTART_DGX_SPARK.md][DGX Spark QuickStart]] · [[https://github.com/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored/issues/1][issue #1 (kvfix)]]
+  - Models: [[https://huggingface.co/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-NVFP4][NVFP4]] (~23.7 GB) · [[https://huggingface.co/AEON-7/Ornith-1.0-35B-AEON-Ultimate-Uncensored-BF16][BF16]] (~66 GB) · [[https://huggingface.co/AEON-7/AEON-DFlash-Qwen3.6-35B-A3B][AEON DFlash drafter]]
+  - [[file:vllm-native-dgx-spark.org][vllm-native-dgx-spark.org]] — preceding plan (already executed in-tree)
+  - In-tree: [[file:../packages/vllm-aeon.nix][packages/vllm-aeon.nix]] · [[file:../modules/vllm.nix][modules/vllm.nix]] · [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] · [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]]

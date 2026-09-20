@@ -1,0 +1,242 @@
+#+TITLE: Plan: Add WezTerm Module
+#+AUTHOR: Yuan Wang
+#+TODO: TODO IN-PROGRESS | DONE CANCELLED
+
+* Overview
+
+Add a =modules/terminal/wezterm.nix= module to the Nix flake configuration,
+enabling declarative WezTerm terminal emulator configuration via home-manager.
+
+WezTerm is a GPU-accelerated cross-platform terminal emulator written in Rust.
+It supports configuration via Lua, which the home-manager module
+(=programs.wezterm=) supports through =settings= (Nix attrset → Lua table)
+and =extraConfig= (raw Lua). It also supports custom color schemes via TOML.
+
+Home-manager upstream module: [[https://github.com/nix-community/home-manager/blob/master/modules/programs/wezterm.nix][programs.wezterm]]
+
+* Design Decisions
+
+** Where the module lives
+- =modules/terminal/wezterm.nix= — reuses the existing =modules/terminal/=
+  directory which already contains the Alacritty configuration. This mirrors
+  how =modules/wm/= houses multiple window manager modules (yabai, xmonad,
+  amethyst) and =modules/browsers/= houses multiple browser modules (firefox,
+  chromium, librewolf, tor).
+
+** Option schema
+- Use =modules.terminal.wezterm.enable= (boolean) as the toggle, following the
+  same pattern as =modules.wm.yabai.enable=, =modules.browsers.firefox.enable=,
+  etc.
+- When enabled, configure =programs.wezterm= under the current user's
+  home-manager config (=home-manager.users.${config.my.username}=).
+
+** Relationship with existing Alacritty config
+- The Alacritty config is embedded in =modules/terminal/default.nix=, which is
+  controlled by =modules.terminal.enable=.
+- WezTerm gets its own sub-module so it can be enabled/disabled independently.
+  A host could run Alacritty, WezTerm, or both simultaneously during a
+  transition period.
+- No changes to =modules/terminal/default.nix= — the Alacritty config stays
+  untouched. Users who want to switch can simply disable Alacritty manually
+  (or we add a future option to =modules.terminal= to select the default
+  terminal).
+
+** Catppuccin theming
+- This repo already uses =catppuccin.nix= (mocha flavor) for theming.
+- WezTerm has a built-in ="Catppuccin Mocha"= color scheme, so we can set
+  =color_scheme = "Catppuccin Mocha"= in settings — no need for=catppuccin.nix= integration or custom TOML color schemes.
+- Alternatively, if more control is needed, the =colorSchemes= option can define
+  a custom Catppuccin Mocha TOML scheme. Start with the built-in for
+  simplicity.
+
+** Font configuration
+- Reuse =config.my.monoFont= (currently ="PragmataPro VF Mono Liga"=) and
+  =config.my.font= to match the rest of the system, just like Alacritty does.
+
+** Shell integration
+- The home-manager module sources =wezterm.sh= for shell integration via
+  =home.sessionVariables= or =programs.zsh.initExtra=. We should enable
+  zsh integration since this repo uses zsh as the primary shell.
+
+** yabai/skhd launcher keybinding
+- =modules/wm/yabai.nix= (skhdrc) has a keybinding to launch Alacritty:
+  =shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/Alacritty.app=
+- We should add an analogous keybinding for WezTerm (or replace it once
+  WezTerm becomes the default). This is a separate, optional step.
+
+* Tasks
+
+** TODO Create =modules/terminal/wezterm.nix=
+:PROPERTIES:
+:CUSTOM_ID: create-module
+:END:
+
+Create the module file with:
+
+1. Options:
+   - =modules.terminal.wezterm.enable= — =mkEnableOption "wezterm"=
+
+2. Configuration (inside =mkIf cfg.enable=):
+   #+BEGIN_SRC nix
+   home-manager.users.${config.my.username} = {
+     programs.wezterm = {
+       enable = true;
+       package = pkgs.wezterm;
+       settings = {
+         color_scheme = "Catppuccin Mocha";
+         font_size = 18;
+         font = lib.generators.mkLuaInline
+           ''wezterm.font("${config.my.monoFont}")'';
+         hide_tab_bar_if_only_one_tab = true;
+         window_padding = {
+           left = 12;
+           right = 12;
+           top = 0;
+           bottom = 0;
+         };
+         window_decorations = "NONE";
+         default_cursor_style = "SteadyBar";
+         scrollback_lines = 10000;
+       };
+       extraConfig = ''
+         -- Shell integration is handled by home-manager
+       '';
+     };
+   };
+   #+END_SRC
+
+   Settings mirror the current Alacritty config where applicable:
+   - Font family → =config.my.monoFont= (same as Alacritty)
+   - Font size → 18 (same as Alacritty)
+   - Cursor → SteadyBar (maps to Alacritty's "Beam")
+   - Window padding → x=12, y=0 (same as Alacritty)
+   - Window decorations → NONE (same as Alacritty)
+   - Tab bar hidden when single tab (Alacritty has no tab bar)
+
+** TODO Register module in =modules/default.nix=
+:PROPERTIES:
+:CUSTOM_ID: register-module
+:END:
+
+Add =./terminal/wezterm.nix= to the =common.imports= list, next to the
+existing =./terminal= entry:
+
+#+BEGIN_SRC nix
+common.imports = [
+  # ... existing entries ...
+  ./terminal
+  ./terminal/wezterm.nix   # <-- add this
+  ./typing
+];
+#+END_SRC
+
+Alternatively, if we want WezTerm to be a darwin-only module, add it to
+=darwin.imports= instead. Recommendation: put it in =common.imports= since
+WezTerm works on both macOS and Linux.
+
+** TODO Enable WezTerm on at least one host for testing
+:PROPERTIES:
+:CUSTOM_ID: enable-on-host
+:END:
+
+In a host file (e.g., =hosts/yuan-mac.nix=), add:
+
+#+BEGIN_SRC nix
+modules.terminal.wezterm.enable = true;
+#+END_SRC
+
+This allows building and testing. The Alacritty config under
+=modules.terminal.enable= can remain active for side-by-side comparison.
+
+** TODO Add shell integration for zsh
+:PROPERTIES:
+:CUSTOM_ID: shell-integration
+:END:
+
+The home-manager =programs.wezterm= module provides shell integration via
+sourcing =wezterm.sh=. Add to the module's home-manager config:
+
+#+BEGIN_SRC nix
+programs.zsh.initExtra = mkAfter ''
+  if [ -n "$WEZTERM_PANE" ]; then
+    source "${pkgs.wezterm}/etc/profile.d/wezterm.sh"
+  fi
+'';
+#+END_SRC
+
+Note: The home-manager module may handle this automatically when
+=programs.wezterm.enable= is true. Verify during implementation.
+
+** TODO Update =modules/terminal/readme.org=
+:PROPERTIES:
+:CUSTOM_ID: update-readme
+:END:
+
+Add WezTerm to the "Current Choices" section:
+
+#+BEGIN_SRC org
+Current Choices
+- Alacritty
+- WezTerm (new, GPU-accelerated, Lua-configurable)
+- starship
+- tmux
+#+END_SRC
+
+** TODO Add yabai/skhd launcher keybinding for WezTerm (optional)
+:PROPERTIES:
+:CUSTOM_ID: yabai-keybinding
+:END:
+
+In =modules/wm/yabai.nix= (skhdrc section), add a keybinding to launch
+WezTerm:
+
+#+BEGIN_SRC
+shift + ctrl + alt - t : open -n -a ~/Applications/Home\ Manager\ Apps/WezTerm.app
+#+END_SRC
+
+Or make this conditional based on which terminal is enabled. This can be
+deferred to a follow-up.
+
+** TODO Build and verify
+:PROPERTIES:
+:CUSTOM_ID: build-verify
+:END:
+
+1. Run =nix build .#yuanw= (or relevant host) to verify the build succeeds.
+2. Check that =~/.config/wezterm/wezterm.lua= is generated with the expected
+   settings.
+3. Launch WezTerm and verify:
+   - Font is PragmataPro
+   - Catppuccin Mocha theme applied
+   - Cursor is a bar
+   - No window decorations
+   - Tab bar hidden when single tab
+
+** TODO Consider future: terminal selector option (deferred)
+:PROPERTIES:
+:CUSTOM_ID: terminal-selector
+:END:
+
+Once WezTerm is stable, consider adding a =modules.terminal.defaultTerminal=
+option that selects between ="alacritty"= and ="wezterm"=. This would:
+- Enable only the selected terminal's home-manager program
+- Update the skhd/yabai launcher keybinding accordingly
+- Allow per-host selection
+
+This is out of scope for the initial PR but worth noting.
+
+* File Change Summary
+
+| File                        | Action   | Description                                    |
+|-----------------------------+----------+------------------------------------------------|
+| =modules/terminal/wezterm.nix= | CREATE   | New WezTerm module with enable option + config  |
+| =modules/default.nix=          | MODIFY   | Add =./terminal/wezterm.nix= to common.imports |
+| =modules/terminal/readme.org=  | MODIFY   | Document WezTerm as a current choice           |
+| =hosts/yuan-mac.nix=           | MODIFY   | Enable =modules.terminal.wezterm.enable=true=  |
+
+* References
+
+- [[https://wezfurlong.org/wezterm/][WezTerm documentation]]
+- [[https://github.com/nix-community/home-manager/blob/master/modules/programs/wezterm.nix][home-manager programs.wezterm module]]
+- [[https://catppuccin.com/palette/][Catppuccin palette]] (WezTerm has built-in ="Catppuccin Mocha"= scheme)
+- Existing Alacritty config in =modules/terminal/default.nix=

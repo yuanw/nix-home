@@ -1,0 +1,330 @@
+#+TITLE: vLLM Ultimate DGX Spark — AEON Fleet Container Plan for DGX Spark
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-06-28
+#+LINK: https://github.com/AEON-7/vllm-ultimate-dgx-spark
+#+LINK: https://github.com/AEON-7/vllm-ultimate-dgx-spark#quickstart-dgx-spark-copy-paste
+
+* Summary
+  Serve the [[https://github.com/AEON-7/vllm-ultimate-dgx-spark#quickstart-dgx-spark-copy-paste][vLLM Ultimate DGX Spark]] fleet — **Qwen3.6-27B**, **Gemma-4-26B-A4B**, and
+  **Qwen3.6-35B-A3B** — on the DGX Spark (GB10 / sm_121a, aarch64-linux) using the
+  *same* [[https://ghcr.io/aeon-7/aeon-vllm-ultimate][AEON vLLM container]] =ghcr.io/aeon-7/aeon-vllm-ultimate:latest= validated
+  in the ornith plan, but driven *declaratively by NixOS via systemd + Podman*
+  rather than ad-hoc =docker run=.
+
+  This is the **fleet companion** to the
+  [[file:ornith-dgx-spark-docker.org][ornith-dgx-spark-docker.org]] plan (which deploys the Ornith-1.0-35B AEON model only).
+  Whereas ornith is a single-model monolith (NVFP4 + AEON DFlash drafter, BF16 KV,
+  port 8003), this plan deploys the *three-model fleet* benchmarked in the
+  upstream README — each with its own port and optimal DGX Spark configuration:
+
+  | Instance | Model | Drafter | KV | Port | Spec tokens | GPU util |
+  |----------+-------+---------+----+------+-------------+----------|
+  | =aeon= | Qwen3.6-27B NVFP4 | z-lab DFlash (5-layer) | FP8 | 8000 | 12 | 0.78 |
+  | =gemma= | Gemma-4-26B-A4B NVFP4 | Gemma DFlash (5-layer, SWA) | FP8 | 8001 | 12 | 0.78 |
+  | =qwen35b= | Qwen3.6-35B-A3B NVFP4 | Qwen3.6-35B DFlash (8-layer) | FP8 | 8002 | 12 | 0.76 |
+
+  *Reuse note:* the three =native= instances already exist in
+  [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] (→ [[file:../hosts/dgx-spark/configuration.nix][configuration.nix]]). The Podman+CDI
+  infrastructure is proven by the =ornith= container instance (verified 2026-06-28).
+  The only work needed per fleet model is: add =backend = "podman"=, bind the
+  correct container image, confirm the KV/dtype flags match the QuickStart, and
+  re-validate throughput.
+
+* Reuse assessment (from existing in-tree artifacts + ornith plan)
+
+  The vLLM-ultimate fleet reuses the *entire* management machinery built for
+  the ornith plan. No new infrastructure — just configuration.
+
+  | Existing artifact | Reuse for the fleet |
+  |-------------------+---------------------|
+  | [[file:../modules/vllm.nix][modules/vllm.nix]] (instance systemd service, =backend= = =native= | =podman= switch) | **Direct reuse** — the =podman= backend branch already handles =ExecStart=, =ExecStartPre= (CDI guard, image pull, container cleanup), env mapping, and bind-mounts. No changes needed. |
+  | [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] (HF download oneshots) | **Direct reuse** — fleet models and drafters already listed |
+  | [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] (existing =aeon=, =gemma=, =qwen35b= instances) | **Add =backend = "podman"= and =containerImage=** to each (see [[Phase 2][Phase 2]]). Already configured =enable = false= (one-at-a-time use). |
+  | [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] (existing Podman dev env) | **Aligned** — inference Podman is enabled system-wide via =hardware.dgx-spark.enable= |
+  | [[file:../hosts/dgx-spark/cuda-fixes.nix][cuda-fixes.nix]] (CUDA 13.2 / aarch64 fixes) | Unchanged |
+  | [[file:plans/ornith-dgx-spark-docker.org][plans/ornith-dgx-spark-docker.org]] — Gap A (Podman + CDI verification) | **Gap A already closed** on 2026-06-28: CDI spec present, =podman run --device nvidia.com/gpu=all= works, AEON image pulled and cached with torch seeing GB10 (12, 1). The =hardware.dgx-spark.enable= module already wires everything. |
+  | [[file:plans/ornith-dgx-spark-docker.org][plans/ornith-dgx-spark-docker.org]] — Gap B (container backend) | **Gap B already implemented** in =modules/vllm.nix=: =backend= option (=native= | =podman=), =podman run= =ExecStart= with CDI =--device nvidia.com/gpu=all --ipc host --network host=, bind-mount paths, env passthrough via =-e=, CDI guard + image pull + container cleanup in =ExecStartPre=. |
+
+  *Verdict:* ~95 % reuse, ~5 % new (one flag per instance + model-specific
+  KV/dtype confirmation). The ornith containerization is a direct template for
+  the fleet models — the flags, the image, the runtime are identical; only
+  model paths, ports, and KV cache dtype differ.
+
+* Gaps to close (minimal — two configuration changes)
+
+** Gap A — Add =backend = "podman"= to the three fleet instances
+   :PROPERTIES:
+   :CUSTOM_ID: Gap A
+   :END:
+
+   In [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]], add =backend = "podman"= and
+   =containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest"= to the
+   =aeon=, =gemma=, and =qwen35b= instances. These fields already exist in
+   the instance submodule (added by the ornith plan's Gap B).
+
+   The =ornith= instance (already =podman=) serves as a line-by-line template.
+
+   *Flag audit against the upstream QuickStart:*
+
+   | Flag | AEON QuickStart (=aeon=) | Existing config | Container branch |
+   |------+--------------------------+-----------------+------------------|
+   | =--dtype= | =auto= | =dtype = "auto";= | ✅ same |
+   | =--quantization= | =compressed-tensors= | =quantization = "compressed-tensors";= | ✅ same |
+   | =--kv-cache-dtype= | =fp8_e4m3= | =kvCacheDtype = "fp8_e4m3";= | ✅ same |
+   | =--max-model-len= | =24576= | =maxModelLen = 24576;= | ✅ same |
+   | =--max-num-seqs= | =8= | =maxNumSeqs = 8;= | ✅ same |
+   | =--max-num-batched-tokens= | =8192= | =maxNumBatchedTokens = 8192;= | ✅ same |
+   | =--gpu-memory-utilization= | =0.78= | =gpuMemoryUtilization = 0.78;= | ✅ same |
+   | =--enable-chunked-prefill= | yes | =enableChunkedPrefill = true;= | ✅ same |
+   | =--enable-prefix-caching= | yes | =enablePrefixCaching = true;= | ✅ same |
+   | =--mamba-block-size= | =256= | =mambaBlockSize = 256;= | ✅ same |
+   | =--speculative-config= method | =dflash= | =speculative.enable = true;= | ✅ same |
+   | =--speculative-config= model | =/drafter= | =speculative.model= (host path) | → =/drafter= (podman branch auto-rewrites) |
+   | =--speculative-config= num_speculative_tokens | =12= | =speculative.numSpeculativeTokens = 12;= | ✅ same |
+   | =--trust-remote-code= | yes | =extraArgs = [ "--trust-remote-code" ];= | ✅ same |
+   | =shm-size=16g= | =--shm-size=16g= | not set | ⚠️ **add =--shm-size=16g=** to podman args |
+
+   The =--shm-size=16g= flag appears in the QuickStart's =docker run=
+   but is *not* currently wired in the =podman= backend branch — add it
+   (see [[Gap B][Gap B]]).
+
+   *Gemma-4-26B and Qwen3.6-35B-A3B specifics:*
+
+   The Gemma instance uses the same =--kv-cache-dtype fp8_e4m3= flags as
+   the QuickStart's Qwen3.6-27B recipe (confirmed by the fleet benchmark
+   section — all three models benchmark with FP8 KV). The upstream README
+   does not provide separate =docker run= blocks for Gemma-4 or the 35B-A3B;
+   the three models share the same AEON image and the same serve flags
+   (only model paths, ports, =max-model-len=, and =gpuMemoryUtilization=
+   differ). Per the fleet benchmark tables:
+   - Gemma-4-26B: =max-model-len 32768= (slightly longer context than 27B), =gpuMemoryUtilization 0.78=
+   - Qwen3.6-35B-A3B: =max-model-len 24576=, =gpuMemoryUtilization 0.76= (more conservative for larger model)
+
+   Both already match the existing config. No flag changes needed.
+
+** Gap B — Add =--shm-size=16g= to the podman backend args
+   :PROPERTIES:
+   :CUSTOM_ID: Gap B
+   :END:
+
+   The upstream QuickStart's =docker run= includes =--shm-size=16g=
+   (shared memory for vLLM's CUDA IPC / PyTorch distributed). The
+   current =podman= backend in [[file:../modules/vllm.nix][modules/vllm.nix]] does not set this.
+   Podman defaults to 64 MB =/dev/shm= — too small for vLLM's CUDA
+   graphs and tensor-parallel IPC (even though these models are
+   single-GPU, vLLM still uses shared memory for the async scheduler
+   and CUDA events).
+
+   Add to the =podmanArgs= list in =mkService=:
+
+   #+BEGIN_SRC nix :tangle no
+   ++ [ "--shm-size" "16g" ]
+   #+END_SRC
+
+   Placement: after =--network host=, before =-e= flags. Podman's CLI
+   accepts both =--shm-size 16g= and =--shm-size=16g= — the Nix
+   =escapeShellArgs= serializes them identically either way. Stick
+   with the two-arg form for readability (matching how =--device= and
+   =--ipc= are already written).
+
+   *Why this was missed in the ornith plan:* the ornith instance's
+   QUICKSTART_DGX_SPARK.md also uses =--shm-size= = (etymology: the
+   =serve_ornith.sh= recipe). We simply need to add it — both the
+   ornith plan and this fleet plan benefit.
+
+   *Verification:* after adding =--shm-size 16g=, check in the running
+   container:
+   #+BEGIN_SRC bash :tangle no
+   podman exec vllm-aeon df -h /dev/shm   # should show 16G
+   #+END_SRC
+
+   Or, if the container does not expose a shell exec-able entrypoint,
+   check the container inspect output:
+   #+BEGIN_SRC bash :tangle no
+   podman inspect vllm-aeon --format '{{.HostConfig.ShmSize}}'
+   # → 17179869184 (16 GiB in bytes)
+   #+END_SRC
+
+* Phase 1 — Add =--shm-size=16g= to the podman backend
+  1. Edit [[file:../modules/vllm.nix][modules/vllm.nix]], locate the =podmanArgs= list inside =mkService=.
+  2. Add ="--shm-size" "16g"= after ="--network" "host"=.
+  3. =nixos-rebuild switch --flake .#dgx-spark=.
+
+* Phase 2 — Convert fleet instances to podman backend
+  In [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]], for each of the three
+  instances (=aeon=, =gemma=, =qwen35b=), add:
+
+  #+BEGIN_SRC diff :tangle no
+  + backend = "podman";
+  + containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+  #+END_SRC
+
+  The =ornith= instance (lines ~170-220) is the exact template — copy
+  its backend + image fields, keep the rest of each instance's existing
+  model-specific config intact.
+
+  *After the edit, the =aeon= instance section reads:*
+
+  #+BEGIN_SRC nix :tangle no
+  aeon = {
+    enable = false;
+    autoStart = false;
+    backend = "podman";
+    containerImage = "ghcr.io/aeon-7/aeon-vllm-ultimate:latest";
+    model = "/var/lib/vllm/models/Qwen3.6-27B-AEON-NVFP4";
+    servedModelName = "aeon";
+    port = 8000;
+    gpuMemoryUtilization = 0.78;
+    maxModelLen = 24576;
+    maxNumSeqs = 8;
+    maxNumBatchedTokens = 8192;
+    dtype = "auto";
+    quantization = "compressed-tensors";
+    kvCacheDtype = "fp8_e4m3";
+    enableChunkedPrefill = true;
+    enablePrefixCaching = true;
+    mambaBlockSize = 256;
+    speculative = {
+      enable = true;
+      model = "/var/lib/vllm/models/Qwen3.6-27B-DFlash-drafter";
+      numSpeculativeTokens = 12;
+    };
+    extraArgs = [ "--trust-remote-code" ];
+  };
+  #+END_SRC
+
+  For =gemma= and =qwen35b=, the same pattern applies — only model
+  paths, ports, and GPU util differ (all already correct in config).
+
+  No model download changes needed: the =services.vllm-models.models=
+  attrset already lists all fleet models and drafters.
+
+* Phase 3 — Deploy + smoke test
+
+  1. =nixos-rebuild switch --flake .#dgx-spark=
+  2. If model downloads haven't run yet (fresh host):
+     #+BEGIN_SRC bash :tangle no
+     systemctl start vllm-model-Qwen3.6-27B-AEON-NVFP4
+     systemctl start vllm-model-Qwen3.6-27B-DFlash-drafter
+     #+END_SRC
+     Wait for both to =RemainAfterExit=.
+  3. Start the instance:
+     #+BEGIN_SRC bash :tangle no
+     systemctl start vllm-aeon
+     journalctl -u vllm-aeon -f
+     #+END_SRC
+     Expected boot: vLLM v0.23.0 loading the AEON image, DFlash
+     drafter initializing, NVFP4 weights, then /Application startup
+     complete/.
+  4. Smoke test (upstream QuickStart §5):
+     #+BEGIN_SRC bash :tangle no
+     curl -s http://dgx-spark.local:8000/v1/chat/completions \
+       -H "content-type: application/json" \
+       -d '{"model":"aeon","messages":[{"role":"user","content":"Hello!"}],"max_tokens":64,"temperature":0.0}' \
+       | python3 -m json.tool
+     #+END_SRC
+     Expect coherent response; ~30-50 tok/s single-stream.
+  5. Repeat for =gemma= (port 8001) and =qwen35b= (port 8002).
+
+  *Benchmark validation (optional but recommended per upstream README):*
+
+  Spot-check single-stream decode by category against the published
+  fleet benchmark tables (header ~ "Single-stream (c=1), by category").
+
+  | Instance | Expected coding tok/s | Expected extraction tok/s |
+  |----------+-----------------------+---------------------------|
+  | =aeon= (Qwen3.6-27B) | ~41.8 | ~44.2 |
+  | =gemma= (Gemma-4-26B) | ~155.8 (fastest) | ~202.4 |
+  | =qwen35b= (Qwen3.6-35B-A3B) | ~91.7 | ~79.8 |
+
+  If tok/s is ~20-30% below published figures, the container is still
+  working but may need drafter refresh (=systemctl restart vllm-aeon=;
+  DFlash acceptance decays over hours, see Operating Notes).
+
+* Operating notes
+
+  - **One instance at a time:** instances declare mutual =conflicts=;
+    starting =vllm-aeon= stops =vllm-gemma= and vice-versa (single GPU).
+    Use =conflicts= override only if deliberately running CPU-offloaded
+    instances (not supported).
+  - **DFlash acceptance decays** over many hours of sustained traffic;
+    =systemctl restart vllm-<name>= restores it. Consider a daily timer
+    if the instance runs continuously.
+  - **Container image drift:** =:latest= is convenient but
+    non-reproducible. Pin by digest
+    (=ghcr.io/aeon-7/aeon-vllm-ultimate@sha256:...=) once a known-good
+    build is validated; bump deliberately (the ornith plan verified a
+    successful pull 2026-06-28 — use that digest).
+  - **=--shm-size=16g=** is now wired in the podman backend — no
+    per-instance knob needed. Podman mounts the shm regardless of
+    =--device nvidia.com/gpu=all=.
+  - **Model downloads** are shared between native and container paths
+    (same =/var/lib/vllm/models=). Switching backend does not re-download.
+  - **KV cache dtype:** the fleet uses =fp8_e4m3= (FP8), not =nvfp4=.
+    The upstream README explains that DFlash (non-causal) does not pair
+    with NVFP4 KV on GB10 today. If using MTP self-speculation instead
+    of DFlash, switch to =nvfp4= for ~3× KV capacity (Recipe B).
+  - **=--max-num-seqs 8=** (two instances) or =16= (qwen35b) — well below
+    the DFlash crash threshold of 32 on GB10 (the v0.23.0 image carries
+    the high-concurrency fix that scales to 64, so these are safe).
+  - **Unified memory:** =gpu-memory-utilization= never exceeds 0.78
+    (qwen35b is 0.76). On GB10, the LPDDR5X pool is shared between CPU
+    and GPU — exceeding ~0.88 page-thrashes.
+
+* Native vs Container — fleet decision matrix
+
+  | Aspect | Native (current state) | Container (this plan) |
+  |---------------------------------------+---------------------------+--------------------------------|
+  | vLLM binary | =pkgs.vllm-aeon= (built from source, multi-hour) | AEON container (pre-compiled sm_121a + DFlash) |
+  | Maintenance | Rebase AEON patches on vLLM bumps | Pull new AEON image; zero local patch work |
+  | Build time | Multi-hour (GB10 aarch64) | None (pre-built image) |
+  | GPU passthrough | Native (no OCI runtime) | Podman + CDI (proven) |
+  | Reproducibility | High (pinned nixpkgs) | Medium (=latest= tag); pin digest to fix |
+  | Shm size | Default (systemd) | =--shm-size=16g= (explicit, matching QuickStart) |
+  | Deployment overhead | None beyond NixOS | Image pull + CDI verification |
+  | DFlash + NVFP4 KV | Not yet possible (vLLM builds may diverge) | Container ships working combination |
+  | Fleet validation | Individual model testing | Single image validated across all three models |
+
+* Risks / open questions
+
+  | # | Question | Mitigation |
+  |---+----------+------------|
+  | R1 | =--shm-size=16g= regression — does vLLM actually need 16 GB on single-GPU aarch64, or is 2 GB enough? | Start with 16 GB (matching QuickStart); reduce to 2 GB if systemd =MemoryMax= pressure is observed. The QuickStart value is conservative for =--shm-size=. |
+  | R2 | Image =:latest= may drift between ornith validation (2026-06-28) and fleet deployment | Pin to the same digest the ornith plan pulled (recorded in ornith-dgx-spark-docker.org Phase 1 verification table) |
+  | R3 | Gemma-4-26B has 5 layers of SWA in the DFlash drafter (4 of 5 SWA-2048) — does the FP8 KV change anything vs the ornith instance's BF16 KV for the Gemma drafter? | No — =--kv-cache-dtype= controls the *base* model's KV, not the drafter's. The Gemma drafter's SWA operates independently of the KV cache dtype. Confirmed by upstream README fleet benchmarks (all three use FP8 KV). |
+  | R4 | =--shm-size= flag in the native backend: native vLLM is already running without it; is it only a container concern? | Yes —=--shm-size= is an OCI-runtime-specific flag (=/dev/shm= mount size). Native systemd services use the host's =/dev/shm= (typically 50% of RAM). Only affects the podman backend. |
+  | R5 | Podman backend sets =--network host= — does this bypass the firewall rules (allowedTCPPorts 8000-8002)? | =--network host= means the container uses the host's network stack directly, so host firewall rules apply. The =networking.firewall.allowedTCPPorts= rules already cover all three ports. Verified by ornith (port 8003 works). |
+
+* Timeline
+
+  | Task | Estimate | Depends on |
+  |--------------------------------------------+----------+-------------|
+  | Gap B: Add =--shm-size=16g= to podman backend | 0.1 d | — |
+  | Gap A: Add =backend = "podman"= to three instances | 0.1 d | Gap B |
+  | Deploy + smoke test (3 models) | 0.5 d | Gap A + B |
+  | Spot-check benchmark vs published figures | 0.5 d | Deploy |
+  |--------------------------------------------+----------+-------------|
+  | TOTAL | ~1 d | (all infrastructure proven by ornith) |
+
+* References
+
+  - [[https://github.com/AEON-7/vllm-ultimate-dgx-spark][vLLM Ultimate DGX Spark repo]] · [[https://github.com/AEON-7/vllm-ultimate-dgx-spark#quickstart-dgx-spark-copy-paste][QuickStart DGX Spark]]
+  - [[https://ghcr.io/aeon-7/aeon-vllm-ultimate][AEON vLLM container image]] (vLLM 0.23.0, sm_121a, DFlash)
+  - [[https://github.com/AEON-7/vllm-ultimate-dgx-spark#v0230-fleet-benchmarks--one-image-three-models][Fleet benchmarks: Gemma-4-26B · Qwen3.6-27B · Qwen3.6-35B-A3B]]
+  - [[https://github.com/AEON-7/vllm-ultimate-dgx-spark#what-we-fixed-for-the-dgx-spark][Fixes: NVFP4 KV (PR #44389), DFlash SWA (PR #40898), prefix-cache (PR #41703), DFlash high-concurrency (PR #43982)]]
+  - [[https://github.com/AEON-7/vllm-ultimate-dgx-spark#deployment-recipes][Deployment recipes: Recipe A (DFlash + FP8 KV), Recipe B (MTP + NVFP4 KV), Recipe C (TurboQuant)]]
+
+  - Models:
+    - [[https://huggingface.co/AEON-7/Qwen3.6-27B-AEON-Ultimate-Uncensored-NVFP4][Qwen3.6-27B NVFP4 (~26 GB)]]
+    - [[https://huggingface.co/z-lab/Qwen3.6-27B-DFlash][z-lab DFlash drafter for Qwen3.6-27B (~3.3 GB)]]
+    - [[https://huggingface.co/AEON-7/Gemma-4-26B-A4B-NVFP4][Gemma-4-26B-A4B NVFP4]]
+    - [[https://huggingface.co/AEON-7/Gemma-4-26B-A4B-DFlash-drafter][Gemma-4-26B DFlash drafter]]
+    - [[https://huggingface.co/AEON-7/Qwen3.6-35B-A3B-NVFP4][Qwen3.6-35B-A3B NVFP4]]
+    - [[https://huggingface.co/AEON-7/Qwen3.6-35B-A3B-DFlash-drafter][Qwen3.6-35B-A3B DFlash drafter]]
+
+  - In-tree:
+    - [[file:../modules/vllm.nix][modules/vllm.nix]] (instance service with podman backend)
+    - [[file:../modules/vllm-models.nix][modules/vllm-models.nix]] (model download oneshots)
+    - [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]] (instance definitions)
+    - [[file:ornith-dgx-spark-docker.org][ornith-dgx-spark-docker.org]] (companion plan: Ornith-1.0-35B via same container)
+    - [[file:../modules/dev/podman.nix][modules/dev/podman.nix]] (existing Podman dev env — inference Podman is system-wide)

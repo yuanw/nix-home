@@ -6,9 +6,12 @@ jobs:
   mac:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Install Nix
       uses: DeterminateSystems/nix-installer-action@main
+      with:
+        extra-conf: |
+          experimental-features = nix-command flakes pipe-operators
     - uses: cachix/cachix-action@v17
       with:
         name: yuanwang-wf

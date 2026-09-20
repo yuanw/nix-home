@@ -11,30 +11,24 @@
 
 let
   pname = "hurl-mode";
-  version = "0-unstable-2026-02-19";
+  version = "0-unstable-2026-08-23";
 in
 melpaBuild {
   inherit pname version;
   src = fetchFromGitHub {
     owner = "JasZhe";
     repo = "hurl-mode";
-    rev = "6608e69296d37f5e090030280270d40046f1fe8e";
+    rev = "054a9bbf39a93528019d2274139dfae36e29c3cc";
     # sha256 = lib.fakeSha256;
-    sha256 = "sha256-ypo2sX6If/qMGxR2vgDQtAnF2GtNx/dC/Kb8WeEu7hk=";
+    sha256 = "sha256-aO2Z2atB/CN5icXm6csOHpH6/wywZV7G1U13bPeIhb8=";
   };
 
-  dontConfigure = true;
-  dontBuild = true;
+  files = ''("*.el")'';
 
   postPatch = ''
     substituteInPlace hurl-mode.el \
-      --replace ';;; hurl-mode.el --- Major mode for hurl' \
-                ';;; hurl-mode.el --- Major mode for hurl  -*- lexical-binding: t; -*-'
-  '';
-
-  installPhase = ''
-    mkdir -p $out/share/emacs/site-lisp/elpa/$pname-$version
-    cp -rv * $out/share/emacs/site-lisp/elpa/$pname-$version/
+      --replace-fail ';;; hurl-mode.el --- Major mode for hurl' \
+                     ';;; hurl-mode.el --- Major mode for hurl  -*- lexical-binding: t; -*-'
   '';
 
   recipe = writeText "recipe" ''

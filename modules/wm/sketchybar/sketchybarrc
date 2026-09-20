@@ -85,4 +85,3 @@ source "$ITEM_DIR/mic.sh"
 sketchybar --update
 
 echo "sketchybar configuation loaded.."
-t

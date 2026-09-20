@@ -25,6 +25,17 @@ with lib;
   # networking.proxy.default = "http://user:password@proxy:port/";
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
+  # mDNS/Avahi for .local hostname resolution
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+    };
+  };
+
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
   # console = {
@@ -91,7 +102,8 @@ with lib;
     shells = [ pkgs.zsh ];
   };
   programs.zsh.enable = true;
-  programs.gnupg.agent.enable = true;
+  # GPG agent is managed by home-manager (modules/home/gpg.nix).
+  programs.gnupg.agent.enable = false;
   time.timeZone = "America/Regina";
   virtualisation.docker.enable = false;
   #home-manager.backupFileExtension = "backup";

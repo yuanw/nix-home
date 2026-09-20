@@ -1,95 +1,157 @@
 {
   inputs,
+  inputs',
   config,
   pkgs,
   ...
 }:
-let
-  nixCustomConf = pkgs.writeText "nix.custom.conf" ''
-        lazy-trees = true
-    substituters = https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cachix.org/api/v1/cache/yuanwang-wf https://cachix.org/api/v1/cache/devenv https://cache.garnix.io https://cache.iog.io https://cache.zw3rk.com https://cache.nixos.org/
-    trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= yuanwang-wf.cachix.org-1:P/RZ5Iuuuv2MYCNCnAsLfPGmgKMKeTwPaJclkrcwx80= devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= yuanw-nix-home-macos.cachix.org-1:6sDjrV0jQY6kRgXjXe0feuDtsxnoGDnkgvXuKma5JcQ= cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk=
-    trusted-substituters = https://cache.nixos.org https://nix-community.cachix.org https://yuanw-nix-home-macos.cachix.org https://cache.garnix.io https://cache.iog.io
-  '';
-in
 {
 
   imports = [
     inputs.self.myModules.common
     inputs.self.myModules.darwin
-    ../modules/private/jellyfin-darwin.nix
+    ../modules/private/hledger.nix
+    # ../modules/private/jellyfin-darwin.nix
+  ];
+
+  environment.casks = with inputs'.nix-casks.packages; [
+    betterdisplay
+    inputs'.nix-casks.packages."1password"
+    godot
+    racket
+    vlc
   ];
   # determinate system
   nix.enable = false;
   my = {
-    username = "yuanw";
+    username = "yuan";
     name = "Yuan Wang";
     hostname = "mist";
     workspaceDirectory = "workspaces";
-    homeDirectory = "/Users/yuanw";
+    homeDirectory = "/Users/yuan";
   };
 
-  environment.etc."nix/nix.custom.conf".source = nixCustomConf;
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${config.my.username}.programs = {
-    git = {
-      settings = {
-        github.user = "yuanw";
-      };
-    };
+  home-manager.users.${config.my.username} = {
+    programs.git.settings.github.user = "yuanw";
+  };
+
+  launchd.user.agents.dgx-spark-vllm-tunnel.serviceConfig = {
+    Label = "ca.yuanwang.dgx-spark-vllm-tunnel";
+    ProgramArguments = [
+      "/usr/bin/ssh"
+      "-N"
+      "-L"
+      "18000:127.0.0.1:8000"
+      "-o"
+      "ExitOnForwardFailure=yes"
+      "-o"
+      "ServerAliveInterval=30"
+      "-o"
+      "ServerAliveCountMax=3"
+      "yuanw@dgx-spark.local"
+    ];
+    KeepAlive = true;
+    RunAtLoad = true;
+    StandardOutPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.log";
+    StandardErrorPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.err.log";
   };
   modules = {
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    jellyfin.enable = true;
-    ##ai.enable = true;
+    pi = {
+      enable = true;
+      extensionsPkgs = with pkgs.pi-extensions; [
+        pi-loop
+        pi-review
+        pi-cursor-agent
+        pi-slow-mode
+        pi-permission-gate
+        pi-mcp-adapter
+        pi-interactive-shell
+      ];
+      extensionFiles = {
+        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
+        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
+        "web-fetch.ts" = ../modules/coding-agents/pi/extensions/web-fetch.ts;
+      };
+      models = {
+        providers = {
+          dgx-spark = {
+            api = "openai-completions";
+            apiKey = "not-needed";
+            baseUrl = "http://dgx-spark.local:8000/v1";
+            compat = {
+              supportsDeveloperRole = false;
+              supportsReasoningEffort = false;
+              supportsStore = false;
+              thinkingFormat = "qwen-chat-template";
+              thinkingTokenBudgetField = "thinking_token_budget";
+            };
+            models = [
+              {
+                _launch = true;
+                contextWindow = 262144;
+                id = "qwen3.8-flash-next";
+                input = [
+                  "text"
+                  "image"
+                ];
+                maxTokens = 32768;
+                name = "Qwen3.8 Flash Next (DGX Spark)";
+                reasoning = true;
+                thinkingLevelMap = {
+                  off = "off";
+                  minimal = "minimal";
+                  low = "low";
+                  medium = "medium";
+                  high = "high";
+                  xhigh = "xhigh";
+                  max = "max";
+                };
+              }
+            ];
+          };
+        };
+      };
+
+    };
     secrets.agenix = {
       enable = true;
     };
     brew = {
       enable = true;
-      casks = [
-        "1password"
-        "betterdisplay"
-        "godot"
-        "firefox"
-        "racket"
-        "protonvpn"
-        "vlc"
-        "mouseless@preview"
-      ];
       masApps = {
         "Fresh Eyes" = 6480411697;
         "Keystroke Pro" = 1572206224;
       };
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
-    mouseless.enable = true;
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
+    neru.enable = true;
+    browsers = {
+      librewolf.enable = true;
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;
       enableLatex = false;
       enableService = true;
-      # enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+
+      modalEditing = "hel";
+
     };
     # health.enable = true;
-    typing.enable = true;
     #jellyfin.enable = true;
     dev = {
       #agda.enable = true;
       #ask.enable = true;
       scheme.enable = true;
-      lean.enable = true;
+      # lean.enable = true;
       #racket.enable = false;
       haskell.enable = false;
       #idris2.enable = true;
@@ -97,6 +159,24 @@ in
       #zig.enable = false;
     };
 
+    hermes-agent = {
+      enable = false;
+      enableGateway = false;
+      enableDashboard = false;
+      environment = {
+        DEEPSEEK_BASE_URL = "http://dgx-spark.local:8000/v1";
+        DEEPSEEK_API_KEY = "not-needed";
+      };
+      config = {
+        model = "deepseek-v4-flash";
+        custom_providers = [
+          {
+            name = "dgx-spark";
+            base_url = "http://dgx-spark.local:8000/v1";
+          }
+        ];
+      };
+    };
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";

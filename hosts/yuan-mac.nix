@@ -32,15 +32,18 @@
   };
 
   modules = {
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
+    claude-code = {
+      pkg = pkgs.claude-code;
+    };
+    pi.enable = true;
+
+    browsers = {
+      librewolf.enable = true;
+      defaultBrowser = "librewolf";
     };
     editors.emacs = {
       enable = true;
       enableService = true;
-      # TODO fix this
-      enableAider = false;
       enableLatex = false;
     };
 
@@ -53,7 +56,6 @@
       #   "homebrew/cask"
       # ];
       casks = [
-        "firefox"
         "1password"
       ];
     };

@@ -6,16 +6,16 @@
 }:
 buildNpmPackage rec {
   pname = "claude-code-acp";
-  version = "0.12.6";
+  version = "0.16.1";
 
   src = fetchFromGitHub {
     owner = "zed-industries";
     repo = "claude-code-acp";
     rev = "v${version}";
-    sha256 = "sha256-RJ3nl86fGEEh4RgZoLiyz9XOC4wlP7WxuJzavZLsjMI=";
+    sha256 = "sha256-/HeAz0jdXhLhYGcwTgthrE7cGjKjro30GQUmAn4egXs=";
   };
 
-  npmDepsHash = "sha256-3JLqokF1nk41S198NzYDT6xH8QiRm1yPBotyBnXu3E0=";
+  npmDepsHash = "sha256-poTtwIIPHcgQ2uyIUIWVOpHbdDIzVgympa7aHtuSMok=";
   dontNpmBuild = false;
 
   npmFlags = [

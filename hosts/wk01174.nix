@@ -1,6 +1,8 @@
 {
   inputs,
+  inputs',
   config,
+  pkgs,
   ...
 }:
 {
@@ -10,7 +12,7 @@
     inputs.self.myModules.darwin
     ../modules/private/work.nix
   ];
-  users.users.${config.my.username}.uid = 501;
+  users.users.${config.my.username}.uid = 505;
   my = {
     username = "yuanwang";
     name = "Yuan Wang";
@@ -35,61 +37,132 @@
       };
     };
   };
+  environment.casks = with inputs'.nix-casks.packages; [
+    betterdisplay
+    ungoogled-chromium
+    slack
+  ];
   modules = {
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    #ai.enable = true;
+    cursor.enable = true;
+    herdr.enable = true;
+    speak2text = {
+      enable = false;
+      flavor = "parakeet-mlx";
+      parakeetServer = true; # ← enables the server
+      parakeetServerPort = 5092; # ← default, optional
+    };
+    pi = {
+      enable = true;
+      extensionsPkgs = with pkgs.pi-extensions; [
+        pi-loop
+        pi-review
+        pi-cursor-agent
+        pi-slow-mode
+        pi-permission-gate
+        pi-mcp-adapter
+        pi-interactive-shell
+        pi-ponytail
+      ];
+      extensionFiles = {
+        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
+        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
+      };
+      models = {
+        providers = {
+          ollama = {
+            api = "openai-completions";
+            apiKey = "ollama";
+            baseUrl = "http://localhost:11434/v1";
+            models = [
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 202752;
+                id = "glm-5.1:cloud";
+                input = [ "text" ];
+                reasoning = true;
+              }
+              {
+                _launch = true;
+                contextWindow = 262144;
+                id = "kimi-k2.6:cloud";
+                input = [
+                  "text"
+                  "image"
+                ];
+                reasoning = true;
+              }
+            ];
+          };
+        };
+      };
+      skills =
+        (with pkgs.claude-plugins; [
+          caveman
+          humanizer
+          emacs-skills
+          i-have-adhd
+        ])
+        ++ [
+          pkgs.codingAgentsSkillPackages.grilling
+          pkgs.codingAgentsSkillPackages.teach
+          pkgs.codingAgentsSkillPackages.disk-space
+          pkgs.codingAgentsSkillPackages.explain-diff-html
+          pkgs.pi-extensions.pi-interactive-shell
+        ]
+        ++ (pkgs.lib.attrValues pkgs.pi-extensions.pi-ponytail.passthru.skills);
+    };
+    browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;
     };
-    #mouseless.enable = true;
+    claude-code = {
+      enable = true;
+      enableClaudeMem = false;
+    };
+    neru.enable = true;
     brew = {
       enable = true;
       # taps = [ "homebrew/core" "homebrew/cask" ];
       casks = [
         "karabiner-elements"
-        "mouseless@preview"
-        "slack"
-        "sloth"
-        "ungoogled-chromium"
         "viscosity"
-        #"librewolf"
-        "firefox"
       ];
       brews = [
         "redis"
-        "tccutil"
         #"go"
       ];
     };
-    browsers.firefox = {
-      enable = true;
-      pkg = null;
-    };
+    browsers.librewolf.enable = true;
     editors.emacs = {
       enable = true;
       enableService = true;
       enableLatex = true;
-
-      #enableAider = true;
-      # enableCopilot = true;
-      #lspStyle = "lsp-bridge";
+      modalEditing = "hel";
     };
     # health.enable = true;
-    typing.enable = true;
     dev = {
       # agda.enable = true;
       # ask.enable = true;
       dart.enable = true;
       java.enable = true;
+      gcloud.enable = true;
       go.enable = true;
       playwright.enable = true;
       podman.enable = true;
       #scheme.enable = true;
       #haskell.enable = true;
-      lean.enable = true;
+      # lean.enable = true;
       idris2.enable = false;
       python.enable = true;
       zig.enable = false;
@@ -99,6 +172,7 @@
     tmux = {
       enable = true;
       mainWorkspaceDir = "$HOME/workspaces";
+      whichKey.enable = true;
     };
     terminal = {
       enable = true;
@@ -110,7 +184,10 @@
 
     work = {
       enable = true;
+      datadogMcp.enable = true;
       includeTrio = true;
+      atlassianMcp.enable = true;
+      atlassianMcp.readOnly = false;
     };
   };
 }

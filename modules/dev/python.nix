@@ -34,11 +34,14 @@ in
           pytest
           pyflakes
           pillow
+          huggingface-hub
           # pylsp-mypy
           virtualenv
           virtualenvwrapper
           opentype-feature-freezer
           fpdf2
+          requests
+          uv
           #litellm
           #tokenizers
         ]

@@ -1,4 +1,10 @@
-{ config, lib, ... }:
+{
+  config,
+  inputs',
+  lib,
+  options,
+  ...
+}:
 
 with lib;
 let
@@ -15,14 +21,21 @@ in
         assertion = config.modules.brew.enable;
         message = "need homebrew to install mouseless (for now)";
       }
+      {
+        assertion = !config.modules.neru.enable;
+        message = "modules.mouseless and modules.neru cannot both be enabled on the same host";
+      }
 
     ];
 
-    modules.brew = {
-      casks = [
-        "mouseless@preview"
-      ];
-    };
+    environment.casks = mkIf (options ? environment.casks) (mkAfter [
+      inputs'.nix-casks.packages.mouseless
+    ]);
+
+    environment.loginItems.items = mkIf (options ? environment.loginItems.items) (mkAfter [
+      "/Applications/Nix Casks/Mouseless.app"
+    ]);
+
     home-manager.users.${config.my.username} =
       hm@{
         pkgs,

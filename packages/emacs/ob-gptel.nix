@@ -10,12 +10,12 @@
 }:
 melpaBuild {
   pname = "ob-gptel";
-  version = "0-unstable-2026-03-16";
+  version = "0-unstable-2026-09-04";
   src = fetchFromGitHub {
     owner = "jwiegley";
     repo = "ob-gptel";
-    rev = "cbed018a7d81de9ba8dc3220e1c4d10b7bb29b11";
-    sha256 = "sha256-mXGzu6W21dVZ/utwyUEZxSn5PbnsKtTkBGTVi//cyyM=";
+    rev = "db030ea033e9cce0db6457ba530d6f29e5d181f2";
+    sha256 = "sha256-6oJQi5MwO2xG6SbIo10OJInP2qZep2Kp8WYfmvBbQ3w=";
 
   };
 

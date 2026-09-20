@@ -52,6 +52,7 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.colmena.nixosModules.deploymentOptions
             inputs.home-manager.nixosModules.home-manager
             {
               home-manager = {
@@ -61,11 +62,11 @@
                   inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
                   inputs.direnv-instant.homeModules.direnv-instant
-                  inputs.mics-skills.homeManagerModules.default
-                  inputs.git-ai.homeManagerModules.default
+                  inputs.mics-skills.homeModules.default
+                  inputs.mcp-servers-nix.homeManagerModules.default
                   (import ../modules/home/claude-code-plugins.nix)
+                  (import ../modules/helpers/mergetools.nix)
                 ];
-                # users.johnw = import ./config/home.nix;
                 backupFileExtension = "hm-bak";
                 extraSpecialArgs = { inherit inputs; };
               };
@@ -95,7 +96,59 @@
             {
               nixpkgs.hostPlatform = system;
             }
+            inputs.colmena.nixosModules.deploymentOptions
             ./misfit
+          ];
+        }
+      );
+      dgx-spark = withSystem "aarch64-linux" (
+        {
+          config,
+          inputs',
+          system,
+          ...
+        }:
+        inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            isDarwin = false;
+            isNixOS = true;
+            hostname = "dgx-spark";
+            packages = config.packages;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { system = system; };
+            };
+            inherit inputs inputs';
+          };
+          modules = [
+            {
+              nixpkgs.hostPlatform = system;
+              nixpkgs.config.allowUnfree = true;
+              nixpkgs.config.cudaSupport = true;
+              nixpkgs.config.cudaCapabilities = [
+                "12.0"
+                "12.1"
+              ];
+            }
+            inputs.colmena.nixosModules.deploymentOptions
+            inputs.home-manager.nixosModules.home-manager
+            {
+              home-manager = {
+                useGlobalPkgs = true;
+                useUserPackages = true;
+                sharedModules = [
+                  inputs.betterfox.homeModules.betterfox
+                  inputs.catppuccin.homeModules.catppuccin
+                  inputs.direnv-instant.homeModules.direnv-instant
+                  inputs.mics-skills.homeModules.default
+                  inputs.mcp-servers-nix.homeManagerModules.default
+                  (import ../modules/home/claude-code-plugins.nix)
+                  (import ../modules/helpers/mergetools.nix)
+                ];
+                backupFileExtension = "hm-bak";
+                extraSpecialArgs = { inherit inputs; };
+              };
+            }
+            ./dgx-spark
           ];
         }
       );
@@ -126,6 +179,7 @@
                 {
                   nixpkgs.hostPlatform = system;
                 }
+                inputs.nix-darwin-login-items.darwinModules.default
                 inputs.home-manager.darwinModules.home-manager
                 {
                   home-manager = {
@@ -135,9 +189,10 @@
                       inputs.betterfox.homeModules.betterfox
                       inputs.catppuccin.homeModules.catppuccin
                       inputs.direnv-instant.homeModules.direnv-instant
-                      inputs.mics-skills.homeManagerModules.default
-                      inputs.git-ai.homeManagerModules.default
+                      inputs.mics-skills.homeModules.default
+                      inputs.mcp-servers-nix.homeManagerModules.default
                       (import ../modules/home/claude-code-plugins.nix)
+                      (import ../modules/helpers/mergetools.nix)
                     ];
 
                     backupFileExtension = "hm-bak";
@@ -151,7 +206,7 @@
       in
       {
         ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
-        yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
+        # yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
         mist = configure "mist" "aarch64-darwin" true ./mist.nix;
         WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
       };
@@ -161,7 +216,9 @@
     {
       packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
-      packages.yuanw = self.darwinConfigurations.yuanw.system;
+      packages.dgx-spark = self.nixosConfigurations.dgx-spark.config.system.build.toplevel;
+      # darwinConfigurations.yuanw is disabled above; keep this in sync if you re-enable it.
+      # packages.yuanw = self.darwinConfigurations.yuanw.system;
       packages.ci = self.darwinConfigurations.ci.system;
       packages.wk01174 = self.darwinConfigurations.WK01174.system;
       packages.mist = self.darwinConfigurations.mist.system;

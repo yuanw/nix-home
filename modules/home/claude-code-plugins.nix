@@ -12,6 +12,8 @@ let
   cfg = config.programs.claude-code;
   homeDir = config.home.homeDirectory;
 
+  pluginPackages = lib.attrValues cfg.plugins;
+
   allPlugins = map (p: {
     name = p.passthru.claudePlugin.pname;
     inherit (p.passthru.claudePlugin)
@@ -27,7 +29,7 @@ let
       inherit (p.passthru.claudePlugin.marketplace) owner repo;
     };
     pluginSrc = p;
-  }) cfg.plugins;
+  }) pluginPackages;
 
   allRuntimeInputs = lib.unique (lib.flatten (map (p: p.runtimeInputs) allPlugins));
 
@@ -97,12 +99,6 @@ let
   '';
 in
 {
-  options.programs.claude-code.plugins = lib.mkOption {
-    type = lib.types.listOf lib.types.package;
-    default = [ ];
-    description = "List of claude plugin packages built with mkClaudePlugin.";
-  };
-
   options.programs.claude-code.skillPackages = lib.mkOption {
     type = lib.types.listOf lib.types.package;
     default = [ ];

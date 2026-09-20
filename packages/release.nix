@@ -9,28 +9,25 @@ rec {
   sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
   claude-code-acp = pkgs.callPackage ./claude-code-acp.nix { };
+  cursor-agent-acp = pkgs.callPackage ./cursor-agent-acp.nix { };
+  pi-acp = pkgs.callPackage ./pi-acp.nix { };
   auto-save = pkgs.callPackage ./emacs/auto-save.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
   };
-  claude-code-ide = pkgs.callPackage ./emacs/claude-code-ide {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
-  };
-
   consult-omni = pkgs.callPackage ./emacs/consult-omni {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
   emacs-reader = pkgs.callPackage ./emacs/emacs-reader.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs)
+      lib
+      stdenv
       fetchFromGitea
-      writableTmpDirAsHomeHook
-      mupdf
-      writeText
+      mupdf-headless
+      pkg-config
       ;
-
+    melpaBuild = pkgs.emacs.pkgs.melpaBuild;
   };
   emacs-reveal = pkgs.callPackage ./emacs/emacs-reveal.nix {
     trivialBuild = pkgs.stdenv.mkDerivation;
@@ -83,6 +80,34 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
 
+  hel = pkgs.callPackage ./emacs/hel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit ultra-scroll;
+    inherit (pkgs.emacsPackages) avy dash pcre2el;
+  };
+
+  hel-leader = pkgs.callPackage ./emacs/hel-leader.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash s;
+  };
+
+  hel-ghostel = pkgs.callPackage ./emacs/hel-ghostel.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash ghostel;
+  };
+
+  hel-collection = pkgs.callPackage ./emacs/hel-collection.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit hel;
+    inherit (pkgs.emacsPackages) dash;
+  };
+
   home-row-expreg = pkgs.callPackage ./emacs/expreg.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
@@ -98,10 +123,39 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText;
   };
 
+  md-ts-mode = pkgs.callPackage ./emacs/md-ts-mode.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  markdown-table-wrap = pkgs.callPackage ./emacs/markdown-table-wrap.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
+  pi-coding-agent = pkgs.callPackage ./emacs/pi-coding-agent.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit md-ts-mode markdown-table-wrap;
+    transient = pkgs.emacs.pkgs.elpaPackages.transient;
+  };
+
   agent-shell = pkgs.callPackage ./emacs/agent-shell.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
     inherit shell-maker acp;
+  };
+
+  agent-shell-knockknock = pkgs.callPackage ./emacs/agent-shell-knockknock.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell knockknock;
+  };
+
+  agent-shell-manager = pkgs.callPackage ./emacs/agent-shell-manager.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+    inherit agent-shell;
   };
 
   magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
@@ -109,9 +163,15 @@ rec {
     inherit (pkgs) fetchFromGitHub;
   };
 
-  aws-iam-authenticator = pkgs.callPackage ./aws-iam-authenticator.nix { };
+  cozempic = pkgs.python3Packages.callPackage ./cozempic { };
+  chroma-mcp = pkgs.python3Packages.callPackage ./chroma-mcp.nix { };
+  tccutil = pkgs.python3Packages.callPackage ./tccutil { };
   caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
   claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
   emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
+  pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
+  pi-mcp-adapter = pkgs.callPackage ./pi-extensions/pi-mcp-adapter.nix { };
+  pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
+  ds4 = pkgs.callPackage ./ds4 { };
 }

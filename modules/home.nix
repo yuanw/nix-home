@@ -7,15 +7,24 @@
 hm@{ pkgs, ... }:
 
 {
+  imports = [
+    ./home/browser-cli.nix
+    ./home/gpg.nix
+    ./home/nix.nix
+  ];
   home.username = config.my.username;
   home.homeDirectory = config.my.homeDirectory;
   # https://github.com/nix-community/home-manager/blob/c1e671036224089937e111e32ea899f59181c383/modules/misc/version.nix#L14
 
-  home.stateVersion = "25.11";
+  home.stateVersion = "26.05";
   home.packages =
     (import ./packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isDarwin (import ./macos_packages.nix { inherit pkgs; })
-    ++ lib.optionals pkgs.stdenvNoCC.isLinux (import ./linux_packages.nix { inherit pkgs; });
+    ++ lib.optionals pkgs.stdenvNoCC.hostPlatform.isDarwin (
+      import ./macos_packages.nix { inherit pkgs; }
+    )
+    ++ lib.optionals pkgs.stdenvNoCC.hostPlatform.isLinux (
+      import ./linux_packages.nix { inherit pkgs; }
+    );
   home.sessionPath = [
     "/usr/local/bin"
     "/usr/local/sbin"
@@ -33,19 +42,13 @@ hm@{ pkgs, ... }:
   programs = {
     bat = {
       enable = true;
-      extraPackages = with pkgs.bat-extras; [
-        # batdiff
-        batman
-        #batgrep
-        batwatch
-      ];
     };
     direnv-instant.enable = true;
     mics-skills = {
       enable = true;
       package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-      skillsSrc = inputs.mics-skills;
       skills = [
+        "browser-cli"
         "kagi-search"
         "pexpect-cli"
         "screenshot-cli"
@@ -134,13 +137,13 @@ hm@{ pkgs, ... }:
     fzf = {
       enable = true;
       enableZshIntegration = true;
+      historyWidget.command = "";
     };
 
     difftastic = {
       enable = true;
       git = {
         enable = true;
-        diffToolMode = true;
       };
     };
     git = {
@@ -175,7 +178,7 @@ hm@{ pkgs, ... }:
         branch.sort = "-committerdate";
         column.ui = "auto";
         diff = {
-          ignoreSubmodules = "dirty";
+          # ignoreSubmodules = "dirty";
           renames = "copies";
           mnemonicprefix = true;
         };
@@ -202,7 +205,10 @@ hm@{ pkgs, ... }:
         };
         credential = {
           helper =
-            if pkgs.stdenvNoCC.isDarwin then "osxkeychain" else "!${pkgs.gh}/bin/gh auth git-credential";
+            if pkgs.stdenvNoCC.hostPlatform.isDarwin then
+              "osxkeychain"
+            else
+              "!${pkgs.gh}/bin/gh auth git-credential";
           useHttpPath = true;
         };
       };
@@ -229,6 +235,9 @@ hm@{ pkgs, ... }:
         ".claude"
         ".agent-shell"
         ".dir-locals.el"
+        # claude-mem generated folder context files
+        "**/CLAUDE.md"
+        "!/CLAUDE.md"
       ];
     };
 

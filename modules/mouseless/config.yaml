@@ -465,7 +465,7 @@ style_configs:
   - 0.32
   - 0.7
   cursor_size: 7
-  font_family: '[Apple System Font]'
+  font_family: PragmataProMonoLiga-Bold
   font_size_multiplier: 0.4
   font_weight: 500
   grid_line_style: lines

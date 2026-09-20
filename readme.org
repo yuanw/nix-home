@@ -1,7 +1,6 @@
 #+TITLE: My nix-darwin/NixOS configuration
 
 
-[[https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fyuanw%2Fnix-home]]
 
 [[https://github.com/yuanw/nix-home/actions/workflows/ci.yml/badge.svg]]
 
@@ -18,14 +17,14 @@ feel free to take what you like.
 | WM       | yabai + skhd + sketchybar |
 | Terminal | Alacritty + tmux          |
 | Editor   | Emacs + helix             |
-| Browser  | Firefox (shyfox)          |
+| Browser  | Librewolf                 |
 
 * Current Nixos setup
 | Shell    | zsh + starship   |
 | WM       | xmonad + xmobar  |
 | Terminal | Alacritty + tmux |
 | Editor   | Emacs + helix    |
-| Browser  | Firefox (shyfox) |
+| Browser  | Librewolf                    |
 
 * Inspirations
 

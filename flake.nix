@@ -11,12 +11,11 @@
 
     mics-skills.url = "github:Mic92/mics-skills";
 
-    claude-code.url = "github:sadjow/claude-code-nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    git-ai.url = "github:git-ai-project/git-ai";
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -41,12 +40,13 @@
     haskell-flake.url = "github:srid/haskell-flake";
     nur.url = "github:nix-community/NUR";
     emacs = {
-      url = "github:nix-community/emacs-overlay/640fb2092ce9e7547e5d717ff621e561ea5d12a4";
+      url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    emacs-plus = {
-      url = "github:d12frosted/homebrew-emacs-plus";
-      flake = false;
+    nima = {
+      url = "github:yuanw/nima/set-and-vars";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
     agenix = {
       url = "github:ryantm/agenix";
@@ -61,12 +61,7 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    typewell = {
-      url = "github:yuanw/typewell";
-    };
-    mono-stretchly-darwin = {
-      url = "github:yuanw/mono-stretchly";
-    };
+
     shy-fox = {
       url = "github:Naezr/ShyFox";
       flake = false;
@@ -81,6 +76,27 @@
       inputs.treefmt-nix.follows = "treefmt-nix";
     };
     impermanence.url = "github:nix-community/impermanence";
+    nix-casks = {
+      url = "github:atahanyorganci/nix-casks/archive";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.treefmt-nix.follows = "treefmt-nix";
+      inputs.flake-parts.follows = "flake-parts";
+    };
+    nix-darwin-login-items.url = "github:yuanw/nix-darwin-login-items";
+    neru = {
+      url = "github:y3owk1n/neru";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    preservation = {
+      url = "github:nix-community/preservation";
+    };
+    dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    nixified-ai = {
+      url = "github:nixified-ai/flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    colmena.url = "github:zhaofengli/colmena";
   };
 
   outputs =
@@ -89,17 +105,27 @@
       systems = [
         "aarch64-darwin"
         "aarch64-linux"
-        "x86_64-darwin"
         "x86_64-linux"
       ];
       imports = [
         ./devshell.nix
         ./hosts
+        ./hosts/colmena.nix
         ./modules
+        ./tests/flake-module.nix
         inputs.git-hooks.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.haskell-flake.flakeModule
       ];
+
+      flake = {
+        nixConfig = {
+          extra-substituters = [ "https://cache.numtide.com" ];
+          extra-trusted-public-keys = [
+            "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+          ];
+        };
+      };
       perSystem =
         { system, pkgs, ... }:
         {
@@ -108,6 +134,12 @@
             config = {
               allowUnfree = true;
             };
+            overlays =
+              (inputs.nixpkgs.lib.optionals (builtins.elem system [
+                "aarch64-linux"
+                "x86_64-linux"
+              ]) [ inputs.dgx-spark.overlays.fixes ])
+              ++ [ (import ./packages) ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;
@@ -122,6 +154,9 @@
           #   };
           # };
 
+          packages = {
+            llama-benchy = pkgs.llama-benchy;
+          };
           treefmt.imports = [ ./treefmt.nix ];
           pre-commit.settings.hooks.treefmt.enable = true;
           pre-commit.settings.package = pkgs.prek;
