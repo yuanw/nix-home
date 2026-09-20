@@ -9,7 +9,6 @@
       ./browsers/librewolf.nix
       ./browsers/tor.nix
       ./catppuccin.nix
-      ./coding-agents/claude-code
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix

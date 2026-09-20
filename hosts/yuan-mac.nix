@@ -32,9 +32,6 @@
   };
 
   modules = {
-    claude-code = {
-      pkg = pkgs.claude-code;
-    };
     pi.enable = true;
 
     browsers = {

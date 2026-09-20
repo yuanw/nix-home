@@ -233,7 +233,6 @@ in
     mainCodingAgent = lib.mkOption {
       type = lib.types.enum [
         "pi"
-        "claude"
         "codex"
         "opencode"
       ];
@@ -300,11 +299,6 @@ in
         description = "Install Herdr's Pi integration when modules.pi is enabled.";
       };
 
-      claude.enable = lib.mkOption {
-        type = lib.types.bool;
-        default = false;
-        description = "Install Herdr's Claude Code integration when modules.claude-code is enabled.";
-      };
     };
   };
 

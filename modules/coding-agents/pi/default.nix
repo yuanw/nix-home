@@ -9,12 +9,32 @@ let
   cfg = config.modules.pi;
   hasPermissionGate = lib.any (p: p.pname == "permission-gate") cfg.extensionsPkgs;
   defaultConfigDir = ".pi/agent";
-  claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
   agentPmManagedSkillNames = [
+    "caveman"
+    "d2"
+    "describe"
     "disk-space"
+    "dired"
+    "emacs-skills"
+    "emacsclient"
     "explain-diff-html"
+    "file-links"
+    "gnuplot"
     "grilling"
+    "highlight"
+    "humanizer"
+    "i-have-adhd"
     "journal-session"
+    "mermaid"
+    "open"
+    "plantuml"
+    "ponytail"
+    "ponytail-audit"
+    "ponytail-debt"
+    "ponytail-gain"
+    "ponytail-help"
+    "ponytail-review"
+    "select"
     "teach"
   ];
   agentPmManagedPromptNames = [
@@ -114,16 +134,12 @@ in
 
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
-      default = (
-        with claudePlugins;
-        [
-          humanizer
-          emacs-skills
-        ]
-      );
+      default = [ ];
       description = ''
-        Pi skill packages. Each package's pname is used as the skill directory
-        name under <configDir>/skills/.
+        Legacy pi-only skill packages. Shared skills should be declared in
+        modules/coding-agents/prompts and rendered through programs.agent-pm
+        instead. Each package's pname is used as the skill directory name under
+        <configDir>/skills/.
       '';
     };
 

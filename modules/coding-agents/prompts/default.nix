@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   ...
 }:
 let
@@ -14,6 +15,66 @@ let
       text;
 
   skillBody = path: stripFrontmatter (builtins.readFile path);
+
+  humanizerSrc = pkgs.fetchFromGitHub {
+    owner = "blader";
+    repo = "humanizer";
+    rev = "c78047bd4300e5a995d37ae8c7684aa2d53326cd";
+    hash = "sha256-wkrarl0kHUdfQM5pTMikB/yQm0kngmhsMlqoxZ63Fqs=";
+  };
+
+  emacsSkillsSrc = pkgs.fetchFromGitHub {
+    owner = "xenodium";
+    repo = "emacs-skills";
+    rev = "de7adccbc4aef5f4e1e7ebc7a487bdcd7f95509a";
+    hash = "sha256-ilgWnb3w+6mkeLwy5xkU5iX0NRbguur7iTLVqCu27TA=";
+  };
+
+  ponytailSrc = pkgs.fetchFromGitHub {
+    owner = "DietrichGebert";
+    repo = "ponytail";
+    rev = "2ed6c52c9d7e5e56942508591085fd45dea277d3";
+    hash = "sha256-bGdXvzhWPwGdz3T2Yh2h6lf+3PBRFAfdBxP5pESmCHI=";
+  };
+
+  claudePromptsSrc = pkgs.fetchFromGitHub {
+    owner = "jwiegley";
+    repo = "claude-prompts";
+    rev = "39475306a3462d1ecb4697135b24cfaf6184409c";
+    hash = "sha256-AggJ0MAHvUX72xxMeeXZr4h6lmekmyLryrtplI/Am+w=";
+  };
+
+  iHaveAdhdSrc = pkgs.fetchFromGitHub {
+    owner = "ayghri";
+    repo = "i-have-adhd";
+    rev = "cbe69fb83c08a37cf54d5ec9ec6bb88c8bc9973c";
+    hash = "sha256-56Ia9a8lvALeSmUDAumfu9nzmYBzONSlBpFv7o1w7ys=";
+  };
+
+  emacsSkill =
+    {
+      name,
+      description,
+      extraFrontmatter ? { },
+      elisp ? null,
+    }:
+    {
+      type = "skill";
+      inherit name description extraFrontmatter;
+      body = skillBody "${emacsSkillsSrc}/skills/${name}/SKILL.md";
+    }
+    // lib.optionalAttrs (elisp != null) {
+      files."${elisp}".text = builtins.readFile "${emacsSkillsSrc}/skills/${name}/${elisp}";
+    };
+
+  ponytailSkill = name: description: {
+    type = "skill";
+    inherit name description;
+    extraFrontmatter = {
+      license = "MIT";
+    };
+    body = skillBody "${ponytailSrc}/skills/${name}/SKILL.md";
+  };
 
   journalSessionBody = agentName: ''
     Save the current ${agentName} session as a journal entry using emacsclient and denote-journal.
@@ -108,4 +169,138 @@ in
       "RESOURCES-FORMAT.md".text = builtins.readFile ../common/skills/teach/RESOURCES-FORMAT.md;
     };
   }
+
+  {
+    type = "skill";
+    name = "humanizer";
+    description = "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written.";
+    extraFrontmatter = {
+      version = "2.1.1";
+    };
+    body = skillBody "${humanizerSrc}/SKILL.md";
+  }
+
+  {
+    type = "skill";
+    name = "caveman";
+    description = "Compress and simplify prompts to preserve meaning while reducing use of context.";
+    body = skillBody "${claudePromptsSrc}/skills/caveman/SKILL.md";
+  }
+
+  {
+    type = "skill";
+    name = "i-have-adhd";
+    description = "Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, and make wins visible.";
+    extraFrontmatter = {
+      "disable-model-invocation" = true;
+      license = "MIT";
+    };
+    body = skillBody "${iHaveAdhdSrc}/skills/i-have-adhd/SKILL.md";
+  }
+
+  (emacsSkill {
+    name = "d2";
+    description = "Create a diagram from the current context using D2 and output the resulting image path.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+  })
+
+  (emacsSkill {
+    name = "describe";
+    description = "Look up Emacs documentation via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    elisp = "agent-skill-describe.el";
+  })
+
+  (emacsSkill {
+    name = "dired";
+    description = "Open files from the latest interaction in an Emacs dired buffer via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    elisp = "agent-skill-dired.el";
+  })
+
+  (emacsSkill {
+    name = "emacsclient";
+    description = "Always use emacsclient instead of emacs. This applies to all Emacs operations: user requests, byte compilation, check-parens, running ERT tests, and any other elisp evaluation.";
+    extraFrontmatter = {
+      tools = "Bash";
+    };
+  })
+
+  (emacsSkill {
+    name = "file-links";
+    description = "When referencing files, format them as markdown links with line numbers using GitHub-style #L syntax.";
+  })
+
+  (emacsSkill {
+    name = "gnuplot";
+    description = "Plot data from the current context using gnuplot and output the resulting image path.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+  })
+
+  (emacsSkill {
+    name = "highlight";
+    description = "Highlight relevant regions in one or more files in Emacs via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    elisp = "agent-skill-highlight.el";
+  })
+
+  (emacsSkill {
+    name = "mermaid";
+    description = "Create a diagram from the current context using Mermaid and output the resulting image path.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+  })
+
+  (emacsSkill {
+    name = "open";
+    description = "Open files from the latest interaction in Emacs buffers via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    elisp = "agent-skill-open.el";
+  })
+
+  (emacsSkill {
+    name = "plantuml";
+    description = "Create a diagram from the current context using PlantUML and output the resulting image path.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+  })
+
+  (emacsSkill {
+    name = "select";
+    description = "Open one or more files in Emacs and select a region relevant to the current discussion via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    elisp = "agent-skill-select.el";
+  })
+
+  (ponytailSkill "ponytail" "Lazy senior dev mode: force the simplest solution that actually works, prefer stdlib/native features, and stop before over-engineering.")
+  (ponytailSkill "ponytail-audit" "Whole-repo audit for over-engineering: a ranked list of what to delete, simplify, or replace with stdlib/native equivalents.")
+  (ponytailSkill "ponytail-debt" "Harvest every ponytail deferral comment into a debt ledger. One-shot report, changes nothing.")
+  (ponytailSkill "ponytail-gain" "Show ponytail's measured impact as a compact scoreboard. One-shot display, not a persistent mode.")
+  (ponytailSkill "ponytail-help" "Quick-reference card for all ponytail modes, skills, and commands.")
+  (ponytailSkill "ponytail-review" "Review a diff for over-engineering only: what to delete, simplify, or replace with stdlib/native equivalents.")
 ]

@@ -106,25 +106,13 @@
           };
         };
       };
-      skills =
-        (with pkgs.claude-plugins; [
-          caveman
-          humanizer
-          emacs-skills
-          i-have-adhd
-        ])
-        ++ [
-          pkgs.pi-extensions.pi-interactive-shell
-        ]
-        ++ (pkgs.lib.attrValues pkgs.pi-extensions.pi-ponytail.passthru.skills);
+      skills = [
+        pkgs.pi-extensions.pi-interactive-shell
+      ];
     };
     browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;
-    };
-    claude-code = {
-      enable = true;
-      enableClaudeMem = false;
     };
     neru.enable = true;
     brew = {
