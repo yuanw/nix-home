@@ -40,6 +40,7 @@ nix-update:
     @nix-update -f ./packages/release.nix gptel-agent --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
     @nix-update -f ./packages/release.nix humanizer --src-only --version=branch
+    @nix-update -f ./packages/release.nix i-have-adhd --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix hel --src-only --version=branch --override-filename ./packages/emacs/hel.nix
     @nix-update -f ./packages/release.nix hel-leader --src-only --version=branch --override-filename ./packages/emacs/hel-leader.nix
@@ -56,6 +57,7 @@ nix-update:
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
+    @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 

@@ -46,6 +46,7 @@ hm@{ pkgs, ... }:
       for skill in \
         caveman \
         d2 \
+        denote-note \
         describe \
         disk-space \
         dired \

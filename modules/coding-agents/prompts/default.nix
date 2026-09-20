@@ -16,40 +16,9 @@ let
 
   skillBody = path: stripFrontmatter (builtins.readFile path);
 
-  humanizerSrc = pkgs.fetchFromGitHub {
-    owner = "blader";
-    repo = "humanizer";
-    rev = "c78047bd4300e5a995d37ae8c7684aa2d53326cd";
-    hash = "sha256-wkrarl0kHUdfQM5pTMikB/yQm0kngmhsMlqoxZ63Fqs=";
-  };
-
-  emacsSkillsSrc = pkgs.fetchFromGitHub {
-    owner = "xenodium";
-    repo = "emacs-skills";
-    rev = "de7adccbc4aef5f4e1e7ebc7a487bdcd7f95509a";
-    hash = "sha256-ilgWnb3w+6mkeLwy5xkU5iX0NRbguur7iTLVqCu27TA=";
-  };
-
-  ponytailSrc = pkgs.fetchFromGitHub {
-    owner = "DietrichGebert";
-    repo = "ponytail";
-    rev = "2ed6c52c9d7e5e56942508591085fd45dea277d3";
-    hash = "sha256-bGdXvzhWPwGdz3T2Yh2h6lf+3PBRFAfdBxP5pESmCHI=";
-  };
-
-  claudePromptsSrc = pkgs.fetchFromGitHub {
-    owner = "jwiegley";
-    repo = "claude-prompts";
-    rev = "39475306a3462d1ecb4697135b24cfaf6184409c";
-    hash = "sha256-AggJ0MAHvUX72xxMeeXZr4h6lmekmyLryrtplI/Am+w=";
-  };
-
-  iHaveAdhdSrc = pkgs.fetchFromGitHub {
-    owner = "ayghri";
-    repo = "i-have-adhd";
-    rev = "cbe69fb83c08a37cf54d5ec9ec6bb88c8bc9973c";
-    hash = "sha256-56Ia9a8lvALeSmUDAumfu9nzmYBzONSlBpFv7o1w7ys=";
-  };
+  claudeSkills = pkgs.claude-plugins;
+  emacsSkillsDir = claudeSkills.emacs-skills;
+  ponytailSkills = pkgs.pi-extensions.pi-ponytail.passthru.skills;
 
   emacsSkill =
     {
@@ -61,10 +30,10 @@ let
     {
       type = "skill";
       inherit name description extraFrontmatter;
-      body = skillBody "${emacsSkillsSrc}/skills/${name}/SKILL.md";
+      body = skillBody "${emacsSkillsDir}/${name}/SKILL.md";
     }
     // lib.optionalAttrs (elisp != null) {
-      files."${elisp}".text = builtins.readFile "${emacsSkillsSrc}/skills/${name}/${elisp}";
+      files."${elisp}".text = builtins.readFile "${emacsSkillsDir}/${name}/${elisp}";
     };
 
   ponytailSkill = name: description: {
@@ -73,8 +42,88 @@ let
     extraFrontmatter = {
       license = "MIT";
     };
-    body = skillBody "${ponytailSrc}/skills/${name}/SKILL.md";
+    body = skillBody "${ponytailSkills.${name}}/SKILL.md";
   };
+
+  denoteNoteBody = ''
+    # Create Denote notes from the current context
+
+    Create a Denote note in Emacs using `emacsclient`. Denote creates plain text notes with predictable names like `20240322T131856--some-title__topic1_topic2.org`; the `denote` command returns the created path when called from Lisp.
+
+    Use this when the user asks to save something as a Denote note, create a note, add a note to their knowledge base, or invokes `/denote-note`.
+
+    ## How to create a note
+
+    1. Extract a concise title from the user's request or recent context.
+    2. Pick 1-5 lowercase keywords. Use simple words. Do not include spaces inside a keyword.
+    3. Decide the note body. Preserve the useful content, not the whole chat transcript unless the user asks for a transcript.
+    4. Run `emacsclient --eval` with a noninteractive Elisp form that requires `denote`, creates the note, inserts the body after Denote front matter, saves it, and prints the created path.
+    5. Report the path to the user.
+
+    ## Command template
+
+    Write the title, keywords, and body into shell variables with safe quoting, then call Emacs:
+
+    ```sh
+    title='Short descriptive title'
+    keywords='keyword1 keyword2'
+    body='* Summary
+
+    Your note body here.
+    '
+
+    emacsclient --eval "
+    (let* ((title \"$title\")
+           (keywords (split-string \"$keywords\" nil t))
+           (body \"$body\")
+           (path (progn
+                   (require 'denote)
+                   (denote title keywords 'org))))
+      (with-current-buffer (find-file-noselect path)
+        (goto-char (point-max))
+        (unless (bolp) (insert \"\\n\"))
+        (insert \"\\n\" body)
+        (save-buffer))
+      path)"
+    ```
+
+    If the body contains quotes, newlines, or other shell-sensitive text, avoid interpolating it directly. Instead write the body to a temporary file and read it from Elisp:
+
+    ```sh
+    body_file=$(mktemp /tmp/denote-note-body.XXXXXX)
+    cat > "$body_file" <<'EOF'
+    * Summary
+
+    Your note body here.
+    EOF
+
+    emacsclient --eval "
+    (let* ((title \"Short descriptive title\")
+           (keywords '(\"keyword1\" \"keyword2\"))
+           (body-file \"$body_file\")
+           (body (with-temp-buffer
+                   (insert-file-contents body-file)
+                   (buffer-string)))
+           (path (progn
+                   (require 'denote)
+                   (denote title keywords 'org))))
+      (with-current-buffer (find-file-noselect path)
+        (goto-char (point-max))
+        (unless (bolp) (insert \"\\n\"))
+        (insert \"\\n\" body)
+        (save-buffer))
+      path)"
+    ```
+
+    ## Denote facts to respect
+
+    - `denote-directory` controls where notes are created; let the user's Emacs config decide it.
+    - `denote` prompts interactively, but from Lisp it accepts title, keywords, and file type arguments.
+    - Use `'org` unless the user asks for another file type.
+    - Denote creates front matter. Insert note content after it, never before it.
+    - Do not invent a custom filename. Let Denote create the identifier, title slug, keyword suffix, and extension.
+    - If `emacsclient` fails, tell the user Emacs server or Denote may not be available.
+  '';
 
   journalSessionBody = agentName: ''
     Save the current ${agentName} session as a journal entry using emacsclient and denote-journal.
@@ -177,14 +226,14 @@ in
     extraFrontmatter = {
       version = "2.1.1";
     };
-    body = skillBody "${humanizerSrc}/SKILL.md";
+    body = skillBody "${claudeSkills.humanizer}/SKILL.md";
   }
 
   {
     type = "skill";
     name = "caveman";
     description = "Compress and simplify prompts to preserve meaning while reducing use of context.";
-    body = skillBody "${claudePromptsSrc}/skills/caveman/SKILL.md";
+    body = skillBody "${claudeSkills.caveman}/SKILL.md";
   }
 
   {
@@ -195,7 +244,18 @@ in
       "disable-model-invocation" = true;
       license = "MIT";
     };
-    body = skillBody "${iHaveAdhdSrc}/skills/i-have-adhd/SKILL.md";
+    body = skillBody "${claudeSkills.i-have-adhd}/SKILL.md";
+  }
+
+  {
+    type = "skill";
+    name = "denote-note";
+    description = "Create a Denote note in Emacs from the current context using emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+      "disable-model-invocation" = true;
+    };
+    body = denoteNoteBody;
   }
 
   (emacsSkill {

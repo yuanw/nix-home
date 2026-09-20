@@ -12,6 +12,7 @@ let
   agentPmManagedSkillNames = [
     "caveman"
     "d2"
+    "denote-note"
     "describe"
     "disk-space"
     "dired"
