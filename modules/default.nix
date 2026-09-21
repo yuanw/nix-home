@@ -15,6 +15,7 @@
       ./coding-agents/forge.nix
       ./coding-agents/herdr
       ./coding-agents/hermes-agent.nix
+      ./coding-agents/hunk.nix
       ./coding-agents/pi
       ./common.nix
       ./nix-custom-conf.nix

@@ -49,6 +49,7 @@
     # };
     cursor.enable = true;
     herdr.enable = true;
+    hunk.enable = true;
     speak2text = {
       enable = false;
       flavor = "parakeet-mlx";
