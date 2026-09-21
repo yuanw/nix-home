@@ -73,38 +73,43 @@
       };
       models = {
         providers = {
-          ollama = {
+          dgx-spark = {
             api = "openai-completions";
-            apiKey = "ollama";
-            baseUrl = "http://localhost:11434/v1";
+            apiKey = "not-needed";
+            baseUrl = "http://dgx-spark.local:8000/v1";
+            compat = {
+              supportsDeveloperRole = false;
+              supportsReasoningEffort = false;
+              supportsStore = false;
+              thinkingFormat = "qwen-chat-template";
+              thinkingTokenBudgetField = "thinking_token_budget";
+            };
             models = [
               {
                 _launch = true;
-                contextWindow = 202752;
-                id = "glm-5:cloud";
-                input = [ "text" ];
-                reasoning = true;
-              }
-              {
-                _launch = true;
-                contextWindow = 202752;
-                id = "glm-5.1:cloud";
-                input = [ "text" ];
-                reasoning = true;
-              }
-              {
-                _launch = true;
                 contextWindow = 262144;
-                id = "kimi-k2.6:cloud";
+                id = "qwen3.8-flash-next";
                 input = [
                   "text"
                   "image"
                 ];
+                maxTokens = 32768;
+                name = "Qwen3.8 Flash Next (DGX Spark)";
                 reasoning = true;
+                thinkingLevelMap = {
+                  off = "off";
+                  minimal = "minimal";
+                  low = "low";
+                  medium = "medium";
+                  high = "high";
+                  xhigh = "xhigh";
+                  max = "max";
+                };
               }
             ];
           };
         };
+
       };
       skills =
         (with pkgs.claude-plugins; [
