@@ -50,6 +50,19 @@
     cursor.enable = true;
     herdr.enable = true;
     hunk.enable = true;
+    open-code-review = {
+      enable = true;
+      settings = {
+        provider = "dgx-spark";
+        custom_providers.dgx-spark = {
+          url = "http://dgx-spark.local:8000/v1";
+          protocol = "openai";
+          model = "qwen3.8-flash-next";
+          api_key = "not-needed";
+          timeout_sec = 600;
+        };
+      };
+    };
     speak2text = {
       enable = false;
       flavor = "parakeet-mlx";
