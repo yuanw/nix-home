@@ -466,4 +466,15 @@ in
   (ponytailSkill "ponytail-gain" "Show ponytail's measured impact as a compact scoreboard. One-shot display, not a persistent mode.")
   (ponytailSkill "ponytail-help" "Quick-reference card for all ponytail modes, skills, and commands.")
   (ponytailSkill "ponytail-review" "Review a diff for over-engineering only: what to delete, simplify, or replace with stdlib/native equivalents.")
+
+  {
+    type = "skill";
+    name = "open-code-review-delegate";
+    description = "Delegation mode for open-code-review (OCR): host agent reviews; OCR only does file selection and rule resolution.";
+    extraFrontmatter = {
+      license = "Apache-2.0";
+    };
+    # Source: BSFishy/nix-config @ fd3cf7f (Apache-2.0)
+    body = skillBody ../common/skills/open-code-review-delegate/SKILL.md;
+  }
 ]

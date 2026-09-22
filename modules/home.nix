@@ -62,6 +62,7 @@ hm@{ pkgs, ... }:
         journal-session \
         mermaid \
         open \
+        open-code-review-delegate \
         org-agenda-todo \
         plantuml \
         ponytail \
