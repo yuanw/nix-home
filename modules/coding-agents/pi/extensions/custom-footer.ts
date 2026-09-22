@@ -1,5 +1,5 @@
 /**
- * Custom Footer Extension - shows working directory, git branch, model, context usage, and extension statuses
+ * Custom Footer Extension - shows model, context usage, and extension statuses
  */
 
 import type { AssistantMessage } from "@mariozechner/pi-ai";
@@ -9,10 +9,8 @@ import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 export default function (pi: ExtensionAPI) {
   pi.on("session_start", async (_event, ctx) => {
     ctx.ui.setFooter((tui, theme, footerData) => {
-      const unsub = footerData.onBranchChange(() => tui.requestRender());
-
       return {
-        dispose: unsub,
+        dispose() {},
         invalidate() {},
         render(width: number): string[] {
           // Find last non-aborted assistant message for context calculation
@@ -42,34 +40,16 @@ export default function (pi: ExtensionAPI) {
             return `${(n / 1000000).toFixed(1)}M`;
           };
 
-          // Get git branch
-          const branch = footerData.getGitBranch();
-          const branchStr = branch
-            ? theme.fg("dim", " │ ") + theme.fg("success", " ") +
-              theme.fg("accent", branch)
-            : "";
-
           // Get extension statuses (e.g., direnv)
           const statuses = footerData.getExtensionStatuses();
-          let statusStr = "";
+          let left = "";
           if (statuses.size > 0) {
             const statusParts: string[] = [];
             for (const [, value] of statuses) {
               statusParts.push(value);
             }
-            statusStr = theme.fg("dim", " │ ") +
-              statusParts.join(theme.fg("dim", " │ "));
+            left = statusParts.join(theme.fg("dim", " │ "));
           }
-
-          // Get working directory (shortened)
-          const cwd = ctx.cwd;
-          const home = process.env.HOME || "";
-          const shortCwd = home && cwd.startsWith(home)
-            ? "~" + cwd.slice(home.length)
-            : cwd;
-
-          // Build left side: cwd + branch + statuses
-          const left = theme.fg("muted", shortCwd) + branchStr + statusStr;
 
           // Build right side: context usage + model
           const modelId = ctx.model?.id || "no-model";

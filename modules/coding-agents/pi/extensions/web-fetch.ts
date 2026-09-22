@@ -84,6 +84,10 @@ export default function (pi: ExtensionAPI) {
         return fetchWithJina(params.url, backend === "raw", maxLength, signal);
       }
 
+      // NOTE: the page script must END with an expression, not an `if` statement.
+      // browser-cli only prints the value of the final top-level *expression*;
+      // an if/else block prints nothing, leaving stdout empty (exit 0) which we
+      // would wrongly treat as a failure and fall back to Jina. Keep the ternary.
       const browserScript = String.raw`
 set -euo pipefail
 WEB_FETCH_URL="$1"
@@ -91,11 +95,7 @@ TAB="$(browser-cli --go "$WEB_FETCH_URL")"
 browser-cli "$TAB" <<'EOF'
 await wait("idle")
 const article = read({ maxLength: __MAX_LENGTH__, includeMetadata: true })
-if (article && article.content && article.content.trim()) {
-  article
-} else {
-  snap({ full: true })
-}
+(article && article.content && article.content.trim()) ? article : snap({ full: true })
 EOF
 `.replace("__MAX_LENGTH__", String(maxLength));
 

@@ -43,3 +43,95 @@ sudo nixos-rebuild switch --flake '.#misfit'
 systemctl list-units --type=service
 journalctl -u <service-name>
 
+* Testing in a VM (before touching real hardware)
+
+** Create virtual disk and boot NixOS ISO
+
+#+begin_src bash
+qemu-img create -f raw /tmp/misfit-test.raw 50G
+
+# Download NixOS minimal ISO (25.05), then boot:
+nix run nixpkgs#qemu -- \
+  -m 4G -smp 2 \
+  -drive file=/tmp/misfit-test.raw,format=raw \
+  -cdrom /tmp/nixos-minimal-25.05-x86_64-linux.iso \
+  -netdev user,id=net0,hostfwd=tcp::2222-:2222,hostfwd=tcp::2223-:22 \
+  -device virtio-net-pci,netdev=net0 \
+  -accel hvf \
+  -boot d
+# -accel hvf is macOS Hypervisor.framework; use -enable-kvm on Linux
+#+end_src
+
+** Temporarily change disk device for the VM
+
+In =disk-config.nix=, change =/dev/nvme0n1= to =/dev/vda= (or =/dev/sda= depending on QEMU config).
+Remember to revert before deploying to real hardware.
+
+Also add =virtio_pci= to =boot.initrd.availableKernelModules= temporarily so the VM disk is detected.
+
+** Inside the ISO — partition, snapshot, install
+
+#+begin_src bash
+# Partition & format
+nix run github:nix-community/disko -- --mode disko ./hosts/misfit/disk-config.nix
+
+# Load the key and take the blank snapshot BEFORE mounting anything
+zfs load-key -a
+zfs snapshot zroot/root@blank
+
+# Mount filesystems
+mount -t zfs zroot/root /mnt
+mkdir -p /mnt/{boot,nix,persist,persistSave,sshkeys}
+mount /dev/vda1 /mnt/boot
+mount -t zfs zroot/root/nix /mnt/nix
+mount -t zfs zroot/root/persist /mnt/persist
+mount -t zfs zroot/root/persistSave /mnt/persistSave
+mount -t zfs zroot/root/sshkeys /mnt/sshkeys
+
+# Generate initrd SSH host key (needed for remote unlock)
+mkdir -p /mnt/persist/etc/secrets/initrd
+ssh-keygen -t ed25519 -f /mnt/persist/etc/secrets/initrd/ssh_host_ed_25519_key -N ""
+
+nixos-install --flake '.#misfit'
+#+end_src
+
+** Boot from disk (remove ISO flags) and verify
+
+#+begin_src bash
+nix run nixpkgs#qemu -- \
+  -m 4G -smp 2 \
+  -drive file=/tmp/misfit-test.raw,format=raw \
+  -netdev user,id=net0,hostfwd=tcp::2222-:2222,hostfwd=tcp::2223-:22 \
+  -device virtio-net-pci,netdev=net0 \
+  -accel hvf
+#+end_src
+
+Verification checklist:
+- [ ] Initrd SSH reachable during boot: =ssh -p 2222 root@localhost=
+- [ ] Enter ZFS passphrase via initrd SSH → boot completes
+- [ ] Create =/tmp/test-ephemeral= → reboot → confirm file is gone
+- [ ] =/persist= and =/persistSave= retain data across reboots
+- [ ] =/sshkeys= host keys are stable (no "host key changed" on reconnect)
+
+** One-time real hardware install
+
+#+begin_src bash
+# Boot NixOS ISO on misfit, clone repo, then:
+nix run github:nix-community/disko -- --mode disko ./hosts/misfit/disk-config.nix
+zfs load-key -a
+zfs snapshot zroot/root@blank
+
+mount -t zfs zroot/root /mnt
+mkdir -p /mnt/{boot,nix,persist,persistSave,sshkeys}
+mount /dev/nvme0n1p1 /mnt/boot
+mount -t zfs zroot/root/nix /mnt/nix
+mount -t zfs zroot/root/persist /mnt/persist
+mount -t zfs zroot/root/persistSave /mnt/persistSave
+mount -t zfs zroot/root/sshkeys /mnt/sshkeys
+
+mkdir -p /mnt/persist/etc/secrets/initrd
+ssh-keygen -t ed25519 -f /mnt/persist/etc/secrets/initrd/ssh_host_ed_25519_key -N ""
+
+nixos-install --flake '.#misfit'
+#+end_src
+

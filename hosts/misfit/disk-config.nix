@@ -57,6 +57,19 @@
             mountpoint = "/nix";
           };
 
+          "root/persist" = {
+            type = "zfs_fs";
+            mountpoint = "/persist";
+          };
+          "root/persistSave" = {
+            type = "zfs_fs";
+            mountpoint = "/persistSave";
+          };
+          "root/sshkeys" = {
+            type = "zfs_fs";
+            mountpoint = "/sshkeys";
+          };
+
           # README MORE: https://wiki.archlinux.org/title/ZFS#Swap_volume
           "root/swap" = {
             type = "zfs_volume";

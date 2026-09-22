@@ -13,6 +13,7 @@ declare -A packages=(
   [antenna]="ssh://git@github.com/Workiva/antenna.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
   ["wk-plugin-mcp"]="ssh://git@github.com/Workiva/wk-plugin-mcp.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
   ["mcp-atlassian"]="ssh://git@github.com/Workiva/mcp_tools.git|^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  ["wk-local"]="ssh://git@github.com/Workiva/wk-local.git|^v[0-9]+\\.[0-9]+\\.[0-9]+$"
 )
 
 latest_tag() {

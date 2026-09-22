@@ -1,13 +1,19 @@
 ;; Late init tweaks loaded after other nima features.
 
-;; On macOS, `browse-url-default-browser' can ask LaunchServices to open a
-;; browser tab without reliably handing the URL to LibreWolf.  Route Org links
-;; through `open -b org.nixos.librewolf URL' instead.
+;; On macOS, open web links (Org, etc.) with the LibreWolf that Home Manager
+;; installed.  Address it by *path* (`open -a ~/Applications/Home Manager Apps/
+;; LibreWolf.app') rather than by bundle id (`open -b org.nixos.librewolf'): the
+;; id is not reliably registered with LaunchServices, so `-b` intermittently opens
+;; a blank tab / fails with -1712, whereas `-a <app>' goes straight to that bundle
+;; and hands the URL to the already-running instance.  `browse-url-generic'
+;; appends the URL as its own argv element and we pass everything through
+;; `call-process' with no shell in between, so odd characters in the URL stay inert.
 (when (eq system-type 'darwin)
   (require 'browse-url)
   (setq browse-url-browser-function #'browse-url-generic
-        browse-url-generic-program "open"
-        browse-url-generic-args '("-b" "org.nixos.librewolf")))
+        browse-url-generic-program "/usr/bin/open"
+        browse-url-generic-args
+        (list "-a" (expand-file-name "~/Applications/Home Manager Apps/LibreWolf.app"))))
 
 (repeat-mode 1)
 
