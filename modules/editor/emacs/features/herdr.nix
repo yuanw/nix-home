@@ -8,11 +8,13 @@
   # owning the PTYs, so nothing here needs herdr's own TUI to be up.  The
   # opt-in libraries are left alone on purpose: `herdr-review` wants the
   # external herdr-meat-review script, `herdr-sound` wants a sound file.
-  # `C-c h' is taken by consult-history, hence the `C-c g' prefix.
+  # `C-c h' is taken by consult-history, hence the `C-c g' prefix, which stays
+  # a bare prefix: this keymap dialect refuses a command on a key that also
+  # starts a longer sequence.
   elisp = ''
     (use-package herdr-ui
       :commands (herdr-ui herdr-ui-quit herdr-spaces herdr-agents)
-      :bind (("C-c g" . herdr-ui)
+      :bind (("C-c g g" . herdr-ui)
              ("C-c g s" . herdr-spaces-visit)
              ("C-c g a" . herdr-agents-visit)
              ("C-c g q" . herdr-ui-quit)))
