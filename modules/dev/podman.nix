@@ -19,6 +19,12 @@ in
       home.packages = with pkgs; [
         podman
         podman-compose
+        # Real binary on PATH (not a zsh function) so Go's exec.Command("docker")
+        # — e.g. wk-local — finds it. Matches NixOS virtualisation.podman.dockerCompat.
+        (runCommand "docker-podman-compat" { } ''
+          mkdir -p $out/bin
+          ln -s ${podman}/bin/podman $out/bin/docker
+        '')
       ];
 
       programs.zsh = {
@@ -45,19 +51,6 @@ in
           # Testcontainers 2.x only honours this as an environment variable, not via
           # .testcontainers.properties, so we set it here for all zsh invocations.
           export TESTCONTAINERS_RYUK_DISABLED=true
-        '';
-        initContent = ''
-          # Route all `docker` calls to podman.
-          # `docker compose` (plugin form) is intercepted and forwarded to podman-compose,
-          # since shell aliases cannot intercept subcommands.
-          function docker() {
-            if [[ "$1" == "compose" ]]; then
-              shift
-              podman-compose "$@"
-            else
-              podman "$@"
-            fi
-          }
         '';
       };
     };
