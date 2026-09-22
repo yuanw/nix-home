@@ -8,6 +8,9 @@
 with lib;
 let
   cfg = config.modules.dev.podman;
+  # Docker Compose v2 speaks the CLI wk-local expects (`ps -a --format json`);
+  # podman-compose does not. Point podman's `compose` subcommand at it.
+  composeProvider = "${pkgs.docker-compose}/bin/docker-compose";
 in
 {
   options.modules.dev.podman = {
@@ -18,7 +21,7 @@ in
     home-manager.users.${config.my.username} = {
       home.packages = with pkgs; [
         podman
-        podman-compose
+        docker-compose
         # Real binary on PATH (not a zsh function) so Go's exec.Command("docker")
         # — e.g. wk-local — finds it. Matches NixOS virtualisation.podman.dockerCompat.
         (runCommand "docker-podman-compat" { } ''
@@ -27,18 +30,17 @@ in
         '')
       ];
 
+      home.sessionVariables = {
+        PODMAN_COMPOSE_PROVIDER = composeProvider;
+        # Ryuk needs a privileged Docker socket unavailable under rootless Podman.
+        TESTCONTAINERS_RYUK_DISABLED = "true";
+      };
+
       programs.zsh = {
-        shellAliases = {
-          # podman-compose as a drop-in for the legacy hyphenated form
-          docker-compose = "podman-compose";
-        };
-        # envExtra writes to .zshenv, which is sourced for every zsh invocation
-        # (interactive, non-interactive, and login shells alike).  This ensures
-        # DOCKER_HOST is set even for the shell that first spawns the Gradle daemon.
+        # envExtra → .zshenv (every zsh). DOCKER_HOST is dynamic on the running machine socket.
         envExtra = ''
-          # Point DOCKER_HOST at the Podman socket so tools like Testcontainers
-          # work without per-project configuration.
-          # Checked at shell startup so it reflects the currently running machine.
+          export PODMAN_COMPOSE_PROVIDER="${composeProvider}"
+          export TESTCONTAINERS_RYUK_DISABLED=true
           if [[ -z "$DOCKER_HOST" ]]; then
             if [[ -n "$TMPDIR" && -S "''${TMPDIR%/}/podman/podman-machine-default-api.sock" ]]; then
               export DOCKER_HOST="unix://''${TMPDIR%/}/podman/podman-machine-default-api.sock"
@@ -46,11 +48,6 @@ in
               export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
             fi
           fi
-
-          # Ryuk requires a privileged Docker socket unavailable under rootless Podman.
-          # Testcontainers 2.x only honours this as an environment variable, not via
-          # .testcontainers.properties, so we set it here for all zsh invocations.
-          export TESTCONTAINERS_RYUK_DISABLED=true
         '';
       };
     };
