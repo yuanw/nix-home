@@ -30,13 +30,14 @@ in
     home-manager.users.${config.my.username} = {
       home.packages = [
         cfg.package
-        cfg.package.browsers
       ]
       ++ (lib.optionals cfg.enableTest [ pkgs.playwright-test ]);
 
+      # Do not pin PLAYWRIGHT_BROWSERS_PATH / SKIP_BROWSER_DOWNLOAD to the nix
+      # store: long-lived shells keep a stale path after rebuild, and the store
+      # is read-only so `playwright install` cannot self-heal. Projects use
+      # ~/.cache/ms-playwright via `pnpm exec playwright install` instead.
       home.sessionVariables = {
-        PLAYWRIGHT_BROWSERS_PATH = "${cfg.package.browsers}";
-        PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1";
         PLAYWRIGHT_SKIP_VALIDATE_HOST_REQUIREMENTS = "true";
       };
     };
