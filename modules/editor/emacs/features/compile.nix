@@ -27,7 +27,6 @@
       (setq compilation-scroll-output 'first-error)
       (setq compilation-skip-threshold 2)
       (setq compilation-window-height 100)
-      (with-eval-after-load 'compile
-        (keymap-set compilation-mode-map "z" #'delete-window)))
+        )
   '';
 }
