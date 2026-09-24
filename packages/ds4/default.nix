@@ -6,13 +6,13 @@
 
 cudaPackages.backendStdenv.mkDerivation {
   pname = "ds4";
-  version = "0-unstable-2026-09-16";
+  version = "0-unstable-2026-09-20";
 
   src = fetchFromGitHub {
     owner = "antirez";
     repo = "ds4";
-    rev = "8db1d1d155cb0400a86a86b9c62d0defb3a6148b";
-    hash = "sha256-d0TRJH5/cNlDrgJy2i9eEUuSAlnka0BvxDXlXIwMwrE=";
+    rev = "0aaea5a238fb41a35106a551e73c8409dfb751ac";
+    hash = "sha256-Bo/td1HwVjw6bwz3BDwTP+ZSudkVFCo2aIVK4axvmXg=";
   };
 
   strictDeps = true;

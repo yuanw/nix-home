@@ -10,13 +10,13 @@
 
 melpaBuild {
   pname = "agent-shell";
-  version = "persistent-prompt-via-shell-maker-snapshot-unstable-2026-09-19";
+  version = "persistent-prompt-via-shell-maker-snapshot-unstable-2026-09-24";
 
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "agent-shell";
-    rev = "e78b43487007d59415d34c3cec4fadf814b8a373";
-    sha256 = "sha256-tc3BUs8dQXM3UaF16wtcd3b2rreailj1wu2rh1Mn32c=";
+    rev = "19e9d0175a5392af9999447f6be99f65e43f37bb";
+    sha256 = "sha256-/z16NhX9msJRDowFUZlfULYL87HPX4v9AIeS+RtN+io=";
   };
 
   packageRequires = [

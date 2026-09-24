@@ -12,13 +12,13 @@
 }:
 melpaBuild {
   pname = "lean4-mode";
-  version = "1.1.2-unstable-2025-06-01";
+  version = "1.1.2-unstable-2026-09-23";
   src = fetchFromGitHub {
     owner = "leanprover-community";
     repo = "lean4-mode";
-    rev = "1388f9d1429e38a39ab913c6daae55f6ce799479";
+    rev = "d5ed4b1610de45d265fded03b9b1af904efd6c03";
     #sha256 = lib.fakeSha256;
-    sha256 = "sha256-6XFcyqSTx1CwNWqQvIc25cuQMwh3YXnbgr5cDiOCxBk=";
+    sha256 = "sha256-LCVc4+n6LyRtwiLzF4sMmgI3XEI6fesEJu1vHqsjfoI=";
   };
   files = ''
     ("*.el"
