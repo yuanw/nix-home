@@ -15,7 +15,14 @@
                :right-divider-width 15
                :scroll-bar-width 8
                :fringe-width 8))
+      ;; Not `:if (display-graphic-p)': under `--fg-daemon' that is nil at
+      ;; init and would skip the package for later GUI frames too.
+      (defun my/spacious-padding-enable-on-gui ()
+        "Enable spacious-padding only once a graphical frame exists."
+        (when (and (display-graphic-p) (not spacious-padding-mode))
+          (spacious-padding-mode 1)))
+      :hook (server-after-make-frame . my/spacious-padding-enable-on-gui)
       :config
-      (spacious-padding-mode 1))
+      (my/spacious-padding-enable-on-gui))
   '';
 }

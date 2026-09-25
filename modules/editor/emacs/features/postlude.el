@@ -36,9 +36,6 @@ smerge-basic-map))
 (message "Buffer is not visiting a file")))
 (global-set-key (kbd "C-c f n") #'my/copy-buffer-file-name)
 
-(autoload #'nerd-icons-set-font "nerd-icons" "Modify nerd font charsets to use FONT-FAMILY for FRAME." nil)
-(add-hook 'server-after-make-frame-hook #'nerd-icons-set-font)
-
 (setq treesit-font-lock-level 4)
 
 (defconst pragmatapro/prettify-symbols-alist

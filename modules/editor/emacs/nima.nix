@@ -19,6 +19,9 @@
   homeDirectory ? null,
   workspaceDirectory ? null,
   lspStyle ? null,
+  # Whole home-manager/darwin `config`, handed to features so they can read
+  # arbitrary `config.modules.*` (e.g. dart-mode gates on dev.dart.enable).
+  nixConfig ? { },
   featureOverrides ? { },
   extraModule ? { },
   rawOutput ? false,
@@ -121,6 +124,7 @@ pkgs.mkNima {
         homeDirectory = homeDirectory';
         workspaceDirectory = workspaceDirectory';
         lspStyle = lspStyle';
+        inherit nixConfig;
       };
 
       features = featureOverrides;

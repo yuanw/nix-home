@@ -25,6 +25,7 @@ let
     inherit pkgs lib;
     myConfig = config.my;
     emacsConfig = cfg;
+    nixConfig = config;
   };
 in
 with lib;
