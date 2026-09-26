@@ -9,13 +9,15 @@ default:
 
 # prefetch Workiva git sources (needed before build on work hosts)
 prefetch-work-sources:
-    @{{justfile_directory()}}/scripts/prefetch-work-sources.sh
+    @test -d {{justfile_directory()}}/../nix-home-private || { echo "prefetch-work-sources needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+    @{{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh
 
 # build os
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
-        {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
-        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        test -d {{justfile_directory()}}/../nix-home-private || { echo "wk01174 needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }; \
+        @{{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh; \
+        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/../nix-home-private/modules/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
         {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \
     fi
@@ -62,8 +64,9 @@ nix-update:
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 
 update-wk:
-	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
-	{{justfile_directory()}}/scripts/bump-semver-git-sources.sh
+	@test -d {{justfile_directory()}}/../nix-home-private || { echo "update-wk needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+	nvfetcher -c {{justfile_directory()}}/../nix-home-private/modules/nvfetcher.toml -o {{justfile_directory()}}/../nix-home-private/modules/_sources
+	@{{justfile_directory()}}/../nix-home-private/scripts/bump-semver-git-sources.sh
 	just prefetch-work-sources
 
 # deploy to DGX Spark: sync flake and rebuild remotely

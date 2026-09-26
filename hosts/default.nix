@@ -169,6 +169,9 @@
                 isDarwin = true;
                 isNixOS = false;
                 loadPrivate = loadPrivate;
+                # nix-home-private/modules/work.nix builds its agent skills from this
+                # shared public tree; it is given the root rather than copying it.
+                codingAgentsRoot = ../modules/coding-agents;
                 nurNoPkg = import inputs.nur {
                   nurpkgs = import inputs.nixpkgs { system = system; };
                 };

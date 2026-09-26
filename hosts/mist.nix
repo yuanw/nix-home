@@ -11,7 +11,7 @@
     inputs.self.myModules.common
     inputs.self.myModules.darwin
     ../modules/hledger.nix
-    # ../modules/private/jellyfin-darwin.nix
+    # jellyfin-darwin.nix now lives in the nix-home-private repo (modules/jellyfin-darwin.nix)
   ];
 
   environment.casks = with inputs'.nix-casks.packages; [
