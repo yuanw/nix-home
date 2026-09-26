@@ -160,17 +160,13 @@
           };
         in
         {
-          _module.args.pkgs = import inputs.nixpkgs {
+          _module.args.pkgs = import ./lib/mk-pkgs.nix {
+            # one definition of the package set, in lib/; nix-home-private builds
+            # the very same one through the exported flake.mkPkgs, so the two
+            # halves do not drift apart at different nixpkgs revisions
+            nixpkgs = inputs.nixpkgs;
+            fixesOverlay = inputs.dgx-spark.overlays.fixes;
             inherit system;
-            config = {
-              allowUnfree = true;
-            };
-            overlays =
-              (inputs.nixpkgs.lib.optionals (builtins.elem system [
-                "aarch64-linux"
-                "x86_64-linux"
-              ]) [ inputs.dgx-spark.overlays.fixes ])
-              ++ [ (import ./packages) ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;
