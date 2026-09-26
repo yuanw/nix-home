@@ -3,21 +3,32 @@ pipe_feature := `nix --version 2>/dev/null | grep -qi lix && echo pipe-operator 
 nix_config := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf 'extra-experimental-features = nix-command flakes %s' "$feature"`
 nix := `feature=$(nix --version 2>/dev/null | grep -qi lix && echo pipe-operator || echo pipe-operators); printf "env NIX_CONFIG='extra-experimental-features = nix-command flakes %s' nix" "$feature"`
 
+# The Workiva maintenance tools are not called by path from here.  They are
+# packages in the WK01174 dev shell (see devshell.nix, whose tools nix-home-private
+# builds in modules/devshell.nix), so what this file has to know is which shell to
+# enter and which checkout those tools are to work on -- one spelling of each, and
+# no reference at all to the layout of the private repository.
+wk_checkout := justfile_directory() + "/../nix-home-private"
+wk_env := "WK_CHECKOUT=" + wk_checkout + " WK_PUBLIC_FLAKE=" + justfile_directory()
+# The shell the Workiva tools live in.  The system is asked for inside the recipe,
+# where a $() is expanded, and not in a variable, where it is not -- the same way
+# push-all below reaches devShells.
+wk_shell := ".#devShells."
 # list all commands
 default:
     @just --list
 
 # prefetch Workiva git sources (needed before build on work hosts)
 prefetch-work-sources:
-    @test -d {{justfile_directory()}}/../nix-home-private || { echo "prefetch-work-sources needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
-    @{{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh
+    @test -d {{wk_checkout}} || { echo "prefetch-work-sources needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+    @env {{wk_env}} {{nix}} develop "{{wk_shell}}$({{nix}} eval --impure --raw --expr builtins.currentSystem).wk01174" --command prefetch-work-sources
 
 # build os
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
-        test -d {{justfile_directory()}}/../nix-home-private || { echo "wk01174 needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }; \
-        {{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh; \
-        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/../nix-home-private/modules/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        test -d {{wk_checkout}} || { echo "wk01174 needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }; \
+        env {{wk_env}} {{nix}} develop "{{wk_shell}}$({{nix}} eval --impure --raw --expr builtins.currentSystem).wk01174" --command prefetch-work-sources; \
+        env {{wk_env}} {{nix}} develop "{{wk_shell}}$({{nix}} eval --impure --raw --expr builtins.currentSystem).wk01174" --command nix-build-with-workiva-netrc ".#{{lowercase(host)}}"; \
     else \
         {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \
     fi
@@ -63,10 +74,15 @@ nix-update:
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 
+# nvfetcher used to be run here with its config and its output directory spelled out,
+# and bare on the PATH besides, so the layout of the private repository was written
+# down in two languages, free to drift between them.  Now the tools arrive from the
+# WK dev shell, which is where a dependency belongs: declared, not hoped for.
+# Regenerate the Workiva pins from upstream, then warm the store.
 update-wk:
-	@test -d {{justfile_directory()}}/../nix-home-private || { echo "update-wk needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
-	nvfetcher -c {{justfile_directory()}}/../nix-home-private/modules/nvfetcher.toml -o {{justfile_directory()}}/../nix-home-private/modules/_sources
-	@{{justfile_directory()}}/../nix-home-private/scripts/bump-semver-git-sources.sh
+	@test -d {{wk_checkout}} || { echo "update-wk needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+	@env {{wk_env}} {{nix}} develop "{{wk_shell}}$({{nix}} eval --impure --raw --expr builtins.currentSystem).wk01174" --command nvfetcher-work-sources
+	@env {{wk_env}} {{nix}} develop "{{wk_shell}}$({{nix}} eval --impure --raw --expr builtins.currentSystem).wk01174" --command bump-semver-git-sources
 	just prefetch-work-sources
 
 # The DGX Spark box never has nix-home-private: its URL is a Mac-local path and the
