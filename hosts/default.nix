@@ -164,46 +164,8 @@
               system,
               ...
             }:
-            inputs.nix-darwin.lib.darwinSystem {
-              specialArgs = {
-                isDarwin = true;
-                isNixOS = false;
-                loadPrivate = loadPrivate;
-                # nix-home-private/modules/work.nix builds its agent skills from this
-                # shared public tree; it is given the root rather than copying it.
-                codingAgentsRoot = ../modules/coding-agents;
-                nurNoPkg = import inputs.nur {
-                  nurpkgs = import inputs.nixpkgs { system = system; };
-                };
-                packages = config.packages;
-                inherit hostname inputs inputs';
-              };
-              modules = [
-                {
-                  nixpkgs.hostPlatform = system;
-                }
-                inputs.nix-darwin-login-items.darwinModules.default
-                inputs.home-manager.darwinModules.home-manager
-                {
-                  home-manager = {
-                    useGlobalPkgs = true;
-                    useUserPackages = true;
-                    sharedModules = [
-                      inputs.betterfox.homeModules.betterfox
-                      inputs.catppuccin.homeModules.catppuccin
-                      inputs.direnv-instant.homeModules.direnv-instant
-                      inputs.mics-skills.homeModules.default
-                      inputs.flake-prompt.homeManagerModules.default
-                      inputs.mcp-servers-nix.homeManagerModules.default
-                      (import ../modules/helpers/mergetools.nix)
-                    ];
-
-                    backupFileExtension = "hm-bak";
-                    extraSpecialArgs = { inherit inputs; };
-                  };
-                }
-                addtionsModule
-              ];
+            import ../lib/mk-darwin-system.nix {
+              inherit inputs inputs' config hostname loadPrivate addtionsModule system;
             }
           );
       in

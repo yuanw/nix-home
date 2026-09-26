@@ -1,4 +1,4 @@
-{ ... }:
+{ inputs, ... }:
 {
   # Paths to this repo's package overlay, exported as a flake output so that
   # nix-home-private can instantiate the very same pkgs instead of duplicating
@@ -8,6 +8,30 @@
   #
   # Keep it a list of directories, each with a default.nix.
   flake.pkgsOverlays = [ ../packages ];
+
+  # The builder for one nix-darwin host, exported so that nix-home-private can
+  # build a host without re-implementing any of this configuration.  The private
+  # side calls it as:
+  #
+  #     system = inputs.nix-home.flake.mkDarwinSystem {
+  #       hostname = "WK01174";
+  #       system   = "aarch64-darwin";
+  #       addtionsModule = [ ./modules/work.nix ./modules/workMtab.nix ];
+  #     };
+  #
+  # The implementation is lib/mk-darwin-system.nix, in this repository.  Do not
+  # copy it into the private one: import it through the nix-home input, as above.
+  flake.mkDarwinSystem =
+    { hostname
+    , system
+    , config ? { packages = [ ]; }
+    , loadPrivate ? false
+    , addtionsModule ? { }
+    , inputs' ? inputs
+    }:
+    import ../lib/mk-darwin-system.nix {
+      inherit hostname system config loadPrivate addtionsModule inputs inputs';
+    };
 
   flake.myModules = {
     common.imports = [
