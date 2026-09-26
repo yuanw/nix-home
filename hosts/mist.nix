@@ -10,7 +10,7 @@
   imports = [
     inputs.self.myModules.common
     inputs.self.myModules.darwin
-    ../modules/private/hledger.nix
+    ../modules/hledger.nix
     # ../modules/private/jellyfin-darwin.nix
   ];
 
