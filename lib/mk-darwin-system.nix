@@ -1,17 +1,24 @@
 /* lib/mk-darwin-system.nix -- build one nix-darwin host system.
 
-   This is the implementation.  hosts/default.nix calls it from inside its
-   withSystem wrapper, and nix-home-private will call it through its nix-home
-   input.  Do not copy this code into another repository: it is shared by
-   importing this very file, the nix analogue of linking.  A copy is a fork,
-   and the two halves will drift.
+   This is the implementation.  It is called from one place: the withSystem
+   wrapper in hosts/default.nix, which is a flake-parts module of THIS flake.
+   That is not a matter of taste.  The body closes over the inputs and over the
+   primed input set, and flake-parts binds those for a module here; measured
+   from the other side, a caller in another repository receives a primed set in
+   which nix-casks.packages has none of the casks, so the host configuration
+   that does  with inputs'.nix-casks.packages  binds nothing at all.  The WK
+   host is therefore declared here, in hosts/wk01174.nix, while the Workiva
+   modules it imports are contributed by nix-home-private through the flake-less
+   nix-home-private input.  Do not copy this code into another repository: to
+   duplicate an implementation is to fork it, and nothing notices the drift.
 
    The parameters below are named after the words used in the body, which was
    sliced out of hosts/default.nix by line number, not retyped.  Note that
    codingAgentsRoot is deliberately NOT a parameter: it names a directory in
-   this repository, and seen from here it resolves to modules/coding-agents
-   whichever side calls us, so a caller can neither forget it nor point it
-   at a stale location.
+   this repository, and seen from here it resolves to modules/coding-agents, so
+   a caller can neither forget it nor point it at a stale location.  The
+   Workiva module that receives it, modules/work.nix over in nix-home-private,
+   is given the root rather than a copy of the tree.
 */
 {
   inputs,
