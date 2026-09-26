@@ -21,8 +21,10 @@
   system,
   loadPrivate,
   addtionsModule,
+  pkgs ? null,
 }: 
-            inputs.nix-darwin.lib.darwinSystem {
+            inputs.nix-darwin.lib.darwinSystem (
+              {
               specialArgs = {
                 isDarwin = true;
                 isNixOS = false;
@@ -63,3 +65,14 @@
                 addtionsModule
               ];
             }
+
+            # the packages, for whoever has them.  the framework's own channel for them
+            # is args.pkgs: it installs them as _module.args.pkgs with mkforce, which
+            # is how it refuses a duplicate definition.  the public call-site stands in
+            # this flake's perSystem, where flake.nix has already provided them, so it
+            # hands none and that provision stands.  a flake outside that scope --
+            # nix-home-private -- hands them here, built from the exported
+            # flake.pkgsOverlays.  handing them in both places would be a duplicate.
+            //
+            (if pkgs == null then { } else { inherit pkgs; })
+            )
