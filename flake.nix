@@ -103,13 +103,22 @@
     };
     colmena.url = "github:zhaofengli/colmena";
     # Private modules live in a separate repo; see nix-home-private/README.md.
+    #
+    # git+https, not github:, deliberately: a github: input is fetched as a tarball
+    # from the unauthenticated github.com/<owner>/<repo>/archive/<rev> endpoint, which
+    # answers 404 for a private repo, and the token is read daemon-side so a CLI
+    # --option netrc-file is not seen (verified: update fails with that 404; see the
+    # note in nix-build-with-workiva-netrc.sh on the same trap). The git transport
+    # authenticates client-side through the user's git credential helper, which works.
+    # To use github: instead, put an access token where the DAEMON reads config.
+    #
     # Public builds (CI) must not need it; disable it explicitly:
     #   nix build .#mist --override-input nix-home-private path:$PWD/blank
     # (a bare ./blank is taken for the whole repo: a flake-less input ignores
     #  the subdir part of a URL, so the path: scheme is what actually works)
     # and the loadPrivate switch (hosts/default.nix) keeps it unforced there.
     nix-home-private = {
-      url = "git+file:///Users/yuan/workspaces/nix-home-private";
+      url = "git+https://github.com/yuanw/nix-home-private";
       flake = false;
     };
   };

@@ -984,11 +984,11 @@
         "rev": "d836ce2a9f127f8f62ec16d8c27d5111369ae962",
         "revCount": 3,
         "type": "git",
-        "url": "file:///Users/yuan/workspaces/nix-home-private"
+        "url": "https://github.com/yuanw/nix-home-private"
       },
       "original": {
         "type": "git",
-        "url": "file:///Users/yuan/workspaces/nix-home-private"
+        "url": "https://github.com/yuanw/nix-home-private"
       }
     },
     "nix-unit": {
