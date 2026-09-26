@@ -1,5 +1,14 @@
 { ... }:
 {
+  # Paths to this repo's package overlay, exported as a flake output so that
+  # nix-home-private can instantiate the very same pkgs instead of duplicating
+  # the definition. Consumers do:
+  #
+  #     overlays = map (p: import p) inputs.nix-home.pkgsOverlays;
+  #
+  # Keep it a list of directories, each with a default.nix.
+  flake.pkgsOverlays = [ ../packages ];
+
   flake.myModules = {
     common.imports = [
       ./agenix.nix

@@ -102,6 +102,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
+    # Private modules live in a separate repo; see nix-home-private/README.md.
+    # Public builds (CI) must not need it: pass --inputs nix-home-private=./blank
+    # and the loadPrivate switch (hosts/default.nix) keeps it unforced there.
+    nix-home-private = {
+      url = "git+file:///Users/yuan/workspaces/nix-home-private";
+      flake = false;
+    };
   };
 
   outputs =

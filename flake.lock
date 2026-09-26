@@ -975,6 +975,22 @@
         "type": "github"
       }
     },
+    "nix-home-private": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790429137,
+        "narHash": "sha256-AE96MKIcBUBCHx9Q17QNcFuFUlUDFAo9z5h1OpFcoaE=",
+        "ref": "refs/heads/main",
+        "rev": "2041e7fe7873d860f487eab6adabec8c4f0446ce",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///Users/yuan/workspaces/nix-home-private"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///Users/yuan/workspaces/nix-home-private"
+      }
+    },
     "nix-unit": {
       "inputs": {
         "nix-github-actions": [
@@ -1350,6 +1366,7 @@
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nix-darwin-login-items": "nix-darwin-login-items",
+        "nix-home-private": "nix-home-private",
         "nixified-ai": "nixified-ai_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_8",
