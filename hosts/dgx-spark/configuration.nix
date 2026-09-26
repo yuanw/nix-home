@@ -144,12 +144,12 @@
       repoDir = "/var/lib/qwen38-flash-next/repo";
       qwen38User = "qwen38";
       qwen38Group = "qwen38";
-      qwen38SingleSparkRev = "6b5086458023474a7809ea30e1bcf42f03dcd75f";
+      qwen38SingleSparkRev = "b8439110eec0230facbe4ddf0dffe01b8f769be0";
       qwen38SingleSpark = pkgs.fetchFromGitHub {
-        owner = "MiaAI-Lab";
+        owner = "yuanw";
         repo = "Qwen3.8-Flash-Next-Single-DGX-Spark";
         rev = qwen38SingleSparkRev;
-        hash = "sha256-MvZVmFUFDsvPLtyky9I81uK6Dj40qumPdst5yfTlxlc=";
+        hash = "sha256-sMmFTesW8+TR81CaGQVT77XQC2AqkBxBJQV6AyDxUIc=";
       };
       prepare = pkgs.writeShellScript "prepare-qwen38-flash-next" ''
         set -eu

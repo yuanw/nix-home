@@ -23,6 +23,11 @@
   ];
   # determinate system
   nix.enable = false;
+
+  # Phone/remote access for Herdr: join this Mac to a tailnet, then SSH in and run `herdr`.
+  # First login still needs: sudo tailscale up
+  services.tailscale.enable = true;
+  services.openssh.enable = true;
   my = {
     username = "yuan";
     name = "Yuan Wang";
@@ -133,6 +138,7 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     neru.enable = true;
+    herdr.enable = true;
     browsers = {
       librewolf.enable = true;
       defaultBrowser = "librewolf";
