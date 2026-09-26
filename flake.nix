@@ -161,9 +161,11 @@
         in
         {
           _module.args.pkgs = import ./lib/mk-pkgs.nix {
-            # one definition of the package set, in lib/; nix-home-private builds
-            # the very same one through the exported flake.mkPkgs, so the two
-            # halves do not drift apart at different nixpkgs revisions
+            # one definition of the package set, in lib/mk-pkgs.nix, with this
+            # flake as its only caller.  It is not exported to another repository:
+            # what is measured there is that a caller outside a flake-parts
+            # module of this flake cannot bind the primed input set the modules
+            # read -- see the note in lib/mk-pkgs.nix.
             nixpkgs = inputs.nixpkgs;
             fixesOverlay = inputs.dgx-spark.overlays.fixes;
             inherit system;
