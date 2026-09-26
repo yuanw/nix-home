@@ -10,7 +10,7 @@
   imports = [
     inputs.self.myModules.common
     inputs.self.myModules.darwin
-    ../modules/private/work.nix
+    (inputs.nix-home-private + "/modules/work.nix")
   ];
   users.users.${config.my.username}.uid = 505;
   my = {

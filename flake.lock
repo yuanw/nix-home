@@ -975,6 +975,22 @@
         "type": "github"
       }
     },
+    "nix-home-private": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790430801,
+        "narHash": "sha256-DhcyLB6zFdpJkh4u4ySyH7qGLe6IUlStlgX4kcJYN9o=",
+        "ref": "refs/heads/main",
+        "rev": "d836ce2a9f127f8f62ec16d8c27d5111369ae962",
+        "revCount": 3,
+        "type": "git",
+        "url": "https://github.com/yuanw/nix-home-private"
+      },
+      "original": {
+        "type": "git",
+        "url": "https://github.com/yuanw/nix-home-private"
+      }
+    },
     "nix-unit": {
       "inputs": {
         "nix-github-actions": [
@@ -1350,6 +1366,7 @@
         "nix-casks": "nix-casks",
         "nix-darwin": "nix-darwin",
         "nix-darwin-login-items": "nix-darwin-login-items",
+        "nix-home-private": "nix-home-private",
         "nixified-ai": "nixified-ai_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_8",

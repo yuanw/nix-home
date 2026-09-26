@@ -9,13 +9,15 @@ default:
 
 # prefetch Workiva git sources (needed before build on work hosts)
 prefetch-work-sources:
-    @{{justfile_directory()}}/scripts/prefetch-work-sources.sh
+    @test -d {{justfile_directory()}}/../nix-home-private || { echo "prefetch-work-sources needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+    @{{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh
 
 # build os
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
-        {{justfile_directory()}}/scripts/prefetch-work-sources.sh; \
-        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/modules/private/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
+        test -d {{justfile_directory()}}/../nix-home-private || { echo "wk01174 needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }; \
+        {{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh; \
+        NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/../nix-home-private/modules/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
         {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \
     fi
@@ -62,14 +64,20 @@ nix-update:
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 
 update-wk:
-	nvfetcher -c modules/private/nvfetcher.toml -o modules/private/_sources
-	{{justfile_directory()}}/scripts/bump-semver-git-sources.sh
+	@test -d {{justfile_directory()}}/../nix-home-private || { echo "update-wk needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }
+	nvfetcher -c {{justfile_directory()}}/../nix-home-private/modules/nvfetcher.toml -o {{justfile_directory()}}/../nix-home-private/modules/_sources
+	@{{justfile_directory()}}/../nix-home-private/scripts/bump-semver-git-sources.sh
 	just prefetch-work-sources
+
+# The DGX Spark box never has nix-home-private: its URL is a Mac-local path and the
+# repo is not anonymously fetchable. The system needs none of it, so disable it there
+# rather than pretend the box can resolve it (blank/ is carried by the rsync below).
+spark_disable_private := "--override-input nix-home-private path:/etc/nixos/blank"
 
 # deploy to DGX Spark: sync flake and rebuild remotely
 spark-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
-    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark {{spark_disable_private}}"
 
 # DS4 server management on DGX Spark
 spark-ds4-start IP="dgx-spark.local":
@@ -95,7 +103,7 @@ spark-ds4-download MODEL="q2-imatrix" IP="dgx-spark.local":
 # deploy lance changes to DGX Spark and rebuild
 spark-lance-deploy IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
-    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && sudo nixos-rebuild switch --flake .#dgx-spark {{spark_disable_private}}"
 
 # download both Lance model variants (Lance_3B + Lance_3B_Video) on DGX Spark
 spark-lance-download-models IP="dgx-spark.local":
@@ -135,12 +143,12 @@ spark-lance-check-models IP="dgx-spark.local":
 # build lance on DGX Spark (without switching)
 spark-build-lance IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
-    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark {{spark_disable_private}}"
 
 # build ds4 on DGX Spark (without switching)
 spark-build-ds4 IP="dgx-spark.local":
     @rsync -av --exclude=.git --exclude=result ./ "yuanw@{{IP}}:/etc/nixos/"
-    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark"
+    @ssh yuanw@{{IP}} "cd /etc/nixos && nixos-rebuild build --flake .#dgx-spark {{spark_disable_private}}"
 
 # build on DGX Spark using colmena
 colmena-spark-build:

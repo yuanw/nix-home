@@ -102,6 +102,25 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
+    # Private modules live in a separate repo; see nix-home-private/README.md.
+    #
+    # git+https, not github:, deliberately: a github: input is fetched as a tarball
+    # from the unauthenticated github.com/<owner>/<repo>/archive/<rev> endpoint, which
+    # answers 404 for a private repo, and the token is read daemon-side so a CLI
+    # --option netrc-file is not seen (verified: update fails with that 404; see the
+    # note in nix-build-with-workiva-netrc.sh on the same trap). The git transport
+    # authenticates client-side through the user's git credential helper, which works.
+    # To use github: instead, put an access token where the DAEMON reads config.
+    #
+    # Public builds (CI) must not need it; disable it explicitly:
+    #   nix build .#mist --override-input nix-home-private path:$PWD/blank
+    # (a bare ./blank is taken for the whole repo: a flake-less input ignores
+    #  the subdir part of a URL, so the path: scheme is what actually works)
+    # and the loadPrivate switch (hosts/default.nix) keeps it unforced there.
+    nix-home-private = {
+      url = "git+https://github.com/yuanw/nix-home-private";
+      flake = false;
+    };
   };
 
   outputs =
@@ -141,17 +160,13 @@
           };
         in
         {
-          _module.args.pkgs = import inputs.nixpkgs {
+          _module.args.pkgs = import ./lib/mk-pkgs.nix {
+            # one definition of the package set, in lib/; nix-home-private builds
+            # the very same one through the exported flake.mkPkgs, so the two
+            # halves do not drift apart at different nixpkgs revisions
+            nixpkgs = inputs.nixpkgs;
+            fixesOverlay = inputs.dgx-spark.overlays.fixes;
             inherit system;
-            config = {
-              allowUnfree = true;
-            };
-            overlays =
-              (inputs.nixpkgs.lib.optionals (builtins.elem system [
-                "aarch64-linux"
-                "x86_64-linux"
-              ]) [ inputs.dgx-spark.overlays.fixes ])
-              ++ [ (import ./packages) ];
           };
           # haskellProjects.default = {
           #   projectRoot = ./packages;
@@ -178,5 +193,53 @@
           pre-commit.settings.package = pkgs.prek;
 
         };
+    }
+
+    # the exports the other half links against
+    //
+    {
+      # The builder for one nix-darwin host, and the package set that goes with it.
+      # Exported here rather than as a module option: flake-parts emits that
+      # option only for the root evaluation, and a flake importing nix-home
+      # found nothing at these names.  The implementation is in lib/, reached by
+      # importing it -- see the header of lib/mk-darwin-system.nix.  Do not copy
+      # either of them into another repository: a copy is a fork, and the two
+      # halves will drift.
+      #
+      #     system = inputs.nix-home.mkDarwinSystem {
+      #       hostname = "WK01174";
+      #       system   = "aarch64-darwin";
+      #       pkgs     = inputs.nix-home.mkPkgs { inherit system; };
+      #       addtionsModule = [ ./hosts/wk01174.nix ./modules/work.nix ];
+      #     };
+      mkDarwinSystem =
+        {
+          hostname,
+          system,
+          config ? { packages = [ ]; },
+          loadPrivate ? false,
+          addtionsModule ? { },
+          pkgs ? null,
+          inputs' ? inputs,
+        }:
+        import ./lib/mk-darwin-system.nix {
+          inherit hostname system config loadPrivate addtionsModule pkgs inputs inputs';
+        };
+      # The package set for a system: the one perSystem uses, at this flake's own
+      # nixpkgs revision (lib/mk-pkgs.nix).  Two definitions of it, at two
+      # revisions, is the thing the export exists to prevent.
+      mkPkgs =
+        {
+          system,
+          extraOverlays ? [ ],
+          fixesOverlay ? null,
+        }:
+        import ./lib/mk-pkgs.nix {
+          nixpkgs = inputs.nixpkgs;
+          inherit system extraOverlays fixesOverlay;
+        };
+      # Paths to this repo's package overlay, for a consumer wanting the very
+      # same packages:  overlays = map (p: import p) inputs.nix-home.pkgsOverlays;
+      pkgsOverlays = [ ./packages ];
     };
 }

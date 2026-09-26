@@ -336,7 +336,7 @@ in
                 "${sidebery.addonId}".settings = import ./librewolf-config/sidebery.nix;
                 "${mtab.addonId}".settings =
                   if hostname == "WK01174" then
-                    import ../private/workMtab.nix
+                    import (inputs.nix-home-private + "/modules/workMtab.nix")
                   else
                     import ./librewolf-config/mtab.nix;
 

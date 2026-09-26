@@ -1,5 +1,7 @@
-{ ... }:
+{ inputs, ... }:
 {
+
+
   flake.myModules = {
     common.imports = [
       ./agenix.nix
@@ -73,4 +75,5 @@
       ./nix-casks.nix
     ];
   };
+
 }

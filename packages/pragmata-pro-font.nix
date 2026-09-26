@@ -25,7 +25,8 @@ stdenv.mkDerivation rec {
         or
           nix-prefetch-url --type sha256 file:///path/to/${name}
 
-      don't forget to git-crypt unlock
+      (nix-home itself is no longer under git-crypt; unlock whatever repository
+      holds the tarball if it is one)
 
       Did you change the file? maybe you need to update the sha256
       $ nix-hash --flat --base32 --type sha256 /path/to/${name}'';
