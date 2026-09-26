@@ -193,5 +193,53 @@
           pre-commit.settings.package = pkgs.prek;
 
         };
+    }
+
+    # the exports the other half links against
+    //
+    {
+      # The builder for one nix-darwin host, and the package set that goes with it.
+      # Exported here rather than as a module option: flake-parts emits that
+      # option only for the root evaluation, and a flake importing nix-home
+      # found nothing at these names.  The implementation is in lib/, reached by
+      # importing it -- see the header of lib/mk-darwin-system.nix.  Do not copy
+      # either of them into another repository: a copy is a fork, and the two
+      # halves will drift.
+      #
+      #     system = inputs.nix-home.mkDarwinSystem {
+      #       hostname = "WK01174";
+      #       system   = "aarch64-darwin";
+      #       pkgs     = inputs.nix-home.mkPkgs { inherit system; };
+      #       addtionsModule = [ ./hosts/wk01174.nix ./modules/work.nix ];
+      #     };
+      mkDarwinSystem =
+        {
+          hostname,
+          system,
+          config ? { packages = [ ]; },
+          loadPrivate ? false,
+          addtionsModule ? { },
+          pkgs ? null,
+          inputs' ? inputs,
+        }:
+        import ./lib/mk-darwin-system.nix {
+          inherit hostname system config loadPrivate addtionsModule pkgs inputs inputs';
+        };
+      # The package set for a system: the one perSystem uses, at this flake's own
+      # nixpkgs revision (lib/mk-pkgs.nix).  Two definitions of it, at two
+      # revisions, is the thing the export exists to prevent.
+      mkPkgs =
+        {
+          system,
+          extraOverlays ? [ ],
+          fixesOverlay ? null,
+        }:
+        import ./lib/mk-pkgs.nix {
+          nixpkgs = inputs.nixpkgs;
+          inherit system extraOverlays fixesOverlay;
+        };
+      # Paths to this repo's package overlay, for a consumer wanting the very
+      # same packages:  overlays = map (p: import p) inputs.nix-home.pkgsOverlays;
+      pkgsOverlays = [ ./packages ];
     };
 }

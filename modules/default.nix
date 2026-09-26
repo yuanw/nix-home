@@ -1,37 +1,6 @@
 { inputs, ... }:
 {
-  # Paths to this repo's package overlay, exported as a flake output so that
-  # nix-home-private can instantiate the very same pkgs instead of duplicating
-  # the definition. Consumers do:
-  #
-  #     overlays = map (p: import p) inputs.nix-home.pkgsOverlays;
-  #
-  # Keep it a list of directories, each with a default.nix.
-  flake.pkgsOverlays = [ ../packages ];
 
-  # The builder for one nix-darwin host, exported so that nix-home-private can
-  # build a host without re-implementing any of this configuration.  The private
-  # side calls it as:
-  #
-  #     system = inputs.nix-home.mkDarwinSystem {
-  #       hostname = "WK01174";
-  #       system   = "aarch64-darwin";
-  #       addtionsModule = [ ./modules/work.nix ./modules/workMtab.nix ];
-  #     };
-  #
-  # The implementation is lib/mk-darwin-system.nix, in this repository.  Do not
-  # copy it into the private one: import it through the nix-home input, as above.
-  flake.mkDarwinSystem =
-    { hostname
-    , system
-    , config ? { packages = [ ]; }
-    , loadPrivate ? false
-    , addtionsModule ? { }
-    , inputs' ? inputs
-    }:
-    import ../lib/mk-darwin-system.nix {
-      inherit hostname system config loadPrivate addtionsModule inputs inputs';
-    };
 
   flake.myModules = {
     common.imports = [
@@ -107,17 +76,4 @@
     ];
   };
 
-  # The package set for a system, exported for nix-home-private.  It is the one
-  # that perSystem uses, from the same nixpkgs revision: call it as
-  #
-  #     pkgs = inputs.nix-home.mkPkgs { system = "aarch64-darwin"; };
-  #
-  # and hand the result to flake.mkDarwinSystem.  Do not build a package set
-  # of your own: two definitions of it, at two revisions, is what this avoids.
-  flake.mkPkgs =
-    { system, extraOverlays ? [ ], fixesOverlay ? null }:
-    import ../lib/mk-pkgs.nix {
-      nixpkgs = inputs.nixpkgs;
-      inherit system extraOverlays fixesOverlay;
-    };
 }
