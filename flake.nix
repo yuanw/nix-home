@@ -113,10 +113,12 @@
     # To use github: instead, put an access token where the DAEMON reads config.
     #
     # Public builds (CI) must not need it; disable it explicitly:
+    #   nix develop --override-input nix-home-private path:$PWD/blank
     #   nix build .#mist --override-input nix-home-private path:$PWD/blank
     # (a bare ./blank is taken for the whole repo: a flake-less input ignores
-    #  the subdir part of a URL, so the path: scheme is what actually works)
-    # and the loadPrivate switch (hosts/default.nix) keeps it unforced there.
+    #  the subdir part of a URL, so the path: scheme is what actually works).
+    # WK-only paths (hosts/wk01174.nix, nix run .#prefetch-work-sources, …)
+    # throw from blank/; public hosts never force those imports.
     nix-home-private = {
       url = "git+https://github.com/yuanw/nix-home-private";
       flake = false;

@@ -16,5 +16,7 @@ jobs:
       with:
         name: yuanwang-wf
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+    # Public CI must not fetch nix-home-private (private GitHub repo). blank/
+    # stubs the input; see flake.nix comment on nix-home-private.
     #https://github.com/github/roadmap/issues/528
-    - run: nix develop
+    - run: nix develop --override-input nix-home-private path:$PWD/blank

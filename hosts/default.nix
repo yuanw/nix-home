@@ -156,7 +156,7 @@
     darwinConfigurations =
       let
         configure =
-          hostname: sys: loadPrivate: addtionsModule:
+          hostname: sys: addtionsModule:
           withSystem sys (
             {
               config,
@@ -165,15 +165,22 @@
               ...
             }:
             import ../lib/mk-darwin-system.nix {
-              inherit inputs inputs' config hostname loadPrivate addtionsModule system;
+              inherit
+                inputs
+                inputs'
+                config
+                hostname
+                addtionsModule
+                system
+                ;
             }
           );
       in
       {
-        ci = configure "ci" "aarch64-darwin" false ./yuan-mac.nix;
-        # yuanw = configure "yuanw" "x86_64-darwin" false ./yuan-mac.nix;
-        mist = configure "mist" "aarch64-darwin" true ./mist.nix;
-        WK01174 = configure "WK01174" "aarch64-darwin" true ./wk01174.nix;
+        ci = configure "ci" "aarch64-darwin" ./yuan-mac.nix;
+        # yuanw = configure "yuanw" "x86_64-darwin" ./yuan-mac.nix;
+        mist = configure "mist" "aarch64-darwin" ./mist.nix;
+        WK01174 = configure "WK01174" "aarch64-darwin" ./wk01174.nix;
       };
   };
   perSystem =
