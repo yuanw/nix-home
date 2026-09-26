@@ -16,7 +16,7 @@ prefetch-work-sources:
 build:
     @if [ "{{lowercase(host)}}" = "wk01174" ]; then \
         test -d {{justfile_directory()}}/../nix-home-private || { echo "wk01174 needs a nix-home-private checkout beside nix-home; see nix-home-private/README.md"; exit 1; }; \
-        @{{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh; \
+        {{justfile_directory()}}/../nix-home-private/scripts/prefetch-work-sources.sh; \
         NIX_CONFIG="{{nix_config}}" {{justfile_directory()}}/../nix-home-private/modules/nix-build-with-workiva-netrc.sh ".#{{lowercase(host)}}"; \
     else \
         {{nix}} build --quiet --fallback ".#{{lowercase(host)}}"; \

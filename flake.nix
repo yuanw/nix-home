@@ -103,7 +103,10 @@
     };
     colmena.url = "github:zhaofengli/colmena";
     # Private modules live in a separate repo; see nix-home-private/README.md.
-    # Public builds (CI) must not need it: pass --inputs nix-home-private=./blank
+    # Public builds (CI) must not need it; disable it explicitly:
+    #   nix build .#mist --override-input nix-home-private path:$PWD/blank
+    # (a bare ./blank is taken for the whole repo: a flake-less input ignores
+    #  the subdir part of a URL, so the path: scheme is what actually works)
     # and the loadPrivate switch (hosts/default.nix) keeps it unforced there.
     nix-home-private = {
       url = "git+file:///Users/yuan/workspaces/nix-home-private";
