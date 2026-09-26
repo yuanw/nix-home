@@ -13,7 +13,7 @@
   # build a host without re-implementing any of this configuration.  The private
   # side calls it as:
   #
-  #     system = inputs.nix-home.flake.mkDarwinSystem {
+  #     system = inputs.nix-home.mkDarwinSystem {
   #       hostname = "WK01174";
   #       system   = "aarch64-darwin";
   #       addtionsModule = [ ./modules/work.nix ./modules/workMtab.nix ];
@@ -110,7 +110,7 @@
   # The package set for a system, exported for nix-home-private.  It is the one
   # that perSystem uses, from the same nixpkgs revision: call it as
   #
-  #     pkgs = inputs.nix-home.flake.mkPkgs { system = "aarch64-darwin"; };
+  #     pkgs = inputs.nix-home.mkPkgs { system = "aarch64-darwin"; };
   #
   # and hand the result to flake.mkDarwinSystem.  Do not build a package set
   # of your own: two definitions of it, at two revisions, is what this avoids.
