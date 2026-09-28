@@ -1374,24 +1374,7 @@
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nur": "nur",
         "preservation": "preservation",
-        "shy-fox": "shy-fox",
         "treefmt-nix": "treefmt-nix_6"
-      }
-    },
-    "shy-fox": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1737445154,
-        "narHash": "sha256-y/Md0VR8h4n4+xzqfVNy7ARf/NG45T440dpHvC5KkkA=",
-        "owner": "Naezr",
-        "repo": "ShyFox",
-        "rev": "aaec12fb0e88eb422467bc84276991ca564de82b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "Naezr",
-        "repo": "ShyFox",
-        "type": "github"
       }
     },
     "stable": {

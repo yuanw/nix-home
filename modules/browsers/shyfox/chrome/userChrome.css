@@ -1,0 +1,29 @@
+/* imports */
+@import url("ShyFox/shy-variables.css");
+@import url("ShyFox/shy-global.css");
+@import url("ShyFox/shy-sidebar.css");
+@import url("ShyFox/shy-toolbar.css");
+@import url("ShyFox/shy-navbar.css");
+@import url("ShyFox/shy-findbar.css");
+@import url("ShyFox/shy-controls.css");
+@import url("ShyFox/shy-compact.css");
+@import url("ShyFox/shy-icons.css");
+@import url("ShyFox/shy-floating-search.css");
+
+/* additional fixes */
+
+:root {
+    --base-color: 28, 27, 34;
+    --toolbar-bgcolor: rgba(var(--base-color), 0.9) !important;
+    background-color: transparent !important;
+}
+
+#PersonalToolbar {
+    display: none;
+}
+
+/* some sites dont have a background color
+welp, get flashed everytime */
+.browserContainer {
+    background: #ffffff !important;
+}

@@ -74,9 +74,9 @@ in
           fi
         ''
       );
-  # home.file = {
-  #   "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
-  # };
+  home.file = {
+    "${profilesPath}/home/chrome".source = ./shyfox/chrome;
+  };
   programs.${program} = lib.mkMerge (
     [
       {
@@ -708,11 +708,16 @@ in
               #PREF: default permission for Location Requests
               #0=always ask (default), 1=allow, 2=block
               "permissions.default.geo" = 2;
-              # shyfox
-              ## Fill SVG Color
+              # shyfox (see modules/browsers/shyfox/user.js)
               "svg.context-properties.content.enabled" = true;
-              #   ## CSS's `:has()` selector
               "layout.css.has-selector.enabled" = true;
+              "sidebar.revamp" = false;
+              "browser.urlbar.suggest.calculator" = true;
+              "browser.urlbar.unitConversion.enabled" = true;
+              "browser.urlbar.trimHttps" = true;
+              "browser.urlbar.trimURLs" = true;
+              "widget.gtk.rounded-bottom-corners.enabled" = true;
+              "widget.gtk.ignore-bogus-leave-notify" = 1;
             };
           };
         };
