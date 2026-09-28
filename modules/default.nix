@@ -3,6 +3,7 @@
 
   flake.myModules = {
     common.imports = [
+      ./_1password.nix
       ./agenix.nix
       ./ai.nix
       ./browsers/default.nix

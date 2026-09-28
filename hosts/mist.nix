@@ -14,9 +14,11 @@
     # jellyfin-darwin.nix now lives in the nix-home-private repo (modules/jellyfin-darwin.nix)
   ];
 
+  # 1Password comes from modules/_1password.nix now (pkgs._1password-gui into
+  # /Applications, op into /usr/local/bin) - a cask copy here would register the
+  # same bundle twice and fight the CLI integration.
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
-    inputs'.nix-casks.packages."1password"
     godot
     racket
     vlc
@@ -65,6 +67,8 @@
     StandardErrorPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.err.log";
   };
   modules = {
+    _1password.enable = true;
+
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
