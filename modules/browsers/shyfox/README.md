@@ -31,7 +31,8 @@ Naezr/ShyFox is stale. Vortriz includes the Firefox 156 fix that stopped
 
 - `modules/browsers/librewolf-home.nix` links `chrome/` into the LibreWolf
   profile with `home.file."…/chrome".source = ./shyfox/chrome`.
-- ShyFox prefs from `user.js` live in `profiles.home.settings`.
+- ShyFox prefs from `user.js` live in `profiles.home.settings` (except
+  `browser.urlbar.trimURLs`, kept `false` so the full URL stays visible).
 - Active Sidebery config remains `../librewolf-config/sidebery.nix` (custom
   panels). Importing `sidebery-settings.json` wholesale would wipe those.
 

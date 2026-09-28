@@ -709,13 +709,13 @@ in
               #0=always ask (default), 1=allow, 2=block
               "permissions.default.geo" = 2;
               # shyfox (see modules/browsers/shyfox/user.js)
+              # trimURLs stays false above ("Show whole URL"); skip shyfox's true.
               "svg.context-properties.content.enabled" = true;
               "layout.css.has-selector.enabled" = true;
               "sidebar.revamp" = false;
               "browser.urlbar.suggest.calculator" = true;
               "browser.urlbar.unitConversion.enabled" = true;
               "browser.urlbar.trimHttps" = true;
-              "browser.urlbar.trimURLs" = true;
               "widget.gtk.rounded-bottom-corners.enabled" = true;
               "widget.gtk.ignore-bogus-leave-notify" = 1;
             };
