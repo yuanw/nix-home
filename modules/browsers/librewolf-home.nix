@@ -74,9 +74,9 @@ in
           fi
         ''
       );
-  home.file = {
-    "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
-  };
+  # home.file = {
+  #   "${profilesPath}/home/chrome".source = "${inputs.shy-fox}/chrome";
+  # };
   programs.${program} = lib.mkMerge (
     [
       {
