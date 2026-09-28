@@ -69,6 +69,7 @@
       parakeetServer = true; # ← enables the server
       parakeetServerPort = 5092; # ← default, optional
     };
+    transcribe.enable = true; # → transcribe, yt-dlp-librewolf
     pi = {
       enable = true;
       extensionsPkgs = with pkgs.pi-extensions; [

@@ -1,6 +1,5 @@
-{ inputs, ... }:
+{ ... }:
 {
-
 
   flake.myModules = {
     common.imports = [
@@ -44,6 +43,7 @@
       ./helix.nix
       ./settings.nix
       ./speech2text/speak2text.nix
+      ./speech2text/transcribe.nix
       ./terminal
       ./terminal-multiplexer/tmux.nix
       ./terminal-multiplexer/zellij.nix

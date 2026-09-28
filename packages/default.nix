@@ -1,6 +1,9 @@
 _final: prev:
 let
   codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
+  # media -> text; the module that puts these two on PATH is
+  # modules/speech2text/transcribe.nix
+  transcribePkgs = prev.callPackage ./transcribe.nix { srt2txt = ./srt2txt.awk; };
 in
 {
   installApplication =
@@ -163,6 +166,8 @@ in
   cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
+  transcribe = transcribePkgs.transcribe;
+  yt-dlp-librewolf = transcribePkgs.yt-dlp-librewolf;
   parakeet-mlx-server = prev.callPackage ./parakeet-mlx-server.nix {
     inherit (prev) writers;
     parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };

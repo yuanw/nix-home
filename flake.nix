@@ -183,6 +183,9 @@
 
           packages = {
             llama-benchy = pkgs.llama-benchy;
+            # try the transcription scripts without switching the whole system
+            transcribe = pkgs.transcribe;
+            yt-dlp-librewolf = pkgs.yt-dlp-librewolf;
             agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
               prompts = agentPrompts;
               tools.pi.enable = true;
