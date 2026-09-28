@@ -12,7 +12,7 @@
       inhibit-startup-echo-area-message (user-login-name))
 (setq-default inhibit-startup-screen t)
 
-(setq initial-major-mode 'fundamental-mode
+(setq initial-major-mode 'org-mode
       initial-scratch-message nil)
 
 ;; Don't blink the cursor.
