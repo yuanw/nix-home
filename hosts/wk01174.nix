@@ -29,13 +29,16 @@
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
   ];
-  home-manager.users.${config.my.username}.programs = {
-    git = {
+  home-manager.users.${config.my.username} = {
+    programs.git = {
       settings = {
         github.user = "yuanwang-wf";
         # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
+    home.packages = [
+      (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
+    ];
   };
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
