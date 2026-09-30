@@ -81,7 +81,6 @@
         pi-cursor-agent
         pi-slow-mode
         pi-permission-gate
-        pi-mcp-adapter
         pi-interactive-shell
         pi-ponytail
       ];
