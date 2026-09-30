@@ -189,6 +189,10 @@
           bash
           coreutils
           curl
+          # NOTE: broken for GPU: the real Docker CLI's DeviceRequests for
+          # `--gpus all` are silently dropped by the podman compat socket, so
+          # containers get no GPU. Use a docker->podman symlink instead (see
+          # vllm-qwen38-tensorfold) if this service is ever re-enabled.
           docker-client
           gawk
           git
@@ -268,6 +272,16 @@
         rev = tensorFoldRev;
         hash = "sha256-upiScG4RoX6Ff4v/nSJwQEOBiXv04Z409KMUAXopgs0=";
       };
+      # The box has no Docker daemon: `docker` is podman in dockerCompat mode.
+      # The real Docker CLI (pkgs.docker-client) sends HostConfig.DeviceRequests
+      # for `--gpus all`, which the podman compat API silently drops, so the
+      # container starts with Devices=[] and torch finds no NVIDIA driver.
+      # A `docker` symlink to podman makes podman translate --gpus to CDI
+      # devices itself (same as /run/current-system/sw/bin/docker).
+      dockerShim = pkgs.runCommand "docker-podman-shim" { } ''
+        mkdir -p $out/bin
+        ln -s ${pkgs.podman}/bin/podman $out/bin/docker
+      '';
       prepare = pkgs.writeShellScript "prepare-qwen38-tensorfold" ''
         set -eu
 
@@ -301,13 +315,13 @@
         bash
         coreutils
         curl
-        docker-client
+        dockerShim # NOT pkgs.docker-client: see comment above
         findutils
         gawk
         git
         gnugrep
         gnused
-        inetutils
+        hostname-debian # start.sh uses `hostname -I` (net-tools syntax); inetutils' hostname exits 64 on it
         iproute2
         procps
         python3
