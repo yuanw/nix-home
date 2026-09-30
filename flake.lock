@@ -978,11 +978,11 @@
     "nix-home-private": {
       "flake": false,
       "locked": {
-        "lastModified": 1790466604,
-        "narHash": "sha256-bMnBgNq8BiqWMuQTWtUqzJSGuHHYhojaxTPFKIGci70=",
+        "lastModified": 1790781532,
+        "narHash": "sha256-DqzmHj6KvJo5/MF5IhiW3IARr+bVXaiz18eVZ76T68A=",
         "ref": "refs/heads/main",
-        "rev": "29b4f0ff80d5d041a20e9d6379c77ebec6fdb0fe",
-        "revCount": 12,
+        "rev": "b649c2ff922d5e3311dc3bd77ca63f09f8116113",
+        "revCount": 16,
         "type": "git",
         "url": "https://github.com/yuanw/nix-home-private"
       },
