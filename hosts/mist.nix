@@ -46,26 +46,6 @@
     programs.git.settings.github.user = "yuanw";
   };
 
-  launchd.user.agents.dgx-spark-vllm-tunnel.serviceConfig = {
-    Label = "ca.yuanwang.dgx-spark-vllm-tunnel";
-    ProgramArguments = [
-      "/usr/bin/ssh"
-      "-N"
-      "-L"
-      "18000:127.0.0.1:8000"
-      "-o"
-      "ExitOnForwardFailure=yes"
-      "-o"
-      "ServerAliveInterval=30"
-      "-o"
-      "ServerAliveCountMax=3"
-      "yuanw@dgx-spark.local"
-    ];
-    KeepAlive = true;
-    RunAtLoad = true;
-    StandardOutPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.log";
-    StandardErrorPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.err.log";
-  };
   modules = {
     _1password.enable = true;
 
