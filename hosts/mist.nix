@@ -74,7 +74,7 @@
           dgx-spark = {
             api = "openai-completions";
             apiKey = "not-needed";
-            baseUrl = "http://dgx-spark.local:8000/v1";
+            baseUrl = "http://dgx-spark.local:8888/v1";
             compat = {
               supportsDeveloperRole = false;
               supportsReasoningEffort = false;
@@ -86,13 +86,14 @@
               {
                 _launch = true;
                 contextWindow = 262144;
-                id = "qwen3.8-flash-next";
+                # Must match the served name exactly (TensorFold SERVED_NAME).
+                id = "Qwen3.8-Flash-Next";
                 input = [
                   "text"
                   "image"
                 ];
                 maxTokens = 32768;
-                name = "Qwen3.8 Flash Next (DGX Spark)";
+                name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
                 reasoning = true;
                 thinkingLevelMap = {
                   off = "off";
