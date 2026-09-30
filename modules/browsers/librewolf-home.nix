@@ -341,7 +341,10 @@ in
                     import ./librewolf-config/mtab.nix;
 
                 "${vimium-c.addonId}".settings = {
-                  keyMappings = "#!no-check\nunmap x";
+                  searchUrl = "https://kagi.com/search?q=$s";
+                  searchEngines = ''
+                    k: https://kagi.com/search?q=$s Kagi
+                  '';
                 };
 
                 "${userchrome-toggle-extended.addonId}".settings =
