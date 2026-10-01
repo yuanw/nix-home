@@ -46,12 +46,15 @@
       ];
     };
 
+    # Only owns the files the TensorFold launcher chowns (repo checkout,
+    # .env); the unit itself runs as root (podman needs the rootful
+    # engine, and `podman info` fails for ordinary users).
     qwen38 = {
       isSystemUser = true;
       group = "qwen38";
-      home = "/var/lib/qwen38-flash-next";
+      home = "/var/lib/qwen38-tensorfold";
       createHome = false;
-      description = "Qwen3.8 Flash Next vLLM state owner";
+      description = "Qwen3.8 Flash Next TensorFold state owner";
     };
   };
 
@@ -125,140 +128,26 @@
     };
   };
 
-  # ─── DGX Dashboard ─────────────────────────────────────────────────
+  # ─── Firewall ───────────────────────────────────────────────────────
+  # 8888 = TensorFold's API port: the launcher runs its container with
+  # --network host and HOST=0.0.0.0, so the API is only reachable while
+  # this port is open. 8000/11000/8188 were dropped with this branch:
+  # the vLLM service (8000) is gone, the DGX dashboard (11000/11001) is
+  # disabled below, and no ComfyUI instance (8188) is configured.
   networking.firewall.allowedTCPPorts = [
-    8000 # vLLM qwen38 (MiaAI-Lab Qwen3.8 Flash Next single-Spark recipe)
     8888 # TensorFold qwen38 (Qwen3.8 Flash Next TensorFold recipe)
-    11000
-    8188
   ];
 
-  # ─── vLLM Inference ─────────────────────────────────────────────────
-  # Qwen3.8-Flash-Next does not fit the generic services.vllm.instances
-  # wrapper cleanly: the single-DGX-Spark recipe relies on its launcher to
-  # prepare PLE offload patches, build/use the packed PLE mmap table, mount a
-  # reduced MTP draft vocabulary, and run the watchdog. Keep the service
-  # manual; first populate the HF cache with:
-  #   cd /var/lib/qwen38-flash-next/repo && ./download.sh
-  #
-  # vLLM variant disabled while trying out the TensorFold variant below
-  # (they serve the same model on port 8000/8888 and conflict).
-  /*
-    systemd.services.vllm-qwen38 =
-      let
-        repoDir = "/var/lib/qwen38-flash-next/repo";
-        qwen38User = "qwen38";
-        qwen38Group = "qwen38";
-        qwen38SingleSparkRev = "b8439110eec0230facbe4ddf0dffe01b8f769be0";
-        qwen38SingleSpark = pkgs.fetchFromGitHub {
-          owner = "yuanw";
-          repo = "Qwen3.8-Flash-Next-Single-DGX-Spark";
-          rev = qwen38SingleSparkRev;
-          hash = "sha256-sMmFTesW8+TR81CaGQVT77XQC2AqkBxBJQV6AyDxUIc=";
-        };
-        prepare = pkgs.writeShellScript "prepare-qwen38-flash-next" ''
-          set -eu
-
-          if [ ! -e ${repoDir}/.nix-source-rev ] || [ "$(cat ${repoDir}/.nix-source-rev)" != "${qwen38SingleSparkRev}" ]; then
-            rm -rf ${repoDir}
-            install -d -o ${qwen38User} -g ${qwen38Group} -m 0755 ${repoDir}
-            cp -a ${qwen38SingleSpark}/. ${repoDir}/
-            chmod -R u+w ${repoDir}
-            chown -R ${qwen38User}:${qwen38Group} ${repoDir}
-            printf '%s\n' '${qwen38SingleSparkRev}' > ${repoDir}/.nix-source-rev
-            chown ${qwen38User}:${qwen38Group} ${repoDir}/.nix-source-rev
-          fi
-
-          cat > ${repoDir}/.env <<'EOF'
-          # Managed by Nix. Runtime configuration is supplied by
-          # systemd.services.vllm-qwen38.environment.
-          EOF
-          sed -i 's/^        //' ${repoDir}/.env
-          chmod 0600 ${repoDir}/.env
-          chown ${qwen38User}:${qwen38Group} ${repoDir}/.env
-        '';
-      in
-      {
-        description = "vLLM Qwen3.8 Flash Next single-DGX-Spark server";
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
-        conflicts = [ "vllm-qwen36.service" ];
-        wantedBy = [ ]; # start manually: systemctl start vllm-qwen38
-
-        path = with pkgs; [
-          bash
-          coreutils
-          curl
-          # NOTE: broken for GPU: the real Docker CLI's DeviceRequests for
-          # `--gpus all` are silently dropped by the podman compat socket, so
-          # containers get no GPU. Use a docker->podman symlink instead (see
-          # vllm-qwen38-tensorfold) if this service is ever re-enabled.
-          docker-client
-          gawk
-          git
-          gnugrep
-          gnused
-          inetutils
-          procps
-          python3
-          util-linux
-        ];
-
-        environment = {
-          HF_HOME = "/var/lib/vllm/huggingface";
-          HOME = "/var/lib/qwen38-flash-next";
-
-          IMAGE = "docker.io/vllm/vllm-openai:qwen38-flash-next";
-          SERVED_MODEL_NAME = "qwen3.8-flash-next";
-          TP1_CONTAINER_NAME = "vllm-qwen38";
-
-          # Keep the old local API port while switching the served model.
-          PORT = "8000";
-          BIND = "0.0.0.0";
-
-          # MiaAI-Lab measured default profile for one DGX Spark.
-          YARN = "0";
-          MAX_MODEL_LEN = "262144";
-          YARN_MAX_MODEL_LEN = "524288";
-          MTP_NUM_SPECULATIVE_TOKENS = "3";
-          KV_TARGET_GIB = "20";
-          HOST_RESERVE_GIB = "26";
-          KV_CACHE_DTYPE = "fp8";
-          MAMBA_SSM_CACHE_DTYPE = "bfloat16";
-          MAX_NUM_SEQS = "4";
-          MAX_NUM_BATCHED_TOKENS = "2048";
-          CUDAGRAPH_CAPTURE_SIZES = "auto";
-          MTP_DRAFT_VOCAB = "files/draft_vocab_en_code_47k.txt";
-          EXTRA_DOCKER_ARGS = "-e VLLM_USE_V2_MODEL_RUNNER=1";
-
-          PLE_OFFLOAD = "true";
-          REQUIRE_IDLE_GPU = "true";
-          READY_TIMEOUT_S = "1800";
-        };
-
-        serviceConfig = {
-          Type = "oneshot";
-          RemainAfterExit = true;
-          WorkingDirectory = "/var/lib/qwen38-flash-next";
-          EnvironmentFile = [ config.age.secrets.hf-token.path ];
-          ExecStartPre = prepare;
-          ExecStart = "${pkgs.bash}/bin/bash ${repoDir}/start.sh";
-          ExecStop = "${pkgs.bash}/bin/bash ${repoDir}/stop.sh";
-          TimeoutStartSec = 2400;
-          TimeoutStopSec = 120;
-        };
-      };
-  */
-
   # ─── TensorFold Inference ─────────────────────────────────────────────
-  # Same model, different engine: Qwen3.8-Flash-Next-Single-DGX-Spark-
-  # TensorFold serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through
-  # TensorFold v0.3.6.3 in a docker container (5 streams x 262,144 tokens,
-  # int8 KV, vision tower). Like the vLLM variant, its launcher
-  # (start.sh + scripts/prepare.sh) does not fit the generic
-  # services.vllm.instances wrapper: prepare.sh pulls/builds the patched
-  # image and downloads the ~106 GiB checkpoint on the first start, so the
-  # service is manual and has no start timeout. First start:
+  # Serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through TensorFold
+  # v0.3.6.3 in a podman (dockerCompat) container: 5 streams x 262,144
+  # tokens, int8 KV, vision tower. Its launcher (start.sh +
+  # scripts/prepare.sh) does not fit the generic services.vllm.instances
+  # wrapper -- the same reason the older vLLM-based service for this model
+  # was dropped (kept in git history): prepare.sh pulls/builds the patched
+  # image and downloads the ~106 GiB checkpoint on first start, so the
+  # service is kept manual (wantedBy = []) with a capped start timeout.
+  # First start:
   #   systemctl start vllm-qwen38-tensorfold   # then: journalctl -fu vllm-qwen38-tensorfold
   systemd.services.vllm-qwen38-tensorfold =
     let
@@ -308,7 +197,6 @@
       description = "TensorFold Qwen3.8 Flash Next single-DGX-Spark server";
       after = [ "network-online.target" ];
       wants = [ "network-online.target" ];
-      conflicts = [ "vllm-qwen38.service" ];
       wantedBy = [ ]; # start manually: systemctl start vllm-qwen38-tensorfold
 
       path = with pkgs; [
@@ -333,7 +221,12 @@
         # overridden below); .env in the repo dir is written by prepare.
         HOME = "/var/lib/qwen38-tensorfold";
 
-        # Share the HF cache with the vLLM variant.
+        # prepare.sh downloads the ~106 GiB checkpoint into $HF_CACHE/hub
+        # and its free-space check wants ~117 GiB free there: prune any
+        # stale model cache left under this directory by the older vLLM
+        # recipe before the first start (systemd.services.
+        # vllm-prune-obsolete-models handles /var/lib/vllm/models only,
+        # NOT this directory).
         HF_CACHE = "/var/lib/vllm/huggingface";
 
         # scripts/config.sh defaults (all overridable here).
@@ -352,22 +245,25 @@
         ExecStartPre = prepare;
         ExecStart = "${pkgs.bash}/bin/bash ${repoDir}/start.sh";
         ExecStop = "${pkgs.bash}/bin/bash ${repoDir}/stop.sh";
-        # The first start pulls the ~11 GB image and downloads the ~106 GiB
-        # checkpoint: no start timeout.
-        TimeoutStartSec = 0;
+        # The first start pulls the ~11 GB image and downloads the ~106
+        # GiB checkpoint. 4 h is generous headroom on a LAN uplink, yet a
+        # stuck pull/download eventually tears the unit down instead of
+        # hanging in "activating" forever.
+        TimeoutStartSec = 4 * 3600;
         TimeoutStopSec = 120;
       };
     };
 
   systemd.tmpfiles.rules = [
-    "d /var/lib/qwen38-flash-next 0755 qwen38 qwen38 - -"
     "d /var/lib/qwen38-tensorfold 0755 qwen38 qwen38 - -"
     "d /var/lib/vllm 0755 root root - -"
     "d /var/lib/vllm/huggingface 0755 qwen38 qwen38 - -"
   ];
 
-  # Qwen3.8 is served from its HuggingFace repo ID through the upstream
-  # launcher, using /var/lib/vllm/huggingface as the shared HF cache.
+  # Qwen3.8 is served from its HuggingFace repo ID through the TensorFold
+  # launcher above, with /var/lib/vllm/huggingface as its HF cache. The
+  # declarative vllm-models downloader (written for the older vLLM
+  # wrapper) stays off so it cannot pull a second copy of the weights.
   services.vllm-models.enable = false;
 
   services.dgx-dashboard = {
