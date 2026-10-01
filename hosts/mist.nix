@@ -14,9 +14,11 @@
     # jellyfin-darwin.nix now lives in the nix-home-private repo (modules/jellyfin-darwin.nix)
   ];
 
+  # 1Password comes from modules/_1password.nix now (pkgs._1password-gui into
+  # /Applications, op into /usr/local/bin) - a cask copy here would register the
+  # same bundle twice and fight the CLI integration.
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
-    inputs'.nix-casks.packages."1password"
     godot
     racket
     vlc
@@ -44,27 +46,9 @@
     programs.git.settings.github.user = "yuanw";
   };
 
-  launchd.user.agents.dgx-spark-vllm-tunnel.serviceConfig = {
-    Label = "ca.yuanwang.dgx-spark-vllm-tunnel";
-    ProgramArguments = [
-      "/usr/bin/ssh"
-      "-N"
-      "-L"
-      "18000:127.0.0.1:8000"
-      "-o"
-      "ExitOnForwardFailure=yes"
-      "-o"
-      "ServerAliveInterval=30"
-      "-o"
-      "ServerAliveCountMax=3"
-      "yuanw@dgx-spark.local"
-    ];
-    KeepAlive = true;
-    RunAtLoad = true;
-    StandardOutPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.log";
-    StandardErrorPath = "${config.my.homeDirectory}/Library/Logs/dgx-spark-vllm-tunnel.err.log";
-  };
   modules = {
+    _1password.enable = true;
+
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
@@ -90,7 +74,7 @@
           dgx-spark = {
             api = "openai-completions";
             apiKey = "not-needed";
-            baseUrl = "http://dgx-spark.local:8000/v1";
+            baseUrl = "http://dgx-spark.local:8888/v1";
             compat = {
               supportsDeveloperRole = false;
               supportsReasoningEffort = false;
@@ -102,13 +86,14 @@
               {
                 _launch = true;
                 contextWindow = 262144;
-                id = "qwen3.8-flash-next";
+                # Must match the served name exactly (TensorFold SERVED_NAME).
+                id = "Qwen3.8-Flash-Next";
                 input = [
                   "text"
                   "image"
                 ];
                 maxTokens = 32768;
-                name = "Qwen3.8 Flash Next (DGX Spark)";
+                name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
                 reasoning = true;
                 thinkingLevelMap = {
                   off = "off";
