@@ -48,7 +48,7 @@
 
   modules = {
     _1password.enable = true;
-
+    transcribe.enable = true;
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
