@@ -1,11 +1,13 @@
 /*
   Checks for packages/transcribe.nix.
 
-  The scripts under test talk to yt-dlp, ffmpeg, whisper-cpp and
-  cohere-transcribe; all four arrive here as stubs (a real cohere-transcribe
-  would be fetched from GitHub), so what gets exercised is our own logic:
-  caption vs audio routing, the SRT cleanup, cookie flag construction, and
-  which speech-to-text backend gets asked with what.
+  The scripts under test talk to yt-dlp, whisper-cpp and cohere-transcribe;
+  all three arrive as stubs (a real cohere-transcribe would be fetched from
+  GitHub), so what gets exercised is our own logic: caption vs audio
+  routing, the SRT cleanup, cookie flag construction, and which
+  speech-to-text backend gets asked with what.  ffmpeg is real, and so are
+  the media fixtures: whatever reaches a backend has to decode, and empty
+  stand-ins would now stop at the transcoding step instead.
 */
 {
   pkgs,
@@ -129,6 +131,7 @@ pkgs.runCommand "transcribe-tests"
       pkgs.coreutils
       pkgs.gnugrep
       pkgs.gawk
+      pkgs.ffmpeg
     ];
     meta.description = "Regression tests for transcribe and yt-dlp-librewolf";
   }
@@ -153,10 +156,16 @@ pkgs.runCommand "transcribe-tests"
     01:02:03,000 --> 01:02:07,000
     one hour mark line
     EOF
-    : > tmp/hello.m4a
+    # Fixtures that would reach a speech-to-text backend must be decodable
+    # media, not empty files: anything that is not WAV or MP3 goes through
+    # ffmpeg first now, and ffmpeg on an empty file fails the same way a
+    # missing audio track does -- before the stub backend ever runs.  A
+    # 440 Hz sine is cheap real audio; the MP3 stays empty because MP3
+    # skips that step and the stub backends only check that a file arrived.
+    ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -c:a aac tmp/hello.m4a
+    ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -c:a libopus tmp/video.webm
     : > tmp/audioonly.mp3
     cp tmp/hello.srt tmp/video.en.srt
-    : > tmp/video.webm
 
     export YTDLP_STUB_SRT="$PWD/tmp/hello.srt"
     export YTDLP_STUB_AUDIO="$PWD/tmp/hello.m4a"
@@ -198,7 +207,7 @@ pkgs.runCommand "transcribe-tests"
     if grep -q 'cookies-from-browser' "$YTDLP_STUB_LOG"; then
       fail "COOKIE_BROWSER= still asked for cookies: $(cat "$YTDLP_STUB_LOG")"
     fi
-    grep -q '^whisper transcript of stub.m4a$' out/nosubs.txt \
+    grep -q '^whisper transcript of audio.wav$' out/nosubs.txt \
       || fail "whisper fallback did not run: $(cat out/nosubs.txt)"
 
     echo "[transcribe-tests] TRANSCRIBE_ASR_CMD outranks WHISPER_MODEL"
@@ -206,7 +215,7 @@ pkgs.runCommand "transcribe-tests"
     YTDLP_STUB_ID=cmd YTDLP_STUB_SRT= ASR_STUB_SEEN="$PWD/tmp/asr-seen" TRANSCRIBE_ASR_CMD="$asrcmd" \
     WHISPER_MODEL=/dev/null COOKIE_BROWSER= \
       "$transcribe" -o out "https://youtu.be/cmd" >/dev/null
-    grep -q '^cmd transcript of stub.m4a$' out/cmd.txt \
+    grep -q '^cmd transcript of audio.wav$' out/cmd.txt \
       || fail "explicit speech-to-text command ignored: $(cat out/cmd.txt)"
     [[ -f "$(cat tmp/asr-seen)" ]] || fail "command was handed a non-path: $(cat tmp/asr-seen)"
 
@@ -235,12 +244,12 @@ pkgs.runCommand "transcribe-tests"
     fi
     grep -q -- '--audio-format' "$YTDLP_STUB_LOG" \
       || fail "--force-asr never extracted audio: $(cat "$YTDLP_STUB_LOG")"
-    grep -q '^cmd transcript of stub.m4a$' out/force.txt \
+    grep -q '^cmd transcript of audio.wav$' out/force.txt \
       || fail "--force-asr skipped speech-to-text: $(cat out/force.txt)"
 
     echo "[transcribe-tests] --force-asr ignores a sidecar srt next to a local file"
     TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= "$transcribe" -A -o out tmp/video.webm >/dev/null
-    grep -q '^cmd transcript of video.webm$' out/video.txt \
+    grep -q '^cmd transcript of audio.wav$' out/video.txt \
       || fail "sidecar still won over --force-asr: $(cat out/video.txt)"
 
     echo "[transcribe-tests] -n and -A contradict each other"
@@ -281,6 +290,15 @@ pkgs.runCommand "transcribe-tests"
     WHISPER_MODEL=/dev/null COOKIE_BROWSER= "$transcribe" -o out tmp/audioonly.mp3 >/dev/null
     grep -q '^whisper transcript of audioonly.mp3$' out/audioonly.txt \
       || fail "local speech-to-text wrong: $(cat out/audioonly.txt)"
+
+    echo "[transcribe-tests] a media file without an audio track fails loudly"
+    ffmpeg -v error -f lavfi -i "color=c=black:s=64x64:d=1" -an tmp/silent.mp4
+    rc=0
+    WHISPER_MODEL=/dev/null TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= \
+      "$transcribe" -o out tmp/silent.mp4 2>tmp/silent.err || rc=$?
+    [[ $rc -ne 0 ]] || fail "a video with no audio track reached a backend"
+    grep -q 'ffmpeg could not decode' tmp/silent.err \
+      || fail "wrong no-audio failure: $(cat tmp/silent.err)"
 
     echo "[transcribe-tests] a missing profile does not stop public videos"
     YTDLP_STUB_ID=public LIBREWOLF_PROFILE_ROOT="$PWD/tmp/nope" "$transcribe" -o out "https://youtu.be/public" >/dev/null

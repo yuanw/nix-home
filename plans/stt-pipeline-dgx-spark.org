@@ -23,6 +23,19 @@
     straight to the model.  That is how you get the model to run on a
     lecture that happens to have captions; without it captions win, being
     the cheaper correct text.
+  - =asr()= takes the per-input work directory as a second argument and
+    feeds the backends mono 16 kHz WAV unless the input is already WAV or
+    MP3.  Those two are what every backend here is *known* to decode;
+    nothing else is assumed, because the first lecture run -- the
+    Opus-in-WebM downloaded into =~/Downloads= -- reached the CLI raw and
+    died with "Failed to create audio decoder: unsupported codec".  URL
+    extracts (m4a) and local containers (webm, mkv, mp4, ...) take the
+    same detour now; =tests/transcribe.nix= generates real ffmpeg
+    fixtures (a sine in AAC/m4a and in Opus/webm) because empty stand-ins
+    would stop at ffmpeg, plus one case for a media file that has no
+    audio track at all -- that must fail with a named cause, not an
+    empty transcript.  whisper-cpp decodes WAV and MP3 natively too,
+    which is why the passthrough list is exactly those two.
   - =asr()= picks its backend in three steps: =$TRANSCRIBE_ASR_CMD= if set,
     then =$WHISPER_MODEL= with whisper-cpp, then =cohere-transcribe= looked
     up on PATH with =$COHERE_TRANSCRIBE_MODEL_DIR= as the weights
@@ -46,19 +59,37 @@
   - =tests/transcribe.nix= gained the =-A= cases (URL with captions, local
     file with sidecar captions, =-n -A= contradiction) and the model-dir
     cases (explicit command outranks it; --model-dir and the audio file
-    reach the CLI as two arguments).  Run them with
-    =nix-build --no-out-link /tmp/ck/t.nix= (that file imports this test
-    file against a plain nixpkgs), or wire =tests/transcribe.nix= into
-    =perSystem.checks= if they should run in CI.
+    reach the CLI as two arguments).  The stub set in that file now also
+    carries a =cohere-transcribe= stub, because the test scripts build the
+    scripts with an explicit =cohere-transcribe= override instead of the
+    injected one: what is under test is the routing, not the model.  The
+    file is wired into =tests/flake-module.nix= as =checks.transcribe=, so
+    =nix build .#checks.aarch64-darwin.transcribe= runs it; verified green
+    on aarch64-darwin, and the package evaluates for x86_64-linux (where
+    there is no CLI to find, hence the =null=).
 
-  Still open on mist: accept the HuggingFace licence, =HF_TOKEN=, then
-  =huggingface-cli download CohereLabs/cohere-transcribe-03-2026 --local-dir
-  ~/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026= and copy
-  =vocab.json= (from =${pkgs.cohere-transcribe}/share/cohere-transcribe/=)
-  beside the weights.  Then =transcribe -A= the 58-minute lecture and watch
-  the memory water line: 5.6 GB of weights on 16 GB of unified memory is the
-  experiment this plan ends on.  whisper.cpp (1-2 GB, no licence) is the way
-  out if it does not fit.
+  * Results, 2026-09-30: what the lecture run showed
+
+  The licence was accepted, the weights and =vocab.json= put in place, and
+  the 58-minute lecture went through end to end -- as raw WebM (which is
+  what exposed the missing decode step, fixed as described above) and as
+  the WAV transcoded from it.
+
+  Memory decided nothing: the ~5.6 GB of weights never became resident
+  (RSS sampled near 0.1 GB during transcription), the machine stayed
+  responsive, and the full file finished in ~27.5 minutes -- roughly
+  half real time, CPU-bound with the GPU nearly idle.  On 16 GB the
+  pipeline fits; it being slow is a separate finding from it fitting.
+
+  Quality did fail, and badly: long passages that loop and eat
+  themselves, on the lecture ("the number of" x50, "Frog" spam x70) and
+  on a seven-second =say=-generated clip alike.  The CLI invoked by hand
+  on the same file produces identical output, so this is not the
+  pipeline's doing; it is what this CLI's inference produces on this
+  machine, wiring cannot fix it.  A correct transcript of the lecture is
+  still one plain =transcribe <URL>= away, subtitle or not: the default
+  path tries the caption lookup first, which never touches the model.
+
 
 * Overview
 

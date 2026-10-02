@@ -146,8 +146,25 @@ in
         fi
       }
 
-      asr() { # asr FILE -> transcript text on stdout
+      asr() { # asr FILE DIR -> transcript text on stdout
         file="$(realpath "$1")"
+        # What every backend here is *known* to decode is WAV and MP3; a
+        # container or codec outside that gets PCM'd into DIR/audio.wav
+        # first.  Not theory: the first real run handed the script an
+        # Opus-in-WebM file and cohere-transcribe died with "Failed to
+        # create audio decoder: unsupported codec", and whether the m4a
+        # yt-dlp extracts decodes at all was never verified.  Mono
+        # 16 kHz WAV is what both backends eat, so this is a detour that
+        # cannot fail, not a format guess.
+        case "''${file,,}" in
+          *.wav|*.mp3) ;;
+          *)
+            step "decoding audio"
+            ffmpeg -nostdin -loglevel error -i "$file" -vn -acodec pcm_s16le -ar 16000 -ac 1 "$2/audio.wav" \
+              || die "ffmpeg could not decode $1 (no audio track?)"
+            file="$2/audio.wav"
+            ;;
+        esac
         if [[ -n "''${TRANSCRIBE_ASR_CMD:-}" ]]; then
           # TRANSCRIBE_ASR_CMD is word-split on spaces, the media file is
           # appended as its own argument so paths may contain spaces.
@@ -225,7 +242,7 @@ in
           [[ -n "$audio" ]] || audio="$in"
           [[ -f "$audio" ]] || die "nothing to transcribe for $in"
           step "speech-to-text: $audio"
-          asr "$audio" | sed '/^[[:space:]]*$/d' > "$tmp"
+          asr "$audio" "$work" | sed '/^[[:space:]]*$/d' > "$tmp"
         fi
 
         [[ -s "$tmp" ]] || die "empty transcript for $in"
