@@ -260,12 +260,15 @@
       # torch's cpp_extension fails to build the .so) + gcc (cpp_extension
       # compiles the host side with `c++`, which must be on PATH or ninja
       # dies with "posix_spawn: No such file or directory"; torch itself
-      # was built with g++, so use nixpkgs gcc, not clang) + ninja (the
-      # JIT build system) + git (huggingface_hub's git checks).
+      # was built with g++, so use nixpkgs gcc, not clang) + bash (ninja
+      # spawns every rule via `sh -c`, and the unit's PATH replaces the
+      # default, so sh must be in it explicitly) + ninja (the JIT build
+      # system) + git (huggingface_hub's git checks).
       path = with pkgs; [
         cudaHome
         gcc
         ninja
+        bash
         gitMinimal
         coreutils
       ];
