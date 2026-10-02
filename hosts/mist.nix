@@ -38,20 +38,32 @@
     homeDirectory = "/Users/yuan";
   };
 
-  # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and falls back to
-  # cohere-transcribe for the audio; huggingface-cli (python3Packages.huggingface-hub)
-  # is how the gated weights get fetched.  They arrive in that script's own
-  # closure either way -- on a server it is nicer to be able to ask `which ffmpeg`
-  # and get an answer, which is what this list is for.
+  # `transcribe` (below) drives yt-dlp and ffmpeg off PATH.  It picks its
+  # speech-to-text backend the same way: $TRANSCRIBE_ASR_CMD if set, then
+  # $WHISPER_MODEL with whisper-cpp, then `cohere-transcribe' looked up on PATH
+  # with $COHERE_TRANSCRIBE_MODEL_DIR as the weights directory.  Those four
+  # arrive in that script's own closure either way -- writeShellApplication
+  # keeps the caller's PATH behind it, and that has /run/current-system/sw/bin
+  # in it -- so what this list buys is `which ffmpeg` on a machine you ssh into,
+  # and a `transcribe` started from somewhere that never went through a login
+  # shell.  huggingface-cli is how the gated weights get fetched.
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
+    "${pkgs.transcribe}/bin"
     "${pkgs.cohere-transcribe}/bin"
     "${pkgs.python3Packages.huggingface-hub}/bin"
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
   };
+
+  # The weights directory, for the two ways `transcribe` can be told about a
+  # speech-to-text backend: modules.transcribe.asrCmd below (a session variable,
+  # so login shells only) and this, which any process reading the environment
+  # gets.  `cohere-transcribe' takes the model directory as --model-dir and has
+  # no default, which is why it is named in both.
+  environment.variables.COHERE_TRANSCRIBE_MODEL_DIR = "${config.my.homeDirectory}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026";
 
   # Speech to text: `transcribe <URL|file>` (packages/transcribe.nix), with
   # Cohere Transcribe (pkgs.cohere-transcribe, the Rust CLI from

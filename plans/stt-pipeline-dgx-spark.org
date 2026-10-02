@@ -2,6 +2,64 @@
 #+AUTHOR: Yuan Wang
 #+DATE: 2026-09-30
 
+* Revision, 2026-09-30: run on mist, not on the Spark
+
+  The plan below was written for dgx-spark and is kept for the record.  It
+  is not runnable there as written: Qwen3.8-Flash-Next (tensorfold) already
+  keeps 106-118 GiB of the 128 GB resident, and that process is what
+  answers the phone.  Cohere Transcribe wants ~7-8 GB on top of that.  So
+  the pipeline went to =mist= (aarch64-darwin, 16 GB unified memory) and to
+  the MLX artifact, and what follows is what that took.
+
+  - =packages/cohere-transcribe/default.nix= now picks the zip per
+    platform: =transcribe-macos-aarch64.zip= (MLX/Metal, =mlx.metallib=
+    beside the binary) on aarch64-darwin, =transcribe-linux-aarch64-cuda.zip=
+    on aarch64-linux, nothing and no error elsewhere.  Both zips hold one
+    top-level directory, so =fetchzip='s default =stripRoot= is right; on
+    darwin there is no loader reading =LD_LIBRARY_PATH=, no CUDA and no
+    patchelf, so the whole Linux branch (CUDA 12 guard, =wrapProgram=) is
+    skipped instead of being faked.
+  - =transcribe= gained =-A/--force-asr=: ignore the caption search and go
+    straight to the model.  That is how you get the model to run on a
+    lecture that happens to have captions; without it captions win, being
+    the cheaper correct text.
+  - =asr()= picks its backend in three steps: =$TRANSCRIBE_ASR_CMD= if set,
+    then =$WHISPER_MODEL= with whisper-cpp, then =cohere-transcribe= looked
+    up on PATH with =$COHERE_TRANSCRIBE_MODEL_DIR= as the weights
+    directory, and otherwise a message naming those three.  The model
+    directory is a variable of its own rather than part of
+    =$TRANSCRIBE_ASR_CMD= because word splitting is not tilde expansion:
+    =$HOME= written inside an environment variable stays literal.
+    =hosts/mist.nix= therefore names the directory twice -- inside
+    =modules.transcribe.asrCmd= (absolute store path + absolute model dir,
+    which is what a login shell gets) and as =COHERE_TRANSCRIBE_MODEL_DIR=
+    (which any process reading the environment gets).
+  - the CLI is deliberately *not* a =runtimeInput= of the =transcribe=
+    script.  =packages/default.nix= passes =cohere-transcribe = null= to
+    =callPackage=: otherwise the injected attribute is evaluated on every
+    platform (x86_64-* have no binary to point at, and the package
+    expression throws there) and on aarch64-linux it would pick up whatever
+    CUDA that set carries, which on the Spark is CUDA 13 -- a set of
+    libraries the CLI cannot load.  Tests pass a stub; mist installs the
+    real thing through =environment.systemPath=, which is also why the
+    script's =command -v= check works without a home-manager guess.
+  - =tests/transcribe.nix= gained the =-A= cases (URL with captions, local
+    file with sidecar captions, =-n -A= contradiction) and the model-dir
+    cases (explicit command outranks it; --model-dir and the audio file
+    reach the CLI as two arguments).  Run them with
+    =nix-build --no-out-link /tmp/ck/t.nix= (that file imports this test
+    file against a plain nixpkgs), or wire =tests/transcribe.nix= into
+    =perSystem.checks= if they should run in CI.
+
+  Still open on mist: accept the HuggingFace licence, =HF_TOKEN=, then
+  =huggingface-cli download CohereLabs/cohere-transcribe-03-2026 --local-dir
+  ~/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026= and copy
+  =vocab.json= (from =${pkgs.cohere-transcribe}/share/cohere-transcribe/=)
+  beside the weights.  Then =transcribe -A= the 58-minute lecture and watch
+  the memory water line: 5.6 GB of weights on 16 GB of unified memory is the
+  experiment this plan ends on.  whisper.cpp (1-2 GB, no licence) is the way
+  out if it does not fit.
+
 * Overview
 
   Add a speech-to-text (STT) pipeline to the =dgx-spark= host, using

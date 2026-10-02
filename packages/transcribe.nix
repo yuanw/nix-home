@@ -20,8 +20,13 @@
   findutils,
   gnugrep,
   gnused,
-  # The speech-to-text CLI called when a video has no captions.  Only put on
-  # PATH on the two platforms that ship it; tests pass a stub.
+  # The speech-to-text CLI used when a video has no captions.  Optional on
+  # purpose: `asr' looks the name up on the caller's PATH, and hosts that ship
+  # the CLI put it there (mist via environment.systemPath, and it is in the
+  # script's own PATH too when this is called with an override, as the tests
+  # do).  Baking it in would also drag a CUDA 13 package set into every
+  # aarch64-linux build, where the CLI cannot run at all.
+  cohere-transcribe ? null,
   # Path to srt2txt.awk (injected so tests can pass their own copy).
   srt2txt,
   ...
@@ -68,13 +73,11 @@ let
       fi
     fi
   '';
-  # What the wrapped script may look up by name.  cohere-transcribe is only
-  # where it is shipped, and its absence on x86_64-* is a missing attribute
-  # rather than a skipped backend, so it is added by platform.
-  asrPlatforms = [
-    "aarch64-darwin"
-    "aarch64-linux"
-  ];
+
+  # What the wrapped script may look up by name.  cohere-transcribe is there
+  # only when the caller passes one (the tests pass a stub; packages/default.nix
+  # passes null, so a host that wants the CLI ships it through PATH -- see the
+  # asr() branch below and hosts/mist.nix).
 in
 {
   transcribe = writeShellApplication {
@@ -89,7 +92,7 @@ in
       yt-dlp
       whisper-cpp
     ]
-    ++ lib.optionals (builtins.elem stdenv.hostPlatform.system asrPlatforms) [ cohere-transcribe ];
+    ++ lib.optionals (cohere-transcribe != null) [ cohere-transcribe ];
 
     text = ''
       ${preamble}
