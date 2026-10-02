@@ -220,6 +220,17 @@
           pillow
           av
           transformers
+          # The container image shipped torchvision; without it the Qwen-VL
+          # image processor falls back to PIL (works, but warns). The
+          # processor only resizes/interpolates on host, so the CPU-compiled
+          # extension is enough (the standard pairing: CPU torchvision wheel
+          # + CUDA torch) — FORCE_CUDA=0 skips torchvision's own CUDA
+          # compile entirely.
+          (torchvision.overrideAttrs (o: {
+            env = (o.env or { }) // {
+              FORCE_CUDA = "0";
+            };
+          }))
         ])
       );
 
@@ -246,10 +257,14 @@
       wantedBy = [ ]; # start manually: systemctl start vllm-qwen38-tensorfold
 
       # nvcc (first-start JIT of TensorFold's CUDA kernels — without it
-      # torch's cpp_extension fails to build the .so) + ninja (the JIT
-      # build system) + git (huggingface_hub's git checks).
+      # torch's cpp_extension fails to build the .so) + gcc (cpp_extension
+      # compiles the host side with `c++`, which must be on PATH or ninja
+      # dies with "posix_spawn: No such file or directory"; torch itself
+      # was built with g++, so use nixpkgs gcc, not clang) + ninja (the
+      # JIT build system) + git (huggingface_hub's git checks).
       path = with pkgs; [
         cudaHome
+        gcc
         ninja
         gitMinimal
         coreutils
