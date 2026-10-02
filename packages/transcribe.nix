@@ -9,6 +9,7 @@
   yt-dlp-librewolf is for.  See cookieSetup below.
 */
 {
+  lib,
   stdenv,
   writeShellApplication,
   yt-dlp,
@@ -67,6 +68,13 @@ let
       fi
     fi
   '';
+  # What the wrapped script may look up by name.  cohere-transcribe is only
+  # where it is shipped, and its absence on x86_64-* is a missing attribute
+  # rather than a skipped backend, so it is added by platform.
+  asrPlatforms = [
+    "aarch64-darwin"
+    "aarch64-linux"
+  ];
 in
 {
   transcribe = writeShellApplication {
@@ -80,7 +88,8 @@ in
       ffmpeg
       yt-dlp
       whisper-cpp
-    ];
+    ]
+    ++ lib.optionals (builtins.elem stdenv.hostPlatform.system asrPlatforms) [ cohere-transcribe ];
 
     text = ''
       ${preamble}
@@ -117,8 +126,9 @@ in
         esac
         shift
       done
-      [[ "$subs_only$force_asr" != "11" ]] \
-        || die "--subs-only refuses speech-to-text, --force-asr is speech-to-text: pick one"
+      if [[ "$subs_only" -eq 1 && "$force_asr" -eq 1 ]]; then
+        die "--subs-only refuses speech-to-text, --force-asr is speech-to-text: pick one"
+      fi
       [[ ''${#inputs[@]} -gt 0 ]] || usage
       [[ -n "$outdir" ]] || outdir="$PWD"
       mkdir -p "$outdir"
