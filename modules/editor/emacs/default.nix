@@ -16,8 +16,6 @@ let
   aspell = (
     pkgs.aspellWithDicts (ds: [
       ds.en
-      ds.en-computers
-      ds.en-science
     ])
   );
   emacsclient = "${emacsPackage}/bin/emacsclient -c -a '${emacsPackage}/bin/emacs'";

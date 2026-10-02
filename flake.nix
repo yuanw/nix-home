@@ -55,7 +55,6 @@
     };
     agenix = {
       url = "github:ryantm/agenix";
-      inputs.darwin.follows = "nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     treefmt-nix = {
