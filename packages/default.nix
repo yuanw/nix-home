@@ -4,6 +4,18 @@ let
   # media -> text; the module that puts these two on PATH is
   # modules/speech2text/transcribe.nix
   transcribePkgs = prev.callPackage ./transcribe.nix { srt2txt = ./srt2txt.awk; };
+  # TensorFold's python313Packages scope extension (see the entry below).
+  python313PackagesWithTensorfold = prev.python313Packages.overrideScope (
+    pfinal: _pprev: {
+      tensorfold = pfinal.callPackage ./tensorfold { };
+    }
+  );
+  # stdlib-only regression tools (bench/needle/toolcheck/visioncheck)
+  # from the deployment repo, for comparing the native service against
+  # the container baseline (62/90/107/119 tok/s at 1/2/4/5 streams).
+  tensorfold-tools = prev.callPackage ./tensorfold/tools.nix {
+    deploySrc = (import ./tensorfold/src.nix { inherit (prev) fetchFromGitHub; }).deploySrc;
+  };
 in
 {
   installApplication =
@@ -224,6 +236,22 @@ in
     pkg_config = prev.pkg-config;
     gnumake = prev.gnumake;
   };
+
+  # TensorFold v0.3.6.3 (+ the deployment repo's nine site-packages
+  # patches) for the native dgx-spark serving unit. python313, not the
+  # default python3 (3.14): TensorFold self-tests on 3.12/3.13, and the
+  # CUDA-enabled torch lives in python313Packages too. Added to the
+  # python313Packages scope (so python313.withPackages sees it) and
+  # aliased at the top level. Note this only makes sense against the
+  # dgx-spark host's pkgs, which set nixpkgs.config.cudaSupport — the
+  # flake's perSystem pkgs (lib/mk-pkgs.nix) do not, so building
+  # `.#packages.aarch64-linux.tensorfold` would pick a CPU-only torch.
+  # Build it via
+  #   nix build .#nixosConfigurations.dgx-spark.pkgs.tensorfold
+  # or let colmena build it on the target (deployment.buildOnTarget).
+  python313Packages = python313PackagesWithTensorfold;
+  tensorfold = python313PackagesWithTensorfold.tensorfold;
+  inherit tensorfold-tools; # bound in the let above
 
   # Performance Co-Pilot — system performance monitoring toolkit
   # Re-adds pcp removed from nixpkgs (PR #495646)
