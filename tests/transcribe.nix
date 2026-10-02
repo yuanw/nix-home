@@ -189,6 +189,30 @@ pkgs.runCommand "transcribe-tests"
       || fail "explicit speech-to-text command ignored: $(cat out/cmd.txt)"
     [[ -f "$(cat tmp/asr-seen)" ]] || fail "command was handed a non-path: $(cat tmp/asr-seen)"
 
+    echo "[transcribe-tests] --force-asr ignores captions that would have worked"
+    : > "$YTDLP_STUB_LOG"
+    : > tmp/asr-seen
+    YTDLP_STUB_ID=force ASR_STUB_SEEN="$PWD/tmp/asr-seen" TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= \
+      "$transcribe" -A -o out "https://youtu.be/force" >/dev/null
+    if grep -q -- '--write-subs' "$YTDLP_STUB_LOG"; then
+      fail "--force-asr still looked for captions: $(cat "$YTDLP_STUB_LOG")"
+    fi
+    grep -q -- '--audio-format' "$YTDLP_STUB_LOG" \
+      || fail "--force-asr never extracted audio: $(cat "$YTDLP_STUB_LOG")"
+    grep -q '^cmd transcript of stub.m4a$' out/force.txt \
+      || fail "--force-asr skipped speech-to-text: $(cat out/force.txt)"
+
+    echo "[transcribe-tests] --force-asr ignores a sidecar srt next to a local file"
+    TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= "$transcribe" -A -o out tmp/video.webm >/dev/null
+    grep -q '^cmd transcript of video.webm$' out/video.txt \
+      || fail "sidecar still won over --force-asr: $(cat out/video.txt)"
+
+    echo "[transcribe-tests] -n and -A contradict each other"
+    rc=0
+    COOKIE_BROWSER= "$transcribe" -n -A -o out "https://youtu.be/both" 2>tmp/both.err || rc=$?
+    [[ $rc -ne 0 ]] || fail "both contradictory flags accepted"
+    grep -q 'pick one' tmp/both.err || fail "unhelpful message: $(cat tmp/both.err)"
+
     echo "[transcribe-tests] no backend at all -> a message naming the fix"
     rc=0
     WHISPER_MODEL= TRANSCRIBE_ASR_CMD= COOKIE_BROWSER= \

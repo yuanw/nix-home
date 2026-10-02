@@ -19,6 +19,8 @@
   findutils,
   gnugrep,
   gnused,
+  # The speech-to-text CLI called when a video has no captions.  Only put on
+  # PATH on the two platforms that ship it; tests pass a stub.
   # Path to srt2txt.awk (injected so tests can pass their own copy).
   srt2txt,
   ...
@@ -85,24 +87,28 @@ in
 
       sub_langs="''${TRANSCRIBE_SUB_LANGS:-en.,en}"
       subs_only=0
+      force_asr=0
       timestamps=1
       outdir=""
       inputs=()
 
       usage() {
-        step "usage: transcribe [-o DIR] [-n] [-T] URL_OR_FILE..."
+        step "usage: transcribe [-o DIR] [-n] [-A] [-T] URL_OR_FILE..."
         step "  -n, --subs-only       never fall back to speech-to-text"
+        step "  -A, --force-asr       ignore captions, transcribe the audio (benchmarks)"
         step "  -T, --no-timestamps   drop the [mm:ss] prefixes"
         step "  -o, --output-dir DIR  where the .txt files land (default: \$PWD)"
         step "environment: TRANSCRIBE_SUB_LANGS, COOKIE_BROWSER, LIBREWOLF_PROFILE_ROOT,"
         step "             TRANSCRIBE_ASR_CMD (run as: \$TRANSCRIBE_ASR_CMD FILE),"
-        step "             WHISPER_MODEL (ggml model file for the bundled whisper-cpp)"
+        step "             WHISPER_MODEL (ggml model file for the bundled whisper-cpp),"
+        step "             COHERE_TRANSCRIBE_MODEL_DIR (directory holding the Cohere weights)"
         exit 2
       }
 
       while [[ $# -gt 0 ]]; do
         case "$1" in
           -n|--subs-only) subs_only=1 ;;
+          -A|--force-asr) force_asr=1 ;;
           -T|--no-timestamps) timestamps=0 ;;
           -o|--output-dir) shift; [[ $# -gt 0 ]] || usage; outdir="$1" ;;
           -h|--help) usage ;;
@@ -111,6 +117,8 @@ in
         esac
         shift
       done
+      [[ "$subs_only$force_asr" != "11" ]] \
+        || die "--subs-only refuses speech-to-text, --force-asr is speech-to-text: pick one"
       [[ ''${#inputs[@]} -gt 0 ]] || usage
       [[ -n "$outdir" ]] || outdir="$PWD"
       mkdir -p "$outdir"
@@ -135,8 +143,17 @@ in
           "''${cmd[@]}" "$file"
         elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
           whisper-cpp -m "$WHISPER_MODEL" -f "$file" -nt
+        elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
+          && command -v cohere-transcribe >/dev/null; then
+          # The weights live in a directory of their own, named by hand: the
+          # file is a positional argument, and --model-dir has to name the
+          # directory holding config.json, model.safetensors and vocab.json.
+          # $HOME and ~ do not expand inside TRANSCRIBE_ASR_CMD -- word
+          # splitting is not tilde expansion -- which is why the model
+          # directory is a variable of its own instead of part of that one.
+          cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" "$file"
         else
-          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD or \$WHISPER_MODEL, or pass --subs-only"
+          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, \$WHISPER_MODEL or \$COHERE_TRANSCRIBE_MODEL_DIR, or pass --subs-only"
         fi
       }
 
@@ -156,16 +173,19 @@ in
             stem="''${stem%.*}"
           fi
           out="$outdir/$stem.txt"
-          step "looking for captions: $in"
-          run_yt_dlp --write-subs --write-auto-subs --sub-langs "$sub_langs" \
-            --sub-format srt --skip-download --no-part \
-            -o "$work/%(id)s.%(ext)s" "$in" || true
-          srt="$(newest_in "$work" '*.srt')"
+          if [[ "$force_asr" -eq 0 ]]; then
+            step "looking for captions: $in"
+            run_yt_dlp --write-subs --write-auto-subs --sub-langs "$sub_langs" \
+              --sub-format srt --skip-download --no-part \
+              -o "$work/%(id)s.%(ext)s" "$in" || true
+            srt="$(newest_in "$work" '*.srt')"
+          fi
           if [[ -z "$srt" ]]; then
             if [[ "$subs_only" -eq 1 ]]; then
               die "no captions in $sub_langs for $in"
             fi
-            step "no captions, extracting audio"
+            [[ "$force_asr" -eq 0 ]] || step "captions not asked for (--force-asr)"
+            step "extracting audio"
             run_yt_dlp -f "bestaudio/best" -x --audio-format m4a --no-part \
               -o "$work/%(id)s.%(ext)s" "$in"
           fi
@@ -177,8 +197,10 @@ in
             die "--subs-only needs a URL, got a file: $in"
           fi
           # Sidecar captions beside the media beat a local speech-to-text run.
-          srt="$(newest_in "$(dirname "$in")" "$stem*.srt")"
-          [[ -n "$srt" ]] || step "no sidecar captions for $in, transcribing audio"
+          if [[ "$force_asr" -eq 0 ]]; then
+            srt="$(newest_in "$(dirname "$in")" "$stem*.srt")"
+            [[ -n "$srt" ]] || step "no sidecar captions for $in, transcribing audio"
+          fi
         fi
 
         tmp="$(mktemp "$work/out.XXXXXX")"

@@ -38,17 +38,55 @@
     homeDirectory = "/Users/yuan";
   };
 
+  # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and falls back to
+  # cohere-transcribe for the audio; huggingface-cli (python3Packages.huggingface-hub)
+  # is how the gated weights get fetched.  They arrive in that script's own
+  # closure either way -- on a server it is nicer to be able to ask `which ffmpeg`
+  # and get an answer, which is what this list is for.
   environment.systemPath = [
     "/opt/homebrew/bin"
     "/opt/homebrew/sbin"
+    "${pkgs.cohere-transcribe}/bin"
+    "${pkgs.python3Packages.huggingface-hub}/bin"
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
   };
 
+  # Speech to text: `transcribe <URL|file>` (packages/transcribe.nix), with
+  # Cohere Transcribe (pkgs.cohere-transcribe, the Rust CLI from
+  # second-state/cohere_transcribe_rs) as the speech-to-text backend.  A video
+  # that has captions goes through yt-dlp; everything else goes through the
+  # model, which is handed the media file and prints text on stdout -- the shape
+  # $TRANSCRIBE_ASR_CMD expects.  --model-dir has to be part of that command:
+  # the CLI has no default model directory, and $HOME is not expanded inside an
+  # environment variable.
+  #
+  # Nothing here starts by itself.  The model wants 7-8 GB while it runs, on a
+  # machine with 16 GB of unified memory, so transcription is something to run
+  # and not a daemon to keep resident.
+  #
+  # `transcribe -A` (--force-asr) skips the caption lookup, which is how to make
+  # the model run on a video that does have captions: without it the captions
+  # win, being the cheaper correct text.
+  #
+  # The weights are gated on HuggingFace (accept the licence, then HF_TOKEN) and
+  # are deliberately not fetched by Nix.  One time, by hand:
+  #   huggingface-cli download CohereLabs/cohere-transcribe-03-2026 \
+  #     --local-dir ~/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026
+  # and copy vocab.json -- it ships inside the cohere-transcribe package, under
+  # share/cohere-transcribe/ -- next to the weights: the model directory wants
+  # config.json, model.safetensors and vocab.json together.  huggingface-cli
+  # comes from python3Packages.huggingface-hub, which joins cohere-transcribe in
+  # environment.systemPath above.  With no model directory `transcribe` still
+  # does captioned videos and says so for the rest; whisper.cpp (1 to 2 GB, no
+  # licence to accept) is the way out if the model needs too much memory.
   modules = {
     _1password.enable = true;
-    transcribe.enable = true;
+    transcribe = {
+      enable = true;
+      asrCmd = "${pkgs.cohere-transcribe}/bin/cohere-transcribe --model-dir ${config.my.homeDirectory}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026";
+    };
     # common = {
     #   enable = true;
     #   supportLocalVirtualBuilder = true;

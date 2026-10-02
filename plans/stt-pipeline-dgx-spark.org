@@ -1,0 +1,177 @@
+#+TITLE: Speech-to-Text Pipeline for DGX Spark — Implementation Plan
+#+AUTHOR: Yuan Wang
+#+DATE: 2026-09-30
+
+* Overview
+
+  Add a speech-to-text (STT) pipeline to the =dgx-spark= host, using
+  the Cohere Transcribe Rust implementation
+  ([[https://github.com/second-state/cohere_transcribe_rs][second-state/cohere_transcribe_rs]])
+  as the ASR engine.  The pipeline transcribes a YouTube URL (or any
+  media file) to plain text; the initial target text is the lecture
+
+    https://www.youtube.com/watch?v=wsd8nsJg6D8
+    "The Natural Mathematics Arising in Information Theory and Investment" (58 min)
+
+  Current state:
+  - [[file:../packages/cohere-transcribe/default.nix][packages/cohere-transcribe/default.nix]] ::
+    already packages cohere_transcribe_rs v0.1.1, but *macOS-only*
+    (=transcribe-macos-aarch64.zip=, MLX backend).  Consumers call
+    =${pkgs.cohere-transcribe}/lib/transcribe= (see
+    [[file:../modules/speech2text/speak2text.nix][modules/speech2text/speak2text.nix]]).
+  - Upstream v0.1.1 also ships =transcribe-linux-aarch64-cuda.zip=
+    (194.7 MB, libtorch + CUDA 12.6) — the right artifact for the
+    GB10 (aarch64, sm_121a).  *Verified by download:*
+    - unpacked hash: =sha256-rBahlKp/MaLSm0NvcWkq94OeF7Na0dt6zE525MO0TqI=
+    - layout: =transcribe=, =transcribe-server=, =vocab.json=, =libtorch/=
+    - RPATH is =$ORIGIN/libtorch/lib= (finds bundled libtorch)
+    - interpreter is =/lib/ld-linux-aarch64.so.1= → needs patchelf on NixOS
+    - CUDA runtime libs (*not* bundled): libcudart.so.12, libcublas(.Lt).so.12,
+      libcusparse.so.12, libcufft.so.11, libcurand.so.10, libcudnn.so.9,
+      libcufile.so.0, libnvrtc.so.12 — all present in pinned nixpkgs
+      =cudaPackages= for =aarch64-linux= (evaluated, none broken).
+    - =libcuda.so.1= is the driver, supplied by =/run/opengl-driver/lib=
+      at runtime → ignore in autoPatchelf, inject via wrapper.
+  - [[file:../packages/transcribe.nix][packages/transcribe.nix]] :: existing pipeline script:
+    yt-dlp captions first, ASR fallback via =$TRANSCRIBE_ASR_CMD FILE=
+    (prints text on stdout — exactly what the Cohere CLI does).
+    Already in the packages overlay for all platforms.
+  - Model weights =CohereLabs/cohere-transcribe-03-2026= are *gated* on
+    HuggingFace (accept license + =HF_TOKEN=); ~5.6 GB expanded at
+    runtime.  Cannot be a plain fetchurl — downloaded out of band,
+    same pattern as the TensorFold checkpoint in
+    [[file:../hosts/dgx-spark/configuration.nix][hosts/dgx-spark/configuration.nix]].
+  - CUDA arch is already correct: =graham33/nixos-dgx-spark= sets
+    =nixpkgs.config.cudaCapabilities = [ "12.0" "12.1" ];= and
+    =nixpkgs.config.cudaSupport = true= is set in the host config.
+
+  Memory budget (128 GB unified): qwen38 TensorFold takes ~106–118 GiB
+  when warm; Cohere needs ~7–8 GB.  Fits, tight — so the STT side is
+  on-demand (oneshot job / manual server), never auto-started.
+
+* Step 1 — Extend =packages/cohere-transcribe/default.nix= for Linux/CUDA
+
+  Make the derivation platform-aware:
+
+  - =sources= attrset keyed by =stdenv.hostPlatform.system=:
+    - =aarch64-darwin= → existing macos zip + hash (unchanged)
+    - =aarch64-linux= → =transcribe-linux-aarch64-cuda.zip=,
+      hash =sha256-rBahlKp/MaLSm0NvcWkq94OeF7Na0dt6zE525MO0TqI=
+    - anything else → =throw=
+  - Linux only:
+    - =nativeBuildInputs = [ autoPatchelfHook makeWrapper ]=
+    - =buildInputs = [ stdenv.cc.cc.lib ] ++ cudaRuntimeLibs= where
+      =cudaRuntimeLibs = with cudaPackages; [ cuda_cudart cuda_nvrtc
+      libcublas libcusparse libcufft libcurand cudnn libcufile ]=
+    - =autoPatchelfIgnoreMissingDeps = [ "libcuda.so.1" ]= (driver lib)
+    - install =libtorch/= to =$out/lib/=
+    - =postFixup=: =wrapProgram= both binaries with
+      =--prefix LD_LIBRARY_PATH : /run/opengl-driver/lib=
+      (wrapper keeps the real binary in the same dir, so the
+      =$ORIGIN/libtorch/lib= RPATH still resolves)
+  - Keep the established layout so darwin consumers don't change:
+    real binaries at =$out/lib/{transcribe,transcribe-server}=,
+    =vocab.json= at =$out/share/cohere-transcribe/=.
+  - Add convenience symlinks =$out/bin/cohere-transcribe= and
+    =$out/bin/cohere-transcribe-server= (avoid the bare name
+    =transcribe= in =bin/= — it collides with =pkgs.transcribe=).
+  - =meta.platforms = [ "aarch64-darwin" "aarch64-linux" ]=.
+
+  Risk: =autoPatchelfHook= is not usable from the packages overlay if
+  =cudaPackages= is the no-CUDA stub — but the host sets
+  =cudaSupport=, and the overlay is applied after =cuda-fixes.nix=,
+  so =prev.cudaPackages= is the real one.
+
+* Step 2 — One-time model download (manual, gated model)
+
+  Documented + scripted, not automated: the model is
+  access-controlled on HuggingFace.
+
+  On dgx-spark (as root or via sudo):
+  #+begin_src sh
+  huggingface-cli login   # token with access to CohereLabs/cohere-transcribe-03-2026
+  install -d -m 0755 /var/lib/cohere-transcribe/models
+  huggingface-cli download CohereLabs/cohere-transcribe-03-2026 \
+    --local-dir /var/lib/cohere-transcribe/models/cohere-transcribe-03-2026
+  cp "$(nix eval --raw .#nixosConfigurations.dgx-spark.pkgs.cohere-transcribe)/share/cohere-transcribe/vocab.json" \
+    /var/lib/cohere-transcribe/models/cohere-transcribe-03-2026/
+  #+end_src
+
+  (Simpler variant: ship a =cohere-transcribe-init= system package
+  mirroring the darwin helper in =speak2text.nix=, pointed at
+  =/var/lib/cohere-transcribe/models/=.  Decide during implementation;
+  the 3 commands above may be enough.)
+
+* Step 3 — Host wiring in =hosts/dgx-spark/configuration.nix=
+
+  1. =environment.systemPackages = [ pkgs.cohere-transcribe pkgs.transcribe
+     pkgs.yt-dlp pkgs.ffmpeg ]= (the last three come along as
+     runtimeInputs of =transcribe=, but explicit is clearer on a
+     server) plus =python3Packages.huggingface-hub= for step 2.
+  2. =environment.sessionVariables.COOKIE_BROWSER = "";= — no
+     LibreWolf profile on the box; anonymous yt-dlp.
+  3. =systemd.services.stt-target= — oneshot, =wantedBy = [ ];=
+     (manual: =systemctl start stt-target=):
+     - =StateDirectory = "stt"; WorkingDirectory = "/var/lib/stt";=
+     - env =TRANSCRIBE_ASR_CMD="${pkgs.cohere-transcribe}/lib/transcribe
+       --model-dir /var/lib/cohere-transcribe/models/cohere-transcribe-03-2026
+       --language en"=, =COOKIE_BROWSER=""=
+     - =ExecStartPre=: check the model dir is non-empty, else print the
+       step-2 instructions to the journal and fail fast.
+     - =ExecStart=: =${pkgs.transcribe}/bin/transcribe -o /var/lib/stt
+       https://www.youtube.com/watch?v=wsd8nsJg6D8=
+     - =TimeoutStartSec = 0= (58 min lecture; ASR is minutes, captions
+       seconds — but never time out a transcription)
+     - Result: =/var/lib/stt/wsd8nsJg6D8.txt=
+     - Note: =transcribe= prefers YouTube captions when they exist —
+       that is desired (cheapest correct text); the Cohere path is the
+       fallback and is what runs for caption-less media.  If we later
+       want to *force* the ASR path for benchmarking, add a
+       =--force-asr= flag to =packages/transcribe.nix= (small,
+       testable change in =tests/transcribe.nix=).
+  4. =systemd.services.cohere-transcribe-server= — optional
+     OpenAI-compatible API (=transcribe-server --model-dir … --port
+     8080=), =wantedBy = [ ];= manual start, same model-dir check in
+     =ExecStartPre=.  Firewall stays closed (no new
+     =allowedTCPPorts=); reach it via SSH port-forward until proven
+     useful.
+  5. Comment block in the house style explaining: why manual
+     (gated model + memory sharing with qwen38), the memory budget
+     (~8 GB on top of TensorFold's ~106 GiB), and the fallback plan
+     (whisper.cpp q5_0 turbo, ~1–2 GB, if OOM ever bites).
+
+* Step 4 — Build & deploy
+
+  #+begin_src sh
+  # eval check first (fast, catches overlay/attr mistakes)
+  nix eval .#nixosConfigurations.dgx-spark.config.systemd.services.stt-target.enable
+
+  # build the new package for the target arch (build happens on the box)
+  colmena eval -E '{ nodes, ... }: nodes.dgx-spark.pkgs.cohere-transcribe.outPath'
+  just deploy-dgx-spark   # or the usual colmena apply invocation
+  #+end_src
+
+  The CUDA whisper/libtorch deps come from the =cuda-maintainers= and
+  =nixos-cuda= caches already in =nix.settings.substituters=; the
+  195 MB release zip is a fixed-output fetch.
+
+* Step 5 — Validate on the box
+
+  1. =cohere-transcribe --help= runs (patchelf/LD_LIBRARY_PATH correct).
+  2. Step-2 model download completed (dir non-empty, vocab.json present).
+  3. =systemctl start stt-target && journalctl -fu stt-target= →
+     =/var/lib/stt/wsd8nsJg6D8.txt= non-empty.
+  4. Memory check while it runs: =tegrastats= / =nvidia-smi= alongside a
+     warm qwen38 — confirm no OOM; if tight, stop qwen38 during batch
+     jobs or switch the backend to whisper.cpp.
+  5. Optional: start =cohere-transcribe-server=, =curl -F
+     file=@clip.wav localhost:8080/v1/audio/transcriptions= via SSH
+     forward.
+
+* Out of scope (deliberately)
+
+  - Streaming / mic capture (that's the darwin =speak2text= PTT path).
+  - Speaker diarization, punctuation post-processing.
+  - Auto-downloading the gated model from Nix (needs a token; agenix
+    plumbing is a separate change if ever wanted).
+  - Exposing the API server on the LAN.
