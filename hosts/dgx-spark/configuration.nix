@@ -30,7 +30,6 @@
   i18n.defaultLocale = "en_US.UTF-8";
 
   # ─── User accounts ──────────────────────────────────────────────────
-  users.groups.qwen38 = { };
   users.users = {
     yuanw = {
       isNormalUser = true;
@@ -46,16 +45,6 @@
       ];
     };
 
-    # Only owns the files the TensorFold launcher chowns (repo checkout,
-    # .env); the unit itself runs as root (podman needs the rootful
-    # engine, and `podman info` fails for ordinary users).
-    qwen38 = {
-      isSystemUser = true;
-      group = "qwen38";
-      home = "/var/lib/qwen38-tensorfold";
-      createHome = false;
-      description = "Qwen3.8 Flash Next TensorFold state owner";
-    };
   };
 
   # ─── Sudo ────────────────────────────────────────────────────────
@@ -129,139 +118,33 @@
   };
 
   # ─── Firewall ───────────────────────────────────────────────────────
-  # 8888 = TensorFold's API port: the launcher runs its container with
-  # --network host and HOST=0.0.0.0, so the API is only reachable while
-  # this port is open. 8000/11000/8188 were dropped with this branch:
-  # the vLLM service (8000) is gone, the DGX dashboard (11000/11001) is
-  # disabled below, and no ComfyUI instance (8188) is configured.
-  networking.firewall.allowedTCPPorts = [
-    8888 # TensorFold qwen38 (Qwen3.8 Flash Next TensorFold recipe)
-  ];
+  # (TensorFold's API port 8888 is opened by services.tensorfold.openFirewall)
 
-  # ─── TensorFold Inference ─────────────────────────────────────────────
-  # Serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through TensorFold
-  # v0.3.6.3 in a podman (dockerCompat) container: 5 streams x 262,144
-  # tokens, int8 KV, vision tower. Its launcher (start.sh +
-  # scripts/prepare.sh) does not fit the generic services.vllm.instances
-  # wrapper -- the same reason the older vLLM-based service for this model
-  # was dropped (kept in git history): prepare.sh pulls/builds the patched
-  # image and downloads the ~106 GiB checkpoint on first start, so the
-  # service is kept manual (wantedBy = []) with a capped start timeout.
-  # First start:
-  #   systemctl start vllm-qwen38-tensorfold   # then: journalctl -fu vllm-qwen38-tensorfold
-  systemd.services.vllm-qwen38-tensorfold =
-    let
-      repoDir = "/var/lib/qwen38-tensorfold/repo";
-      qwen38User = "qwen38";
-      qwen38Group = "qwen38";
-      tensorFoldRev = "a3aa89835022c55ca8e55008c37785954834e04f";
-      tensorFoldSrc = pkgs.fetchFromGitHub {
-        owner = "yuanw";
-        repo = "Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold";
-        rev = tensorFoldRev;
-        hash = "sha256-upiScG4RoX6Ff4v/nSJwQEOBiXv04Z409KMUAXopgs0=";
-      };
-      # The box has no Docker daemon: `docker` is podman in dockerCompat mode.
-      # The real Docker CLI (pkgs.docker-client) sends HostConfig.DeviceRequests
-      # for `--gpus all`, which the podman compat API silently drops, so the
-      # container starts with Devices=[] and torch finds no NVIDIA driver.
-      # A `docker` symlink to podman makes podman translate --gpus to CDI
-      # devices itself (same as /run/current-system/sw/bin/docker).
-      dockerShim = pkgs.runCommand "docker-podman-shim" { } ''
-        mkdir -p $out/bin
-        ln -s ${pkgs.podman}/bin/podman $out/bin/docker
-      '';
-      prepare = pkgs.writeShellScript "prepare-qwen38-tensorfold" ''
-        set -eu
+  # ─── TensorFold Inference (native Nix, no container) ───────────────
+  # Defined in modules/tensorfold.nix: packages/tensorfold (upstream +
+  # the deployment repo's single site-packages patch) on the CUDA-
+  # enabled nixpkgs torch, JIT kernels compiled on first start into
+  # stateDir/kernels. Serve args and TENSORFOLD_* env mirror the
+  # deployment recipe's defaults (scripts/config.sh @ 4c0dea8).
+  # First start (checkpoint download if missing + JIT kernels):
+  #   systemctl start tensorfold   # then: journalctl -fu tensorfold
+  # Regression tools live in environment.systemPackages (bench/needle/
+  # toolcheck/visioncheck); the container baseline table is in the
+  # deployment repo's README.
+  services.tensorfold = {
+    enable = true;
+    openFirewall = true;
+    environmentFile = config.age.secrets.hf-token.path;
+  };
 
-        if [ ! -e ${repoDir}/.nix-source-rev ] || [ "$(cat ${repoDir}/.nix-source-rev)" != "${tensorFoldRev}" ]; then
-          rm -rf ${repoDir}
-          install -d -o ${qwen38User} -g ${qwen38Group} -m 0755 ${repoDir}
-          cp -a ${tensorFoldSrc}/. ${repoDir}/
-          chmod -R u+w ${repoDir}
-          chown -R ${qwen38User}:${qwen38Group} ${repoDir}
-          printf '%s\n' '${tensorFoldRev}' > ${repoDir}/.nix-source-rev
-          chown ${qwen38User}:${qwen38Group} ${repoDir}/.nix-source-rev
-        fi
-
-        cat > ${repoDir}/.env <<'EOF'
-        # Managed by Nix. Runtime configuration is supplied by
-        # systemd.services.vllm-qwen38-tensorfold.environment.
-        EOF
-        sed -i 's/^        //' ${repoDir}/.env
-        chmod 0600 ${repoDir}/.env
-        chown ${qwen38User}:${qwen38Group} ${repoDir}/.env
-      '';
-    in
-    {
-      description = "TensorFold Qwen3.8 Flash Next single-DGX-Spark server";
-      after = [ "network-online.target" ];
-      wants = [ "network-online.target" ];
-      wantedBy = [ ]; # start manually: systemctl start vllm-qwen38-tensorfold
-
-      path = with pkgs; [
-        bash
-        coreutils
-        curl
-        dockerShim # NOT pkgs.docker-client: see comment above
-        findutils
-        gawk
-        git
-        gnugrep
-        gnused
-        hostname-debian # start.sh uses `hostname -I` (net-tools syntax); inetutils' hostname exits 64 on it
-        iproute2
-        procps
-        python3
-        util-linux
-      ];
-
-      environment = {
-        # start.sh derives HF_CACHE and KERNEL_CACHE from HOME (with HF_CACHE
-        # overridden below); .env in the repo dir is written by prepare.
-        HOME = "/var/lib/qwen38-tensorfold";
-
-        # prepare.sh downloads the ~106 GiB checkpoint into $HF_CACHE/hub
-        # and its free-space check wants ~117 GiB free there: prune any
-        # stale model cache left under this directory by the older vLLM
-        # recipe before the first start (systemd.services.
-        # vllm-prune-obsolete-models handles /var/lib/vllm/models only,
-        # NOT this directory).
-        HF_CACHE = "/var/lib/vllm/huggingface";
-
-        # scripts/config.sh defaults (all overridable here).
-        CONTAINER_NAME = "qwen38-flash-next-tf";
-        SERVED_NAME = "Qwen3.8-Flash-Next";
-        HOST = "0.0.0.0";
-        PORT = "8888";
-        WAIT_TIMEOUT = "1800";
-      };
-
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        WorkingDirectory = "/var/lib/qwen38-tensorfold";
-        EnvironmentFile = [ config.age.secrets.hf-token.path ];
-        ExecStartPre = prepare;
-        ExecStart = "${pkgs.bash}/bin/bash ${repoDir}/start.sh";
-        ExecStop = "${pkgs.bash}/bin/bash ${repoDir}/stop.sh";
-        # The first start pulls the ~11 GB image and downloads the ~106
-        # GiB checkpoint. 4 h is generous headroom on a LAN uplink, yet a
-        # stuck pull/download eventually tears the unit down instead of
-        # hanging in "activating" forever.
-        TimeoutStartSec = 4 * 3600;
-        TimeoutStopSec = 120;
-      };
-    };
-
+  # (the tensorfold state/kernels/HF-cache dir rules live in
+  # modules/tensorfold.nix; only the shared /var/lib/vllm parent stays)
   systemd.tmpfiles.rules = [
-    "d /var/lib/qwen38-tensorfold 0755 qwen38 qwen38 - -"
     "d /var/lib/vllm 0755 root root - -"
-    "d /var/lib/vllm/huggingface 0755 qwen38 qwen38 - -"
   ];
 
-  # Qwen3.8 is served from its HuggingFace repo ID through the TensorFold
-  # launcher above, with /var/lib/vllm/huggingface as its HF cache. The
+  # Qwen3.8 is served from its HuggingFace repo ID through the native
+  # TensorFold service above, with /var/lib/vllm/huggingface as its HF cache. The
   # declarative vllm-models downloader (written for the older vLLM
   # wrapper) stays off so it cannot pull a second copy of the weights.
   services.vllm-models.enable = false;
@@ -307,6 +190,10 @@
     ethtool
     rdma-core
     fwupd
+    # Regression tools for the TensorFold service (bench/needle/toolcheck/
+    # visioncheck) — the container-vs-native performance gate runs through
+    # these; see the deployment repo's README for the baseline table.
+    tensorfold-tools
   ];
 
   # fwupd-refresh.service (fwupdmgr refresh) requires polkit auth and fails during

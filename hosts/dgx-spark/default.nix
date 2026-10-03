@@ -8,6 +8,7 @@
     ../../modules/cockpit.nix
     ../../modules/ds4.nix
     ../../modules/lance.nix
+    ../../modules/tensorfold.nix
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
     ../../modules/services/monitoring/pcp.nix

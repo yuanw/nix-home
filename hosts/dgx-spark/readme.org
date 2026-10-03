@@ -182,6 +182,26 @@ sudo chown yuanw /etc/nixos
 git clone https://github.com/yuanw/nix-home.git /etc/nixos
 #+end_src
 
+* TensorFold Qwen3.8 Flash Next (native)
+
+Serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through TensorFold v0.3.6.3
+built natively (packages/tensorfold, plus the deployment repo's nine
+site-packages patches) — no container. 5 streams x 262,144 tokens, int8
+KV, vision tower, port 8888.
+
+- Service: =tensorfold= (systemd, user =qwen38=, group =qwen38=,
+  manual start: =systemctl start tensorfold=; defined in
+  =modules/tensorfold.nix=, enabled in =hosts/dgx-spark/configuration.nix=)
+- First start downloads the ~106 GiB checkpoint into
+  =/var/lib/vllm/huggingface/hub= and JIT-compiles the CUDA kernels into
+  =/var/lib/qwen38-tensorfold/kernels/= (nvcc + ninja are on the unit's
+  PATH, CUDA_HOME is a merged CUDA 13.2 tree) — unlimited start timeout.
+- Torch is the CUDA-enabled nixpkgs build (cudaSupport + cudaCapabilities
+  12.0/12.1 on GB10), python313.
+- Regression tools: =nix run .#nixosConfigurations.dgx-spark.pkgs.tensorfold-tools= —
+  bench/needle/etc. from the [[https://github.com/yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold][deployment repo]] against the container
+  baseline (62/90/107/119 tok/s at 1/2/4/5 streams).
+
 * Common Operations
 
 ** Build the system
