@@ -1,8 +1,8 @@
-# TensorFold v0.3.6.3 — the CUDA serving engine behind Qwen3.8 Flash Next
+# TensorFold v0.6.1 — the CUDA serving engine behind Qwen3.8 Flash Next
 # on DGX Spark, packaged natively instead of through the podman recipe.
 #
 # The container (nvcr.io/nvidia/pytorch:26.07-py3 + pip install
-# git+.../TensorFold@v0.3.6.3 + nine site-packages patches) only ever
+# git+.../TensorFold@v0.6.1 + one site-packages patch) only ever
 # supplied the *toolchain*: TensorFold's own ~25 .cu/.cpp kernels are
 # JIT-compiled on first start (src/tensorfold/cuda/build.py uses
 # torch.utils.cpp_extension.load, and the triton kernels compile into
@@ -10,13 +10,13 @@
 # nixpkgs torch — the service unit (hosts/dgx-spark/configuration.nix)
 # provides nvcc + ninja on PATH and a CUDA_HOME for those JIT builds.
 #
-# The nine patches live in the deployment repo
-# (yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold), where the image
-# build applied them to the pip-installed site-packages with `patch -p0`
-# (their hunk headers are relative to site-packages, e.g.
-# tensorfold/cuda/geometry.py). They must be applied *in order* (0003
-# fails on a pristine v0.3.6.3 tree; it builds on 0002). Here postInstall
-# replays exactly that: patch -p0 inside $out's site-packages.
+# The single patch (patches/0002-flash-next-v061.patch) lives in the
+# deployment repo (yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold),
+# where the image build applies it to the pip-installed site-packages
+# with `patch -p0` (its hunk headers are relative to site-packages, e.g.
+# tensorfold/cuda/geometry.py). Here postInstall replays exactly that:
+# patch -p0 inside $out's site-packages. (patches/languages/ is only for
+# the DRAFT_LANGUAGE image and is deliberately not applied.)
 #
 # pyproject.toml deliberately does not declare torch/triton ("CUDA uses
 # the container's torch and triton"), so they are pinned here explicitly
@@ -43,7 +43,7 @@
 }:
 
 let
-  version = "0.3.6.3";
+  version = "0.6.1";
 
   inherit (import ./src.nix { inherit fetchFromGitHub; }) src deploySrc;
 in
@@ -85,7 +85,7 @@ buildPythonPackage {
     description = "Fast, exact LLM decoding on NVIDIA GPUs behind an OpenAI-compatible endpoint (CUDA JIT packaging for DGX Spark)";
     homepage = "https://github.com/ashhart/TensorFold";
     changelog = "https://github.com/ashhart/TensorFold/blob/v${version}/CHANGELOG.md";
-    license = licenses.mit;
+    license = licenses.asl20;
     mainProgram = "tensorfold";
     platforms = platforms.linux;
   };

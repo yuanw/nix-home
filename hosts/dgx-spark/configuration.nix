@@ -141,7 +141,7 @@
 
   # ─── TensorFold Inference (native Nix, no container) ───────────────
   # Serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through TensorFold
-  # v0.3.6.3 built natively: 5 streams x 262,144 tokens, int8 KV, vision
+  # v0.6.1 built natively: 5 streams x 262,144 tokens, int8 KV, vision
   # tower. This replaces the retired podman recipe (clone of
   # yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold + the ~11 GB
   # nvcr.io/nvidia/pytorch:26.07-py3 image): the container only supplied
@@ -150,11 +150,12 @@
   # (src/tensorfold/cuda/build.py → torch.utils.cpp_extension.load), so
   # the native side replicates it with the CUDA-enabled nixpkgs torch
   # (nixpkgs.config.cudaSupport + cudaCapabilities 12.0/12.1, set in
-  # hosts/default.nix) plus nvcc + ninja on this unit's PATH. The nine
-  # site-packages patches the image baked in are applied by
-  # packages/tensorfold instead; serve args below mirror the retired
-  # start.sh defaults (scripts/config.sh). Same serving knobs the
-  # container had, so output should be token-for-token identical.
+  # hosts/default.nix) plus nvcc + ninja on this unit's PATH. The single
+  # site-packages patch the image bakes in (0002-flash-next-v061) is
+  # applied by packages/tensorfold instead; serve args and TENSORFOLD_*
+  # env below mirror the deployment recipe's defaults (scripts/config.sh
+  # @ 4c0dea8). The v0.3.6.3 + 9-patch recipe this replaced stays pinned
+  # in git history (packages/tensorfold/src.nix).
   # First start (downloading the ~106 GiB checkpoint + JIT kernels can
   # take hours, hence the unlimited start timeout):
   #   systemctl start vllm-qwen38-tensorfold   # then: journalctl -fu vllm-qwen38-tensorfold
@@ -302,13 +303,18 @@
         # CPATH does (honored by gcc and nvcc's host compile).
         CPATH = "${pkgs.python313Packages.pybind11}/include";
 
-        # TensorFold's own switches — the exact values the container
-        # recipe exported (scripts/config.sh): vision tower with 2,048-
-        # row prompt chunks (with --vision), prompt-lookup drafts ahead
-        # of MTP, and no update check (the patches pin v0.3.6.3).
+        # TensorFold's own switches — the values the deployment recipe
+        # exports (scripts/config.sh @ 4c0dea8, v0.6.1): prompt pieces of
+        # 2,048 rows while the n-gram tables sit on SSD (4096 measured
+        # 10-30% slower on 0.6.1 from 5k-16k tokens), vision tower scratch
+        # from the system reserve, 2 GiB startup memory reserve (0.6.0+
+        # takes max(4 GiB, RAM/10) otherwise and refuses 5 x 262,144),
+        # prompt-lookup drafts ahead of MTP, and no update check (the
+        # patch pins v0.6.1). Image/video token budgets and the max-image
+        # count moved into the --vision-max-images flag above.
         TENSORFOLD_PREFILL_ROWS = "2048";
         TENSORFOLD_VISION_WORKSPACE_MIB = "0";
-        TENSORFOLD_MAX_IMAGES = "50";
+        TENSORFOLD_MEMORY_RESERVE_GIB = "2";
         TENSORFOLD_IMAGE_TOKENS = "16384";
         TENSORFOLD_VIDEO_TOKENS = "16384";
         TENSORFOLD_MTP_COPY = "1";
@@ -322,10 +328,11 @@
         Group = qwen38Group;
         EnvironmentFile = [ config.age.secrets.hf-token.path ];
         ExecStartPre = downloadModel;
-        # SERVE_ARGS of the retired start.sh (scripts/config.sh defaults,
-        # THINKING=1, VISION=1, VISION_URLS=0): a request's own sampling
-        # values still win over these defaults. (systemd word-splits this
-        # line, which is exactly the argv tensorfold expects.)
+        # SERVE_ARGS of the deployment recipe (scripts/config.sh defaults,
+        # THINKING=1, VISION=1, VISION_URLS=0, MAX_TOKENS=32768,
+        # VISION_MAX_IMAGES=50): a request's own sampling values still win
+        # over these defaults. (systemd word-splits this line, which is
+        # exactly the argv tensorfold expects.)
         ExecStart =
           "${tfPython}/bin/tensorfold serve ${modelId}"
           + " --host 0.0.0.0 --port 8888"
@@ -333,7 +340,9 @@
           + " --parallel 5 --context 262144 --kv-dtype int8"
           + " --mtp-drafts 6 --mtp-confidence 0.60"
           + " --temperature 1.0 --top-p 0.95 --top-k 20"
-          + " --thinking --ple-on-ssd --vision";
+          + " --max-tokens 32768"
+          + " --thinking --ple-on-ssd"
+          + " --vision --vision-max-images 50";
         # The container ran with --ulimit memlock=-1 --ulimit stack=67108864.
         LimitMEMLOCK = "infinity";
         LimitSTACK = 67108864;
