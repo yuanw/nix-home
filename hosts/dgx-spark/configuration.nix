@@ -401,6 +401,10 @@
     ethtool
     rdma-core
     fwupd
+    # Regression tools for the TensorFold service (bench/needle/toolcheck/
+    # visioncheck) — the container-vs-native performance gate runs through
+    # these; see the deployment repo's README for the baseline table.
+    tensorfold-tools
   ];
 
   # fwupd-refresh.service (fwupdmgr refresh) requires polkit auth and fails during
