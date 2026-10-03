@@ -297,6 +297,11 @@
         # itself) resolvable.
         CUDA_HOME = "${cudaHome}";
         LD_LIBRARY_PATH = "/run/opengl-driver/lib:${cudaHome}/lib64:${cudaHome}/lib";
+        # NVIDIA's container torch vendors pybind11 headers into
+        # torch/include; nixpkgs torch ships them in the pybind11 python
+        # package instead, and cpp_extension doesn't add that include dir —
+        # CPATH does (honored by gcc and nvcc's host compile).
+        CPATH = "${pkgs.python313Packages.pybind11}/include";
 
         # TensorFold's own switches — the exact values the container
         # recipe exported (scripts/config.sh): vision tower with 2,048-
