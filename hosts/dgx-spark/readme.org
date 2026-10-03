@@ -189,8 +189,9 @@ built natively (packages/tensorfold, plus the deployment repo's nine
 site-packages patches) — no container. 5 streams x 262,144 tokens, int8
 KV, vision tower, port 8888.
 
-- Service: =vllm-qwen38-tensorfold= (systemd, user =qwen38=, group =qwen38=,
-  manual start: =systemctl start vllm-qwen38-tensorfold=)
+- Service: =tensorfold= (systemd, user =qwen38=, group =qwen38=,
+  manual start: =systemctl start tensorfold=; defined in
+  =modules/tensorfold.nix=, enabled in =hosts/dgx-spark/configuration.nix=)
 - First start downloads the ~106 GiB checkpoint into
   =/var/lib/vllm/huggingface/hub= and JIT-compiles the CUDA kernels into
   =/var/lib/qwen38-tensorfold/kernels/= (nvcc + ninja are on the unit's
