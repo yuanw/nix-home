@@ -174,14 +174,12 @@
 
       # CUDA_HOME for torch's runtime JIT (cpp_extension needs bin/nvcc,
       # include/cuda_runtime.h and the libraries under one root). Same
-      # merged list as packages/vllm-aeon.nix, plus nvcc itself. LD paths
-      # below also keep the JIT-built .so's libcudart dlopen-able, and
-      # /run/opengl-driver/lib provides libcuda.so.1 for torch/triton.
-      getAllOutputs = p: [
-        (pkgs.lib.getBin p)
-        (pkgs.lib.getLib p)
-        (pkgs.lib.getDev p)
-      ];
+      # merged list as packages/vllm-aeon.nix, plus nvcc itself. Note:
+      # several CUDA redist packages keep their headers in a separate
+      # "include" output (libcusparse, libcublas, …), so every output is
+      # merged — getDev/getLib alone miss them and the JIT .cu kernels
+      # then fail with 'cusparse.h: No such file or directory'.
+      getAllOutputs = p: map (o: p.${o}) p.outputs;
       cudaHome = pkgs.symlinkJoin {
         name = "cuda-merged-${pkgs.cudaPackages.cudaMajorMinorVersion}";
         paths = builtins.concatMap getAllOutputs (
