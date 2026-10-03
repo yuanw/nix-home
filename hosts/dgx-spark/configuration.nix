@@ -188,6 +188,7 @@
           with pkgs.cudaPackages;
           [
             cuda_nvcc
+            cuda_crt # include/crt/host_config.h — cuda_runtime.h needs it
             cuda_cudart
             cuda_cccl
             cuda_nvrtc
