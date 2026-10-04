@@ -70,6 +70,13 @@
             mountpoint = "/sshkeys";
           };
 
+          # media library; lives outside the ephemeral root so it survives
+          # the per-boot rollback to @blank
+          "data" = {
+            type = "zfs_fs";
+            mountpoint = "/data";
+          };
+
           # README MORE: https://wiki.archlinux.org/title/ZFS#Swap_volume
           "root/swap" = {
             type = "zfs_volume";
