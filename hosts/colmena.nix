@@ -7,13 +7,13 @@ in
 
     meta = {
       nixpkgs = import inputs.nixpkgs {
-        system = "x86_64-linux";
+        localSystem.system = "x86_64-linux";
         config.allowUnfree = true;
         overlays = [ ];
       };
       nodeNixpkgs = {
         dgx-spark = import inputs.nixpkgs {
-          system = "aarch64-linux";
+          localSystem.system = "aarch64-linux";
           config.allowUnfree = true;
           overlays = [ (import ../packages) ];
         };

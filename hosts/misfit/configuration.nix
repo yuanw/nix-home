@@ -363,6 +363,7 @@
     #"r8169" cannot load this firmware as right now
     "i40e"
   ];
+  boot.zfs.forceImportRoot = false;
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
   boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
   # systemd stage 1 replaces postDeviceCommands; roll back the ephemeral

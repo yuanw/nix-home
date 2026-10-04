@@ -69,19 +69,6 @@ let
       dur="$(duration "$1")"
       [[ -n "$dur" ]] && awk -v d="$dur" -v c="$2" 'BEGIN { exit !(d + 0 > c + 0) }'
     }
-    # A model that has lost the thread repeats whole spans, and text like that
-    # compresses far better than speech does -- the same test faster-whisper
-    # runs, on the whole answer.  Measured here: clean English prose lands
-    # between 2.0 and 2.8, one clean run of the lecture below reached 2.35, and
-    # the 74 KB that came back looping sat at 9.4 (23.7 counting the whole
-    # file).  Nothing that reads like someone talking gets near 4.
-    repetitive() { # repetitive FILE SIZE RATIO -> true when FILE is looping
-      [[ "$2" -gt 512 ]] || return 1
-      [[ "$3" == 0 ]] && return 1
-      local gzipped
-      gzipped="$(gzip -9 -c < "$1" | wc -c)"
-      awk -v s="$2" -v g="$gzipped" -v r="$3" 'BEGIN { exit !((g > 0) && (s / g > r + 0)) }'
-    }
   '';
 
   # yt-dlp has no "librewolf" browser type (yt-dlp/yt-dlp#14050), so the
@@ -198,15 +185,43 @@ in
       # True when the answer that came back is the model eating itself.  The
       # gzip size ratio is the tell: text that repeats whole spans compresses
       # to a fraction of its size and text that does not.  Measured on this
-      # machine -- clean English prose sits between 2.0 and 2.8 here, one
-      # clean run of a lecture lecture reached 2.35, and the 74 KB that came
-      # back looping from the lecture below sat at 9.4 (23.7 counted over the
-      # whole file).  Nothing that reads like someone talking comes near 4.
+      # machine -- clean English prose sits between 2.0 and 2.8 here, and the
+      # 74 KB that came back looping from a lecture sat at 9.4 (23.7 counted
+      # over the whole file).  Nothing that reads like someone talking comes
+      # near 4, which is why nothing that reads like someone talking is ever
+      # refused by this.
       repetitive() { # repetitive FILE SIZE RATIO -> true when FILE is looping
         [[ "$2" -gt 512 && "$3" != 0 ]] || return 1
         local gzipped
         gzipped="$(gzip -9 -c < "$1" | wc -c)"
         awk -v s="$2" -v g="$gzipped" -v r="$3" 'BEGIN { exit !((g > 0) && (s / g > r + 0)) }'
+      }
+
+      # Which backend does the transcription, and where the audio file goes in
+      # its argv.  TRANSCRIBE_ASR_CMD is word-split on spaces and the media
+      # file is appended as its own argument, so paths may contain spaces;
+      # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'.
+      asr_run() { # asr_run FILE -> transcript text on stdout
+        if [[ -n "''${TRANSCRIBE_ASR_CMD:-}" ]]; then
+          read -ra cmd <<< "$TRANSCRIBE_ASR_CMD"
+          "''${cmd[@]}" "$1"
+        elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
+          # -nt is whisper.cpp's own "no timestamps": without it every line
+          # of the answer comes back with a [00:00:00] prefix, which is noise
+          # in a plain-text transcript.
+          whisper-cpp -m "$WHISPER_MODEL" -f "$1" -nt
+        elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
+          && command -v cohere-transcribe >/dev/null; then
+          # The weights live in a directory of their own, named by hand: the
+          # file is a positional argument, and --model-dir has to name the
+          # directory holding config.json, model.safetensors and vocab.json.
+          # $HOME and ~ do not expand inside TRANSCRIBE_ASR_CMD -- word
+          # splitting is not tilde expansion -- which is why the model
+          # directory is a variable of its own instead of part of that one.
+          cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" "$1"
+        else
+          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, \$WHISPER_MODEL or \$COHERE_TRANSCRIBE_MODEL_DIR, or pass --subs-only"
+        fi
       }
 
       # Transcribe FILE into OUT, one model call per window of audio, and stop
@@ -232,33 +247,13 @@ in
             ;;
         esac
 
-        # Which command does the transcription.  The audio file is always the
-        # last argument, so a backend that wants a model directory or a model
-        # file named gets it through the environment instead of through a
-        # flag invented here.
-        if [[ -n "''${TRANSCRIBE_ASR_CMD:-}" ]]; then
-          # TRANSCRIBE_ASR_CMD is word-split on spaces, the media file is
-          # appended as its own argument so paths may contain spaces.
-          # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'
-          read -ra cmd <<< "$TRANSCRIBE_ASR_CMD"
-        elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
-          cmd=(whisper-cpp -m "$WHISPER_MODEL" -nt)
-        elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
-          && command -v cohere-transcribe >/dev/null; then
-          # The weights live in a directory of their own, named by hand: the
-          # file is a positional argument, and --model-dir has to name the
-          # directory holding config.json, model.safetensors and vocab.json.
-          # $HOME and ~ do not expand inside TRANSCRIBE_ASR_CMD -- word
-          # splitting is not tilde expansion -- which is why the model
-          # directory is a variable of its own instead of part of that one.
-          cmd=(cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}")
-        else
-          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, \$WHISPER_MODEL or \$COHERE_TRANSCRIBE_MODEL_DIR, or pass --subs-only"
-        fi
-
-        # One window for the whole file when it is not longer than a window:
-        # the check below then judges the whole answer at once, which is what
-        # caught the lecture run.
+        # A lecture is not a clip: one unbounded call holds all of it at once,
+        # and a decoder that starts echoing a span back keeps doing it until
+        # its token budget runs out.  Cutting the audio into windows gives the
+        # model a way back out, gives `repetitive' above somewhere to notice
+        # that it never found one, and stops the run at the first window that
+        # comes back looping.  A file no longer than one window skips all of
+        # this and is judged as one answer, which is what caught the lecture.
         if [[ "$chunk_s" != 0 ]] && longer_than "$file" "$chunk_s"; then
           step "transcribing $file in $chunk_s s windows"
           rm -f "$2"/window-*.wav "$2/window.txt"
@@ -277,7 +272,7 @@ in
         while read -r window; do
           [[ -n "$window" ]] || continue
           step "speech-to-text: $(basename "$window")"
-          if ! "''${cmd[@]}" "$window" > "$2/window.txt"; then
+          if ! asr_run "$window" > "$2/window.txt"; then
             die "speech-to-text died on $window (does the model still run?)"
           fi
           if repetitive "$2/window.txt" "$(wc -c < "$2/window.txt")" "$cr_max"; then

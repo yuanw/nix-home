@@ -100,6 +100,27 @@ let
     [[ -z "''${ASR_STUB_SEEN:-}" ]] || printf '%s\n' "$1" > "$ASR_STUB_SEEN"
   '';
 
+  # Stands in for a backend that answers every call with the same text, which
+  # is the only way to script what the model would have said.  CAT_FILE names
+  # that answer; CAT_SEEN collects the file behind each call.
+  catStub = stub "cat-file" ''
+    answer="''${CAT_FILE:?}"
+    printf '%s\n' "$(cat "$answer")"
+    [[ -z "''${CAT_SEEN:-}" ]] || printf '%s\n' "$1" >> "$CAT_SEEN"
+  '';
+
+  # A stand-in for a model that is transcribing correctly: real English prose
+  # from docs/, three times over.  Big enough to judge on its own -- prose
+  # compresses to about a quarter of its size, a model eating itself to a
+  # thirteenth -- and not identical on every line, so three windows worth of
+  # it reads as three answers and not as one repetition loop.
+  cleanAnswer = pkgs.runCommand "clean-answer.txt" { } ''
+    for copy in 1 2 3; do
+      cat ${./../docs}/*.md ${./../docs}/*.org
+      printf '\n'
+    done >> $out
+  '';
+
   scripts = pkgs.callPackage ../packages/transcribe.nix {
     inherit (pkgs)
       lib
@@ -123,6 +144,7 @@ let
   # dash parses as subtraction.
   ytDlpLibrewolfBin = "${builtins.getAttr "yt-dlp-librewolf" scripts}/bin/yt-dlp-librewolf";
   asrBin = "${asrStub}/bin/asr-cmd";
+  catFileBin = "${catStub}/bin/cat-file";
 in
 pkgs.runCommand "transcribe-tests"
   {
@@ -142,6 +164,8 @@ pkgs.runCommand "transcribe-tests"
     transcribe="${transcribeBin}"
     wrapper="${ytDlpLibrewolfBin}"
     asrcmd="${asrBin}"
+    catfile="${catFileBin}"
+    clean="${cleanAnswer}"
     ytstubbin="${ytDlpStub}/bin/yt-dlp"
 
     mkdir -p tmp out
@@ -166,6 +190,23 @@ pkgs.runCommand "transcribe-tests"
     ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -c:a libopus tmp/video.webm
     : > tmp/audioonly.mp3
     cp tmp/hello.srt tmp/video.en.srt
+    # A lecture-sized fixture: three minutes of tone, so a 30 s window means
+    # three windows and one model call each.  MP3 on purpose: WAV and MP3 are
+    # what the backends are known to decode, so this is the shape a lecture
+    # arrives in, and a window has to be cut out of it before one is asked
+    # to read it.
+    ffmpeg -v error -f lavfi -t 180 -i sine=frequency=440 -c:a libmp3lame tmp/long.mp3
+
+    # A lecture-sized answer that came back looping: one sentence, on repeat,
+    # which is the shape the first lecture transcript had.  27 lines, which is
+    # far too big to be true and far too compressible to be believed.
+    {
+      printf 'Is this amplification on?\n'
+      for i in $(seq 25); do
+        printf 'The emphasis was that the emphasis was that the emphasis was that\n'
+      done
+      printf 'And the upshot is true.\n'
+    } > tmp/loop.txt
 
     export YTDLP_STUB_SRT="$PWD/tmp/hello.srt"
     export YTDLP_STUB_AUDIO="$PWD/tmp/hello.m4a"
@@ -299,6 +340,61 @@ pkgs.runCommand "transcribe-tests"
     [[ $rc -ne 0 ]] || fail "a video with no audio track reached a backend"
     grep -q 'ffmpeg could not decode' tmp/silent.err \
       || fail "wrong no-audio failure: $(cat tmp/silent.err)"
+
+    echo "[transcribe-tests] a lecture is transcribed in windows, one model call each"
+    : > tmp/window-calls
+    rc=0
+    TRANSCRIBE_ASR_CHUNK=30 TRANSCRIBE_ASR_CMD="$catfile" CAT_FILE="$clean" \
+      CAT_SEEN="$PWD/tmp/window-calls" "$transcribe" -o tmp/windowed tmp/long.mp3 \
+      >tmp/windowed.log 2>&1 || rc=$?
+    [[ $rc -eq 0 ]] || fail "clean speech was refused: $(tail -n 1 tmp/windowed.log)"
+    # Seven, not six: the segment muxer cuts just after the window length, so
+    # a 3-minute file at a 30 s window is six whole windows and a 26 ms sliver.
+    [[ $(grep -c . tmp/window-calls) -eq 7 ]] \
+      || fail "30 s windows in a 3-minute file should mean seven calls: $(grep -c . tmp/window-calls)"
+    [[ -s tmp/windowed/long.txt ]] || fail "the windows were transcribed and nothing was written"
+
+    echo "[transcribe-tests] ...and stops at the window that comes back looping"
+    : > tmp/looping-calls
+    rc=0
+    TRANSCRIBE_ASR_CHUNK=30 TRANSCRIBE_ASR_CMD="$catfile" CAT_FILE="$PWD/tmp/loop.txt" \
+      CAT_SEEN="$PWD/tmp/looping-calls" "$transcribe" -o tmp/looped tmp/long.mp3 \
+      >tmp/looped.log 2>&1 || rc=$?
+    if [[ $rc -eq 0 ]]; then fail "a model eating itself was filed as a transcript"; fi
+    if ! grep -q 'repetition loop' tmp/looped.log; then
+      fail "looping text was accepted without a word about it: $(tail -n 1 tmp/looped.log)"
+    fi
+    [[ $(grep -c . tmp/looping-calls) -eq 1 ]] \
+      || fail "it should have stopped at the first window: $(grep -c . tmp/looping-calls)"
+
+    echo "[transcribe-tests] TRANSCRIBE_REPEAT_RATIO=0 turns the looping check off"
+    rc=0
+    TRANSCRIBE_REPEAT_RATIO=0 TRANSCRIBE_ASR_CHUNK=30 TRANSCRIBE_ASR_CMD="$catfile" \
+      CAT_FILE="$PWD/tmp/loop.txt" \
+      "$transcribe" -o tmp/unchecked tmp/long.mp3 >tmp/unchecked.log 2>&1 || rc=$?
+    [[ $rc -eq 0 ]] || fail "the looping check ran although TRANSCRIBE_REPEAT_RATIO=0"
+    [[ -s tmp/unchecked/long.txt ]] || fail "with the check off the looping answer should still be filed"
+
+    echo "[transcribe-tests] TRANSCRIBE_ASR_CHUNK=0 means one pass over the whole file"
+    : > tmp/whole-call
+    rc=0
+    TRANSCRIBE_ASR_CHUNK=0 TRANSCRIBE_ASR_CMD="$catfile" CAT_FILE="$clean" \
+      CAT_SEEN="$PWD/tmp/whole-call" "$transcribe" -o tmp/whole tmp/long.mp3 \
+      >tmp/whole.log 2>&1 || rc=$?
+    [[ $rc -eq 0 ]] || fail "one pass over a lecture was refused: $(cat tmp/whole.log)"
+    [[ $(grep -c . tmp/whole-call) -eq 1 ]] \
+      || fail "TRANSCRIBE_ASR_CHUNK=0 still cut the file up: $(grep -c . tmp/whole-call)"
+
+    echo "[transcribe-tests] with both backends on PATH, whisper-cpp is the one that gets asked"
+    rc=0
+    WHISPER_MODEL=/dev/null COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" TRANSCRIBE_ASR_CMD= "$transcribe" -o tmp/either tmp/long.mp3 >tmp/either.log 2>&1 || rc=$?
+    if [[ $rc -eq 0 ]]; then
+      if ! grep -q '^whisper transcript of long.mp3$' tmp/either/long.txt; then
+        fail "wrong backend, or the file was not passed as one whole argument: $(cat tmp/either/long.txt)"
+      fi
+    else
+      fail "nothing transcribed although two backends were on PATH: $(tail -n 1 tmp/either.log)"
+    fi
 
     echo "[transcribe-tests] a missing profile does not stop public videos"
     YTDLP_STUB_ID=public LIBREWOLF_PROFILE_ROOT="$PWD/tmp/nope" "$transcribe" -o out "https://youtu.be/public" >/dev/null
