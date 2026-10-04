@@ -377,6 +377,7 @@
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
+      "/home"
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/private"
