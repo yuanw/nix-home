@@ -323,6 +323,10 @@
   # ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  security.sudo = {
+    wheelNeedsPassword = false;
+  };
+
   users.groups.data = { };
   users.users.yuanw = {
     isNormalUser = true;
