@@ -50,9 +50,14 @@ let
   #    reason.
   #
   # TRANSCRIBE_ASR_CHUNK=0 puts the single call back; TRANSCRIBE_REPEAT_RATIO=0
-  # turns the repetition check off.
+  # turns the repetition check off.  TRANSCRIBE_ASR_MAX_TOKENS is the token cap
+  # one call may spend: CohereTranscribe's own default is 448, which cuts a
+  # ten-minute window of lecture off mid-sentence, so it is a knob and not a
+  # constant; whisper.cpp has no such cap and does not need one.
   asrChunk = "\"\${TRANSCRIBE_ASR_CHUNK:-600}\"";
   repeatRatio = "\"\${TRANSCRIBE_REPEAT_RATIO:-4}\"";
+  asrLang = "\"\${TRANSCRIBE_ASR_LANG:-en}\"";
+  maxTokens = "\"\${TRANSCRIBE_ASR_MAX_TOKENS:-448}\"";
 
   preamble = ''
     set -euo pipefail
@@ -131,6 +136,8 @@ in
       sub_langs="''${TRANSCRIBE_SUB_LANGS:-en.,en}"
       chunk_s=${asrChunk}
       cr_max=${repeatRatio}
+      asr_lang=${asrLang}
+      max_tokens=${maxTokens}
       subs_only=0
       force_asr=0
       timestamps=1
@@ -148,6 +155,8 @@ in
         step "             TRANSCRIBE_ASR_CHUNK (seconds of audio per model call, 0 = one call),"
         step "             TRANSCRIBE_REPEAT_RATIO (gzip size ratio above which the answer"
         step "             counts as a repetition loop, 0 = no check),"
+        step "             TRANSCRIBE_ASR_LANG (en, the default, for the backends that ask),"
+        step "             TRANSCRIBE_ASR_MAX_TOKENS (448; 0 leaves the cap out),"
         step "             WHISPER_MODEL (ggml model file for the bundled whisper-cpp),"
         step "             COHERE_TRANSCRIBE_MODEL_DIR (directory holding the Cohere weights)"
         exit 2
@@ -208,8 +217,13 @@ in
         elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
           # -nt is whisper.cpp's own "no timestamps": without it every line
           # of the answer comes back with a [00:00:00] prefix, which is noise
-          # in a plain-text transcript.
-          whisper-cpp -m "$WHISPER_MODEL" -f "$1" -nt
+          # in a plain-text transcript.  -l names the language, which is the
+          # other half of why the lecture went wrong: left to itself whisper
+          # --listen --language auto decided that 58 minutes of English
+          # graduate lecture was Portuguese, Spanish and Turkish, and then
+          # dictated the whole lot in whatever it had guessed.
+          cmd=(whisper-cpp -m "$WHISPER_MODEL" -f "$1" -nt -l "$asr_lang")
+          "''${cmd[@]}"
         elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
           && command -v cohere-transcribe >/dev/null; then
           # The weights live in a directory of their own, named by hand: the
@@ -218,7 +232,15 @@ in
           # $HOME and ~ do not expand inside TRANSCRIBE_ASR_CMD -- word
           # splitting is not tilde expansion -- which is why the model
           # directory is a variable of its own instead of part of that one.
-          cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" "$1"
+          # --language and --max-tokens have to be spelled out too; the CLI's
+          # defaults (en, 448) are what the flags would say anyway, except
+          # when TRANSCRIBE_ASR_MAX_TOKENS says 0 and the window runs free.
+          cmd=(cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" \
+            --language "$asr_lang")
+          if [[ "$max_tokens" != 0 ]]; then
+            cmd+=(--max-tokens "$max_tokens")
+          fi
+          "''${cmd[@]}" "$1"
         else
           die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, \$WHISPER_MODEL or \$COHERE_TRANSCRIBE_MODEL_DIR, or pass --subs-only"
         fi

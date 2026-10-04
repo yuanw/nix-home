@@ -385,16 +385,26 @@ pkgs.runCommand "transcribe-tests"
     [[ $(grep -c . tmp/whole-call) -eq 1 ]] \
       || fail "TRANSCRIBE_ASR_CHUNK=0 still cut the file up: $(grep -c . tmp/whole-call)"
 
-    echo "[transcribe-tests] with both backends on PATH, whisper-cpp is the one that gets asked"
+    echo "[transcribe-tests] TRANSCRIBE_ASR_CMD is asked per window, file and all"
     rc=0
-    WHISPER_MODEL=/dev/null COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" TRANSCRIBE_ASR_CMD= "$transcribe" -o tmp/either tmp/long.mp3 >tmp/either.log 2>&1 || rc=$?
-    if [[ $rc -eq 0 ]]; then
-      if ! grep -q '^whisper transcript of long.mp3$' tmp/either/long.txt; then
-        fail "wrong backend, or the file was not passed as one whole argument: $(cat tmp/either/long.txt)"
-      fi
-    else
-      fail "nothing transcribed although two backends were on PATH: $(tail -n 1 tmp/either.log)"
-    fi
+    TRANSCRIBE_ASR_CHUNK=30 TRANSCRIBE_ASR_CMD="$asrcmd" \
+      "$transcribe" -o tmp/bycmd tmp/long.mp3 >tmp/bycmd.log 2>&1 || rc=$?
+    [[ $rc -eq 0 ]] || fail "a custom speech-to-text command was refused: $(tail -n 1 tmp/bycmd.log)"
+    [[ $(grep -c '^cmd transcript of ' tmp/bycmd/long.txt) -eq 7 ]] \
+      || fail "not one answer per window: $(grep -c '^cmd transcript of ' tmp/bycmd/long.txt)"
+    grep -q '^cmd transcript of window-006.wav$' tmp/bycmd/long.txt \
+      || fail "the last window went unheard: $(tail -n 2 tmp/bycmd/long.txt)"
+
+    echo "[transcribe-tests] with both backends on PATH, whisper-cpp is the one that gets asked"
+    mkdir -p tmp/models2
+    : > tmp/models2/model.safetensors
+    rc=0
+    WHISPER_MODEL=/dev/null TRANSCRIBE_ASR_LANG=de \
+      COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models2" TRANSCRIBE_ASR_CMD= \
+      "$transcribe" -o tmp/either tmp/long.mp3 >tmp/either.log 2>&1 || rc=$?
+    [[ $rc -eq 0 ]] || fail "nothing transcribed although two backends were on PATH: $(tail -n 1 tmp/either.log)"
+    grep -q '^whisper transcript of long.mp3$' tmp/either/long.txt \
+      || fail "wrong backend, or the file was not passed as one whole argument: $(cat tmp/either/long.txt)"
 
     echo "[transcribe-tests] a missing profile does not stop public videos"
     YTDLP_STUB_ID=public LIBREWOLF_PROFILE_ROOT="$PWD/tmp/nope" "$transcribe" -o out "https://youtu.be/public" >/dev/null
