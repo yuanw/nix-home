@@ -16,7 +16,7 @@
   # colmena deployment configuration
   deployment = {
     targetHost = "misfit.local";
-    targetUser = "yuanw";
+    targetUser = "yuan";
   };
 
   # declarative-jellyfin does not yet support jellyfin 12.x

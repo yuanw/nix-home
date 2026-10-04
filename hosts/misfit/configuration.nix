@@ -344,7 +344,7 @@
   ];
 
   users.groups.data = { };
-  users.users.yuanw = {
+  users.users.yuan = {
     isNormalUser = true;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
@@ -527,11 +527,11 @@
       auto-optimise-store = true;
       allowed-users = [
         "root"
-        "yuanw"
+        "yuan"
       ];
       trusted-users = [
         "root"
-        "yuanw"
+        "yuan"
       ];
     };
   };
