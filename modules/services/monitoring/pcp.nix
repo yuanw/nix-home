@@ -338,17 +338,28 @@ in
       after = [ "pmcd.service" ];
       bindsTo = [ "pmcd.service" ];
       environment = pcpEnv;
+      # pmlogger_check leaves a lock file behind when it is killed mid-run
+      # (e.g. by a start timeout during a NixOS switch). It only self-heals
+      # after 30 min, silently skipping archive logging until then. Clean up
+      # stale locks (> 30 min old, same policy as pmlogger_check) up front.
       path = servicePath;
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
+        ExecStartPre =
+          "-"
+          + pkgs.writeShellScript "pmlogger-clean-stale-locks" ''
+            find /var/log/pcp/pmlogger -mindepth 2 -maxdepth 2 -name lock -mmin +30 -delete
+          '';
         ExecStart = "${cfg.package}/libexec/pcp/bin/pmlogger_check -V";
         ExecStop = "${cfg.package}/libexec/pcp/bin/pmlogger_check -s -V";
         User = "pcp";
         Group = "pcp";
         StateDirectory = "pcp";
         LogsDirectory = "pcp/pmlogger";
-        TimeoutStartSec = "120";
+        # pmlogger_check can spend up to ~20s per control-file entry waiting
+        # for the pmlogger daemon to connect to pmcd.
+        TimeoutStartSec = "300";
       };
     };
 
