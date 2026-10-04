@@ -38,66 +38,49 @@
     homeDirectory = "/Users/yuan";
   };
 
-  # `transcribe` (below) drives yt-dlp and ffmpeg off PATH.  It picks its
-  # speech-to-text backend the same way: $TRANSCRIBE_ASR_CMD if set, then
-  # $WHISPER_MODEL with whisper-cpp, then `cohere-transcribe' looked up on PATH
-  # with $COHERE_TRANSCRIBE_MODEL_DIR as the weights directory.  Those four
-  # arrive in that script's own closure either way -- writeShellApplication
-  # keeps the caller's PATH behind it, and that has /run/current-system/sw/bin
-  # in it -- so what this list buys is `which ffmpeg` on a machine you ssh into,
-  # and a `transcribe` started from somewhere that never went through a login
-  # shell.  huggingface-cli is how the gated weights get fetched.
+  # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and it picks its
+  # speech-to-text backend by looking names up on that PATH: $TRANSCRIBE_ASR_CMD
+  # if something sets it (nothing here does now), then $WHISPER_MODEL with
+  # whisper.cpp, then `cohere-transcribe'.  writeShellApplication keeps the
+  # caller's PATH behind the script's own, so what this list buys is `which
+  # ffmpeg' on a machine you ssh into, and a `transcribe` started from somewhere
+  # that never went through a login shell.
+  #
+  # /opt/homebrew/bin used to be here for brew's whisper.cpp, and
+  # pkgs.cohere-transcribe with python3Packages.huggingface-hub beside it for
+  # Cohere Transcribe and the tool that fetched its weights.  All three are gone:
+  # nixpkgs carries whisper.cpp (as `whisper-cpp', installing `whisper-cli'), and
+  # on the one long lecture the Cohere model spent 58 minutes echoing sentences
+  # it had already said, which is not a transcript.
   environment.systemPath = [
-    "/opt/homebrew/bin"
-    "/opt/homebrew/sbin"
     "${pkgs.transcribe}/bin"
-    "${pkgs.cohere-transcribe}/bin"
-    "${pkgs.python3Packages.huggingface-hub}/bin"
+    "${pkgs.whisper-cpp}/bin"
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
   };
 
-  # The weights directory, for the two ways `transcribe` can be told about a
-  # speech-to-text backend: modules.transcribe.asrCmd below (a session variable,
-  # so login shells only) and this, which any process reading the environment
-  # gets.  `cohere-transcribe' takes the model directory as --model-dir and has
-  # no default, which is why it is named in both.
-  environment.variables.COHERE_TRANSCRIBE_MODEL_DIR = "${config.my.homeDirectory}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026";
-
-  # Speech to text: `transcribe <URL|file>` (packages/transcribe.nix), with
-  # Cohere Transcribe (pkgs.cohere-transcribe, the Rust CLI from
-  # second-state/cohere_transcribe_rs) as the speech-to-text backend.  A video
-  # that has captions goes through yt-dlp; everything else goes through the
-  # model, which is handed the media file and prints text on stdout -- the shape
-  # $TRANSCRIBE_ASR_CMD expects.  --model-dir has to be part of that command:
-  # the CLI has no default model directory, and $HOME is not expanded inside an
-  # environment variable.
+  # Speech to text: `transcribe <URL|file>` (packages/transcribe.nix).  A video
+  # with captions goes through yt-dlp; everything else goes through the model,
+  # which is handed the media file and prints text on stdout.  A file with no
+  # speech in it has nothing to transcribe and is filed as a failed file, which
+  # is what the quality gate in packages/transcribe.nix is for.
   #
-  # Nothing here starts by itself.  The model wants 7-8 GB while it runs, on a
-  # machine with 16 GB of unified memory, so transcription is something to run
-  # and not a daemon to keep resident.
+  # Nothing here starts by itself: whisper.cpp is a command, not a service.
   #
-  # `transcribe -A` (--force-asr) skips the caption lookup, which is how to make
-  # the model run on a video that does have captions: without it the captions
-  # win, being the cheaper correct text.
-  #
-  # The weights are gated on HuggingFace (accept the licence, then HF_TOKEN) and
-  # are deliberately not fetched by Nix.  One time, by hand:
-  #   huggingface-cli download CohereLabs/cohere-transcribe-03-2026 \
-  #     --local-dir ~/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026
-  # and copy vocab.json -- it ships inside the cohere-transcribe package, under
-  # share/cohere-transcribe/ -- next to the weights: the model directory wants
-  # config.json, model.safetensors and vocab.json together.  huggingface-cli
-  # comes from python3Packages.huggingface-hub, which joins cohere-transcribe in
-  # environment.systemPath above.  With no model directory `transcribe` still
-  # does captioned videos and says so for the rest; whisper.cpp (1 to 2 GB, no
-  # licence to accept) is the way out if the model needs too much memory.
+  # The weights are not in Nix and are not gated either -- plain downloads from
+  # HuggingFace, so no HF_TOKEN is wanted for them.
+  #   curl -L -o ~/.local/share/whisper/models/ggml-small.en.bin \
+  #     https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.en.bin
+  # (base.en is 142 MB, small.en 466 MB; whisper.cpp reads it with -m, and a
+  # .bin outside the Nix store is not GC'd, so name it here once it is down).
   modules = {
     _1password.enable = true;
     transcribe = {
       enable = true;
-      asrCmd = "${pkgs.cohere-transcribe}/bin/cohere-transcribe --model-dir ${config.my.homeDirectory}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026";
+      # asrCmd stays "", which leaves whisper.cpp as the backend on this
+      # machine: found on PATH, and given this model.
+      whisperModel = "${config.my.homeDirectory}/.local/share/whisper/models/ggml-small.en.bin";
     };
     # common = {
     #   enable = true;
