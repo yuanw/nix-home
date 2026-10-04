@@ -238,10 +238,15 @@
     };
   };
 
-  users.users.${config.services.jellyfin.user}.extraGroups = [
-    "video"
-    "render"
-  ];
+  # only meaningful while jellyfin is enabled (see below)
+  users.users.${config.services.jellyfin.user} =
+    pkgs.lib.mkIf config.services.declarative-jellyfin.enable
+      {
+        extraGroups = [
+          "video"
+          "render"
+        ];
+      };
 
   # jellyfin disabled temporarily: jellyfin-init migration OOM-loops
   # (27.6G RSS during the DB migration run). Note: the full
