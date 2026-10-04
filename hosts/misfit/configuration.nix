@@ -243,8 +243,14 @@
     "render"
   ];
 
+  # jellyfin disabled temporarily: jellyfin-init migration OOM-loops
+  # (27.6G RSS during the DB migration run). Note: the full
+  # services.declarative-jellyfin block lives here (jellyfin.nix is NOT
+  # imported by default.nix — dead file, kept for reference).
+  # Re-enable once root cause is sorted:
+  # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
   services.declarative-jellyfin = {
-    enable = true;
+    enable = false;
     group = "data";
     system = {
       serverName = "My Declarative Jellyfin Server";
