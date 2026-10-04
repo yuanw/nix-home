@@ -15,7 +15,7 @@ buildNpmPackage rec {
     hash = "sha256-QRwxOtTZOY+Np3PkAoy2o2PrUzEqjItM/372sCPlSMo=";
   };
 
-  npmDepsHash = "sha256-/H/778yM5qmd8FxAoytZLebcqQ6kwZ+2qiAR6RUAYzs=";
+  npmDepsHash = "sha256-BvLNtFfp1cMVjzWcMRSdhTqiJrTfbFoUbWkkPW9200o=";
 
   npmFlags = [
     "--ignore-scripts"
