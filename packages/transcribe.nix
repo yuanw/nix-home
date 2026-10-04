@@ -50,14 +50,13 @@ let
   #    reason.
   #
   # TRANSCRIBE_ASR_CHUNK=0 puts the single call back; TRANSCRIBE_REPEAT_RATIO=0
-  # turns the repetition check off.  TRANSCRIBE_ASR_MAX_TOKENS is the token cap
-  # one call may spend: CohereTranscribe's own default is 448, which cuts a
-  # ten-minute window of lecture off mid-sentence, so it is a knob and not a
-  # constant; whisper.cpp has no such cap and does not need one.
+  # turns the repetition check off.  TRANSCRIBE_ASR_MAX_TOKENS is the cap on
+  # what one call may spend: CohereTranscribe's own default is 448, which is
+  # about a third of a windowful of lecture, so a full window comes back cut
+  # off mid-sentence -- hence a knob, with a default big enough to finish.
   asrChunk = "\"\${TRANSCRIBE_ASR_CHUNK:-600}\"";
   repeatRatio = "\"\${TRANSCRIBE_REPEAT_RATIO:-4}\"";
-  asrLang = "\"\${TRANSCRIBE_ASR_LANG:-en}\"";
-  maxTokens = "\"\${TRANSCRIBE_ASR_MAX_TOKENS:-448}\"";
+  maxTokens = "\"\${TRANSCRIBE_ASR_MAX_TOKENS:-2048}\"";
 
   preamble = ''
     set -euo pipefail
@@ -136,7 +135,6 @@ in
       sub_langs="''${TRANSCRIBE_SUB_LANGS:-en.,en}"
       chunk_s=${asrChunk}
       cr_max=${repeatRatio}
-      asr_lang=${asrLang}
       max_tokens=${maxTokens}
       subs_only=0
       force_asr=0
@@ -155,9 +153,9 @@ in
         step "             TRANSCRIBE_ASR_CHUNK (seconds of audio per model call, 0 = one call),"
         step "             TRANSCRIBE_REPEAT_RATIO (gzip size ratio above which the answer"
         step "             counts as a repetition loop, 0 = no check),"
-        step "             TRANSCRIBE_ASR_LANG (en, the default, for the backends that ask),"
-        step "             TRANSCRIBE_ASR_MAX_TOKENS (448; 0 leaves the cap out),"
-        step "             WHISPER_MODEL (ggml model file for the bundled whisper-cpp),"
+        step "             TRANSCRIBE_ASR_MAX_TOKENS (2048, a whole window's worth; 0 = no cap),"
+        step "             WHISPER_MODEL (ggml model file; whisper.cpp has to be on"
+        step "             PATH too, under the name whisper-cli or whisper-cpp),"
         step "             COHERE_TRANSCRIBE_MODEL_DIR (directory holding the Cohere weights)"
         exit 2
       }
@@ -210,33 +208,38 @@ in
       # its argv.  TRANSCRIBE_ASR_CMD is word-split on spaces and the media
       # file is appended as its own argument, so paths may contain spaces;
       # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'.
+      # Which backend does the transcription, and where the audio file goes in
+      # its argv.  TRANSCRIBE_ASR_CMD is word-split on spaces and the media
+      # file is appended as its own argument, so paths may contain spaces;
+      # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'.
       asr_run() { # asr_run FILE -> transcript text on stdout
+        local -a cmd=()
+        local wb=""
         if [[ -n "''${TRANSCRIBE_ASR_CMD:-}" ]]; then
           read -ra cmd <<< "$TRANSCRIBE_ASR_CMD"
           "''${cmd[@]}" "$1"
-        elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
-          # -nt is whisper.cpp's own "no timestamps": without it every line
-          # of the answer comes back with a [00:00:00] prefix, which is noise
-          # in a plain-text transcript.  -l names the language, which is the
-          # other half of why the lecture went wrong: left to itself whisper
-          # --listen --language auto decided that 58 minutes of English
-          # graduate lecture was Portuguese, Spanish and Turkish, and then
-          # dictated the whole lot in whatever it had guessed.
-          cmd=(whisper-cpp -m "$WHISPER_MODEL" -f "$1" -nt -l "$asr_lang")
+        elif [[ -f "''${WHISPER_MODEL:-}" ]]; then
+          # brew's formula, and whisper.cpp upstream since 1.7.x, call the CLI
+          # whisper-cli; nixpkgs still calls the package whisper-cpp.  Same
+          # flags, different name, so look the name up rather than guess it.
+          if command -v whisper-cli >/dev/null; then
+            wb=whisper-cli
+          elif command -v whisper-cpp >/dev/null; then
+            wb=whisper-cpp
+          else
+            die "\$WHISPER_MODEL names a model but nothing on PATH would read it: install whisper.cpp (brew install whisper.cpp, or nixpkgs' whisper-cpp) and put it on PATH"
+          fi
+          # -nt drops the timestamps: without it every line comes back with a
+          # [00:00:00] prefix, which is noise in a plain-text transcript.
+          cmd=("$wb" -m "$WHISPER_MODEL" -f "$1" -nt)
           "''${cmd[@]}"
         elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
           && command -v cohere-transcribe >/dev/null; then
           # The weights live in a directory of their own, named by hand: the
           # file is a positional argument, and --model-dir has to name the
           # directory holding config.json, model.safetensors and vocab.json.
-          # $HOME and ~ do not expand inside TRANSCRIBE_ASR_CMD -- word
-          # splitting is not tilde expansion -- which is why the model
-          # directory is a variable of its own instead of part of that one.
-          # --language and --max-tokens have to be spelled out too; the CLI's
-          # defaults (en, 448) are what the flags would say anyway, except
-          # when TRANSCRIBE_ASR_MAX_TOKENS says 0 and the window runs free.
           cmd=(cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" \
-            --language "$asr_lang")
+            --language en)
           if [[ "$max_tokens" != 0 ]]; then
             cmd+=(--max-tokens "$max_tokens")
           fi

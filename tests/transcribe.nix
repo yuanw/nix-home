@@ -80,7 +80,10 @@ let
     printf 'cohere transcript of %s\n' "$(basename "$file")"
   '';
 
-  whisperStub = stub "whisper-cpp" ''
+  # whisper.cpp's CLI: called whisper-cli by brew's formula and by upstream
+  # since 1.7.x, whisper-cpp by nixpkgs' package.  It takes the model with -m
+  # and the audio with -f, which is what the stub below checks.
+  whisperStub = stub "whisper-cli" ''
     model=""
     file=""
     while [[ $# -gt 0 ]]; do
@@ -91,7 +94,7 @@ let
       esac
       shift
     done
-    if [[ -z "$model" || ! -f "$file" ]]; then echo "stub whisper-cpp: bad -m/-f" >&2; exit 3; fi
+    if [[ -z "$model" || ! -f "$file" ]]; then echo "stub whisper-cli: bad -m/-f" >&2; exit 3; fi
     printf 'whisper transcript of %s\n' "$(basename "$file")"
   '';
 
@@ -189,6 +192,7 @@ pkgs.runCommand "transcribe-tests"
     ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -c:a aac tmp/hello.m4a
     ffmpeg -v error -f lavfi -i sine=frequency=440:duration=1 -c:a libopus tmp/video.webm
     : > tmp/audioonly.mp3
+    : > tmp/ggml-fake.bin
     cp tmp/hello.srt tmp/video.en.srt
     # A lecture-sized fixture: three minutes of tone, so a 30 s window means
     # three windows and one model call each.  MP3 on purpose: WAV and MP3 are
@@ -241,7 +245,7 @@ pkgs.runCommand "transcribe-tests"
 
     echo "[transcribe-tests] no captions -> audio -> whisper-cpp"
     : > "$YTDLP_STUB_LOG"
-    YTDLP_STUB_ID=nosubs YTDLP_STUB_SRT= WHISPER_MODEL=/dev/null COOKIE_BROWSER= \
+    YTDLP_STUB_ID=nosubs YTDLP_STUB_SRT= WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" COOKIE_BROWSER= \
       "$transcribe" -o out "https://youtu.be/nosubs" >/dev/null
     grep -q -- '--audio-format' "$YTDLP_STUB_LOG" \
       || fail "no audio extraction was ever asked for: $(cat "$YTDLP_STUB_LOG")"
@@ -254,7 +258,7 @@ pkgs.runCommand "transcribe-tests"
     echo "[transcribe-tests] TRANSCRIBE_ASR_CMD outranks WHISPER_MODEL"
     : > tmp/asr-seen
     YTDLP_STUB_ID=cmd YTDLP_STUB_SRT= ASR_STUB_SEEN="$PWD/tmp/asr-seen" TRANSCRIBE_ASR_CMD="$asrcmd" \
-    WHISPER_MODEL=/dev/null COOKIE_BROWSER= \
+    WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" COOKIE_BROWSER= \
       "$transcribe" -o out "https://youtu.be/cmd" >/dev/null
     grep -q '^cmd transcript of audio.wav$' out/cmd.txt \
       || fail "explicit speech-to-text command ignored: $(cat out/cmd.txt)"
@@ -316,7 +320,7 @@ pkgs.runCommand "transcribe-tests"
 
     echo "[transcribe-tests] URL with neither captions nor audio fails loudly"
     rc=0
-    YTDLP_STUB_SRT= YTDLP_STUB_AUDIO= WHISPER_MODEL=/dev/null COOKIE_BROWSER= \
+    YTDLP_STUB_SRT= YTDLP_STUB_AUDIO= WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" COOKIE_BROWSER= \
       "$transcribe" -o out "https://youtu.be/empty" 2>tmp/empty.err || rc=$?
     [[ $rc -ne 0 ]] || fail "succeeded with nothing to transcribe"
     grep -q 'nothing to transcribe' tmp/empty.err \
@@ -328,14 +332,14 @@ pkgs.runCommand "transcribe-tests"
       || fail "sidecar transcript wrong: $(cat out/video.txt)"
 
     echo "[transcribe-tests] local file without sidecar goes to speech-to-text"
-    WHISPER_MODEL=/dev/null COOKIE_BROWSER= "$transcribe" -o out tmp/audioonly.mp3 >/dev/null
+    WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" COOKIE_BROWSER= "$transcribe" -o out tmp/audioonly.mp3 >/dev/null
     grep -q '^whisper transcript of audioonly.mp3$' out/audioonly.txt \
       || fail "local speech-to-text wrong: $(cat out/audioonly.txt)"
 
     echo "[transcribe-tests] a media file without an audio track fails loudly"
     ffmpeg -v error -f lavfi -i "color=c=black:s=64x64:d=1" -an tmp/silent.mp4
     rc=0
-    WHISPER_MODEL=/dev/null TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= \
+    TRANSCRIBE_ASR_CMD="$asrcmd" COOKIE_BROWSER= \
       "$transcribe" -o out tmp/silent.mp4 2>tmp/silent.err || rc=$?
     [[ $rc -ne 0 ]] || fail "a video with no audio track reached a backend"
     grep -q 'ffmpeg could not decode' tmp/silent.err \
@@ -396,11 +400,11 @@ pkgs.runCommand "transcribe-tests"
       || fail "the last window went unheard: $(tail -n 2 tmp/bycmd/long.txt)"
 
     echo "[transcribe-tests] with both backends on PATH, whisper-cpp is the one that gets asked"
-    mkdir -p tmp/models2
-    : > tmp/models2/model.safetensors
+    mkdir -p tmp/models
+    : > tmp/models/model.safetensors
     rc=0
-    WHISPER_MODEL=/dev/null TRANSCRIBE_ASR_LANG=de \
-      COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models2" TRANSCRIBE_ASR_CMD= \
+    WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" \
+      COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" TRANSCRIBE_ASR_CMD= \
       "$transcribe" -o tmp/either tmp/long.mp3 >tmp/either.log 2>&1 || rc=$?
     [[ $rc -eq 0 ]] || fail "nothing transcribed although two backends were on PATH: $(tail -n 1 tmp/either.log)"
     grep -q '^whisper transcript of long.mp3$' tmp/either/long.txt \
