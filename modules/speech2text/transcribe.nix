@@ -47,7 +47,29 @@ in
     asrCmd = lib.mkOption {
       type = lib.types.str;
       default = "";
-      description = ''Speech-to-text fallback, run as "$asrCmd FILE" and expected to print text. "" means the bundled whisper-cpp with $WHISPER_MODEL.'';
+      description = ''
+        Speech-to-text fallback, run as "$asrCmd FILE" and expected to print text.
+        Checked before $WHISPER_MODEL, so whatever is named here outranks a
+        whisperModel below -- and a bare command name is looked up on $PATH, which
+        is how a host names a transcriber of its own. "" means no default
+        backend: speech-to-text then happens only if $WHISPER_MODEL names a model.
+      '';
+    };
+
+    whisperModel = lib.mkOption {
+      type = lib.types.str;
+      default = "";
+      example = "/Users/yuan/.cache/whisper/ggml-small.en.bin";
+      description = ''
+        ggml model file for whisper.cpp, exported as $WHISPER_MODEL, which is what
+        lets `transcribe' transcribe anything at all on a machine with no other
+        backend: `transcribe' carries whisper.cpp itself on its own $PATH (nixpkgs'
+        whisper-cpp, whose binary is whisper-cli), but no weights, and a machine
+        without a way to transcribe audio has no way to make a transcript.
+        A model file is a download: base.en is 142 MB, small.en 466 MB, both from
+        https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin
+        and .../ggml-small.en.bin, and a .bin outside the store is not GC'd.
+      '';
     };
   };
 
@@ -63,6 +85,7 @@ in
         COOKIE_BROWSER = lib.mkDefault cfg.cookieBrowser;
         LIBREWOLF_PROFILE_ROOT = lib.mkDefault cfg.librewolfProfileRoot;
         TRANSCRIBE_ASR_CMD = lib.mkDefault cfg.asrCmd;
+        WHISPER_MODEL = lib.mkDefault cfg.whisperModel;
       };
     };
   };

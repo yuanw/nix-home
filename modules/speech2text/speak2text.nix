@@ -167,13 +167,25 @@ let
 
   flavorDefs = {
     whispercpp = {
+      # nixpkgs calls the package whisper-cpp; the binary it installs -- and the
+      # name whisper.cpp upstream and brew both use -- is whisper-cli.  A dictation
+      # hotkey that quietly finds no transcriber is worse than one that is absent,
+      # so name the binary by looking it up instead of guessing.
       runtimeInputs = [ pkgs.whisper-cpp ];
       transcribeExpr = ''
         if [[ -z "''${WHISPER_MODEL:-}" ]]; then
           step 'Set $WHISPER_MODEL to the path of a ggml model file (e.g. ggml-base.en.bin)'
           exit 1
         fi
-        TRANSCRIPT=$(whisper-cpp -m "''${WHISPER_MODEL}" -f "$TMPFILE" -nt 2>/dev/null || true)
+        if command -v whisper-cli >/dev/null 2>&1; then
+          WHISPER_BIN=whisper-cli
+        elif command -v whisper-cpp >/dev/null 2>&1; then
+          WHISPER_BIN=whisper-cpp
+        else
+          step 'No whisper.cpp on PATH: it is in nixpkgs as whisper-cpp (binary whisper-cli)'
+          exit 1
+        fi
+        TRANSCRIPT=$($WHISPER_BIN -m "''${WHISPER_MODEL}" -f "$TMPFILE" -nt 2>/dev/null || true)
       '';
     };
     "parakeet-mlx" = {
