@@ -80,7 +80,9 @@
           # README MORE: https://wiki.archlinux.org/title/ZFS#Swap_volume
           "root/swap" = {
             type = "zfs_volume";
-            size = "10M";
+            # generous swap: the decorative 10M zvol left the OOM killer no
+            # breathing room (see jellyfin-init OOM during DB migration)
+            size = "16G";
             content = {
               type = "swap";
             };

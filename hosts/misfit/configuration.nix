@@ -374,7 +374,11 @@
   ];
   boot.zfs.forceImportRoot = false;
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
-  boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
+  boot.kernelParams = [
+    "ip=::::nixos-initrd::dhcp"
+    # cap ZFS ARC at 4 GiB so userspace (jellyfin, hass) has headroom
+    "zfs.zfs_arc_max=4294967296"
+  ];
   # systemd stage 1 replaces postDeviceCommands; roll back the ephemeral
   # root dataset to @blank after the pool is imported, before sysroot mounts
   boot.initrd.systemd.services.zfs-rollback = {
