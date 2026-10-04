@@ -327,6 +327,10 @@
     wheelNeedsPassword = false;
   };
 
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+  ];
+
   users.groups.data = { };
   users.users.yuanw = {
     isNormalUser = true;
