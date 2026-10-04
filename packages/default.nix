@@ -2,14 +2,21 @@ _final: prev:
 let
   codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
   # media -> text; the module that puts these two on PATH is
-  # modules/speech2text/transcribe.nix
-  transcribePkgs = prev.callPackage ./transcribe.nix { srt2txt = ./srt2txt.awk; };
+  # modules/speech2text/transcribe.nix.  whisper.cpp is not passed in by name:
+  # `transcribe' looks transcribers up on PATH (nixpkgs calls the package
+  # whisper-cpp and installs the binary as whisper-cli), and a host that wants
+  # a different one names it in modules.transcribe.asrCmd -- see hosts/mist.nix.
+  transcribePkgs = prev.callPackage ./transcribe.nix {
+    srt2txt = ./srt2txt.awk;
+  };
+
   # TensorFold's python313Packages scope extension (see the entry below).
   python313PackagesWithTensorfold = prev.python313Packages.overrideScope (
     pfinal: _pprev: {
       tensorfold = pfinal.callPackage ./tensorfold { };
     }
   );
+
   # stdlib-only regression tools (bench/needle/toolcheck/visioncheck)
   # from the deployment repo, for comparing the native service against
   # the container baseline (62/90/107/119 tok/s at 1/2/4/5 streams).
@@ -175,7 +182,6 @@ in
   claude-plugins = prev.callPackage ./claude-plugins { };
   inherit codingAgentsCommonSkills;
   codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
-  cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
   transcribe = transcribePkgs.transcribe;

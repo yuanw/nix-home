@@ -43,7 +43,7 @@
             hostname = "asche";
             packages = config.packages;
             nurNoPkg = import inputs.nur {
-              nurpkgs = import inputs.nixpkgs { system = system; };
+              nurpkgs = import inputs.nixpkgs { localSystem.system = system; };
             };
             inherit inputs inputs';
           };
@@ -88,7 +88,7 @@
             isNixOS = true;
             packages = config.packages;
             nurNoPkg = import inputs.nur {
-              nurpkgs = import inputs.nixpkgs { system = system; };
+              nurpkgs = import inputs.nixpkgs { localSystem.system = system; };
             };
             inherit inputs inputs';
           };
@@ -115,7 +115,7 @@
             hostname = "dgx-spark";
             packages = config.packages;
             nurNoPkg = import inputs.nur {
-              nurpkgs = import inputs.nixpkgs { system = system; };
+              nurpkgs = import inputs.nixpkgs { localSystem.system = system; };
             };
             inherit inputs inputs';
           };

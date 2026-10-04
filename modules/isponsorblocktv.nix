@@ -49,13 +49,16 @@ in
     age.secrets = {
       isponsorblock-config = {
         file = ../secrets/isponsorblockvg.age;
-        # mode = "770";
+        mode = "0640";
         path = "${cfg.dataDir}/config.json";
         owner = "isponsorblocktv";
         group = "isponsorblocktv";
       };
     };
     systemd = {
+      tmpfiles.rules = [
+        "d '${cfg.dataDir}' 0750 isponsorblocktv isponsorblocktv - -"
+      ];
       services.isponsorblocktv = {
         description = "isponsorblock Server";
         after = [ "network-online.target" ];
@@ -70,6 +73,13 @@ in
           UMask = "0077";
           #WorkingDirectory = cfg.dataDir;
           ExecStart = " ${pkgs.isponsorblocktv}/bin/iSponsorBlockTV --data '${cfg.dataDir}'";
+          # agenix chowns the decrypted secret during system activation, which can
+          # race with user creation on fresh installs — enforce ownership here so
+          # the service can always read its config
+          ExecStartPre = [
+            "+${pkgs.coreutils}/bin/chown isponsorblocktv:isponsorblocktv '${cfg.dataDir}'"
+            "+${pkgs.coreutils}/bin/chown isponsorblocktv:isponsorblocktv '${cfg.dataDir}/config.json'"
+          ];
           Restart = "on-failure";
           TimeoutSec = 15;
           SuccessExitStatus = [

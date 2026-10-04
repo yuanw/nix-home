@@ -5,7 +5,6 @@
 {
   pkgs,
   config,
-  lib,
   ...
 }:
 
@@ -239,13 +238,24 @@
     };
   };
 
-  users.users.${config.services.jellyfin.user}.extraGroups = [
-    "video"
-    "render"
-  ];
+  # only meaningful while jellyfin is enabled (see below)
+  users.users.${config.services.jellyfin.user} =
+    pkgs.lib.mkIf config.services.declarative-jellyfin.enable
+      {
+        extraGroups = [
+          "video"
+          "render"
+        ];
+      };
 
+  # jellyfin disabled temporarily: jellyfin-init migration OOM-loops
+  # (27.6G RSS during the DB migration run). Note: the full
+  # services.declarative-jellyfin block lives here (jellyfin.nix is NOT
+  # imported by default.nix — dead file, kept for reference).
+  # Re-enable once root cause is sorted:
+  # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
   services.declarative-jellyfin = {
-    enable = true;
+    enable = false;
     group = "data";
     system = {
       serverName = "My Declarative Jellyfin Server";
@@ -324,11 +334,20 @@
   # ];
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
+  security.sudo = {
+    wheelNeedsPassword = false;
+  };
+
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+  ];
+
   users.groups.data = { };
   users.users.yuanw = {
     isNormalUser = true;
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
     ];
     extraGroups = [
       "wheel"
@@ -364,11 +383,28 @@
     #"r8169" cannot load this firmware as right now
     "i40e"
   ];
+  boot.zfs.forceImportRoot = false;
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
-  boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    zfs rollback -r zroot/root@blank
-  '';
+  boot.kernelParams = [
+    "ip=::::nixos-initrd::dhcp"
+    # cap ZFS ARC at 4 GiB so userspace (jellyfin, hass) has headroom
+    "zfs.zfs_arc_max=4294967296"
+  ];
+  # systemd stage 1 replaces postDeviceCommands; roll back the ephemeral
+  # root dataset to @blank after the pool is imported, before sysroot mounts
+  boot.initrd.systemd.services.zfs-rollback = {
+    description = "Roll back the root ZFS dataset to @blank";
+    wantedBy = [ "initrd.target" ];
+    requires = [ "zfs-import-zroot.service" ];
+    after = [ "zfs-import-zroot.service" ];
+    before = [ "sysroot.mount" ];
+    unitConfig.DefaultDependencies = "no";
+    serviceConfig.Type = "oneshot";
+    path = [ config.boot.zfs.package ];
+    script = ''
+      zfs rollback -r zroot/root@blank
+    '';
+  };
 
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/persistSave".neededForBoot = true;
@@ -377,6 +413,7 @@
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
+      "/home"
       "/var/log"
       "/var/lib/nixos"
       "/var/lib/private"
@@ -421,6 +458,7 @@
       ];
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
       ];
 
     };

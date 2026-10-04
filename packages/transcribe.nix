@@ -10,11 +10,14 @@
 */
 {
   stdenv,
+  # Only for stdenv.hostPlatform.isDarwin below, keep `lib' and `stdenv' out
+  # of the script's own PATH.
   writeShellApplication,
   yt-dlp,
   ffmpeg,
   whisper-cpp,
   gawk,
+  gzip,
   coreutils,
   findutils,
   gnugrep,
@@ -26,12 +29,37 @@
 let
   isDarwin = stdenv.hostPlatform.isDarwin;
 
+  # `asr' cuts a long recording into windows of TRANSCRIBE_ASR_CHUNK seconds,
+  # and hands one window to the model at a time.  Two things that buys:
+  #
+  #  - a model that stops understanding the audio keeps saying the last span
+  #    it could still say, so the sooner a window starts the sooner that is
+  #    noticed (see repetitive below), and the less of the lecture is spent
+  #    before the run says so out loud;
+  #  - the work per call is bounded, which is the only way a 16 GB host has of
+  #    transcription with a model that has to page weights in -- the first
+  #    lecture run spent ~27.5 minutes on one 58-minute call for exactly that
+  #    reason.
+  #
+  # TRANSCRIBE_ASR_CHUNK=0 puts the single call back; TRANSCRIBE_REPEAT_RATIO=0
+  # turns the repetition check off.
+  asrChunk = "\"\${TRANSCRIBE_ASR_CHUNK:-600}\"";
+  repeatRatio = "\"\${TRANSCRIBE_REPEAT_RATIO:-4}\"";
+
   preamble = ''
     set -euo pipefail
     step() { printf '[%s] %s\n' "''${0##*/}" "$*" >&2; }
     die() { step "$*"; exit 1; }
     newest_in() { # newest_in DIR PATTERN -> newest match, or empty
       find "$1" -maxdepth 1 -type f -name "$2" 2>/dev/null | sort | tail -1
+    }
+    duration() { # duration FILE -> seconds, empty when ffprobe cannot say
+      ffprobe -v error -show_entries format=duration -of csv=p=0 "$1" 2>/dev/null | tail -1
+    }
+    longer_than() { # longer_than FILE SECONDS
+      local dur
+      dur="$(duration "$1")"
+      [[ -n "$dur" ]] && awk -v d="$dur" -v c="$2" 'BEGIN { exit !(d + 0 > c + 0) }'
     }
   '';
 
@@ -65,16 +93,24 @@ let
       fi
     fi
   '';
+
+  # What the wrapped script may look up by name: whisper.cpp, under either
+  # name (brew/upstream say whisper-cli, nixpkgs says whisper-cpp, same
+  # program).  Anything else arrives through $TRANSCRIBE_ASR_CMD, which the
+  # caller writes and which is run on the caller's PATH.
 in
 {
   transcribe = writeShellApplication {
     name = "transcribe";
+
+    # ffprobe comes with ffmpeg, gzip and wc with coreutils.
     runtimeInputs = [
       coreutils
       findutils
       gnugrep
       gnused
       gawk
+      gzip
       ffmpeg
       yt-dlp
       whisper-cpp
@@ -84,25 +120,34 @@ in
       ${preamble}
 
       sub_langs="''${TRANSCRIBE_SUB_LANGS:-en.,en}"
+      chunk_s=${asrChunk}
+      cr_max=${repeatRatio}
       subs_only=0
+      force_asr=0
       timestamps=1
       outdir=""
       inputs=()
 
       usage() {
-        step "usage: transcribe [-o DIR] [-n] [-T] URL_OR_FILE..."
+        step "usage: transcribe [-o DIR] [-n] [-A] [-T] URL_OR_FILE..."
         step "  -n, --subs-only       never fall back to speech-to-text"
+        step "  -A, --force-asr       ignore captions, transcribe the audio (benchmarks)"
         step "  -T, --no-timestamps   drop the [mm:ss] prefixes"
         step "  -o, --output-dir DIR  where the .txt files land (default: \$PWD)"
         step "environment: TRANSCRIBE_SUB_LANGS, COOKIE_BROWSER, LIBREWOLF_PROFILE_ROOT,"
         step "             TRANSCRIBE_ASR_CMD (run as: \$TRANSCRIBE_ASR_CMD FILE),"
-        step "             WHISPER_MODEL (ggml model file for the bundled whisper-cpp)"
+        step "             TRANSCRIBE_ASR_CHUNK (seconds of audio per model call, 0 = one call),"
+        step "             TRANSCRIBE_REPEAT_RATIO (gzip size ratio above which the answer"
+        step "             counts as a repetition loop, 0 = no check),"
+        step "             WHISPER_MODEL (ggml model file; whisper.cpp has to be on"
+        step "             PATH too, under the name whisper-cli or whisper-cpp)"
         exit 2
       }
 
       while [[ $# -gt 0 ]]; do
         case "$1" in
           -n|--subs-only) subs_only=1 ;;
+          -A|--force-asr) force_asr=1 ;;
           -T|--no-timestamps) timestamps=0 ;;
           -o|--output-dir) shift; [[ $# -gt 0 ]] || usage; outdir="$1" ;;
           -h|--help) usage ;;
@@ -111,6 +156,9 @@ in
         esac
         shift
       done
+      if [[ "$subs_only" -eq 1 && "$force_asr" -eq 1 ]]; then
+        die "--subs-only refuses speech-to-text, --force-asr is speech-to-text: pick one"
+      fi
       [[ ''${#inputs[@]} -gt 0 ]] || usage
       [[ -n "$outdir" ]] || outdir="$PWD"
       mkdir -p "$outdir"
@@ -125,19 +173,111 @@ in
         fi
       }
 
-      asr() { # asr FILE -> transcript text on stdout
-        file="$(realpath "$1")"
+      # True when the answer that came back is the model eating itself.  The
+      # gzip size ratio is the tell: text that repeats whole spans compresses
+      # to a fraction of its size and text that does not.  Measured on this
+      # machine -- clean English prose sits between 2.0 and 2.8 here, and the
+      # 74 KB that came back looping from a lecture sat at 9.4 (23.7 counted
+      # over the whole file).  Nothing that reads like someone talking comes
+      # near 4, which is why nothing that reads like someone talking is ever
+      # refused by this.
+      repetitive() { # repetitive FILE SIZE RATIO -> true when FILE is looping
+        [[ "$2" -gt 512 && "$3" != 0 ]] || return 1
+        local gzipped
+        gzipped="$(gzip -9 -c < "$1" | wc -c)"
+        awk -v s="$2" -v g="$gzipped" -v r="$3" 'BEGIN { exit !((g > 0) && (s / g > r + 0)) }'
+      }
+
+      # Which backend does the transcription, and where the audio file goes in
+      # its argv.  TRANSCRIBE_ASR_CMD is word-split on spaces and the media
+      # file is appended as its own argument, so paths may contain spaces;
+      # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'.
+      # Which backend does the transcription, and where the audio file goes in
+      # its argv.  TRANSCRIBE_ASR_CMD is word-split on spaces and the media
+      # file is appended as its own argument, so paths may contain spaces;
+      # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'.
+      asr_run() { # asr_run FILE -> transcript text on stdout
+        local -a cmd=()
+        local wb=""
         if [[ -n "''${TRANSCRIBE_ASR_CMD:-}" ]]; then
-          # TRANSCRIBE_ASR_CMD is word-split on spaces, the media file is
-          # appended as its own argument so paths may contain spaces.
-          # e.g. TRANSCRIBE_ASR_CMD='parakeet-mlx --output-format txt'
           read -ra cmd <<< "$TRANSCRIBE_ASR_CMD"
-          "''${cmd[@]}" "$file"
-        elif [[ -n "''${WHISPER_MODEL:-}" ]] && command -v whisper-cpp >/dev/null; then
-          whisper-cpp -m "$WHISPER_MODEL" -f "$file" -nt
+          "''${cmd[@]}" "$1"
+        elif [[ -f "''${WHISPER_MODEL:-}" ]]; then
+          # brew's formula, and whisper.cpp upstream since 1.7.x, call the CLI
+          # whisper-cli; nixpkgs still calls the package whisper-cpp.  Same
+          # flags, different name, so look the name up rather than guess it.
+          if command -v whisper-cli >/dev/null; then
+            wb=whisper-cli
+          elif command -v whisper-cpp >/dev/null; then
+            wb=whisper-cpp
+          else
+            die "\$WHISPER_MODEL names a model but nothing on PATH would read it: install whisper.cpp (brew install whisper.cpp, or nixpkgs' whisper-cpp) and put it on PATH"
+          fi
+          # -nt drops the timestamps: without it every line comes back with a
+          # [00:00:00] prefix, which is noise in a plain-text transcript.
+          cmd=("$wb" -m "$WHISPER_MODEL" -f "$1" -nt)
+          "''${cmd[@]}"
         else
-          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD or \$WHISPER_MODEL, or pass --subs-only"
+          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, or point \$WHISPER_MODEL at a ggml model with whisper.cpp (whisper-cli or whisper-cpp) somewhere on PATH, or pass --subs-only"
         fi
+      }
+
+      # Transcribe FILE into OUT, one model call per window of audio, and stop
+      # at the first window that comes back looping instead of transcribing
+      # the rest of the file on the strength of it.
+      asr() { # asr FILE DIR OUT
+        file="$(realpath "$1")"
+        # What every backend here is *known* to decode is WAV and MP3; a
+        # container or codec outside that gets PCM'd into DIR/audio.wav
+        # first.  Not theory: the first real run handed the script an
+        # Opus-in-WebM file and cohere-transcribe died with "Failed to
+        # create audio decoder: unsupported codec", and whether the m4a
+        # yt-dlp extracts decodes at all was never verified.  Mono
+        # 16 kHz WAV is what both backends eat, so this is a detour that
+        # cannot fail, not a format guess.
+        case "''${file,,}" in
+          *.wav|*.mp3) ;;
+          *)
+            step "decoding audio"
+            ffmpeg -nostdin -loglevel error -i "$file" -vn -acodec pcm_s16le -ar 16000 -ac 1 "$2/audio.wav" \
+              || die "ffmpeg could not decode $1 (no audio track?)"
+            file="$2/audio.wav"
+            ;;
+        esac
+
+        # A lecture is not a clip: one unbounded call holds all of it at once,
+        # and a decoder that starts echoing a span back keeps doing it until
+        # its token budget runs out.  Cutting the audio into windows gives the
+        # model a way back out, gives `repetitive' above somewhere to notice
+        # that it never found one, and stops the run at the first window that
+        # comes back looping.  A file no longer than one window skips all of
+        # this and is judged as one answer, which is what caught the lecture.
+        if [[ "$chunk_s" != 0 ]] && longer_than "$file" "$chunk_s"; then
+          step "transcribing $file in $chunk_s s windows"
+          rm -f "$2"/window-*.wav "$2/window.txt"
+          ffmpeg -nostdin -loglevel error -i "$file" -f segment -segment_time "$chunk_s" \
+            -c copy "$2/window-%03d.wav" \
+            || die "ffmpeg could not cut $file into $chunk_s s windows"
+        fi
+
+        if [[ -f "$2/window-000.wav" ]]; then
+          windows="$(find "$2" -type f -name 'window-*.wav' | sort)"
+        else
+          windows="$file"
+        fi
+
+        : > "$3"
+        while read -r window; do
+          [[ -n "$window" ]] || continue
+          step "speech-to-text: $(basename "$window")"
+          if ! asr_run "$window" > "$2/window.txt"; then
+            die "speech-to-text died on $window (does the model still run?)"
+          fi
+          if repetitive "$2/window.txt" "$(wc -c < "$2/window.txt")" "$cr_max"; then
+            die "$(basename "$window") came back as a repetition loop: that is the model eating itself, not a transcript"
+          fi
+          sed '/^[[:space:]]*$/d' "$2/window.txt" >> "$3"
+        done < <(printf '%s\n' "$windows")
       }
 
       for in in "''${inputs[@]}"; do
@@ -156,16 +296,19 @@ in
             stem="''${stem%.*}"
           fi
           out="$outdir/$stem.txt"
-          step "looking for captions: $in"
-          run_yt_dlp --write-subs --write-auto-subs --sub-langs "$sub_langs" \
-            --sub-format srt --skip-download --no-part \
-            -o "$work/%(id)s.%(ext)s" "$in" || true
-          srt="$(newest_in "$work" '*.srt')"
+          if [[ "$force_asr" -eq 0 ]]; then
+            step "looking for captions: $in"
+            run_yt_dlp --write-subs --write-auto-subs --sub-langs "$sub_langs" \
+              --sub-format srt --skip-download --no-part \
+              -o "$work/%(id)s.%(ext)s" "$in" || true
+            srt="$(newest_in "$work" '*.srt')"
+          fi
           if [[ -z "$srt" ]]; then
             if [[ "$subs_only" -eq 1 ]]; then
               die "no captions in $sub_langs for $in"
             fi
-            step "no captions, extracting audio"
+            [[ "$force_asr" -eq 0 ]] || step "captions not asked for (--force-asr)"
+            step "extracting audio"
             run_yt_dlp -f "bestaudio/best" -x --audio-format m4a --no-part \
               -o "$work/%(id)s.%(ext)s" "$in"
           fi
@@ -177,8 +320,10 @@ in
             die "--subs-only needs a URL, got a file: $in"
           fi
           # Sidecar captions beside the media beat a local speech-to-text run.
-          srt="$(newest_in "$(dirname "$in")" "$stem*.srt")"
-          [[ -n "$srt" ]] || step "no sidecar captions for $in, transcribing audio"
+          if [[ "$force_asr" -eq 0 ]]; then
+            srt="$(newest_in "$(dirname "$in")" "$stem*.srt")"
+            [[ -n "$srt" ]] || step "no sidecar captions for $in, transcribing audio"
+          fi
         fi
 
         tmp="$(mktemp "$work/out.XXXXXX")"
@@ -190,7 +335,7 @@ in
           [[ -n "$audio" ]] || audio="$in"
           [[ -f "$audio" ]] || die "nothing to transcribe for $in"
           step "speech-to-text: $audio"
-          asr "$audio" | sed '/^[[:space:]]*$/d' > "$tmp"
+          asr "$audio" "$work" "$tmp"
         fi
 
         [[ -s "$tmp" ]] || die "empty transcript for $in"
@@ -205,6 +350,7 @@ in
 
   yt-dlp-librewolf = writeShellApplication {
     name = "yt-dlp-librewolf";
+
     runtimeInputs = [ yt-dlp ];
 
     text = ''
