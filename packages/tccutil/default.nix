@@ -6,7 +6,7 @@
 }:
 buildPythonApplication rec {
   pname = "tccutil-manage";
-  version = "1.5.1";
+  version = "1.5.5";
   format = "other";
 
   src = fetchFromGitHub {

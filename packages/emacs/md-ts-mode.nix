@@ -8,13 +8,13 @@
 
 melpaBuild {
   pname = "md-ts-mode";
-  version = "0.4.0-unstable-2026-09-23";
+  version = "0.5-unstable-2026-10-04";
 
   src = fetchFromGitHub {
     owner = "dnouri";
     repo = "md-ts-mode";
-    rev = "c6f0bc5cb505ac82802ef588a6a9bc085c823c2f";
-    sha256 = "sha256-pvpHtFrZIOcIWh8P5Hy2Z9svbUeWrX+BNcTey+I3wAM=";
+    rev = "769ef52965c46e9346bf19d04adc6fef9d23b01c";
+    sha256 = "sha256-YhRk6lhFm7zVicP/c8228NZzpMcSIyrFLTH2SZ4tAEs=";
   };
 
   packageRequires = [ ];

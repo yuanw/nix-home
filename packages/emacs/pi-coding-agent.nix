@@ -11,13 +11,13 @@
 
 melpaBuild {
   pname = "pi-coding-agent";
-  version = "3.1.0-unstable-2026-09-23";
+  version = "3.3.0-unstable-2026-10-04";
 
   src = fetchFromGitHub {
     owner = "dnouri";
     repo = "pi-coding-agent";
-    rev = "7ca4ee574d6a2b14032a9769c5c4cada97b97977";
-    sha256 = "sha256-I84N9Ax3Jm3xtojs7+TVyMn4eUDszfv91xVNvpPaZhQ=";
+    rev = "b8ab7fcdb2f7e177133200acbcd9c85b03f1c052";
+    sha256 = "sha256-fE/lxuFHuonVfIzWTjOXyQQUpG2cCirt6DKKMfhRfCk=";
   };
 
   packageRequires = [
