@@ -1,7 +1,10 @@
 { config, ... }:
 {
+  # disabled temporarily: jellyfin-init migration OOM-loops after the pool
+  # rebuild; re-enable once root cause is sorted
+  # (tracking: https://github.com/Sveske-Juice/declarative-jellyfin/issues/32)
   services.declarative-jellyfin = {
-    enable = true;
+    enable = false;
     serverId = "f4655afd22f348e19089c6b474b24a75";
     libraries = {
       Movies = {
