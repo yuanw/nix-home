@@ -5,7 +5,6 @@
 {
   pkgs,
   config,
-  lib,
   ...
 }:
 
@@ -366,9 +365,21 @@
   ];
   # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
   boot.kernelParams = [ "ip=::::nixos-initrd::dhcp" ];
-  boot.initrd.postDeviceCommands = lib.mkAfter ''
-    zfs rollback -r zroot/root@blank
-  '';
+  # systemd stage 1 replaces postDeviceCommands; roll back the ephemeral
+  # root dataset to @blank after the pool is imported, before sysroot mounts
+  boot.initrd.systemd.services.zfs-rollback = {
+    description = "Roll back the root ZFS dataset to @blank";
+    wantedBy = [ "initrd.target" ];
+    requires = [ "zfs-import-zroot.service" ];
+    after = [ "zfs-import-zroot.service" ];
+    before = [ "sysroot.mount" ];
+    unitConfig.DefaultDependencies = "no";
+    serviceConfig.Type = "oneshot";
+    path = [ config.boot.zfs.package ];
+    script = ''
+      zfs rollback -r zroot/root@blank
+    '';
+  };
 
   fileSystems."/persist".neededForBoot = true;
   fileSystems."/persistSave".neededForBoot = true;
