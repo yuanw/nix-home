@@ -1,9 +1,8 @@
 /*
   Checks for packages/transcribe.nix.
 
-  The scripts under test talk to yt-dlp, whisper-cpp and cohere-transcribe;
-  all three arrive as stubs (a real cohere-transcribe would be fetched from
-  GitHub), so what gets exercised is our own logic: caption vs audio
+  The scripts under test talk to yt-dlp and to a speech-to-text CLI; both
+  arrive as stubs, so what gets exercised is our own logic: caption vs audio
   routing, the SRT cleanup, cookie flag construction, and which
   speech-to-text backend gets asked with what.  ffmpeg is real, and so are
   the media fixtures: whatever reaches a backend has to decode, and empty
@@ -60,24 +59,6 @@ let
     mkdir -p "$d"
     if [[ "$subs" == 1 && -n "$emit_srt" ]]; then cp "$emit_srt" "$d/stub.en.srt"; fi
     if [[ "$audio" == 1 && -n "$emit_audio" ]]; then cp "$emit_audio" "$d/stub.m4a"; fi
-  '';
-
-  # Stands in for pkgs.cohere-transcribe, which the script may also look up by
-  # name.  What matters here is that the model *directory* and the media file
-  # reach it as two separate arguments.
-  cohereStub = stub "cohere-transcribe" ''
-    model=""
-    file=""
-    while [[ $# -gt 0 ]]; do
-      case "$1" in
-        --model-dir) model="''${2:?}" ;;
-        *) file="''${1:?}" ;;
-      esac
-      shift
-    done
-    [[ -d "$model" ]] || { echo "stub cohere-transcribe: not a directory: $model" >&2; exit 4; }
-    [[ -f "$file" ]] || { echo "stub cohere-transcribe: not a file: $file" >&2; exit 4; }
-    printf 'cohere transcript of %s\n' "$(basename "$file")"
   '';
 
   # whisper.cpp's CLI: called whisper-cli by brew's formula and by upstream
@@ -138,7 +119,6 @@ let
       ;
     yt-dlp = ytDlpStub;
     whisper-cpp = whisperStub;
-    cohere-transcribe = cohereStub;
     srt2txt = ../packages/srt2txt.awk;
   };
 
@@ -264,20 +244,11 @@ pkgs.runCommand "transcribe-tests"
       || fail "explicit speech-to-text command ignored: $(cat out/cmd.txt)"
     [[ -f "$(cat tmp/asr-seen)" ]] || fail "command was handed a non-path: $(cat tmp/asr-seen)"
 
-    echo "[transcribe-tests] the model directory reaches cohere-transcribe as --model-dir"
-    mkdir -p tmp/models
-    : > tmp/models/model.safetensors
-    TRANSCRIBE_ASR_CMD="$asrcmd" COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" COOKIE_BROWSER= \
+    echo "[transcribe-tests] TRANSCRIBE_ASR_CMD outranks $WHISPER_MODEL"
+    TRANSCRIBE_ASR_CMD="$asrcmd" WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" COOKIE_BROWSER= \
       "$transcribe" -o out tmp/audioonly.mp3 >/dev/null
     grep -q '^cmd transcript of audioonly.mp3$' out/audioonly.txt \
       || fail "TRANSCRIBE_ASR_CMD should still be the first choice: $(cat out/audioonly.txt)"
-    # No TRANSCRIBE_ASR_CMD this time, so the model directory is what names
-    # the backend.  The stub only prints a transcript when --model-dir names a
-    # real directory and the audio file arrives as a file of its own.
-    COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" COOKIE_BROWSER= \
-      "$transcribe" -o out tmp/audioonly.mp3 >/dev/null
-    grep -q '^cohere transcript of audioonly.mp3$' out/audioonly.txt \
-      || fail "model directory ignored: $(cat out/audioonly.txt)"
 
     echo "[transcribe-tests] --force-asr ignores captions that would have worked"
     : > "$YTDLP_STUB_LOG"
@@ -305,7 +276,7 @@ pkgs.runCommand "transcribe-tests"
 
     echo "[transcribe-tests] no backend at all -> a message naming the fix"
     rc=0
-    WHISPER_MODEL= TRANSCRIBE_ASR_CMD= COHERE_TRANSCRIBE_MODEL_DIR= COOKIE_BROWSER= \
+    WHISPER_MODEL= TRANSCRIBE_ASR_CMD= COOKIE_BROWSER= \
       "$transcribe" -o out tmp/audioonly.mp3 2>tmp/nobackend.err || rc=$?
     [[ $rc -ne 0 ]] || fail "succeeded with no speech-to-text backend"
     grep -q 'TRANSCRIBE_ASR_CMD' tmp/nobackend.err \
@@ -399,14 +370,11 @@ pkgs.runCommand "transcribe-tests"
     grep -q '^cmd transcript of window-006.wav$' tmp/bycmd/long.txt \
       || fail "the last window went unheard: $(tail -n 2 tmp/bycmd/long.txt)"
 
-    echo "[transcribe-tests] with both backends on PATH, whisper-cpp is the one that gets asked"
-    mkdir -p tmp/models
-    : > tmp/models/model.safetensors
+    echo "[transcribe-tests] with no command to run, $WHISPER_MODEL names the backend"
     rc=0
-    WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" \
-      COHERE_TRANSCRIBE_MODEL_DIR="$PWD/tmp/models" TRANSCRIBE_ASR_CMD= \
+    WHISPER_MODEL="$PWD/tmp/ggml-fake.bin" TRANSCRIBE_ASR_CMD= \
       "$transcribe" -o tmp/either tmp/long.mp3 >tmp/either.log 2>&1 || rc=$?
-    [[ $rc -eq 0 ]] || fail "nothing transcribed although two backends were on PATH: $(tail -n 1 tmp/either.log)"
+    [[ $rc -eq 0 ]] || fail "nothing transcribed with only $WHISPER_MODEL: $(tail -n 1 tmp/either.log)"
     grep -q '^whisper transcript of long.mp3$' tmp/either/long.txt \
       || fail "wrong backend, or the file was not passed as one whole argument: $(cat tmp/either/long.txt)"
 

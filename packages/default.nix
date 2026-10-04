@@ -2,18 +2,12 @@ _final: prev:
 let
   codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
   # media -> text; the module that puts these two on PATH is
-  # modules/speech2text/transcribe.nix
-  #
-  # cohere-transcribe is passed as null, not as a package.  Two reasons: the
-  # injected attribute would also be *evaluated* on x86_64-*, where no binary
-  # of that CLI exists (see the `or throw` in packages/cohere-transcribe), and
-  # on aarch64-linux it would be whatever CUDA this set happens to carry, which
-  # for CUDA 13 is a set of libraries the CLI cannot load.  Hosts that do want
-  # the CLI put it on PATH themselves -- see hosts/mist.nix -- and `transcribe`
-  # looks the name up there rather than assuming a store path.
+  # modules/speech2text/transcribe.nix.  whisper.cpp is not passed in by name:
+  # `transcribe' looks transcribers up on PATH (nixpkgs calls the package
+  # whisper-cpp and installs the binary as whisper-cli), and a host that wants
+  # a different one names it in modules.transcribe.asrCmd -- see hosts/mist.nix.
   transcribePkgs = prev.callPackage ./transcribe.nix {
     srt2txt = ./srt2txt.awk;
-    cohere-transcribe = null;
   };
 
   # TensorFold's python313Packages scope extension (see the entry below).
@@ -188,7 +182,6 @@ in
   claude-plugins = prev.callPackage ./claude-plugins { };
   inherit codingAgentsCommonSkills;
   codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
-  cohere-transcribe = prev.callPackage ./cohere-transcribe { };
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
   transcribe = transcribePkgs.transcribe;

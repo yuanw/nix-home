@@ -23,22 +23,6 @@ let
     '';
   };
 
-  cohere-transcribe-init = pkgs.writeShellApplication {
-    name = "cohere-transcribe-init";
-    runtimeInputs = [ pythonWithHf ];
-    text = ''
-      MODEL_DIR="''${COHERE_TRANSCRIBE_MODEL_DIR:-''${HOME}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026}"
-      echo "Note: CohereLabs/cohere-transcribe-03-2026 is an access-controlled model." >&2
-      echo "Run 'huggingface-cli login' first if you haven't already." >&2
-      echo "Downloading to ''${MODEL_DIR} ..." >&2
-      huggingface-cli download CohereLabs/cohere-transcribe-03-2026 \
-        --local-dir "''${MODEL_DIR}"
-      echo "Copying vocab.json from Nix package..." >&2
-      cp ${pkgs.cohere-transcribe}/share/cohere-transcribe/vocab.json "''${MODEL_DIR}/"
-      echo "Done. Model ready at ''${MODEL_DIR}" >&2
-    '';
-  };
-
   # Server-aware transcribe script: tries HTTP server first, falls back to CLI
   parakeetMlxServerTranscribe =
     let
@@ -202,23 +186,14 @@ let
         rm -f "$TXT_OUT"
       '';
     };
-    "cohere-transcribe" = {
-      runtimeInputs = [ ];
-      transcribeExpr = ''
-        MODEL_DIR="''${COHERE_TRANSCRIBE_MODEL_DIR:-''${HOME}/.local/share/cohere-transcribe/models/cohere-transcribe-03-2026}"
-        TRANSCRIPT=$(${pkgs.cohere-transcribe}/lib/transcribe --model-dir "''${MODEL_DIR}" "$TMPFILE" 2>/dev/null || true)
-      '';
-    };
   };
 
   whisperPair = mkFlavor "whispercpp" flavorDefs.whispercpp;
   parakeetPair = mkFlavor "parakeet-mlx" flavorDefs."parakeet-mlx";
-  coherePair = mkFlavor "cohere-transcribe" flavorDefs."cohere-transcribe";
 
   flavorPairs = {
     whispercpp = whisperPair;
     "parakeet-mlx" = parakeetPair;
-    "cohere-transcribe" = coherePair;
   };
 
   selectedPair = flavorPairs.${cfg.flavor};
@@ -245,11 +220,6 @@ let
       parakeetPair.speak2text
     ]
     ++ lib.optional cfg.parakeetServer pkgs.parakeet-mlx-server;
-    "cohere-transcribe" = [
-      pkgs.cohere-transcribe
-      cohere-transcribe-init
-      coherePair.speak2text
-    ];
   };
 
   pttListener =
@@ -285,10 +255,9 @@ in
       type = lib.types.enum [
         "whispercpp"
         "parakeet-mlx"
-        "cohere-transcribe"
       ];
       default = "parakeet-mlx";
-      description = "Speech-to-text backend. whispercpp: cross-platform CPU; parakeet-mlx: Apple Silicon MLX; cohere-transcribe: Rust + MLX (aarch64-darwin only).";
+      description = "Speech-to-text backend. whispercpp: cross-platform CPU, needs $WHISPER_MODEL; parakeet-mlx: Apple Silicon MLX.";
     };
     parakeetServer = lib.mkOption {
       type = lib.types.bool;

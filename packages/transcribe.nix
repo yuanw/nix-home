@@ -9,7 +9,6 @@
   yt-dlp-librewolf is for.  See cookieSetup below.
 */
 {
-  lib,
   stdenv,
   # Only for stdenv.hostPlatform.isDarwin below, keep `lib' and `stdenv' out
   # of the script's own PATH.
@@ -23,13 +22,6 @@
   findutils,
   gnugrep,
   gnused,
-  # The speech-to-text CLI used when a video has no captions.  Optional on
-  # purpose: `asr' looks the name up on the caller's PATH, and hosts that ship
-  # the CLI put it there (mist via environment.systemPath, and it is in the
-  # script's own PATH too when this is called with an override, as the tests
-  # do).  Baking it in would also drag a CUDA 13 package set into every
-  # aarch64-linux build, where the CLI cannot run at all.
-  cohere-transcribe ? null,
   # Path to srt2txt.awk (injected so tests can pass their own copy).
   srt2txt,
   ...
@@ -50,13 +42,9 @@ let
   #    reason.
   #
   # TRANSCRIBE_ASR_CHUNK=0 puts the single call back; TRANSCRIBE_REPEAT_RATIO=0
-  # turns the repetition check off.  TRANSCRIBE_ASR_MAX_TOKENS is the cap on
-  # what one call may spend: CohereTranscribe's own default is 448, which is
-  # about a third of a windowful of lecture, so a full window comes back cut
-  # off mid-sentence -- hence a knob, with a default big enough to finish.
+  # turns the repetition check off.
   asrChunk = "\"\${TRANSCRIBE_ASR_CHUNK:-600}\"";
   repeatRatio = "\"\${TRANSCRIBE_REPEAT_RATIO:-4}\"";
-  maxTokens = "\"\${TRANSCRIBE_ASR_MAX_TOKENS:-2048}\"";
 
   preamble = ''
     set -euo pipefail
@@ -106,10 +94,10 @@ let
     fi
   '';
 
-  # What the wrapped script may look up by name.  cohere-transcribe is there
-  # only when the caller passes one (the tests pass a stub; packages/default.nix
-  # passes null, so a host that wants the CLI ships it through PATH -- see the
-  # asr() branch below and hosts/mist.nix).
+  # What the wrapped script may look up by name: whisper.cpp, under either
+  # name (brew/upstream say whisper-cli, nixpkgs says whisper-cpp, same
+  # program).  Anything else arrives through $TRANSCRIBE_ASR_CMD, which the
+  # caller writes and which is run on the caller's PATH.
 in
 {
   transcribe = writeShellApplication {
@@ -126,8 +114,7 @@ in
       ffmpeg
       yt-dlp
       whisper-cpp
-    ]
-    ++ lib.optionals (cohere-transcribe != null) [ cohere-transcribe ];
+    ];
 
     text = ''
       ${preamble}
@@ -135,7 +122,6 @@ in
       sub_langs="''${TRANSCRIBE_SUB_LANGS:-en.,en}"
       chunk_s=${asrChunk}
       cr_max=${repeatRatio}
-      max_tokens=${maxTokens}
       subs_only=0
       force_asr=0
       timestamps=1
@@ -153,10 +139,8 @@ in
         step "             TRANSCRIBE_ASR_CHUNK (seconds of audio per model call, 0 = one call),"
         step "             TRANSCRIBE_REPEAT_RATIO (gzip size ratio above which the answer"
         step "             counts as a repetition loop, 0 = no check),"
-        step "             TRANSCRIBE_ASR_MAX_TOKENS (2048, a whole window's worth; 0 = no cap),"
         step "             WHISPER_MODEL (ggml model file; whisper.cpp has to be on"
-        step "             PATH too, under the name whisper-cli or whisper-cpp),"
-        step "             COHERE_TRANSCRIBE_MODEL_DIR (directory holding the Cohere weights)"
+        step "             PATH too, under the name whisper-cli or whisper-cpp)"
         exit 2
       }
 
@@ -233,19 +217,8 @@ in
           # [00:00:00] prefix, which is noise in a plain-text transcript.
           cmd=("$wb" -m "$WHISPER_MODEL" -f "$1" -nt)
           "''${cmd[@]}"
-        elif [[ -n "''${COHERE_TRANSCRIBE_MODEL_DIR:-}" ]] \
-          && command -v cohere-transcribe >/dev/null; then
-          # The weights live in a directory of their own, named by hand: the
-          # file is a positional argument, and --model-dir has to name the
-          # directory holding config.json, model.safetensors and vocab.json.
-          cmd=(cohere-transcribe --model-dir "''${COHERE_TRANSCRIBE_MODEL_DIR}" \
-            --language en)
-          if [[ "$max_tokens" != 0 ]]; then
-            cmd+=(--max-tokens "$max_tokens")
-          fi
-          "''${cmd[@]}" "$1"
         else
-          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, \$WHISPER_MODEL or \$COHERE_TRANSCRIBE_MODEL_DIR, or pass --subs-only"
+          die "no speech-to-text backend: set \$TRANSCRIBE_ASR_CMD, or point \$WHISPER_MODEL at a ggml model with whisper.cpp (whisper-cli or whisper-cpp) somewhere on PATH, or pass --subs-only"
         fi
       }
 
