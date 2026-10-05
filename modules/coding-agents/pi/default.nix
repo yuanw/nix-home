@@ -113,7 +113,10 @@ in
     };
 
     home-manager.users.${user} =
-      hm@{ ... }:
+      {
+        lib,
+        ...
+      }@hm:
       let
         permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
         micsSkillNames = [
