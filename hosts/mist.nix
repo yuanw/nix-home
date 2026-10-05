@@ -88,6 +88,7 @@
     # };
     pi = {
       enable = true;
+      useNixpi = true;
       extensionsPkgs = with pkgs.pi-extensions; [
         pi-loop
         pi-review

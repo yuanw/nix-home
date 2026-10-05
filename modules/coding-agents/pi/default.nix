@@ -17,6 +17,16 @@ let
   nixpiPackages =
     (map toNixpiPackage.fromExtensionPkg cfg.extensionsPkgs)
     ++ lib.mapAttrsToList toNixpiPackage.fromExtensionFile cfg.extensionFiles;
+  # Runtime-registered providers (cursor-agent, …) must appear in
+  # programs.pi.providers for settings.defaultProvider assertions.
+  defaultProviderName = cfg.settings.defaultProvider or null;
+  nixpiProviders =
+    cfg.providers
+    // lib.optionalAttrs (defaultProviderName != null && !(cfg.providers ? ${defaultProviderName})) {
+      ${defaultProviderName} = {
+        enable = true;
+      };
+    };
   agentPmManagedSkillNames = [
     "caveman"
     "d2"
@@ -106,17 +116,16 @@ in
     enableWorkMux = lib.mkEnableOption "workmux";
 
     useNixpi = lib.mkEnableOption ''
-      Drive Pi through the nixpi Home Manager module (programs.pi).
+      Drive Pi through nixpi (programs.pi). Prefer this on Darwin hosts.
 
-      When enabled, nixpi owns the wrapped `pi` package and generated
-      settings.json. Extensions are wrapped as Pi packages and listed in
-      programs.pi.packages (not rawExtensions, and not home-manager links under
-      extensions/). This module still owns models.json via mergetools (nixpi's
-      provider→models.json path drops freeform fields like `compat`), legacy
-      skills/prompts/themes links, permission-gate rules, and agent-pm
-      coexistence. Sets PI_CODING_AGENT_DIR to the HM-managed config dir so the
-      nixpi launcher does not redirect to XDG. Only enable on hosts that import
-      nixpi.homeModules.default.
+      modules.pi remains the host-facing API; this option selects the backend:
+      nixpi owns the wrapped `pi` package, settings.json, and extension packages
+      (programs.pi.packages). This module still owns models.json via mergetools
+      (nixpi drops freeform fields like `compat`), legacy skills/prompts/themes
+      links, permission-gate rules, and agent-pm coexistence. Sets
+      PI_CODING_AGENT_DIR to the HM-managed config dir so the nixpi launcher
+      does not redirect to XDG. Requires nixpi.homeModules.default in HM
+      sharedModules.
     '';
 
     package = lib.mkOption {
@@ -256,6 +265,40 @@ in
         freeform provider fields (e.g. compat) needed by custom providers.
       '';
     };
+
+    # Host-facing nixpi settings/providers. Forwarded to programs.pi when
+    # useNixpi is enabled. Prefer these over configuring programs.pi in the host.
+    settings = lib.mkOption {
+      type = lib.types.attrsOf lib.types.anything;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          defaultProvider = "cursor-agent";
+          defaultModel = "default";
+        }
+      '';
+      description = ''
+        Values merged into programs.pi.settings (and thus settings.json) when
+        useNixpi is enabled. Ignored on the legacy path.
+      '';
+    };
+
+    providers = lib.mkOption {
+      type = lib.types.attrsOf lib.types.attrs;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          cursor-agent.enable = true;
+        }
+      '';
+      description = ''
+        Extra programs.pi.providers declarations when useNixpi is enabled.
+        Use this for runtime-registered providers (e.g. cursor-agent) so
+        settings.defaultProvider passes nixpi's assertion. Do not set baseUrl/api
+        here for providers that only exist via extensions — that would generate
+        a competing models.json. Ignored on the legacy path.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -315,14 +358,13 @@ in
         }
 
         (lib.mkIf cfg.useNixpi {
-          # nixpi owns the wrapped package + settings.json; pin the agent dir so
-          # the launcher uses HM-managed files (mergetools models + agent-pm
-          # skills) instead of XDG_DATA_HOME/nixpi/agent. Extensions load as
-          # settings.packages (Pi packages with host peer-dep mapping).
+          # Backend: nixpi programs.pi. Host knobs stay on modules.pi.*.
           programs.pi = {
             enable = true;
             package = cfg.package;
             packages = nixpiPackages;
+            settings = cfg.settings;
+            providers = nixpiProviders;
             environment.variables = cfg.environment // {
               PI_CODING_AGENT_DIR = agentConfigPath;
             };
