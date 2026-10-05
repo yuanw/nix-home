@@ -1,8 +1,7 @@
 { pkgs, ... }:
 let
   # Build a single pi extension (.ts file) derivation.
-  # pname must include the .ts suffix — it is used as the filename in the
-  # extensions directory by the pi module (e.g. "pi-loop.ts").
+  # pname must include the .ts suffix when the package is a single file.
   mkPiExtension =
     {
       pname,
@@ -44,15 +43,10 @@ let
 in
 {
   inherit mkPiExtension mkLocalPiExtension;
-  pi-autoresearch = callExtension ./pi-autoresearch.nix;
-  pi-loop = callExtension ./pi-loop.nix;
   pi-review = callExtension ./pi-review.nix;
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
   pi-cursor-agent = callExtension ./pi-cursor-agent;
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
   pi-permission-gate = callExtension ./pi-permission-gate.nix;
-  pi-tutorial = callExtension ./pi-tutorial.nix;
-  earendil-pi-review = callExtension ./earendil-pi-review.nix;
-  pi-caveman = callExtension ./pi-caveman.nix;
   pi-ponytail = callExtension ./pi-ponytail.nix;
 }

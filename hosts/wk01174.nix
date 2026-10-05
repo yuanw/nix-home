@@ -85,7 +85,6 @@
         defaultModel = "default";
       };
       extensionsPkgs = with pkgs.pi-extensions; [
-        pi-loop
         pi-review
         pi-cursor-agent
         pi-slow-mode
