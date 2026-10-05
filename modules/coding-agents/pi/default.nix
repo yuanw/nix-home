@@ -62,13 +62,20 @@ let
       + lib.concatStringsSep "\n" (map mkMsg duplicates);
     };
 
-  # Store paths listed in programs.pi settings.json (nixpi). Extensions are not
-  # also symlinked under configDir when useNixpi is on.
-  nixpiRawExtensions = cfg.extensionsPkgs ++ lib.attrValues cfg.extensionFiles;
+  # Always install extensions under <configDir>/extensions/ so Pi's jiti loader
+  # resolves @mariozechner/* / typebox against the agent runtime. Putting bare
+  # store paths in programs.pi.rawExtensions (settings.json) loads them outside
+  # that context and fails with "Cannot find package ...".
+  extensionHomeFiles =
+    lib.listToAttrs (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
+    // lib.mapAttrs' (
+      name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
+    ) cfg.extensionFiles;
 
   sharedHomeFiles =
     hm:
-    lib.listToAttrs (
+    extensionHomeFiles
+    // lib.listToAttrs (
       (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
       ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
     )
@@ -85,12 +92,6 @@ let
       ".config/pi-agent-extensions/permission-gate/rules.ts".source =
         hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
     };
-
-  legacyExtensionFiles =
-    lib.listToAttrs (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-    // lib.mapAttrs' (
-      name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
-    ) cfg.extensionFiles;
 in
 {
   options.modules.pi = {
@@ -102,12 +103,14 @@ in
       Drive Pi through the nixpi Home Manager module (programs.pi).
 
       When enabled, nixpi owns the wrapped `pi` package and generated
-      settings.json (including extension store paths). This module still owns
-      models.json via mergetools (nixpi's provider→models.json path drops
-      freeform fields like `compat`), legacy skills/prompts/themes links,
-      permission-gate rules, and agent-pm coexistence. Sets PI_CODING_AGENT_DIR
-      to the HM-managed config dir so the nixpi launcher does not redirect to
-      XDG. Only enable on hosts that import nixpi.homeModules.default.
+      settings.json. Extensions stay as home-manager links under
+      <configDir>/extensions/ (not programs.pi.rawExtensions store paths —
+      those break package resolution). This module still owns models.json via
+      mergetools (nixpi's provider→models.json path drops freeform fields like
+      `compat`), legacy skills/prompts/themes links, permission-gate rules, and
+      agent-pm coexistence. Sets PI_CODING_AGENT_DIR to the HM-managed config
+      dir so the nixpi launcher does not redirect to XDG. Only enable on hosts
+      that import nixpi.homeModules.default.
     '';
 
     package = lib.mkOption {
@@ -157,9 +160,8 @@ in
       default = [ ];
       description = ''
         Pi extension packages built with mkPiExtension or mkLocalPiExtension.
-        Without useNixpi, each package's pname is used as the filename under
-        <configDir>/extensions/. With useNixpi, packages are passed to
-        programs.pi.rawExtensions as store paths in settings.json.
+        Each package's pname is used as the filename under
+        <configDir>/extensions/.
       '';
     };
 
@@ -173,9 +175,9 @@ in
         }
       '';
       description = ''
-        Local .ts files to install as extensions. Without useNixpi, linked
-        under <configDir>/extensions/. With useNixpi, passed to
-        programs.pi.rawExtensions. Keys should include the .ts suffix.
+        Local .ts files to link directly into <configDir>/extensions/.
+        Keys are the filenames (must include .ts suffix); values are paths to
+        the source files. No packaging step required.
         Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
       '';
     };
@@ -307,12 +309,12 @@ in
 
         (lib.mkIf cfg.useNixpi {
           # nixpi owns the wrapped package + settings.json; pin the agent dir so
-          # the launcher uses HM-managed files (settings + mergetools models +
-          # agent-pm skills) instead of XDG_DATA_HOME/nixpi/agent.
+          # the launcher uses HM-managed files (extension links + mergetools
+          # models + agent-pm skills) instead of XDG_DATA_HOME/nixpi/agent.
+          # Leave rawExtensions empty: Pi discovers ~/.pi/agent/extensions/.
           programs.pi = {
             enable = true;
             package = cfg.package;
-            rawExtensions = nixpiRawExtensions;
             environment.variables = cfg.environment // {
               PI_CODING_AGENT_DIR = agentConfigPath;
             };
@@ -321,8 +323,6 @@ in
 
         (lib.mkIf (!cfg.useNixpi) {
           home.packages = [ cfg.package ];
-
-          home.file = legacyExtensionFiles;
 
           home.sessionVariables =
             cfg.environment
