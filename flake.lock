@@ -1128,11 +1128,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1790694751,
-        "narHash": "sha256-lN9Nkppz7XPnPutRQRfqu3MTuTk2TLOhtvA/xWTo1SA=",
+        "lastModified": 1791229643,
+        "narHash": "sha256-SdPMdACTcVd/N1vjA8kxVBPZ/36hIHxa4zFoGBqfQsc=",
         "owner": "yuanwang-wf",
         "repo": "nixpi",
-        "rev": "35a62dd984e68e46eec4a252e4853d26b56284a8",
+        "rev": "820d24274acb9118dd30c95f344341d4e6815af9",
         "type": "github"
       },
       "original": {

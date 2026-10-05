@@ -27,47 +27,6 @@ let
         enable = true;
       };
     };
-  # Stock nixpi models.json only keeps baseUrl/api/apiKey/models. Rebuild it
-  # from our provider attrs so freeform fields (compat, …) survive.
-  providerModelsJson =
-    let
-      dropKeys = [
-        "enable"
-        "package"
-        "packages"
-        "runtimePackages"
-        "environment"
-        "isPiProvider"
-        "passthru"
-        "version"
-      ];
-      toModelsProvider =
-        prov:
-        let
-          models =
-            if builtins.isAttrs (prov.models or null) then
-              builtins.attrValues prov.models
-            else if builtins.isList (prov.models or null) then
-              prov.models
-            else
-              [ ];
-        in
-        lib.filterAttrs (_: v: v != null) (
-          (builtins.removeAttrs prov dropKeys)
-          // {
-            inherit models;
-          }
-        );
-      static = lib.filterAttrs (
-        _: prov: (prov.enable or true) && ((prov.baseUrl or null) != null || (prov.api or null) != null)
-      ) nixpiProviders;
-    in
-    if static == { } then
-      null
-    else
-      pkgs.writeText "pi-models.json" (
-        builtins.toJSON { providers = builtins.mapAttrs (_: toModelsProvider) static; }
-      );
   agentPmManagedSkillNames = [
     "caveman"
     "d2"
@@ -120,19 +79,9 @@ let
       + lib.concatStringsSep "\n" (map mkMsg duplicates);
     };
 
-  # Legacy (!useNixpi): symlink under <configDir>/extensions/. With useNixpi,
-  # extensions become settings.packages (Pi packages) instead — bare store paths
-  # in settings.extensions skip host peer-dep mapping.
-  extensionHomeFiles =
-    lib.listToAttrs (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-    // lib.mapAttrs' (
-      name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
-    ) cfg.extensionFiles;
-
   sharedHomeFiles =
     hm:
-    lib.optionalAttrs (!cfg.useNixpi) extensionHomeFiles
-    // lib.listToAttrs (
+    lib.listToAttrs (
       (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
       ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
     )
@@ -152,22 +101,17 @@ let
 in
 {
   options.modules.pi = {
-    enable = lib.mkEnableOption "pi";
+    enable = lib.mkEnableOption ''
+      Pi coding agent via nixpi (programs.pi).
 
-    enableWorkMux = lib.mkEnableOption "workmux";
-
-    useNixpi = lib.mkEnableOption ''
-      Drive Pi through nixpi (programs.pi). Prefer this on Darwin hosts.
-
-      modules.pi remains the host-facing API; this option selects the backend:
-      nixpi owns the wrapped `pi` package, settings.json, and extension packages
-      (programs.pi.packages). This module still owns models.json via mergetools
-      (nixpi drops freeform fields like `compat`), legacy skills/prompts/themes
-      links, permission-gate rules, and agent-pm coexistence. Sets
-      PI_CODING_AGENT_DIR to the HM-managed config dir so the nixpi launcher
-      does not redirect to XDG. Requires nixpi.homeModules.default in HM
+      modules.pi is the host-facing API; nixpi owns the wrapped `pi` package,
+      settings.json, models.json, and extension packages. This module still
+      owns legacy skills/prompts/themes links, permission-gate rules, and
+      agent-pm coexistence. Requires nixpi.homeModules.default in HM
       sharedModules.
     '';
+
+    enableWorkMux = lib.mkEnableOption "workmux";
 
     package = lib.mkOption {
       type = lib.types.package;
@@ -179,8 +123,9 @@ in
       default = defaultConfigDir;
       example = ".config/pi/agent";
       description = ''
-        Directory where pi agent files (extensions, skills, themes) are stored,
-        relative to the home directory.
+        Directory where pi agent files (skills, themes) are stored, relative
+        to the home directory. Must stay at the default because nixpi's Home
+        Manager integration hardcodes .pi/agent for settings.json.
       '';
     };
 
@@ -215,10 +160,8 @@ in
       type = lib.types.listOf lib.types.package;
       default = [ ];
       description = ''
-        Pi extension packages built with mkPiExtension or mkLocalPiExtension.
-        Without useNixpi, each package's pname is the filename under
-        <configDir>/extensions/. With useNixpi, each package is converted to a
-        Pi package and added to programs.pi.packages.
+        Pi extension packages. Each is converted to a Pi package and added to
+        programs.pi.packages.
       '';
     };
 
@@ -232,8 +175,7 @@ in
         }
       '';
       description = ''
-        Local .ts files. Without useNixpi, linked under <configDir>/extensions/.
-        With useNixpi, wrapped as Pi packages in programs.pi.packages.
+        Local .ts files wrapped as Pi packages in programs.pi.packages.
         Keys should include the .ts suffix.
         Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
       '';
@@ -283,32 +225,6 @@ in
       description = "Custom themes to install under <configDir>/themes/.";
     };
 
-    models = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = { };
-      example = lib.literalExpression ''
-        {
-          providers = {
-            ollama = {
-              api = "openai-completions";
-              baseUrl = "http://localhost:11434/v1";
-              models = [ { id = "llama3"; } ];
-            };
-          };
-        }
-      '';
-      description = ''
-        Declarative pi model configuration. Merged into <configDir>/models.json
-        at activation time using yq, preserving existing settings and backing up
-        the previous file. Set to { } to skip model management.
-
-        Still used when useNixpi is enabled: nixpi's generated models.json omits
-        freeform provider fields (e.g. compat) needed by custom providers.
-      '';
-    };
-
-    # Host-facing nixpi settings/providers. Forwarded to programs.pi when
-    # useNixpi is enabled. Prefer these over configuring programs.pi in the host.
     settings = lib.mkOption {
       type = lib.types.attrsOf lib.types.anything;
       default = { };
@@ -319,8 +235,7 @@ in
         }
       '';
       description = ''
-        Values merged into programs.pi.settings (and thus settings.json) when
-        useNixpi is enabled. Ignored on the legacy path.
+        Values merged into programs.pi.settings (and thus settings.json).
       '';
     };
 
@@ -333,12 +248,11 @@ in
         }
       '';
       description = ''
-        programs.pi.providers declarations when useNixpi is enabled. Use
+        programs.pi.providers declarations. Use
         inputs.nixpi.lib.nixpi.mkPiProvider (see providers/dgx-spark.nix) for
         static OpenAI-compatible endpoints, or `{ enable = true; }` for
         runtime-registered providers (e.g. cursor-agent). Freeform fields such
-        as `compat` are preserved in models.json by this module. Ignored on the
-        legacy path (use modules.pi.models + mergetools there).
+        as `compat` are preserved in models.json by nixpi.
       '';
     };
   };
@@ -353,18 +267,10 @@ in
         '';
       }
       {
-        assertion = !cfg.useNixpi || cfg.configDir == defaultConfigDir;
+        assertion = cfg.configDir == defaultConfigDir;
         message = ''
-          modules.pi.useNixpi requires configDir = "${defaultConfigDir}" because
-          nixpi's Home Manager integration hardcodes .pi/agent for settings.json.
-        '';
-      }
-      {
-        assertion = !(cfg.useNixpi && cfg.models != { } && providerModelsJson != null);
-        message = ''
-          modules.pi.models (mergetools) conflicts with modules.pi.providers that
-          declare baseUrl/api when useNixpi is enabled. Move the endpoint into
-          modules.pi.providers (mkPiProvider) and drop modules.pi.models.
+          modules.pi.configDir must be "${defaultConfigDir}" because nixpi's
+          Home Manager integration hardcodes .pi/agent for settings.json.
         '';
       }
       (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
@@ -387,54 +293,26 @@ in
 
     home-manager.users.${config.my.username} =
       hm@{ ... }:
-      lib.mkMerge [
-        {
-          programs.mics-skills.skillDirs = [
-            "${cfg.configDir}/skills"
-          ];
+      {
+        programs.mics-skills.skillDirs = [
+          "${cfg.configDir}/skills"
+        ];
 
-          home.packages = lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
+        home.packages = lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
-          home.file = sharedHomeFiles hm;
+        home.file = sharedHomeFiles hm;
 
-          mergetools = lib.mkIf (cfg.models != { }) {
-            "pi-models" = {
-              target = "${agentConfigPath}/models.json";
-              format = "json";
-              force = true;
-              settings = cfg.models;
-            };
+        # nixpi backend. Host knobs stay on modules.pi.*.
+        programs.pi = {
+          enable = true;
+          package = cfg.package;
+          packages = nixpiPackages;
+          settings = cfg.settings;
+          providers = nixpiProviders;
+          environment.variables = cfg.environment // {
+            PI_CODING_AGENT_DIR = agentConfigPath;
           };
-        }
-
-        (lib.mkIf cfg.useNixpi {
-          # Backend: nixpi programs.pi. Host knobs stay on modules.pi.*.
-          programs.pi = {
-            enable = true;
-            package = cfg.package;
-            packages = nixpiPackages;
-            settings = cfg.settings;
-            providers = nixpiProviders;
-            environment.variables = cfg.environment // {
-              PI_CODING_AGENT_DIR = agentConfigPath;
-            };
-          };
-
-          # Replace nixpi's stripped models.json when we have static providers.
-          home.file = lib.optionalAttrs (providerModelsJson != null) {
-            ".pi/agent/models.json" = lib.mkForce { source = providerModelsJson; };
-          };
-        })
-
-        (lib.mkIf (!cfg.useNixpi) {
-          home.packages = [ cfg.package ];
-
-          home.sessionVariables =
-            cfg.environment
-            // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
-              PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
-            };
-        })
-      ];
+        };
+      };
   };
 }

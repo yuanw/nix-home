@@ -88,7 +88,6 @@
     # };
     pi = {
       enable = true;
-      useNixpi = true;
       settings = {
         defaultProvider = "dgx-spark";
         defaultModel = "Qwen3.8-Flash-Next";

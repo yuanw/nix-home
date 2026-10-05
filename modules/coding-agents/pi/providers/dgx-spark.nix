@@ -1,15 +1,9 @@
-/*
-  DGX Spark / TensorFold OpenAI-compatible endpoint as a nixpi provider.
-
-  mkPiProvider does not pass freeform fields through; merge `compat` afterward
-  so models.json can keep thinkingFormat and related knobs (see modules.pi
-  freeform models.json override — stock nixpi strips these).
-*/
+# DGX Spark / TensorFold OpenAI-compatible endpoint as a nixpi provider.
 {
   inputs,
   pkgs,
 }:
-(inputs.nixpi.lib.nixpi.mkPiProvider {
+inputs.nixpi.lib.nixpi.mkPiProvider {
   inherit pkgs;
   name = "dgx-spark";
   api = "openai-completions";
@@ -39,9 +33,6 @@
       };
     }
   ];
-})
-// {
-  enable = true;
   compat = {
     supportsDeveloperRole = false;
     supportsReasoningEffort = false;

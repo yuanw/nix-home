@@ -80,7 +80,6 @@
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
     pi = {
       enable = true;
-      useNixpi = true;
       settings = {
         defaultProvider = "cursor-agent";
         defaultModel = "default";
