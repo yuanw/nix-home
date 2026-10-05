@@ -14,12 +14,7 @@
   duplicate an implementation is to fork it, and nothing notices the drift.
 
   The parameters below are named after the words used in the body, which was
-  sliced out of hosts/default.nix by line number, not retyped.  Note that
-  codingAgentsRoot is deliberately NOT a parameter: it names a directory in
-  this repository, and seen from here it resolves to modules/coding-agents, so
-  a caller can neither forget it nor point it at a stale location.  The
-  Workiva module that receives it, modules/work.nix over in nix-home-private,
-  is given the root rather than a copy of the tree.
+  sliced out of hosts/default.nix by line number, not retyped.
 */
 {
   inputs,
@@ -33,9 +28,6 @@ inputs.nix-darwin.lib.darwinSystem {
   specialArgs = {
     isDarwin = true;
     isNixOS = false;
-    # nix-home-private/modules/work.nix builds its agent skills from this
-    # shared public tree; it is given the root rather than copying it.
-    codingAgentsRoot = ../modules/coding-agents;
     nurNoPkg = import inputs.nur {
       nurpkgs = import inputs.nixpkgs { system = system; };
     };

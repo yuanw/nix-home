@@ -35,17 +35,6 @@ in
       '';
     };
 
-    # Legacy: still used by nix-home-private modules/work.nix.
-    # Prefer modules.pi.rawSkills for new code.
-    skills = lib.mkOption {
-      type = lib.types.listOf lib.types.package;
-      default = [ ];
-      description = ''
-        Legacy pi-only skill packages linked under .pi/agent/skills/<pname>.
-        Prefer modules.pi.rawSkills.
-      '';
-    };
-
     localModel = lib.mkOption {
       type = lib.types.bool;
       default = true;
@@ -127,14 +116,6 @@ in
       hm@{ ... }:
       let
         permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
-        skillFiles = lib.listToAttrs (
-          map (
-            skill:
-            lib.nameValuePair "${agentConfigDir}/skills/${skill.pname}" {
-              source = skill;
-            }
-          ) cfg.skills
-        );
       in
       {
         imports =
@@ -147,9 +128,27 @@ in
               ;
           });
 
-        programs.mics-skills.skillDirs = [
-          "${agentConfigDir}/skills"
-        ];
+        programs.mics-skills = {
+          enable = true;
+          package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
+          skills = [
+            "browser-cli"
+            "kagi-search"
+            "pexpect-cli"
+            "screenshot-cli"
+          ];
+          skillDirs = [
+            "${agentConfigDir}/skills"
+          ];
+        };
+
+        programs.agent-pm = {
+          enable = true;
+          tools.pi.enable = true;
+          prompts = import ../prompts {
+            inherit pkgs lib;
+          };
+        };
 
         programs.pi = {
           enable = true;
@@ -182,12 +181,10 @@ in
                 };
         };
 
-        home.file =
-          skillFiles
-          // lib.optionalAttrs permissionGateEnabled {
-            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
-          };
+        home.file = lib.optionalAttrs permissionGateEnabled {
+          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+            hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+        };
       };
   };
 }

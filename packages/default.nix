@@ -1,6 +1,5 @@
 _final: prev:
 let
-  codingAgentsCommonSkills = prev.callPackage ../modules/coding-agents/common/skills { };
   # media -> text; the module that puts these two on PATH is
   # modules/speech2text/transcribe.nix.  whisper.cpp is not passed in by name:
   # `transcribe' looks transcribers up on PATH (nixpkgs calls the package
@@ -180,8 +179,6 @@ in
   pi-acp = prev.callPackage ./pi-acp.nix { };
   pi-extensions = prev.callPackage ./pi-extensions { };
   claude-plugins = prev.callPackage ./claude-plugins { };
-  inherit codingAgentsCommonSkills;
-  codingAgentsSkillPackages = codingAgentsCommonSkills.packages;
   parakeet-mlx = prev.python3Packages.callPackage ./parakeet-mlx.nix { };
   parakeet-transcribe = prev.callPackage ./parakeet-transcribe.nix { };
   transcribe = transcribePkgs.transcribe;
