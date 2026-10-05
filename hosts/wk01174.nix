@@ -44,6 +44,15 @@
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
     ];
+    # cursor-agent is registered by the pi-cursor-agent package at runtime;
+    # declare it so nixpi accepts it as settings.defaultProvider.
+    programs.pi = {
+      providers.cursor-agent.enable = true;
+      settings = {
+        defaultProvider = "cursor-agent";
+        defaultModel = "default";
+      };
+    };
   };
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
