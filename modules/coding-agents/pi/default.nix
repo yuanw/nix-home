@@ -14,9 +14,7 @@ let
     inherit lib pkgs;
     mkPiExtension = inputs.nixpi.lib.nixpi.mkPiExtension;
   };
-  nixpiPackages =
-    (map toNixpiPackage.fromExtensionPkg cfg.extensionsPkgs)
-    ++ lib.mapAttrsToList toNixpiPackage.fromExtensionFile cfg.extensionFiles;
+  nixpiPackages = map toNixpiPackage.fromExtensionPkg cfg.extensionsPkgs;
   # Runtime-registered providers (cursor-agent, …) must appear in
   # programs.pi.providers for settings.defaultProvider assertions.
   defaultProviderName = cfg.settings.defaultProvider or null;
@@ -159,25 +157,18 @@ in
     extensionsPkgs = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [ ];
-      description = ''
-        Pi extension packages. Each is converted to a Pi package and added to
-        programs.pi.packages.
-      '';
-    };
-
-    extensionFiles = lib.mkOption {
-      type = lib.types.attrsOf lib.types.path;
-      default = { };
       example = lib.literalExpression ''
-        {
-          "notify.ts" = ./extensions/notify.ts;
-          "my-tool.ts" = ./extensions/my-tool.ts;
-        }
+        with pkgs.pi-extensions; [
+          pi-notify
+          pi-custom-footer
+          pi-cursor-agent
+        ]
       '';
       description = ''
-        Local .ts files wrapped as Pi packages in programs.pi.packages.
-        Keys should include the .ts suffix.
-        Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
+        Pi extension packages from pkgs.pi-extensions (or elsewhere). Each is
+        converted to a Pi package and added to programs.pi.packages. Local
+        single-file extensions live under modules/coding-agents/pi/extensions
+        and are packaged as pi-notify, pi-custom-footer, etc.
       '';
     };
 

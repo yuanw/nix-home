@@ -58,6 +58,9 @@
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
+    home.packages = [
+      (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
+    ];
   };
 
   # Speech to text: `transcribe <URL|file>` (packages/transcribe.nix).  A video
@@ -96,17 +99,14 @@
         inherit inputs pkgs;
       };
       extensionsPkgs = with pkgs.pi-extensions; [
-        pi-review
+        pi-notify
+        pi-custom-footer
+        pi-web-fetch
         pi-cursor-agent
         pi-slow-mode
         pi-permission-gate
         pi-interactive-shell
       ];
-      extensionFiles = {
-        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
-        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
-        "web-fetch.ts" = ../modules/coding-agents/pi/extensions/web-fetch.ts;
-      };
     };
     secrets.agenix = {
       enable = true;

@@ -172,6 +172,7 @@ rec {
   humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
   i-have-adhd = (pkgs.callPackage ./claude-plugins { }).i-have-adhd;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
+  pi-interactive-shell = pkgs.callPackage ./pi-extensions/pi-interactive-shell.nix { };
   pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
   ds4 = pkgs.callPackage ./ds4 { };
 }

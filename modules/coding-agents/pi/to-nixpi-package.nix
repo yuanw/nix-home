@@ -1,6 +1,6 @@
 /*
-  Convert nix-home pi extension derivations / local files into Pi packages that
-  nixpi can put in settings.packages.
+  Convert nix-home pi extension derivations into Pi packages that nixpi can put
+  in settings.packages.
 
   Bare store paths in settings.extensions skip Pi's host peer-dep mapping
   (@mariozechner/*, @sinclair/typebox). Local Pi packages get that mapping.
@@ -98,12 +98,4 @@ in
         version = pkg.version or "0.1.0";
         entrypoint = pkg;
       };
-
-  # name: filename (notify.ts); path: source file
-  fromExtensionFile =
-    name: path:
-    wrapEntrypoint {
-      pname = name;
-      entrypoint = path;
-    };
 }

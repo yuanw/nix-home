@@ -40,13 +40,18 @@ let
       '';
 
   callExtension = path: pkgs.callPackage path { inherit mkPiExtension; };
+  localExt = ../../modules/coding-agents/pi/extensions;
 in
 {
   inherit mkPiExtension mkLocalPiExtension;
-  pi-review = callExtension ./pi-review.nix;
   pi-interactive-shell = callExtension ./pi-interactive-shell.nix;
   pi-cursor-agent = callExtension ./pi-cursor-agent;
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
   pi-permission-gate = callExtension ./pi-permission-gate.nix;
   pi-ponytail = callExtension ./pi-ponytail.nix;
+  # Local single-file extensions (modules/coding-agents/pi/extensions)
+  pi-notify = mkLocalPiExtension "notify.ts" (localExt + "/notify.ts");
+  pi-custom-footer = mkLocalPiExtension "custom-footer.ts" (localExt + "/custom-footer.ts");
+  pi-web-fetch = mkLocalPiExtension "web-fetch.ts" (localExt + "/web-fetch.ts");
+  pi-direnv = mkLocalPiExtension "direnv.ts" (localExt + "/direnv.ts");
 }

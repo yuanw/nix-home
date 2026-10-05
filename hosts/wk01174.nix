@@ -85,17 +85,14 @@
         defaultModel = "default";
       };
       extensionsPkgs = with pkgs.pi-extensions; [
-        pi-review
+        pi-notify
+        pi-custom-footer
         pi-cursor-agent
         pi-slow-mode
         pi-permission-gate
         pi-interactive-shell
         pi-ponytail
       ];
-      extensionFiles = {
-        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
-        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
-      };
       providers.dgx-spark = import ../modules/coding-agents/pi/providers/dgx-spark.nix {
         inherit inputs pkgs;
       };
