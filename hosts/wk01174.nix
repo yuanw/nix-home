@@ -41,6 +41,10 @@
         # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
+    programs.pi.extensions = {
+      notify.enable = true;
+      custom-footer.enable = true;
+    };
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
     ];
@@ -85,8 +89,6 @@
         defaultModel = "default";
       };
       extensionsPkgs = with pkgs.pi-extensions; [
-        pi-notify
-        pi-custom-footer
         pi-cursor-agent
         pi-slow-mode
         pi-permission-gate

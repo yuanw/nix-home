@@ -58,6 +58,11 @@
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
+    programs.pi.extensions = {
+      notify.enable = true;
+      custom-footer.enable = true;
+      web-fetch.enable = true;
+    };
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
     ];
@@ -99,9 +104,6 @@
         inherit inputs pkgs;
       };
       extensionsPkgs = with pkgs.pi-extensions; [
-        pi-notify
-        pi-custom-footer
-        pi-web-fetch
         pi-cursor-agent
         pi-slow-mode
         pi-permission-gate

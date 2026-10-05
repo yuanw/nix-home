@@ -159,16 +159,15 @@ in
       default = [ ];
       example = lib.literalExpression ''
         with pkgs.pi-extensions; [
-          pi-notify
-          pi-custom-footer
           pi-cursor-agent
+          pi-interactive-shell
         ]
       '';
       description = ''
         Pi extension packages from pkgs.pi-extensions (or elsewhere). Each is
-        converted to a Pi package and added to programs.pi.packages. Local
-        single-file extensions live under modules/coding-agents/pi/extensions
-        and are packaged as pi-notify, pi-custom-footer, etc.
+        converted to a Pi package and added to programs.pi.packages. Prefer
+        programs.pi.extensions.<name>.enable for local typed extensions
+        (notify, custom-footer, web-fetch, direnv).
       '';
     };
 
@@ -285,6 +284,8 @@ in
     home-manager.users.${config.my.username} =
       hm@{ ... }:
       {
+        imports = import ./local-extensions.nix { inherit inputs pkgs; };
+
         programs.mics-skills.skillDirs = [
           "${cfg.configDir}/skills"
         ];
@@ -293,7 +294,9 @@ in
 
         home.file = sharedHomeFiles hm;
 
-        # nixpi backend. Host knobs stay on modules.pi.*.
+        # nixpi backend. Host knobs stay on modules.pi.*; typed local
+        # extensions use programs.pi.extensions.<name>.enable (see
+        # local-extensions.nix).
         programs.pi = {
           enable = true;
           package = cfg.package;
