@@ -98,46 +98,8 @@
         "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
         "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
       };
-      models = {
-        providers = {
-          dgx-spark = {
-            api = "openai-completions";
-            apiKey = "not-needed";
-            baseUrl = "http://dgx-spark.local:8888/v1";
-            compat = {
-              supportsDeveloperRole = false;
-              supportsReasoningEffort = false;
-              supportsStore = false;
-              thinkingFormat = "qwen-chat-template";
-              thinkingTokenBudgetField = "thinking_token_budget";
-            };
-            models = [
-              {
-                _launch = true;
-                contextWindow = 262144;
-                # Must match the served name exactly (TensorFold SERVED_NAME).
-                id = "Qwen3.8-Flash-Next";
-                input = [
-                  "text"
-                  "image"
-                ];
-                maxTokens = 32768;
-                name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
-                reasoning = true;
-                thinkingLevelMap = {
-                  off = "off";
-                  minimal = "minimal";
-                  low = "low";
-                  medium = "medium";
-                  high = "high";
-                  xhigh = "xhigh";
-                  max = "max";
-                };
-              }
-            ];
-          };
-        };
-
+      providers.dgx-spark = import ../modules/coding-agents/pi/providers/dgx-spark.nix {
+        inherit inputs pkgs;
       };
       skills = [
         pkgs.pi-extensions.pi-interactive-shell

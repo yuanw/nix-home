@@ -27,6 +27,47 @@ let
         enable = true;
       };
     };
+  # Stock nixpi models.json only keeps baseUrl/api/apiKey/models. Rebuild it
+  # from our provider attrs so freeform fields (compat, …) survive.
+  providerModelsJson =
+    let
+      dropKeys = [
+        "enable"
+        "package"
+        "packages"
+        "runtimePackages"
+        "environment"
+        "isPiProvider"
+        "passthru"
+        "version"
+      ];
+      toModelsProvider =
+        prov:
+        let
+          models =
+            if builtins.isAttrs (prov.models or null) then
+              builtins.attrValues prov.models
+            else if builtins.isList (prov.models or null) then
+              prov.models
+            else
+              [ ];
+        in
+        lib.filterAttrs (_: v: v != null) (
+          (builtins.removeAttrs prov dropKeys)
+          // {
+            inherit models;
+          }
+        );
+      static = lib.filterAttrs (
+        _: prov: (prov.enable or true) && ((prov.baseUrl or null) != null || (prov.api or null) != null)
+      ) nixpiProviders;
+    in
+    if static == { } then
+      null
+    else
+      pkgs.writeText "pi-models.json" (
+        builtins.toJSON { providers = builtins.mapAttrs (_: toModelsProvider) static; }
+      );
   agentPmManagedSkillNames = [
     "caveman"
     "d2"
@@ -292,11 +333,12 @@ in
         }
       '';
       description = ''
-        Extra programs.pi.providers declarations when useNixpi is enabled.
-        Use this for runtime-registered providers (e.g. cursor-agent) so
-        settings.defaultProvider passes nixpi's assertion. Do not set baseUrl/api
-        here for providers that only exist via extensions — that would generate
-        a competing models.json. Ignored on the legacy path.
+        programs.pi.providers declarations when useNixpi is enabled. Use
+        inputs.nixpi.lib.nixpi.mkPiProvider (see providers/dgx-spark.nix) for
+        static OpenAI-compatible endpoints, or `{ enable = true; }` for
+        runtime-registered providers (e.g. cursor-agent). Freeform fields such
+        as `compat` are preserved in models.json by this module. Ignored on the
+        legacy path (use modules.pi.models + mergetools there).
       '';
     };
   };
@@ -315,6 +357,14 @@ in
         message = ''
           modules.pi.useNixpi requires configDir = "${defaultConfigDir}" because
           nixpi's Home Manager integration hardcodes .pi/agent for settings.json.
+        '';
+      }
+      {
+        assertion = !(cfg.useNixpi && cfg.models != { } && providerModelsJson != null);
+        message = ''
+          modules.pi.models (mergetools) conflicts with modules.pi.providers that
+          declare baseUrl/api when useNixpi is enabled. Move the endpoint into
+          modules.pi.providers (mkPiProvider) and drop modules.pi.models.
         '';
       }
       (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
@@ -368,6 +418,11 @@ in
             environment.variables = cfg.environment // {
               PI_CODING_AGENT_DIR = agentConfigPath;
             };
+          };
+
+          # Replace nixpi's stripped models.json when we have static providers.
+          home.file = lib.optionalAttrs (providerModelsJson != null) {
+            ".pi/agent/models.json" = lib.mkForce { source = providerModelsJson; };
           };
         })
 
