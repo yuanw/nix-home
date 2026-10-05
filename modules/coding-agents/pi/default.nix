@@ -116,6 +116,12 @@ in
       hm@{ ... }:
       let
         permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
+        micsSkillNames = [
+          "browser-cli"
+          "kagi-search"
+          "pexpect-cli"
+          "screenshot-cli"
+        ];
       in
       {
         imports =
@@ -131,12 +137,7 @@ in
         programs.mics-skills = {
           enable = true;
           package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-          skills = [
-            "browser-cli"
-            "kagi-search"
-            "pexpect-cli"
-            "screenshot-cli"
-          ];
+          skills = micsSkillNames;
           skillDirs = [
             "${agentConfigDir}/skills"
           ];
@@ -149,6 +150,27 @@ in
             inherit pkgs lib;
           };
         };
+
+        # Old modules.pi.skills linked whole store packages as
+        # ~/.pi/agent/skills/<name> -> /nix/store/... . agent-pm manages files
+        # under a real directory; HM cannot rename through a store symlink.
+        # Keep mics-skills whole-dir links; remove other store dir symlinks.
+        home.activation.removeLegacyAgentPmSkillDirLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+          skillsDir="$HOME/${agentConfigDir}/skills"
+          if [ -d "$skillsDir" ]; then
+            for path in "$skillsDir"/*; do
+              [ -L "$path" ] || continue
+              name="''${path##*/}"
+              case "$name" in
+                ${lib.concatMapStringsSep "|" lib.escapeShellArg micsSkillNames}) continue ;;
+              esac
+              target="$(readlink "$path" || true)"
+              case "$target" in
+                /nix/store/*) run rm -f "$path" ;;
+              esac
+            done
+          fi
+        '';
 
         programs.pi = {
           enable = true;
