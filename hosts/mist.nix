@@ -58,10 +58,20 @@
   ];
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
-    programs.pi.extensions = {
-      notify.enable = true;
-      custom-footer.enable = true;
-      web-fetch.enable = true;
+    programs.pi = {
+      settings = {
+        defaultProvider = "dgx-spark";
+        defaultModel = "Qwen3.8-Flash-Next";
+      };
+      extensions = {
+        notify.enable = true;
+        custom-footer.enable = true;
+        web-fetch.enable = true;
+        cursor-agent.enable = true;
+        slow-mode.enable = true;
+        permission-gate.enable = true;
+        interactive-shell.enable = true;
+      };
     };
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
@@ -94,22 +104,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    pi = {
-      enable = true;
-      settings = {
-        defaultProvider = "dgx-spark";
-        defaultModel = "Qwen3.8-Flash-Next";
-      };
-      providers.dgx-spark = import ../modules/coding-agents/pi/providers/dgx-spark.nix {
-        inherit inputs pkgs;
-      };
-      extensionsPkgs = with pkgs.pi-extensions; [
-        pi-cursor-agent
-        pi-slow-mode
-        pi-permission-gate
-        pi-interactive-shell
-      ];
-    };
+    pi.enable = true;
     secrets.agenix = {
       enable = true;
     };

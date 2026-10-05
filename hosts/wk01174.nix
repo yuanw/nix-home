@@ -41,9 +41,25 @@
         # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
-    programs.pi.extensions = {
-      notify.enable = true;
-      custom-footer.enable = true;
+    programs.pi = {
+      settings = {
+        defaultProvider = "cursor-agent";
+        defaultModel = "default";
+      };
+      # Runtime-registered provider used as default.
+      providers.cursor-agent.enable = true;
+      extensions = {
+        notify.enable = true;
+        custom-footer.enable = true;
+        cursor-agent.enable = true;
+        slow-mode.enable = true;
+        permission-gate.enable = true;
+        interactive-shell.enable = true;
+        ponytail.enable = true;
+      };
+      rawSkills = [
+        pkgs.pi-extensions.pi-interactive-shell
+      ];
     };
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
@@ -82,26 +98,7 @@
       parakeetServerPort = 5092; # ← default, optional
     };
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
-    pi = {
-      enable = true;
-      settings = {
-        defaultProvider = "cursor-agent";
-        defaultModel = "default";
-      };
-      extensionsPkgs = with pkgs.pi-extensions; [
-        pi-cursor-agent
-        pi-slow-mode
-        pi-permission-gate
-        pi-interactive-shell
-        pi-ponytail
-      ];
-      providers.dgx-spark = import ../modules/coding-agents/pi/providers/dgx-spark.nix {
-        inherit inputs pkgs;
-      };
-      skills = [
-        pkgs.pi-extensions.pi-interactive-shell
-      ];
-    };
+    pi.enable = true;
     browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;
