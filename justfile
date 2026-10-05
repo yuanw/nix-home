@@ -106,7 +106,7 @@ switch:
     @if [ "$(uname)" = "Darwin" ]; then \
         sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback; \
     else \
-        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#' --quiet --sudo --fallback; \
+        env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#{{lowercase(host)}}' --quiet --sudo --fallback; \
         if systemctl is-enabled --quiet emacs.service 2>/dev/null; then sudo systemctl try-restart emacs.service; fi; \
     fi
 
