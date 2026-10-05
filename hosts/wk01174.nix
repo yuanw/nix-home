@@ -80,6 +80,9 @@
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
     pi = {
       enable = true;
+      # Phase 1 nixpi coexistence: nixpi owns package + settings.json;
+      # mergetools still owns models.json (compat fields); agent-pm owns skills.
+      useNixpi = true;
       extensionsPkgs = with pkgs.pi-extensions; [
         pi-loop
         pi-review

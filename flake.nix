@@ -17,6 +17,10 @@
     };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Declarative Pi host module (programs.pi). Fork of mateusdcc/nixpi; pin
+    # here so we can diverge. Consumed as a HM module — uses the host pkgs, so
+    # no nixpkgs.follows (nixpi pins an older stable channel for its own CI).
+    nixpi.url = "github:yuanwang-wf/nixpi";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";

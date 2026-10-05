@@ -59,6 +59,7 @@ inputs.nix-darwin.lib.darwinSystem {
           inputs.mics-skills.homeModules.default
           inputs.flake-prompt.homeManagerModules.default
           inputs.mcp-servers-nix.homeManagerModules.default
+          inputs.nixpi.homeModules.default
           (import ../modules/helpers/mergetools.nix)
         ];
 

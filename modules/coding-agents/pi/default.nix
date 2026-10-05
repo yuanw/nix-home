@@ -9,6 +9,7 @@ let
   cfg = config.modules.pi;
   hasPermissionGate = lib.any (p: p.pname == "permission-gate") cfg.extensionsPkgs;
   defaultConfigDir = ".pi/agent";
+  agentConfigPath = "${config.my.homeDirectory}/${cfg.configDir}";
   agentPmManagedSkillNames = [
     "caveman"
     "d2"
@@ -60,12 +61,54 @@ let
       ''
       + lib.concatStringsSep "\n" (map mkMsg duplicates);
     };
+
+  # Store paths listed in programs.pi settings.json (nixpi). Extensions are not
+  # also symlinked under configDir when useNixpi is on.
+  nixpiRawExtensions = cfg.extensionsPkgs ++ lib.attrValues cfg.extensionFiles;
+
+  sharedHomeFiles =
+    hm:
+    lib.listToAttrs (
+      (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
+      ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
+    )
+    // lib.optionalAttrs (cfg.nodeDeps != null) {
+      "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
+    }
+    // lib.optionalAttrs (cfg.skillsDir != null) {
+      "${cfg.configDir}/skills".source = cfg.skillsDir;
+    }
+    // lib.mapAttrs' (
+      name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
+    ) cfg.prompts
+    // lib.optionalAttrs hasPermissionGate {
+      ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+        hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+    };
+
+  legacyExtensionFiles =
+    lib.listToAttrs (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
+    // lib.mapAttrs' (
+      name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
+    ) cfg.extensionFiles;
 in
 {
   options.modules.pi = {
     enable = lib.mkEnableOption "pi";
 
     enableWorkMux = lib.mkEnableOption "workmux";
+
+    useNixpi = lib.mkEnableOption ''
+      Drive Pi through the nixpi Home Manager module (programs.pi).
+
+      When enabled, nixpi owns the wrapped `pi` package and generated
+      settings.json (including extension store paths). This module still owns
+      models.json via mergetools (nixpi's provider→models.json path drops
+      freeform fields like `compat`), legacy skills/prompts/themes links,
+      permission-gate rules, and agent-pm coexistence. Sets PI_CODING_AGENT_DIR
+      to the HM-managed config dir so the nixpi launcher does not redirect to
+      XDG. Only enable on hosts that import nixpi.homeModules.default.
+    '';
 
     package = lib.mkOption {
       type = lib.types.package;
@@ -114,7 +157,9 @@ in
       default = [ ];
       description = ''
         Pi extension packages built with mkPiExtension or mkLocalPiExtension.
-        Each package's pname is used as the filename under <configDir>/extensions/.
+        Without useNixpi, each package's pname is used as the filename under
+        <configDir>/extensions/. With useNixpi, packages are passed to
+        programs.pi.rawExtensions as store paths in settings.json.
       '';
     };
 
@@ -128,9 +173,9 @@ in
         }
       '';
       description = ''
-        Local .ts files to link directly into <configDir>/extensions/.
-        Keys are the filenames (must include .ts suffix); values are paths to
-        the source files. No packaging step required.
+        Local .ts files to install as extensions. Without useNixpi, linked
+        under <configDir>/extensions/. With useNixpi, passed to
+        programs.pi.rawExtensions. Keys should include the .ts suffix.
         Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
       '';
     };
@@ -197,6 +242,9 @@ in
         Declarative pi model configuration. Merged into <configDir>/models.json
         at activation time using yq, preserving existing settings and backing up
         the previous file. Set to { } to skip model management.
+
+        Still used when useNixpi is enabled: nixpi's generated models.json omits
+        freeform provider fields (e.g. compat) needed by custom providers.
       '';
     };
   };
@@ -208,6 +256,13 @@ in
         message = ''
           modules.pi.environment.PI_CODING_AGENT_DIR is managed by modules.pi.configDir.
           Set modules.pi.configDir instead of PI_CODING_AGENT_DIR.
+        '';
+      }
+      {
+        assertion = !cfg.useNixpi || cfg.configDir == defaultConfigDir;
+        message = ''
+          modules.pi.useNixpi requires configDir = "${defaultConfigDir}" because
+          nixpi's Home Manager integration hardcodes .pi/agent for settings.json.
         '';
       }
       (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
@@ -230,52 +285,51 @@ in
 
     home-manager.users.${config.my.username} =
       hm@{ ... }:
-      {
-        programs.mics-skills.skillDirs = [
-          ".claude/skills"
-          ".opencode/skills"
-          "${cfg.configDir}/skills"
-        ];
+      lib.mkMerge [
+        {
+          programs.mics-skills.skillDirs = [
+            "${cfg.configDir}/skills"
+          ];
 
-        home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
+          home.packages = lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
 
-        home.file =
-          lib.listToAttrs (
-            (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-            ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
-            ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
-          )
-          // lib.mapAttrs' (
-            name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
-          ) cfg.extensionFiles
-          // lib.optionalAttrs (cfg.nodeDeps != null) {
-            "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
-          }
-          // lib.optionalAttrs (cfg.skillsDir != null) {
-            "${cfg.configDir}/skills".source = cfg.skillsDir;
-          }
-          // lib.mapAttrs' (
-            name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-          ) cfg.prompts
-          // lib.optionalAttrs hasPermissionGate {
-            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+          home.file = sharedHomeFiles hm;
+
+          mergetools = lib.mkIf (cfg.models != { }) {
+            "pi-models" = {
+              target = "${agentConfigPath}/models.json";
+              format = "json";
+              force = true;
+              settings = cfg.models;
+            };
           };
+        }
 
-        home.sessionVariables =
-          cfg.environment
-          // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
-            PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
+        (lib.mkIf cfg.useNixpi {
+          # nixpi owns the wrapped package + settings.json; pin the agent dir so
+          # the launcher uses HM-managed files (settings + mergetools models +
+          # agent-pm skills) instead of XDG_DATA_HOME/nixpi/agent.
+          programs.pi = {
+            enable = true;
+            package = cfg.package;
+            rawExtensions = nixpiRawExtensions;
+            environment.variables = cfg.environment // {
+              PI_CODING_AGENT_DIR = agentConfigPath;
+            };
           };
+        })
 
-        mergetools = lib.mkIf (cfg.models != { }) {
-          "pi-models" = {
-            target = "${config.my.homeDirectory}/${cfg.configDir}/models.json";
-            format = "json";
-            force = true;
-            settings = cfg.models;
-          };
-        };
-      };
+        (lib.mkIf (!cfg.useNixpi) {
+          home.packages = [ cfg.package ];
+
+          home.file = legacyExtensionFiles;
+
+          home.sessionVariables =
+            cfg.environment
+            // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
+              PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
+            };
+        })
+      ];
   };
 }
