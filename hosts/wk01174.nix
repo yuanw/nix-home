@@ -41,26 +41,6 @@
         # url."git@github.com:".insteadOf = "https://github.com";
       };
     };
-    programs.pi = {
-      settings = {
-        defaultProvider = "cursor-agent";
-        defaultModel = "default";
-      };
-      # Runtime-registered provider used as default.
-      providers.cursor-agent.enable = true;
-      extensions = {
-        notify.enable = true;
-        custom-footer.enable = true;
-        cursor-agent.enable = true;
-        slow-mode.enable = true;
-        permission-gate.enable = true;
-        interactive-shell.enable = true;
-        ponytail.enable = true;
-      };
-      rawSkills = [
-        pkgs.pi-extensions.pi-interactive-shell
-      ];
-    };
     home.packages = [
       (pkgs.writeShellScriptBin "pi-review" (builtins.readFile ../scripts/pi-review))
     ];
@@ -98,7 +78,15 @@
       parakeetServerPort = 5092; # ← default, optional
     };
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
-    pi.enable = true;
+    pi = {
+      enable = true;
+      defaultProvider = "cursor-agent";
+      defaultModel = "default";
+      extensions.cursor-agent.enable = true;
+      rawSkills = [
+        pkgs.pi-extensions.pi-interactive-shell
+      ];
+    };
     browsers.defaultBrowser = "librewolf";
     secrets.agenix = {
       enable = true;

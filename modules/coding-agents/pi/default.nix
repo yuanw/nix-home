@@ -19,14 +19,9 @@ in
       Pi coding agent via nixpi (programs.pi).
 
       This module enables nixpi Home Manager integration and small nix-home
-      glue (extension modules, permission-gate rules, mics-skills). Configure
-      Pi itself with programs.pi under home-manager.users, e.g.:
-
-        home-manager.users.''${username}.programs.pi = {
-          settings.defaultProvider = "cursor-agent";
-          extensions.notify.enable = true;
-          extensions.cursor-agent.enable = true;
-        };
+      glue (extension modules, permission-gate rules, mics-skills). Host knobs
+      (defaultProvider, extensions, rawSkills, …) are declared here and passed
+      through to programs.pi.
     '';
 
     # Escape hatch for other nix-darwin modules (e.g. browser-cli) that must
@@ -41,13 +36,13 @@ in
     };
 
     # Legacy: still used by nix-home-private modules/work.nix.
-    # Prefer programs.pi.rawSkills for new code.
+    # Prefer modules.pi.rawSkills for new code.
     skills = lib.mkOption {
       type = lib.types.listOf lib.types.package;
       default = [ ];
       description = ''
         Legacy pi-only skill packages linked under .pi/agent/skills/<pname>.
-        Prefer programs.pi.rawSkills.
+        Prefer modules.pi.rawSkills.
       '';
     };
 
@@ -59,13 +54,79 @@ in
         programs.pi.providers.dgx-spark (see providers/dgx-spark.nix).
       '';
     };
+
+    defaultProvider = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "cursor-agent";
+      description = "Passed to programs.pi.settings.defaultProvider.";
+    };
+
+    defaultModel = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "default";
+      description = "Passed to programs.pi.settings.defaultModel.";
+    };
+
+    extensions = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.submodule {
+          freeformType = lib.types.attrsOf lib.types.anything;
+          options.enable = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to enable this Pi extension.";
+          };
+        }
+      );
+      default = { };
+      example = lib.literalExpression ''
+        {
+          # defaults already enable notify, custom-footer, slow-mode,
+          # permission-gate, interactive-shell, and ponytail
+          cursor-agent.enable = true;
+          web-fetch.enable = true;
+        }
+      '';
+      description = ''
+        Passed to programs.pi.extensions. By default enables notify,
+        custom-footer, slow-mode, permission-gate, interactive-shell, and
+        ponytail. Set `<name>.enable = false` to opt out, or enable extras
+        such as cursor-agent / web-fetch / direnv.
+      '';
+    };
+
+    rawSkills = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.oneOf [
+          lib.types.package
+          lib.types.path
+          lib.types.str
+        ]
+      );
+      default = [ ];
+      example = lib.literalExpression ''
+        [ pkgs.pi-extensions.pi-interactive-shell ]
+      '';
+      description = "Passed to programs.pi.rawSkills.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
+    modules.pi.extensions = {
+      notify.enable = lib.mkDefault true;
+      custom-footer.enable = lib.mkDefault true;
+      slow-mode.enable = lib.mkDefault true;
+      permission-gate.enable = lib.mkDefault true;
+      interactive-shell.enable = lib.mkDefault true;
+      ponytail.enable = lib.mkDefault true;
+    };
+
     home-manager.users.${user} =
-      hm@{ config, ... }:
+      hm@{ ... }:
       let
-        permissionGateEnabled = config.programs.pi.extensions.permission-gate.enable or false;
+        permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
         skillFiles = lib.listToAttrs (
           map (
             skill:
@@ -90,7 +151,6 @@ in
           "${agentConfigDir}/skills"
         ];
 
-        # nixpi-native configuration surface. Hosts extend programs.pi.*.
         programs.pi = {
           enable = true;
           package = lib.mkDefault pkgs.llm-agents.pi;
@@ -99,11 +159,27 @@ in
             PI_CODING_AGENT_DIR = agentConfigPath;
           }
           // cfg.environment;
-          providers = lib.optionalAttrs cfg.localModel {
-            dgx-spark = import ./providers/dgx-spark.nix {
-              inherit inputs pkgs;
-            };
+          settings = lib.filterAttrs (_: v: v != null) {
+            defaultProvider = cfg.defaultProvider;
+            defaultModel = cfg.defaultModel;
           };
+          extensions = cfg.extensions;
+          rawSkills = cfg.rawSkills;
+          providers =
+            (lib.optionalAttrs cfg.localModel {
+              dgx-spark = import ./providers/dgx-spark.nix {
+                inherit inputs pkgs;
+              };
+            })
+            # Runtime-registered providers must be present for defaultProvider assertions.
+            //
+              lib.optionalAttrs
+                (cfg.defaultProvider != null && !(cfg.localModel && cfg.defaultProvider == "dgx-spark"))
+                {
+                  ${cfg.defaultProvider} = {
+                    enable = true;
+                  };
+                };
         };
 
         home.file =
