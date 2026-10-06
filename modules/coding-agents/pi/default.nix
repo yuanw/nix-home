@@ -86,6 +86,24 @@ in
       '';
     };
 
+    mcpServers = lib.mkOption {
+      type = lib.types.attrsOf (lib.types.attrsOf lib.types.anything);
+      default = { };
+      example = lib.literalExpression ''
+        {
+          Amplitude = {
+            type = "http";
+            url = "https://mcp.amplitude.com/mcp";
+          };
+        }
+      '';
+      description = ''
+        Entries under `mcpServers` in `${agentConfigDir}/mcp.json`, which Pi
+        reads for user-level MCP servers. When empty the file is left alone
+        (hand-managed). When non-empty Home Manager owns the whole file.
+      '';
+    };
+
     rawSkills = lib.mkOption {
       type = lib.types.listOf (
         lib.types.oneOf [
@@ -206,10 +224,14 @@ in
                 };
         };
 
-        home.file = lib.optionalAttrs permissionGateEnabled {
-          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-            hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
-        };
+        home.file =
+          lib.optionalAttrs permissionGateEnabled {
+            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+              hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+          }
+          // lib.optionalAttrs (cfg.mcpServers != { }) {
+            "${agentConfigDir}/mcp.json".text = builtins.toJSON { mcpServers = cfg.mcpServers; };
+          };
       };
   };
 }
