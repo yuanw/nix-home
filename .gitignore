@@ -52,3 +52,6 @@ diff.json
 
 # Python bytecode cache
 __pycache__/
+
+# throwaway initrd SSH host key (copied to build hosts manually; keep out of git)
+secrets/initrd/
