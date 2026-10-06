@@ -80,61 +80,10 @@
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
     pi = {
       enable = true;
-      extensionsPkgs = with pkgs.pi-extensions; [
-        pi-loop
-        pi-review
-        pi-cursor-agent
-        pi-slow-mode
-        pi-permission-gate
-        pi-interactive-shell
-        pi-ponytail
-      ];
-      extensionFiles = {
-        "notify.ts" = ../modules/coding-agents/pi/extensions/notify.ts;
-        "custom-footer.ts" = ../modules/coding-agents/pi/extensions/custom-footer.ts;
-      };
-      models = {
-        providers = {
-          dgx-spark = {
-            api = "openai-completions";
-            apiKey = "not-needed";
-            baseUrl = "http://dgx-spark.local:8888/v1";
-            compat = {
-              supportsDeveloperRole = false;
-              supportsReasoningEffort = false;
-              supportsStore = false;
-              thinkingFormat = "qwen-chat-template";
-              thinkingTokenBudgetField = "thinking_token_budget";
-            };
-            models = [
-              {
-                _launch = true;
-                contextWindow = 262144;
-                # Must match the served name exactly (TensorFold SERVED_NAME).
-                id = "Qwen3.8-Flash-Next";
-                input = [
-                  "text"
-                  "image"
-                ];
-                maxTokens = 32768;
-                name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
-                reasoning = true;
-                thinkingLevelMap = {
-                  off = "off";
-                  minimal = "minimal";
-                  low = "low";
-                  medium = "medium";
-                  high = "high";
-                  xhigh = "xhigh";
-                  max = "max";
-                };
-              }
-            ];
-          };
-        };
-
-      };
-      skills = [
+      defaultProvider = "cursor-agent";
+      defaultModel = "default";
+      extensions.cursor-agent.enable = true;
+      rawSkills = [
         pkgs.pi-extensions.pi-interactive-shell
       ];
     };

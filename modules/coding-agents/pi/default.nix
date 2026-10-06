@@ -2,279 +2,213 @@
   config,
   lib,
   pkgs,
-
+  inputs,
   ...
 }:
 let
   cfg = config.modules.pi;
-  hasPermissionGate = lib.any (p: p.pname == "permission-gate") cfg.extensionsPkgs;
-  defaultConfigDir = ".pi/agent";
-  agentPmManagedSkillNames = [
-    "caveman"
-    "d2"
-    "denote-note"
-    "describe"
-    "disk-space"
-    "dired"
-    "emacs-skills"
-    "emacsclient"
-    "explain-diff-html"
-    "file-links"
-    "gnuplot"
-    "grilling"
-    "highlight"
-    "humanizer"
-    "i-have-adhd"
-    "journal-session"
-    "mermaid"
-    "open"
-    "open-code-review-delegate"
-    "org-agenda-todo"
-    "plantuml"
-    "ponytail"
-    "ponytail-audit"
-    "ponytail-debt"
-    "ponytail-gain"
-    "ponytail-help"
-    "ponytail-review"
-    "select"
-    "teach"
-  ];
-  agentPmManagedPromptNames = [
-    "journal-session.md"
-  ];
-  mkEntries =
-    items: nameOf: sourceOf:
-    map (item: lib.nameValuePair "${cfg.configDir}/${nameOf item}" { source = (sourceOf item); }) items;
-
-  mkNoDuplicateAssertion =
-    values: entityKind:
-    let
-      duplicates = lib.filter (value: lib.count (x: x == value) values > 1) (lib.unique values);
-      mkMsg = value: "  - ${entityKind} `${toString value}`";
-    in
-    {
-      assertion = duplicates == [ ];
-      message = ''
-        Must not have duplicate ${entityKind}s:
-      ''
-      + lib.concatStringsSep "\n" (map mkMsg duplicates);
-    };
+  user = config.my.username;
+  home = config.my.homeDirectory;
+  workspace = config.my.workspaceDirectory;
+  agentConfigDir = ".pi/agent";
+  agentConfigPath = "${home}/${agentConfigDir}";
 in
 {
   options.modules.pi = {
-    enable = lib.mkEnableOption "pi";
+    enable = lib.mkEnableOption ''
+      Pi coding agent via nixpi (programs.pi).
 
-    enableWorkMux = lib.mkEnableOption "workmux";
+      This module enables nixpi Home Manager integration and small nix-home
+      glue (extension modules, permission-gate rules, mics-skills). Host knobs
+      (defaultProvider, extensions, rawSkills, …) are declared here and passed
+      through to programs.pi.
+    '';
 
-    package = lib.mkOption {
-      type = lib.types.package;
-      default = pkgs.llm-agents.pi;
-    };
-
-    configDir = lib.mkOption {
-      type = lib.types.str;
-      default = defaultConfigDir;
-      example = ".config/pi/agent";
-      description = ''
-        Directory where pi agent files (extensions, skills, themes) are stored,
-        relative to the home directory.
-      '';
-    };
-
+    # Escape hatch for other nix-darwin modules (e.g. browser-cli) that must
+    # not write home-manager.users while also reading it.
     environment = lib.mkOption {
       type = lib.types.attrsOf lib.types.str;
-      default = {
-        PI_TELEMETRY = "0";
-      };
-      example = lib.literalExpression ''
-        {
-          PI_SKIP_VERSION_CHECK = "1";
-        }
-      '';
-      description = "Extra environment variables to set for pi.";
-    };
-
-    nodeDeps = lib.mkOption {
-      type = lib.types.nullOr lib.types.package;
-      default = null;
-      example = lib.literalExpression ''
-        pkgs.callPackage ./pi-node-deps.nix { }
-      '';
-      description = ''
-        A derivation whose node_modules/ directory is linked into
-        <configDir>/node_modules/. Build it with buildNpmPackage +
-        importNpmLock. Required when extensions import runtime npm packages
-        (anything beyond `import type` from the pi API).
-      '';
-    };
-
-    extensionsPkgs = lib.mkOption {
-      type = lib.types.listOf lib.types.package;
-      default = [ ];
-      description = ''
-        Pi extension packages built with mkPiExtension or mkLocalPiExtension.
-        Each package's pname is used as the filename under <configDir>/extensions/.
-      '';
-    };
-
-    extensionFiles = lib.mkOption {
-      type = lib.types.attrsOf lib.types.path;
-      default = { };
-      example = lib.literalExpression ''
-        {
-          "notify.ts" = ./extensions/notify.ts;
-          "my-tool.ts" = ./extensions/my-tool.ts;
-        }
-      '';
-      description = ''
-        Local .ts files to link directly into <configDir>/extensions/.
-        Keys are the filenames (must include .ts suffix); values are paths to
-        the source files. No packaging step required.
-        Multi-file extensions belong in extensionsPkgs (see pi-permission-gate).
-      '';
-    };
-
-    skills = lib.mkOption {
-      type = lib.types.listOf lib.types.package;
-      default = [ ];
-      description = ''
-        Legacy pi-only skill packages. Shared skills should be declared in
-        modules/coding-agents/prompts and rendered through programs.agent-pm
-        instead. Each package's pname is used as the skill directory name under
-        <configDir>/skills/.
-      '';
-    };
-
-    skillsDir = lib.mkOption {
-      type = lib.types.nullOr lib.types.path;
-      default = null;
-      description = ''
-        Path to a directory containing skill files to link into <configDir>/skills/.
-        Set to null to disable.
-      '';
-    };
-
-    prompts = lib.mkOption {
-      type = lib.types.attrsOf lib.types.path;
       default = { };
       description = ''
-        Legacy pi-only prompt templates to install under <configDir>/prompts/.
-        Shared prompts should be declared in modules/coding-agents/prompts and
-        rendered through programs.agent-pm instead. Keys are filenames (must
-        include .md suffix); values are paths to the template files.
+        Extra programs.pi.environment.variables. Prefer setting
+        programs.pi.environment.variables in Home Manager when possible.
       '';
     };
 
-    themes = lib.mkOption {
+    localModel = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = ''
+        Register the local DGX Spark / TensorFold OpenAI-compatible endpoint as
+        programs.pi.providers.dgx-spark (see providers/dgx-spark.nix).
+      '';
+    };
+
+    defaultProvider = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "cursor-agent";
+      description = "Passed to programs.pi.settings.defaultProvider.";
+    };
+
+    defaultModel = lib.mkOption {
+      type = lib.types.nullOr lib.types.str;
+      default = null;
+      example = "default";
+      description = "Passed to programs.pi.settings.defaultModel.";
+    };
+
+    extensions = lib.mkOption {
       type = lib.types.attrsOf (
         lib.types.submodule {
-          options.src = lib.mkOption {
-            type = lib.types.path;
-            description = "Path to the theme JSON file.";
+          freeformType = lib.types.attrsOf lib.types.anything;
+          options.enable = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = "Whether to enable this Pi extension.";
           };
         }
       );
       default = { };
-      description = "Custom themes to install under <configDir>/themes/.";
-    };
-
-    models = lib.mkOption {
-      type = lib.types.attrsOf lib.types.anything;
-      default = { };
       example = lib.literalExpression ''
         {
-          providers = {
-            ollama = {
-              api = "openai-completions";
-              baseUrl = "http://localhost:11434/v1";
-              models = [ { id = "llama3"; } ];
-            };
-          };
+          # defaults already enable notify, custom-footer, slow-mode,
+          # permission-gate, interactive-shell, and ponytail
+          cursor-agent.enable = true;
+          web-fetch.enable = true;
         }
       '';
       description = ''
-        Declarative pi model configuration. Merged into <configDir>/models.json
-        at activation time using yq, preserving existing settings and backing up
-        the previous file. Set to { } to skip model management.
+        Passed to programs.pi.extensions. By default enables notify,
+        custom-footer, slow-mode, permission-gate, interactive-shell, and
+        ponytail. Set `<name>.enable = false` to opt out, or enable extras
+        such as cursor-agent / web-fetch / direnv.
       '';
+    };
+
+    rawSkills = lib.mkOption {
+      type = lib.types.listOf (
+        lib.types.oneOf [
+          lib.types.package
+          lib.types.path
+          lib.types.str
+        ]
+      );
+      default = [ ];
+      example = lib.literalExpression ''
+        [ pkgs.pi-extensions.pi-interactive-shell ]
+      '';
+      description = "Passed to programs.pi.rawSkills.";
     };
   };
 
   config = lib.mkIf cfg.enable {
-    assertions = [
-      {
-        assertion = !(cfg.environment ? PI_CODING_AGENT_DIR);
-        message = ''
-          modules.pi.environment.PI_CODING_AGENT_DIR is managed by modules.pi.configDir.
-          Set modules.pi.configDir instead of PI_CODING_AGENT_DIR.
-        '';
-      }
-      (mkNoDuplicateAssertion (map (p: p.pname) cfg.extensionsPkgs) "extension")
-      (mkNoDuplicateAssertion (map (s: s.pname) cfg.skills) "skill")
-      {
-        assertion = lib.intersectLists (map (s: s.pname) cfg.skills) agentPmManagedSkillNames == [ ];
-        message = ''
-          These pi skills are managed by programs.agent-pm, not modules.pi.skills:
-          ${lib.concatStringsSep ", " agentPmManagedSkillNames}
-        '';
-      }
-      {
-        assertion = lib.intersectLists (lib.attrNames cfg.prompts) agentPmManagedPromptNames == [ ];
-        message = ''
-          These pi prompts are managed by programs.agent-pm, not modules.pi.prompts:
-          ${lib.concatStringsSep ", " agentPmManagedPromptNames}
-        '';
-      }
-    ];
+    modules.pi.extensions = {
+      notify.enable = lib.mkDefault true;
+      custom-footer.enable = lib.mkDefault true;
+      slow-mode.enable = lib.mkDefault true;
+      permission-gate.enable = lib.mkDefault true;
+      interactive-shell.enable = lib.mkDefault true;
+      ponytail.enable = lib.mkDefault true;
+    };
 
-    home-manager.users.${config.my.username} =
-      hm@{ ... }:
+    home-manager.users.${user} =
       {
-        programs.mics-skills.skillDirs = [
-          ".claude/skills"
-          ".opencode/skills"
-          "${cfg.configDir}/skills"
+        lib,
+        ...
+      }@hm:
+      let
+        permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
+        micsSkillNames = [
+          "browser-cli"
+          "kagi-search"
+          "pexpect-cli"
+          "screenshot-cli"
         ];
+      in
+      {
+        imports =
+          (import ./local-extensions.nix { inherit inputs pkgs; })
+          ++ (import ./third-party-extensions.nix {
+            inherit
+              inputs
+              pkgs
+              lib
+              ;
+          });
 
-        home.packages = [ cfg.package ] ++ lib.optional cfg.enableWorkMux pkgs.llm-agents.workmux;
+        programs.mics-skills = {
+          enable = true;
+          package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
+          skills = micsSkillNames;
+          skillDirs = [
+            "${agentConfigDir}/skills"
+          ];
+        };
 
-        home.file =
-          lib.listToAttrs (
-            (mkEntries cfg.extensionsPkgs (ext: "extensions/${ext.pname}") (x: x))
-            ++ (mkEntries cfg.skills (skill: "skills/${skill.pname}") (x: x))
-            ++ (mkEntries (lib.attrsToList cfg.themes) (t: "themes/${t.name}.json") (t: t.value.src))
-          )
-          // lib.mapAttrs' (
-            name: path: lib.nameValuePair "${cfg.configDir}/extensions/${name}" { source = path; }
-          ) cfg.extensionFiles
-          // lib.optionalAttrs (cfg.nodeDeps != null) {
-            "${cfg.configDir}/node_modules".source = "${cfg.nodeDeps}/node_modules";
+        programs.agent-pm = {
+          enable = true;
+          tools.pi.enable = true;
+          prompts = import ../prompts {
+            inherit pkgs lib;
+          };
+        };
+
+        # Old modules.pi.skills linked whole store packages as
+        # ~/.pi/agent/skills/<name> -> /nix/store/... . agent-pm manages files
+        # under a real directory; HM cannot rename through a store symlink.
+        # Keep mics-skills whole-dir links; remove other store dir symlinks.
+        home.activation.removeLegacyAgentPmSkillDirLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
+          skillsDir="$HOME/${agentConfigDir}/skills"
+          if [ -d "$skillsDir" ]; then
+            for path in "$skillsDir"/*; do
+              [ -L "$path" ] || continue
+              name="''${path##*/}"
+              case "$name" in
+                ${lib.concatMapStringsSep "|" lib.escapeShellArg micsSkillNames}) continue ;;
+              esac
+              target="$(readlink "$path" || true)"
+              case "$target" in
+                /nix/store/*) run rm -f "$path" ;;
+              esac
+            done
+          fi
+        '';
+
+        programs.pi = {
+          enable = true;
+          package = lib.mkDefault pkgs.llm-agents.pi;
+          environment.variables = {
+            PI_TELEMETRY = lib.mkDefault "0";
+            PI_CODING_AGENT_DIR = agentConfigPath;
           }
-          // lib.optionalAttrs (cfg.skillsDir != null) {
-            "${cfg.configDir}/skills".source = cfg.skillsDir;
-          }
-          // lib.mapAttrs' (
-            name: path: lib.nameValuePair "${cfg.configDir}/prompts/${name}" { source = path; }
-          ) cfg.prompts
-          // lib.optionalAttrs hasPermissionGate {
-            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+          // cfg.environment;
+          settings = lib.filterAttrs (_: v: v != null) {
+            defaultProvider = cfg.defaultProvider;
+            defaultModel = cfg.defaultModel;
           };
+          extensions = cfg.extensions;
+          rawSkills = cfg.rawSkills;
+          providers =
+            (lib.optionalAttrs cfg.localModel {
+              dgx-spark = import ./providers/dgx-spark.nix {
+                inherit inputs pkgs;
+              };
+            })
+            # Runtime-registered providers must be present for defaultProvider assertions.
+            //
+              lib.optionalAttrs
+                (cfg.defaultProvider != null && !(cfg.localModel && cfg.defaultProvider == "dgx-spark"))
+                {
+                  ${cfg.defaultProvider} = {
+                    enable = true;
+                  };
+                };
+        };
 
-        home.sessionVariables =
-          cfg.environment
-          // lib.optionalAttrs (cfg.configDir != defaultConfigDir) {
-            PI_CODING_AGENT_DIR = "$HOME/${cfg.configDir}";
-          };
-
-        mergetools = lib.mkIf (cfg.models != { }) {
-          "pi-models" = {
-            target = "${config.my.homeDirectory}/${cfg.configDir}/models.json";
-            format = "json";
-            force = true;
-            settings = cfg.models;
-          };
+        home.file = lib.optionalAttrs permissionGateEnabled {
+          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+            hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
         };
       };
   };

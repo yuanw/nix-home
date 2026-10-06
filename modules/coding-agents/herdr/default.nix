@@ -458,12 +458,11 @@ in
 
               ''}
             '';
-      };
 
-    modules.pi.themes = lib.mkIf (cfg.managePiTheme && piEnabled) (
-      lib.genAttrs [ piThemeName ] (_: {
-        src = piThemeFile;
-      })
-    );
+        programs.pi = lib.mkIf (cfg.managePiTheme && piEnabled) {
+          themes = [ piThemeFile ];
+          settings.theme = lib.mkDefault piThemeName;
+        };
+      };
   };
 }

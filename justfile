@@ -60,6 +60,8 @@ nix-update:
     @nix-update -f ./packages/release.nix thrift-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix ultra-scroll --src-only --version=branch
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
+    # Vendored lock: bump version/src; also refresh npmDepsHash. If production deps change, regenerate packages/pi-extensions/pi-interactive-shell.package-lock.json first.
+    @nix-update -f ./packages/release.nix pi-interactive-shell --override-filename ./packages/pi-extensions/pi-interactive-shell.nix --version-regex 'v(.*)'
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch

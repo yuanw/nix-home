@@ -2,35 +2,43 @@
   lib,
   buildNpmPackage,
   fetchFromGitHub,
+  jq,
   nix-update-script,
   ...
 }:
-let
-  rev = "df4771e9105d29bde9b8f32858df6139c1c90605";
-in
 buildNpmPackage (finalAttrs: {
   pname = "pi-interactive-shell";
-  version = "0.13.0-unstable-2026-04-24";
+  version = "0.17.0";
 
   src = fetchFromGitHub {
     owner = "nicobailon";
     repo = "pi-interactive-shell";
-    inherit rev;
-    hash = "sha256-80E/Mw9id7b2KoJ2iLAOb2hXILIdqNZ00PxlvPQ+08g=";
+    rev = "v${finalAttrs.version}";
+    hash = "sha256-zugoEOJNhjZ7GeGj+Ak6tptmxd2y7/pH5/1jmj1iG2w=";
   };
+
+  # Upstream package-lock.json includes peerDependencies (@earendil-works/pi-*)
+  # whose nested packages lack integrity hashes, which breaks fetch-npm-deps.
+  # Regenerate with (use registry.npmjs.org, not a corporate mirror):
+  #   jq 'del(.peerDependencies, .devDependencies, .peerDependenciesMeta)' package.json \
+  #     | sponge package.json && rm -f package-lock.json \
+  #     && npm install --package-lock-only --ignore-scripts --registry=https://registry.npmjs.org/
+  nativeBuildInputs = [ jq ];
 
   postPatch = ''
     cp ${./pi-interactive-shell.package-lock.json} package-lock.json
+    jq 'del(.peerDependencies, .devDependencies, .peerDependenciesMeta)' package.json > package.json.tmp
+    mv package.json.tmp package.json
   '';
 
-  npmDepsHash = "sha256-jGXdGx5vEkpg5ECyFhuxepevwOPaXSLN1HILubq0/YI=";
+  npmDepsHash = "sha256-Wv0PFQeRVPlZvq+noluKWlt8uBvZnjAsCGxT8m+nPas=";
 
   dontNpmBuild = true;
 
   installPhase = ''
     runHook preInstall
     mkdir -p $out
-    cp -r *.ts *.json node_modules $out/
+    cp -r *.ts *.json node_modules skills $out/
     runHook postInstall
   '';
 
@@ -39,7 +47,11 @@ buildNpmPackage (finalAttrs: {
       pname = finalAttrs.pname;
       version = finalAttrs.version;
     };
-    updateScript = nix-update-script { };
+    updateScript = nix-update-script {
+      extraArgs = [
+        "--version-regex=v(.*)"
+      ];
+    };
   };
 
   meta = {
