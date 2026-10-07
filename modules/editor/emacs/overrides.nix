@@ -152,6 +152,22 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  magit = (
+    pkgs.callPackage "${packagePath}/magit.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self)
+        melpaBuild
+        compat
+        cond-let
+        llama
+        magit-section
+        seq
+        transient
+        with-editor
+        ;
+    }
+  );
   herdr-el = (
     pkgs.callPackage "${packagePath}/herdr-el.nix" {
       inherit (pkgs) fetchFromGitHub;
