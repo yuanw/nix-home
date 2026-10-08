@@ -378,19 +378,60 @@
     shells = [ pkgs.zsh ];
   };
 
-  # ethernet drivers to load: (run "lspci -v | grep -iA8 'network\|ethernet'")
-  boot.initrd.availableKernelModules = [
-    "igc"
-    #"r8169" cannot load this firmware as right now
-    "i40e"
-  ];
+  # Ethernet drivers for stage-1. The wired uplink enp3s0 is an onboard
+  # RTL8125B driven by the in-tree r8169 driver (the old "cannot load this
+  # firmware" note was wrong: r8169 loads fine — stage-2 runs this driver
+  # today and links up even while the optional rtl_nic/rtl8125b-2.fw request
+  # fails with -2; that fw file exists nowhere in nixpkgs). Without the
+  # module copied+loaded in the initrd, stage-1 has NO NIC at all, so the
+  # initrd-ssh unlock shell on port 2222 is unreachable = dead-end boot.
+  # igc/i40e (the SFP cards) are idle; harmless, keep them listed.
+  boot.initrd.kernelModules = [ "r8169" ]; # modprobed at stage-1 start (modules-load.d)
+  boot.initrd.availableKernelModules = [ "igc" "i40e" "r8169" ]; # copied into the initrd image
   boot.zfs.forceImportRoot = false;
-  # boot.kernelParams = [ "ip=127.0.0.1::::lo:none" ];
+  # Remote-unlock support for the encrypted zroot:
+  # - keep asking for the pool passphrase long enough (default 0 = wait
+  #   forever; 1800 = finite) that I can answer from an initrd-ssh shell:
+  #   ssh -p2222 root@misfit  ->  echo PASSPHRASE | zfs load-key zroot/root
+  #   (if the import unit stalls, re-run it from that shell: systemctl restart
+  #   zfs-import-zroot.service — the second pass skips datasets already
+  #   unlocked and finishes, then rollback + mounts proceed)
+  # - without the ordering below, the import unit (DefaultDependencies=no,
+  #   after=[modules-load ask-password-console] only) starts racing sshd and
+  #   networkd: the prompt can time out while nobody can reach the machine.
+  boot.zfs = {
+    requestEncryptionCredentials = true;
+    passwordTimeout = 1800;
+  };
+
   boot.kernelParams = [
-    "ip=::::nixos-initrd::dhcp"
+    # DHCP on all NICs in stage-1 (systemd-network-generator). Old value
+    # "ip=::::nixos-initrd::dhcp" had an empty DEVICE field = may have
+    # configured no interface at all; there is no .network file in the image,
+    # so ip= is the only thing that could configure enp3s0.
+    "ip=dhcp"
     # cap ZFS ARC at 4 GiB so userspace (jellyfin, hass) has headroom
     "zfs.zfs_arc_max=4294967296"
   ];
+
+  # give network + sshd a chance to come up before the pool-unlock prompt
+  # waits on a human; keep the module's own deps + add sshd/networkd (safe
+  # whatever the list-merge semantics; duplicates are harmless)
+  boot.initrd.systemd.services.zfs-import-zroot = {
+    wants = [ "sshd.service" "systemd-networkd.service" ];
+    after = [
+      "systemd-modules-load.service"
+      "systemd-ask-password-console.service"
+      "sshd.service"
+      "systemd-networkd.service"
+      "systemd-networkd-wait-online.service"
+    ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      TimeoutStartSec = 3600;
+    };
+  };
   # systemd stage 1 replaces postDeviceCommands; roll back the ephemeral
   # root dataset to @blank after the pool is imported, before sysroot mounts
   boot.initrd.systemd.services.zfs-rollback = {
@@ -454,9 +495,15 @@
     ssh = {
       enable = true;
       port = 2222;
-      hostKeys = [
-        "/etc/secrets/initrd/ssh_host_ed_25519_key"
-      ];
+      # Throwaway initrd-only host key (NEVER reuse /sshkeys production host
+      # keys — they would sit on the unencrypted boot disk; nixpkgs warns).
+      # A *path* literal is copied into the nix store at build time and
+      # embedded in the initrd regardless of which host builds. The previous
+      # absolute-string value never resolved: the deployed initrd shipped an
+      # sshd with NO host key at all (sshd exits -> flap loop) = remote boot
+      # was dead on arrival. Keep it out of git (see .gitignore) + copy it
+      # to every build host (rsync) or eval fails loudly (path missing).
+      hostKeys = [ ../../secrets/initrd/ssh_host_ed25519_key ];
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"

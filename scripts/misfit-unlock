@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Remote-unlock misfit's encrypted zroot over the initrd SSH (port 2222).
+#
+# Probes for the box during the stage-1 unlock window (initrd sshd on :2222,
+# key prompt waits passwordTimeout=1800s after boot; start this at/after
+# `reboot`), then feeds the zroot passphrase via stdin — the recipe proven
+# on the scratch pool in Phase 2.3: `echo KEY | zfs load-key zroot/root`.
+# Boot continues ONLY if the import unit is also restarted after load-key:
+# its ask-password gate never notices an externally loaded key (proven in
+# both reboot windows — without the kick the unit stalls in its 3x30-min
+# prompt timeouts and the boot hangs with every fs unavailable).
+#
+# Usage: misfit-unlock [-w SECONDS] [-t HOST]
+#   -w N              probing window, default 1800s (fire it right after
+#                     `reboot` and it can keep up with the box)
+#   -t HOST           probe only this host (when DHCP did something weird)
+#
+# Passphrase source (first hit wins): $MISFIT_ZFS_KEY, $MISFIT_ZFS_KEY_CMD
+# (any command printing the key), `pass misfit/boot`, else interactive prompt.
+
+set -euo pipefail
+
+WAIT=1800
+TARGET=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -w) WAIT=$2; shift 2 ;;
+    -t) TARGET=$2; shift 2 ;;
+    *) echo "unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+KEY=""
+if [ -n "${MISFIT_ZFS_KEY:-}" ]; then
+  KEY=$MISFIT_ZFS_KEY
+elif [ -n "${MISFIT_ZFS_KEY_CMD:-}" ]; then
+  KEY=$(eval "$MISFIT_ZFS_KEY_CMD")
+elif command -v pass >/dev/null 2>&1 && pass find misfit/boot >/dev/null 2>&1; then
+  echo "pass: fetched misfit/boot" >&2
+  KEY=$(pass misfit/boot) || true
+fi
+if [ -z "$KEY" ]; then
+  printf 'zroot passphrase (type it, empty aborts): ' >&2
+  read -rs KEY; echo >&2
+fi
+[ -n "$KEY" ] || { echo "no passphrase" >&2; exit 1; }
+
+# stage-1 and stage-2 take SEPARATE DHCP leases (observed stage-1: .191,
+# .194; stage-2: .190, .194) → never trust one IP: probe candidates, then
+# sweep the whole /24 in parallel batches.
+find_stage1() {  # one probe round; echoes first host answering :2222
+  local h hit
+  for h in $CANDIDATES; do
+    if nc -z -G 2 -w 2 "$h" 2222 2>/dev/null; then echo "$h"; return 0; fi
+  done
+  hit=$(seq 1 254 | xargs -P 32 -I@ sh -c \
+    'nc -z -G 1 -w 1 192.168.1.@ 2222 >/dev/null 2>&1 && echo 192.168.1.@' 2>/dev/null | head -1)
+  [ -n "$hit" ] && { echo "$hit"; return 0; }
+  return 1
+}
+
+# stage-2 normally keeps the .190-ish lease; seed candidates with observed
+# stage-1 leases too, and let -t override everything
+CANDIDATES="misfit.local 192.168.1.190 192.168.1.191 192.168.1.194"
+[ -n "$TARGET" ] && CANDIDATES="$TARGET"
+
+found=""
+deadline=$(( $(date +%s) + WAIT ))
+echo "probing :2222 on [$CANDIDATES + /24 sweep] for up to ${WAIT}s…"
+while [ "$(date +%s)" -lt "$deadline" ]; do
+  found=$(find_stage1) || found=""
+  [ -n "$found" ] && break
+  sleep 5
+done
+[ -n "$found" ] || { echo "FAIL: :2222 never answered — stage-1 sshd/networkd died;" \
+  "collect /run/log/journal or use the console. Nothing was unlocked." >&2; exit 1; }
+echo "stage-1 sshd found on $found"
+
+SSH="ssh -p 2222 -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR root@$found"
+# `;` not `&&` inside ssh: the restart must run even when load-key errored
+# (e.g. key already available) — the restarted unit re-checks keystatus,
+# skips the prompt, imports + mounts immediately. `&& echo` outside +
+# set -e: a failed remote side aborts the script without claiming success.
+printf '%s\n' "$KEY" | $SSH 'zfs load-key zroot/root; systemctl restart zfs-import-zroot.service' \
+  && echo "unlocked + import restarted; check: ssh misfit systemctl is-system-running"
