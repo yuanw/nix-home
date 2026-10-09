@@ -23,8 +23,8 @@ against the recipe's published numbers, and an optional regression phase.
 - DONE Packaging ([[#packaging-done]])
 - DONE Eval verification on the pinned nixpkgs
 - DONE =nix fmt= clean on every touched file
-- TODO Phase 0: Commit ([[#commit]])
-- TODO Phase 1: Build on target ([[#build-target]])
+- DONE Phase 0: Commit ([[#commit]]) — =b5626bd5=
+- DONE Phase 1: Build on target ([[#build-target]]) — reverted incidental nixpkgs bump in =flake.lock=
 - TODO Phase 2: First start ([[#first-start]])
 - TODO Phase 3: Smoke + acceptance ([[#acceptance]])
 - TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]])
@@ -52,23 +52,20 @@ package set as =ps=, so =ps.exllamav3= picked upstream and refused on
 aarch64. The module passes =pkgs.python313Packages.exllamav3= explicitly —
 exactly how the tensorfold unit handles the same situation.
 
-** TODO Phase 0: Commit the staged work
+** DONE Phase 0: Commit the staged work
 :PROPERTIES:
 :CUSTOM_ID: commit
 :END:
 
-#+BEGIN_SRC shell
-cd ~/workspaces/nix-home
-git status --short          # expect the 9 files from [[#file-summary]]
-git commit
-#+END_SRC
+Committed as =b5626bd5= (=red-snow: native exllamav3 serving on dgx-spark=)
+with exactly the 9 files from [[#file-summary]].
 
 - The ~105 GB checkpoint and all runtime state live *outside* the store
   (= /var/lib/redsnow=, = /var/lib/vllm/huggingface=) — nothing here makes
   =nix gc= dangerous.
 - Leave =mono-gateway-evaluation.md= untracked (unrelated work).
 
-** TODO Phase 1: Build on target
+** DONE Phase 1: Build on target
 :PROPERTIES:
 :CUSTOM_ID: build-target
 :END:
@@ -102,6 +99,55 @@ No such file or directory=) means a redist package split its headers into
 another output — extend the =cudaHome= merge list. The import smoke test
 is Phase 3 itself: =serve_glm.py= imports =exllamav3_ext= before the
 first "Native API listening", so no separate import check is needed.
+
+*** DONE Outcome
+
+=just colmena-spark-build= succeeded in 15 s; system toplevel
+=v0bn27hh6gjwn0qq3hksfik65jjcd0v4-nixos-system-dgx-spark-26.11pre-git=
+is VALID on the Spark, and its closure contains:
+
+| path | note |
+|------+------|
+| =n79qam0y2rnpn211f757vbb198dzc9kd-python3.13-torch-2.13.0= | already valid (no =cxxdev=/=dist= needed) |
+| =mhnhsl24sxzpspzv8sbkhai6qpzbzz0i-python3.13-torchvision-0.28.0= | already valid |
+| =srd7f4bgrx7g6xppblwwy8pv297wrjjl-python3.13-exllamav3-1.5.1.post1= | AOT =sm_121= build |
+| =vc37jq0zbjiacxns4wazv8gs0nm0dpyr-unit-red-snow.service= | plus its =preStart= script |
+
+Extension confirmed on the Spark:
+
+#+BEGIN_SRC shell
+.../site-packages/exllamav3_ext.cpython-313-aarch64-linux-gnu.so
+#+END_SRC
+
+*** Why the build was fast: reverted =57c29f89=
+
+The =wip= commit =57c29f89= bumped the main =nixpkgs= input
+(=c59305bab2= → =151fa4e8dd=). That bump left torch's drv unchanged but
+pulled a *new* =torchvision= that depends on extra CUDA-library outputs;
+torch's =cxxdev/dist= outputs had been GC'd, forcing a full torch source
+rebuild. On this host that rebuild crashed twice in different CUDA
+compiler subprocesses (=ptxas= SEGV at =ScatterGatherKernel.cu.o=; =cicc=
+SEGV at =IGammaKernel.cu.o=) — no cache carries the bleeding-edge
+aarch64 torch, so substitution was not an option.
+
+=flake.lock= was restored to =57c29f89^= (only the nixpkgs pin reverted;
+=flake.nix= inputs unchanged). Verified under =c59305bab2=:
+
+- torch = =xrhfxz636g5xfh16rlakavvhs248fzrn= (running system's drv)
+- torchvision = =g0k8mjhk0xdnrx9im3cf455msb3a99lg= (running system's drv)
+- exllamav3 drv byte-identical to the new-pin build (=jnfbdzkwa808vy5b0gbw3c0n0jzp4pbj=)
+
+so the revert reuses the already-built torch/torchvision and invalidates
+nothing previously built. Self-check runnable on the Spark:
+
+#+BEGIN_SRC shell
+nix-store --check-validity /nix/store/v0bn27hh6gjwn0qq3hksfik65jjcd0v4-nixos-system-dgx-spark-26.11pre-git
+find -L /nix/store/srd7f4bgrx7g6xppblwwy8pv297wrjjl-python3.13-exllamav3-1.5.1.post1 -name 'exllamav3_ext*.so'
+#+END_SRC
+
+Re-bumping nixpkgs is a separate task: if the newer pin is wanted later,
+the torch =cxxdev/dist= outputs must be rebuilt (or capped to =sm_121=)
+*and* an aarch64 cache found. Deferred; not required for RED-SNOW.
 
 ** TODO Phase 2: First start
 :PROPERTIES:
