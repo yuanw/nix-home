@@ -26,10 +26,24 @@
   # determinate system
   nix.enable = false;
 
-  # Phone/remote access for Herdr: join this Mac to a tailnet, then SSH in and run `herdr`.
-  # First login still needs: sudo tailscale up
+  # Phone/remote access: mist is already in the tailnet (tailscaled runs as a
+  # LaunchDaemon and keeps its login, so no `tailscale up` after a reboot).  SSH
+  # from the phone goes over the tailnet on port 22; see docs/tailscale-ssh.md.
   services.tailscale.enable = true;
-  services.openssh.enable = true;
+
+  # Key-only SSH.  No ListenAddress: launchd owns the :22 socket (Sockets /
+  # SocketServiceName in /System/Library/LaunchDaemons/ssh.plist) and hands it to
+  # sshd, so binding to the tailnet address would not narrow the listener.  An
+  # `AllowUsers yuan@100.64.0.0/10` (plus the tailnet v6 range) would restrict by
+  # source address, but only blocks the LAN -- with the tunnel down the phone has
+  # no route here anyway.  See docs/tailscale-ssh.md.
+  services.openssh = {
+    enable = true;
+    extraConfig = ''
+      PasswordAuthentication no
+      MaxAuthTries 3
+    '';
+  };
   my = {
     username = "yuan";
     name = "Yuan Wang";
@@ -56,6 +70,11 @@
     "${pkgs.transcribe}/bin"
     "${pkgs.whisper-cpp}/bin"
   ];
+  # The phone's own key (Termius).  Public, but it does unlock this box.
+  users.users.${config.my.username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHxznM8gR74HduksHumFTEBN0JjMmKdEIS+dpEyAFoZ5"
+  ];
+
   home-manager.users.${config.my.username} = {
     programs.git.settings.github.user = "yuanw";
     home.packages = [
