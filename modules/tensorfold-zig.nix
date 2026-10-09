@@ -17,6 +17,8 @@ let
     mkIf
     mkOption
     optional
+    optionalAttrs
+    optionals
     types
     concatStringsSep
     replaceStrings
@@ -47,6 +49,15 @@ let
     replaceStrings [ "/" ] [ "--" ] cfg.modelId
   }/snapshots/${cfg.modelRevision}";
 
+  # The --vision helper's interpreter: Pillow + PyAV + transformers (5.17.0)
+  # + the CUDA torch, running TensorFold's own Python tree.
+  visionPython = pkgs.python313Packages.python.withPackages (ps: [
+    ps.torch
+    ps.transformers
+    ps.av
+    ps.pillow
+  ]);
+
   serveArgs = [
     "--host ${cfg.host}"
     "--port ${toString cfg.port}"
@@ -57,7 +68,13 @@ let
     "--kv-dtype ${cfg.kvDtype}"
   ]
   ++ optional cfg.thinking "--thinking"
-  ++ optional (!cfg.thinking) "--no-thinking";
+  ++ optional (!cfg.thinking) "--no-thinking"
+  ++ optionals cfg.vision [
+    "--vision"
+    "--vision-max-images ${toString cfg.visionMaxImages}"
+    "--vision-max-videos ${toString cfg.visionMaxVideos}"
+    "--vision-image-tokens ${toString cfg.visionImageTokens}"
+  ];
 in
 {
   options.services.tensorfold-zig = {
@@ -142,6 +159,36 @@ in
       description = "Serve with a think block by default.";
     };
 
+    vision = mkOption {
+      type = types.bool;
+      default = true;
+      description = "Serve the model's vision tower (image/video input) via a Python helper.";
+    };
+
+    visionMaxImages = mkOption {
+      type = types.ints.positive;
+      default = 50;
+      description = "Images a request may carry.";
+    };
+
+    visionMaxVideos = mkOption {
+      type = types.ints.positive;
+      default = 4;
+      description = "Videos a request may carry.";
+    };
+
+    visionImageTokens = mkOption {
+      type = types.ints.positive;
+      default = 16384;
+      description = "Token budget a request's images share.";
+    };
+
+    visionWorkspaceMib = mkOption {
+      type = types.ints.positive;
+      default = 2048;
+      description = "TENSORFOLD_VISION_WORKSPACE_MIB: MiB kept for the vision helper.";
+    };
+
     memoryReserveGib = mkOption {
       type = types.ints.positive;
       default = 10;
@@ -190,6 +237,13 @@ in
         LD_LIBRARY_PATH = "/run/opengl-driver/lib:${cudaHome}/lib64:${cudaHome}/lib";
         HOME = cfg.stateDir;
         TENSORFOLD_MEMORY_RESERVE_GIB = toString cfg.memoryReserveGib;
+      }
+      // optionalAttrs cfg.vision {
+        # --vision runs a helper process (python3 -m tensorfold.vision.native_helper)
+        # with TensorFold's Python tree and a Pillow/PyAV/transformers/torch env.
+        TENSORFOLD_VISION_PYTHON = "${visionPython}/bin/python3";
+        TENSORFOLD_VISION_PYTHONPATH = "${pkgs.tensorfold-zig}/share/tensorfold/python";
+        TENSORFOLD_VISION_WORKSPACE_MIB = toString cfg.visionWorkspaceMib;
       };
 
       # First start: the ~122 GiB checkpoint, resumable, skipped once the

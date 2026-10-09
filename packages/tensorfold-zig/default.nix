@@ -165,6 +165,9 @@ stdenv.mkDerivation (_finalAttrs: {
     install -Dm755 zig-out/native/bin/tensorfold-native "$out/bin/tensorfold-native"
     cp -r zig-out/fatbin "$out/share/tensorfold/fatbin"
     cp -r "$TMPDIR/sm121" "$out/share/tensorfold/cuda/sm121"
+    # the --vision helper's Python tree: python3 -m tensorfold.vision.native_helper
+    mkdir -p "$out/share/tensorfold/python"
+    cp -r src/tensorfold "$out/share/tensorfold/python/tensorfold"
     runHook postInstall
   '';
 

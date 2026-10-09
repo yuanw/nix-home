@@ -15,9 +15,10 @@ inputs.nixpi.lib.nixpi.mkPiProvider {
       contextWindow = 262144;
       # Must match the served name exactly (TensorFold SERVED_NAME).
       id = "Qwen3.8-Flash-Next";
-      # The Zig service currently runs text-only (services.tensorfold-zig
-      # passes no --vision); add "image" once its vision helper is packaged.
-      input = [ "text" ];
+      input = [
+        "text"
+        "image"
+      ];
       maxTokens = 32768;
       name = "Qwen3.8 Flash Next (DGX Spark, TensorFold Zig)";
       reasoning = true;
