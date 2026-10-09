@@ -129,7 +129,7 @@ run while a model is still serving.
 
 - DONE Route analysis + native feasibility (nixpkgs =zig_0_17=; CPU-only fatbins + Triton AOT)
 - DONE Phase 0: Recon — =docker= is the podman shim; pinned nixpkgs lacks =zig_0_17=
-- TODO Phase 1: Provision (native Nix build; container/checkpoint as fallback)
+- IN-PROGRESS Phase 1: Provision (native Nix build) — spike done; package scaffolded
 - TODO Phase 2: First start + smoke
 - TODO Phase 3: Spark-Bench
 - TODO Phase 4: Compare + decide
@@ -184,9 +184,38 @@ New =packages/tensorfold-zig/= + =modules/tensorfold-zig.nix=:
   the Python unit keeps 8888), =TENSORFOLD_CUDA_KERNELS=, =THINKING=1=,
   =KV_DTYPE=fp8=, =VISION=0= first.
 
-Spike before committing to the package: in a =nix shell= with =zig_0_17=
-and =cudaPackages=, checkout =TF_REF=, apply the patches, and run just the
-=fatbins= step — that is the part that can fail on toolchain mismatch.
+*** DONE 1a spike (2026-10-09): the native build works
+
+Run by hand on the Spark, no container:
+
+- =zig build -Dnvcc=<nvcc> -Dsm=121 fatbins= → every CUDA fatbin
+  (experts, gdn, int4, fn_qmm*, prefill_attention, scan_rows, torch_*).
+- =zig build … install native= → =tensorfold-native= (22.7 MB);
+  =capabilities --json= reports =engine zig=, =chip nvidia-sm121=,
+  family =qwen4_exp= (=gptq-b4=) — the INT4-AutoRound format.
+- =tools/zig/flashnext_aot.py build= → 320 Triton cubins + =aot.json=.
+
+Three things the container hides:
+
+1. *nvcc needs a header wrapper.* =cuda_nvcc= alone has no
+   =cuda_runtime.h=; the merged CUDA home (nvcc + crt + cudart + cccl + …)
+   supplies it, so nvcc is invoked as =nvcc -I<cudaHome>/include=.
+   =packages/tensorfold-zig/default.nix= ships that wrapper.
+2. *The AOT spec records the container's paths.* =kernels.json= hardcodes
+   =source_root=/tensorfold/src= and the triton
+   =…/dist-packages/triton/…/libdevice.10.bc= for all 421 kernels; both
+   must be rewritten to the build's paths — the tool refuses otherwise.
+3. *The cubins are not byte-identical.* With nixpkgs torch 2.13 + triton
+   3.7.1 the capture compiles all 320 kernels but 0 match the container's
+   cubin sha and 202 report drift (=cubin sha256= and =Triton hash=). The
+   recipe tolerates cubin-sha drift but not Triton-hash drift, so the next
+   step is to prove the engine *accepts* this capture at serve time
+   (=TENSORFOLD_CUDA_KERNELS=), or match the container's exact triton.
+
+Scaffolded: =packages/tensorfold-zig/{src.nix,default.nix}= (first cut, not
+yet =nix build=-validated) with the pinned sources + the Zig 0.17.0 tarball.
+Remaining: validate the package, add =modules/tensorfold-zig.nix= (port
+8890 so the Python unit keeps 8888), runtime smoke, then Phase 3.
 
 *** 1b — container (fallback / sanity check)
 
