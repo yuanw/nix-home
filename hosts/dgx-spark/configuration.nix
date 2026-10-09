@@ -137,6 +137,18 @@
     environmentFile = config.age.secrets.hf-token.path;
   };
 
+  # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
+  # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
+  # TensorFold's Zig engine (branch zig-flashnext) packaged natively,
+  # serving Qwen3.8 Flash Next (INT4-AutoRound) on :8890. The CUDA
+  # fatbins + Triton AOT cubins are baked in (no first-start JIT).
+  # Plan: docs/tensorfold-zig-plan.org
+  services.tensorfold-zig = {
+    enable = true;
+    openFirewall = true;
+    environmentFile = config.age.secrets.hf-token.path;
+  };
+
   # (the tensorfold state/kernels/HF-cache dir rules live in
   # modules/tensorfold.nix; only the shared /var/lib/vllm parent stays)
   systemd.tmpfiles.rules = [

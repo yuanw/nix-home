@@ -205,6 +205,7 @@ in
   };
 
   ds4 = prev.callPackage ./ds4 { };
+  tensorfold-zig = prev.callPackage ./tensorfold-zig { };
 
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 
