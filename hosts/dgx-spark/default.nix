@@ -9,6 +9,7 @@
     ../../modules/ds4.nix
     ../../modules/lance.nix
     ../../modules/tensorfold.nix
+    ../../modules/red-snow.nix
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
     ../../modules/services/monitoring/pcp.nix

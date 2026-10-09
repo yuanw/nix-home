@@ -1,0 +1,248 @@
+#+TITLE: Plan: RED-SNOW Native Packaging — Remaining Works
+#+AUTHOR: Yuan Wang
+#+TODO: TODO IN-PROGRESS | DONE CANCELLED
+
+* Overview
+
+Rollout plan for the native RED-SNOW-5.3-Flash 2.49bpw serving deployment
+(=Weschera/RED-SNOW-5.3-Flash-2.49bpw-1x-DGX-Spark@b96fac2=, engine
+=vcruz305/exllamav3@7c1636f=) on the DGX Spark host after the packaging work.
+
+The packaging itself is *complete and staged* (see [[#file-summary]]):
+=packages/red-snow/= (AOT sm_121 CUDA =exllamav3= + the recipe's stdlib /v1
+server), =modules/red-snow.nix= (=services.red-snow= unit replacing =serve.sh=),
+overlay and host wiring, and =hosts/dgx-spark/readme.org= documentation —
+all eval-verified through the colmena hive (ExecStart, tmpfiles, firewall
+8899) on =aarch64-linux= with the host's =cuda-fixes.nix= overlay.
+
+What remains: commit, build/apply on the target, first start, acceptance
+against the recipe's published numbers, and an optional regression phase.
+
+* Status
+
+- DONE Packaging ([[#packaging-done]])
+- DONE Eval verification on the pinned nixpkgs
+- DONE =nix fmt= clean on every touched file
+- TODO Phase 0: Commit ([[#commit]])
+- TODO Phase 1: Build on target ([[#build-target]])
+- TODO Phase 2: First start ([[#first-start]])
+- TODO Phase 3: Smoke + acceptance ([[#acceptance]])
+- TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]])
+- TODO Cleanup: formatter drift on two unrelated files ([[#fmt-drift]])
+
+* Tasks
+
+** DONE Packaging
+:PROPERTIES:
+:CUSTOM_ID: packaging-done
+:END:
+
+Nothing left here — recorded for context:
+
+| Piece | Replaces | Notes |
+|-------+----------+-------|
+| =packages/red-snow/default.nix= | =build.sh= | AOT =exllamav3_ext= CUDAExtension for =sm_121= (=TORCH_CUDA_ARCH_LIST=12.1=, =MAX_JOBS=16=, merged =CUDA_HOME=, =CPATH=pybind11=). Unlike TensorFold, no first-start JIT — the .so is baked into site-packages. |
+| =packages/red-snow/server.nix= | Docker layer | =server/*.py= installed as-is; stdlib =ThreadingHTTPServer=. fastapi/uvicorn from =build.sh= are *not* packaged — =serve_glm.py= never imports them. |
+| =modules/red-snow.nix= | =serve.sh= | Unit runs as *root* for the page-cache drops (GB10 undercounts file cache as free unified memory); =preStart= downloads the checkpoint (=hf download … --revision 071adef=, resumable, skipped when cached); ExecStart = serve flags =-gs 112 --cache_size 262144 --cache_quant 4 --mtp --num_draft_tokens 2=. |
+
+Known trap (found during eval, now commented in the module): nixpkgs
+carries an *upstream* =python3.13-exllamav3= (1.5.0, x86_64-only).
+=python313.withPackages (ps: …)= hands the interpreter's *un-overlaid*
+package set as =ps=, so =ps.exllamav3= picked upstream and refused on
+aarch64. The module passes =pkgs.python313Packages.exllamav3= explicitly —
+exactly how the tensorfold unit handles the same situation.
+
+** TODO Phase 0: Commit the staged work
+:PROPERTIES:
+:CUSTOM_ID: commit
+:END:
+
+#+BEGIN_SRC shell
+cd ~/workspaces/nix-home
+git status --short          # expect the 9 files from [[#file-summary]]
+git commit
+#+END_SRC
+
+- The ~105 GB checkpoint and all runtime state live *outside* the store
+  (= /var/lib/redsnow=, = /var/lib/vllm/huggingface=) — nothing here makes
+  =nix gc= dangerous.
+- Leave =mono-gateway-evaluation.md= untracked (unrelated work).
+
+** TODO Phase 1: Build on target
+:PROPERTIES:
+:CUSTOM_ID: build-target
+:END:
+
+=colmena apply= (=buildOnTarget = true=) runs the real AOT CUDA compile on
+the Spark (~15–20 min for =exllamav3_ext=, =MAX_JOBS=16=). Build first so a
+compile failure never touches the running system:
+
+#+BEGIN_SRC shell
+just colmena-spark-build    # colmena build --on dgx-spark
+#+END_SRC
+
+Verify the extension landed before applying (on the Spark; the build
+products are in the store after =colmena-spark-build=):
+
+#+BEGIN_SRC shell
+ssh yuanw@dgx-spark.local
+nix build /etc/nixos#nixosConfigurations.dgx-spark.pkgs.python313Packages.exllamav3 -o /tmp/exl
+find -L /tmp/exl -name 'exllamav3_ext*.so'   # expect: .../site-packages/exllamav3/exllamav3_ext.*.so
+#+END_SRC
+
+A *missing* .so means setup.py built pure-python — the classic trap is
+torch not importable in the build sandbox, so the =CUDAExtension=
+was skipped (=EXLLAMA_NOCOMPILE= unset but =precompile and not torch=
+false). Fix in =packages/red-snow/default.nix= (=build-system=,
+=dependencies.torch=), not by adding a JIT fallback: the whole point of
+the AOT build is that first start never compiles.
+
+Missing CUDA *headers* (the bitsandbytes/cusparse class: =cusparse.h:
+No such file or directory=) means a redist package split its headers into
+another output — extend the =cudaHome= merge list. The import smoke test
+is Phase 3 itself: =serve_glm.py= imports =exllamav3_ext= before the
+first "Native API listening", so no separate import check is needed.
+
+** TODO Phase 2: First start
+:PROPERTIES:
+:CUSTOM_ID: first-start
+:END:
+
+1. One model at a time on 128 GB unified memory:
+   #+BEGIN_SRC shell
+   ssh yuanw@dgx-spark.local
+   sudo systemctl stop tensorfold     # frees the Qwen3.8 weights + KV
+   #+END_SRC
+2. Apply the new system:
+   #+BEGIN_SRC shell
+   just colmena-spark-apply            # colmena apply --on dgx-spark
+   #+END_SRC
+   (or from the host: =sudo nixos-rebuild switch --flake /etc/nixos=.)
+3. Start and watch:
+   #+BEGIN_SRC shell
+   sudo systemctl start red-snow
+   journalctl -fu red-snow
+   #+END_SRC
+   Expected sequence in the journal:
+   - =downloading … SAGE-2.49bpw (~105 GB) … (resumes if interrupted)= —
+     only on the very first start (hours on a LAN uplink); interrupted
+     runs resume.
+   - Then =Canonical chat template sha256=…=, weight load ~4–6 min
+     (page-cache drops visible via =free -g= — the dropper loop runs
+     every 2 s for at most 10 min, then =exec serve_glm.py=).
+   - Acceptance line: =Native API listening 0.0.0.0:8899=.
+4. =systemctl status red-snow= shows =active (running)=; the unit is
+   *manual-start by design* (=autoStart=false=): a boot never fights the
+   ~105 GB load against TensorFold or the download against a cold uplink.
+
+** TODO Phase 3: Smoke + acceptance
+:PROPERTIES:
+:CUSTOM_ID: acceptance
+:END:
+
+The recipe's =test.sh= is two curls; either run it from a checkout or just:
+
+1. Health + model list:
+   #+BEGIN_SRC shell
+   curl -s http://dgx-spark.local:8899/health | jq
+   curl -s http://dgx-spark.local:8899/v1/models | jq   # max_model_len 262144, chat_template_sha256
+   #+END_SRC
+2. Chat speed + MTP acceptance (thinking off, temp 0.7 / top_p 0.95 /
+   min_p 0 — the recipe's sampling):
+   #+BEGIN_SRC shell
+   curl -s http://dgx-spark.local:8899/v1/chat/completions \
+     -H 'Content-Type: application/json' \
+     -d '{"model":"RED-SNOW-5.3-FLASH-EXL3-2.49","messages":[{"role":"user","content":"Write a Python LRU cache class with O(1) get/put and unit tests."}],"temperature":0.7,"top_p":0.95,"min_p":0,"chat_template_kwargs":{"enable_thinking":false}}' \
+     | jq '.usage | {completion_tokens, decode_tok_s, draft_accept}'
+   #+END_SRC
+3. Tool calls:
+   #+BEGIN_SRC shell
+   curl -s http://dgx-spark.local:8899/v1/chat/completions \
+     -H 'Content-Type: application/json' \
+     -d '{"model":"RED-SNOW-5.3-FLASH-EXL3-2.49","messages":[{"role":"user","content":"Weather in Paris for 3 days? Use the tool."}],"tools":[{"type":"function","function":{"name":"get_weather","parameters":{"type":"object","properties":{"city":{"type":"string"},"days":{"type":"integer"}},"required":["city"]}}}],"chat_template_kwargs":{"enable_thinking":false}}' \
+     | jq '.choices[0] | {finish_reason, tool_calls: .message.tool_calls}'
+   #+END_SRC
+
+Acceptance (the recipe's measured numbers, single stream, MTP 2 drafts):
+
+| Check | Target |
+|-------+--------|
+| Long outputs (≥1,000 tok) decode | ~34 tok/s median (p10–p90 32.9–34.9) |
+| Prose decode | ~24 tok/s |
+| MTP draft acceptance (long) | ~84% |
+| MTP draft acceptance (prose) | ~47% |
+| Tool call | =finish_reason= = =tool_calls=, parsed =get_weather= |
+
+A materially slower decode (≈ container-era, not 2×) means the page-cache
+drops are not landing — check the unit runs as root and
+=/proc/sys/vm/drop_caches= writes appear in the journal.
+
+** TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1
+:PROPERTIES:
+:CUSTOM_ID: regression
+:END:
+
+The repo published a full Spark-Bench run (80 tests, 2 repeats, thinking
+off, uncapped output, TrueScore 85.1) for the *container* deployment. The
+native serving path changes none of the model bits (same engine commit,
+same quant revision, same flags), so a full re-bench is a redundancy check —
+but a spot run is cheap insurance against a silent environment difference
+(nixpkgs torch vs the =26.07= container image):
+
+- Same sampling as the report: temp 0.7 / top_p 0.95 / min_p 0,
+  thinking off.
+- Compare per-domain quality (agentic, code, instruction) — these move
+  little with engine-level noise; treat ±0.3 aggregate as noise (the
+  report's own caveat).
+- Decode speed *should match the container exactly*: same kernel commit,
+  same =sm_121= compile — differences point at the environment (torch
+  version, CUDA 13.2 vs the image), not the server.
+
+Skip entirely if the Phase 3 smoke numbers match the container baseline.
+
+** TODO Cleanup: formatter drift on two unrelated files
+:PROPERTIES:
+:CUSTOM_ID: fmt-drift
+:END:
+
+=nix fmt= (nixfmt, via treefmt) re-wraps comments in two files *not*
+touched by this work, every run:
+
+- =lib/mk-pkgs.nix=
+- =hosts/misfit/configuration.nix=
+
+Both are plain comment re-wraps (no code changes), pre-existing
+HEAD-vs-formatter drift. Decided *out of scope* for the RED-SNOW commit;
+either commit them separately as a pure-formatting change, or leave them.
+Do not =git add -A= over them.
+
+* File Change Summary
+:PROPERTIES:
+:CUSTOM_ID: file-summary
+:END:
+
+Already staged (eval-verified, =nix fmt= clean):
+
+| File                              | Action | Description                                                        |
+|-----------------------------------+--------+---------------------------------------------------------------------|
+| =packages/red-snow/src.nix=       | CREATE | Pinned sources: =exllamav3@7c1636f= + recipe =@b96fac2= (hashes verified) |
+| =packages/red-snow/default.nix=   | CREATE | AOT =sm_121= CUDA =exllamav3= (=build.sh= replacement)              |
+| =packages/red-snow/server.nix=     | CREATE | The recipe's =server/*.py= installed as-is                          |
+| =modules/red-snow.nix=            | CREATE | =services.red-snow= systemd unit (=serve.sh= replacement)           |
+| =packages/default.nix=            | MODIFY | Overlay entries (=exllamav3= into the =python313Packages= scope)    |
+| =hosts/dgx-spark/default.nix=     | MODIFY | Import =../../modules/red-snow.nix=                                |
+| =hosts/dgx-spark/configuration.nix= | MODIFY | =services.red-snow.enable = true= + hf-token secret                 |
+| =hosts/dgx-spark/readme.org=      | MODIFY | RED-SNOW section + link to this plan                               |
+| =docs/redsnow-native-plan.org=    | CREATE | This document                                                        |
+
+* References
+
+- Recipe: https://github.com/Weschera/RED-SNOW-5.3-Flash-2.49bpw-1x-DGX-Spark
+- Engine fork (RED-SNOW's DEPLOY.md pin): https://github.com/vcruz305/exllamav3
+  @ =7c1636fead6b…= (compare: =exllamav3.version = "1.5.1.post1"=)
+- Benchmark report: =results/spark-bench-report.md= in the recipe repo
+  (TrueScore 85.1, 34.4 tok/s median long-output decode)
+- Sibling native deployment in this repo: =modules/tensorfold.nix= +
+  =packages/tensorfold/= (Qwen3.8, port 8888 — stop before starting RED-SNOW)
+- Deployment tooling: =just colmena-spark-build= / =just colmena-spark-apply=
+  (=justfile:80-98=)
