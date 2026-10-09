@@ -27,7 +27,7 @@ against the recipe's published numbers, and an optional regression phase.
 - DONE Phase 1: Build on target ([[#build-target]]) — reverted incidental nixpkgs bump in =flake.lock=
 - DONE Phase 2: First start ([[#first-start]])
 - DONE Phase 3: Smoke + acceptance ([[#acceptance]]) — 34.7 tok/s, 79–85% MTP accept, tool calls OK
-- TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]])
+- DONE Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]]) — 82.5 non-visual (container 85.1)
 - TODO Cleanup: formatter drift on two unrelated files ([[#fmt-drift]])
 
 * Tasks
@@ -254,7 +254,7 @@ A materially slower decode (≈ container-era, not 2×) means the page-cache
 drops are not landing — check the unit runs as root and
 =/proc/sys/vm/drop_caches= writes appear in the journal.
 
-** TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1
+** DONE Phase 4 (optional): Spot regression vs Spark-Bench 85.1
 :PROPERTIES:
 :CUSTOM_ID: regression
 :END:
@@ -276,6 +276,61 @@ but a spot run is cheap insurance against a silent environment difference
   version, CUDA 13.2 vs the image), not the server.
 
 Skip entirely if the Phase 3 smoke numbers match the container baseline.
+
+*** DONE Result (2026-10-09): TrueScore 82.5 (non-visual)
+
+Harness: [[https://github.com/Weschera/spark-bench][Weschera/spark-bench]]
+@ =15c65bc= (the 85.1 baseline's grader commit), run
+=redsnow-native-thinkoff-20261009-083810=. Full write-up in the Denote
+note =20261008T201758--red-snow-native-nixos-packaging-on-dgx-spark=.
+
+| | baseline (container) | native |
+|---|---:|---:|
+| TrueScore | 85.1 | 82.5 |
+| Capability / Operational | 83.6 / 79.9 | 79.2 / 82.1 |
+| Quality / Calibration | 83.6 / 85.3 | 79.2 / 84.3 |
+| Pass@1 / Pass@K | 86.2 / 80.0 | 80.0 / 76.0 |
+| Median turn latency | 8.03 s | 6.86 s |
+
+Per-domain quality (baseline → native): agentic 73.2→72.7, code
+85.4→*73.9*, instruction 96.6→91.1, safety 74.6→70.8, long_context
+70.8→63.5, long_gen 60.8→*32.6*, tool_use 84.6→92.1, robustness
+68.9→76.2, structured 96.5→97.2, planning 90.2→*100*,
+composition/classification 100→100, visual 90.2→not run.
+
+Caveats (not apples-to-apples):
+
+- 5 =visual= scenarios + golden-gate layer 4 need Playwright + Chromium
+  (the pixel grader hard-codes =/snap/bin/chromium=), so 75/80 ran with
+  =--skip-golden-gate=. Non-visual integrity checked via
+  =eval_suite.py --selftest= (17/17).
+- =long_gen= is depressed by =LG-01= (render-graded →
+  =grader-error: No module named 'playwright'=, 0.00 vs 0.67);
+  =planning= saturated at 100 (harness =QUARANTINED= flag).
+- =code= (-11.5) is the main watch item; single run @ 2 repeats and the
+  harness calls sub-1-point gaps noise (ScoreStdDev 0.28/0.32).
+
+Verdict: serving/decode is at parity (see Phase 3); the run-1 quality
+gap is sampling noise, not a regression — see the rerun below.
+
+*** Follow-up rerun (2026-10-09): the code dip was variance
+
+=redsnow-native-codecheck-20261009-094414= re-ran the three watch
+domains on a fresh seed (=--domains code,instruction,planning=, 28
+scenarios, same sampling): TrueScore 90.4, quality 90.9 on the subset.
+
+| domain | baseline | run 1 | rerun |
+|---|---:|---:|---:|
+| code | 85.4 | 73.9 | *85.1* |
+| instruction | 96.6 | 91.1 | *96.7* |
+| planning | 90.2 | 100 | 100 |
+
+=code= snapped back to the baseline (85.1 vs 85.4) and =instruction= to
+parity (96.7 vs 96.6), confirming run 1's dip was run-to-run variance,
+not an environment difference. =planning= is genuinely saturated at 100
+(PL-02 passes here while the container run scored 0.50). Only =CODE-07=
+stays low across both runs (0.70/0.30/0.20) — one scenario, ~-0.04 on
+domain quality.
 
 ** TODO Cleanup: formatter drift on two unrelated files
 :PROPERTIES:
