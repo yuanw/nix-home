@@ -209,7 +209,13 @@
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
-    jellyfin-admin.file = ../../secrets/jellyfin-admin.age;
+    # jellyfin-init `cat`s this to read the admin password hash, and it runs as
+    # the unit's User (jellyfin), not root — agenix's default root:root 0600
+    # makes that cat fail, the ERR trap fires, and the server never starts.
+    jellyfin-admin = {
+      file = ../../secrets/jellyfin-admin.age;
+      owner = config.services.jellyfin.user;
+    };
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
