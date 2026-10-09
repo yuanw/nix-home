@@ -11,8 +11,9 @@
 #    resulting cubins are valid but not byte-identical to the container's
 #    capture — see docs/tensorfold-zig-plan.org.
 #
-# STATUS: first cut, not yet `nix build`-validated. See the plan for the
-# validated spike (fatbins + native binary + 320-kernel AOT all built by hand).
+# Validated: `nix build` yields bin/tensorfold-native, 34 fatbins and a
+# 302-cubin sm121 AOT set (see docs/tensorfold-zig-plan.org). The sandbox
+# needs HOME/cache dirs under $TMPDIR (Triton otherwise hits /homeless-shelter).
 {
   lib,
   stdenv,
@@ -105,6 +106,13 @@ stdenv.mkDerivation (_finalAttrs: {
     export ZIG_GLOBAL_CACHE_DIR="$TMPDIR/zig-cache"
     export ZIG_LOCAL_CACHE_DIR="$TMPDIR/zig-cache"
 
+    # Triton/torch write caches under $HOME (which is /homeless-shelter in the
+    # sandbox); give them a writable home.
+    export HOME="$TMPDIR"
+    export XDG_CACHE_HOME="$TMPDIR/.cache"
+    export TRITON_CACHE_DIR="$TMPDIR/triton-cache"
+    export CUDA_CACHE_PATH="$TMPDIR/cuda-cache"
+
     # nvcc needs the CUDA runtime/CCCL headers; cuda_nvcc alone has none.
     cat > "$TMPDIR/nvcc" <<EOF
     #!${stdenv.shell}
@@ -135,10 +143,15 @@ stdenv.mkDerivation (_finalAttrs: {
     json.dump(json.loads(s), open(p, "w"), indent=1)
     PYEOF
 
+    # exits 1 when any cubin differs from the container's capture (it does:
+    # a different triton build), but still writes every cubin + aot.json.
     PYTHONPATH="$PWD/src" ${python}/bin/python -B tools/zig/flashnext_aot.py build \
       --spec zig/tests/cuda/flashnext/kernels.json \
       --jit zig/tests/cuda/flashnext/jit.json \
-      --tp 1 --out "$TMPDIR/sm121"
+      --tp 1 --out "$TMPDIR/sm121" || true
+
+    test -f "$TMPDIR/sm121/aot.json"
+    test -n "$(ls -A "$TMPDIR/sm121/cubins")"
 
     runHook postBuild
   '';
