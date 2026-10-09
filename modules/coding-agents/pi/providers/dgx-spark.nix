@@ -8,19 +8,18 @@ inputs.nixpi.lib.nixpi.mkPiProvider {
   name = "dgx-spark";
   api = "openai-completions";
   apiKey = "not-needed";
-  baseUrl = "http://dgx-spark.local:8888/v1";
+  baseUrl = "http://dgx-spark.local:8890/v1";
   models = [
     {
       _launch = true;
       contextWindow = 262144;
       # Must match the served name exactly (TensorFold SERVED_NAME).
       id = "Qwen3.8-Flash-Next";
-      input = [
-        "text"
-        "image"
-      ];
+      # The Zig service currently runs text-only (services.tensorfold-zig
+      # passes no --vision); add "image" once its vision helper is packaged.
+      input = [ "text" ];
       maxTokens = 32768;
-      name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
+      name = "Qwen3.8 Flash Next (DGX Spark, TensorFold Zig)";
       reasoning = true;
       thinkingLevelMap = {
         off = "off";
