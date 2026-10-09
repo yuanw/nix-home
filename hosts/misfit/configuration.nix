@@ -387,7 +387,11 @@
   # initrd-ssh unlock shell on port 2222 is unreachable = dead-end boot.
   # igc/i40e (the SFP cards) are idle; harmless, keep them listed.
   boot.initrd.kernelModules = [ "r8169" ]; # modprobed at stage-1 start (modules-load.d)
-  boot.initrd.availableKernelModules = [ "igc" "i40e" "r8169" ]; # copied into the initrd image
+  boot.initrd.availableKernelModules = [
+    "igc"
+    "i40e"
+    "r8169"
+  ]; # copied into the initrd image
   boot.zfs.forceImportRoot = false;
   # Remote-unlock support for the encrypted zroot:
   # - keep asking for the pool passphrase long enough (default 0 = wait
@@ -418,7 +422,10 @@
   # waits on a human; keep the module's own deps + add sshd/networkd (safe
   # whatever the list-merge semantics; duplicates are harmless)
   boot.initrd.systemd.services.zfs-import-zroot = {
-    wants = [ "sshd.service" "systemd-networkd.service" ];
+    wants = [
+      "sshd.service"
+      "systemd-networkd.service"
+    ];
     after = [
       "systemd-modules-load.service"
       "systemd-ask-password-console.service"
