@@ -28,7 +28,7 @@ against the recipe's published numbers, and an optional regression phase.
 - DONE Phase 2: First start ([[#first-start]])
 - DONE Phase 3: Smoke + acceptance ([[#acceptance]]) — 34.7 tok/s, 79–85% MTP accept, tool calls OK
 - DONE Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]]) — 82.5 non-visual (container 85.1)
-- TODO Cleanup: formatter drift on two unrelated files ([[#fmt-drift]])
+- DONE Cleanup: formatter drift on two unrelated files ([[#fmt-drift]]) — =689a87db=
 
 * Tasks
 
@@ -332,7 +332,7 @@ not an environment difference. =planning= is genuinely saturated at 100
 stays low across both runs (0.70/0.30/0.20) — one scenario, ~-0.04 on
 domain quality.
 
-** TODO Cleanup: formatter drift on two unrelated files
+** DONE Cleanup: formatter drift on two unrelated files
 :PROPERTIES:
 :CUSTOM_ID: fmt-drift
 :END:
@@ -343,10 +343,13 @@ touched by this work, every run:
 - =lib/mk-pkgs.nix=
 - =hosts/misfit/configuration.nix=
 
-Both are plain comment re-wraps (no code changes), pre-existing
-HEAD-vs-formatter drift. Decided *out of scope* for the RED-SNOW commit;
-either commit them separately as a pure-formatting change, or leave them.
-Do not =git add -A= over them.
+Both are comment re-wraps plus single-line list literals expanding to
+nixfmt's multi-line style (no semantic change; difftastic reports no
+syntactic changes) — pre-existing HEAD-vs-formatter drift.
+
+Done as a separate pure-formatting commit, =689a87db= (=treefmt: nixfmt
+lib/mk-pkgs.nix + hosts/misfit/configuration.nix=), so it stays out of
+the RED-SNOW history. =mono-gateway-evaluation.md= was left untracked.
 
 * File Change Summary
 :PROPERTIES:
