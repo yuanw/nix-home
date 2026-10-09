@@ -130,7 +130,7 @@ run while a model is still serving.
 - DONE Route analysis + native feasibility (nixpkgs =zig_0_17=; CPU-only fatbins + Triton AOT)
 - DONE Phase 0: Recon — =docker= is the podman shim; pinned nixpkgs lacks =zig_0_17=
 - DONE Phase 1: Provision — =nix build= validated (34 fatbins, 302-cubin AOT)
-- TODO Phase 2: First start + smoke
+- DONE Phase 2: First start + smoke — serving on :8890 (chat + tool calls OK)
 - TODO Phase 3: Spark-Bench
 - TODO Phase 4: Compare + decide
 
@@ -237,7 +237,7 @@ Expect: image =tensorfold-qwen38:zig-db28187-*; checkpoint under
 prefers to keep the GPU workload on the MLX checkpoint — but note the Zig
 engine reads INT4-AutoRound, not MLX, so this checkpoint is required.
 
-** TODO Phase 2: First start + smoke
+** DONE Phase 2: First start + smoke
 
 #+BEGIN_SRC shell
 ./start.sh                    # builds/loads, smoke-tests, prints "LIVE! on port 8888"
@@ -250,6 +250,27 @@ Gate: =/v1/models= id = =Qwen3.8-Flash-Next=; a tool-call request returns
 parseable =tool_calls= (Spark-Bench preflight needs this). Watch
 =MemAvailable= stays ≥ =MEM_FLOOR_GIB= during load (the recipe stops the
 server below it).
+
+*** DONE Result (2026-10-09): serving on :8890
+
+The native engine loaded the INT4-AutoRound checkpoint and served in 68.1 s
+(38.85 GiB sequence budget, fp8 KV), and the *re-captured* cubin set was
+accepted at runtime — the one open risk is closed. =/v1/models= returns
+=Qwen3.8-Flash-Next=; chat returns valid code (=stop=); a tool request
+returns =finish_reason=tool_calls= with a parsed
+=get_weather {"city":"Paris","days":3}=.
+
+Two packaging fixes this surfaced (both in =default.nix=):
+
+- *ELF interpreter*: zig emits the musl loader (=/lib/ld-musl-aarch64.so.1=,
+  absent on NixOS) but the binary needs glibc, so =postFixup= sets
+  =--set-interpreter ${glibc}/lib/ld-linux-aarch64.so.1= plus the rpath.
+- *AOT env needs numpy*: =exl3_mm= imports it; without it the =_embed=
+  variants never compiled and the engine died with =MissingTritonVariant=.
+
+Service: =services.tensorfold-zig=, port 8890, =autoStart=false=, runs as
+root, model = the pinned snapshot dir, cubins via
+=TENSORFOLD_CUDA_KERNELS=${pkgs.tensorfold-zig}/share/tensorfold/cuda/sm121=.
 
 ** TODO Phase 3: Spark-Bench (same protocol as the other runs)
 
