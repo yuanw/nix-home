@@ -1,0 +1,280 @@
+#+title:      TensorFold Zig (tensorfold-native) on dgx-spark — tryout + Spark-Bench
+#+date:       [2026-10-09 Fri]
+#+filetags:   :dgxspark:tensorfold:zig:nixos:
+#+identifier: tensorfold-zig-plan
+
+* Goal
+
+Try upstream TensorFold's *Zig* engine (1.0.0 = =tensorfold-native=) on the
+single DGX Spark, serving Qwen3.8 Flash Next over an OpenAI-compatible API
+on :8888, then run the *same* Spark-Bench suite already used against the
+Python TensorFold and red-snow deployments so all three are comparable.
+
+* Why now
+
+- The repo's current =packages/tensorfold= pins the *Python* engine:
+  =ashhart/TensorFold= @ =17c73e1= (v0.6.1), served via =python3-env=.
+- Upstream has since become a Zig binary (repo language: Zig; 1.0.0
+  "serves language models from a Zig binary … no Python or MLX at serve
+  time"). Upstream 1.0.0 qualifies Flash Next on *Metal* only; the CUDA
+  single-Spark path is the gated branch =zig-flashnext= plus the CUDA
+  family registry from [[https://github.com/ashhart/TensorFold/pull/443][PR #443]] (=59e77e8=).
+- MiaAI-Lab packaged exactly that path (container + ~9 patches) for a
+  single GB10; it is the reference deployment to copy.
+
+* Current state (2026-10-09)
+
+| deployment | engine | checkpoint | TrueScore (non-visual) | median latency |
+| native red-snow (container baseline) | exllamav3 (container) | SAGE 2.49bpw | 85.1 | 8.03 s |
+| native red-snow | exllamav3 AOT | SAGE 2.49bpw | 82.5 | 6.86 s |
+| native TensorFold | TensorFold *Python* v0.6.1 | Vontra MLX-4bit-MTP | 81.4 | 2.14 s |
+| **TensorFold Zig (this plan)** | TensorFold *Zig* =zig-flashnext= | azampatti INT4-AutoRound | — | — |
+
+Bench harness: =Weschera/spark-bench= @ =15c65bc= — 75/80 scenarios
+(=visual= + =LG-01= need Playwright/Chromium), 2 repeats, thinking off,
+temp 0.7 / top_p 0.95 / min_p 0, uncapped, =--skip-throughput
+--skip-golden-gate=.
+
+* Key pins / facts
+
+** Engine
+- Repo: =https://github.com/ashhart/TensorFold.git=, branch =zig-flashnext=,
+  commit =db281878ddb836fd0df510d8771ecb7e0fe47d26= (=TF_REF=).
+- Zig =0.17.0= (=.zig-version=), sha256 =9e8d1166…34ff8= (official tarball).
+- Serve binary =zig-out/native/bin/tensorfold-native=; default listen
+  =127.0.0.1:8080=; =serve <model-dir|repo> --name … --port …=.
+- Native build (release): =zig build native -Dcpu=… -Dversion=…=; the
+  Linux CUDA server needs fatbins (=zig build fatbins -Dtarget=…
+  -Dnvcc=… -Dsm=121=, =SM121=), optionally + Triton AOT cubins
+  (=share/tensorfold/cuda/sm121/=).
+
+** MiaAI-Lab recipe (the CUDA single-Spark path)
+- Repo =MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold=, tree
+  =364f21a1=. Files: =start.sh= (14 KB), =stop.sh=,
+  =scripts/{prepare,config,banner,publish-image}.sh=, =patches/0001…0009=
+  (~8 MB total: build-registry-server, kernels, config-weights,
+  triton-replay-torch-ops, engine, two-ranks, serving, kernel-spec-tools,
+  vision-python).
+- Base image =nvcr.io/nvidia/pytorch:26.07-py3=; image tag
+  =tensorfold-qwen38:zig-db28187-<patches+Dockerfile hash>=; prebuilt at
+  =ghcr.io/miaai-lab/qwen3.8-flash-next-single-dgx-spark-tensorfold=.
+- Flags/env (=scripts/config.sh=): =SERVED_NAME=Qwen3.8-Flash-Next=,
+  =PORT=8888=, =HOST=0.0.0.0=, =CONTEXT=262144=, =PARALLEL=8=,
+  =KV_DTYPE=fp8= (bf16 exact), =MAX_TOKENS=32768=, =THINKING=1=,
+  =TEMPERATURE=1.0 TOP_P=0.95 TOP_K=20=, =VISION=1=,
+  =TF_FLASHNEXT_DEPTH=15=, =KERNELS_PATH=/opt/tensorfold/share/tensorfold/cuda/sm121=,
+  =TENSORFOLD_MEMORY_RESERVE_GIB=10=, =MEM_FLOOR_GIB=10=.
+- Checkpoint: =azampatti/Qwen3.8-Flash-Next-125B-A5B-INT4-AutoRound= @
+  =1464274120d36a4d8fcaa934552334a7d83ce0fd= (~122 GiB; GPTQ int4
+  experts, FP8 n-gram table in =ple-table/=). *Different from the Python
+  recipe's Vontra MLX-4bit-MTP* — a fresh ~122 GiB download.
+
+** Host (dgx-spark, NixOS)
+- =docker= and =podman= both report =5.8.7= → =docker= is almost
+  certainly the podman-docker shim; NVIDIA CDI spec present at
+  =/var/run/cdi/nvidia-container-toolkit.json=; =nvidia-ctk= not on PATH;
+  =yuanw= *not* in the =docker= group; 3.2 TB free on =/=.
+- No large model may share the GPU: stop =red-snow= / =tensorfold= first.
+
+* Routes
+
+*** A — run the MiaAI-Lab recipe as-is (default, fastest)
+Clone the recipe on the Spark, =scripts/prepare.sh= (image + checkpoint),
+=./start.sh=. Least work; validates the engine and gives the benchmark.
+Risks: =docker=-vs-podman differences, group/permissions, GHCR pull,
+image build (Zig + patches) time.
+
+*** B — extract the image's engine into the Nix store (middle path)
+Pull the prebuilt (or locally built) =tensorfold-qwen38:zig-…= image and
+lift =/opt/tensorfold/{bin,lib,share}= into a fixed-output derivation, then
+run =tensorfold-native= from a Nix systemd unit (no container at serve
+time) with =TENSORFOLD_CUDA_KERNELS= pointing at the extracted =sm121=
+cubins. Mirrors how the repo treated the old containers as toolchain
+suppliers. Fiddly: CUDA runtime libs / =RUNTIME.md=.
+
+*** C — fully native Nix build (recommended target; see feasibility below)
+Package =zig_0_17= from nixpkgs, apply =patches/0001…0009= to =TF_REF=,
+=zig build fatbins install native= with nixpkgs =cudaPackages= nvcc, and
+reproduce the Triton AOT capture with nixpkgs =python313Packages.{torch,triton}=
+(=tools/zig/flashnext_aot.py=). Ship the binary + =sm121= cubins in the
+store and point =TENSORFOLD_CUDA_KERNELS= at them. This is the goal;
+Routes A/B are a quick engine sanity check and a fallback.
+
+** Native feasibility — verified (2026-10-09)
+
+Reading the recipe's Dockerfile (=scripts/prepare.sh=) against nixpkgs,
+a container-free build is viable:
+
+- *Zig*: nixpkgs ships =zig_0_17= = 0.17.0 (aarch64-linux) — the exact
+  =.zig-version= pin. No tarball fetch needed.
+- *Engine*: clean =TF_REF= checkout + =git apply patches/*.patch=, then
+  =zig build -Dnvcc=<nvcc> -Doptimize=fast --prefix … fatbins install native=
+  (=fatbins= = sm_121 SASS via nvcc; no GPU at build time).
+- *Triton AOT*: =PYTHONPATH=src python -B tools/zig/flashnext_aot.py build
+  --spec zig/tests/cuda/flashnext/kernels.json --jit zig/tests/cuda/flashnext/jit.json
+  --tp 1 --out …/share/tensorfold/cuda/sm121=, run *during* =docker build=
+  (no GPU). Reproducible with nixpkgs =python313Packages.{torch,triton}=;
+  =KERNEL_SOURCE_MTIME= only pins source mtimes for reproducible cubins.
+- *Runtime*: =TENSORFOLD_CUDA_KERNELS=<…/cuda/sm121>=; CUDA libs from
+  =cudaPackages= + =/run/opengl-driver/lib=; vision helper (Pillow, PyAV,
+  =transformers==5.17.0=) via =TENSORFOLD_VISION_PYTHONPATH= — text-only
+  (=VISION=0=) can ship first, since the Spark-Bench domains are text.
+
+Only open risk: matching the container's Triton version closely enough
+that the AOT cubins are equivalent (byte-identical is not required; the
+engine only needs a valid captured set). The build needs no GPU, so it can
+run while a model is still serving.
+
+* Status
+
+- DONE Route analysis + native feasibility (nixpkgs =zig_0_17=; CPU-only fatbins + Triton AOT)
+- TODO Phase 0: Recon + route decision (default C: native)
+- TODO Phase 1: Provision (native Nix build; container/checkpoint as fallback)
+- TODO Phase 2: First start + smoke
+- TODO Phase 3: Spark-Bench
+- TODO Phase 4: Compare + decide
+
+* Tasks
+
+** TODO Phase 0: Recon + route decision
+
+1. Confirm the container toolchain: =docker info | grep -i runtime=,
+   =podman info | grep -i nvidia=, =podman run --rm --device
+   nvidia.com/gpu=all nvcr.io/nvidia/pytorch:26.07-py3 nvidia-smi=.
+   Decide real-Docker vs podman-docker; add =yuanw= to the right group or
+   run the recipe with =sudo -E= (note: clone + download then land in
+   =root='s home).
+2. Check GHCR reachability and whether the prebuilt image exists for
+   =zig-db28187= (=ghcr.io/miaai-lab/…:zig-db28187-<hash>=); otherwise the
+   first =prepare.sh= builds locally (Zig compile — minutes to tens of min).
+3. Free the GPU: =systemctl stop red-snow tensorfold=; confirm
+   =free -g= ~119 GB and =df -h /= ≥ ~150 GB.
+4. Pick the route (default A); record it here.
+
+** TODO Phase 1: Provision engine + checkpoint
+
+*** 1a — native Nix (default)
+
+New =packages/tensorfold-zig/= + =modules/tensorfold-zig.nix=:
+
+- =src.nix=: =fetchFromGitHub ashhart/TensorFold @ TF_REF=, plus the
+  recipe repo (=MiaAI-Lab/…=) at a pinned commit for =patches/*.patch=.
+- =default.nix=: =zig_0_17=; =cudaPackages.cuda_nvcc=;
+  =python313Packages.{torch,triton}=; =postPatch= applies the patches;
+  =zig build fatbins install native -Dnvcc=… -Doptimize=fast=; then the
+  AOT capture into =$out/share/tensorfold/cuda/sm121=; install
+  =bin/tensorfold-native= with a runpath to =cudaPackages= +
+  =/run/opengl-driver/lib=.
+- =modules/tensorfold-zig.nix=: =services.tensorfold-zig= (port 8890 so
+  the Python unit keeps 8888), =TENSORFOLD_CUDA_KERNELS=, =THINKING=1=,
+  =KV_DTYPE=fp8=, =VISION=0= first.
+
+Spike before committing to the package: in a =nix shell= with =zig_0_17=
+and =cudaPackages=, checkout =TF_REF=, apply the patches, and run just the
+=fatbins= step — that is the part that can fail on toolchain mismatch.
+
+*** 1b — container (fallback / sanity check)
+
+#+BEGIN_SRC shell
+git clone https://github.com/MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold
+cd Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold
+scripts/prepare.sh          # preflight, image (GHCR then local build), checkpoint fetch + shard check
+#+END_SRC
+
+Expect: image =tensorfold-qwen38:zig-db28187-*; checkpoint under
+=~/.cache/huggingface/hub/models--azampatti--Qwen3.8-Flash-Next-125B-A5B-INT4-AutoRound=
+(~122 GiB, ~25 min at ~72 MB/s). Skip the fresh download if the user
+prefers to keep the GPU workload on the MLX checkpoint — but note the Zig
+engine reads INT4-AutoRound, not MLX, so this checkpoint is required.
+
+** TODO Phase 2: First start + smoke
+
+#+BEGIN_SRC shell
+./start.sh                    # builds/loads, smoke-tests, prints "LIVE! on port 8888"
+curl -s http://dgx-spark.local:8888/v1/models | jq
+curl -s http://dgx-spark.local:8888/v1/chat/completions -H 'Content-Type: application/json' \
+  -d '{"model":"Qwen3.8-Flash-Next","messages":[{"role":"user","content":"Say hi in one line."}],"max_tokens":64}'
+#+END_SRC
+
+Gate: =/v1/models= id = =Qwen3.8-Flash-Next=; a tool-call request returns
+parseable =tool_calls= (Spark-Bench preflight needs this). Watch
+=MemAvailable= stays ≥ =MEM_FLOOR_GIB= during load (the recipe stops the
+server below it).
+
+** TODO Phase 3: Spark-Bench (same protocol as the other runs)
+
+#+BEGIN_SRC shell
+cd /tmp/spark-bench          # Weschera/spark-bench @ 15c65bc
+export SPARK_BENCH_EXTRA_BODY='{"top_p":0.95,"min_p":0}'
+python3 -u spark_bench.py eval \
+  --label tensorfold-zig-qwen38-thinkoff \
+  --endpoint http://dgx-spark.local:8888/v1 \
+  --model Qwen3.8-Flash-Next \
+  --thinking off --repeats 2 --temperature 0.7 --tier all \
+  --uncapped --timeout 0 --skip-throughput --skip-golden-gate \
+  --domains agentic,instruction,structured,long_context,code,safety,robustness,tool_use,planning,composition,classification,long_gen \
+  --notes "TensorFold Zig (native binary, INT4-AutoRound) single Spark"
+#+END_SRC
+
+Run detached (=nohup … & disown=), ~45 min; then compare per-domain
+against the Python-TensorFold =tensorfold-qwen38-thinkoff= run and the
+red-snow runs.
+
+** TODO Phase 4: Compare + decide
+
+Read =results/runs/tensorfold-zig-qwen38-thinkoff-*.md=; compare domain
+quality, TrueScore, and median latency:
+
+| | Python TF (81.4) | Zig TF (?) |
+|---|---|---|
+| code / instruction | 90.1 / 96.7 | ? |
+| agentic / tool_use | 62.1 / 79.2 | ? |
+| long_gen / long_context | 2.5 / 27.0 | ? |
+| median latency | 2.14 s | ? |
+
+Decide: keep Zig as the TensorFold deployment, keep Python, or keep both
+behind a switch. Note the checkpoint differs, so quality deltas confound
+engine vs quant.
+
+** TODO Phase 5 (optional): native Nix packaging (Routes B/C)
+
+Superseded by Route C above: this is now the main line, not a follow-up.
+Route B (extract engine + =sm121= cubins from the image into a FOD, Nix
+unit with =TENSORFOLD_CUDA_KERNELS=) remains the fallback if the native
+Triton AOT capture proves troublesome.
+
+* Comparability caveats
+
+- *Different checkpoint.* Zig serves INT4-AutoRound (top-5 experts, 4.8B
+  active); its authors note ~10 % lower general capability than the
+  full-expert model. A lower Spark-Bench score than the Python run does
+  not mean the Zig engine is worse.
+- Same harness limits as before: 75/80 scenarios, =--skip-golden-gate=,
+  =LG-01= and =visual= unavailable without Playwright/Chromium.
+- FP8 KV is lossy (~98.8 % top-1 agreement with bf16); use =KV_DTYPE=bf16=
+  if exactness matters more than cache size.
+- =THINKING=1= is the recipe default; the bench sends
+  =enable_thinking=false= — verify the Zig server honours it (the README
+  says request fields override serve flags).
+- The Spark-Bench leaderboard's "TensorFold Zig" row is a *different*
+  config (Qwen3.8 Flash Next *NVFP4*, 2 Sparks TP2, 77.9) — not this run.
+
+* Risks / unknowns
+
+- =docker= on this host may be podman-docker with CDI; the recipe assumes
+  Docker. Phase 0 must resolve this before Phase 1.
+- GHCR prebuilt image may not exist for the pinned =TF_REF=; a local image
+  build compiles Zig + patches.
+- Fresh ~122 GiB checkpoint download; both checkpoints together plus the
+  image want ~150 GB (3.2 TB free, fine).
+- One-model-at-a-time on 128 GB: the Zig boot needs ~92 GiB =MemAvailable=
+  and the recipe refuses below =MEM_FLOOR_GIB= 10.
+
+* References
+
+- Zig engine: https://github.com/ashhart/TensorFold (1.0.0; branch =zig-flashnext=)
+- CUDA registration: https://github.com/ashhart/TensorFold/pull/443
+- Recipe: https://github.com/MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold
+- Checkpoint: https://huggingface.co/azampatti/Qwen3.8-Flash-Next-125B-A5B-INT4-AutoRound
+- Harness: =Weschera/spark-bench= @ =15c65bc= (see the Denote note and =docs/redsnow-native-plan.org=)
+- Current native Python TensorFold: =packages/tensorfold/=, =modules/tensorfold.nix=
