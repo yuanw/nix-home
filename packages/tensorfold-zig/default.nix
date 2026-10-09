@@ -22,6 +22,7 @@
   symlinkJoin,
   xz,
   git,
+  patchelf,
   cudaPackages,
   python313Packages,
 }:
@@ -79,6 +80,7 @@ let
   python = python313Packages.python.withPackages (ps: [
     ps.torch
     ps.triton
+    ps.numpy
   ]);
 in
 stdenv.mkDerivation (_finalAttrs: {
@@ -90,6 +92,7 @@ stdenv.mkDerivation (_finalAttrs: {
   nativeBuildInputs = [
     git
     xz
+    patchelf
   ];
 
   postPatch = ''
@@ -163,6 +166,17 @@ stdenv.mkDerivation (_finalAttrs: {
     cp -r zig-out/fatbin "$out/share/tensorfold/fatbin"
     cp -r "$TMPDIR/sm121" "$out/share/tensorfold/cuda/sm121"
     runHook postInstall
+  '';
+
+  # zig picks the musl interpreter for a native link (and there is no
+  # /lib/ld-musl-aarch64.so.1 on NixOS); the binary actually needs glibc
+  # (NEEDED libc.so.6), so point it at the Nix glibc loader and bake the
+  # glibc + CUDA rpath.
+  postFixup = ''
+    patchelf \
+      --set-interpreter ${stdenv.cc.libc}/lib/ld-linux-aarch64.so.1 \
+      --set-rpath "${stdenv.cc.libc}/lib:${cudaHome}/lib64:${cudaHome}/lib" \
+      "$out/bin/tensorfold-native"
   '';
 
   meta = {
