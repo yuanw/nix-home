@@ -131,7 +131,7 @@ run while a model is still serving.
 - DONE Phase 0: Recon — =docker= is the podman shim; pinned nixpkgs lacks =zig_0_17=
 - DONE Phase 1: Provision — =nix build= validated (34 fatbins, 302-cubin AOT)
 - DONE Phase 2: First start + smoke — serving on :8890 (chat + tool calls OK)
-- TODO Phase 3: Spark-Bench
+- DONE Phase 3: Spark-Bench — TrueScore 81.7 (py 81.4, red-snow 82.5, container 85.1)
 - TODO Phase 4: Compare + decide
 
 * Tasks
@@ -272,7 +272,7 @@ Service: =services.tensorfold-zig=, port 8890, =autoStart=false=, runs as
 root, model = the pinned snapshot dir, cubins via
 =TENSORFOLD_CUDA_KERNELS=${pkgs.tensorfold-zig}/share/tensorfold/cuda/sm121=.
 
-** TODO Phase 3: Spark-Bench (same protocol as the other runs)
+** DONE Phase 3: Spark-Bench (same protocol as the other runs)
 
 #+BEGIN_SRC shell
 cd /tmp/spark-bench          # Weschera/spark-bench @ 15c65bc
@@ -290,6 +290,41 @@ python3 -u spark_bench.py eval \
 Run detached (=nohup … & disown=), ~45 min; then compare per-domain
 against the Python-TensorFold =tensorfold-qwen38-thinkoff= run and the
 red-snow runs.
+
+*** DONE Result (2026-10-09): TrueScore 81.7
+
+Run =tensorfold-zig-qwen38-thinkoff-20261009-133636= (75/80 non-visual,
+2 repeats, same protocol). Valid, 0 errors, Pass@1 = Pass@K = 84.0%,
+ScenStdDev 0.0 (deterministic, like the Python engine).
+
+| deployment | TrueScore | Quality | Operational | median latency |
+|---|---:|---:|---:|---:|
+| container red-snow | 85.1 | 83.6 | 79.9 | 8.03 s |
+| native red-snow | 82.5 | 79.2 | 82.1 | 6.86 s |
+| native TensorFold Python | 81.4 | 75.7 | 93.2 | 2.14 s |
+| **native TensorFold Zig** | **81.7** | 78.1 | 93.1 | **2.20 s** |
+
+Per-domain quality:
+
+| domain | container | red-snow | TF-py | TF-zig |
+|---|---:|---:|---:|---:|
+| agentic | 71.8 | 71.8 | 62.1 | *74.3* |
+| code | 84.1 | 72.4 | 90.1 | 88.6 |
+| instruction | 95.6 | 88.1 | 96.7 | 90.9 |
+| safety | 74.3 | 70.3 | 81.8 | 78.8 |
+| robustness | 68.8 | 77.5 | 100 | 77.5 |
+| tool_use | 85.0 | 92.5 | 79.2 | 76.7 |
+| planning | 90.0 | 100 | 82.0 | 82.0 |
+| structured | 96.0 | 97.0 | 100 | 100 |
+| long_context | 64.5 | 58.5 | 27.0 | 12.5 |
+| long_gen | 61.5 | 33.0 | 2.5 | *30.5* |
+
+The Zig engine lands within 0.3 TrueScore of the Python one (81.7 vs 81.4)
+on a *different* checkpoint (INT4-AutoRound vs Vontra MLX-4bit) and at the
+same speed (2.20 vs 2.14 s median): the Zig rewrite is a drop-in, not a
+regression. It is notably stronger on agentic and long_gen and weaker on
+tool_use/long_context. As before, =visual= and =LG-01= are excluded (no
+Playwright), and the container row is a different checkpoint.
 
 ** TODO Phase 4: Compare + decide
 
