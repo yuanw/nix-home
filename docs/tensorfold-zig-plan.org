@@ -78,7 +78,7 @@ temp 0.7 / top_p 0.95 / min_p 0, uncapped, =--skip-throughput
 
 * Routes
 
-*** A — run the MiaAI-Lab recipe as-is (default, fastest)
+*** A — run the MiaAI-Lab recipe as-is (fallback/sanity check)
 Clone the recipe on the Spark, =scripts/prepare.sh= (image + checkpoint),
 =./start.sh=. Least work; validates the engine and gives the benchmark.
 Risks: =docker=-vs-podman differences, group/permissions, GHCR pull,
@@ -128,7 +128,7 @@ run while a model is still serving.
 * Status
 
 - DONE Route analysis + native feasibility (nixpkgs =zig_0_17=; CPU-only fatbins + Triton AOT)
-- TODO Phase 0: Recon + route decision (default C: native)
+- DONE Phase 0: Recon — =docker= is the podman shim; pinned nixpkgs lacks =zig_0_17=
 - TODO Phase 1: Provision (native Nix build; container/checkpoint as fallback)
 - TODO Phase 2: First start + smoke
 - TODO Phase 3: Spark-Bench
@@ -149,7 +149,22 @@ run while a model is still serving.
    first =prepare.sh= builds locally (Zig compile — minutes to tens of min).
 3. Free the GPU: =systemctl stop red-snow tensorfold=; confirm
    =free -g= ~119 GB and =df -h /= ≥ ~150 GB.
-4. Pick the route (default A); record it here.
+4. Pick the route — *native (C)* — and record the findings.
+
+*** DONE Result (2026-10-09)
+
+- =docker= on the Spark is the **podman shim**
+  (=/nix/store/…podman-5.8.7/bin/podman=), so the MiaAI-Lab recipe's
+  Dockerfile/heredoc build and =--gpus= usage make Route A a poor primary
+  path. Native it is.
+- GHCR is reachable (401 without auth); nothing pulled.
+- **Pinned nixpkgs (=c59305bab2=) has no =zig_0_17=** — only up to
+  =zig_0_16=. Deliver Zig 0.17.0 from the repo's =nixpkgs-master= input,
+  or (as the recipe does) the official tarball
+  =https://ziglang.org/download/0.17.0/zig-aarch64-linux-0.17.0.tar.xz=
+  (sha256 =9e8d11661d4ae3bd57702a3832781e23ad151dde5798e16a5ccd503f65234ff8=).
+- The native build needs no GPU, so it can proceed while a model still
+  serves (tensorfold was active during this recon).
 
 ** TODO Phase 1: Provision engine + checkpoint
 
