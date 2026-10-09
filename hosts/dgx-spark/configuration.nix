@@ -21,6 +21,34 @@
   # modules/dgx-spark.nix:164-174 and plans/ornith-dgx-spark-docker.org.
   hardware.dgx-spark.enable = true;
 
+  # ─── GPU clock cap (thermal protection) ─────────────────────────────
+  # The GB10 burns 140W inside 1.13 L with firmware cooling that exposes
+  # neither a fan curve nor a power limit (`nvidia-smi -pl` is N/A). Under
+  # sustained inference its SM clock sits at the 3003 MHz boost limit, temps
+  # park in the 85 °C danger zone, and the box eventually thermal-shuts-down
+  # on a concurrent-prefill power spike. Locking the clock to 2200 MHz drops
+  # it ~20 °C for no measurable throughput loss, because MoE inference here
+  # is HBM-bandwidth-bound, not clock-bound.
+  # The lock is not persistent across reboots, so reapply it every boot, and
+  # ahead of any unit that touches the GPU. Add other GPU services to
+  # `before` when they appear (red-snow, tensorfold-zig).
+  # https://www.wildpines.ai/blog/your-dgx-spark-is-cooking-itself/
+  systemd.services.gpu-clock-cap = {
+    description = "Cap GPU SM clocks to 2200 MHz for thermal protection";
+    after = [ "nvidia-persistenced.service" ];
+    wantedBy = [ "multi-user.target" ];
+    before = [ "tensorfold.service" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      # Belt and suspenders: persistenced should have done this already.
+      ExecStartPre = "${config.system.path}/bin/nvidia-smi -pm 1";
+      # The second field is the *cap* (3003 MHz is the default boost); the
+      # first only keeps the idle floor, so low utilisation still downclocks.
+      ExecStart = "${config.system.path}/bin/nvidia-smi -lgc 300,2200";
+    };
+  };
+
   # ─── Networking ─────────────────────────────────────────────────────
   networking.hostName = "dgx-spark";
   networking.useDHCP = true;
