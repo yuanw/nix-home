@@ -9,12 +9,21 @@ let
     srt2txt = ./srt2txt.awk;
   };
 
-  # TensorFold's python313Packages scope extension (see the entry below).
+  # TensorFold's + exllamav3's python313Packages scope extensions (see
+  # the entries below).
   python313PackagesWithTensorfold = prev.python313Packages.overrideScope (
     pfinal: _pprev: {
       tensorfold = pfinal.callPackage ./tensorfold { };
+      # vcruz305/exllamav3 @ 7c1636f (RED-SNOW's engine pin), AOT sm_121
+      # CUDA build — see packages/red-snow/default.nix.
+      exllamav3 = pfinal.callPackage ./red-snow { };
     }
   );
+
+  # RED-SNOW's stdlib /v1 server (the deployment repo's server/*.py)
+  redsnow-server = prev.callPackage ./red-snow/server.nix {
+    deploySrc = (import ./red-snow/src.nix { inherit (prev) fetchFromGitHub; }).deploySrc;
+  };
 
   # stdlib-only regression tools (bench/needle/toolcheck/visioncheck)
   # from the deployment repo, for comparing the native service against
@@ -196,6 +205,7 @@ in
   };
 
   ds4 = prev.callPackage ./ds4 { };
+  tensorfold-zig = prev.callPackage ./tensorfold-zig { };
 
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 
@@ -254,7 +264,9 @@ in
   # or let colmena build it on the target (deployment.buildOnTarget).
   python313Packages = python313PackagesWithTensorfold;
   tensorfold = python313PackagesWithTensorfold.tensorfold;
+  exllamav3 = python313PackagesWithTensorfold.exllamav3;
   inherit tensorfold-tools; # bound in the let above
+  inherit redsnow-server; # bound in the let above
 
   # Performance Co-Pilot — system performance monitoring toolkit
   # Re-adds pcp removed from nixpkgs (PR #495646)

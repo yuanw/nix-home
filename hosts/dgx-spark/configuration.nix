@@ -131,7 +131,24 @@
   # Regression tools live in environment.systemPackages (bench/needle/
   # toolcheck/visioncheck); the container baseline table is in the
   # deployment repo's README.
+  # The Python TensorFold (v0.6.1, Vontra MLX-4bit) is the *disabled*
+  # fallback: the Zig engine below won on simplicity at equal quality
+  # (Spark-Bench 81.7 vs 81.4). To revert, set enable = true here and
+  # `services.tensorfold-zig.enable = false`; both serve :8888, so the
+  # provider needs no change. See docs/tensorfold-zig-plan.org.
   services.tensorfold = {
+    enable = false;
+    openFirewall = true;
+    environmentFile = config.age.secrets.hf-token.path;
+  };
+
+  # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
+  # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
+  # TensorFold's Zig engine (branch zig-flashnext) packaged natively,
+  # serving Qwen3.8 Flash Next (INT4-AutoRound) on :8888. The CUDA
+  # fatbins + Triton AOT cubins are baked in (no first-start JIT).
+  # Plan: docs/tensorfold-zig-plan.org
+  services.tensorfold-zig = {
     enable = true;
     openFirewall = true;
     environmentFile = config.age.secrets.hf-token.path;
@@ -142,6 +159,26 @@
   systemd.tmpfiles.rules = [
     "d /var/lib/vllm 0755 root root - -"
   ];
+
+  # ─── RED-SNOW-5.3-Flash 2.49bpw (native exllamav3) ──────────────
+  # modules/red-snow.nix: packages/red-snow (vcruz305/exllamav3 @
+  # 7c1636f precompiled for sm_121) + the deployment repo's stdlib
+  # /v1 server (Weschera/RED-SNOW-5.3-Flash-2.49bpw-1x-DGX-Spark @
+  # b96fac2). Serves on :8899 next to TensorFold's :8888 — but one
+  # model at a time on 128 GB unified memory, so
+  # `systemctl stop tensorfold` first. The unit runs as root because
+  # serve.sh's page-cache drops (GB10 undercounts file cache as free
+  # unified memory) need it.
+  # First start (checkpoint download if missing, then a 4-6 min load):
+  #   systemctl start red-snow   # then: journalctl -fu red-snow
+  # Smoke test (chat speed + tool calls): the repo's test.sh is just
+  # curl against :8899 — any client works. Remaining rollout phases
+  # (build/apply, first start, acceptance): docs/redsnow-native-plan.org
+  services.red-snow = {
+    enable = true;
+    openFirewall = true;
+    environmentFile = config.age.secrets.hf-token.path;
+  };
 
   # Qwen3.8 is served from its HuggingFace repo ID through the native
   # TensorFold service above, with /var/lib/vllm/huggingface as its HF cache. The

@@ -20,7 +20,7 @@ inputs.nixpi.lib.nixpi.mkPiProvider {
         "image"
       ];
       maxTokens = 32768;
-      name = "Qwen3.8 Flash Next (DGX Spark, TensorFold)";
+      name = "Qwen3.8 Flash Next (DGX Spark, TensorFold Zig)";
       reasoning = true;
       thinkingLevelMap = {
         off = "off";

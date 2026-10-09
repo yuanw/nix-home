@@ -202,6 +202,28 @@ KV, vision tower, port 8888.
   bench/needle/etc. from the [[https://github.com/yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold][deployment repo]] against the container
   baseline (62/90/107/119 tok/s at 1/2/4/5 streams).
 
+* RED-SNOW-5.3-Flash 2.49bpw (native exllamav3)
+
+Serves =vcruz305/RED-SNOW-5.3-FLASH-EXL3-SAGE-2.49bpw= @ =071adef= (the
+Blackfrost security fine-tune of GLM-5.3-Flash, SAGE mixed-bit EXL3, ~105 GB)
+through [[https://github.com/vcruz305/exllamav3][exllamav3]] @ 7c1636f built natively (=packages/red-snow= — AOT
+sm_121 CUDA build, replacing the recipe's Docker image) plus the
+[[https://github.com/Weschera/RED-SNOW-5.3-Flash-2.49bpw-1x-DGX-Spark][deployment repo]]'s stdlib /v1 server (chat, streaming, tool calls) on
+port 8899. 262,144-token context, Q4 KV cache, MTP with 2 draft tokens.
+
+- Service: =red-snow= (systemd; *root* — =serve.sh='s page-cache drops,
+  GB10 undercounts file cache as free unified memory, need it; defined in
+  =modules/red-snow.nix=, enabled in =hosts/dgx-spark/configuration.nix=)
+- First start downloads the checkpoint into =/var/lib/vllm/huggingface/hub=
+  (resumable) then loads for 4-6 min; =journalctl -fu red-snow= until
+  "Native API listening".
+- One model at a time on 128 GB unified memory: =systemctl stop tensorfold=
+  before starting it (and vice versa).
+- Smoke test: the deployment repo's =test.sh= is just curl against
+  =http://dgx-spark:8899/v1/chat/completions=.
+- Remaining rollout phases (build/apply, first start, acceptance vs the
+  recipe's numbers, optional spot regression): [[file:../../docs/redsnow-native-plan.org][docs/redsnow-native-plan.org]].
+
 * Common Operations
 
 ** Build the system
