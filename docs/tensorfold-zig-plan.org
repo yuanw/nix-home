@@ -130,9 +130,10 @@ run while a model is still serving.
 - DONE Route analysis + native feasibility (nixpkgs =zig_0_17=; CPU-only fatbins + Triton AOT)
 - DONE Phase 0: Recon — =docker= is the podman shim; pinned nixpkgs lacks =zig_0_17=
 - DONE Phase 1: Provision — =nix build= validated (34 fatbins, 302-cubin AOT)
-- DONE Phase 2: First start + smoke — serving on :8890 (chat + tool calls OK)
+- DONE Phase 2: First start + smoke — serving (chat + tool calls OK)
 - DONE Phase 3: Spark-Bench — TrueScore 81.7 (py 81.4, red-snow 82.5, container 85.1)
-- TODO Phase 4: Compare + decide
+- DONE Phase 4: Decided — Zig is the engine; Python TensorFold disabled as fallback
+- DONE Phase 5: native Nix packaging — done (Route C); Routes A/B moot
 
 * Tasks
 
@@ -251,7 +252,7 @@ parseable =tool_calls= (Spark-Bench preflight needs this). Watch
 =MemAvailable= stays ≥ =MEM_FLOOR_GIB= during load (the recipe stops the
 server below it).
 
-*** DONE Result (2026-10-09): serving on :8890
+*** DONE Result (2026-10-09): serving on :8890 (moved to :8888 later)
 
 The native engine loaded the INT4-AutoRound checkpoint and served in 68.1 s
 (38.85 GiB sequence budget, fp8 KV), and the *re-captured* cubin set was
@@ -326,28 +327,54 @@ regression. It is notably stronger on agentic and long_gen and weaker on
 tool_use/long_context. As before, =visual= and =LG-01= are excluded (no
 Playwright), and the container row is a different checkpoint.
 
-** TODO Phase 4: Compare + decide
+** DONE Phase 4: Decided — Zig is the TensorFold
 
-Read =results/runs/tensorfold-zig-qwen38-thinkoff-*.md=; compare domain
-quality, TrueScore, and median latency:
-
-| | Python TF (81.4) | Zig TF (?) |
+| | Python TF | Zig TF |
 |---|---|---|
-| code / instruction | 90.1 / 96.7 | ? |
-| agentic / tool_use | 62.1 / 79.2 | ? |
-| long_gen / long_context | 2.5 / 27.0 | ? |
-| median latency | 2.14 s | ? |
+| TrueScore | 81.4 | **81.7** |
+| code / instruction | 90.1 / 96.7 | 88.6 / 90.9 |
+| agentic / tool_use | 62.1 / 79.2 | **74.3** / 76.7 |
+| long_gen / long_context | 2.5 / 27.0 | **30.5** / 12.5 |
+| median latency | 2.14 s | 2.20 s |
 
-Decide: keep Zig as the TensorFold deployment, keep Python, or keep both
-behind a switch. Note the checkpoint differs, so quality deltas confound
-engine vs quant.
+Decision: the engine of record is *Zig* — equal quality/speed, better
+agentic (what a coding agent leans on), and far simpler to own (static
+binary + AOT, no Python env / first-start JIT toolchain). The Python
+TensorFold stays packaged as a *disabled fallback*
+(=services.tensorfold.enable = false=). Both serve =:8888=, so the client
+providers are engine-neutral. Watch the one weak spot: =long_context=
+(n=2, noisy); a real long-context failure is the trigger to revisit.
 
-** TODO Phase 5 (optional): native Nix packaging (Routes B/C)
+** DONE Phase 5: native Nix packaging (Route C)
 
 Superseded by Route C above: this is now the main line, not a follow-up.
 Route B (extract engine + =sm121= cubins from the image into a FOD, Nix
 unit with =TENSORFOLD_CUDA_KERNELS=) remains the fallback if the native
 Triton AOT capture proves troublesome.
+
+* Reverting to the Python TensorFold
+
+The Python engine (v0.6.1, Vontra MLX-4bit-MTP) is intact and shares
+=:8888=, so reverting is a client-free, provider-free flip:
+
+1. Edit =hosts/dgx-spark/configuration.nix=:
+   - =services.tensorfold.enable = true;=
+   - =services.tensorfold-zig.enable = false;=
+2. Deploy and switch:
+   #+BEGIN_SRC shell
+   just colmena-spark-apply
+   # or, live: systemctl stop tensorfold-zig; systemctl start tensorfold
+   #+END_SRC
+   The Python unit's preStart re-uses the cached Vontra checkpoint (still
+   in =/var/lib/vllm/huggingface=) and its =kernels/= JIT cache, so no
+   download and no recompile.
+3. Nothing else changes: the Pi provider (=modules/coding-agents/pi/
+   providers/dgx-spark.nix=) and the open-code-review provider still point
+   at =http://dgx-spark.local:8888/v1= with model =Qwen3.8-Flash-Next=.
+
+Reverting is only worthwhile if Zig fails a real long-context (or
+tool-use) task; both checkpoints and both packages stay in the tree, so
+nothing needs re-adding.
 
 * Comparability caveats
 

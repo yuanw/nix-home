@@ -8,7 +8,7 @@ inputs.nixpi.lib.nixpi.mkPiProvider {
   name = "dgx-spark";
   api = "openai-completions";
   apiKey = "not-needed";
-  baseUrl = "http://dgx-spark.local:8890/v1";
+  baseUrl = "http://dgx-spark.local:8888/v1";
   models = [
     {
       _launch = true;

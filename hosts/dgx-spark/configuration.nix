@@ -131,8 +131,13 @@
   # Regression tools live in environment.systemPackages (bench/needle/
   # toolcheck/visioncheck); the container baseline table is in the
   # deployment repo's README.
+  # The Python TensorFold (v0.6.1, Vontra MLX-4bit) is the *disabled*
+  # fallback: the Zig engine below won on simplicity at equal quality
+  # (Spark-Bench 81.7 vs 81.4). To revert, set enable = true here and
+  # `services.tensorfold-zig.enable = false`; both serve :8888, so the
+  # provider needs no change. See docs/tensorfold-zig-plan.org.
   services.tensorfold = {
-    enable = true;
+    enable = false;
     openFirewall = true;
     environmentFile = config.age.secrets.hf-token.path;
   };
@@ -140,7 +145,7 @@
   # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
   # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
   # TensorFold's Zig engine (branch zig-flashnext) packaged natively,
-  # serving Qwen3.8 Flash Next (INT4-AutoRound) on :8890. The CUDA
+  # serving Qwen3.8 Flash Next (INT4-AutoRound) on :8888. The CUDA
   # fatbins + Triton AOT cubins are baked in (no first-start JIT).
   # Plan: docs/tensorfold-zig-plan.org
   services.tensorfold-zig = {

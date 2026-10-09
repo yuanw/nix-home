@@ -92,8 +92,8 @@ in
 
     port = mkOption {
       type = types.port;
-      default = 8890;
-      description = "TCP port for the API (8888 is the Python TensorFold, 8899 RED-SNOW).";
+      default = 8888;
+      description = "TCP port for the API (the Python TensorFold used the same port, so either engine serves :8888).";
     };
 
     openFirewall = mkOption {

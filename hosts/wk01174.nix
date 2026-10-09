@@ -63,7 +63,7 @@
       settings = {
         provider = "dgx-spark";
         custom_providers.dgx-spark = {
-          url = "http://dgx-spark.local:8890/v1";
+          url = "http://dgx-spark.local:8888/v1";
           protocol = "openai";
           model = "Qwen3.8-Flash-Next";
           api_key = "not-needed";
