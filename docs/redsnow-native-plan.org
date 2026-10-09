@@ -25,8 +25,8 @@ against the recipe's published numbers, and an optional regression phase.
 - DONE =nix fmt= clean on every touched file
 - DONE Phase 0: Commit ([[#commit]]) — =b5626bd5=
 - DONE Phase 1: Build on target ([[#build-target]]) — reverted incidental nixpkgs bump in =flake.lock=
-- TODO Phase 2: First start ([[#first-start]])
-- TODO Phase 3: Smoke + acceptance ([[#acceptance]])
+- DONE Phase 2: First start ([[#first-start]])
+- DONE Phase 3: Smoke + acceptance ([[#acceptance]]) — 34.7 tok/s, 79–85% MTP accept, tool calls OK
 - TODO Phase 4 (optional): Spot regression vs Spark-Bench 85.1 ([[#regression]])
 - TODO Cleanup: formatter drift on two unrelated files ([[#fmt-drift]])
 
@@ -149,7 +149,7 @@ Re-bumping nixpkgs is a separate task: if the newer pin is wanted later,
 the torch =cxxdev/dist= outputs must be rebuilt (or capped to =sm_121=)
 *and* an aarch64 cache found. Deferred; not required for RED-SNOW.
 
-** TODO Phase 2: First start
+** DONE Phase 2: First start
 :PROPERTIES:
 :CUSTOM_ID: first-start
 :END:
@@ -181,7 +181,22 @@ the torch =cxxdev/dist= outputs must be rebuilt (or capped to =sm_121=)
    *manual-start by design* (=autoStart=false=): a boot never fights the
    ~105 GB load against TensorFold or the download against a cold uplink.
 
-** TODO Phase 3: Smoke + acceptance
+*** DONE Result (2026-10-09 08:26)
+
+- =just colmena-spark-apply= → Activation successful (system
+  =v0bn27hh6gjwn0qq3hksfik65jjcd0v4=; label stayed =26.11pre-git= because
+  the untracked =mono-gateway-evaluation.md= keeps the git tree dirty).
+- =tensorfold= stopped; ~119 GB free at start.
+- =hf download= finished in 21 min (~72 MB/s, 28 files) into
+  =/var/lib/vllm/huggingface/hub=.
+- Load → API listening in ~2 min. Note: first start still JIT-compiles
+  exllamav3's tiny =cuda_utils.c= helper (torch cpp_extension → =nvcc=);
+  the main =exllamav3_ext=.so is AOT, so this is not the TensorFold-scale
+  compile the packaging replaced.
+- =red-snow= =active (running)=; =MemoryCurrent= ≈ 114 GB and =free=
+  shows =buff/cache 0= — the page-cache drops are landing.
+
+** DONE Phase 3: Smoke + acceptance
 :PROPERTIES:
 :CUSTOM_ID: acceptance
 :END:
@@ -218,6 +233,22 @@ Acceptance (the recipe's measured numbers, single stream, MTP 2 drafts):
 | MTP draft acceptance (long) | ~84% |
 | MTP draft acceptance (prose) | ~47% |
 | Tool call | =finish_reason= = =tool_calls=, parsed =get_weather= |
+
+*** DONE Result (2026-10-09)
+
+| Check | Target | Measured |
+|-------+--------+----------|
+| Health | healthy | ={"status":"healthy","healthy":true,"max_active_requests":1}= |
+| =/v1/models= | =max_model_len= 262144 | 262144; template =sha256=f987a112…= |
+| Long decode (1,400 tok) | ~34 tok/s | 34.7 |
+| Medium decode (595 tok) | — | 32.9 |
+| MTP accept (1,400 tok) | ~84% | 79.4% |
+| MTP accept (595 tok) | — | 85.2% |
+| Tool call | =tool_calls= + parsed | =get_weather= ={"city":"Paris","days":3}= |
+
+Same in-range band as the recipe (=1,400-tok= run hits =p90= on decode
+and the acceptance spread is prompt-dependent). Prose decode and prose
+MTP (~24 tok/s / ~47%) were not separately exercised.
 
 A materially slower decode (≈ container-era, not 2×) means the page-cache
 drops are not landing — check the unit runs as root and
