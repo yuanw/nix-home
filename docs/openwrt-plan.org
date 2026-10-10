@@ -62,21 +62,29 @@ loop only clears 10 entries, so more than 10 leftovers survive. Matters for
 | =rauter= single router        | single router + host as an arg                   | keep the 3-way nixpkgs pattern; no flake output per box |
 | ~opkg install ...~ in apply   | separate =openwrt-packages= target               | package churn shouldn't block config apply |
 
-* File layout to add
+* File layout (what is actually on disk)
 
 #+begin_src
 openwrt/
-  default.nix          # writeUci glue  (~25 lines, adapted from upstream nix/default.nix)
-  module-options.nix    # options.uci.{settings,secrets.age.files}
-  nix_uci/__init__.py  # vendored upstream + ~15 line age adapter
+  default.nix          # writeUci glue, adapted from upstream nix/default.nix
+  module-options.nix   # options.uci.settings
+  nix_uci/__init__.py  # vendored upstream, secrets via $NIX_UCI_SECRETS
   pyproject.toml       # vendored (buildPythonApplication needs it)
-  routers/default-router.nix   # per-router uci.settings
-  flake-module.nix     # packages.openwrt-<router> = (writeUci ./routers/...).command
-justfile               # openwrt-* recipes
-secrets/openwrt.age    # only if the agenix fallback in "secrets" below is needed
-docs/openwrt-plan.org  # this file
-state/openwrt/<router>/ # committed config snapshots for drift detection
+  justfile             # openwrt-* recipes, imported by the root justfile
+  routers/e8450.nix    # declared state for the router
+  selfcheck.py         # runnable check of the serialization rules
+  redact-config.py     # turns a live /etc/config dump into @placeholders@
+  flake-module.nix     # packages.openwrt-<router> = the uci-command script
+justfile               # root recipes; ends with import 'openwrt/justfile'
+state/openwrt/<router>/live/   # drift baseline, secrets redacted
+state/openwrt/<router>/config.txt  # first snapshot, taken before there was a recipe
 #+end_src
+
+Mic92 keeps his router code self-contained under =openwrt/= with its own
+=Justfile=, which means he runs =just= from that directory. Here the router is one
+thing among many hosts, and =just= has =import= (1.22+), so the recipes live in
+=openwrt/justfile= and are still invoked as =just openwrt-diff= from the repo root.
+Same cohesion, one entry point, no duplicated =nix := wrapper.
 
 ** secrets: `pass`, not sops and not (yet) age
 
