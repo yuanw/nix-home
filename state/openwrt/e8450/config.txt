@@ -384,7 +384,7 @@ config rpcd
 
 config login
 	option username 'root'
-	option password '@rpcd_password@'
+	option password '$p$root'
 	list read '*'
 	list write '*'
 
