@@ -16,12 +16,6 @@ import os
 import re
 import sys
 
-# Anonymous sections cannot reliably be deleted, so the list is truncated the way
-# upstream does it. Bump this if a router ever has more than this many sections of
-# one type -- see docs/openwrt-plan.org, "the lockout-risk configs".
-MAX_ANON_SECTIONS = 10
-
-
 class ConfigError(Exception):
     """The declared configuration is not usable."""
 
@@ -105,16 +99,13 @@ def serialize(configs: dict, secrets: dict[str, str]) -> str:
             raise ConfigError(msg)
         for name, section in sections.items():
             if isinstance(section, list):
-                # Descending, not ascending: uci renumbers what is left after a
-                # delete, so walking upward deletes one real section and then
-                # targets empty slots, which leaves stale options behind merged
-                # into the re-added section (upstream's known bug). Walking down
-                # removes the existing ones first, highest index first, where
-                # nothing above it can shift.
-                lines.extend(
-                    f"delete {config}.@{name}[{i}]"
-                    for i in reversed(range(MAX_ANON_SECTIONS))
-                )
+                # No delete commands here: an anonymous section cannot be targeted
+                # by index reliably, because uci renumbers what is left after each
+                # delete, so a fixed index loop hits empty slots and leaves stale
+                # options merged into what gets re-added. The caller wipes the type
+                # first with `while uci -q delete c.@type[0]; do :; done` -- that
+                # deletes the whole type however many sections there are, and is
+                # driven by the `add` lines below. See docs/openwrt-plan.org.
                 if not section:
                     continue
                 for _ in range(len(section)):

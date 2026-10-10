@@ -27,11 +27,10 @@ assert named == [
 ], named
 
 anon = nix_uci.serialize({"system": {"system": [{"_type": "system", "hostname": "e8450"}]}}, SECRETS)
-# Order matters: uci renumbers after a delete, so ascending deletes merge stale
-# options into the re-added section. Assert descending, highest index first.
-deletes = [int(line.rsplit("[", 1)[1].rstrip("]")) for line in anon.splitlines()
-           if line.startswith("delete system.@system[")]
-assert deletes == list(range(nix_uci.MAX_ANON_SECTIONS - 1, -1, -1)), deletes
+# The generator must not delete anonymous sections itself (the caller wipes the
+# type first, unbounded); `add` lines are what tell it which types to wipe.
+assert not any(line.startswith("delete ") for line in anon.splitlines()), anon
+assert anon.splitlines().count("add system system") == 1, anon
 assert "add system system" in anon, anon
 assert "set system.@system[0].hostname='e8450'" in anon, anon
 
