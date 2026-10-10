@@ -209,7 +209,13 @@
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
-    jellyfin-admin.file = ../../secrets/jellyfin-admin.age;
+    # jellyfin-init `cat`s this to read the admin password hash, and it runs as
+    # the unit's User (jellyfin), not root — agenix's default root:root 0600
+    # makes that cat fail, the ERR trap fires, and the server never starts.
+    jellyfin-admin = {
+      file = ../../secrets/jellyfin-admin.age;
+      owner = config.services.jellyfin.user;
+    };
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
@@ -249,14 +255,22 @@
         ];
       };
 
-  # jellyfin disabled temporarily: jellyfin-init migration OOM-loops
-  # (27.6G RSS during the DB migration run). Note: the full
-  # services.declarative-jellyfin block lives here (jellyfin.nix is NOT
-  # imported by default.nix — dead file, kept for reference).
-  # Re-enable once root cause is sorted:
+  # Jellyfin. Upstream 12.x broke declarative-jellyfin, so we pin 10.11.x via
+  # the overlay in ./default.nix. The 12.x startup memory regression made
+  # declarative-jellyfin's init (which boots the server once for DB migrations
+  # before touching the DB) OOM-loop the box at ~27G RSS, so the unit now runs
+  # inside a memory cgroup instead of trusting the kernel to be fair.
   # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
+  #
+  # Pin trap: plugins installed while 12.x ran are still in the data dir and
+  # are ABI-incompatible with 10.11.x. TheTVDB_19.0.0.0 threw
+  # MissingMethodException in TvdbClientManager's constructor during host
+  # startup — fatal, the server never binds. It is parked out of the way in
+  # /var/lib/jellyfin/plugins.disabled (not declarative: nixpkgs has no
+  # plugin-install option here). Reinstall a 10.11-compatible build, or delete
+  # it for good, before dropping this pin.
   services.declarative-jellyfin = {
-    enable = false;
+    enable = true;
     group = "data";
     system = {
       serverName = "My Declarative Jellyfin Server";
@@ -302,6 +316,22 @@
         };
       };
     };
+  };
+
+  # Contain jellyfin's startup: MemoryHigh throttles the runaway migration run
+  # into swap (16G zvol) instead of letting it page through home-assistant and
+  # caddy; MemoryMax is the last-resort ceiling. Tune via MEMORY_HIGH once
+  # misfit's real RSS headroom is measured.
+  systemd.services.jellyfin.serviceConfig = {
+    MemoryHigh = "6G";
+    MemoryMax = "8G";
+    # die before anything else on this box does
+    OOMScoreAdjust = 500;
+    # nixpkgs' unit already sets Restart=on-failure
+    RestartSec = "30s";
+    # jellyfin's unit doesn't set this; .NET would otherwise reserve
+    # server-GC heaps per core and overshoot the cgroup cap
+    Environment = "DOTNET_gcServer=0";
   };
 
   # Configure keymap in X11
