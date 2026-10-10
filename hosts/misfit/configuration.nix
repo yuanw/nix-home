@@ -261,6 +261,14 @@
   # before touching the DB) OOM-loop the box at ~27G RSS, so the unit now runs
   # inside a memory cgroup instead of trusting the kernel to be fair.
   # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
+  #
+  # Pin trap: plugins installed while 12.x ran are still in the data dir and
+  # are ABI-incompatible with 10.11.x. TheTVDB_19.0.0.0 threw
+  # MissingMethodException in TvdbClientManager's constructor during host
+  # startup — fatal, the server never binds. It is parked out of the way in
+  # /var/lib/jellyfin/plugins.disabled (not declarative: nixpkgs has no
+  # plugin-install option here). Reinstall a 10.11-compatible build, or delete
+  # it for good, before dropping this pin.
   services.declarative-jellyfin = {
     enable = true;
     group = "data";
