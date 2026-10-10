@@ -160,6 +160,32 @@ openwrt-facts router="mist-router":
 =just openwrt-diff= is the "what will this apply change" answer. Two different
 questions, no clever code needed for either.
 
+* Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
+
+- Linksys E8450 (UBI), =mediatek/mt7622=, 512 MiB RAM, kernel 6.12, **OpenWrt
+  25.12.5** (r33051), 30d uptime. Hostname is still the default =OpenWrt=.
+- **Same board as upstream's** =rauter= — the =sysupgrade= URL in
+  =openwrt/Justfile= (~targets/mediatek/mt7622/...linksys_e8450-ubi...) works verbatim.
+- **Plan correction: the package manager is =apk=, not =opkg=** (24.10 switched).
+  =opkg list-installed= returns nothing here, and upstream's =apply= target ends
+  with =opkg update && opkg install ...= which does nothing. Everything in this
+  plan that says =opkg= means =apk update= / =apk add= / =apk info=.
+- Installed extras beyond base: =adguardhome= (so the AdGuard in =adguard.tf= *is*
+  on this router — answer to open question 5), =https-dns-proxy= +
+  =luci-app-https-dns-proxy=, =wireguard-tools=, =ppp-mod-pppoe=, =iperf3=, =firewall4=,
+  =luci-light=, =attendedsysupgrade= + =luci-app-attendedsysupgrade=,
+  =luci-app-package-manager=. No =tinc=, no =ddns-scripts=, no node exporter.
+- =/etc/config=: adguardhome, attendedsysupgrade, dhcp, dropbear, firewall,
+  https-dns-proxy, luci, network, rpcd, system, ubihealthd, ubootenv, uhttpd,
+  wireless.
+- =dropbear=: one section =config dropbear 'main'=, =PasswordAuth 'off'=,
+  =RootPasswordAuth 'off'=. =network=: =lan= static 192.168.1.1/24 on =br-lan=
+  (=lan1=-=lan4=), =wan= dhcp + =wan6= dhcpv6 on =wan=. =wireless=: =NoneAndVoid=
+  (=radio0=, 2.4g) + =NoneAndVoid-5G= (=radio1=, 5g), both =psk2= on =lan=. Upstream
+  uses =sae-mixed=; changing cipher affects old clients, so it is a deliberate
+  change, not a default.
+- SSH access with a personal key confirmed working (=/etc/dropbear/authorized_keys=).
+
 * Phases
 
 ** Phase 0 — read-only inventory (~1h, no writes)
