@@ -306,18 +306,62 @@ correct empty diff when config matches the router.
 Exit criteria: =just openwrt-apply= brings config from "whatever LuCI left behind"
 to declared, with =just openwrt-diff= clean afterwards.
 
-** Phase 3 — the lockout-risk configs (defer until Phase 1-2 are boring)
+** Phase 3 — =network= + =firewall= (the lockout configs)
 
-- =network.= (lan/wan devices, bridges, interfaces, =dhcp=) and =firewall.=
-  (zones, rules, redirects, port forwards).
-- firewall is where the anonymous-list bug bites and where
-  =delete firewall.@zone[0]= x10 is not enough. Two options, pick at the time:
-  1. raise the delete loop to a length read from the router (~10 line patch), or
-  2. declare firewall zones as *named* sections (=zone_lan=, =zone_wan=) so the
-     named-section delete path is used. Costs nothing and dodges the bug —
-     but changes section names vs. what LuCI shows.
-- always stage first, review with =uci changes=, apply during a window where
-  the physical fallback is acceptable.
+What is actually on the box (`state/openwrt/e8450/live/`):
+
+| config    | options | sections | anonymous                                   |
+|-----------|---------|----------|---------------------------------------------|
+| =network=  | 21      | 6        | 1 =device= (=br-lan=, bridge over lan1-4)      |
+| =firewall= | 94      | 13       | 1 =defaults=, 2 =zone=, 1 =forwarding=, 9 =rule= |
+
+No config references another by anonymous index (`uci show | grep -E '^[a-z]+[^=]*=@[a-z]+\['`
+is zero), so anonymous sections can be renamed to *named* sections here without
+breaking anything. =fw4 check= reports the current config valid.
+
+*Two blockers before the first apply:*
+
+1. **The diff must stop sorting.** Rule order is first-match-wins and
+   delete-then-add moves every section to the end, so a sorted diff cannot tell
+   "rules reordered" from "rules unchanged" — it will report a reordered firewall as
+   clean. Keep the sort for configs where order is meaningless (=dhcp=, =system=,
+   =luci=, =rpcd=, =ubootenv=, =uhttpd=) and compare =firewall= (and =network=) in
+   emission order. ~3 lines in =openwrt-diff=.
+2. **The 10-delete ceiling is not a hypothetical.** There are nine anonymous
+   =config rule= entries; the ceiling is ten. One rule added through LuCI and the
+   delete sweep silently stops covering them, leaving strays. Options, cheapest
+   first:
+   a. raise =MAX_ANON_SECTIONS= (one line, harmless =Entry not found= noise),
+   b. declare these as **named** sections (=zone 'lan'=, =rule 'Allow-Ping'= — they
+      already carry =option name=) so they take the named-section path and the ceiling
+      stops applying. This is the lazy correct answer for =firewall=, and =network.device=
+      =br-lan= too: semantics are identical, only =uci show='s reference form changes,
+      and nothing references them by index.
+      *Migration is one-off:* the old anonymous copies need deleting once
+      (descending, the pattern is already =openwrt-revert=-shaped), then declare named.
+   c. state-aware generator: read existing section counts from the router and emit
+      exact deletes. ~15 lines, was already deferred to phase 3, and is the right
+      answer the moment a second router or many anonymous lists shows up.
+
+*Safety, in the order that matters:*
+
+- confirm the console/serial path works *before* you need it, or be physically
+  present. =/tmp= is RAM: =sysupgrade -b= must be =scp='d off the router to count as a
+  backup.
+- first apply must be a no-op — translate exactly what is there, get an empty
+  =openwrt-diff=, and change nothing. Risk starts with the first real change, not with
+  declaring.
+- preview with =fw4 check= against the staged copy (read-only, catches malformed
+  config before it goes live).
+- reload order: =network= first, give interfaces ~5s to come up, then =firewall=
+  (=dnsmasq= for =dhcp=). One plane per run — never =network= + =firewall= + =wireless=
+  together.
+- decide rollback explicitly instead of discovering you have none: =at=/=crond=-based
+  auto-revert firing a few minutes after the apply unless cancelled, tested by hand
+  once; otherwise apply with serial access only. =network reload= can drop the session
+  and a bad =input= policy in =defaults= or a =zone= locks you out of the LAN.
+- no =/etc/firewall.user= and no =include= lines here, so nothing outside the declared
+  config gets merged in.
 
 ** Phase 4 — deferred, do not build yet
 
@@ -353,9 +397,10 @@ to declared, with =just openwrt-diff= clean afterwards.
    paths and package names.)
 2. What should it be called in =packages.openwrt-<name>=? Nothing in the repo
    names the router today.
-3. Do you want the firewall (zones, port forwards, dns redirects) declared, or
-   only the LAN/WiFi/secrets side? Firewall is where the risk and the extra
-   engineering live.
+3. Firewall: decision recorded — declare it, in phase 3, as named sections, behind
+   the order-sensitive-diff prerequisite. Still open: whether to bother with
+   =network.device=/=interface= ordering niceties or just declare and let the no-op
+   diff prove it.
 4. =age= or =sops= for =openwrt.age= — assumption is age/agenix, matching
    =modules/agenix.nix= and =secrets/secrets.nix=. If you'd rather keep sops for
    the router path (upstream-faithful, zero Python changes), say so.
