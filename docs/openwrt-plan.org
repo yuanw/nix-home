@@ -179,12 +179,14 @@ openwrt-facts router="mist-router":
 =just openwrt-diff= is the "what will this apply change" answer. Two different
 questions, no clever code needed for either.
 
-* Phase 1 status (built, not yet applied)
+* Phase 1/2 status (applied, in daily use)
 
 Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
 `packages.openwrt-e8450`, and `just openwrt-{eval,diff,apply,revert,facts}`.
-`python3 openwrt/selfcheck.py` covers the serialization rules; the generated
-batch output looks right by inspection.
+`python3 openwrt/selfcheck.py` covers the serialization rules. Applied: timezone
+(Regina, as the POSIX string `CST6` — the image has no `/usr/share/zoneinfo`, so
+`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. Twelve configs are
+declared; only `network` and `firewall` are not.
 
 Two traps hit while building it, both worth remembering:
 
@@ -202,20 +204,38 @@ decrypt =openwrt/wifipw= (once in any terminal it stays unlocked a while).
 
 ### What the diff really compares
 
-=uci batch= has no dry run, so =openwrt-diff= stages the batch, diffs the
-effective =uci show= against what is committed, then unstages. Two things that
-look like bugs and are not:
+=uci batch= has no dry run, so =openwrt-diff= applies the batch to a *materialized
+copy* of =/etc/config= under =/tmp=: copy, =uci -c <copy> batch=, =uci -c <copy>
+commit= inside the copy, then =uci show= and diff. Staging the real configs and
+reverting them was wrong: the revert does not always unwind anonymous sections, and
+repeated previews grew extra =@host[3]= sections. Three traps found by running it:
 
-- delete-then-add moves a section to the *end* of the config file, so an unsorted
-  diff reported all of =wireless= as changed. Both sides are sorted now; once
-  firewall rules are declared this has to go back to being order-sensitive,
-  because rule order is precedence.
-- 9 lines of =uci: Entry not found= on every run, from the anonymous-section
-  truncation deleting indexes that do not exist (~MAX_ANON_SECTIONS=). Benign and
-  identical to upstream; make the count come from the router if it gets annoying.
-Verified: =just openwrt-diff= ends with *no changes: the router already matches
-the declared config*, which is the proof that the snapshot translation and the
-=wireless_key= coming from =pass= are both right.
+- **anonymous sections must be deleted descending.** uci renumbers after a delete,
+  so upstream's ascending loop deletes one real section, then targets empty slots,
+  and stale options end up merged into the re-added section (two of three
+  =config host= entries collapsed into one, with the third's options kept).
+  Descending removes the real ones highest-index-first.
+- **libuci hardcodes =/tmp/.uci=**, so =uci -c <copy>= does *not* isolate the staged
+  delta -- the batch stays pending against the real configs and must be reverted.
+  Showing a copy with a pending delta also prints deleted anonymous sections as
+  bare =cfg<hex>= lines that the real config never contains.
+- **=uci batch= prints the generated name of every =add= section.** Capturing its
+  stdout as config added nine phantom lines to every preview.
+- delete-then-add moves a section to the *end* of the file, so both sides are
+  sorted. Once firewall rules are declared this has to go back to being
+  order-sensitive, because rule order is precedence.
+- =uci: Entry not found= for the ~MAX_ANON_SECTIONS= truncation deletes is benign
+  and identical to upstream.
+
+=just openwrt-diff= ends with *no changes: the router already matches the declared
+config*, which is the proof that the snapshot translation and the =wireless_key=
+coming from =pass= are both right.
+
+The flip side: anything **undeclared** is invisible to the diff, because uci reports
+the whole file regardless of what Nix declares. That is the argument for declaring
+the rest — the day LuCI writes a =firewall= rule we know nothing about, the diff
+only catches it if =firewall= is declared. Until then =openwrt-facts= + =git diff=
+is the drift check.
 
 * Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
 
