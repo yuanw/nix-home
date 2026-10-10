@@ -73,42 +73,54 @@ openwrt/
   routers/default-router.nix   # per-router uci.settings
   flake-module.nix     # packages.openwrt-<router> = (writeUci ./routers/...).command
 justfile               # openwrt-* recipes
-secrets/openwrt.age    # router secrets; publicKeys = users ++ router key
-secrets/secrets.nix    # add the entry
+secrets/openwrt.age    # only if the agenix fallback in "secrets" below is needed
 docs/openwrt-plan.org  # this file
 state/openwrt/<router>/ # committed config snapshots for drift detection
 #+end_src
 
-** secrets: age adapter
+** secrets: 1Password, not sops and not (yet) age
 
-~module-options.nix~ gains, alongside =settings=:
-
-#+begin_src nix
-uci.secrets.age.files = lib.mkOption {
-  default = [ ];
-  type = lib.types.listOf lib.types.path;
-};
-#+end_src
-
-and ~nix_uci~ learns one more loader next to ~load_sops_file~ (the tool path is
-baked absolute by the glue, the identity comes from the environment so no key
-path is stored in the nix store):
+The =op= CLI is installed and authenticated on the control machine
+(=modules/_1password.nix=), so the shortest path is to skip encryption files
+entirely. =nix_uci= needs only a =dict[str, str]=; drop the sops coupling and have
+it read a plain JSON file instead:
 
 #+begin_src python
-def load_age_file(path: str) -> dict[str, str]:
-    identity = os.environ["AGE_IDENTITY"]  # glue: ${pkgs.rage}/bin/rage
-    res = subprocess.run(
-        [os.environ.get("AGE_BIN", "@RAGE@"), "-d", "-i", identity, path],
-        capture_output=True, text=True, check=False)
-    if res.returncode != 0:
-        raise ConfigError(f"Cannot decrypt {path}: {res.stderr}")
-    return json.loads(res.stdout)
+# load_sops_file(path) -> load_secrets(path): json.loads(path.read_text())
 #+end_src
 
-Usage: =AGE_IDENTITY=~/.ssh/id_ed25519 just openwrt-apply=. =@RAGE@= is substituted by
-~substituteAll~ in the glue. Plaintext secrets only ever exist in the pipe and in
-the router's =/tmp/.uci= delta (same exposure as upstream — note it, do not
-"improve" it).
+The justfile is what knows about 1Password. Known mappings:
+
+| placeholder     | source                                              | note                    |
+|-----------------|-----------------------------------------------------|-------------------------|
+| =wifi_password=   | =op read "op://Shared/NoneAndVoid/base station password"= | 21 chars, verified present |
+| =router_password= | =op://Shared/NoneAndVoid/wireless network password=       | *empty*, do not use         |
+| =root_password=   | =op://Private/Linksys03758/base station password=         | 11 chars, admin login?    |
+
+#+begin_src makefile
+openwrt-secrets:
+  jq -n --arg wp "$$(op read "op://Shared/NoneAndVoid/base station password")" \
+     '{wifi_password: $$wp}' > "$${TMPDIR:-/tmp}/openwrt-secrets.json"
+#+end_src
+
+** Guard: a blank secret is not an error.
+
+=op read= on a field that exists but is empty prints nothing *and exits 0*, so
+=wifi=$$(op read ...)= happily yields "". An empty =wireless.@wifi-iface.key= is an
+open AP or a broken network, applied with a green exit code. Never interpolate
+without a non-empty check, either in the recipe or in ~serialize_option_val~:
+
+#+begin_src python
+if not val: raise ConfigError(f"secret {name} resolved to empty string")
+#+end_src
+
+** Fallback for headless use: agenix
+
+If a router ever has to be configured without =op= (CI, a fresh machine), keep
+the age path as an option rather than a second code path: =AGE_IDENTITY= +
+=secrets/openwrt.age=, loaded by the same =load_secrets= after =rage -d=. Do not
+build it until there is a machine that needs it. The plaintext exposure is the
+same either way: the pipe and =/tmp/.uci= on the router.
 
 ** apply workflow (this is where we do better than upstream)
 
