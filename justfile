@@ -130,4 +130,52 @@ push-all:
 sys-diff:
     @nix store diff-closures /run/current-system ./result
 
+# --- openwrt (Linksys E8450) -------------------------------------------------
+# uci stages every batch command into /tmp/.uci and persists only on `uci commit`,
+# so review is free: stage, read `uci changes`, then commit or revert.
+router_host := "192.168.1.1"
+router := "e8450"
+configs := "system wireless dropbear"
+
+# print the declared config as `uci batch` commands, with secrets interpolated
+openwrt-eval:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    commands=$( {{nix}} build --quiet --no-link --print-out-paths ".#openwrt-{{router}}" )
+    secrets=$(mktemp); trap 'rm -f "$secrets"' EXIT
+    umask 077
+    # op read of a blank field exits 0 with no output, so never interpolate unchecked.
+    psk=$(op read "op://Shared/NoneAndVoid/base station password")
+    test -n "$psk" || { echo 'empty wifi key from 1Password' >&2; exit 1; }
+    printf '{"wireless_key": "%s"}\n' "$psk" > "$secrets"
+    NIX_UCI_SECRETS="$secrets" "$commands"
+
+# stage on the router and show what would change; persists nothing
+openwrt-diff:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    just openwrt-eval | ssh "root@{{router_host}}" 'uci batch'
+    ssh "root@{{router_host}}" 'uci changes'
+
+# stage, show, apply on confirmation; can drop the ssh session, keep a console handy
+openwrt-apply:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    ssh "root@{{router_host}}" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+    just openwrt-eval | ssh "root@{{router_host}}" 'uci batch'
+    ssh "root@{{router_host}}" 'uci changes'
+    read -r -p 'commit and reload? ' -n 1; echo
+    ssh "root@{{router_host}}" 'for c in {{configs}}; do uci commit $c; done; for s in system wireless dropbear network firewall; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done; sync'
+
+# discard staged-but-uncommitted changes in the configs we declare, and nothing
+# else (someone else's staged delta, e.g. dhcp, is not ours to undo)
+openwrt-revert:
+    @ssh "root@{{router_host}}" 'for c in {{configs}}; do uci revert $c; done; uci changes'
+
+# snapshot the live config into state/ for drift detection
+openwrt-facts:
+    @rsync -a --delete -e ssh "root@{{router_host}}:/etc/config/" "$PWD/state/openwrt/{{router}}/live/"
+    @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
+    @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"
+
 

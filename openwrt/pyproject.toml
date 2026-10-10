@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nix-uci"
+version = "0.1"
+description = "Turn nixos modules into openwrt uci batch commands"
+requires-python = ">=3.12"
+
+[project.scripts]
+nix-uci = "nix_uci:main"
+
+[tool.setuptools]
+packages = ["nix_uci"]
+zip-safe = true
