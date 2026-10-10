@@ -54,3 +54,25 @@ for label, call in must_raise:
     raise AssertionError(f"{label} should have raised ConfigError")
 
 print("nix-uci selfcheck: ok")
+
+# raw: appended verbatim after the declared config, verbs whitelisted so a stray
+# shell command or a `commit` in the config is a build error, not a surprise.
+import json as _json, subprocess, tempfile, os
+_doc = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+_json.dump({"settings": {"system": {"system": [{"_type": "system", "hostname": "h"}]}},
+           "raw": ["reorder firewall.@rule[0]=2"]}, _doc)
+_doc.flush()
+out = nix_uci.convert(_doc.name, SECRETS).splitlines()
+assert out[-1] == "reorder firewall.@rule[0]=2", out
+assert out.index("add system system") < len(out) - 1, out
+try:
+    _bad = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+    _json.dump({"settings": {"system": {"system": [{"_type": "system", "hostname": "h"}]}},
+               "raw": ["rm -rf /etc/config"]}, _bad)
+    _bad.flush()
+    nix_uci.convert(_bad.name, SECRETS)
+except nix_uci.ConfigError:
+    pass
+else:
+    raise AssertionError("raw accepted a non-uci command")
+os.unlink(_doc.name); os.unlink(_bad.name)

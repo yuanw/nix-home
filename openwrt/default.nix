@@ -24,7 +24,7 @@ in
         ];
       };
       json = (pkgs.formats.json { }).generate "uci.json" {
-        settings = res.config.uci.settings;
+        inherit (res.config.uci) settings raw;
       };
     in
     {

@@ -20,6 +20,14 @@ class ConfigError(Exception):
     """The declared configuration is not usable."""
 
 
+# uci verbs that mean something inside a batch. Verified against this box:
+# `uci help` lists add_list/batch/commit/del_list/delete/rename/reorder; set and
+# add are implied. commit/revert belong to the recipes, not the config.
+RAW_VERBS = frozenset(
+    {"add", "add_list", "del_list", "delete", "rename", "reorder", "set"}
+)
+
+
 def load_secrets() -> dict[str, str]:
     path = os.environ.get("NIX_UCI_SECRETS")
     if not path:
@@ -133,7 +141,37 @@ def convert(path: str, secrets: dict[str, str]) -> str:
     if not settings:
         msg = f"{path}: settings is empty, refusing to emit nothing"
         raise ConfigError(msg)
-    return serialize(settings, secrets)
+    return "\n".join(
+        [*serialize(settings, secrets).splitlines(), *raw_commands(data.get("raw", []))]
+    )
+
+
+def raw_commands(raw: list) -> list[str]:
+    """Escape hatch: uci commands the typed model cannot express, appended after
+    the declared config so they can fix section order or rename one-off leftovers.
+
+    Only verbs that do something useful inside a batch are allowed, which also
+    rejects shell: a batch is read by uci, not by a shell, so `rm -rf /` here is a
+    string, and `commit`/`revert` would undo the whole point of reviewing first.
+    """
+    if not isinstance(raw, list):
+        msg = "raw: expected a list of uci commands"
+        raise ConfigError(msg)
+    lines = []
+    for command in raw:
+        if not isinstance(command, str):
+            msg = "raw: each command must be a string"
+            raise ConfigError(msg)
+        verb = command.split(" ", 1)[0]
+        if verb not in RAW_VERBS:
+            msg = (
+                f"raw: {command!r}: first word must be one of "
+                f"{' '.join(sorted(RAW_VERBS))}; commands run inside `uci batch`, so "
+                "no `uci` prefix, no commit/revert/show"
+            )
+            raise ConfigError(msg)
+        lines.append(command)
+    return lines
 
 
 def main() -> None:

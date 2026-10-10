@@ -45,6 +45,7 @@ openwrt-diff:
     batch=$(just openwrt-eval)
     wipes=$(printf '%s\n' "$batch" | awk '$1 == "add" { print $2 ".@" $3 }' | sort -u | tr '\n' ' ')
     after=$(printf '%s\n' "$batch" | ssh "$host" "
+        set -eu
         rm -rf /tmp/nix-uci-diff
         mkdir -p /tmp/nix-uci-diff
         cp /etc/config/* /tmp/nix-uci-diff/
@@ -54,11 +55,11 @@ openwrt-diff:
         # batch prints the generated name of every add section: not config content.
         uci -c /tmp/nix-uci-diff batch > /dev/null
         for f in /tmp/nix-uci-diff/*; do
-            uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null
+            uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null || true
         done
         uci -c /tmp/nix-uci-diff show | sort
         rm -rf /tmp/nix-uci-diff
-        for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null; done
+        for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null || true; done
         true")
     if diff -u <(ssh -n "$host" '{{show_committed}}') <(printf '%s\n' "$after"); then
         echo 'no changes: the router already matches the declared config'
@@ -71,12 +72,12 @@ openwrt-apply:
     set -eu -o pipefail
     host="root@{{router_host}}"
     batch=$(just openwrt-eval)
-    configs=$(printf '%s\n' "$batch" \
-        | awk '{ if ($1 == "add") print $2; else { n = index($1, "."); if (n > 1) print substr($1, 1, n - 1) } }' | sort -u | tr '\n' ' ')
+    configs=$(printf '%s\n' "$batch" | awk '{ c = $2; sub(/[.=].*/, "", c); if (c != "") print c }' | sort -u | tr '\n' ' ')
     wipes=$(printf '%s\n' "$batch" | awk '$1 == "add" { print $2 ".@" $3 }' | sort -u | tr '\n' ' ')
 
     before=$(ssh -n "$host" '{{show_committed}}')
     after=$(printf '%s\n' "$batch" | ssh "$host" "
+        set -eu
         rm -rf /tmp/nix-uci-diff
         mkdir -p /tmp/nix-uci-diff
         cp /etc/config/* /tmp/nix-uci-diff/
@@ -85,11 +86,11 @@ openwrt-apply:
         done
         uci -c /tmp/nix-uci-diff batch > /dev/null
         for f in /tmp/nix-uci-diff/*; do
-            uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null
+            uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null || true
         done
         uci -c /tmp/nix-uci-diff show | sort
         rm -rf /tmp/nix-uci-diff
-        for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null; done
+        for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null || true; done
         true")
     diff -u <(printf '%s\n' "$before") <(printf '%s\n' "$after") || true
     # reload only what actually changed: a timezone edit must not bounce the radio.
@@ -133,8 +134,7 @@ openwrt-apply:
 openwrt-revert:
     #!/usr/bin/env bash
     set -eu -o pipefail
-    configs=$(just openwrt-eval \
-        | awk '{ if ($1 == "add") print $2; else { n = index($1, "."); if (n > 1) print substr($1, 1, n - 1) } }' | sort -u | tr '\n' ' ')
+    configs=$(just openwrt-eval | awk '{ c = $2; sub(/[.=].*/, "", c); if (c != "") print c }' | sort -u | tr '\n' ' ')
     ssh -n "root@{{router_host}}" "for c in $configs; do uci revert \$c 2>/dev/null; done"
     ssh -n "root@{{router_host}}" 'uci changes | wc -l' | xargs echo 'staged lines remaining:'
 

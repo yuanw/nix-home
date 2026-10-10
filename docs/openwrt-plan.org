@@ -40,8 +40,16 @@ writeUci configuration =
   (~while uci -q delete cfg.@foo[0]; do :; done~), then ~add cfg foo~ N times, then
   ~set cfg.@foo[i].opt= — deletion by index is not reliable, see "What the diff really
   compares".
-- secrets: ~"@key@"~ in any value is substituted from a decrypted sops file,
-  decrypted on the control machine at apply time.
+- secrets: ~"@key@"~ in any value is filled from the JSON file named by
+  ~$NIX_UCI_SECRETS~, written by the =just= recipe at apply time (=pass
+  openwrt/wifipw= here). The plaintext never enters the nix store, and an
+  empty value is a hard error rather than an open access point.
+- ~uci.raw~: verbatim commands emitted after everything else, for what the typed
+  model cannot say — =reorder firewall.@rule[i]=N to fix rule precedence, =rename= to
+  name a section. No =uci= prefix; only set/add/add_list/del_list/delete/rename/reorder
+  are accepted, so a stray shell command or a =commit= in the config is a build error.
+  =reorder= and =rename= both exist on this box (=uci help=).
+  Imperative: it reruns every time, so use it once and take it back out.
 
 Apply path (upstream ~Justfile~):
 
@@ -336,6 +344,11 @@ breaking anything. =fw4 check= reports the current config valid.
    emission order. ~3 lines in =openwrt-diff=. Nothing in openwrt-nix helps here — its
    "array diff is reorder-neutral via =U+1F= separator" trick is about *values* inside
    one option, not section order.
+   One caveat, found while wiring up =uci.raw=: =uci batch= does **not** exit nonzero
+   when it rejects a command — a =reorder= of a section that does not exist prints
+   nothing and returns 0 (measured). So a bad raw command shows up as "no changes",
+   not as an error: use =raw= for things whose effect the diff can see, and never
+   trust a clean run to prove a command took.
 2. **Closed — anonymous types are wiped, not deleted.** =MAX_ANON_SECTIONS= is gone;
    =openwrt-diff=/=openwrt-apply= now run
    =while uci -q delete cfg.@type[0]; do :; done= before batching, from the =add= lines
@@ -401,11 +414,19 @@ copies.
   Aug 2026). The "real project" upstream said it would switch to. If we want
   watchdog rollback on day one, consume this instead of vendoring.
   Recommendation: vendor the small upstream now (we control the ~200 lines),
-  steal what nuci does better. Two things already taken: the wipe-first idempotency
+  steal what nuci does better. Three things taken: the wipe-first idempotency
   strategy for anonymous sections (better than upstream's delete loop, and the
-  reason =MAX_ANON_SECTIONS= is gone), and its rollback shape — detached reload plus
-  a 60s in-session watchdog and a =S15= boot-time restore. Its =uci.json= schema, secrets
-  via sops, and package management are not needed here.
+  reason =MAX_ANON_SECTIONS= is gone), the =rawUci= escape hatch as =uci.raw=, and its
+  rollback shape — detached reload plus a 60s in-session watchdog and a =S15=
+  boot-time restore, still to build in phase 3.
+
+  Decided against switching wholesale on 2026-10-10, on the repo rather than the
+  docs: 9782 lines against our 464, the =uci.settings=/=_type= schema is already identical
+  so nothing is gained in expressiveness, their generator emits
+  =touch; uci -q batch; commit= per config (auto-commit guarded by the watchdog, where our
+  flow previews and confirms first), and secrets assume sops while ours come from
+  =pass=. Revisit for declarative packages (=uci.packages=, =packageSources=), or if we
+  want imagebuilder firmware, or when we hit a bug they have fixed.
 - ~nix-openwrt-imagebuilder~ — reproducible images, heavy. Deferred.
 - ~openwrt-configuration~-style full image rebuild — same tradeoff, no.
 - =nix-on-derbarou= / =nixos-anywhere= style "nixify the router" — no. OpenWrt is
