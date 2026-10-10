@@ -196,9 +196,9 @@ Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
 `packages.openwrt-e8450`, and `just openwrt-{eval,diff,apply,revert,facts}`.
 `python3 openwrt/selfcheck.py` covers the serialization rules. Applied: timezone
 (Regina, as the POSIX string `CST6` — the image has no `/usr/share/zoneinfo`, so
-`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. Thirteen configs are
-declared — `network` among them, declared but never applied by a routine run. Only
-`firewall` is not.
+`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. All fourteen configs
+in `/etc/config` are now declared, so `openwrt-diff` is a complete drift check.
+`network` and `firewall` are declared but never applied by a routine run.
 
 Two traps hit while building it, both worth remembering:
 
@@ -241,8 +241,12 @@ by running it:
   =for= needs =tr '\n' ' '= — this one had been quietly breaking =openwrt-apply='s
   commit loop for a while.
 - wipe-and-re-add moves a section to the *end* of the file, so both sides are
-  sorted. Once firewall rules are declared this has to go back to being
-  order-sensitive, because rule order is precedence.
+  sorted — otherwise every section the batch touches shows as changed. That sorting
+  is blind to *named* sections being reordered (same content, different order), which
+  is exactly what our own apply did to =wireless=; it is not blind to =firewall= rule
+  order, because anonymous sections are indexed positionally, so swapping two rules
+  changes =@rule[0].name= and the values differ. An explicit rule-sequence check is
+  kept for that case and nothing else, so it is a guard, not the machinery.
 
 =just openwrt-diff= ends with *no changes: the router already matches the declared
 config*, which is the proof that the snapshot translation and the =wireless_key=
@@ -338,20 +342,21 @@ breaking anything. =fw4 check= reports the current config valid.
 
 *Blockers before the first apply:*
 
-1. **Still open — the diff must stop sorting.** Rule order is first-match-wins and
-   wipe-and-re-add moves every section to the end, so a sorted diff cannot tell
-   "rules reordered" from "rules unchanged" — it reports a reordered firewall as
-   clean. Keep the sort for configs where order is meaningless (=dhcp=, =system=,
-   =luci=, =rpcd=, =ubootenv=, =uhttpd=) and compare =firewall= (and =network=) in
-   emission order. ~3 lines in =openwrt-diff=. Nothing in openwrt-nix helps here — its
-   "array diff is reorder-neutral via =U+1F= separator" trick is about *values* inside
-   one option, not section order.
-   One caveat, found while wiring up =uci.raw=: =uci batch= does **not** exit nonzero
+1. **Closed — and my earlier reasoning was wrong.** I wrote that a sorted diff would
+   report a reordered firewall as clean. It would not: =@rule[0].name= is positional,
+   so reordering two rules changes the compared values. Verified by swapping two rules
+   in the declaration — both the content diff and the rule-order note fired. Sorting is
+   blind to *named* sections moving (the wireless case), where order carries no
+   meaning. Kept anyway: =openwrt-diff= now compares content sorted and rule sequence
+   separately, ~8 lines, and the check is demonstrated rather than assumed.
+   One caveat found while wiring up =uci.raw=: =uci batch= does **not** exit nonzero
    when it rejects a command — a =reorder= of a section that does not exist prints
    nothing and returns 0 (measured). So a bad raw command shows up as "no changes",
    not as an error: use =raw= for things whose effect the diff can see, and never
    trust a clean run to prove a command took.
-2. **Closed — anonymous types are wiped, not deleted.** =MAX_ANON_SECTIONS= is gone;
+2. **Closed — anonymous types are wiped, not deleted.** See earlier.
+
+*So what is left: the first real change.* =MAX_ANON_SECTIONS= is gone;
    =openwrt-diff=/=openwrt-apply= now run
    =while uci -q delete cfg.@type[0]; do :; done= before batching, from the =add= lines
    the batch already emits. That empties the type however many sections exist, and
@@ -448,10 +453,9 @@ could not see it, the snapshot's `git diff` could.
    paths and package names.)
 2. What should it be called in =packages.openwrt-<name>=? Nothing in the repo
    names the router today.
-3. Firewall: decision recorded — declare it, in phase 3, as named sections, behind
-   the order-sensitive-diff prerequisite. Still open: whether to bother with
-   =network.device=/=interface= ordering niceties or just declare and let the no-op
-   diff prove it.
+3. Firewall: declared 2026-10-10 as anonymous lists, not named sections, for exactly
+   the reason above. =network.device= ordering proved to be a non-question — the
+   no-op diff proved it.
 4. =age= or =sops= for =openwrt.age= — assumption is age/agenix, matching
    =modules/agenix.nix= and =secrets/secrets.nix=. If you'd rather keep sops for
    the router path (upstream-faithful, zero Python changes), say so.

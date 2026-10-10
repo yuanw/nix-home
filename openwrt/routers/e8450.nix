@@ -93,9 +93,9 @@
     };
     # --- everything else, translated 1:1 from state/openwrt/e8450/live ------------
     # Declared so drift shows up as a diff instead of disappearing. None of these
-    # can lock us out: worst case is a service restart. `network` is declared too --
-    # see its block below -- and `firewall` is still absent, waiting on the sorted
-    # diff. See docs/openwrt-plan.org, "the lockout-risk configs".
+    # can lock us out: worst case is a service restart. `firewall` is declared last
+    # and is the one config that can; see docs/openwrt-plan.org,
+    # "the lockout-risk configs".
 
     adguardhome.config = {
       _type = "adguardhome";
@@ -422,6 +422,162 @@
       device = "wan";
       proto = "dhcpv6";
     };
+
+    # The last undeclared config, so every file in /etc/config is now under Nix and
+    # the diff is a complete drift check. Everything here is anonymous, which is what
+    # preserves rule order: named sections would iterate alphabetically and silently
+    # reorder precedence. Translated 1:1 from the live config, so it declares without
+    # changing. **Not applied by any routine run** -- this is the config that locks us
+    # out of the LAN if `input` or a zone policy goes wrong.
+    #
+    # The commented-out example rules in the live file are not declared. They are
+    # comments, and once applied they are gone with them; the snapshot keeps them.
+    firewall.defaults = [
+      {
+        _type = "defaults";
+        syn_flood = "1";
+        input = "REJECT";
+        output = "ACCEPT";
+        forward = "REJECT";
+      }
+    ];
+
+    firewall.forwarding = [
+      {
+        _type = "forwarding";
+        src = "lan";
+        dest = "wan";
+      }
+    ];
+
+    firewall.zone = [
+      {
+        _type = "zone";
+        name = "lan";
+        network = [ "lan" ];
+        input = "ACCEPT";
+        output = "ACCEPT";
+        forward = "ACCEPT";
+      }
+      {
+        _type = "zone";
+        name = "wan";
+        network = [ "wan" "wan6" ];
+        input = "REJECT";
+        output = "ACCEPT";
+        forward = "REJECT";
+        masq = "1";
+        mtu_fix = "1";
+      }
+    ];
+
+    # Order is semantics here: fw4 stops at the first match. Do not reorder this list
+    # without reading each rule, and do not convert it to named sections.
+    firewall.rule = [
+      {
+        _type = "rule";
+        name = "Allow-DHCP-Renew";
+        src = "wan";
+        proto = "udp";
+        dest_port = "68";
+        target = "ACCEPT";
+        family = "ipv4";
+      }
+      {
+        _type = "rule";
+        name = "Allow-Ping";
+        src = "wan";
+        proto = "icmp";
+        icmp_type = "echo-request";
+        family = "ipv4";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-IGMP";
+        src = "wan";
+        proto = "igmp";
+        family = "ipv4";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-DHCPv6";
+        src = "wan";
+        proto = "udp";
+        dest_port = "546";
+        family = "ipv6";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-MLD";
+        src = "wan";
+        proto = "icmp";
+        src_ip = "fe80::/10";
+        icmp_type = [ "130/0" "131/0" "132/0" "143/0" ];
+        family = "ipv6";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-ICMPv6-Input";
+        src = "wan";
+        proto = "icmp";
+        icmp_type = [
+          "echo-request"
+          "echo-reply"
+          "destination-unreachable"
+          "packet-too-big"
+          "time-exceeded"
+          "bad-header"
+          "unknown-header-type"
+          "router-solicitation"
+          "neighbour-solicitation"
+          "router-advertisement"
+          "neighbour-advertisement"
+        ];
+        limit = "1000/sec";
+        family = "ipv6";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-ICMPv6-Forward";
+        src = "wan";
+        dest = "*";
+        proto = "icmp";
+        icmp_type = [
+          "echo-request"
+          "echo-reply"
+          "destination-unreachable"
+          "packet-too-big"
+          "time-exceeded"
+          "bad-header"
+          "unknown-header-type"
+        ];
+        limit = "1000/sec";
+        family = "ipv6";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-IPSec-ESP";
+        src = "wan";
+        dest = "lan";
+        proto = "esp";
+        target = "ACCEPT";
+      }
+      {
+        _type = "rule";
+        name = "Allow-ISAKMP";
+        src = "wan";
+        dest = "lan";
+        dest_port = "500";
+        proto = "udp";
+        target = "ACCEPT";
+      }
+    ];
 
   };
 }

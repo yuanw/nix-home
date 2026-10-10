@@ -17,11 +17,12 @@
 router_host := "192.168.1.1"
 router := "e8450"
 
-# sort both sides: a wipe-and-re-add moves sections to the end of the file, so an
-# unsorted diff reports pure reordering as changes. Order is meaningless for
-# dhcp/system/luci/rpcd/ubootenv/uhttpd; for firewall rules it *is* precedence, and
-# they are not declared yet -- docs/openwrt-plan.org, phase 3.
-show_committed := "uci show | sort"
+# Both sides of the comparison get sorted, because a wipe-and-re-add moves the
+# sections it touches to the end of the file and an unsorted diff would call that a
+# change. What sorting cannot see is *order*: for firewall rules that is precedence,
+# so the rule sequence is compared separately below. Order carries no meaning for the
+# named sections here, which is why the sorting is safe.
+show_committed := "uci show"
 
 # print the declared config as `uci batch` commands, with secrets interpolated
 openwrt-eval:
@@ -44,6 +45,7 @@ openwrt-diff:
     host="root@{{router_host}}"
     batch=$(just openwrt-eval)
     wipes=$(printf '%s\n' "$batch" | awk '$1 == "add" { print $2 ".@" $3 }' | sort -u | tr '\n' ' ')
+    before=$(ssh -n "$host" '{{show_committed}}')
     after=$(printf '%s\n' "$batch" | ssh "$host" "
         set -eu
         rm -rf /tmp/nix-uci-diff
@@ -57,11 +59,21 @@ openwrt-diff:
         for f in /tmp/nix-uci-diff/*; do
             uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null || true
         done
-        uci -c /tmp/nix-uci-diff show | sort
+        uci -c /tmp/nix-uci-diff show
         rm -rf /tmp/nix-uci-diff
         for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null || true; done
         true")
-    if diff -u <(ssh -n "$host" '{{show_committed}}') <(printf '%s\n' "$after"); then
+
+    # fw4 compiles rules in file order and stops at the first match, so rule order is
+    # precedence, and sorting both sides to compare hides a reorder. Compare the sequence
+    # of rule names. Section *type* block order is alphabetical here because nix attrsets
+    # iterate by name, and that does not matter: fw4 resolves zones by name, so only the
+    # order within `rule` carries meaning.
+    if ! diff -q <(printf '%s\n' "$before" | grep -E '^firewall\.@rule\[[0-9]+\]\.name=' | sed "s/.*=//;s/'$//") \
+        <(printf '%s\n' "$after" | grep -E '^firewall\.@rule\[[0-9]+\]\.name=' | sed "s/.*=//;s/'$//") >/dev/null 2>&1; then
+        echo 'NOTE: firewall rule order differs from the declaration; first match wins.'
+    fi
+    if diff -u <(printf '%s\n' "$before" | sort) <(printf '%s\n' "$after" | sort); then
         echo 'no changes: the router already matches the declared config'
     fi
 
@@ -88,16 +100,25 @@ openwrt-apply:
         for f in /tmp/nix-uci-diff/*; do
             uci -c /tmp/nix-uci-diff commit \"\$(basename \"\$f\")\" 2>/dev/null || true
         done
-        uci -c /tmp/nix-uci-diff show | sort
+        uci -c /tmp/nix-uci-diff show
         rm -rf /tmp/nix-uci-diff
         for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null || true; done
         true")
-    diff -u <(printf '%s\n' "$before") <(printf '%s\n' "$after") || true
+    diff -u <(printf '%s\n' "$before" | sort) <(printf '%s\n' "$after" | sort) || true
     # reload only what actually changed: a timezone edit must not bounce the radio.
     # Not 1:1 -- wireless is driven by netifd, dhcp by dnsmasq, no /etc/init.d/wireless.
     changed=$(diff <(printf '%s\n' "$before") <(printf '%s\n' "$after") \
         | sed -nE 's/^[-+]([a-z][a-z0-9_]*)\..*/\1/p' | sort -u || true)
     echo "configs to reload: ${changed:-none}"
+    # fw4 compiles rules in order and stops at the first match, so rule order is
+    # precedence, and sorting both sides hides a reorder. Section *type* block order is
+    # alphabetical here (nix attrsets iterate by name) and does not matter, because fw4
+    # resolves zones by name -- only the order within `rule` carries meaning.
+    if ! diff -q <(printf '%s\n' "$before" | grep -E '^firewall\.@rule\[[0-9]+\]\.name=' | sed "s/.*=//;s/'$//") \
+        <(printf '%s\n' "$after" | grep -E '^firewall\.@rule\[[0-9]+\]\.name=' | sed "s/.*=//;s/'$//") >/dev/null 2>&1; then
+        echo 'NOTE: firewall rule order differs from the declaration; first match wins.'
+    fi
+
 
     # ssh wants stdin, and `read` fails at EOF, which used to abort this recipe with
     # the batch still staged.
