@@ -66,6 +66,12 @@ nix-update:
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
 
+# Take the newest stable 1Password into packages/_1password-gui/sources.json,
+# so a host does not wait on nixpkgs to notice a release.  Idempotent: it
+# rewrites only the os/arch pairs that file already lists.
+bump-1password:
+    @./scripts/bump-1password
+
 # Regenerate the Workiva pins from upstream, then warm the store.
 update-wk:
 	@{{nix}} run .#nvfetcher-work-sources

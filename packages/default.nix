@@ -130,6 +130,11 @@ in
   #   }
   # );
 
+  # The 1Password desktop app, pinned by packages/_1password-gui/sources.json so
+  # a release does not have to wait for nixpkgs to notice it -- see the note in
+  # that file for why an overrideAttrs and not an override.
+  _1password-gui = import ./_1password-gui prev;
+
   haskellPackages = prev.haskellPackages.override {
     overrides = haskellPackagesNew: _haskellPackagesOld: rec {
       ask = haskellPackagesNew.callPackage ./ask/release.nix { };
