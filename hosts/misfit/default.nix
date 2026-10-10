@@ -15,8 +15,15 @@
 
   # colmena deployment configuration
   deployment = {
-    targetHost = "misfit.local";
+    # `misfit.local` is dead: misfit never answers for its own .local name
+    # (avahi-resolve on misfit itself times out), so ssh-ng dies with
+    # "stream ended unexpectedly" and the build dangles.  Use the DHCP name,
+    # which is what `ssh misfit` resolves to.
+    targetHost = "misfit";
     targetUser = "yuan";
+    # This control box is aarch64-darwin and has no x86_64-linux builder, so
+    # build the closure on misfit itself.
+    buildOnTarget = true;
   };
 
   # declarative-jellyfin does not yet support jellyfin 12.x

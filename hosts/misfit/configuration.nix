@@ -534,13 +534,14 @@
       port = 2222;
       # Throwaway initrd-only host key (NEVER reuse /sshkeys production host
       # keys — they would sit on the unencrypted boot disk; nixpkgs warns).
-      # A *path* literal is copied into the nix store at build time and
-      # embedded in the initrd regardless of which host builds. The previous
-      # absolute-string value never resolved: the deployed initrd shipped an
-      # sshd with NO host key at all (sshd exits -> flap loop) = remote boot
-      # was dead on arrival. Keep it out of git (see .gitignore) + copy it
-      # to every build host (rsync) or eval fails loudly (path missing).
-      hostKeys = [ ../../secrets/initrd/ssh_host_ed25519_key ];
+      # An absolute *string* makes initrd-secrets copy it from misfit's own
+      # filesystem at activation, so no build host needs the file in its tree.
+      # A path literal (`../../secrets/...`) only ever worked when the builder
+      # had that untracked file rsynced in: a git-based flake source drops
+      # .gitignore'd files, so the initrd shipped an sshd with no host key and
+      # remote boot was dead on arrival (and `colmena apply` fails at
+      # install-bootloader with "failed to create initrd secrets!").
+      hostKeys = [ "/etc/secrets/initrd/ssh_host_ed25519_key" ];
       authorizedKeys = [
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"

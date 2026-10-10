@@ -77,31 +77,35 @@ update-wk:
 # rather than pretend the box can resolve it (blank/ is carried by the rsync below).
 spark_disable_private := "--override-input nix-home-private path:/etc/nixos/blank"
 
-# build on DGX Spark using colmena
-colmena-spark-build:
+# Run colmena against one host from the hive, with an ssh agent available to the
+# target (private flake inputs get fetched there when buildOnTarget is set).
+colmena-run ACTION HOST:
     @set -e; \
     if [ "$(uname)" = "Darwin" ]; then \
         ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
-        colmena build --on dgx-spark; \
+        colmena {{ACTION}} --on {{HOST}}; \
     else \
         eval `ssh-agent -s`; \
         trap 'ssh-agent -k >/dev/null' EXIT; \
         setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
-        colmena build --on dgx-spark; \
+        colmena {{ACTION}} --on {{HOST}}; \
     fi
 
-# apply (build + switch) on DGX Spark using colmena
+# build the closure on a remote host (no activation).  HOST is a hive name:
+# just remote-build misfit | dgx-spark | asche
+remote-build HOST:
+    @just colmena-run build {{HOST}}
+
+# build + activate on a remote host
+remote-apply HOST:
+    @just colmena-run apply {{HOST}}
+
+# kept so docs/redsnow-native-plan.org and muscle memory keep working
+colmena-spark-build:
+    @just remote-build dgx-spark
+
 colmena-spark-apply:
-    @set -e; \
-    if [ "$(uname)" = "Darwin" ]; then \
-        ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
-        colmena apply --on dgx-spark; \
-    else \
-        eval `ssh-agent -s`; \
-        trap 'ssh-agent -k >/dev/null' EXIT; \
-        setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
-        colmena apply --on dgx-spark; \
-    fi
+    @just remote-apply dgx-spark
 
 # build and deploy to local host (macOS or NixOS)
 switch:
