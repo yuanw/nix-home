@@ -238,6 +238,12 @@
       ];
       dnsProvider = "cloudflare";
       dnsResolver = "1.1.1.1:53";
+      # nixpkgs passes `--ari-disable` on its fresh-order branch but not on the
+      # renew branch, which instead sends an ARI `replaces` serial Let's Encrypt
+      # no longer has a record of -- every renewal then dies with 400 malformed
+      # and the cert quietly expires.  Drop this when renewOpts gets the flag:
+      # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/security/acme/default.nix#L329
+      extraLegoRenewFlags = [ "--ari-disable" ];
       #dnsPropagationCheck = false;
       dnsPropagationCheck = true;
       #webroot = "/var/lib/acme";
