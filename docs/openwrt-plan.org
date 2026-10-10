@@ -174,7 +174,8 @@ Rules that keep this boring and safe:
   =ssh root@r "sysupgrade -b /tmp/backup-$(date +%F-%H%M).bin"= then =scp= it out.
 - no remote rollback automation in v1. Test it by hand before trusting it, and
   only touch LAN/WAN paths with physical/serial access available.
-- the generated script prints plaintext secrets: never pipe it to a log file.
+- the generated batch prints plaintext secrets: never pipe it to a log file, and do
+  not =grep= its output either — the wifi key scrolls right past.
 
 ** drift detection (cheaper than a diff engine)
 
@@ -195,8 +196,9 @@ Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
 `packages.openwrt-e8450`, and `just openwrt-{eval,diff,apply,revert,facts}`.
 `python3 openwrt/selfcheck.py` covers the serialization rules. Applied: timezone
 (Regina, as the POSIX string `CST6` — the image has no `/usr/share/zoneinfo`, so
-`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. Twelve configs are
-declared; only `network` and `firewall` are not.
+`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. Thirteen configs are
+declared — `network` among them, declared but never applied by a routine run. Only
+`firewall` is not.
 
 Two traps hit while building it, both worth remembering:
 
@@ -358,10 +360,16 @@ breaking anything. =fw4 check= reports the current config valid.
    idempotency strategy. The nine anonymous dhcp hosts sitting one below the old
    ceiling is why this came up now instead of at firewall time.
 
-Named sections (=zone 'lan'=, =rule 'Allow-Ping'=, which already carry =option name=)
-are no longer needed to dodge a ceiling. They remain a reasonable choice on taste —
-nicer =uci show= output — and would need a one-off delete of the existing anonymous
-copies.
+Named sections are no longer needed to dodge a ceiling — and for **rules they would
+be wrong**: an attrset iterates alphabetically, so naming `rule 'Allow-Ping'` gives
+the router alphabetical rule order, not the order declared. Proved on this box: our
+own timezone apply rewrote `/etc/config/wireless` at 12:16 and its sections came out
+alphabetical (`default_radio0` before `radio0`) rather than in declaration order.
+Rule order is precedence, so declare rules as an **anonymous list**, where JSON array
+order is preserved. Benign for `wireless`; fatal for `firewall`.
+
+That reordering is also the proof that `state/` still earns its keep: the sorted diff
+could not see it, the snapshot's `git diff` could.
 
 *Safety, in the order that matters:*
 

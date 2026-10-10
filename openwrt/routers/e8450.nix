@@ -93,8 +93,9 @@
     };
     # --- everything else, translated 1:1 from state/openwrt/e8450/live ------------
     # Declared so drift shows up as a diff instead of disappearing. None of these
-    # can lock us out: worst case is a service restart. `network` and `firewall` are
-    # deliberately absent -- see docs/openwrt-plan.org, "the lockout-risk configs".
+    # can lock us out: worst case is a service restart. `network` is declared too --
+    # see its block below -- and `firewall` is still absent, waiting on the sorted
+    # diff. See docs/openwrt-plan.org, "the lockout-risk configs".
 
     adguardhome.config = {
       _type = "adguardhome";
@@ -369,6 +370,58 @@
         ip = "192.168.1.190";
       }
     ];
+
+    # Declared so drift is visible. Nothing here is applied by a routine run: a
+    # `network` reload rebuilds interfaces and can drop the ssh session, so this
+    # config gets changed by an explicit, confirmed apply only. Translated 1:1 from
+    # the live config, so the declaration itself changes nothing.
+    network.loopback = {
+      _type = "interface";
+      device = "lo";
+      proto = "static";
+      ipaddr = "127.0.0.1";
+      netmask = "255.0.0.0";
+    };
+
+    network.globals = {
+      _type = "globals";
+      ula_prefix = "fd1f:26e2:8ef1::/48";
+      # Generated once; if the router re-derives it the diff says so.
+      dhcp_default_duid = "00045bc0b77d5e4a4217aca2cda7dd259d38";
+    };
+
+    # Anonymous `config device`, hence a list. This is the LAN bridge -- the part of
+    # the config that can actually cut the session, because netifd tears br-lan down
+    # and rebuilds it.
+    network.device = [
+      {
+        _type = "device";
+        name = "br-lan";
+        type = "bridge";
+        ports = [ "lan1" "lan2" "lan3" "lan4" ];
+      }
+    ];
+
+    network.lan = {
+      _type = "interface";
+      device = "br-lan";
+      proto = "static";
+      ipaddr = "192.168.1.1";
+      netmask = "255.255.255.0";
+      ip6assign = "60";
+    };
+
+    network.wan = {
+      _type = "interface";
+      device = "wan";
+      proto = "dhcp";
+    };
+
+    network.wan6 = {
+      _type = "interface";
+      device = "wan";
+      proto = "dhcpv6";
+    };
 
   };
 }
