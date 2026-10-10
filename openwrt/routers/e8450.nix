@@ -11,8 +11,11 @@
     system.system = [
       {
         _type = "system";
-        hostname = "OpenWrt"; # not "e8450": that is the flake target name, renaming is a deliberate change
-        timezone = "UTC";
+        hostname = "OpenWrt";
+        # Same wall clock as every other host here (UTC-6, no DST), in POSIX form
+        # because this image has no /usr/share/zoneinfo. Once packages are declared,
+        # switch to "America/Regina" and apk add zoneinfo-america.
+        timezone = "CST6";
         ttylogin = "0";
         log_size = "128";
         urandom_seed = "0";

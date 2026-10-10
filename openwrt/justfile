@@ -28,15 +28,15 @@ openwrt-diff:
     #!/usr/bin/env bash
     set -eu -o pipefail
     host="root@{{router_host}}"
-    before=$(ssh "$host" 'uci show')
+    before=$(ssh -n "$host" 'uci show')
     just openwrt-eval | ssh "$host" 'uci batch'
     # sort both sides: delete-then-add moves a section to the end of the file, so
     # an unsorted diff reports pure reordering as changes. ponytail: when we declare
     # firewall rules this must become order-sensitive, rule order is precedence.
-    if diff -u <(printf '%s\n' "$before" | sort) <(ssh "$host" 'uci show' | sort); then
+    if diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort); then
         echo 'no changes: the router already matches the declared config'
     fi
-    ssh "$host" 'for c in {{configs}}; do uci revert $c; done'
+    ssh -n "$host" 'for c in {{configs}}; do uci revert $c; done'
 
 # stage, show the change set, commit or revert on confirmation. Committing can
 # drop the ssh session (wireless/network reload), so keep a console handy.
@@ -44,28 +44,54 @@ openwrt-apply:
     #!/usr/bin/env bash
     set -eu -o pipefail
     host="root@{{router_host}}"
-    before=$(ssh "$host" 'uci show')
-    ssh "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+    before=$(ssh -n "$host" 'uci show')
+    ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
     just openwrt-eval | ssh "$host" 'uci batch'
-    diff -u <(printf '%s\n' "$before" | sort) <(ssh "$host" 'uci show' | sort) || true
-    read -r -p 'commit and reload? [y/N] ' answer
+    diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort) || true
+    # reload only the configs that actually changed -- a timezone edit must not
+    # bounce the radio or the wan link because the file mentions wireless.
+    # `|| true`: diff exits 1 when the two sides differ, which with pipefail makes
+    # this very assignment abort the recipe on the exact run where there IS a change.
+    # -u, not plain diff: without it the change lines start with `< `/`> ` and this
+    # silently matched nothing, so nothing was reloaded.
+    changed=$(diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort) \
+        | sed -nE 's/^[-+]([a-z][a-z0-9_]*)\..*/\1/p' | sort -u || true)
+    echo "configs to reload: ${changed:-none}"
+    # ssh wants stdin (hence -n) and `read` returns non-zero at EOF, which under
+    # set -e aborted the recipe with the batch left staged.
+    answer=non
+    read -r -p 'commit and reload? [y/N] ' answer || true
     if [ "$answer" = y ]; then
-        ssh "$host" 'for c in {{configs}}; do uci commit $c; done'
-        ssh "$host" 'for s in system wireless dropbear network firewall; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done; sync' || true
+        ssh -n "$host" 'for c in {{configs}}; do uci commit $c; done'
+        for cfg in $changed; do
+            # not 1:1: wireless is driven by netifd, there is no /etc/init.d/wireless.
+            case $cfg in
+                wireless|network) svc=network ;;
+                *) svc=$cfg ;;
+            esac
+            ssh -n "$host" "[ -x /etc/init.d/$svc ] && /etc/init.d/$svc reload" || true
+            echo "reloaded $svc (for $cfg)"
+        done
+        ssh -n "$host" 'sync'
+        # verify: a commit that silently does not persist is exactly the failure we
+        # just hit, so confirm rather than assume. openwrt-diff stages+reverts, and
+        # after a real commit there is no delta left to disturb.
+        echo '--- verifying the commit took: '
+        just openwrt-diff
     else
-        ssh "$host" 'for c in {{configs}}; do uci revert $c; done'
+        ssh -n "$host" 'for c in {{configs}}; do uci revert $c; done'
     fi
 
 # discard staged-but-uncommitted changes in the configs we declare, and nothing
 # else (someone else's staged delta, e.g. dhcp, is not ours to undo)
 openwrt-revert:
-    @ssh "root@{{router_host}}" 'for c in {{configs}}; do uci revert $c; done; uci changes'
+    @ssh -n "root@{{router_host}}" 'for c in {{configs}}; do uci revert $c; done; uci changes'
 
 # snapshot the live config into state/ for drift detection. openwrt has busybox
 # tar, not rsync, so the copy is a tar pipe rather than an rsync.
 openwrt-facts:
     @rm -rf "$PWD/state/openwrt/{{router}}/live" && mkdir -p "$PWD/state/openwrt/{{router}}/live"
-    @ssh "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
+    @ssh -n "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
     @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
     @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"
 
