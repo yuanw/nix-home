@@ -172,6 +172,29 @@ openwrt-facts router="mist-router":
 =just openwrt-diff= is the "what will this apply change" answer. Two different
 questions, no clever code needed for either.
 
+* Phase 1 status (built, not yet applied)
+
+Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
+`packages.openwrt-e8450`, and `just openwrt-{eval,diff,apply,revert,facts}`.
+`python3 openwrt/selfcheck.py` covers the serialization rules; the generated
+batch output looks right by inspection.
+
+Two traps hit while building it, both worth remembering:
+
+- **nix cannot see untracked files in a git worktree.** `nix build .#openwrt-e8450`
+  failed with "No such file or directory" on `openwrt/flake-module.nix` because nix
+  enumerates a `path:` flake source with `git ls-files`; `?? openwrt/` is invisible.
+  A brand new directory needs `git add` before it builds. This will bite any new
+  module directory.
+- **`uci revert` needs a config argument**, and `uci commit` with none commits every
+  pending delta on the box. Both recipes now loop over the declared configs only —
+  the router had a stray uncommitted `dhcp` delta that is not ours to commit or undo.
+
+Blocked on you: `op` reports *account is not signed in*, so `openwrt-eval` cannot
+resolve `@wireless_key@`. Once 1Password CLI is signed in (`op signin`), run
+`just openwrt-diff`; it should be empty, and `just openwrt-apply` is then the
+no-op proof that the translation is faithful.
+
 * Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
 
 - Linksys E8450 (UBI), =mediatek/mt7622=, 512 MiB RAM, kernel 6.12, **OpenWrt
