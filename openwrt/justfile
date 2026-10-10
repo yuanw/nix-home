@@ -4,10 +4,12 @@
 #
 # --- openwrt (Linksys E8450) -------------------------------------------------
 # uci stages every batch command into /tmp/.uci and persists only on `uci commit`,
-# so review is free: stage, read `uci changes`, then commit or revert.
+# so review is free. The preview runs against a scratch copy of /etc/config under
+# /tmp instead of staging the real configs: deleting and re-adding anonymous
+# sections does not unwind cleanly with `uci revert`, and repeated diffs were
+# growing extra `@host[3]` sections.
 router_host := "192.168.1.1"
 router := "e8450"
-configs := "system wireless dropbear"
 
 # print the declared config as `uci batch` commands, with secrets interpolated
 openwrt-eval:
@@ -22,70 +24,101 @@ openwrt-eval:
     printf '{"wireless_key": "%s"}\n' "$psk" > "$secrets"
     NIX_UCI_SECRETS="$secrets" "$commands"
 
-# what would actually change. uci has no dry run, so stage it, diff the effective
-# config against what is committed, then unstage. Leaves the router untouched.
+# what would actually change, with nothing touched. The batch runs against
+# /tmp/nix-uci-diff, a copy of the committed config.
 openwrt-diff:
     #!/usr/bin/env bash
     set -eu -o pipefail
     host="root@{{router_host}}"
-    before=$(ssh -n "$host" 'uci show')
-    just openwrt-eval | ssh "$host" 'uci batch'
+    after=$(just openwrt-eval | ssh "$host" '
+        scratch=/tmp/nix-uci-diff
+        rm -rf "$scratch"; mkdir -p "$scratch"; cp /etc/config/* "$scratch/"
+        # batch prints one line per `add` (the generated anonymous section name),
+        # which is not config content -- it landed in the preview as 9 phantom
+        # `cfg<hex>` additions.
+        uci -c "$scratch" batch > /dev/null
+        # commit inside the copy, then show. Reading the copy with a pending delta
+        # prints deleted anonymous sections as bare `cfg<hash>` lines, which the
+        # real config never contains -- the preview would report phantom changes.
+        for f in "$scratch"/*; do uci -c "$scratch" commit "$(basename "$f")" 2>/dev/null; done
+        uci -c "$scratch" show | sort
+        rm -rf "$scratch"
+        # libuci hardcodes /tmp/.uci, so -c does not isolate the staged delta.
+        # Without this the batch is left pending against the real configs.
+        for f in /etc/config/*; do uci revert "$(basename $f)" 2>/dev/null; done
+        true')
     # sort both sides: delete-then-add moves a section to the end of the file, so
-    # an unsorted diff reports pure reordering as changes. ponytail: when we declare
-    # firewall rules this must become order-sensitive, rule order is precedence.
-    if diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort); then
+    # an unsorted diff reports pure reordering as changes. ponytail: once firewall
+    # rules are declared this must become order-sensitive -- rule order is precedence.
+    if diff -u <(ssh -n "$host" 'uci show | sort') <(printf '%s\n' "$after"); then
         echo 'no changes: the router already matches the declared config'
     fi
-    ssh -n "$host" 'for c in {{configs}}; do uci revert $c; done'
 
-# stage, show the change set, commit or revert on confirmation. Committing can
-# drop the ssh session (wireless/network reload), so keep a console handy.
+# preview, then commit and reload on confirmation. Committing can drop the ssh
+# session (wireless/network reload), so keep a console handy.
 openwrt-apply:
     #!/usr/bin/env bash
     set -eu -o pipefail
     host="root@{{router_host}}"
-    before=$(ssh -n "$host" 'uci show')
-    ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
-    just openwrt-eval | ssh "$host" 'uci batch'
-    diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort) || true
-    # reload only the configs that actually changed -- a timezone edit must not
-    # bounce the radio or the wan link because the file mentions wireless.
-    # `|| true`: diff exits 1 when the two sides differ, which with pipefail makes
-    # this very assignment abort the recipe on the exact run where there IS a change.
-    # -u, not plain diff: without it the change lines start with `< `/`> ` and this
-    # silently matched nothing, so nothing was reloaded.
-    changed=$(diff -u <(printf '%s\n' "$before" | sort) <(ssh -n "$host" 'uci show' | sort) \
+    batch=$(just openwrt-eval)
+    configs=$(printf '%s\n' "$batch" \
+        | awk '{ if ($1 == "add") print $2; else { n = index($1, "."); if (n > 1) print substr($1, 1, n - 1) } }' | sort -u)
+
+    # preview against a copy; the real configs are not touched until commit.
+    before=$(ssh -n "$host" 'uci show | sort')
+    after=$(printf '%s\n' "$batch" | ssh "$host" '
+        scratch=/tmp/nix-uci-diff
+        rm -rf "$scratch"; mkdir -p "$scratch"; cp /etc/config/* "$scratch/"
+        # batch prints one line per `add` (the generated anonymous section name),
+        # which is not config content -- it landed in the preview as 9 phantom
+        # `cfg<hex>` additions.
+        uci -c "$scratch" batch > /dev/null
+        # commit inside the copy, then show. Reading the copy with a pending delta
+        # prints deleted anonymous sections as bare `cfg<hash>` lines, which the
+        # real config never contains -- the preview would report phantom changes.
+        for f in "$scratch"/*; do uci -c "$scratch" commit "$(basename "$f")" 2>/dev/null; done
+        uci -c "$scratch" show | sort
+        rm -rf "$scratch"
+        for f in /etc/config/*; do uci revert "$(basename $f)" 2>/dev/null; done
+        true')
+    diff -u <(printf '%s\n' "$before") <(printf '%s\n' "$after") || true
+    # reload only what actually changed: a timezone edit must not bounce the radio.
+    # Not 1:1 -- wireless is driven by netifd, dhcp by dnsmasq, no /etc/init.d/wireless.
+    changed=$(diff <(printf '%s\n' "$before") <(printf '%s\n' "$after") \
         | sed -nE 's/^[-+]([a-z][a-z0-9_]*)\..*/\1/p' | sort -u || true)
     echo "configs to reload: ${changed:-none}"
-    # ssh wants stdin (hence -n) and `read` returns non-zero at EOF, which under
-    # set -e aborted the recipe with the batch left staged.
+
     answer=non
     read -r -p 'commit and reload? [y/N] ' answer || true
-    if [ "$answer" = y ]; then
-        ssh -n "$host" 'for c in {{configs}}; do uci commit $c; done'
-        for cfg in $changed; do
-            # not 1:1: wireless is driven by netifd, there is no /etc/init.d/wireless.
-            case $cfg in
-                wireless|network) svc=network ;;
-                *) svc=$cfg ;;
-            esac
-            ssh -n "$host" "[ -x /etc/init.d/$svc ] && /etc/init.d/$svc reload" || true
-            echo "reloaded $svc (for $cfg)"
-        done
-        ssh -n "$host" 'sync'
-        # verify: a commit that silently does not persist is exactly the failure we
-        # just hit, so confirm rather than assume. openwrt-diff stages+reverts, and
-        # after a real commit there is no delta left to disturb.
-        echo '--- verifying the commit took: '
-        just openwrt-diff
-    else
-        ssh -n "$host" 'for c in {{configs}}; do uci revert $c; done'
-    fi
+    if [ "$answer" != y ]; then echo 'left the router alone'; exit 0; fi
+
+    ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+    # start from a clean delta: anything pending that is not ours gets reverted
+    # first, so `uci commit` cannot sweep up someone else's staged edit.
+    printf '%s\n' "$batch" | ssh "$host" 'for f in /etc/config/*; do uci revert "$(basename $f)" 2>/dev/null; done; uci batch'
+    ssh -n "$host" "for c in $configs; do uci commit \$c; done"
+    for cfg in $changed; do
+        case $cfg in
+            wireless|network) svc=network ;;
+            dhcp) svc=dnsmasq ;;
+            *) svc=$cfg ;;
+        esac
+        ssh -n "$host" "[ -x /etc/init.d/$svc ] && /etc/init.d/$svc reload" || true
+        echo "reloaded $svc (for $cfg)"
+    done
+    ssh -n "$host" 'sync'
+    echo '--- verifying: the diff should come back clean'
+    just openwrt-diff
 
 # discard staged-but-uncommitted changes in the configs we declare, and nothing
-# else (someone else's staged delta, e.g. dhcp, is not ours to undo)
+# else (the router had an unrelated `dhcp` delta that is not ours to undo).
 openwrt-revert:
-    @ssh -n "root@{{router_host}}" 'for c in {{configs}}; do uci revert $c; done; uci changes'
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    configs=$(just openwrt-eval \
+        | awk '{ if ($1 == "add") print $2; else { n = index($1, "."); if (n > 1) print substr($1, 1, n - 1) } }' | sort -u)
+    ssh -n "root@{{router_host}}" "for c in $configs; do uci revert \$c 2>/dev/null; done"
+    ssh -n "root@{{router_host}}" 'uci changes | wc -l' | xargs echo 'staged lines remaining:'
 
 # snapshot the live config into state/ for drift detection. openwrt has busybox
 # tar, not rsync, so the copy is a tar pipe rather than an rsync.
@@ -94,5 +127,3 @@ openwrt-facts:
     @ssh -n "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
     @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
     @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"
-
-

@@ -105,8 +105,15 @@ def serialize(configs: dict, secrets: dict[str, str]) -> str:
             raise ConfigError(msg)
         for name, section in sections.items():
             if isinstance(section, list):
+                # Descending, not ascending: uci renumbers what is left after a
+                # delete, so walking upward deletes one real section and then
+                # targets empty slots, which leaves stale options behind merged
+                # into the re-added section (upstream's known bug). Walking down
+                # removes the existing ones first, highest index first, where
+                # nothing above it can shift.
                 lines.extend(
-                    f"delete {config}.@{name}[{i}]" for i in range(MAX_ANON_SECTIONS)
+                    f"delete {config}.@{name}[{i}]"
+                    for i in reversed(range(MAX_ANON_SECTIONS))
                 )
                 if not section:
                     continue
