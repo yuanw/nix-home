@@ -20,7 +20,12 @@ def redact(path: pathlib.Path) -> bool:
         r"(option (%s) ')(?!/)([^']+)(')" % "|".join(SECRET_OPTIONS)
     )
     updated = pattern.sub(
-        lambda m: f"{m.group(1)}@{path.name}_{m.group(2)}@{m.group(4)}", original
+        # `$p$<user>` is the shipped rpcd reference to the user's shadow entry,
+        # not a secret anyone typed, so keep it as-is.
+        lambda m: m.group(0)
+        if m.group(3).startswith("$p$")
+        else f"{m.group(1)}@{path.name}_{m.group(2)}@{m.group(4)}",
+        original,
     )
     if updated != original:
         path.write_text(updated)

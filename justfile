@@ -144,37 +144,56 @@ openwrt-eval:
     commands=$( {{nix}} build --quiet --no-link --print-out-paths ".#openwrt-{{router}}" )
     secrets=$(mktemp); trap 'rm -f "$secrets"' EXIT
     umask 077
-    # op read of a blank field exits 0 with no output, so never interpolate unchecked.
-    psk=$(op read "op://Shared/NoneAndVoid/base station password")
-    test -n "$psk" || { echo 'empty wifi key from 1Password' >&2; exit 1; }
+    # empty reads must never reach uci: `pass`/`op` can both succeed with no output
+    psk=$(pass openwrt/wifipw)
+    test -n "$psk" || { echo 'empty wifi key from pass openwrt/wifipw' >&2; exit 1; }
     printf '{"wireless_key": "%s"}\n' "$psk" > "$secrets"
     NIX_UCI_SECRETS="$secrets" "$commands"
 
-# stage on the router and show what would change; persists nothing
+# what would actually change. uci has no dry run, so stage it, diff the effective
+# config against what is committed, then unstage. Leaves the router untouched.
 openwrt-diff:
     #!/usr/bin/env bash
     set -eu -o pipefail
-    just openwrt-eval | ssh "root@{{router_host}}" 'uci batch'
-    ssh "root@{{router_host}}" 'uci changes'
+    host="root@{{router_host}}"
+    before=$(ssh "$host" 'uci show')
+    just openwrt-eval | ssh "$host" 'uci batch'
+    # sort both sides: delete-then-add moves a section to the end of the file, so
+    # an unsorted diff reports pure reordering as changes. ponytail: when we declare
+    # firewall rules this must become order-sensitive, rule order is precedence.
+    if diff -u <(printf '%s\n' "$before" | sort) <(ssh "$host" 'uci show' | sort); then
+        echo 'no changes: the router already matches the declared config'
+    fi
+    ssh "$host" 'for c in {{configs}}; do uci revert $c; done'
 
-# stage, show, apply on confirmation; can drop the ssh session, keep a console handy
+# stage, show the change set, commit or revert on confirmation. Committing can
+# drop the ssh session (wireless/network reload), so keep a console handy.
 openwrt-apply:
     #!/usr/bin/env bash
     set -eu -o pipefail
-    ssh "root@{{router_host}}" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
-    just openwrt-eval | ssh "root@{{router_host}}" 'uci batch'
-    ssh "root@{{router_host}}" 'uci changes'
-    read -r -p 'commit and reload? ' -n 1; echo
-    ssh "root@{{router_host}}" 'for c in {{configs}}; do uci commit $c; done; for s in system wireless dropbear network firewall; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done; sync'
+    host="root@{{router_host}}"
+    before=$(ssh "$host" 'uci show')
+    ssh "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+    just openwrt-eval | ssh "$host" 'uci batch'
+    diff -u <(printf '%s\n' "$before" | sort) <(ssh "$host" 'uci show' | sort) || true
+    read -r -p 'commit and reload? [y/N] ' answer
+    if [ "$answer" = y ]; then
+        ssh "$host" 'for c in {{configs}}; do uci commit $c; done'
+        ssh "$host" 'for s in system wireless dropbear network firewall; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done; sync' || true
+    else
+        ssh "$host" 'for c in {{configs}}; do uci revert $c; done'
+    fi
 
 # discard staged-but-uncommitted changes in the configs we declare, and nothing
 # else (someone else's staged delta, e.g. dhcp, is not ours to undo)
 openwrt-revert:
     @ssh "root@{{router_host}}" 'for c in {{configs}}; do uci revert $c; done; uci changes'
 
-# snapshot the live config into state/ for drift detection
+# snapshot the live config into state/ for drift detection. openwrt has busybox
+# tar, not rsync, so the copy is a tar pipe rather than an rsync.
 openwrt-facts:
-    @rsync -a --delete -e ssh "root@{{router_host}}:/etc/config/" "$PWD/state/openwrt/{{router}}/live/"
+    @rm -rf "$PWD/state/openwrt/{{router}}/live" && mkdir -p "$PWD/state/openwrt/{{router}}/live"
+    @ssh "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
     @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
     @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"
 

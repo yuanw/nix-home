@@ -1,0 +1,5 @@
+
+config adguardhome 'config'
+	option workdir '/var/adguardhome'
+	option config_file '/etc/adguardhome/adguardhome.yaml'
+
