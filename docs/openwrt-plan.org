@@ -84,6 +84,7 @@ openwrt/
   routers/e8450.nix    # declared state for the router
   selfcheck.py         # runnable check of the serialization rules
   redact-config.py     # turns a live /etc/config dump into @placeholders@
+  rollback.sh          # the undo for an apply that costs us the session
   flake-module.nix     # packages.openwrt-<router> = the uci-command script
 justfile               # root recipes; ends with import 'openwrt/justfile'
 state/openwrt/<router>/live/   # drift baseline, secrets redacted
@@ -354,9 +355,7 @@ breaking anything. =fw4 check= reports the current config valid.
    nothing and returns 0 (measured). So a bad raw command shows up as "no changes",
    not as an error: use =raw= for things whose effect the diff can see, and never
    trust a clean run to prove a command took.
-2. **Closed — anonymous types are wiped, not deleted.** See earlier.
-
-*So what is left: the first real change.* =MAX_ANON_SECTIONS= is gone;
+2. **Closed — anonymous types are wiped, not deleted.** =MAX_ANON_SECTIONS= is gone;
    =openwrt-diff=/=openwrt-apply= now run
    =while uci -q delete cfg.@type[0]; do :; done= before batching, from the =add= lines
    the batch already emits. That empties the type however many sections exist, and
@@ -376,6 +375,12 @@ order is preserved. Benign for `wireless`; fatal for `firewall`.
 That reordering is also the proof that `state/` still earns its keep: the sorted diff
 could not see it, the snapshot's `git diff` could.
 
+**What is left is the first real change** to `network` or `firewall` — a translation
+with nothing to apply is risk-free, and we have done two of those. Everything the
+first one needs is in place: the rollback watchdog, armed before the commit and tested
+on both branches, and the diff that shows exactly what is about to change. The
+remaining part is not code: confirm the console path, or be in the room.
+
 *Safety, in the order that matters:*
 
 - confirm the console/serial path works *before* you need it, or be physically
@@ -389,18 +394,33 @@ could not see it, the snapshot's `git diff` could.
 - reload order: =network= first, give interfaces ~5s to come up, then =firewall=
   (=dnsmasq= for =dhcp=). One plane per run — never =network= + =firewall= + =wireless=
   together.
-- rollback: don't design it later, openwrt-nix has the shape worth copying, two
-  layers:
-  - *in-session*: start the reload detached — =( sleep 1; <reload>) >/dev/null 2>&1 &=
-    so ssh exits 0 *before* the interface bounces, which is what otherwise turns a
-    correct apply into an ssh exit 255 and a stuck operator. Then a background
-    =trap '' HUP; sleep 60= watchdog that reverts and reloads unless the next ssh
-    handshake kills it.
-  - *boot-time*: dump =/etc/config= to =/etc/rollback-backup= (not =/tmp=, that is RAM),
-    install a =S15= init script that restores it on the next boot and self-deletes.
-    Covers the power-loss-mid-apply case an in-session watchdog cannot.
-  Test both by hand once before trusting them; a rollback path never exercised is
-  a rumor.
+- rollback: **built** — =openwrt/rollback.sh=, armed by =openwrt-apply= before it
+  commits and disarmed after, so a change that costs us the session undoes itself.
+  The shape is openwrt-nix's, the details had to be ours:
+  - arm = tar =/etc/config= to =/etc/rollback.tar= (flash, not =/tmp=), start
+    =setsid sh rollback.sh= detached, =touch /tmp/rollback.armed=.
+  - disarm = delete the marker. Not a signal: busybox has **no =nohup=**, and its
+    =setsid= forks, so a recorded =$!= can point at a process that already exited.
+    The script checks the marker after its sleep, so whoever disarms only has to be
+    faster than 90 seconds.
+  - fire = restore the tar over =/etc/config= and reload =network=, =firewall=,
+    =dnsmasq=. That is the whole goal: a reachable router, not a verdict.
+  - armed only when =changed= touches =network=/=wireless=/=firewall=, so ordinary
+    applies pay nothing. =OPENWRT_FORCE_ROLLBACK=1 arms it anyway, for testing.
+  - the decision to roll back is gated on whether ssh answers, **not** on the reload's
+    exit status — a reload that drops the connection returns 255 on a perfectly good
+    apply, and aborting there would roll back a change that was fine.
+  Tested both branches: snapshot = SNAP-STATE, live = NEW-STATE, armed = SNAP-STATE
+  again, disarmed = NEW-STATE stands.
+  - *deliberately not built*: the boot-time =S15= hook. =/tmp= is RAM, so this watchdog
+    dies with a reboot and cannot cover power loss mid-apply. On a box with 31 days of
+    uptime, that is a far smaller risk than a bad rule, and =state/openwrt/e8450/live=
+    is the manual path back for it. Add the hook if that ever stops being true.
+- reloads are still synchronous. openwrt-nix detaches them
+  (=( sleep 1; <reload>) >/dev/null 2>&1 &=) so ssh exits 0 before the interface
+  bounces, which avoids exit 255 but also lets us disarm before the reload has taken
+  effect — that is worse than an ugly exit code, because the disarm then proves
+  nothing. What protects us is the watchdog plus the answering poll.
 - =network reload= can drop the session and a bad =input= policy in =defaults= or a
   =zone= locks you out of the LAN, so apply with the console path confirmed or with
   someone in the room.

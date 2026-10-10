@@ -130,6 +130,32 @@ openwrt-apply:
     fi
 
     ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+
+    # Arm the undo *before* the commit, and disarm it only if the router answers
+    # afterwards. Both halves matter: armed after the commit it cannot cover a config
+    # that kills the session while the commit is in flight, and a reload that drops the
+    # connection must not abort this recipe -- what decides whether to roll back is
+    # whether ssh comes back, not what the reload exited with.
+    risky=
+    for cfg in $changed; do
+        case $cfg in
+            network|wireless|firewall) risky=$cfg ;;
+        esac
+    done
+    if [ -n "$risky" ] || [ -n "${OPENWRT_FORCE_ROLLBACK:-}" ]; then
+        ssh -n "$host" 'cat > /tmp/rollback.sh' < "$PWD/openwrt/rollback.sh"
+        # setsid, not nohup: busybox has no nohup. Disarm is deleting the marker file,
+        # which the script checks after its sleep -- busybox setsid forks, so a recorded
+        # PID would not reliably point at the thing we want to stop.
+        ssh -n "$host" '
+            tar cf /etc/rollback.tar -C /etc/config . || exit 1
+            touch /tmp/rollback.armed
+            setsid sh /tmp/rollback.sh >/dev/null 2>&1 </dev/null &
+            sleep 1
+            pgrep -f rollback.sh >/dev/null || exit 1'
+        echo 'rollback armed: restores /etc/config ~90s from now unless disarmed'
+    fi
+
     # clean delta first so `uci commit` cannot sweep up a staged edit that is not
     # ours; then the same wipe, then stage for real.
     printf '%s\n' "$batch" | ssh "$host" "
@@ -146,6 +172,14 @@ openwrt-apply:
         ssh -n "$host" "[ -x /etc/init.d/$svc ] && /etc/init.d/$svc reload" || true
         echo "reloaded $svc (for $cfg)"
     done
+
+    if ssh -n "$host" 'echo router answers' >/dev/null 2>&1; then
+        ssh -n "$host" 'rm -f /tmp/rollback.armed /tmp/rollback.sh /etc/rollback.tar'
+        echo 'rollback disarmed, apply stands'
+    else
+        echo 'no answer from the router; the armed rollback restores /etc/config in ~90s' >&2
+        exit 1
+    fi
     ssh -n "$host" 'sync'
     echo '--- verifying: the diff should come back clean'
     just openwrt-diff
