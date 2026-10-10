@@ -1,0 +1,260 @@
+#+TITLE: Declarative OpenWrt management with nix — plan
+#+DATE: 2026-10-09
+#+OPTIONS: toc:t
+
+* TL;DR
+
+Port Mic92's [[https://github.com/Mic92/dotfiles/tree/main/openwrt][nix-uci]] idea (~230 LoC of Python + ~40 lines of nix glue, MIT,
+unpacked in nixpkgs) into this repo:
+
+  nix modules -> JSON -> generated shell script that emits ~UCI batch commands ->
+  ssh | uci batch
+
+Deltas from upstream: =rage=/age= instead of =sops= (this repo uses agenix, no
+=sops= installed), a per-router config under =openwrt/=, and =just= targets that
+use uci's native stage/review/commit split instead of blind apply.
+
+First wins are low-risk, additive settings (hostname, dropbear, wifi, ddns).
+Network/firewall only after the rollback path is proven.
+
+* What the upstream mechanism actually does
+
+~openwrt/nix/default.nix~ :
+
+#+begin_src nix
+writeUci configuration =
+  let res = lib.evalModules { modules = [ module-options configuration ]; };
+      json = (formats.json {}).generate "uci.json" { inherit (res.config.uci) settings secrets; };
+  in { inherit json; command = writeShellScript "uci-commands" "${nix-uci}/bin/nix-uci ${json};"; }
+#+end_src
+
+~nix_uci/__init__.py~ walks that JSON and emits commands for ~uci batch~
+([[https://openwrt.org/docs/guide-user/base-system/uci#uci_dataobject_model][dataobject model]]):
+
+- named section: ~delete cfg.sec~ then ~set cfg.sec=<type>~ then one ~set~ per option
+  -> *declared* sections are fully replaced, undeclared sections in the same file
+  are left alone (additive management, unlike rsyncing whole =/etc/config= files).
+- list option: one ~add_list~ per element.
+- anonymous/list section (=config foo = without a name, e.g. =firewall= zones,
+  =dropbear=, =network.device=): ~delete cfg.@foo[0]~ x10, then ~add cfg foo~ N times,
+  then ~set cfg.@foo[i].opt= — the "clear the list" hack.
+- secrets: ~"@key@"~ in any value is substituted from a decrypted sops file,
+  decrypted on the control machine at apply time.
+
+Apply path (upstream ~Justfile~):
+
+#+begin_src makefile
+eval-config: "$(nix build --no-link --print-out-paths ../#openwrt-example)"
+apply: just eval-config | just ssh 'uci batch; uci commit'
+#+end_src
+
+Known upstream bug: deleting an anonymous list section is not reliable — the
+loop only clears 10 entries, so more than 10 leftovers survive. Matters for
+=firewall.rule=/=redirect=, =dhcp.host=, =dropbear=, =network.device=.
+
+* What carries over and what must change here
+
+| upstream                    | here                                             | why                                     |
+|-----------------------------|--------------------------------------------------|-----------------------------------------|
+| sops + ~secrets.yml~         | =secrets/openwrt.age= + =rage -d=                | repo is agenix; no sops on the control host |
+| =Justfile= inside =openwrt/=  | targets in the repo =justfile=                   | one entry point for all hosts            |
+| ~nix build ../#openwrt-example~ | ~nix build .#openwrt-<router>~                 | flake-module style already used here     |
+| =rauter= single router        | single router + host as an arg                   | keep the 3-way nixpkgs pattern; no flake output per box |
+| ~opkg install ...~ in apply   | separate =openwrt-packages= target               | package churn shouldn't block config apply |
+
+* File layout to add
+
+#+begin_src
+openwrt/
+  default.nix          # writeUci glue  (~25 lines, adapted from upstream nix/default.nix)
+  module-options.nix    # options.uci.{settings,secrets.age.files}
+  nix_uci/__init__.py  # vendored upstream + ~15 line age adapter
+  pyproject.toml       # vendored (buildPythonApplication needs it)
+  routers/default-router.nix   # per-router uci.settings
+  flake-module.nix     # packages.openwrt-<router> = (writeUci ./routers/...).command
+justfile               # openwrt-* recipes
+secrets/openwrt.age    # router secrets; publicKeys = users ++ router key
+secrets/secrets.nix    # add the entry
+docs/openwrt-plan.org  # this file
+state/openwrt/<router>/ # committed config snapshots for drift detection
+#+end_src
+
+** secrets: age adapter
+
+~module-options.nix~ gains, alongside =settings=:
+
+#+begin_src nix
+uci.secrets.age.files = lib.mkOption {
+  default = [ ];
+  type = lib.types.listOf lib.types.path;
+};
+#+end_src
+
+and ~nix_uci~ learns one more loader next to ~load_sops_file~ (the tool path is
+baked absolute by the glue, the identity comes from the environment so no key
+path is stored in the nix store):
+
+#+begin_src python
+def load_age_file(path: str) -> dict[str, str]:
+    identity = os.environ["AGE_IDENTITY"]  # glue: ${pkgs.rage}/bin/rage
+    res = subprocess.run(
+        [os.environ.get("AGE_BIN", "@RAGE@"), "-d", "-i", identity, path],
+        capture_output=True, text=True, check=False)
+    if res.returncode != 0:
+        raise ConfigError(f"Cannot decrypt {path}: {res.stderr}")
+    return json.loads(res.stdout)
+#+end_src
+
+Usage: =AGE_IDENTITY=~/.ssh/id_ed25519 just openwrt-apply=. =@RAGE@= is substituted by
+~substituteAll~ in the glue. Plaintext secrets only ever exist in the pipe and in
+the router's =/tmp/.uci= delta (same exposure as upstream — note it, do not
+"improve" it).
+
+** apply workflow (this is where we do better than upstream)
+
+~uci batch~ *stages* into ~/tmp/.uci~; =uci commit= persists. So a review step is
+free:
+
+#+begin_src makefile
+# stage + show what would change, commit nothing
+openwrt-diff router="mist-router":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  batch="$(nix build --no-link --print-out-paths .#openwrt-{{router}})"
+  "$batch" | {{ssh root@{{router}}}} 'uci batch'
+  {{ssh root@{{router}}}} 'uci changes'
+
+# stage, show, wait for confirmation, commit
+openwrt-apply router="mist-router":
+  just openwrt-diff {{router}}
+  read -r -p "commit? "
+  "$batch" | {{ssh root@{{router}}}} 'uci batch && uci commit && sync'
+  {{ssh root@{{router}}}} 'for s in network wireless firewall system; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done'
+
+openwrt-revert router="mist-router":
+  {{ssh root@{{router}}}} 'uci revert'
+#+end_src
+
+Rules that keep this boring and safe:
+
+- one =uci batch= at a time, no parallel applies (=uci commit= is global state).
+- never apply and reload in one unreviewed shot. =uci revert= is the undo.
+- =network=, =wireless= and =firewall= reloads *will* drop the ssh session and can
+  lock you out. Everything else (system, ddns, dropbear, cron, luci) is safe.
+- backup before any =network=/=firewall= apply:
+  =ssh root@r "sysupgrade -b /tmp/backup-$(date +%F-%H%M).bin"= then =scp= it out.
+- no remote rollback automation in v1. Test it by hand before trusting it, and
+  only touch LAN/WAN paths with physical/serial access available.
+- the generated script prints plaintext secrets: never pipe it to a log file.
+
+** drift detection (cheaper than a diff engine)
+
+~state/openwrt/<router>/etc/config/*= checked into git.
+
+#+begin_src makefile
+openwrt-facts router="mist-router":
+  rsync -a --delete -e ssh root@{{router}}:/etc/config/ state/openwrt/{{router}}/etc/config/
+#+end_src
+
+=git diff= against that is the "what did I change in LuCI last week" answer, and
+=just openwrt-diff= is the "what will this apply change" answer. Two different
+questions, no clever code needed for either.
+
+* Phases
+
+** Phase 0 — read-only inventory (~1h, no writes)
+
+Router is up (=192.168.1.1= responds, ssh gives =Permission denied (publickey)=, so
+root auth needs our key installed first). =/etc/openwrt_release= has not been
+read yet — every decision below depends on it.
+
+- install key: =ssh-copy-id root@192.168.1.1= (password auth may need =dropbear=
+  =PasswordAuth= on temporarily — that is a change, do it deliberately).
+- identify: =cat /etc/openwrt_release=, =ubus call system board=, =opkg print-architecture=,
+  =cat /proc/mtd= if relevant. Target platform + device profile drive the
+  =sysupgrade= URL for the later upgrade target.
+- snapshot: =scp -r root@r:/etc/config . && ssh root@r 'opkg list-installed' > installed.txt=
+- translate: =ssh root@r 'uci show network' # -> write openwrt/routers/*.nix, section by section=
+
+Exit criteria: model, OpenWrt version, installed packages, and the full
+=/etc/config= in =state/=. Everything after this is a diff away from this.
+
+** Phase 1 — vendored tool + trivial config apply (~2h)
+
+- vendor ~nix_uci/~ + glue under =openwrt/=, add =flake-module.nix= and one
+  =packages.openwrt-<router>= output.
+- first config = only =system.system.hostname= + a =uci show= parity check.
+  Prove =delete=/=set cfg.sec=<type>= behaves on this uci version before
+  trusting it — verify a section survives =uci batch= -> =uci commit= -> reboot.
+- =just openwrt-diff= against that.
+
+Exit criteria: hostname change round-trips and =just openwrt-diff= shows a
+correct empty diff when config matches the router.
+
+** Phase 2 — secrets + real configs (~1-2h)
+
+- =secrets/openwrt.age= with =wifi_password=, =root_password=, =pppoe_*=/=ddns_key=;
+  publicKeys = =users ++ <router-key>=.
+- configs: =dropbear= (2 instances like upstream: LAN + VPN/lan), =system=,
+  =network.vpn= if applicable, =ddns=, =wireless= (2.4/5 GHz + =@wifi_password@=).
+- =just openwrt-backup= for =sysupgrade -b= before wireless changes (wifi reload
+  drops clients but not the router).
+
+Exit criteria: =just openwrt-apply= brings config from "whatever LuCI left behind"
+to declared, with =just openwrt-diff= clean afterwards.
+
+** Phase 3 — the lockout-risk configs (defer until Phase 1-2 are boring)
+
+- =network.= (lan/wan devices, bridges, interfaces, =dhcp=) and =firewall.=
+  (zones, rules, redirects, port forwards).
+- firewall is where the anonymous-list bug bites and where
+  =delete firewall.@zone[0]= x10 is not enough. Two options, pick at the time:
+  1. raise the delete loop to a length read from the router (~10 line patch), or
+  2. declare firewall zones as *named* sections (=zone_lan=, =zone_wan=) so the
+     named-section delete path is used. Costs nothing and dodges the bug —
+     but changes section names vs. what LuCI shows.
+- always stage first, review with =uci changes=, apply during a window where
+  the physical fallback is acceptable.
+
+** Phase 4 — deferred, do not build yet
+
+- =opkg= package management (declarative install/remove). Needed when the
+  running package set diverges from declared; a ~pkglist= diff is enough then.
+- =sysupgrade= flow + =at=-based remote rollback (the upstream Justfile has the
+  =wget= -> =sysupgrade= -> =just apply= shape, worth stealing once versions matter).
+- imagebuilding (=astro/nix-openwrt-imagebuilder=) instead of =opkg=: reproducible
+  images and no package drift, but you take on a full cross toolchain and a
+  much heavier flash cycle. Only worth it if we end up with 2+ routers.
+- =/etc/crontabs/root=, =/etc/sysctl.conf=, =/etc/dropbear/authorized_keys= — these are
+  file-level, not uci. Handle as plain =rsync=-deployed files in the same
+  =justfile= (upstream does =authorized_keys= exactly this way in its =apply= target).
+
+* Alternatives considered
+
+- [[https://github.com/lonerOrz/openwrt-nix][lonerOrz/openwrt-nix (nuci)]] — same design as upstream, plus =nuci diff=, =nuci deploy=
+  with a 60s watchdog and imagebuilder support. Actively maintained (last push
+  Aug 2026). The "real project" upstream said it would switch to. If we want
+  watchdog rollback on day one, consume this instead of vendoring.
+  Recommendation: vendor the small upstream now (we control the ~200 lines),
+  steal the watchdog idea from nuci in Phase 4.
+- ~nix-openwrt-imagebuilder~ — reproducible images, heavy. Deferred.
+- ~openwrt-configuration~-style full image rebuild — same tradeoff, no.
+- =nix-on-derbarou= / =nixos-anywhere= style "nixify the router" — no. OpenWrt is
+  the platform; we want its =uci=, not NixOS.
+
+* Open questions for you
+
+1. Which box is at =192.168.1.1= — model and OpenWrt version? (The device_tracker
+   in =hosts/misfit/configuration.nix:194= is =luci= with =openwrt_admin_username=,
+   so it is already assumed to be OpenWrt, but the model decides =sysupgrade=
+   paths and package names.)
+2. What should it be called in =packages.openwrt-<name>=? Nothing in the repo
+   names the router today.
+3. Do you want the firewall (zones, port forwards, dns redirects) declared, or
+   only the LAN/WiFi/secrets side? Firewall is where the risk and the extra
+   engineering live.
+4. =age= or =sops= for =openwrt.age= — assumption is age/agenix, matching
+   =modules/agenix.nix= and =secrets/secrets.nix=. If you'd rather keep sops for
+   the router path (upstream-faithful, zero Python changes), say so.
+5. Is =adguard.tf='s AdGuard Home running on this router (=openwrt= =adguard-home=
+   package + uci) or on a host — i.e. does it belong in the router config?
