@@ -36,8 +36,10 @@ writeUci configuration =
   are left alone (additive management, unlike rsyncing whole =/etc/config= files).
 - list option: one ~add_list~ per element.
 - anonymous/list section (=config foo = without a name, e.g. =firewall= zones,
-  =dropbear=, =network.device=): ~delete cfg.@foo[0]~ x10, then ~add cfg foo~ N times,
-  then ~set cfg.@foo[i].opt= — the "clear the list" hack.
+  =dhcp.host=, =ubootenv=): the caller wipes the type first
+  (~while uci -q delete cfg.@foo[0]; do :; done~), then ~add cfg foo~ N times, then
+  ~set cfg.@foo[i].opt= — deletion by index is not reliable, see "What the diff really
+  compares".
 - secrets: ~"@key@"~ in any value is substituted from a decrypted sops file,
   decrypted on the control machine at apply time.
 
@@ -205,27 +207,32 @@ decrypt =openwrt/wifipw= (once in any terminal it stays unlocked a while).
 ### What the diff really compares
 
 =uci batch= has no dry run, so =openwrt-diff= applies the batch to a *materialized
-copy* of =/etc/config= under =/tmp=: copy, =uci -c <copy> batch=, =uci -c <copy>
-commit= inside the copy, then =uci show= and diff. Staging the real configs and
-reverting them was wrong: the revert does not always unwind anonymous sections, and
-repeated previews grew extra =@host[3]= sections. Three traps found by running it:
+copy* of =/etc/config= under =/tmp=: copy, wipe the anonymous types, =uci -c <copy>
+batch=, =uci -c <copy> commit= inside the copy, then =uci show= and diff. Staging the
+real configs and reverting them was wrong: the revert does not always unwind
+anonymous sections, and repeated previews grew extra =@host[3]= sections. Traps found
+by running it:
 
-- **anonymous sections must be deleted descending.** uci renumbers after a delete,
-  so upstream's ascending loop deletes one real section, then targets empty slots,
-  and stale options end up merged into the re-added section (two of three
-  =config host= entries collapsed into one, with the third's options kept).
-  Descending removes the real ones highest-index-first.
+- **anonymous sections cannot be deleted by index, only wiped.** uci renumbers after
+  a delete, so deleting =x.@type[0]=, =x.@type[1]=, ... hits empty slots once the list
+  shifts, and stale options end up merged into what gets re-added (two of three
+  =config host= entries collapsed into one, keeping the third's options). The fix is
+  =while uci -q delete x.@type[0]; do :; done= — slot zero always names the current
+  first section, so the loop empties the type and errors out of itself. No cap, no
+  ordering subtlety. From openwrt-nix.
 - **libuci hardcodes =/tmp/.uci=**, so =uci -c <copy>= does *not* isolate the staged
   delta -- the batch stays pending against the real configs and must be reverted.
   Showing a copy with a pending delta also prints deleted anonymous sections as
   bare =cfg<hex>= lines that the real config never contains.
 - **=uci batch= prints the generated name of every =add= section.** Capturing its
   stdout as config added nine phantom lines to every preview.
-- delete-then-add moves a section to the *end* of the file, so both sides are
+- **ash rejects =for x in <newline-separated words>;** the newline ends the command
+  before =do= arrives. Anything derived from =sort -u= and interpolated into a remote
+  =for= needs =tr '\n' ' '= — this one had been quietly breaking =openwrt-apply='s
+  commit loop for a while.
+- wipe-and-re-add moves a section to the *end* of the file, so both sides are
   sorted. Once firewall rules are declared this has to go back to being
   order-sensitive, because rule order is precedence.
-- =uci: Entry not found= for the ~MAX_ANON_SECTIONS= truncation deletes is benign
-  and identical to upstream.
 
 =just openwrt-diff= ends with *no changes: the router already matches the declared
 config*, which is the proof that the snapshot translation and the =wireless_key=
@@ -319,29 +326,29 @@ No config references another by anonymous index (`uci show | grep -E '^[a-z]+[^=
 is zero), so anonymous sections can be renamed to *named* sections here without
 breaking anything. =fw4 check= reports the current config valid.
 
-*Two blockers before the first apply:*
+*Blockers before the first apply:*
 
-1. **The diff must stop sorting.** Rule order is first-match-wins and
-   delete-then-add moves every section to the end, so a sorted diff cannot tell
-   "rules reordered" from "rules unchanged" — it will report a reordered firewall as
+1. **Still open — the diff must stop sorting.** Rule order is first-match-wins and
+   wipe-and-re-add moves every section to the end, so a sorted diff cannot tell
+   "rules reordered" from "rules unchanged" — it reports a reordered firewall as
    clean. Keep the sort for configs where order is meaningless (=dhcp=, =system=,
    =luci=, =rpcd=, =ubootenv=, =uhttpd=) and compare =firewall= (and =network=) in
-   emission order. ~3 lines in =openwrt-diff=.
-2. **The 10-delete ceiling is not a hypothetical.** There are nine anonymous
-   =config rule= entries; the ceiling is ten. One rule added through LuCI and the
-   delete sweep silently stops covering them, leaving strays. Options, cheapest
-   first:
-   a. raise =MAX_ANON_SECTIONS= (one line, harmless =Entry not found= noise),
-   b. declare these as **named** sections (=zone 'lan'=, =rule 'Allow-Ping'= — they
-      already carry =option name=) so they take the named-section path and the ceiling
-      stops applying. This is the lazy correct answer for =firewall=, and =network.device=
-      =br-lan= too: semantics are identical, only =uci show='s reference form changes,
-      and nothing references them by index.
-      *Migration is one-off:* the old anonymous copies need deleting once
-      (descending, the pattern is already =openwrt-revert=-shaped), then declare named.
-   c. state-aware generator: read existing section counts from the router and emit
-      exact deletes. ~15 lines, was already deferred to phase 3, and is the right
-      answer the moment a second router or many anonymous lists shows up.
+   emission order. ~3 lines in =openwrt-diff=. Nothing in openwrt-nix helps here — its
+   "array diff is reorder-neutral via =U+1F= separator" trick is about *values* inside
+   one option, not section order.
+2. **Closed — anonymous types are wiped, not deleted.** =MAX_ANON_SECTIONS= is gone;
+   =openwrt-diff=/=openwrt-apply= now run
+   =while uci -q delete cfg.@type[0]; do :; done= before batching, from the =add= lines
+   the batch already emits. That empties the type however many sections exist, and
+   deleting slot [0] repeatedly is immune to uci renumbering (the bug in deleting by
+   fixed index). Borrowed from openwrt-nix, whose architecture page spells out the
+   idempotency strategy. The nine anonymous dhcp hosts sitting one below the old
+   ceiling is why this came up now instead of at firewall time.
+
+Named sections (=zone 'lan'=, =rule 'Allow-Ping'=, which already carry =option name=)
+are no longer needed to dodge a ceiling. They remain a reasonable choice on taste —
+nicer =uci show= output — and would need a one-off delete of the existing anonymous
+copies.
 
 *Safety, in the order that matters:*
 
@@ -356,10 +363,21 @@ breaking anything. =fw4 check= reports the current config valid.
 - reload order: =network= first, give interfaces ~5s to come up, then =firewall=
   (=dnsmasq= for =dhcp=). One plane per run — never =network= + =firewall= + =wireless=
   together.
-- decide rollback explicitly instead of discovering you have none: =at=/=crond=-based
-  auto-revert firing a few minutes after the apply unless cancelled, tested by hand
-  once; otherwise apply with serial access only. =network reload= can drop the session
-  and a bad =input= policy in =defaults= or a =zone= locks you out of the LAN.
+- rollback: don't design it later, openwrt-nix has the shape worth copying, two
+  layers:
+  - *in-session*: start the reload detached — =( sleep 1; <reload>) >/dev/null 2>&1 &=
+    so ssh exits 0 *before* the interface bounces, which is what otherwise turns a
+    correct apply into an ssh exit 255 and a stuck operator. Then a background
+    =trap '' HUP; sleep 60= watchdog that reverts and reloads unless the next ssh
+    handshake kills it.
+  - *boot-time*: dump =/etc/config= to =/etc/rollback-backup= (not =/tmp=, that is RAM),
+    install a =S15= init script that restores it on the next boot and self-deletes.
+    Covers the power-loss-mid-apply case an in-session watchdog cannot.
+  Test both by hand once before trusting them; a rollback path never exercised is
+  a rumor.
+- =network reload= can drop the session and a bad =input= policy in =defaults= or a
+  =zone= locks you out of the LAN, so apply with the console path confirmed or with
+  someone in the room.
 - no =/etc/firewall.user= and no =include= lines here, so nothing outside the declared
   config gets merged in.
 
@@ -383,7 +401,11 @@ breaking anything. =fw4 check= reports the current config valid.
   Aug 2026). The "real project" upstream said it would switch to. If we want
   watchdog rollback on day one, consume this instead of vendoring.
   Recommendation: vendor the small upstream now (we control the ~200 lines),
-  steal the watchdog idea from nuci in Phase 4.
+  steal what nuci does better. Two things already taken: the wipe-first idempotency
+  strategy for anonymous sections (better than upstream's delete loop, and the
+  reason =MAX_ANON_SECTIONS= is gone), and its rollback shape — detached reload plus
+  a 60s in-session watchdog and a =S15= boot-time restore. Its =uci.json= schema, secrets
+  via sops, and package management are not needed here.
 - ~nix-openwrt-imagebuilder~ — reproducible images, heavy. Deferred.
 - ~openwrt-configuration~-style full image rebuild — same tradeoff, no.
 - =nix-on-derbarou= / =nixos-anywhere= style "nixify the router" — no. OpenWrt is
