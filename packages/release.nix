@@ -173,6 +173,10 @@ rec {
   i-have-adhd = (pkgs.callPackage ./claude-plugins { }).i-have-adhd;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
   pi-interactive-shell = pkgs.callPackage ./pi-extensions/pi-interactive-shell.nix { };
+  # Need mkPiExtension from the extensions set, so borrow the built attrs.
+  pi-extensions-all = pkgs.callPackage ./pi-extensions { };
+  pi-permission-gate = pi-extensions-all.pi-permission-gate;
+  pi-slow-mode = pi-extensions-all.pi-slow-mode;
   pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
   ds4 = pkgs.callPackage ./ds4 { };
 }

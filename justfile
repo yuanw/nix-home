@@ -62,6 +62,9 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-cursor-agent --src-only --override-filename ./packages/pi-extensions/pi-cursor-agent/default.nix --version-regex 'pi-cursor-agent@(.+)'
     # Vendored lock: bump version/src; also refresh npmDepsHash. If production deps change, regenerate packages/pi-extensions/pi-interactive-shell.package-lock.json first.
     @nix-update -f ./packages/release.nix pi-interactive-shell --override-filename ./packages/pi-extensions/pi-interactive-shell.nix --version-regex 'v(.*)'
+    # Both are rev-pinned (no tags) from https://github.com/rytswd/pi-agent-extensions
+    @nix-update -f ./packages/release.nix pi-permission-gate --src-only --version=branch --override-filename ./packages/pi-extensions/pi-permission-gate.nix
+    @nix-update -f ./packages/release.nix pi-slow-mode --src-only --version=branch --override-filename ./packages/pi-extensions/pi-slow-mode.nix
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
