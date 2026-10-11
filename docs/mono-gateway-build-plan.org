@@ -184,8 +184,10 @@ just mono-gateway-build      # builds there via SSH (runs sync first)
 just mono-gateway-fetch      # rsyncs result to ./result-mono-gateway
 #+end_src
 
-Output: =result= → ext4 image (~2 GB, ~550 store paths). =result= is a symlink to
-one =.img= file, not a directory.
+Output: =result= → ext4 image. =result= is a symlink to one =.img= file, not a
+directory. Measured on the DGX Spark (2026-10-11): 1.5 GB, 561 store paths, and
+the build took about a minute because the closure was already in the store/cache
+-- a fresh build host will be far slower than that.
 
 ** Inspect the Image
 
@@ -200,6 +202,32 @@ ls -la /mnt/mono-rootfs/etc/                # config files (cdx_cfg.xml, etc.)
 
 sudo umount /mnt/mono-rootfs
 #+end_src
+
+** Checked Against Upstream =BUILD_OUTPUT.md=
+
+Verified on the built image (2026-10-11, =debugfs= against =result=, no mounting):
+
+| Claim | Upstream | This image | |
+|-------+----------+------------+-|
+| Image size | 2.0 GB | 2.07 GB apparent (1.5 GB sparse) | ✅ |
+| Volume name / UUID | =NIXOS_ROOT= | =NIXOS_ROOT=, 39e0cc49-d11a-…-8baf2fd64ed7 | ✅ |
+| NixOS version | 25.11 | 25.11.20260207.23d72da | ✅ |
+| Store packages | ~550 | 561 | ✅ |
+| Kernel | 6.12.49 NXP fork, ARM64 | 6.12.49, Image 17 MB, initrd 9.8 MiB | ✅ |
+| DTBs | dk + dk-sdk (default) | both, extlinux selects =mono-gateway-dk-sdk.dtb= | ✅ |
+| Kernel cmdline | =console=ttyS0,115200 earlycon=… loglevel=4 lsm=landlock,yama,bpf= | identical | ✅ |
+| Module versions | cdx 5.03.1, fci 9.00.12, auto-bridge 6.02.0, sfp-led 1.0, lp5812 1.0 | identical | ✅ |
+| Userspace | cmm 17.03.1, dpa-app 4.03.0, libcli 1.10.0, libfci 9.00.12, fmc 2.2.0, status-led 1.0 | identical | ✅ |
+| =fmlib= | listed as userspace | absent from the image, present as =fmlib-6.12.49-2.2.0= build input only | ✅ expected (static lib) |
+| Services | sshd, dhcpcd, nftables, fancontrol, strongswan-swanctl, lldpd, cmm, load-ask-modules | all enabled in =*.wants= | ✅ |
+| =/etc=, =/bin= as =/nix/store= symlinks | shown in the layout diagram | not present in the image | ⚠️ see below |
+
+The =/etc= / =/bin= difference is cosmetic for us: the image is populated only by
+the extlinux command, and NixOS creates those paths at first activation —
+=install -m 0755 -d /etc= in =init=, then =mkdir -p /bin= plus the =binsh=, =etc=,
+=var=, =usrbinenv= activation snippets. Booting uses absolute store paths and
+=init=/nix/store/.../init=, so nothing depends on them existing in the image. Upstream's
+diagram describes the install-cd layout, not this rootfs builder.
 
 ** Build Individual Packages (for debugging)
 
@@ -303,6 +331,14 @@ After the board reboots into NixOS, verify each function. Connect via serial con
 # Systemd boot messages → serial getty login prompt
 
 # Expected boot time: < 30 seconds
+
+# Verified from the image before flashing (debugfs reads the ext4 image without
+# mounting, so no loop device and no sudo):
+#   debugfs -R "ls -l /boot/nixos" "$img"
+#     -> linux-6.12.49-Image, ...-initrd, ...-dtbs/freescale/mono-gateway-dk-sdk.dtb
+#   debugfs -R "cat /boot/extlinux/extlinux.conf" "$img"
+#     -> APPEND init=... console=ttyS0,115200 earlycon=uart8250,mmio,0x21c0500 loglevel=4 lsm=...
+#     -> FDT ../nixos/...-dtbs/freescale/mono-gateway-dk-sdk.dtb, TIMEOUT 50
 
 # Check system info
 cat /proc/version
