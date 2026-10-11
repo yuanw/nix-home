@@ -6,17 +6,17 @@
   ...
 }:
 let
-  rev = "268655eee9ba1256eef79bcc0e113915231461fc";
+  rev = "798cf2859c3848bfa175652e00e2784fd98246b2";
 in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "permission-gate";
-  version = "0-unstable-2026-07-24";
+  version = "0-unstable-2026-09-22";
 
   src = fetchFromGitHub {
     owner = "rytswd";
     repo = "pi-agent-extensions";
     inherit rev;
-    hash = "sha256-1RWkjy/mQew1l67DgEj6ChNwkeuz/Kxn/FyymQGWSA0=";
+    hash = "sha256-qmAihSg/IMvd6b98lKfclY/a2sZe6jEHIInvBB4nBMQ=";
   };
 
   dontBuild = true;
