@@ -3,12 +3,11 @@
 Vendored from Mic92's nix-uci (MIT), from
 https://github.com/Mic92/dotfiles/tree/main/openwrt. Adaptations here:
 
-* secrets come from a plain JSON object named by ``$NIX_UCI_SECRETS`` instead of
-  a sops file, so the plaintext never lands in the nix store and 1Password can
-  fill it from a ``just`` recipe;
-* a secret that resolves to the empty string is a hard error -- ``op read`` of a
-  present-but-blank 1Password field exits 0 with no output, which would otherwise
-  silently produce an open access point.
+* secrets come from a plain JSON object named by ``$NIX_UCI_SECRETS`` instead of a
+  sops file, so the plaintext never lands in the nix store; the just recipe fills it
+  from ``pass openwrt/wifipw``;
+* a secret that resolves to the empty string is a hard error -- ``pass`` can exit 0
+  with no output, which would otherwise silently produce an open access point.
 """
 
 import json
@@ -56,14 +55,31 @@ def interpolate(value: str, secrets: dict[str, str]) -> str:
             raise ConfigError(msg)
         return str(secret)
 
-    return re.sub(r"@(.*?)@", substitute, str(value))
+    # Narrow on purpose: `@(.*?)@` would call any pair of @ in a value a placeholder,
+    # so the error below would name something that is not a secret at all.
+    return re.sub(r"@([a-z0-9_]+)@", substitute, str(value))
+
+
+def quoted(value: str, secrets: dict[str, str]) -> str:
+    """Interpolate, then keep the value safe for the hardcoded '...' quoting."""
+    text = interpolate(value, secrets)
+    if "'" in text:
+        # uci batch has no quoting escape, so a single quote silently truncates the
+        # command -- a half-applied config rather than a failed one.
+        msg = f"value contains a single quote, which uci cannot quote: {text!r}"
+        raise ConfigError(msg)
+    return text
 
 
 def serialize_option(key: str, value: object, secrets: dict[str, str]) -> list[str]:
-    if isinstance(value, bool | int | float | str):
-        return [f"set {key}='{interpolate(value, secrets)}'"]
+    # bool is checked first: True must not reach the router as the string 'True',
+    # which most OpenWrt init scripts will not read as enabled.
+    if isinstance(value, bool):
+        return [f"set {key}='{1 if value else 0}'"]
+    if isinstance(value, int | float | str):
+        return [f"set {key}='{quoted(value, secrets)}'"]
     if isinstance(value, list):
-        return [f"add_list {key}='{interpolate(v, secrets)}'" for v in value]
+        return [f"add_list {key}='{quoted(v, secrets)}'" for v in value]
     msg = f"{key}: {value!r} is not a scalar or a list"
     raise ConfigError(msg)
 

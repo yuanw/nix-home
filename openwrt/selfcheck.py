@@ -40,6 +40,21 @@ lists = nix_uci.serialize({"system": {"ntp": {
 assert "add_list system.ntp.server='a'" in lists, lists
 assert "add_list system.ntp.server='b'" in lists, lists
 
+# A bool has to reach the router as 1/0; 'True' is not something OpenWrt init
+# scripts read as enabled, and every value in e8450.nix being a string today is no
+# reason for the next one to be safe.
+bools = nix_uci.serialize({"a": {"s": {"_type": "t", "x": True, "y": False}}}, SECRETS)
+assert "set a.s.x='1'" in bools and "set a.s.y='0'" in bools, bools
+
+# uci batch has no quoting escape, so a value containing ' would silently truncate
+# the command -- a half-applied config, which is worse than a failed build.
+try:
+    nix_uci.serialize({"a": {"s": {"_type": "t", "x": "it's"}}}, SECRETS)
+except nix_uci.ConfigError:
+    pass
+else:
+    raise AssertionError("a value uci cannot quote should have raised ConfigError")
+
 must_raise = [
     ("undefined secret", lambda: nix_uci.interpolate("@missing@", {})),
     ("empty secret", lambda: nix_uci.interpolate("@empty@", {"empty": ""})),
@@ -57,7 +72,7 @@ print("nix-uci selfcheck: ok")
 
 # raw: appended verbatim after the declared config, verbs whitelisted so a stray
 # shell command or a `commit` in the config is a build error, not a surprise.
-import json as _json, subprocess, tempfile, os
+import json as _json, tempfile, os
 _doc = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
 _json.dump({"settings": {"system": {"system": [{"_type": "system", "hostname": "h"}]}},
            "raw": ["reorder firewall.@rule[0]=2"]}, _doc)
