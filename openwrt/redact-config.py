@@ -11,22 +11,32 @@ import pathlib
 import re
 import sys
 
-SECRET_OPTIONS = ("key", "password", "passwd", "secret")
+# This is the only thing between a router config dump and the repo, so it is drawn
+# wider than the four names that happen to be live today: this box runs AdGuard,
+# uhttpd and rpcd, and a future dropbear or wireguard section would push a real key
+# through the same pipe. `openwrt-facts` is the only writer and runs it unconditionally.
+SECRET_OPTIONS = frozenset(
+    ("key", "password", "passwd", "secret", "psk", "passphrase", "token", "privkey")
+)
+
+OPTION_LINE = re.compile(r"(option|list) ([A-Za-z_][A-Za-z0-9_]*) '([^']*)'")
 
 
 def redact(path: pathlib.Path) -> bool:
     original = path.read_text()
-    pattern = re.compile(
-        r"(option (%s) ')(?!/)([^']+)(')" % "|".join(SECRET_OPTIONS)
-    )
-    updated = pattern.sub(
-        # `$p$<user>` is the shipped rpcd reference to the user's shadow entry,
-        # not a secret anyone typed, so keep it as-is.
-        lambda m: m.group(0)
-        if m.group(3).startswith("$p$")
-        else f"{m.group(1)}@{path.name}_{m.group(2)}@{m.group(4)}",
-        original,
-    )
+
+    def substitute(match: re.Match) -> str:
+        keyword, name, value = match.group(1).lower(), match.group(2).lower(), match.group(3)
+        if name not in SECRET_OPTIONS:
+            return match.group(0)
+        # `$p$<user>` is the shipped rpcd reference to the user's shadow entry, and a
+        # leading / is a path, so neither is a secret anyone typed. A value already
+        # holding a placeholder is left alone, because redaction runs on every facts.
+        if value.startswith(("$p$", "/", "@")):
+            return match.group(0)
+        return f"{keyword} '{name}' '@{path.name}_{name}@'"
+
+    updated = OPTION_LINE.sub(substitute, original)
     if updated != original:
         path.write_text(updated)
         return True
