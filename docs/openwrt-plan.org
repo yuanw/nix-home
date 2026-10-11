@@ -173,18 +173,25 @@ Rules that keep this boring and safe:
   lock you out. Everything else (system, ddns, dropbear, cron, luci) is safe.
 - backup before any =network=/=firewall= apply:
   =ssh root@r "sysupgrade -b /tmp/backup-$(date +%F-%H%M).bin"= then =scp= it out.
-- no remote rollback automation in v1. Test it by hand before trusting it, and
-  only touch LAN/WAN paths with physical/serial access available.
+- a risky apply arms a rollback =watchdog= first: it snapshots =/etc/config= to flash,
+  waits 90 s, and restores it unless the router has answered ssh by then. It is armed
+  only when the change touches =network=, =wireless= or =firewall= (=OPENWRT_FORCE_ROLLBACK=1=
+  forces it for testing). There is deliberately no boot-time hook: =/tmp= is RAM, so the
+  watchdog cannot cover a power loss mid-apply. =state/openwrt/<router>/live= is the
+  manual path back for that, and =sysupgrade -b= must be =scp='d off the box to count.
+  The failsafe button is *not* part of this story yet, and should not be leaned on;
+  see *Failsafe rehearsal*.
 - the generated batch prints plaintext secrets: never pipe it to a log file, and do
   not =grep= its output either — the wifi key scrolls right past.
 
 ** drift detection (cheaper than a diff engine)
 
-~state/openwrt/<router>/etc/config/*= checked into git.
+~state/openwrt/<router>/live/*= checked into git, with secrets replaced by =@name@=
+placeholders. =openwrt= has busybox =tar= and no =rsync=, so the copy is a tar pipe:
 
 #+begin_src makefile
-openwrt-facts router="mist-router":
-  rsync -a --delete -e ssh root@{{router}}:/etc/config/ state/openwrt/{{router}}/etc/config/
+openwrt-facts:
+    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C state/openwrt/{{router}}/live
 #+end_src
 
 =git diff= against that is the "what did I change in LuCI last week" answer, and
@@ -247,9 +254,14 @@ by running it:
   first section, so the loop empties the type and errors out of itself. No cap, no
   ordering subtlety. From openwrt-nix.
 - **libuci hardcodes =/tmp/.uci=**, so =uci -c <copy>= does *not* isolate the staged
-  delta -- the batch stays pending against the real configs and must be reverted.
-  Showing a copy with a pending delta also prints deleted anonymous sections as
-  bare =cfg<hex>= lines that the real config never contains.
+  delta -- the batch stays pending against the real configs. Cleaning that up by
+  =uci revert= over every config is what =openwrt/preview.sh= does now instead: the
+  delta is parked to =/tmp/.uci.nix-uci-park= and restored afterwards, because
+  reverting it discarded whatever someone else had staged. Measured: a staged
+  =dhcp= edit used to vanish across =just openwrt-diff= (1 staged line -> 0); now it
+  survives. Showing a copy with a pending delta also prints deleted anonymous sections
+  as bare =cfg<hex>= lines that the real config never contains, which is the other
+  reason the delta gets cleared rather than ignored.
 - **=uci batch= prints the generated name of every =add= section.** Capturing its
   stdout as config added nine phantom lines to every preview.
 - **ash rejects =for x in <newline-separated words>;** the newline ends the command
