@@ -1,0 +1,579 @@
+#+TITLE: Mono Gateway DK — Nix Build Plan
+#+DATE: 2025-09-13
+#+CATEGORY: plan
+#+ROLES: nix-build
+#+ID: mono-gateway-build-plan
+#+FILETAGS: :plan:mono:nixos:embedded:
+
+* Overview
+
+The Mono Gateway Development Kit (NXP LS1046A, 4×Cortex-A72, 8 GB ECC, 32 GB eMMC,
+3×1GbE + 2×10GbE SFP+) runs NixOS via the =we-are-mono/nix= flake. This plan covers:
+
+1. Where to build (x86_64 Linux, DGX Spark, or on-device)
+2. How to build (cross-compilation vs native, per-package vs full image)
+3. How to flash and verify each gateway function
+
+* Reference: =we-are-mono/nix= Repo Structure
+
+#+begin_src
+we-are-mono/nix/
+├── flake.nix                    # Entry point, overlay, NixOS configs
+├── configurations/
+│   └── gateway.nix              # Top-level profile (imports modules)
+├── modules/
+│   ├── hardware.nix             # Board hardware: kernel, DTB, eMMC, serial, fancontrol
+│   ├── networking.nix           # Networking, firewall, SSH, NTP, IPsec, LLDP
+│   └── ask-offload.nix          # ASK fast path (NixOS module with options)
+├── image/
+│   └── default.nix              # ext4 rootfs image builder
+└── pkgs/
+    ├── kernel/                  # Patched NXP kernel + DTS + defconfig
+    ├── fmlib/                   # Frame Manager library (static)
+    ├── fmc/                     # Frame Manager Configuration tool
+    ├── sfp-led/                 # SFP LED kernel module
+    ├── lp5812-driver/           # LP5812 LED kernel module
+    ├── status-led/              # Status LED script
+    ├── fancontrol/              # Fancontrol config
+    ├── libcli/                  # Cisco-like CLI library
+    ├── auto-bridge/             # Auto-bridge kernel module
+    ├── cdx/                     # CDX kernel module (ASK fast path core)
+    ├── fci/                     # FCI kernel module (depends on CDX)
+    ├── libfci/                  # FCI userspace library
+    ├── cmm/                     # CMM daemon + patched libnetfilter_conntrack
+    └── dpa-app/                 # DPA App + XML configs
+#+end_src
+
+** Build Modes Offered by the Flake
+
+| Mode | Command | Target System | Build Host |
+|------+---------+---------------+------------|
+| Cross-compiled image | =.#packages.aarch64-linux.rootfsImage= | aarch64 | x86_64 |
+| Native NixOS config | =.#nixosConfigurations.gateway-native= | aarch64 | aarch64 |
+| Cross NixOS config | =.#nixosConfigurations.gateway= | aarch64 | x86_64 |
+| Individual package | =.#packages.aarch64-linux.<pkg>= | aarch64 | Either |
+
+* Phase 1: Set Up the Build Environment
+
+** Option A: Build on Existing x86_64 Linux (Recommended for First Build)
+
+Any x86_64 Linux box with Nix (flakes enabled) can cross-compile. Requirements:
+
+- ~30 GB free disk
+- Nix with flakes enabled (=extra-experimental-features = nix-command flakes=)
+- ~2-4 hours for first build (mostly kernel + toolchain download)
+
+** Option B: Build on DGX Spark (aarch64, Native)
+
+The DGX Spark is an aarch64-linux machine (Grace CPU, 128 GB RAM, 20 ARM cores) —
+it builds natively, no cross-compilation overhead. Requirements:
+
+- [[file:../hosts/dgx-spark/readme.org][DGX Spark]] running NixOS
+- Clone we-are-mono/nix somewhere on the box
+- Use =.#nixosConfigurations.gateway-native= for native builds
+- ~15 GB disk (less than x86_64 since no cross toolchain needed)
+- Faster incremental rebuilds (no QEMU user-mode emulation)
+
+#+begin_src bash
+# On DGX Spark
+cd /tmp
+git clone --depth 1 https://github.com/we-are-mono/nix.git mono-nix
+cd mono-nix
+nix build .#nixosConfigurations.gateway-native.config.system.build.rootfsImage -L
+#+end_src
+
+** Option C: Build on-device (aarch64, on the Mono Gateway itself)
+
+Only feasible once NixOS is already booted on the Mono Gateway (chicken-and-egg
+problem). Use as an upgrade path after initial flash.
+
+#+begin_src bash
+# Once Mono Gateway is booted with NixOS + nix-daemon:
+nix build .#nixosConfigurations.gateway-native.config.system.build.toplevel
+nixos-rebuild switch --flake .#gateway-native
+#+end_src
+
+* Phase 2: Initial Build — Full Rootfs Image
+
+** Step 1: Clone the Repo
+
+#+begin_src bash
+git clone --depth 1 https://github.com/we-are-mono/nix.git /tmp/mono-nix
+cd /tmp/mono-nix
+#+end_src
+
+** Step 2: Build the Full Rootfs Image
+
+#+begin_src bash
+# Cross-compiled from x86_64 Linux (default)
+nix build .#packages.aarch64-linux.rootfsImage -L
+
+# OR: Native build on aarch64 (DGX Spark or on-device)
+nix build .#nixosConfigurations.gateway-native.config.system.build.rootfsImage -L
+#+end_src
+
+Output: =result= → ext4 image (~2 GB, ~550 store paths)
+
+** Step 3: Inspect the Image
+
+#+begin_src bash
+# Mount to inspect
+sudo mkdir -p /mnt/mono-rootfs
+sudo mount -o loop,ro result /mnt/mono-rootfs
+
+ls /mnt/mono-rootfs/boot/nixos/           # kernel, initrd, DTBs
+cat /mnt/mono-rootfs/boot/extlinux/extlinux.conf  # boot config
+ls /mnt/mono-rootfs/nix/store/ | head     # packages
+ls -la /mnt/mono-rootfs/etc/              # config files (cdx_cfg.xml, etc.)
+
+sudo umount /mnt/mono-rootfs
+#+end_src
+
+** Step 4: Build Individual Packages (for debugging)
+
+Use when a specific component fails or needs iteration:
+
+#+begin_src bash
+nix build .#packages.aarch64-linux.kernel -L          # Kernel + DTB (~15 min)
+nix build .#packages.aarch64-linux.fmlib -L           # Frame Manager lib
+nix build .#packages.aarch64-linux.fmc -L             # FMC tool
+nix build .#packages.aarch64-linux.cdx -L             # CDX kernel module
+nix build .#packages.aarch64-linux.cmm -L             # CMM daemon
+#+end_src
+
+* Phase 3: One-Time U-Boot Setup
+
+Before flashing NixOS, the Mono Gateway must have the correct U-Boot environment.
+This is a one-time operation done over UART console on the board.
+
+** Connect UART
+
+- Baud: 115200
+- Console: UART on the DK's debug header
+- Boot the board into U-Boot (hit any key during boot)
+
+** Set U-Boot Variables
+
+#+begin_src
+setenv scriptaddr 0x80000000
+setenv bootcmd 'sysboot mmc 0:1 ext2 ${scriptaddr} /boot/extlinux/extlinux.conf'
+saveenv
+#+end_src
+
+** What This Does
+
+- =scriptaddr=: memory address where U-Boot loads extlinux.conf
+- =bootcmd=: tells U-Boot to read extlinux.conf from eMMC partition 1 (ext2 fs type
+  works on ext4) and boot from it
+- =sysboot= reads extlinux.conf, which NixOS generates dynamically per-generation
+
+* Phase 4: Flashing the Image
+
+** Boot into Recovery Linux
+
+The board must be running Recovery Linux (the Yocto-built recovery image stored in
+the firmware partition) to flash the rootfs:
+
+#+begin_src bash
+# On the Mono Gateway in Recovery Linux
+ip link set eth0 up
+ip addr add 10.0.0.199/24 dev eth0
+ip route add default via 10.0.0.1 dev eth0
+#+end_src
+
+** Serve the Image from Build Machine
+
+#+begin_src bash
+# On the build machine (where result/ lives)
+python3 -m http.server 8000 --directory /tmp/mono-nix
+#+end_src
+
+** Flash from Recovery Linux
+
+#+begin_src bash
+# On the Mono Gateway (Recovery Linux)
+curl -O http://10.0.0.1:8000/result    # replace with your build machine's IP
+dd if=result of=/dev/mmcblk0p1 bs=1M   # partition 1 only — SAFE (not raw device)
+sync
+reboot
+#+end_src
+
+** Safety Notes
+
+| Command | Writes to | Safe? |
+|---------+-----------+-------|
+| =dd if=result of=/dev/mmcblk0p1= | Partition 1 (rootfs) only | ✅ Yes — firmware at offsets 0-32 MB untouched |
+| =dd if=result of=/dev/mmcblk0= | Entire raw device | ❌ Destroys firmware, bricks board |
+
+Only ever write to =/dev/mmcblk0p1= when flashing NixOS.
+
+* Phase 5: Verify Each Gateway Function
+
+After the board reboots into NixOS, verify each function. Connect via serial console
+(default: =root@ttyS0=, no password) or SSH after configuring networking.
+
+** 5.1 Boot Sequence
+
+#+begin_src bash
+# Watch boot via serial console
+# Expected: U-Boot → sysboot extlinux.conf → kernel (6.12.49) → initrd → NixOS
+# Systemd boot messages → serial getty login prompt
+
+# Expected boot time: < 30 seconds
+
+# Check system info
+cat /proc/version
+# Should show: Linux version 6.12.49 ...
+uname -a
+# Should show: aarch64 GNU/Linux
+systemctl status
+# Should show: State: running
+#+end_src
+
+** 5.2 NixOS Generations (Rollback)
+
+#+begin_src bash
+# List boot entries
+ls /boot/extlinux/
+
+# List NixOS generations
+nixos-rebuild list-generations
+
+# Check if booted generation is the deployed one
+readlink /run/current-system
+
+# Verify rollback path
+# (the symlink tree supports nixos-rebuild switch --rollback)
+#+end_src
+
+** 5.3 Network Interfaces
+
+The board has 5 physical ports (FMan numbering ≠ PCB labeling):
+
+| Port # | Interface | Speed | PCB Label |
+|--------+-----------+-------+-----------|
+| 1 | dtsec1 | 1 GbE | Port 1 |
+| 2 | dtsec2 | 1 GbE | Port 2 |
+| 3 | dtsec0 | 1 GbE | Port 3 |
+| 4 | dtsec3 | 10 GbE SFP+ | Port 4 |
+| 5 | dtsec4 | 10 GbE SFP+ | Port 5 |
+
+#+begin_src bash
+# List interfaces
+ip link show
+# Expect: lo, dtsec0, dtsec1, dtsec2, dtsec3, dtsec4
+
+# Check link status
+ip link show dtsec3           # 10GbE SFP+
+ip link show dtsec0           # 1GbE
+
+# Verify interface ordering matches FMan numbering
+# (the kernel patch 003-fman-respect-ethernet-aliases.patch ensures this)
+cat /proc/net/dev | grep dtsec
+#+end_src
+
+** 5.4 Serial Console and agetty
+
+#+begin_src bash
+# Verify serial console is active
+ps aux | grep agetty
+# Should show: agetty --autologin root --noclear 115200 ttyS0 vt100
+# Terminal should auto-size via xterm's resize utility
+
+# Verify console= kernel parameter
+cat /proc/cmdline
+# Should contain: console=ttyS0,115200 earlycon=uart8250,mmio,0x21c0500
+#+end_src
+
+** 5.5 Throughput Testing
+
+Connect two machines to test routing throughput:
+
+#+begin_src bash
+# On a client machine connected to dtsec0 (1GbE):
+iperf3 -c <gateway-ip> -t 30
+# Expected: ~940 Mbps (1GbE line rate minus overhead)
+
+# On a client connected to dtsec3 (10GbE SFP+):
+iperf3 -c <gateway-ip> -t 30
+# Expected: ~9.4 Gbps (10GbE line rate minus overhead)
+
+# Bidirectional
+iperf3 -c <gateway-ip> -t 30 -R
+# Expected: ~4-8 Gbps total bidirectional
+
+# UDP test
+iperf3 --udp -b 1G -c <gateway-ip> -t 30
+#+end_src
+
+** 5.6 ASK Fast Path Stack
+
+The ASK stack is the heart of hardware-accelerated packet processing:
+
+#+begin_src bash
+# Verify kernel modules loaded
+lsmod | grep -E "cdx|fci|auto_bridge"
+# Expected: cdx, fci, auto_bridge
+
+# Check CDX control device
+ls -la /dev/cdx_ctrl
+# Expected: exists (character device)
+
+# Check CMM service
+systemctl status cmm
+# Expected: active (running), forking type
+
+# Check load-ask-modules service
+systemctl status load-ask-modules
+# Expected: active (exited), oneshot
+
+# Check FMan microcode loaded
+# (FMan firmware is loaded by U-Boot, kernel DPAA driver uses it)
+# Can verify via dmesg:
+dmesg | grep -i "fman\|dpaa\|fsl-mc"
+#+end_src
+
+** 5.7 CAAM Crypto Accelerator
+
+CAAM is built into the kernel — verify it's active and available for XFRM offload:
+
+#+bin_src bash
+# Check CAAM in crypto API
+cat /proc/crypto | grep caam -A 5
+# Should show: driver: caam-...
+
+# Check CAAM job rings
+ls /sys/class/crypto/
+# Should list crypto devices backed by CAAM
+
+# Test crypto via openssl
+openssl speed -elapsed -evp aes-256-gcm
+# Hardware-accelerated (CAAM) should be significantly faster than software
+
+# Check XFRM offload capability (for IPsec)
+cat /proc/crypto | grep "driver.*caam" | head -10
+#+end_src
+
+** 5.8 IPsec (strongSwan + CAAM)
+
+#+begin_src bash
+# Check strongSwan service
+systemctl status strongswan-swanctl
+# Expected: active (running)
+
+# Check swanctl
+swanctl --list-conns
+# (After configuring IPsec conns)
+
+# Verify XFRM offload uses CAAM
+ip xfrm state
+# Should show hardware offload flags (if configured)
+#+end_src
+
+** 5.9 Fan Control
+
+#+begin_src bash
+# Check fancontrol service
+systemctl status fancontrol
+# Expected: active (running)
+
+# Check fan speeds (if available)
+sensors
+# Should show: emc2305 or fan PWM values
+
+# Verify fancontrol config
+cat /etc/fancontrol
+#+end_src
+
+** 5.10 LED Matrix (LP5812)
+
+#+begin_src bash
+# Check LP5812 kernel module
+lsmod | grep lp5812
+# Expected: leds-lp5812
+
+# Check LED subsystem
+ls -la /sys/class/leds/
+# Should list LP5812-backed LEDs
+
+# Test: turn on an LED
+# (status-led script handles boot/online status)
+
+# Verify status-led script
+status-led.sh --help
+#+end_src
+
+** 5.11 SFP+ LED Monitoring
+
+#+begin_src bash
+# Check SFP LED kernel module
+lsmod | grep sfp_led
+# Expected: sfp_led
+
+# Check SFP status
+ls -la /sys/class/leds/ | grep sfp
+# Should show SFP transceiver link/activity LEDs
+#+end_src
+
+** 5.12 eMMC and Filesystem
+
+#+bin_src bash
+# Check partition layout
+cat /proc/partitions
+# Should show: mmcblk0, mmcblk0p1
+
+# Check filesystem
+df -h /
+# Should show: /dev/mmcblk0p1, ext4
+# Should auto-resize on first boot (resize2fs in initrd)
+
+# Check mount options
+mount | grep mmcblk0
+# Should show: noatime, commit=60
+
+# Verify fstrim
+systemctl status fstrim
+# Expected: active (or timer)
+
+# Check journald (volatile)
+journalctl --verify
+# Should confirm volatile storage
+#+end_src
+
+** 5.13 NixOS-Specific Features
+
+#+begin_src bash
+# Verify nix-daemon running
+systemctl status nix-daemon
+# Expected: active (running)
+
+# Nix store registered
+ls /nix/store/ | wc -l
+# Expected: ~550 store paths
+
+# Nix commands work
+nix eval nixpkgs#lib.version
+#+end_src
+
+** 5.14 Stability Test
+
+#+begin_src bash
+# Run sustained load
+iperf3 -c <gateway-ip> -t 3600              # 1 hour throughput
+# or with multiple streams:
+iperf3 -c <gateway-ip> -t 3600 -P 4 -O 10   # 4 parallel streams
+
+# Watch temperature
+sensors -A
+# Check for thermal throttling
+
+# Check for kernel errors
+dmesg --level=err,warn
+# No errors expected after initial boot
+
+# 24-hour stability
+# Run iperf3 in background for 24h, check for drops
+nohup iperf3 -c <gateway-ip> -t 86400 -i 60 --logfile /tmp/iperf-24h.log &
+#+end_src
+
+* Phase 6: Quick Fixes for Missing NixOS Features
+
+Per the [[file:/Users/yuan/org/denote/20250913T140000--mono-gateway-dk-opnsense-vs-nixos-evaluation.org][evaluation document]], three of four gaps are trivially fixable.
+
+** Fix 1: PCF2131 RTC (1 line)
+
+Add to =pkgs/kernel/defconfig=:
+
+#+begin_src
+CONFIG_RTC_DRV_PCF2131=y
+#+end_src
+
+The driver exists in Linux 6.12; just not enabled in the NixOS defconfig.
+
+** Fix 2: TMP431 Thermal Sensor (1 line + rebuild)
+
+Add to =pkgs/kernel/defconfig=:
+
+#+begin_src
+CONFIG_SENSORS_TMP431=m
+#+end_src
+
+The tmp431 driver is in mainline =drivers/hwmon/tmp431.c= — no custom patch needed.
+
+** Fix 3: CAAM — Already Done
+
+CAAM is fully built-in to the kernel. XFRM will auto-offload to CAAM.
+
+** Fix 4: On-board WiFi (88W9098) — Significant Work
+
+Not trivial. Requires porting the =mwifiex= driver (~30 files) and the =dpaa_wifi=
+bridge from the OPNsense-deps repo. Defer unless WiFi on the Mono Gateway is a
+hard requirement.
+
+* Phase 7: CI/CD Integration
+
+** Option A: Build on GitHub Actions
+
+Add a workflow that cross-compiles from x86_64:
+
+#+begin_src yaml
+# .github/workflows/build.yml (in we-are-mono/nix)
+name: Build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+      - run: nix build .#packages.aarch64-linux.rootfsImage -L
+      - run: nix flake check
+#+end_src
+
+** Option B: Build on DGX Spark (Day-to-Day Development)
+
+For iterative development (kernel patches, package updates):
+
+#+begin_src bash
+# On DGX Spark
+cd /path/to/we-are-mono/nix
+nix build .#nixosConfigurations.gateway-native.config.system.build.toplevel -L
+
+# Deploy to Mono Gateway via SSH (once booted with network)
+nixos-rebuild switch --flake .#gateway-native \
+  --target-host root@mono-gateway --build-host localhost
+#+end_src
+
+* Build Diagnostics Quick Reference
+
+| Symptom | Likely Cause | Fix |
+|---------+-------------+-----|
+| Kernel build fails in =linuxManualConfig= | Missing defconfig option | Check =pkgs/kernel/defconfig= for required NixOS assertions (=CONFIG_AUTOFS_FS=y=, =CONFIG_CRYPTO_USER_API_HASH=y=) |
+| FMC build fails | CRLF line endings | Should be handled in =prePatch= but check =source/*.cpp= for =^M= |
+| CDX build fails: =ncsw_config.mk= not found | SDK headers missing | Check =sdk-headers.nix= has extracted the FMan UAPI headers; CDX =Makefile= patches for direct =ccflags-y= |
+| CDX calls =/usr/bin/dpa_app= at runtime | Hardcoded path | Check =substituteInPlace= in =pkgs/cdx/default.nix= pointing to Nix store path |
+| CMM fails to start | =/dev/cdx_ctrl= not found | CDX module not loaded; check =load-ask-modules.service= runs before =cmm.service= |
+| Boot fails: kernel panic on rootfs | Wrong partition | Confirm flashed to =/dev/mmcblk0p1=, not raw =/dev/mmcblk0= |
+| Boot fails: no serial console | Wrong kernel param | Check =console=ttyS0,115200= in =kernelParams= |
+| SFP+ LEDs not working | sfp_led module not loaded | Check =boot.extraModulePackages= includes =mono-gateway-sfp-led= |
+| nftables fails | Missing =CONFIG_NFT_*= in kernel | Add missing nftables options to =defconfig= |
+
+* Verification Checklist
+
+- [ ] Boot to NixOS serial login (UART)
+- [ ] All 5 network interfaces detected (dtsec0-4)
+- [ ] Interface ordering matches FMan numbering (dtsec0 ≠ port 1 physically)
+- [ ] CAAM crypto accelerator active (=/proc/crypto=)
+- [ ] ASK modules loaded (=lsmod | grep cdx=)
+- [ ] CMM daemon running (=systemctl status cmm=)
+- [ ] Fancontrol running (=systemctl status fancontrol=)
+- [ ] LP5812 LEDs enumerated (=/sys/class/leds/=)
+- [ ] SFP LEDs enumerated
+- [ ] eMMC mounted with noatime/commit=60
+- [ ] iperf3 line rate (~940 Mbps / ~9.4 Gbps)
+- [ ] NixOS generations working (=nixos-rebuild list-generations=)
+- [ ] StrongSwan service running (=systemctl status strongswan-swanctl=)
+- [ ] 24-hour stability (no crashes, no thermal throttling)
+- [ ] (Optional) PCF2131 RTC fix applied
+- [ ] (Optional) TMP431 thermal sensor fix applied
