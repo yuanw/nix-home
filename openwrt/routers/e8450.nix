@@ -1,9 +1,14 @@
 # Declared state for the Linksys E8450 router (192.168.1.1).
 #
-# Translated 1:1 from state/openwrt/e8450/config.txt, so a first `just
-# openwrt-diff` should come back empty.  Change values here to change the router;
-# sections absent here are left untouched, because nix-uci only deletes the
-# sections it is told about.
+# Translated 1:1 from state/openwrt/e8450/live, so `just openwrt-diff` comes back
+# empty. Change values here to change the router.
+#
+# Named sections are edited in place, so a section missing from this file is left
+# alone. Anonymous sections are NOT: the apply wipes every *type* declared here and
+# re-adds only what is declared, so a live anonymous section that is missing here gets
+# deleted rather than preserved. In practice that is a LuCI-added port forward or a
+# hand-written static lease, which is why openwrt-diff warns when the live and declared
+# counts disagree. If LuCI added something worth keeping, declare it before applying.
 {
   uci.settings = {
     # Anonymous section (`config system` with no name), so this is a list whose
