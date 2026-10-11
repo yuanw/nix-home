@@ -191,6 +191,12 @@ openwrt-facts router="mist-router":
 =just openwrt-diff= is the "what will this apply change" answer. Two different
 questions, no clever code needed for either.
 
+Caveat found on 2026-10-11: once =openwrt-apply= has touched a config, that file
+rewrites itself — comments are dropped and every value comes out quoted, so
+=option input REJECT= becomes =option input 'REJECT'=. =openwrt-diff= still reads it
+as clean, but =git diff state/= does not. Expect cosmetic churn in the snapshot after
+any apply, and read the diff as *content* rather than as line-for-line.
+
 * Phase 1/2 status (applied, in daily use)
 
 Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
@@ -211,6 +217,15 @@ Two traps hit while building it, both worth remembering:
 - **`uci revert` needs a config argument**, and `uci commit` with none commits every
   pending delta on the box. Both recipes now loop over the declared configs only —
   the router had a stray uncommitted `dhcp` delta that is not ours to commit or undo.
+- **applies were committing without reloading, until 2026-10-11.** `changed` came from a
+  plain `diff`, whose change markers are `<` and `>` rather than `+` and `-`, so the sed
+  that extracted config names never matched, the reload loop never ran, and every apply
+  was file-level only. It went unnoticed because the configs we applied were already
+  what the router was running, and the one case that looked wrong (timezone) had been
+  reloaded by hand that day. A test firewall rule proved it: present in
+  `/etc/config/firewall`, absent from `nft list ruleset`. Fixed by deriving `changed`
+  from the sorted *unified* diff. Anything that depends on "the apply reloaded it" is
+  false before that date.
 
 Unlocked: the first =just openwrt-eval= needs =gpg-agent= unlocked so =pass= can
 decrypt =openwrt/wifipw= (once in any terminal it stays unlocked a while).
@@ -375,17 +390,26 @@ order is preserved. Benign for `wireless`; fatal for `firewall`.
 That reordering is also the proof that `state/` still earns its keep: the sorted diff
 could not see it, the snapshot's `git diff` could.
 
-**What is left is the first real change** to `network` or `firewall` — a translation
-with nothing to apply is risk-free, and we have done two of those. Everything the
-first one needs is in place: the rollback watchdog, armed before the commit and tested
-on both branches, and the diff that shows exactly what is about to change. The
-remaining part is not code: confirm the console path, or be in the room.
+**What is left is the first real change** to `network` or `firewall`. That happened on
+2026-10-11: a firewall rule added and then removed, applied with the rollback armed and
+`firewall reload` running for real — so the mechanism is now demonstrated rather than
+reasoned about, and it is what surfaced the reload bug in [[file:openwrt/justfile]]
+(see *Phase 1/2 status*: applies had been committing without reloading since the
+beginning).
+
+What is *not* settled is the recovery path under that first change. The plan used to say
+"confirm the console path, or be in the room". The console path was rehearsed and did
+not work; see **Failsafe rehearsal** below. Practical translation: the watchdog is the
+only protection we have measured, so one plane per run, and be physically present for
+anything touching `network`.
 
 *Safety, in the order that matters:*
 
-- confirm the console/serial path works *before* you need it, or be physically
-  present. =/tmp= is RAM: =sysupgrade -b= must be =scp='d off the router to count as a
-  backup.
+- **The button failsafe is unproven and should be treated as unavailable.** It was
+  rehearsed about seven times on 2026-10-11 and never entered failsafe once; details
+  and the three ways to settle it are in *Failsafe rehearsal* below. Serial is the
+  option that also covers the device's known unbrick failure mode. =/tmp= is RAM:
+  =sysupgrade -b= must be =scp='d off the router to count as a backup.
 - first apply must be a no-op — translate exactly what is there, get an empty
   =openwrt-diff=, and change nothing. Risk starts with the first real change, not with
   declaring.
@@ -422,10 +446,63 @@ remaining part is not code: confirm the console path, or be in the room.
   effect — that is worse than an ugly exit code, because the disarm then proves
   nothing. What protects us is the watchdog plus the answering poll.
 - =network reload= can drop the session and a bad =input= policy in =defaults= or a
-  =zone= locks you out of the LAN, so apply with the console path confirmed or with
-  someone in the room.
+  =zone= locks you out of the LAN, so apply one plane per run with someone in the room —
+  the button failsafe is not a safety net we have confirmed.
 - no =/etc/firewall.user= and no =include= lines here, so nothing outside the declared
   config gets merged in.
+
+*** Failsafe rehearsal (2026-10-11)
+
+The plan assumed the WPS button would put this E8450 into failsafe. It was rehearsed
+against the box about seven times, with the laptop wired into the correct port, and the
+router **never once entered failsafe**. Everything that the procedure depends on is
+intact except the one thing that could not be observed.
+
+Verified by reading the build, not the wiki:
+
+- the window is =fs_failsafe_wait_timeout=4= in =/lib/preinit/00_preinit.conf=, and it
+  opens about 6-10 s after the =reboot= command — the kernel banner logs in the same
+  second the command runs. The LAN does not answer for ~40 s, which is why timing this
+  from the laptop is the hard part, and why an observer that assumes the router is down
+  at +0 s reports a false negative in under a second.
+- interface selection falls through to the default branch of
+  =/lib/preinit/05_set_preinit_iface= — =ip link set eth0 up; ifname=lan1= — so failsafe
+  answers on **LAN1 only**. Confirmed by pushing traffic down the cable and reading
+  =/sys/class/net/lanN/statistics/rx_bytes=: lan1 counted it, lan4 counted zero.
+- pressing WPS arrives as =ACTION=pressed BUTTON=wps TYPE=<empty>=, and the handler is
+  =[ "${TYPE}" = "switch" ] || echo ${BUTTON} > /tmp/failsafe_button=, so an actual
+  button *would* write the flag. After boot the same press goes to
+  =/etc/rc.button/wps=, which starts with =exit 5= — a real no-op.
+- =gpio_button_hotplug= loads at 3.7 s of kernel time from =/etc/modules-boot.d=, so
+  the driver is not late, and =/sbin/init= does reference =/etc/hotplug-preinit.json=,
+  so the preinit routing is wired rather than merely shipped.
+- squashfs =ro= root with overlay on =/dev/ubi0_7=, so the prerequisite holds.
+
+Two measurement traps, both of which produced a wrong conclusion here before the right
+one:
+
+- the only witness is =/tmp/failsafe_button=, and it is present only if the handler ran
+  during that boot. Nothing else in the running system records it.
+- instrumenting =/etc/rc.button/*= to log presses cannot see the window: during preinit
+  =/etc= comes from squashfs, so an overlay edit is invisible until after
+  =mount_root= — i.e. after the window has closed. Logging =at=$(cut -d. -f1
+  /proc/uptime)= makes it worse, because uptime resets every boot, so those lines cannot
+  be attributed to any particular boot. A per-boot witness has to live in =tmpfs=.
+
+So: failsafe is *plausible and instrumentless*, not broken, and not proven. What would
+settle it, cheapest first:
+
+1. log button presses to =/tmp/buttonlog= (wiped per boot), press from before the
+   reboot through ~40 s, and prefer holding through the reboot then releasing over
+   mashing — a driver that reports state rather than edges sees that and not the mash.
+2. =failsafe== on the kernel cmdline, which =failsafe_wait= also honors — deterministic,
+   but =fw_setenv= twice on a board with the OKD bootloader history.
+3. serial: =fs_wait_for_key f= reads a keypress, so with a console attached, =f= enters
+   failsafe on demand, and the same cable is the documented unbrick path for this
+   device. This is the option that buys both, and the only reliable view of the window.
+
+Until one of those is done, treat the watchdog as the only measured protection: one
+plane per apply, and be present.
 
 ** Phase 4 — deferred, do not build yet
 
