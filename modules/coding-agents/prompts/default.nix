@@ -66,49 +66,23 @@ let
 
     Use `emacsclient --eval` so Emacs owns the file update. This preserves Org buffers correctly if they are already open.
 
-    ```sh
-    category="" # empty means inbox; otherwise use the user-provided category argument
-    todo="Actionable TODO text"
-
-    emacsclient --eval "
-    (let* ((raw-category \"$category\")
-           (todo \"$todo\")
-           (slug (if (string-empty-p raw-category)
-                     \"inbox\"
-                   (replace-regexp-in-string
-                    \"-+\" \"-\"
-                    (replace-regexp-in-string
-                     \"[^[:alnum:]]+\" \"-\"
-                     (downcase (string-trim raw-category))))))
-           (dir (expand-file-name \"~/org/agenda/\"))
-           (file (expand-file-name (concat slug \".org\") dir)))
-      (require 'org)
-      (make-directory dir t)
-      (with-current-buffer (find-file-noselect file)
-        (goto-char (point-max))
-        (unless (bolp) (insert \"\\n\"))
-        (insert \"* TODO \" todo \"\\n  Added: \" (format-time-string \"[%Y-%m-%d %a %H:%M]\") \"\\n\")
-        (save-buffer))
-      file)"
-    ```
-
-    ## Safe quoting
-
-    If the TODO text contains quotes, newlines, or shell-sensitive characters, write it to a temporary file and read it from Elisp instead of interpolating it directly.
+    Write the entry block to a temp file and read it from Elisp, so quoting and
+    newlines are never a problem:
 
     ```sh
-    todo_file=$(mktemp /tmp/org-agenda-todo.XXXXXX)
-    cat > "$todo_file" <<'EOF'
+    category="work"   # empty means inbox
+    entry_file=$(mktemp /tmp/org-agenda-todo.XXXXXX)
+    cat > "$entry_file" <<'EOF'
     Actionable TODO text
     EOF
 
     emacsclient --eval "
-    (let* ((raw-category \"work\")
-           (todo-file \"$todo_file\")
-           (todo (string-trim
-                  (with-temp-buffer
-                    (insert-file-contents todo-file)
-                    (buffer-string))))
+    (let* ((raw-category \"$category\")
+           (entry-file \"$entry_file\")
+           (entry (string-trim
+                   (with-temp-buffer
+                     (insert-file-contents entry-file)
+                     (buffer-string))))
            (slug (if (string-empty-p raw-category)
                      \"inbox\"
                    (replace-regexp-in-string
@@ -123,10 +97,38 @@ let
       (with-current-buffer (find-file-noselect file)
         (goto-char (point-max))
         (unless (bolp) (insert \"\\n\"))
-        (insert \"* TODO \" todo \"\\n  Added: \" (format-time-string \"[%Y-%m-%d %a %H:%M]\") \"\\n\")
+        (insert
+         (if (string-prefix-p \"*\" entry t)
+             (replace-regexp-in-string \"%now%\" (format-time-string \"[%Y-%m-%d %a %H:%M]\") entry nil t)
+           (concat \"* TODO \" entry \"\\n  Added: \"
+                   (format-time-string \"[%Y-%m-%d %a %H:%M]\") \"\\n\"))
+         \"\\n\")
         (save-buffer))
       file)"
     ```
+
+    ## Subitems
+
+    If the entry is a project rather than a single action, write the whole
+    heading tree into the entry file yourself, with the parent heading first:
+
+    ```
+    * TODO Bring up the new router
+      Added: %now%
+      See [[file:~/plans/router.org]] for the details.
+    ** TODO First action
+    ** TODO Second action
+    ```
+
+    - Use `**` for subitems; org ignores everything after the first heading.
+    - Write `Added: %now%` on the parent heading. Elisp replaces `%now%` with
+      the current timestamp. Do not try to stamp it with `sed` or `date` —
+      `date`'s format string is not portable and the backrefs bite.
+    - Keep `Added: [...]` on the parent only — that is the capture convention.
+    - Split the tree across `**` subitems when the effort has independently
+      finishable steps; keep a flat `* TODO` when it is one action.
+    - Do not duplicate the plan into org. One subitem per phase, with a link to
+      the plan doc so there is a single source of truth.
 
     ## Rules
 
@@ -308,6 +310,18 @@ in
       "disable-model-invocation" = true;
     };
     body = denoteNoteBody;
+  }
+
+  {
+    type = "skill";
+    name = "org-agenda-pick";
+    description = "Pick a TODO item from the Emacs org-agenda, change its TODO state, add sub-items, and link it to a Denote note via emacsclient.";
+    extraFrontmatter = {
+      tools = "Bash";
+    };
+    body = skillBody ./skills/org-agenda-pick/SKILL.md;
+    files."agent-skill-org-agenda.el".text =
+      builtins.readFile ./skills/org-agenda-pick/agent-skill-org-agenda.el;
   }
 
   (emacsSkill {
