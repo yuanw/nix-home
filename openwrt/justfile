@@ -107,7 +107,12 @@ openwrt-apply:
     diff -u <(printf '%s\n' "$before" | sort) <(printf '%s\n' "$after" | sort) || true
     # reload only what actually changed: a timezone edit must not bounce the radio.
     # Not 1:1 -- wireless is driven by netifd, dhcp by dnsmasq, no /etc/init.d/wireless.
-    changed=$(diff <(printf '%s\n' "$before") <(printf '%s\n' "$after") \
+    # Two things have to be right here, and one of them was not: a plain `diff` marks
+    # changes with `<`/`>` instead of `+`/`-`, so this sed never matched and every apply
+    # silently became commit-without-reload (the timezone change only looked applied
+    # because it was reloaded by hand). Use the sorted *unified* diff -- the one we show
+    # -- so the signs are right and a pure reordering does not bounce a service.
+    changed=$(diff -u <(printf '%s\n' "$before" | sort) <(printf '%s\n' "$after" | sort) \
         | sed -nE 's/^[-+]([a-z][a-z0-9_]*)\..*/\1/p' | sort -u || true)
     echo "configs to reload: ${changed:-none}"
     # fw4 compiles rules in order and stops at the first match, so rule order is
