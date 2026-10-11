@@ -14,6 +14,12 @@ The Mono Gateway Development Kit (NXP LS1046A, 4×Cortex-A72, 8 GB ECC, 32 GB eM
 2. How to build (cross-compilation vs native, per-package vs full image)
 3. How to flash and verify each gateway function
 
+Vendor-supported OSes for this board are Debian/Ubuntu, OpenWrt, and OPNsense.
+NixOS is a community port (=we-are-mono/nix=), so vendor kernel/firmware changes
+land there first and our flake must re-pin deliberately.
+
+See *[[#field-notes][Field Notes]]* for findings from non-NixOS use of the same hardware.
+
 * Reference: =we-are-mono/nix= Repo Structure
 
 #+begin_src
@@ -52,93 +58,163 @@ we-are-mono/nix/
 | Native NixOS config | =.#nixosConfigurations.gateway-native= | aarch64 | aarch64 |
 | Cross NixOS config | =.#nixosConfigurations.gateway= | aarch64 | x86_64 |
 | Individual package | =.#packages.aarch64-linux.<pkg>= | aarch64 | Either |
+| **This repo's image** | =.#rootfsImage= | aarch64 | DGX Spark (native) |
+
+Note: upstream's =packages.aarch64-linux.rootfsImage= is the *cross* config
+(=gateway=, which hard-codes =nixpkgs.localSystem = x86_64-linux=). It is the
+right entry point from an x86_64 host and wrong on the DGX Spark. Our package of
+the same name wraps =gateway-native= instead, so =nix build .#rootfsImage= does
+the native thing wherever it is run.
+
+* Integration Architecture
+
+The =we-are-mono/nix= flake is wired as a [[file:../flake.nix][flake input]] (=mono-nix=) in this
+repo. Its rootfs image for the Mono Gateway DK is re-exported as
+=rootfsImage= under =packages.aarch64-linux= (the previous name
+=mono-gateway-image= is kept as an alias):
+
+#+begin_src nix
+# flake.nix (simplified)
+inputs = {
+  mono-nix.url = "github:we-are-mono/nix";  # NO nixpkgs.follows
+  ...
+};
+
+perSystem = { system, pkgs, inputs, ... }: {
+  packages = {
+    # ... other packages ...
+  } // (if system == "aarch64-linux" then {
+    rootfsImage = inputs.mono-nix.nixosConfigurations.gateway-native.config.system.build.rootfsImage;
+    mono-gateway-image = rootfsImage;  # old name, still works
+  } else { });
+};
+#+end_src
+
+Key design decisions:
+
+1. **Self-contained nixpkgs** — =mono-nix= does NOT use =inputs.nixpkgs.follows=.
+   The mono kernel patches (6.12.49, NXP fork) target nixpkgs 25.11; our
+   =nixos-unstable= churn would break them. The upstream flake pins its own
+   revision.
+
+2. **Native aarch64 only** — =rootfsImage= is only exposed for
+   =aarch64-linux= (= system == "aarch64-linux"). Building from macOS or
+   x86_64-linux gives "attribute missing". Use the upstream flake directly for
+   cross-compilation (see Option A below).
+
+3. **=gateway-native=, not =gateway=** — The upstream flake offers two NixOS
+   configs: =gateway= (forces cross-compilation from x86_64) and
+   =gateway-native= (native aarch64). We use =gateway-native= since we build on
+   the DGX Spark (aarch64).
+
+4. **Pinned by flake.lock** — The =mono-nix= revision is pinned in our
+   [[file:../flake.lock][flake.lock]]. Run =nix flake update mono-nix= to pick up upstream changes
+   deliberately, not by accident.
 
 * Phase 1: Set Up the Build Environment
 
-** Option A: Build on Existing x86_64 Linux (Recommended for First Build)
+The =rootfsImage= package is available in this repo. Three ways to build
+it:
 
-Any x86_64 Linux box with Nix (flakes enabled) can cross-compile. Requirements:
+** Option B (Default): Native Build on DGX Spark
 
-- ~30 GB free disk
-- Nix with flakes enabled (=extra-experimental-features = nix-command flakes=)
-- ~2-4 hours for first build (mostly kernel + toolchain download)
-
-** Option B: Build on DGX Spark (aarch64, Native)
-
-The DGX Spark is an aarch64-linux machine (Grace CPU, 128 GB RAM, 20 ARM cores) —
-it builds natively, no cross-compilation overhead. Requirements:
-
-- [[file:../hosts/dgx-spark/readme.org][DGX Spark]] running NixOS
-- Clone we-are-mono/nix somewhere on the box
-- Use =.#nixosConfigurations.gateway-native= for native builds
-- ~15 GB disk (less than x86_64 since no cross toolchain needed)
-- Faster incremental rebuilds (no QEMU user-mode emulation)
+The DGX Spark is an aarch64-linux machine (Grace CPU, 128 GB RAM, 20 ARM
+cores) — builds natively with no cross-compilation overhead. This is the
+primary build target.
 
 #+begin_src bash
-# On DGX Spark
-cd /tmp
-git clone --depth 1 https://github.com/we-are-mono/nix.git mono-nix
-cd mono-nix
-nix build .#nixosConfigurations.gateway-native.config.system.build.rootfsImage -L
+# On DGX Spark (SSH in) — the sync'd build tree, NOT /etc/nixos
+ssh yuanw@dgx-spark.local
+cd nix-mono        # created by `just mono-gateway-sync`; /etc/nixos is a stale
+                   # deployed copy with no mono-nix input
+nix build .#rootfsImage -L
 #+end_src
 
-** Option C: Build on-device (aarch64, on the Mono Gateway itself)
-
-Only feasible once NixOS is already booted on the Mono Gateway (chicken-and-egg
-problem). Use as an upgrade path after initial flash.
+Or from macOS via justfile:
 
 #+begin_src bash
-# Once Mono Gateway is booted with NixOS + nix-daemon:
+just mono-gateway-build      # builds on dgx-spark via SSH, leaves result/ there
+just mono-gateway-fetch      # rsyncs result/ to ./result-mono-gateway locally
+just mono-gateway-serve      # serves result/ via HTTP for the mono to curl
+#+end_src
+
+** Option A: Cross-Compile from x86_64 Linux
+
+Use when the DGX Spark is unavailable. Clone =we-are-mono/nix= separately on any
+x86_64 Linux machine with Nix:
+
+#+begin_src bash
+cd /tmp
+git clone --depth 1 https://github.com/we-are-mono/nix.git
+cd nix
+nix build .#packages.aarch64-linux.rootfsImage -L
+# Takes ~2-4 h first build (kernel cross-compiles under QEMU)
+#+end_src
+
+** Option C: On-Device Build (after initial flash)
+
+Once NixOS is booted on the Mono Gateway itself, incremental updates build
+natively on-device:
+
+#+begin_src bash
+# On the Mono Gateway (once NixOS + nix-daemon are running)
 nix build .#nixosConfigurations.gateway-native.config.system.build.toplevel
 nixos-rebuild switch --flake .#gateway-native
 #+end_src
 
 * Phase 2: Initial Build — Full Rootfs Image
 
-** Step 1: Clone the Repo
+Build from this repo using the =rootfsImage= package (aarch64-linux
+only). This references =we-are-mono/nix= via the pinned flake input.
+
+** Build on DGX Spark (Default, Recommended)
 
 #+begin_src bash
-git clone --depth 1 https://github.com/we-are-mono/nix.git /tmp/mono-nix
-cd /tmp/mono-nix
+# On DGX Spark (or via SSH)
+ssh yuanw@dgx-spark.local
+cd nix-mono
+nix build .#rootfsImage -L
 #+end_src
 
-** Step 2: Build the Full Rootfs Image
+Or from macOS via justfile:
 
 #+begin_src bash
-# Cross-compiled from x86_64 Linux (default)
-nix build .#packages.aarch64-linux.rootfsImage -L
-
-# OR: Native build on aarch64 (DGX Spark or on-device)
-nix build .#nixosConfigurations.gateway-native.config.system.build.rootfsImage -L
+just mono-gateway-sync       # rsyncs the working tree to ~/nix-mono on the Spark
+just mono-gateway-build      # builds there via SSH (runs sync first)
+just mono-gateway-fetch      # rsyncs result to ./result-mono-gateway
 #+end_src
 
-Output: =result= → ext4 image (~2 GB, ~550 store paths)
+Output: =result= → ext4 image (~2 GB, ~550 store paths). =result= is a symlink to
+one =.img= file, not a directory.
 
-** Step 3: Inspect the Image
+** Inspect the Image
 
 #+begin_src bash
-# Mount to inspect
 sudo mkdir -p /mnt/mono-rootfs
 sudo mount -o loop,ro result /mnt/mono-rootfs
 
-ls /mnt/mono-rootfs/boot/nixos/           # kernel, initrd, DTBs
+ls /mnt/mono-rootfs/boot/nixos/             # kernel, initrd, DTBs
 cat /mnt/mono-rootfs/boot/extlinux/extlinux.conf  # boot config
-ls /mnt/mono-rootfs/nix/store/ | head     # packages
-ls -la /mnt/mono-rootfs/etc/              # config files (cdx_cfg.xml, etc.)
+ls /mnt/mono-rootfs/nix/store/ | wc -l     # ~550 paths
+ls -la /mnt/mono-rootfs/etc/                # config files (cdx_cfg.xml, etc.)
 
 sudo umount /mnt/mono-rootfs
 #+end_src
 
-** Step 4: Build Individual Packages (for debugging)
+** Build Individual Packages (for debugging)
 
-Use when a specific component fails or needs iteration:
+Use when a specific component fails or needs iteration. These reference the
+individual aarch64-linux packages from =we-are-mono/nix= directly via the
+flake input. Since they take just the attribute path, Nix resolves them
+through the input without needing a separate checkout:
 
 #+begin_src bash
-nix build .#packages.aarch64-linux.kernel -L          # Kernel + DTB (~15 min)
-nix build .#packages.aarch64-linux.fmlib -L           # Frame Manager lib
-nix build .#packages.aarch64-linux.fmc -L             # FMC tool
-nix build .#packages.aarch64-linux.cdx -L             # CDX kernel module
-nix build .#packages.aarch64-linux.cmm -L             # CMM daemon
+# The mono-nix flake input exposes individual packages
+nix build inputs.mono-nix#packages.aarch64-linux.kernel -L
+nix build inputs.mono-nix#packages.aarch64-linux.fmlib -L
+nix build inputs.mono-nix#packages.aarch64-linux.fmc -L
+nix build inputs.mono-nix#packages.aarch64-linux.cdx -L
+nix build inputs.mono-nix#packages.aarch64-linux.cmm -L
 #+end_src
 
 * Phase 3: One-Time U-Boot Setup
@@ -184,16 +260,23 @@ ip route add default via 10.0.0.1 dev eth0
 ** Serve the Image from Build Machine
 
 #+begin_src bash
-# On the build machine (where result/ lives)
-python3 -m http.server 8000 --directory /tmp/mono-nix
+just mono-gateway-serve     # makes rootfs.img and serves it on :8000
 #+end_src
+
+=just mono-gateway-fetch= instead copies the image to this Mac (needs =-L=,
+since =result= is a symlink into =/nix/store=).
+
+Note: =result= is a symlink to a file in =/nix/store=, and python >= 3.11
+=http.server= refuses to serve files whose =realpath= escapes the served
+directory (404). Hence the dereferenced =rootfs.img= copy; the same trick applies
+if you serve by hand — =cp -L result . = before starting the server.
 
 ** Flash from Recovery Linux
 
 #+begin_src bash
 # On the Mono Gateway (Recovery Linux)
-curl -O http://10.0.0.1:8000/result    # replace with your build machine's IP
-dd if=result of=/dev/mmcblk0p1 bs=1M   # partition 1 only — SAFE (not raw device)
+curl -O http://10.0.0.1:8000/rootfs.img   # replace with your build machine's IP
+dd if=rootfs.img of=/dev/mmcblk0p1 bs=1M  # partition 1 only — SAFE (not raw device)
 sync
 reboot
 #+end_src
@@ -272,6 +355,16 @@ ip link show dtsec0           # 1GbE
 cat /proc/net/dev | grep dtsec
 #+end_src
 
+Vendor note: upstream confirms the 1,2,0,3,4 port order is a known bug they
+intend to fix. Their users match =eth0..eth4= (guaranteed order today); our
+kernel patch renames to =dtsecN=. Re-verify the mapping after any =nix flake
+update mono-nix=, and prefer matching on MAC/PCI topology in configs.
+
+#+begin_quote
+Note: on Debian the interfaces are =ethN=; the =dtsecN= names come from our
+kernel patch, so the two distros never show the same names.
+#+end_quote
+
 ** 5.4 Serial Console and agetty
 
 #+begin_src bash
@@ -306,6 +399,15 @@ iperf3 -c <gateway-ip> -t 30 -R
 iperf3 --udp -b 1G -c <gateway-ip> -t 30
 #+end_src
 
+The real pass criterion is CPU idle, not throughput: on the same hardware, line-rate
+gigabit NAT + nftables + conntrack used ~0.3–2.6% CPU, and 10G line rate was
+confirmed under a different OS. High CPU during iperf means the ASK fast path is
+/not offloading — go back to 5.6.
+
+#+begin_src bash
+top -bn1 | head -20       # during iperf: expect ~1-3% CPU at line rate
+#+end_src
+
 ** 5.6 ASK Fast Path Stack
 
 The ASK stack is the heart of hardware-accelerated packet processing:
@@ -337,7 +439,7 @@ dmesg | grep -i "fman\|dpaa\|fsl-mc"
 
 CAAM is built into the kernel — verify it's active and available for XFRM offload:
 
-#+bin_src bash
+#+begin_src bash
 # Check CAAM in crypto API
 cat /proc/crypto | grep caam -A 5
 # Should show: driver: caam-...
@@ -369,6 +471,12 @@ swanctl --list-conns
 ip xfrm state
 # Should show hardware offload flags (if configured)
 #+end_src
+
+Expectation to set before testing: offload is known to cover plain routing,
+NAT, conntrack and nftables. Tunnel interfaces are reported as /not/ cleanly
+offloaded, so an IPsec/WireGuard tunnel carrying all traffic may run in
+software at ~CPU speed. Measure tunnel throughput separately; do not assume
+the 10G figure applies there.
 
 ** 5.9 Fan Control
 
@@ -417,7 +525,7 @@ ls -la /sys/class/leds/ | grep sfp
 
 ** 5.12 eMMC and Filesystem
 
-#+bin_src bash
+#+begin_src bash
 # Check partition layout
 cat /proc/partitions
 # Should show: mmcblk0, mmcblk0p1
@@ -545,6 +653,31 @@ nixos-rebuild switch --flake .#gateway-native \
   --target-host root@mono-gateway --build-host localhost
 #+end_src
 
+* Reference: Field Notes
+:PROPERTIES:
+:CUSTOM_ID: field-notes
+:END:
+
+External, non-NixOS use of the same Mono Gateway DK dev kit:
+[[https://www.youtube.com/watch?v=afUdNdhUUeE]["I'm not happy with any router OS, so I'm trying something else"]]. They use
+Debian + systemd-networkd + nftables + resolved, automated with Ansible — a
+different toolchain, so the config work does not transfer to NixOS. These
+hardware findings do:
+
+| Finding | Use here |
+|---------+----------|
+| Packet offload is transparent on Linux: =ip=, =ip route= and nftables are all pushed to hardware | Confirms our architecture — no userspace fast-path config needed beyond 5.6 |
+| 1 Gbps NAT/firewall/conntrack at ~0.3–2.6% CPU; 10G line rate confirmed | Pass criterion for 5.5 |
+| Offload may not apply to tunnel interfaces | Caveat for 5.8 IPsec and Phase 6 Fix 3 |
+| Vendor port order 1,2,0,3,4 is a known bug they plan to fix | Note in 5.3 |
+| Vendor OS list: Debian/Ubuntu, OpenWrt, OPNsense | Context in Overview |
+| Board runs from USB-PD, tiny fan, not warm at line rate | Baseline for 5.9/5.14 thermal checks |
+
+Not applicable to us: their systemd-networkd =.network=/=.netdev= files, their
+Ansible/Jinja generation pipeline (NixOS already gives us this), and their
+rescue-port trick (spare 1GbE port running IPv6 ULA + mDNS so the box is always
+reachable at =gateway.local= — worth stealing later if we ever serial-lockout).
+
 * Build Diagnostics Quick Reference
 
 | Symptom | Likely Cause | Fix |
@@ -571,7 +704,7 @@ nixos-rebuild switch --flake .#gateway-native \
 - [ ] LP5812 LEDs enumerated (=/sys/class/leds/=)
 - [ ] SFP LEDs enumerated
 - [ ] eMMC mounted with noatime/commit=60
-- [ ] iperf3 line rate (~940 Mbps / ~9.4 Gbps)
+- [ ] iperf3 line rate (~940 Mbps / ~9.4 Gbps) at ~1–3% CPU (offload actually working)
 - [ ] NixOS generations working (=nixos-rebuild list-generations=)
 - [ ] StrongSwan service running (=systemctl status strongswan-swanctl=)
 - [ ] 24-hour stability (no crashes, no thermal throttling)

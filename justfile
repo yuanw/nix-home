@@ -143,4 +143,29 @@ push-all:
 sys-diff:
     @nix store diff-closures /run/current-system ./result
 
+# build tree for the mono gateway on dgx-spark. NOT /etc/nixos: that is a stale
+# deployed copy (no .git, no mono-nix input), so building there gives
+# "attribute missing".
+mono-work-dir := "nix-mono"
+
+# sync the working tree (uncommitted edits included) to dgx-spark
+mono-gateway-sync:
+    @rsync -az --delete --filter=':- .gitignore' --exclude .git --exclude 'result*' \
+        ./ yuanw@dgx-spark.local:{{mono-work-dir}}/
+
+# build mono-gateway rootfs image on dgx-spark (native aarch64-linux).
+# Leaves result/ (the ~2 GB ext4 .img) on the dgx-spark filesystem.
+mono-gateway-build: mono-gateway-sync
+    @ssh yuanw@dgx-spark.local "cd {{mono-work-dir}} && {{nix}} build '.#rootfsImage' -L"
+
+# result is a symlink into /nix/store, so -L is required:
+# rsync the image to ./result-mono-gateway
+mono-gateway-fetch:
+    @rsync -avPL yuanw@dgx-spark.local:{{mono-work-dir}}/result ./result-mono-gateway
+
+# python >= 3.11 http.server 404s on result (realpath escapes the dir),
+# so serve a dereferenced rootfs.img for the mono to curl in Recovery Linux
+mono-gateway-serve:
+    @ssh -t yuanw@dgx-spark.local "cd {{mono-work-dir}} && cp -L -f result rootfs.img && python3 -m http.server 8000"
+
 
