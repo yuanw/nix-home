@@ -43,10 +43,13 @@
         '';
       };
 
+      # Upstreams here must resolve via plain DNS on misfit: mDNS `.local`
+      # names do not (see the targetHost note in hosts/misfit/default.nix),
+      # so use the router's dnsmasq/DHCP `.lan` names.
       "cockpit.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
-          reverse_proxy http://dgx-spark.local:9090
+          reverse_proxy http://dgx-spark.lan:9090
         '';
       };
 
@@ -56,7 +59,7 @@
       "tensorfold.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
-          reverse_proxy http://dgx-spark.local:8888
+          reverse_proxy http://dgx-spark.lan:8888
         '';
       };
     };
