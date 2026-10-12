@@ -192,3 +192,6 @@ mono-gateway-redeploy: mono-gateway-sync
 mono-gateway-rollback:
     @ssh root@{{mono-gateway-host}} 'G=$(readlink /nix/var/nix/profiles/system | sed -E "s/.*system-([0-9]+)-link/\\1/"); echo "from generation $G"; nix-env --profile /nix/var/nix/profiles/system --switch-generation $((G>1 ? G-1 : 1)) && /nix/var/nix/profiles/system/bin/switch-to-configuration switch'
     @ssh root@{{mono-gateway-host}} 'readlink /run/current-system'
+
+# Router management lives in openwrt/justfile, reachable as `just openwrt-...`.
+import 'openwrt/justfile'

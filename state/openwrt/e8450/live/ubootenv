@@ -1,0 +1,15 @@
+
+config ubootenv
+	option dev '/dev/ubi0_2'
+	option envsize '0x1f000'
+	option numsec '1'
+	option offset '0x0'
+	option secsize '0x1f000'
+
+config ubootenv
+	option dev '/dev/ubi0_3'
+	option envsize '0x1f000'
+	option numsec '1'
+	option offset '0x0'
+	option secsize '0x1f000'
+

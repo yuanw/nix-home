@@ -1,0 +1,504 @@
+### adguardhome
+
+config adguardhome 'config'
+	option workdir '/var/adguardhome'
+	option config_file '/etc/adguardhome/adguardhome.yaml'
+
+### attendedsysupgrade
+
+config server 'server'
+	option url 'https://sysupgrade.openwrt.org'
+
+config client 'client'
+	option upgrade_packages '1'
+	option auto_search '0'
+	option advanced_mode '0'
+	option login_check_for_upgrades '1'
+
+### dhcp
+
+config dnsmasq
+	option domainneeded '1'
+	option localise_queries '1'
+	option rebind_protection '1'
+	option rebind_localhost '1'
+	option local '/lan/'
+	option domain 'lan'
+	option expandhosts '1'
+	option cachesize '1000'
+	option authoritative '1'
+	option readethers '1'
+	option leasefile '/tmp/dhcp.leases'
+	option localservice '1'
+	option ednspacket_max '1232'
+	list server '127.0.0.1#5054'
+	list server '/mask.icloud.com/'
+	list server '/mask-h2.icloud.com/'
+	list server '/use-application-dns.net/'
+	list server '127.0.0.1#5053'
+	option doh_backup_noresolv '-1'
+	option noresolv '1'
+	list doh_backup_server '127.0.0.1#5054'
+	list doh_backup_server '/mask.icloud.com/'
+	list doh_backup_server '/mask-h2.icloud.com/'
+	list doh_backup_server '/use-application-dns.net/'
+	list doh_backup_server '127.0.0.1#5053'
+	list doh_server '127.0.0.1#5053'
+	list address ' /router.local/router.lan/192.168.1.1'
+	list address '/.yuanw.me/192.168.1.190'
+
+config dhcp 'lan'
+	option interface 'lan'
+	option start '100'
+	option limit '150'
+	option leasetime '12h'
+	option dhcpv4 'server'
+	option dhcpv6 'server'
+	option ra 'server'
+	option ra_slaac '1'
+	list ra_flags 'managed-config'
+	list ra_flags 'other-config'
+
+config dhcp 'wan'
+	option interface 'wan'
+	option ignore '1'
+
+config odhcpd 'odhcpd'
+	option leasefile '/tmp/odhcpd.leases'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+	option piodir '/tmp/odhcpd-piodir'
+	option hostsdir '/tmp/hosts'
+
+config host
+	option name 'Mac'
+	option ip '192.168.1.212'
+	list mac 'DA:E4:6A:44:49:09'
+
+config host
+	option name 'dgx-spark'
+	list duid '00010001319cd0c54cbb47298169%47298169'
+	list mac '4c:bb:47:29:81:69'
+	option hostid '86a'
+
+config host
+	option name 'misfit'
+	list mac '58:47:CA:7E:C0:05'
+	option ip '192.168.1.190'
+
+### dropbear
+
+config dropbear 'main'
+	option PasswordAuth 'off'
+	option RootPasswordAuth 'off'
+	option Port '22'
+
+### firewall
+config defaults
+	option syn_flood	1
+	option input		REJECT
+	option output		ACCEPT
+	option forward		REJECT
+# Uncomment this line to disable ipv6 rules
+#	option disable_ipv6	1
+
+config zone
+	option name		lan
+	list   network		'lan'
+	option input		ACCEPT
+	option output		ACCEPT
+	option forward		ACCEPT
+
+config zone
+	option name		wan
+	list   network		'wan'
+	list   network		'wan6'
+	option input		REJECT
+	option output		ACCEPT
+	option forward		REJECT
+	option masq		1
+	option mtu_fix		1
+
+config forwarding
+	option src		lan
+	option dest		wan
+
+# We need to accept udp packets on port 68,
+# see https://dev.openwrt.org/ticket/4108
+config rule
+	option name		Allow-DHCP-Renew
+	option src		wan
+	option proto		udp
+	option dest_port	68
+	option target		ACCEPT
+	option family		ipv4
+
+# Allow IPv4 ping
+config rule
+	option name		Allow-Ping
+	option src		wan
+	option proto		icmp
+	option icmp_type	echo-request
+	option family		ipv4
+	option target		ACCEPT
+
+config rule
+	option name		Allow-IGMP
+	option src		wan
+	option proto		igmp
+	option family		ipv4
+	option target		ACCEPT
+
+# Allow DHCPv6 replies
+# see https://github.com/openwrt/openwrt/issues/5066
+config rule
+	option name		Allow-DHCPv6
+	option src		wan
+	option proto		udp
+	option dest_port	546
+	option family		ipv6
+	option target		ACCEPT
+
+config rule
+	option name		Allow-MLD
+	option src		wan
+	option proto		icmp
+	option src_ip		fe80::/10
+	list icmp_type		'130/0'
+	list icmp_type		'131/0'
+	list icmp_type		'132/0'
+	list icmp_type		'143/0'
+	option family		ipv6
+	option target		ACCEPT
+
+# Allow essential incoming IPv6 ICMP traffic
+config rule
+	option name		Allow-ICMPv6-Input
+	option src		wan
+	option proto	icmp
+	list icmp_type		echo-request
+	list icmp_type		echo-reply
+	list icmp_type		destination-unreachable
+	list icmp_type		packet-too-big
+	list icmp_type		time-exceeded
+	list icmp_type		bad-header
+	list icmp_type		unknown-header-type
+	list icmp_type		router-solicitation
+	list icmp_type		neighbour-solicitation
+	list icmp_type		router-advertisement
+	list icmp_type		neighbour-advertisement
+	option limit		1000/sec
+	option family		ipv6
+	option target		ACCEPT
+
+# Allow essential forwarded IPv6 ICMP traffic
+config rule
+	option name		Allow-ICMPv6-Forward
+	option src		wan
+	option dest		*
+	option proto		icmp
+	list icmp_type		echo-request
+	list icmp_type		echo-reply
+	list icmp_type		destination-unreachable
+	list icmp_type		packet-too-big
+	list icmp_type		time-exceeded
+	list icmp_type		bad-header
+	list icmp_type		unknown-header-type
+	option limit		1000/sec
+	option family		ipv6
+	option target		ACCEPT
+
+config rule
+	option name		Allow-IPSec-ESP
+	option src		wan
+	option dest		lan
+	option proto		esp
+	option target		ACCEPT
+
+config rule
+	option name		Allow-ISAKMP
+	option src		wan
+	option dest		lan
+	option dest_port	500
+	option proto		udp
+	option target		ACCEPT
+
+
+### EXAMPLE CONFIG SECTIONS
+# do not allow a specific ip to access wan
+#config rule
+#	option src		lan
+#	option src_ip	192.168.45.2
+#	option dest		wan
+#	option proto	tcp
+#	option target	REJECT
+
+# block a specific mac on wan
+#config rule
+#	option dest		wan
+#	option src_mac	00:11:22:33:44:66
+#	option target	REJECT
+
+# block incoming ICMP traffic on a zone
+#config rule
+#	option src		lan
+#	option proto	ICMP
+#	option target	DROP
+
+# port redirect port coming in on wan to lan
+#config redirect
+#	option src			wan
+#	option src_dport	80
+#	option dest			lan
+#	option dest_ip		192.168.16.235
+#	option dest_port	80
+#	option proto		tcp
+
+# port redirect of remapped ssh port (22001) on wan
+#config redirect
+#	option src		wan
+#	option src_dport	22001
+#	option dest		lan
+#	option dest_port	22
+#	option proto		tcp
+
+### FULL CONFIG SECTIONS
+#config rule
+#	option src		lan
+#	option src_ip	192.168.45.2
+#	option src_mac	00:11:22:33:44:55
+#	option src_port	80
+#	option dest		wan
+#	option dest_ip	194.25.2.129
+#	option dest_port	120
+#	option proto	tcp
+#	option target	REJECT
+
+#config redirect
+#	option src		lan
+#	option src_ip	192.168.45.2
+#	option src_mac	00:11:22:33:44:55
+#	option src_port		1024
+#	option src_dport	80
+#	option dest_ip	194.25.2.129
+#	option dest_port	120
+#	option proto	tcp
+### https-dns-proxy
+
+config main 'config'
+	option canary_domains_icloud '1'
+	option canary_domains_mozilla '1'
+	option dnsmasq_config_update '*'
+	option force_dns '1'
+	list force_dns_port '53'
+	list force_dns_port '853'
+	option procd_trigger_wan6 '0'
+
+config https-dns-proxy 'dns'
+	option bootstrap_dns '1.1.1.1'
+	option resolver_url 'https://cloudflare-dns.com/dns-query'
+	option listen_addr '127.0.0.1'
+	option listen_port '5053'
+
+### luci
+
+config core 'main'
+	option lang 'auto'
+	option mediaurlbase '/luci-static/bootstrap'
+	option resourcebase '/luci-static/resources'
+	option ubuspath '/ubus/'
+
+config extern 'flash_keep'
+	option uci '/etc/config/'
+	option dropbear '/etc/dropbear/'
+	option openvpn '/etc/openvpn/'
+	option passwd '/etc/passwd'
+	option opkg '/etc/opkg.conf'
+	option firewall '/etc/firewall.user'
+	option uploads '/lib/uci/upload/'
+
+config internal 'languages'
+
+config internal 'sauth'
+	option sessionpath '/tmp/luci-sessions'
+	option sessiontime '3600'
+
+config internal 'ccache'
+	option enable '1'
+
+config internal 'themes'
+	option Bootstrap '/luci-static/bootstrap'
+	option BootstrapDark '/luci-static/bootstrap-dark'
+	option BootstrapLight '/luci-static/bootstrap-light'
+
+config internal 'apply'
+	option rollback '90'
+	option holdoff '4'
+	option timeout '5'
+	option display '1.5'
+
+config internal 'diag'
+	option dns 'openwrt.org'
+	option ping 'openwrt.org'
+	option route 'openwrt.org'
+
+### network
+
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fd1f:26e2:8ef1::/48'
+	option dhcp_default_duid '00045bc0b77d5e4a4217aca2cda7dd259d38'
+
+config device
+	option name 'br-lan'
+	option type 'bridge'
+	list ports 'lan1'
+	list ports 'lan2'
+	list ports 'lan3'
+	list ports 'lan4'
+
+config interface 'lan'
+	option device 'br-lan'
+	option proto 'static'
+	option ipaddr '192.168.1.1'
+	option netmask '255.255.255.0'
+	option ip6assign '60'
+
+config interface 'wan'
+	option device 'wan'
+	option proto 'dhcp'
+
+config interface 'wan6'
+	option device 'wan'
+	option proto 'dhcpv6'
+
+### rpcd
+config rpcd
+	option socket /var/run/ubus/ubus.sock
+	option timeout 30
+
+config login
+	option username 'root'
+	option password '$p$root'
+	list read '*'
+	list write '*'
+
+### system
+
+config system
+	option hostname 'OpenWrt'
+	option timezone 'UTC'
+	option ttylogin '0'
+	option log_size '128'
+	option urandom_seed '0'
+	option compat_version '2.0'
+
+config timeserver 'ntp'
+	option enabled '1'
+	option enable_server '0'
+	list server '0.openwrt.pool.ntp.org'
+	list server '1.openwrt.pool.ntp.org'
+	list server '2.openwrt.pool.ntp.org'
+	list server '3.openwrt.pool.ntp.org'
+
+config led 'led_wan'
+	option name 'WAN'
+	option sysfs 'inet:blue'
+	option trigger 'netdev'
+	option mode 'link tx rx'
+	option dev 'wan'
+
+### ubihealthd
+
+config ubi-device 'ubi0'
+	option device '/dev/ubi0'
+	option enable '1'
+
+### ubootenv
+
+config ubootenv
+	option dev '/dev/ubi0_2'
+	option offset '0x0'
+	option envsize '0x1f000'
+	option secsize '0x1f000'
+	option numsec '1'
+
+config ubootenv
+	option dev '/dev/ubi0_3'
+	option offset '0x0'
+	option envsize '0x1f000'
+	option secsize '0x1f000'
+	option numsec '1'
+
+### uhttpd
+
+config uhttpd 'main'
+	list listen_http '0.0.0.0:80'
+	list listen_http '[::]:80'
+	list listen_https '0.0.0.0:443'
+	list listen_https '[::]:443'
+	option redirect_https '0'
+	option home '/www'
+	option rfc1918_filter '1'
+	option max_requests '3'
+	option max_connections '100'
+	option cert '/etc/uhttpd.crt'
+	option key '/etc/uhttpd.key'
+	option cgi_prefix '/cgi-bin'
+	list lua_prefix '/cgi-bin/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
+	option script_timeout '60'
+	option network_timeout '30'
+	option http_keepalive '20'
+	option tcp_keepalive '1'
+	option ubus_prefix '/ubus'
+
+config cert 'defaults'
+	option days '397'
+	option key_type 'ec'
+	option bits '2048'
+	option ec_curve 'P-256'
+	option country 'ZZ'
+	option state 'Somewhere'
+	option location 'Unknown'
+	option commonname 'OpenWrt'
+
+### wireless
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option phy 'wl0'
+	option cell_density '0'
+	option country 'CA'
+	option band '2g'
+	option channel '6'
+	option htmode 'HT20'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'NoneAndVoid'
+	option encryption 'psk2'
+	option key '@wireless_key@'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option phy 'wl1'
+	option band '5g'
+	option channel '36'
+	option htmode 'HE80'
+	option disabled '0'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'NoneAndVoid-5G'
+	option encryption 'psk2'
+	option key '@wireless_key@'
+

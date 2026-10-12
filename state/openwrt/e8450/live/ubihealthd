@@ -1,0 +1,5 @@
+
+config ubi-device 'ubi0'
+	option device '/dev/ubi0'
+	option enable '1'
+
