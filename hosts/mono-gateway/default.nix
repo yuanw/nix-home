@@ -11,6 +11,33 @@
   # and comments that it is "managed manually on the device". Hand-editing
   # /root/.ssh/authorized_keys does not survive a rebuild, so put the key here.
 
+  # --- Phase 5.6 fix: stop cmm crash-looping on the ctnetlink ABI ---
+  # cmm was failing on every boot with:
+  #   ctnetlink kernel ABI is broken, contact your vendor.
+  #   parse_mnl.c:884 reason: Numerical result out of range
+  # Root cause: mono-nix's libnetfilter_conntrack patch validates the nested
+  # CTA_COMCERTO_FP_XFRM_HANDLE attribute as 16 bytes (its struct is uint32_t[4]),
+  # but the kernel in the same flake emits it as 8 bytes -- u16 xfrm_handle[2*2]
+  # (MAX_SUPPORTED_XFRMS_PER_DIR = 2). mnl_attr_validate2() therefore returns
+  # ERANGE and abi_breakage() exits, so the ASK fast path never gets programmed
+  # and every flow silently falls back to software forwarding. cmm itself reads
+  # the handle as uint16_t*, so the library is the odd one out: fix the struct to
+  # u16[4] and the validator to 8. grep guards make a silent no-op a build error.
+  nixpkgs.overlays = [
+    (_final: prev: {
+      mono-gateway-libnetfilter_conntrack = prev.mono-gateway-libnetfilter_conntrack.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          sed -i 's/uint32_t[[:space:]]*xfrm_handle\[4\]/uint16_t xfrm_handle[4]/' \
+            include/internal/object.h
+          sed -i '/nfct_parse_comcerto_fp_attr_cb/,/^}/ s/MNL_TYPE_UNSPEC, 16/MNL_TYPE_UNSPEC, 8/' \
+            src/conntrack/parse_mnl.c
+          grep -q 'uint16_t xfrm_handle\[4\]' include/internal/object.h
+          grep -q 'mnl_attr_validate2(attr, MNL_TYPE_UNSPEC, 8)' src/conntrack/parse_mnl.c
+        '';
+      });
+    })
+  ];
+
   # --- LAN ---
   # Point-to-point with the development Mac (10.0.0.1), no gateway on this link.
   # eth0 is the third RJ-45 from the left -- see Phase 3 of the build plan.
