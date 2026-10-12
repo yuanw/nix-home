@@ -211,10 +211,22 @@
                 # intentionally NOT a follows — the mono kernel patches need their
                 # own nixpkgs revision, unaffected by our nixos-unstable churn.
                 mono-rootfs = inputs.mono-nix.nixosConfigurations.gateway-native.config.system.build.rootfsImage;
+
+                # Our own layer, so LAN addressing / root keys / nix-daemon live in
+                # git instead of being hand-edited on the device. extendModules keeps
+                # upstream's overlay and module list intact and just appends ours, so
+                # there is nothing to maintain when we bump mono-nix.
+                mono-gateway-config = inputs.mono-nix.nixosConfigurations.gateway-native.extendModules {
+                  modules = [ ./hosts/mono-gateway/default.nix ];
+                };
               in
               {
                 rootfsImage = mono-rootfs;
                 mono-gateway-image = mono-rootfs; # old name, kept
+                # The running system: build this and run switch-to-configuration on
+                # the board. Far smaller delta than rootfsImage, since it reuses the
+                # ~561 store paths already flashed.
+                mono-gateway-system = mono-gateway-config.config.system.build.toplevel;
               }
             else
               { }

@@ -169,3 +169,26 @@ mono-gateway-serve:
     @ssh -t yuanw@dgx-spark.local "cd {{mono-work-dir}} && cp -L -f result rootfs.img && python3 -m http.server 8000"
 
 
+
+# Address the board answers at while it is cabled straight to this Mac.
+mono-gateway-host := "10.0.0.2"
+
+# Build the gateway's NixOS system closure on dgx-spark and switch the running
+# board. Cheaper than re-flashing: the closure reuses the ~561 store paths already
+# on the eMMC, so a config change normally moves a few kilobytes. The copy is
+# relayed through this Mac because dgx-spark has no route to 10.0.0.0/24.
+mono-gateway-redeploy: mono-gateway-sync
+    @ssh yuanw@dgx-spark.local "cd {{mono-work-dir}} && {{nix}} build '.#mono-gateway-system' -L"
+    @P=$(ssh yuanw@dgx-spark.local "readlink -f {{mono-work-dir}}/result"); \
+     {{nix}} copy --from 'ssh://yuanw@dgx-spark.local' --to 'ssh://root@{{mono-gateway-host}}' "$P" && \
+     ssh root@{{mono-gateway-host}} "nix-env --profile /nix/var/nix/profiles/system --set \"$P\" && \
+      \"$P/bin/switch-to-configuration\" switch"
+
+# Roll the board back to the previous generation and activate it. Works because the
+# deploy target registers a profile. Note nixos-rebuild --rollback does NOT work here:
+# it nix-builds its own wrapper from <nixpkgs>, and this board has no route. So this
+# uses the primitives. Switching back twice is idempotent (it re-points at the older
+# generation, it does not create a new one).
+mono-gateway-rollback:
+    @ssh root@{{mono-gateway-host}} 'G=$(readlink /nix/var/nix/profiles/system | sed -E "s/.*system-([0-9]+)-link/\\1/"); echo "from generation $G"; nix-env --profile /nix/var/nix/profiles/system --switch-generation $((G>1 ? G-1 : 1)) && /nix/var/nix/profiles/system/bin/switch-to-configuration switch'
+    @ssh root@{{mono-gateway-host}} 'readlink /run/current-system'

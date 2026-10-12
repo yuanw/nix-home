@@ -252,9 +252,18 @@ This is a one-time operation done over UART console on the board.
 
 ** Connect UART
 
-- Baud: 115200
-- Console: UART on the DK's debug header
-- Boot the board into U-Boot (hit any key during boot)
+- Console is the **USB-C UART** port, 115200 8N1. It is *not* the USB-C data port and
+  not the power port — see the panel order below. FTDI chips enumerate natively on
+  macOS as =/dev/cu.usbserial-*=.
+- Boot the board into U-Boot and hit any key during the countdown.
+- Panel order, left to right: =USB-C power | USB-C (data) | USB-C UART | eth1 | eth2
+  | eth0 | eth3 SFP+ | eth4 SFP+=. So =eth0= is the **third** RJ-45. The case labels
+  match what the OS reports; identify a port by link state, not by what sits next to
+  it — there are two reset buttons, and the first is described as being "near the USB
+  and network ports", i.e. near all of them.
+- Status LED during boot: green = hardware self-test passed, red = a test failed (U-Boot
+  names the chip), orange pulsing = Recovery Linux, white = OpenWrt. One glance answers
+  "is the board alive" without any network.
 
 ** Set U-Boot Variables
 
@@ -271,12 +280,33 @@ saveenv
   works on ext4) and boot from it
 - =sysboot= reads extlinux.conf, which NixOS generates dynamically per-generation
 
+** How a Stale Environment Looks
+
+Untouched vendor env boots =/boot/Image.gz= + =mono-gateway-dk-sdk.dtb=, then
+=kernel.itb=, fails with =ERROR -91: can't get kernel image!=, falls through an SPI-NOR
+read and lands in **Recovery Linux**. This is indistinguishable from a failed flash if
+you are only looking at the network. A board that drops into Recovery on every reset,
+with a correct filesystem on =mmcblk0p1=, is an env problem — apply the section above.
+
 * Phase 4: Flashing the Image
 
 ** Boot into Recovery Linux
 
 The board must be running Recovery Linux (the Yocto-built recovery image stored in
-the firmware partition) to flash the rootfs:
+the firmware partition) to flash the rootfs. **It never starts by itself**: interrupt
+the U-Boot countdown and run:
+
+#+begin_src
+=> run recovery
+#+end_src
+
+This is the hard dependency on the serial console — there is no network path into
+recovery, and Recovery Linux brings up no interface and takes no address on its own.
+Flashing from inside OpenWrt is not an alternative: its root is =mmcblk0p1=, the same
+partition you are about to overwrite.
+
+Interface names are stable across the three images (U-Boot, OpenWrt, Recovery Linux),
+and Recovery Linux's =eth0= is =dtsec0=.
 
 #+begin_src bash
 # On the Mono Gateway in Recovery Linux
@@ -299,6 +329,15 @@ Note: =result= is a symlink to a file in =/nix/store=, and python >= 3.11
 directory (404). Hence the dereferenced =rootfs.img= copy; the same trick applies
 if you serve by hand — =cp -L result . = before starting the server.
 
+Two things this page did not say, learned the hard way:
+
+- Serve from a directory that contains **only** the image (hardlink it in). Serving
+  the repo root puts =secrets/= on an HTTP listener, and =--bind 10.0.0.1= keeps it
+  off the LAN but does nothing about the directory listing.
+- macOS ships =openrsync=, which copies =result= as a *symlink* unless you pass =-L=,
+  leaving you with a 55-byte file and no error. Same footgun as the =just=
+  =mono-gateway-fetch= note above, different tool.
+
 ** Flash from Recovery Linux
 
 #+begin_src bash
@@ -318,10 +357,83 @@ reboot
 
 Only ever write to =/dev/mmcblk0p1= when flashing NixOS.
 
+** Flashed (2026-10-11) — First Success
+
+One clean run end to end, for the numbers:
+
+| Step | Result |
+|--------------------------------------+-----------------------------------------------------|
+| Image | 2,075,000,832 B logical, 1.51 GiB allocated (sparse ext4) |
+| =curl= in Recovery | 1978 MB in 17 s, 112 MB/s ≈ 890 Mbps, i.e. 1GbE line rate |
+| =dd= to =mmcblk0p1= | =bs=1M=; returned in ~5 s (write-back), so =sync= before rebooting |
+| Read-back verify | =dd if=/dev/mmcblk0p1 bs=4096 count=506592 |= =md5sum= → matches source |
+| Boot | extlinux menu → kernel 6.12.49 → systemd multi-user, sshd active |
+
+Verification discipline matters more here than anywhere else in this plan, because two
+failure modes look like success:
+
+- =head -c <huge> /dev/blockdevice= prints nothing on BusyBox and the pipe's =md5sum=
+  returns the digest of *empty input* (=d41d8cd9...=). A read-back check using it proves
+  nothing. Use a block size that divides the image length exactly (=4096 × 506592=).
+- A serial console echoes what you type, so watching for a marker like =echo DD-OK= in
+  the log tells you you typed a command, not that it finished. Match on text the board
+  generates, not text you echoed.
+
 * Phase 5: Verify Each Gateway Function
 
 After the board reboots into NixOS, verify each function. Connect via serial console
 (default: =root@ttyS0=, no password) or SSH after configuring networking.
+
+** Configuration Layer and Deployment
+
+Upstream's =gateway-native= leaves every interface unconfigured -- with nothing
+declared, NixOS just enables DHCP everywhere, which is why a board on a direct link
+sinks to =169.254/16= after a reboot and looks unreachable. Our own settings live in
+=hosts/mono-gateway/default.nix= and are attached with:
+
+#+begin_src nix
+inputs.mono-nix.nixosConfigurations.gateway-native.extendModules {
+  modules = [ ./hosts/mono-gateway/default.nix ];
+};
+#+end_src
+
+=extendModules= rather than re-importing the modules, so upstream's overlay, module
+list and 25.11 nixpkgs pin are inherited and bumping =mono-nix= cannot drift. Build the
+closure and switch the running board in one step:
+
+#+begin_src bash
+just mono-gateway-redeploy   # build on dgx-spark, copy via this Mac, switch in place
+#+end_src
+
+Cheaper than re-flashing: the closure reuses the ~561 store paths already on the eMMC,
+so a config change typically moves a few kilobytes. The copy is relayed through the Mac
+because dgx-spark has no route to =10.0.0.0/24=.
+
+*** Generations and rollback
+
+A deploy registers a profile before activating, which is not optional: =switch-to-configuration
+alone never creates a =system= profile, so with the plain recipe the board sits at *zero*
+generations and =nixos-rebuild list-generations errors with =no profile 'system' found=. Once
+profiles exist, extlinux emits one boot label per generation, so rollback is visible at the
+console menu and survives a power cycle.
+
+#+begin_quote
+*nixos-rebuild cannot be used on the board.* =nixos-rebuild switch --rollback= nix-builds its
+own wrapper from =<nixpkgs>= and fails on DNS, because this board is air-gapped by design.
+Roll back with the primitives, which is what =just mono-gateway-rollback= does — =nix-env
+--switch-generation= then =switch-to-configuration switch=. Note this re-points at the older
+generation rather than creating a new one, so running it twice is idempotent.
+#+end_quote
+
+Verified 2026-10-12: gen 1 → canary deploy → gen 2 → rolled back → *rebooted*, and the board
+came up on gen 1 (t+28 s). A config differing only by a comment rewrites to a generation
+pointing at the same store path — deterministic builds, not a broken profile.
+
+#+begin_quote
+*Deliberate:* the board is air-gapped -- on-link route only, no gateway, no DNS. Closures
+are pushed, never pulled. Do not add =defaultGateway=/DNS to "fix" it; WAN addressing
+belongs to the cutover (Phase 6 of the agenda). On-device building stays deferred.
+#+end_quote
 
 ** 5.1 Boot Sequence
 
@@ -399,6 +511,13 @@ update mono-nix=, and prefer matching on MAC/PCI topology in configs.
 #+begin_quote
 Note: on Debian the interfaces are =ethN=; the =dtsecN= names come from our
 kernel patch, so the two distros never show the same names.
+#+end_quote
+
+#+begin_quote
+**Corrected 2026-10-11:** the flashed 25.11 image enumerates =eth0..eth4=, not
+=dtsecN= — =ls /sys/class/net= says so, as does =ip -o addr=. Nothing in the built
+output matches the rename claim above, so any Phase 5 config written against =dtsecN=
+would bind nothing. Trust =ls /sys/class/net= after each rebuild.
 #+end_quote
 
 ** 5.4 Serial Console and agetty
@@ -708,6 +827,7 @@ hardware findings do:
 | Vendor port order 1,2,0,3,4 is a known bug they plan to fix | Note in 5.3 |
 | Vendor OS list: Debian/Ubuntu, OpenWrt, OPNsense | Context in Overview |
 | Board runs from USB-PD, tiny fan, not warm at line rate | Baseline for 5.9/5.14 thermal checks |
+| Vendor OpenWrt defaults =br-lan= to 192.168.1.1/24, bridged over eth0/eth1/eth2 | Landmine: same address as the house router. Never bridge these ports onto the LAN until the address changes |
 
 Not applicable to us: their systemd-networkd =.network=/=.netdev= files, their
 Ansible/Jinja generation pipeline (NixOS already gives us this), and their
