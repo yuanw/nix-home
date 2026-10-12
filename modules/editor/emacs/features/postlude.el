@@ -36,6 +36,26 @@ smerge-basic-map))
 (message "Buffer is not visiting a file")))
 (global-set-key (kbd "C-c f n") #'my/copy-buffer-file-name)
 
+;; Open a file with the default application macOS picked for it.  Address the
+;; file by *path* through `call-process' with no shell in between, so spaces and
+;; odd characters in the name stay inert.  In Dired this opens the file under
+;; point (and the directory under point), which `buffer-file-name' can't see.
+(when (eq system-type 'darwin)
+  (defun my/open-file ()
+    "Open what is at point with the default macOS application via `open'.
+In Dired that is the file or subdirectory under point; otherwise the visited
+file, falling back to the buffer's directory."
+    (interactive)
+    (let ((target (or (and (derived-mode-p 'dired-mode)
+                           ;; nil = no trailing slash on directories, t = no error.
+                           (dired-get-filename nil t))
+                      buffer-file-name
+                      default-directory)))
+      ;; `open' hands off to LaunchServices and returns immediately.
+      (call-process "/usr/bin/open" nil 0 nil target)))
+  (global-set-key (kbd "C-c f o") #'my/open-file)
+  )
+
 (setq treesit-font-lock-level 4)
 
 (defconst pragmatapro/prettify-symbols-alist
