@@ -429,6 +429,46 @@ Verified 2026-10-12: gen 1 → canary deploy → gen 2 → rolled back → *rebo
 came up on gen 1 (t+28 s). A config differing only by a comment rewrites to a generation
 pointing at the same store path — deterministic builds, not a broken profile.
 
+*** Throughput, first pass (Phase 5.5)
+
+Measured 2026-10-12 with =asche= as the peer over =eth1= (USB Ethernet adapter, static
+=10.1.0.24=). CPU is a delta of /proc/stat samples taken across the transfer window, not an
+guess; idle baseline was 1.2-1.5 % of eight cores.
+
+| Path                       | Direction       |  Gbps | Board CPU (% of 8 cores) |
+|----------------------------+-----------------+-------+--------------------------|
+| =eth1= = asche             | asche -> board  | 0.83  | 24.7 / 26.2 / 30.9       |
+| =eth1= = asche             | board -> asche  | 0.90  | 17.9                     |
+| =eth0= = =mist= (control)  | Mac -> board    | 0.94  | 50.0                     |
+
+Four parallel streams produced the same aggregate as one (0.83 Gbit/s, 26 %), so nothing is
+flow-limited: these runs are pinned by the 1 GbE path, not by CPU. That is the honest reading
+of why the numbers cluster just under a gigabit.
+
+*The claim this does not test.* Everything above terminates TCP on the board, so it measures
+the host stack, not the Frame Manager. The plan's ~1-3 % CPU target is a *forwarding* figure:
+frames crossing from one port to another without the CPU deciding where they go. That needs an
+endpoint on each side of the board and is still open.
+
+*** Firewall gotchas that cost the most time
+
+Two behaviours both read as "the gateway is broken" and neither shows up in =iperf3=
+output. Both are handled in =hosts/mono-gateway/default.nix= by the
+=gw-lab-firewall= service, marked for deletion at cutover.
+
++ *RP-filter drops the lab link.* =rpfilter= hooks =prerouting= with =policy drop= and runs
+  =fib saddr . mark . iif check exists=, jumping into =rpfilter-allow=, which was empty. A
+  link-local source fails that fib test, so the packet dies before any accept rule is
+  consulted. Symptom: ICMP looks fine in one direction while TCP hangs.
++ *iperf's port is simply not permitted.* =input-allow= accepts =tcp dport 22= and the
+  temp-port set, nothing else; everything else falls to =policy drop=. Every "connection
+  refused" in this phase was this, including the ones that looked like a bad cable.
+
+Prove these with counters, not impressions. =/sys/class/net/ethN/statistics/{rx,tx}_packets=
+plus =ip -6 neigh= settled it in three moves, after =tcpdump= and =ethtool= had misled us.
+One trap worth naming: =tcpdump= toggles =fsl_dpa= into promiscuous mode and the driver's
+multicast filter can come back wrong, which looks like a dead link minutes after a capture.
+
 #+begin_quote
 *Deliberate:* the board is air-gapped -- on-link route only, no gateway, no DNS. Closures
 are pushed, never pulled. Do not add =defaultGateway=/DNS to "fix" it; WAN addressing

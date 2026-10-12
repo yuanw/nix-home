@@ -25,7 +25,7 @@
   };
 
   # --- Phase 5.5 test link ---
-  # eth1 to the throughput client (a Mac, 10.1.0.2). Declared rather than left to
+  # eth1 to the throughput client (asche, 10.1.0.24). Declared rather than left to
   # `ip link set up`, because an unconfigured interface is never brought up, and
   # carrier reports from the FMan driver cannot be trusted without it. Nothing here
   # is production addressing -- this subnet exists for iperf3 and should be replaced
@@ -55,4 +55,35 @@
   #
   # Separately, there is no `nix.enable` here: it already defaults to true and the
   # daemon is socket-activated, so it reads "inactive" until a client connects.
+
+  # --- Phase 5.5 lab firewall exceptions ---
+  # Two rules, both needed before any iperf traffic moves, and both invisible until
+  # you go looking. The generated ruleset RP-filters via `fib saddr . iif check` in a
+  # chain whose policy is drop and whose exception chain is empty, so a link-local
+  # source is dropped in prerouting before any accept rule is consulted. Its input
+  # chain accepts tcp 22 and the temp-port set only, so iperf's port falls through to
+  # the drop policy. Both present as "the gateway is broken", never "packet dropped".
+  #
+  # Temporary scaffolding. Delete this whole service at cutover, when zones carry real
+  # subnets and RP-filter has something real to match against.
+  systemd.services.gw-lab-firewall = {
+    description = "Phase 5.5 lab firewall exceptions (remove at cutover)";
+    after = [
+      "nftables.service"
+      "network-addresses-eth1.service"
+    ];
+
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      # List form, so nft's arguments go straight to argv. There is no shell here and
+      # therefore nothing to quote -- ruleset names contain no spaces.
+      ExecStart = [
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw rpfilter-allow iifname eth1 accept"
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 tcp dport 5201 accept"
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth0 tcp dport 5201 accept"
+      ];
+    };
+  };
 }
