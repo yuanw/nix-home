@@ -46,7 +46,7 @@
       "cockpit.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
-          reverse_proxy http://dgx-spark.lan:9090
+          reverse_proxy http://dgx-spark.local:9090
         '';
       };
 
@@ -56,7 +56,7 @@
       "tensorfold.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
-          reverse_proxy http://dgx-spark.lan:8888
+          reverse_proxy http://dgx-spark.local:8888
         '';
       };
     };
