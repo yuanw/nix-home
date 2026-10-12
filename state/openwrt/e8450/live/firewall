@@ -1,0 +1,121 @@
+
+config defaults
+	option forward 'REJECT'
+	option input 'REJECT'
+	option output 'ACCEPT'
+	option syn_flood '1'
+
+config forwarding
+	option dest 'wan'
+	option src 'lan'
+
+config rule
+	option dest_port '68'
+	option family 'ipv4'
+	option name 'Allow-DHCP-Renew'
+	option proto 'udp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option family 'ipv4'
+	option icmp_type 'echo-request'
+	option name 'Allow-Ping'
+	option proto 'icmp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option family 'ipv4'
+	option name 'Allow-IGMP'
+	option proto 'igmp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option dest_port '546'
+	option family 'ipv6'
+	option name 'Allow-DHCPv6'
+	option proto 'udp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option family 'ipv6'
+	list icmp_type '130/0'
+	list icmp_type '131/0'
+	list icmp_type '132/0'
+	list icmp_type '143/0'
+	option name 'Allow-MLD'
+	option proto 'icmp'
+	option src 'wan'
+	option src_ip 'fe80::/10'
+	option target 'ACCEPT'
+
+config rule
+	option family 'ipv6'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	list icmp_type 'router-solicitation'
+	list icmp_type 'neighbour-solicitation'
+	list icmp_type 'router-advertisement'
+	list icmp_type 'neighbour-advertisement'
+	option limit '1000/sec'
+	option name 'Allow-ICMPv6-Input'
+	option proto 'icmp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option dest '*'
+	option family 'ipv6'
+	list icmp_type 'echo-request'
+	list icmp_type 'echo-reply'
+	list icmp_type 'destination-unreachable'
+	list icmp_type 'packet-too-big'
+	list icmp_type 'time-exceeded'
+	list icmp_type 'bad-header'
+	list icmp_type 'unknown-header-type'
+	option limit '1000/sec'
+	option name 'Allow-ICMPv6-Forward'
+	option proto 'icmp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option dest 'lan'
+	option name 'Allow-IPSec-ESP'
+	option proto 'esp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config rule
+	option dest 'lan'
+	option dest_port '500'
+	option name 'Allow-ISAKMP'
+	option proto 'udp'
+	option src 'wan'
+	option target 'ACCEPT'
+
+config zone
+	option forward 'ACCEPT'
+	option input 'ACCEPT'
+	option name 'lan'
+	list network 'lan'
+	option output 'ACCEPT'
+
+config zone
+	option forward 'REJECT'
+	option input 'REJECT'
+	option masq '1'
+	option mtu_fix '1'
+	option name 'wan'
+	list network 'wan'
+	list network 'wan6'
+	option output 'ACCEPT'
+

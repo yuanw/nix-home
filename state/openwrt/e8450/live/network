@@ -1,0 +1,34 @@
+
+config device
+	option name 'br-lan'
+	list ports 'lan1'
+	list ports 'lan2'
+	list ports 'lan3'
+	list ports 'lan4'
+	option type 'bridge'
+
+config globals 'globals'
+	option dhcp_default_duid '00045bc0b77d5e4a4217aca2cda7dd259d38'
+	option ula_prefix 'fd1f:26e2:8ef1::/48'
+
+config interface 'lan'
+	option device 'br-lan'
+	option ip6assign '60'
+	option ipaddr '192.168.1.1'
+	option netmask '255.255.255.0'
+	option proto 'static'
+
+config interface 'loopback'
+	option device 'lo'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+	option proto 'static'
+
+config interface 'wan'
+	option device 'wan'
+	option proto 'dhcp'
+
+config interface 'wan6'
+	option device 'wan'
+	option proto 'dhcpv6'
+

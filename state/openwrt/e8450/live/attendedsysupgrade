@@ -1,0 +1,10 @@
+
+config client 'client'
+	option advanced_mode '0'
+	option auto_search '0'
+	option login_check_for_upgrades '1'
+	option upgrade_packages '1'
+
+config server 'server'
+	option url 'https://sysupgrade.openwrt.org'
+

@@ -1,0 +1,41 @@
+
+config internal 'apply'
+	option display '1.5'
+	option holdoff '4'
+	option rollback '90'
+	option timeout '5'
+
+config internal 'ccache'
+	option enable '1'
+
+config internal 'diag'
+	option dns 'openwrt.org'
+	option ping 'openwrt.org'
+	option route 'openwrt.org'
+
+config extern 'flash_keep'
+	option dropbear '/etc/dropbear/'
+	option firewall '/etc/firewall.user'
+	option openvpn '/etc/openvpn/'
+	option opkg '/etc/opkg.conf'
+	option passwd '/etc/passwd'
+	option uci '/etc/config/'
+	option uploads '/lib/uci/upload/'
+
+config internal 'languages'
+
+config core 'main'
+	option lang 'auto'
+	option mediaurlbase '/luci-static/bootstrap'
+	option resourcebase '/luci-static/resources'
+	option ubuspath '/ubus/'
+
+config internal 'sauth'
+	option sessionpath '/tmp/luci-sessions'
+	option sessiontime '3600'
+
+config internal 'themes'
+	option Bootstrap '/luci-static/bootstrap'
+	option BootstrapDark '/luci-static/bootstrap-dark'
+	option BootstrapLight '/luci-static/bootstrap-light'
+

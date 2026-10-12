@@ -1,0 +1,183 @@
+# Router recipes, imported by the root justfile -- run them as `just openwrt-...`
+# from the repo root, not from here (the `nix` wrapper is defined upstream, and
+# copying that incantation here is how it rots).
+#
+# --- openwrt (Linksys E8450) -------------------------------------------------
+# Applying is a `uci batch` over ssh: every command stages into /tmp/.uci and only
+# `uci commit` persists. Reviewing is therefore free. Two rules below, both learned
+# the hard way:
+# - Anonymous sections are WIPED (`uci -q delete x.@type[0]` until it errors), never
+#   deleted by index: uci renumbers what is left after each delete, so indexing
+#   leaves stale options merged into what gets re-added, and any fixed count silently
+#   caps the list. The refs come from the batch's own `add` lines, so nothing here
+#   depends on how many sections a router happens to have.
+# - A copy read with a pending delta prints deleted anonymous sections as bare
+#   `cfg<hash>` lines that no real config contains, and libuci writes that delta to
+#   /tmp/.uci regardless of `-c`. So the delta is parked around the batch and restored
+#   afterwards -- reverting it, which is what this used to do, quietly discarded
+#   someone else's staged work from a recipe that promises to change nothing.
+#
+# The preview itself lives in openwrt/preview.sh and is shared by openwrt-diff and
+# openwrt-apply. Keeping two copies of that block is how the reload bug survived: the
+# fix landed in the apply copy, so the diff was showing a clean run against state the
+# apply was not going to reload.
+router_host := "192.168.1.1"
+router := "e8450"
+
+# Both sides of the comparison get sorted, because a wipe-and-re-add moves the
+# sections it touches to the end of the file and an unsorted diff would call that a
+# change. What sorting cannot see is *order*: for firewall rules that is precedence,
+# so the rule sequence is compared separately below. Order carries no meaning for the
+# named sections here, which is why the sorting is safe.
+
+# print the declared config as `uci batch` commands, with secrets interpolated
+openwrt-eval:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    commands=$( {{nix}} build --quiet --no-link --print-out-paths ".#openwrt-{{router}}" )
+    secrets=$(mktemp); trap 'rm -f "$secrets"' EXIT
+    umask 077
+    # empty reads must never reach uci: `pass`/`op` can both succeed with no output
+    psk=$(pass openwrt/wifipw)
+    test -n "$psk" || { echo 'empty wifi key from pass openwrt/wifipw' >&2; exit 1; }
+    printf '{"wireless_key": "%s"}\n' "$psk" > "$secrets"
+    NIX_UCI_SECRETS="$secrets" "$commands"
+
+# what would change, with nothing on the router modified. See openwrt/preview.sh for
+# how that read-only claim is kept.
+openwrt-diff:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    batch=$(just openwrt-eval)
+    printf '%s\n' "$batch" | host="root@{{router_host}}" bash {{ justfile_directory() }}/openwrt/preview.sh
+
+# preview, then commit and reload on confirmation. Committing can drop the ssh
+# session (wireless/network reload), so keep a console handy.
+openwrt-apply:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    host="root@{{router_host}}"
+    batch=$(just openwrt-eval)
+    configs=$(printf '%s\n' "$batch" | awk '{ c = $2; sub(/[.=].*/, "", c); if (c != "") print c }' | sort -u | tr '\n' ' ')
+    wipes=$(printf '%s\n' "$batch" | awk '$1 == "add" { print $2 "." $3 }' | sort -u | tr '\n' ' ')
+
+    # One implementation for the preview, shared with openwrt-diff: it prints the diff,
+    # the CHANGED line the reload loop below is driven by, and the notes.
+    preview=$(printf '%s\n' "$batch" | host="$host" bash {{ justfile_directory() }}/openwrt/preview.sh)
+    printf '%s\n' "$preview"
+    # Reload only what actually changed: a timezone edit must not bounce the radio. Not
+    # 1:1 -- wireless is driven by netifd, dhcp by dnsmasq, no /etc/init.d/wireless.
+    changed=$(printf '%s\n' "$preview" | sed -n 's/^CHANGED: //p')
+    echo "configs to reload: ${changed:-none}"
+
+
+    # ssh wants stdin, and `read` fails at EOF, which used to abort this recipe with
+    # the batch still staged.
+    answer=non
+    read -r -p 'commit and reload? [y/N] ' answer || true
+    if [ "$answer" != y ]; then
+        echo 'left the router alone'
+        exit 0
+    fi
+
+    ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+
+    # Arm the undo *before* the commit, and disarm it only if the router answers
+    # afterwards. Both halves matter: armed after the commit it cannot cover a config
+    # that kills the session while the commit is in flight, and a reload that drops the
+    # connection must not abort this recipe -- what decides whether to roll back is
+    # whether ssh comes back, not what the reload exited with.
+    risky=
+    for cfg in $changed; do
+        case $cfg in
+            network|wireless|firewall) risky=$cfg ;;
+        esac
+    done
+    if [ -n "$risky" ] || [ -n "${OPENWRT_FORCE_ROLLBACK:-}" ]; then
+        ssh -n "$host" 'cat > /tmp/rollback.sh' < "$PWD/openwrt/rollback.sh"
+        # setsid, not nohup: busybox has no nohup. Disarm is deleting the marker file,
+        # which the script checks after its sleep -- busybox setsid forks, so a recorded
+        # PID would not reliably point at the thing we want to stop.
+        ssh -n "$host" '
+            tar cf /etc/rollback.tar -C /etc/config . || exit 1
+            touch /tmp/rollback.armed
+            setsid sh /tmp/rollback.sh >/dev/null 2>&1 </dev/null &
+            sleep 1
+            pgrep -f rollback.sh >/dev/null || exit 1'
+        echo 'rollback armed: restores /etc/config ~90s from now unless disarmed'
+    fi
+
+    # Stage against a clean delta so `uci commit` cannot sweep up an edit that is not
+    # ours -- then say what that is about to throw away, rather than throwing it away
+    # without a word. Reverting only our configs would be the same action; the
+    # difference is that the operator learns it happened.
+    pending=$(ssh -n "$host" 'uci changes | wc -l' 2>/dev/null || echo 0)
+    if [ "${pending:-0}" -gt 0 ]; then
+        echo "note: discarding ${pending} staged uci line(s) that predate this apply"
+    fi
+    printf '%s\n' "$batch" | ssh "$host" "
+        for f in /etc/config/*; do uci revert \"\$(basename \"\$f\")\" 2>/dev/null; done
+        for t in $wipes; do while uci -q delete \"\${t%%.*}.@\${t#*.}[0]\"; do :; done; done
+        uci batch > /dev/null"
+
+    # The batch is staged but not committed, and fw4 reads the staged delta, so this is
+    # the last cheap look at a rule that would otherwise be discovered by losing the
+    # session. `uci batch` cannot be trusted to report its own failures, which is what
+    # makes an outside validator worth one ssh call.
+    fwbad=$(ssh -n "$host" 'fw4 check 2>&1' | grep -E 'Error|invalid|skipped due to' || true)
+    if [ -n "$fwbad" ]; then
+        echo 'fw4 refused the staged firewall config; nothing committed:' >&2
+        printf '%s\n' "$fwbad" >&2
+        ssh -n "$host" "for c in $configs; do uci revert \$c 2>/dev/null; done" || true
+        # nothing was committed, so there is nothing to undo -- but the watchdog is
+        # already armed and would fire 90s later, bouncing network and firewall over a
+        # config it was never given the chance to change.
+        ssh -n "$host" 'rm -f /tmp/rollback.armed /tmp/rollback.sh /etc/rollback.tar' || true
+        exit 1
+    fi
+
+    ssh -n "$host" "for c in $configs; do uci commit \$c; done"
+    for cfg in $changed; do
+        case $cfg in
+            wireless|network) svc=network ;;
+            dhcp) svc=dnsmasq ;;
+            *) svc=$cfg ;;
+        esac
+        if ! ssh -n "$host" "[ -x /etc/init.d/$svc ]" 2>/dev/null; then
+            echo "NOT reloaded $cfg: no /etc/init.d/$svc"
+        elif ssh -n "$host" "/etc/init.d/$svc reload" >/dev/null 2>&1; then
+            echo "reloaded $svc (for $cfg)"
+        else
+            # A reload that drops the session exits non-zero and is fine; the poll below
+            # is what decides. So report the attempt, not a verdict.
+            echo "reload of $svc reported failure -- checking whether the router is up"
+        fi
+    done
+
+    if ssh -n "$host" 'echo router answers' >/dev/null 2>&1; then
+        ssh -n "$host" 'rm -f /tmp/rollback.armed /tmp/rollback.sh /etc/rollback.tar'
+        echo 'rollback disarmed, apply stands'
+    else
+        echo 'no answer from the router; the armed rollback restores /etc/config in ~90s' >&2
+        exit 1
+    fi
+    ssh -n "$host" 'sync'
+    echo '--- verifying: the diff should come back clean'
+    just openwrt-diff
+
+# discard staged-but-uncommitted changes in the configs we declare, and nothing
+# else (the router had an unrelated `dhcp` delta that is not ours to undo).
+openwrt-revert:
+    #!/usr/bin/env bash
+    set -eu -o pipefail
+    configs=$(just openwrt-eval | awk '{ c = $2; sub(/[.=].*/, "", c); if (c != "") print c }' | sort -u | tr '\n' ' ')
+    ssh -n "root@{{router_host}}" "for c in $configs; do uci revert \$c 2>/dev/null; done"
+    ssh -n "root@{{router_host}}" 'uci changes | wc -l' | xargs echo 'staged lines remaining:'
+
+# snapshot the live config into state/ for drift detection. openwrt has busybox
+# tar, not rsync, so the copy is a tar pipe rather than an rsync.
+openwrt-facts:
+    @rm -rf "$PWD/state/openwrt/{{router}}/live" && mkdir -p "$PWD/state/openwrt/{{router}}/live"
+    @ssh -n "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
+    @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
+    @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"

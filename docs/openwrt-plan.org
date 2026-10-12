@@ -1,0 +1,572 @@
+#+TITLE: Declarative OpenWrt management with nix — plan
+#+DATE: 2026-10-09
+#+OPTIONS: toc:t
+
+* TL;DR
+
+Port Mic92's [[https://github.com/Mic92/dotfiles/tree/main/openwrt][nix-uci]] idea (~230 LoC of Python + ~40 lines of nix glue, MIT,
+unpacked in nixpkgs) into this repo:
+
+  nix modules -> JSON -> generated shell script that emits ~UCI batch commands ->
+  ssh | uci batch
+
+Deltas from upstream: =rage=/age= instead of =sops= (this repo uses agenix, no
+=sops= installed), a per-router config under =openwrt/=, and =just= targets that
+use uci's native stage/review/commit split instead of blind apply.
+
+First wins are low-risk, additive settings (hostname, dropbear, wifi, ddns).
+Network/firewall only after the rollback path is proven.
+
+* What the upstream mechanism actually does
+
+~openwrt/nix/default.nix~ :
+
+#+begin_src nix
+writeUci configuration =
+  let res = lib.evalModules { modules = [ module-options configuration ]; };
+      json = (formats.json {}).generate "uci.json" { inherit (res.config.uci) settings secrets; };
+  in { inherit json; command = writeShellScript "uci-commands" "${nix-uci}/bin/nix-uci ${json};"; }
+#+end_src
+
+~nix_uci/__init__.py~ walks that JSON and emits commands for ~uci batch~
+([[https://openwrt.org/docs/guide-user/base-system/uci#uci_dataobject_model][dataobject model]]):
+
+- named section: ~delete cfg.sec~ then ~set cfg.sec=<type>~ then one ~set~ per option
+  -> *declared* sections are fully replaced, undeclared sections in the same file
+  are left alone (additive management, unlike rsyncing whole =/etc/config= files).
+- list option: one ~add_list~ per element.
+- anonymous/list section (=config foo = without a name, e.g. =firewall= zones,
+  =dhcp.host=, =ubootenv=): the caller wipes the type first
+  (~while uci -q delete cfg.@foo[0]; do :; done~), then ~add cfg foo~ N times, then
+  ~set cfg.@foo[i].opt= — deletion by index is not reliable, see "What the diff really
+  compares".
+- secrets: ~"@key@"~ in any value is filled from the JSON file named by
+  ~$NIX_UCI_SECRETS~, written by the =just= recipe at apply time (=pass
+  openwrt/wifipw= here). The plaintext never enters the nix store, and an
+  empty value is a hard error rather than an open access point.
+- ~uci.raw~: verbatim commands emitted after everything else, for what the typed
+  model cannot say — =reorder firewall.@rule[i]=N to fix rule precedence, =rename= to
+  name a section. No =uci= prefix; only set/add/add_list/del_list/delete/rename/reorder
+  are accepted, so a stray shell command or a =commit= in the config is a build error.
+  =reorder= and =rename= both exist on this box (=uci help=).
+  Imperative: it reruns every time, so use it once and take it back out.
+
+Apply path (upstream ~Justfile~):
+
+#+begin_src makefile
+eval-config: "$(nix build --no-link --print-out-paths ../#openwrt-example)"
+apply: just eval-config | just ssh 'uci batch; uci commit'
+#+end_src
+
+Known upstream bug: deleting an anonymous list section is not reliable — the
+loop only clears 10 entries, so more than 10 leftovers survive. Matters for
+=firewall.rule=/=redirect=, =dhcp.host=, =dropbear=, =network.device=.
+
+* What carries over and what must change here
+
+| upstream                    | here                                             | why                                     |
+|-----------------------------|--------------------------------------------------|-----------------------------------------|
+| sops + ~secrets.yml~         | =secrets/openwrt.age= + =rage -d=                | repo is agenix; no sops on the control host |
+| =Justfile= inside =openwrt/=  | targets in the repo =justfile=                   | one entry point for all hosts            |
+| ~nix build ../#openwrt-example~ | ~nix build .#openwrt-<router>~                 | flake-module style already used here     |
+| =rauter= single router        | single router + host as an arg                   | keep the 3-way nixpkgs pattern; no flake output per box |
+| ~opkg install ...~ in apply   | separate =openwrt-packages= target               | package churn shouldn't block config apply |
+
+* File layout (what is actually on disk)
+
+#+begin_src
+openwrt/
+  default.nix          # writeUci glue, adapted from upstream nix/default.nix
+  module-options.nix   # options.uci.settings
+  nix_uci/__init__.py  # vendored upstream, secrets via $NIX_UCI_SECRETS
+  pyproject.toml       # vendored (buildPythonApplication needs it)
+  justfile             # openwrt-* recipes, imported by the root justfile
+  routers/e8450.nix    # declared state for the router
+  selfcheck.py         # runnable check of the serialization rules
+  redact-config.py     # turns a live /etc/config dump into @placeholders@
+  rollback.sh          # the undo for an apply that costs us the session
+  flake-module.nix     # packages.openwrt-<router> = the uci-command script
+justfile               # root recipes; ends with import 'openwrt/justfile'
+state/openwrt/<router>/live/   # drift baseline, secrets redacted
+state/openwrt/<router>/config.txt  # first snapshot, taken before there was a recipe
+#+end_src
+
+Mic92 keeps his router code self-contained under =openwrt/= with its own
+=Justfile=, which means he runs =just= from that directory. Here the router is one
+thing among many hosts, and =just= has =import= (1.22+), so the recipes live in
+=openwrt/justfile= and are still invoked as =just openwrt-diff= from the repo root.
+Same cohesion, one entry point, no duplicated =nix := wrapper.
+
+** secrets: `pass`, not sops and not (yet) age
+
+`pass` is already installed and the entry already exists (`~/.password-store/openwrt/wifipw.gpg`), so the shortest path is to skip encryption files entirely. =nix_uci= needs only a =dict[str, str]=; drop the sops coupling and have it read a plain JSON file instead:
+
+#+begin_src python
+# load_sops_file(path) -> load_secrets(path): json.loads(path.read_text())
+#+end_src
+
+The justfile is what knows about the backend, and it is one line away from any
+other source. Current mapping:
+
+| placeholder     | source                  | note                                  |
+|-----------------|-------------------------|----------------------------------------|
+| =wireless_key=    | =pass openwrt/wifipw=     | 21 chars, verified against =/etc/config= |
+| (unused)          | =op://Shared/NoneAndVoid/wireless network password= | *empty*, do not use   |
+
+#+begin_src makefile
+# in openwrt-eval: gpg-agent may prompt for a PIN the first time each session
+psk=$$(pass openwrt/wifipw)
+test -n "$$psk" || { echo 'empty wifi key from pass openwrt/wifipw' >&2; exit 1; }
+printf '{"wireless_key": "%s"}\n' "$$psk" > "$$secrets"
+#+end_src
+
+** Guard: a blank secret is not an error.
+
+=op read= of a field that exists but is empty prints nothing *and exits 0*, and a
+failed =pass= read inside =$(...)= is just an empty string. Either way
+=wifi=$$(...)= happily yields "", and an empty =wireless.@wifi-iface.key= is an
+open AP or a broken network, applied with a green exit code. Hence both the
+=psk= check above and the guard inside ~interpolate~:
+
+#+begin_src python
+if not val: raise ConfigError(f"secret {name} resolved to empty string")
+#+end_src
+
+** Fallback for headless use: agenix
+
+If a router ever has to be configured without =op= (CI, a fresh machine), keep
+the age path as an option rather than a second code path: =AGE_IDENTITY= +
+=secrets/openwrt.age=, loaded by the same =load_secrets= after =rage -d=. Do not
+build it until there is a machine that needs it. The plaintext exposure is the
+same either way: the pipe and =/tmp/.uci= on the router.
+
+** apply workflow (this is where we do better than upstream)
+
+~uci batch~ *stages* into ~/tmp/.uci~; =uci commit= persists. So a review step is
+free:
+
+#+begin_src makefile
+# stage + show what would change, commit nothing
+openwrt-diff router="mist-router":
+  #!/usr/bin/env bash
+  set -euo pipefail
+  batch="$(nix build --no-link --print-out-paths .#openwrt-{{router}})"
+  "$batch" | {{ssh root@{{router}}}} 'uci batch'
+  {{ssh root@{{router}}}} 'uci changes'
+
+# stage, show, wait for confirmation, commit
+openwrt-apply router="mist-router":
+  just openwrt-diff {{router}}
+  read -r -p "commit? "
+  "$batch" | {{ssh root@{{router}}}} 'uci batch && uci commit && sync'
+  {{ssh root@{{router}}}} 'for s in network wireless firewall system; do [ -x /etc/init.d/$s ] && /etc/init.d/$s reload; done'
+
+openwrt-revert router="mist-router":
+  {{ssh root@{{router}}}} 'uci revert'
+#+end_src
+
+Rules that keep this boring and safe:
+
+- one =uci batch= at a time, no parallel applies (=uci commit= is global state).
+- never apply and reload in one unreviewed shot. =uci revert= is the undo.
+- =network=, =wireless= and =firewall= reloads *will* drop the ssh session and can
+  lock you out. Everything else (system, ddns, dropbear, cron, luci) is safe.
+- backup before any =network=/=firewall= apply:
+  =ssh root@r "sysupgrade -b /tmp/backup-$(date +%F-%H%M).bin"= then =scp= it out.
+- a risky apply arms a rollback =watchdog= first: it snapshots =/etc/config= to flash,
+  waits 90 s, and restores it unless the router has answered ssh by then. It is armed
+  only when the change touches =network=, =wireless= or =firewall= (=OPENWRT_FORCE_ROLLBACK=1=
+  forces it for testing). There is deliberately no boot-time hook: =/tmp= is RAM, so the
+  watchdog cannot cover a power loss mid-apply. =state/openwrt/<router>/live= is the
+  manual path back for that, and =sysupgrade -b= must be =scp='d off the box to count.
+  The failsafe button is *not* part of this story yet, and should not be leaned on;
+  see *Failsafe rehearsal*.
+- the generated batch prints plaintext secrets: never pipe it to a log file, and do
+  not =grep= its output either — the wifi key scrolls right past.
+
+** drift detection (cheaper than a diff engine)
+
+~state/openwrt/<router>/live/*= checked into git, with secrets replaced by =@name@=
+placeholders. =openwrt= has busybox =tar= and no =rsync=, so the copy is a tar pipe:
+
+#+begin_src makefile
+openwrt-facts:
+    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C state/openwrt/{{router}}/live
+#+end_src
+
+=git diff= against that is the "what did I change in LuCI last week" answer, and
+=just openwrt-diff= is the "what will this apply change" answer. Two different
+questions, no clever code needed for either.
+
+Caveat found on 2026-10-11: once =openwrt-apply= has touched a config, that file
+rewrites itself — comments are dropped and every value comes out quoted, so
+=option input REJECT= becomes =option input 'REJECT'=. =openwrt-diff= still reads it
+as clean, but =git diff state/= does not. Expect cosmetic churn in the snapshot after
+any apply, and read the diff as *content* rather than as line-for-line.
+
+* Phase 1/2 status (applied, in daily use)
+
+Landed: `openwrt/` (vendored nix-uci + glue + `routers/e8450.nix`),
+`packages.openwrt-e8450`, and `just openwrt-{eval,diff,apply,revert,facts}`.
+`python3 openwrt/selfcheck.py` covers the serialization rules. Applied: timezone
+(Regina, as the POSIX string `CST6` — the image has no `/usr/share/zoneinfo`, so
+`America/Regina` would parse as UTC), wifi SSIDs/keys, dropbear. All fourteen configs
+in `/etc/config` are now declared, so `openwrt-diff` is a complete drift check.
+`network` and `firewall` are declared but never applied by a routine run.
+
+Two traps hit while building it, both worth remembering:
+
+- **nix cannot see untracked files in a git worktree.** `nix build .#openwrt-e8450`
+  failed with "No such file or directory" on `openwrt/flake-module.nix` because nix
+  enumerates a `path:` flake source with `git ls-files`; `?? openwrt/` is invisible.
+  A brand new directory needs `git add` before it builds. This will bite any new
+  module directory.
+- **`uci revert` needs a config argument**, and `uci commit` with none commits every
+  pending delta on the box. Both recipes now loop over the declared configs only —
+  the router had a stray uncommitted `dhcp` delta that is not ours to commit or undo.
+- **applies were committing without reloading, until 2026-10-11.** `changed` came from a
+  plain `diff`, whose change markers are `<` and `>` rather than `+` and `-`, so the sed
+  that extracted config names never matched, the reload loop never ran, and every apply
+  was file-level only. It went unnoticed because the configs we applied were already
+  what the router was running, and the one case that looked wrong (timezone) had been
+  reloaded by hand that day. A test firewall rule proved it: present in
+  `/etc/config/firewall`, absent from `nft list ruleset`. Fixed by deriving `changed`
+  from the sorted *unified* diff. Anything that depends on "the apply reloaded it" is
+  false before that date.
+
+Unlocked: the first =just openwrt-eval= needs =gpg-agent= unlocked so =pass= can
+decrypt =openwrt/wifipw= (once in any terminal it stays unlocked a while).
+
+### What the diff really compares
+
+=uci batch= has no dry run, so =openwrt-diff= applies the batch to a *materialized
+copy* of =/etc/config= under =/tmp=: copy, wipe the anonymous types, =uci -c <copy>
+batch=, =uci -c <copy> commit= inside the copy, then =uci show= and diff. Staging the
+real configs and reverting them was wrong: the revert does not always unwind
+anonymous sections, and repeated previews grew extra =@host[3]= sections. Traps found
+by running it:
+
+- **anonymous sections cannot be deleted by index, only wiped.** uci renumbers after
+  a delete, so deleting =x.@type[0]=, =x.@type[1]=, ... hits empty slots once the list
+  shifts, and stale options end up merged into what gets re-added (two of three
+  =config host= entries collapsed into one, keeping the third's options). The fix is
+  =while uci -q delete x.@type[0]; do :; done= — slot zero always names the current
+  first section, so the loop empties the type and errors out of itself. No cap, no
+  ordering subtlety. From openwrt-nix.
+- **libuci hardcodes =/tmp/.uci=**, so =uci -c <copy>= does *not* isolate the staged
+  delta -- the batch stays pending against the real configs. Cleaning that up by
+  =uci revert= over every config is what =openwrt/preview.sh= does now instead: the
+  delta is parked to =/tmp/.uci.nix-uci-park= and restored afterwards, because
+  reverting it discarded whatever someone else had staged. Measured: a staged
+  =dhcp= edit used to vanish across =just openwrt-diff= (1 staged line -> 0); now it
+  survives. Showing a copy with a pending delta also prints deleted anonymous sections
+  as bare =cfg<hex>= lines that the real config never contains, which is the other
+  reason the delta gets cleared rather than ignored.
+- **=uci batch= prints the generated name of every =add= section.** Capturing its
+  stdout as config added nine phantom lines to every preview.
+- **ash rejects =for x in <newline-separated words>;** the newline ends the command
+  before =do= arrives. Anything derived from =sort -u= and interpolated into a remote
+  =for= needs =tr '\n' ' '= — this one had been quietly breaking =openwrt-apply='s
+  commit loop for a while.
+- wipe-and-re-add moves a section to the *end* of the file, so both sides are
+  sorted — otherwise every section the batch touches shows as changed. That sorting
+  is blind to *named* sections being reordered (same content, different order), which
+  is exactly what our own apply did to =wireless=; it is not blind to =firewall= rule
+  order, because anonymous sections are indexed positionally, so swapping two rules
+  changes =@rule[0].name= and the values differ. An explicit rule-sequence check is
+  kept for that case and nothing else, so it is a guard, not the machinery.
+
+=just openwrt-diff= ends with *no changes: the router already matches the declared
+config*, which is the proof that the snapshot translation and the =wireless_key=
+coming from =pass= are both right.
+
+The flip side: anything **undeclared** is invisible to the diff, because uci reports
+the whole file regardless of what Nix declares. That is the argument for declaring
+the rest — the day LuCI writes a =firewall= rule we know nothing about, the diff
+only catches it if =firewall= is declared. Until then =openwrt-facts= + =git diff=
+is the drift check.
+
+* Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
+
+- Linksys E8450 (UBI), =mediatek/mt7622=, 512 MiB RAM, kernel 6.12, **OpenWrt
+  25.12.5** (r33051), 30d uptime. Hostname is still the default =OpenWrt=.
+- **Same board as upstream's** =rauter= — the =sysupgrade= URL in
+  =openwrt/Justfile= (~targets/mediatek/mt7622/...linksys_e8450-ubi...) works verbatim.
+- **Plan correction: the package manager is =apk=, not =opkg=** (24.10 switched).
+  =opkg list-installed= returns nothing here, and upstream's =apply= target ends
+  with =opkg update && opkg install ...= which does nothing. Everything in this
+  plan that says =opkg= means =apk update= / =apk add= / =apk info=.
+- Installed extras beyond base: =adguardhome= (so the AdGuard in =adguard.tf= *is*
+  on this router — answer to open question 5), =https-dns-proxy= +
+  =luci-app-https-dns-proxy=, =wireguard-tools=, =ppp-mod-pppoe=, =iperf3=, =firewall4=,
+  =luci-light=, =attendedsysupgrade= + =luci-app-attendedsysupgrade=,
+  =luci-app-package-manager=. No =tinc=, no =ddns-scripts=, no node exporter.
+- =/etc/config=: adguardhome, attendedsysupgrade, dhcp, dropbear, firewall,
+  https-dns-proxy, luci, network, rpcd, system, ubihealthd, ubootenv, uhttpd,
+  wireless.
+- =dropbear=: one section =config dropbear 'main'=, =PasswordAuth 'off'=,
+  =RootPasswordAuth 'off'=. =network=: =lan= static 192.168.1.1/24 on =br-lan=
+  (=lan1=-=lan4=), =wan= dhcp + =wan6= dhcpv6 on =wan=. =wireless=: =NoneAndVoid=
+  (=radio0=, 2.4g) + =NoneAndVoid-5G= (=radio1=, 5g), both =psk2= on =lan=. Upstream
+  uses =sae-mixed=; changing cipher affects old clients, so it is a deliberate
+  change, not a default.
+- SSH access with a personal key confirmed working (=/etc/dropbear/authorized_keys=).
+
+* Phases
+
+** Phase 0 — read-only inventory (~1h, no writes)
+
+Router is up (=192.168.1.1= responds, ssh gives =Permission denied (publickey)=, so
+root auth needs our key installed first). =/etc/openwrt_release= has not been
+read yet — every decision below depends on it.
+
+- install key: =ssh-copy-id root@192.168.1.1= (password auth may need =dropbear=
+  =PasswordAuth= on temporarily — that is a change, do it deliberately).
+- identify: =cat /etc/openwrt_release=, =ubus call system board=, =opkg print-architecture=,
+  =cat /proc/mtd= if relevant. Target platform + device profile drive the
+  =sysupgrade= URL for the later upgrade target.
+- snapshot: =scp -r root@r:/etc/config . && ssh root@r 'opkg list-installed' > installed.txt=
+- translate: =ssh root@r 'uci show network' # -> write openwrt/routers/*.nix, section by section=
+
+Exit criteria: model, OpenWrt version, installed packages, and the full
+=/etc/config= in =state/=. Everything after this is a diff away from this.
+
+** Phase 1 — vendored tool + trivial config apply (~2h)
+
+- vendor ~nix_uci/~ + glue under =openwrt/=, add =flake-module.nix= and one
+  =packages.openwrt-<router>= output.
+- first config = only =system.system.hostname= + a =uci show= parity check.
+  Prove =delete=/=set cfg.sec=<type>= behaves on this uci version before
+  trusting it — verify a section survives =uci batch= -> =uci commit= -> reboot.
+- =just openwrt-diff= against that.
+
+Exit criteria: hostname change round-trips and =just openwrt-diff= shows a
+correct empty diff when config matches the router.
+
+** Phase 2 — secrets + real configs (~1-2h)
+
+- =secrets/openwrt.age= with =wifi_password=, =root_password=, =pppoe_*=/=ddns_key=;
+  publicKeys = =users ++ <router-key>=.
+- configs: =dropbear= (2 instances like upstream: LAN + VPN/lan), =system=,
+  =network.vpn= if applicable, =ddns=, =wireless= (2.4/5 GHz + =@wifi_password@=).
+- =just openwrt-backup= for =sysupgrade -b= before wireless changes (wifi reload
+  drops clients but not the router).
+
+Exit criteria: =just openwrt-apply= brings config from "whatever LuCI left behind"
+to declared, with =just openwrt-diff= clean afterwards.
+
+** Phase 3 — =network= + =firewall= (the lockout configs)
+
+What is actually on the box (`state/openwrt/e8450/live/`):
+
+| config    | options | sections | anonymous                                   |
+|-----------|---------|----------|---------------------------------------------|
+| =network=  | 21      | 6        | 1 =device= (=br-lan=, bridge over lan1-4)      |
+| =firewall= | 94      | 13       | 1 =defaults=, 2 =zone=, 1 =forwarding=, 9 =rule= |
+
+No config references another by anonymous index (`uci show | grep -E '^[a-z]+[^=]*=@[a-z]+\['`
+is zero), so anonymous sections can be renamed to *named* sections here without
+breaking anything. =fw4 check= reports the current config valid.
+
+*Blockers before the first apply:*
+
+1. **Closed — and my earlier reasoning was wrong.** I wrote that a sorted diff would
+   report a reordered firewall as clean. It would not: =@rule[0].name= is positional,
+   so reordering two rules changes the compared values. Verified by swapping two rules
+   in the declaration — both the content diff and the rule-order note fired. Sorting is
+   blind to *named* sections moving (the wireless case), where order carries no
+   meaning. Kept anyway: =openwrt-diff= now compares content sorted and rule sequence
+   separately, ~8 lines, and the check is demonstrated rather than assumed.
+   One caveat found while wiring up =uci.raw=: =uci batch= does **not** exit nonzero
+   when it rejects a command — a =reorder= of a section that does not exist prints
+   nothing and returns 0 (measured). So a bad raw command shows up as "no changes",
+   not as an error: use =raw= for things whose effect the diff can see, and never
+   trust a clean run to prove a command took.
+2. **Closed — anonymous types are wiped, not deleted.** =MAX_ANON_SECTIONS= is gone;
+   =openwrt-diff=/=openwrt-apply= now run
+   =while uci -q delete cfg.@type[0]; do :; done= before batching, from the =add= lines
+   the batch already emits. That empties the type however many sections exist, and
+   deleting slot [0] repeatedly is immune to uci renumbering (the bug in deleting by
+   fixed index). Borrowed from openwrt-nix, whose architecture page spells out the
+   idempotency strategy. The nine anonymous dhcp hosts sitting one below the old
+   ceiling is why this came up now instead of at firewall time.
+
+Named sections are no longer needed to dodge a ceiling — and for **rules they would
+be wrong**: an attrset iterates alphabetically, so naming `rule 'Allow-Ping'` gives
+the router alphabetical rule order, not the order declared. Proved on this box: our
+own timezone apply rewrote `/etc/config/wireless` at 12:16 and its sections came out
+alphabetical (`default_radio0` before `radio0`) rather than in declaration order.
+Rule order is precedence, so declare rules as an **anonymous list**, where JSON array
+order is preserved. Benign for `wireless`; fatal for `firewall`.
+
+That reordering is also the proof that `state/` still earns its keep: the sorted diff
+could not see it, the snapshot's `git diff` could.
+
+**What is left is the first real change** to `network` or `firewall`. That happened on
+2026-10-11: a firewall rule added and then removed, applied with the rollback armed and
+`firewall reload` running for real — so the mechanism is now demonstrated rather than
+reasoned about, and it is what surfaced the reload bug in [[file:openwrt/justfile]]
+(see *Phase 1/2 status*: applies had been committing without reloading since the
+beginning).
+
+What is *not* settled is the recovery path under that first change. The plan used to say
+"confirm the console path, or be in the room". The console path was rehearsed and did
+not work; see **Failsafe rehearsal** below. Practical translation: the watchdog is the
+only protection we have measured, so one plane per run, and be physically present for
+anything touching `network`.
+
+*Safety, in the order that matters:*
+
+- **The button failsafe is unproven and should be treated as unavailable.** It was
+  rehearsed about seven times on 2026-10-11 and never entered failsafe once; details
+  and the three ways to settle it are in *Failsafe rehearsal* below. Serial is the
+  option that also covers the device's known unbrick failure mode. =/tmp= is RAM:
+  =sysupgrade -b= must be =scp='d off the router to count as a backup.
+- first apply must be a no-op — translate exactly what is there, get an empty
+  =openwrt-diff=, and change nothing. Risk starts with the first real change, not with
+  declaring.
+- preview with =fw4 check= against the staged copy (read-only, catches malformed
+  config before it goes live).
+- reload order: =network= first, give interfaces ~5s to come up, then =firewall=
+  (=dnsmasq= for =dhcp=). One plane per run — never =network= + =firewall= + =wireless=
+  together.
+- rollback: **built** — =openwrt/rollback.sh=, armed by =openwrt-apply= before it
+  commits and disarmed after, so a change that costs us the session undoes itself.
+  The shape is openwrt-nix's, the details had to be ours:
+  - arm = tar =/etc/config= to =/etc/rollback.tar= (flash, not =/tmp=), start
+    =setsid sh rollback.sh= detached, =touch /tmp/rollback.armed=.
+  - disarm = delete the marker. Not a signal: busybox has **no =nohup=**, and its
+    =setsid= forks, so a recorded =$!= can point at a process that already exited.
+    The script checks the marker after its sleep, so whoever disarms only has to be
+    faster than 90 seconds.
+  - fire = restore the tar over =/etc/config= and reload =network=, =firewall=,
+    =dnsmasq=. That is the whole goal: a reachable router, not a verdict.
+  - armed only when =changed= touches =network=/=wireless=/=firewall=, so ordinary
+    applies pay nothing. =OPENWRT_FORCE_ROLLBACK=1 arms it anyway, for testing.
+  - the decision to roll back is gated on whether ssh answers, **not** on the reload's
+    exit status — a reload that drops the connection returns 255 on a perfectly good
+    apply, and aborting there would roll back a change that was fine.
+  Tested both branches: snapshot = SNAP-STATE, live = NEW-STATE, armed = SNAP-STATE
+  again, disarmed = NEW-STATE stands.
+  - *deliberately not built*: the boot-time =S15= hook. =/tmp= is RAM, so this watchdog
+    dies with a reboot and cannot cover power loss mid-apply. On a box with 31 days of
+    uptime, that is a far smaller risk than a bad rule, and =state/openwrt/e8450/live=
+    is the manual path back for it. Add the hook if that ever stops being true.
+- reloads are still synchronous. openwrt-nix detaches them
+  (=( sleep 1; <reload>) >/dev/null 2>&1 &=) so ssh exits 0 before the interface
+  bounces, which avoids exit 255 but also lets us disarm before the reload has taken
+  effect — that is worse than an ugly exit code, because the disarm then proves
+  nothing. What protects us is the watchdog plus the answering poll.
+- =network reload= can drop the session and a bad =input= policy in =defaults= or a
+  =zone= locks you out of the LAN, so apply one plane per run with someone in the room —
+  the button failsafe is not a safety net we have confirmed.
+- no =/etc/firewall.user= and no =include= lines here, so nothing outside the declared
+  config gets merged in.
+
+*** Failsafe rehearsal (2026-10-11)
+
+The plan assumed the WPS button would put this E8450 into failsafe. It was rehearsed
+against the box about seven times, with the laptop wired into the correct port, and the
+router **never once entered failsafe**. Everything that the procedure depends on is
+intact except the one thing that could not be observed.
+
+Verified by reading the build, not the wiki:
+
+- the window is =fs_failsafe_wait_timeout=4= in =/lib/preinit/00_preinit.conf=, and it
+  opens about 6-10 s after the =reboot= command — the kernel banner logs in the same
+  second the command runs. The LAN does not answer for ~40 s, which is why timing this
+  from the laptop is the hard part, and why an observer that assumes the router is down
+  at +0 s reports a false negative in under a second.
+- interface selection falls through to the default branch of
+  =/lib/preinit/05_set_preinit_iface= — =ip link set eth0 up; ifname=lan1= — so failsafe
+  answers on **LAN1 only**. Confirmed by pushing traffic down the cable and reading
+  =/sys/class/net/lanN/statistics/rx_bytes=: lan1 counted it, lan4 counted zero.
+- pressing WPS arrives as =ACTION=pressed BUTTON=wps TYPE=<empty>=, and the handler is
+  =[ "${TYPE}" = "switch" ] || echo ${BUTTON} > /tmp/failsafe_button=, so an actual
+  button *would* write the flag. After boot the same press goes to
+  =/etc/rc.button/wps=, which starts with =exit 5= — a real no-op.
+- =gpio_button_hotplug= loads at 3.7 s of kernel time from =/etc/modules-boot.d=, so
+  the driver is not late, and =/sbin/init= does reference =/etc/hotplug-preinit.json=,
+  so the preinit routing is wired rather than merely shipped.
+- squashfs =ro= root with overlay on =/dev/ubi0_7=, so the prerequisite holds.
+
+Two measurement traps, both of which produced a wrong conclusion here before the right
+one:
+
+- the only witness is =/tmp/failsafe_button=, and it is present only if the handler ran
+  during that boot. Nothing else in the running system records it.
+- instrumenting =/etc/rc.button/*= to log presses cannot see the window: during preinit
+  =/etc= comes from squashfs, so an overlay edit is invisible until after
+  =mount_root= — i.e. after the window has closed. Logging =at=$(cut -d. -f1
+  /proc/uptime)= makes it worse, because uptime resets every boot, so those lines cannot
+  be attributed to any particular boot. A per-boot witness has to live in =tmpfs=.
+
+So: failsafe is *plausible and instrumentless*, not broken, and not proven. What would
+settle it, cheapest first:
+
+1. log button presses to =/tmp/buttonlog= (wiped per boot), press from before the
+   reboot through ~40 s, and prefer holding through the reboot then releasing over
+   mashing — a driver that reports state rather than edges sees that and not the mash.
+2. =failsafe== on the kernel cmdline, which =failsafe_wait= also honors — deterministic,
+   but =fw_setenv= twice on a board with the OKD bootloader history.
+3. serial: =fs_wait_for_key f= reads a keypress, so with a console attached, =f= enters
+   failsafe on demand, and the same cable is the documented unbrick path for this
+   device. This is the option that buys both, and the only reliable view of the window.
+
+Until one of those is done, treat the watchdog as the only measured protection: one
+plane per apply, and be present.
+
+** Phase 4 — deferred, do not build yet
+
+- =opkg= package management (declarative install/remove). Needed when the
+  running package set diverges from declared; a ~pkglist= diff is enough then.
+- =sysupgrade= flow + =at=-based remote rollback (the upstream Justfile has the
+  =wget= -> =sysupgrade= -> =just apply= shape, worth stealing once versions matter).
+- imagebuilding (=astro/nix-openwrt-imagebuilder=) instead of =opkg=: reproducible
+  images and no package drift, but you take on a full cross toolchain and a
+  much heavier flash cycle. Only worth it if we end up with 2+ routers.
+- =/etc/crontabs/root=, =/etc/sysctl.conf=, =/etc/dropbear/authorized_keys= — these are
+  file-level, not uci. Handle as plain =rsync=-deployed files in the same
+  =justfile= (upstream does =authorized_keys= exactly this way in its =apply= target).
+
+* Alternatives considered
+
+- [[https://github.com/lonerOrz/openwrt-nix][lonerOrz/openwrt-nix (nuci)]] — same design as upstream, plus =nuci diff=, =nuci deploy=
+  with a 60s watchdog and imagebuilder support. Actively maintained (last push
+  Aug 2026). The "real project" upstream said it would switch to. If we want
+  watchdog rollback on day one, consume this instead of vendoring.
+  Recommendation: vendor the small upstream now (we control the ~200 lines),
+  steal what nuci does better. Three things taken: the wipe-first idempotency
+  strategy for anonymous sections (better than upstream's delete loop, and the
+  reason =MAX_ANON_SECTIONS= is gone), the =rawUci= escape hatch as =uci.raw=, and its
+  rollback shape — detached reload plus a 60s in-session watchdog and a =S15=
+  boot-time restore, still to build in phase 3.
+
+  Decided against switching wholesale on 2026-10-10, on the repo rather than the
+  docs: 9782 lines against our 464, the =uci.settings=/=_type= schema is already identical
+  so nothing is gained in expressiveness, their generator emits
+  =touch; uci -q batch; commit= per config (auto-commit guarded by the watchdog, where our
+  flow previews and confirms first), and secrets assume sops while ours come from
+  =pass=. Revisit for declarative packages (=uci.packages=, =packageSources=), or if we
+  want imagebuilder firmware, or when we hit a bug they have fixed.
+- ~nix-openwrt-imagebuilder~ — reproducible images, heavy. Deferred.
+- ~openwrt-configuration~-style full image rebuild — same tradeoff, no.
+- =nix-on-derbarou= / =nixos-anywhere= style "nixify the router" — no. OpenWrt is
+  the platform; we want its =uci=, not NixOS.
+
+* Open questions for you
+
+1. Which box is at =192.168.1.1= — model and OpenWrt version? (The device_tracker
+   in =hosts/misfit/configuration.nix:194= is =luci= with =openwrt_admin_username=,
+   so it is already assumed to be OpenWrt, but the model decides =sysupgrade=
+   paths and package names.)
+2. What should it be called in =packages.openwrt-<name>=? Nothing in the repo
+   names the router today.
+3. Firewall: declared 2026-10-10 as anonymous lists, not named sections, for exactly
+   the reason above. =network.device= ordering proved to be a non-question — the
+   no-op diff proved it.
+4. =age= or =sops= for =openwrt.age= — assumption is age/agenix, matching
+   =modules/agenix.nix= and =secrets/secrets.nix=. If you'd rather keep sops for
+   the router path (upstream-faithful, zero Python changes), say so.
+5. Is =adguard.tf='s AdGuard Home running on this router (=openwrt= =adguard-home=
+   package + uci) or on a host — i.e. does it belong in the router config?

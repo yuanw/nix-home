@@ -137,6 +137,7 @@
         ./hosts
         ./hosts/colmena.nix
         ./modules
+        ./openwrt/flake-module.nix
         ./tests/flake-module.nix
         inputs.git-hooks.flakeModule
         inputs.treefmt-nix.flakeModule

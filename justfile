@@ -144,3 +144,6 @@ sys-diff:
     @nix store diff-closures /run/current-system ./result
 
 
+
+# Router management lives in openwrt/justfile, reachable as `just openwrt-...`.
+import 'openwrt/justfile'
