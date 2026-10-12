@@ -87,12 +87,15 @@
       21067
       1400
       1900
+      5201 # Phase 5.8 iperf3 server over the tunnel (temporary, delete at cutover)
     ];
     allowedUDPPorts = [
       21064
       21066
       21067
       5353
+      500 # Phase 5.8 IPsec IKE (temporary, delete at cutover)
+      4500 # Phase 5.8 IPsec NAT-T (temporary, delete at cutover)
     ]; # 5353 is for mDNS/Bonjour discovery
 
   };
@@ -657,6 +660,31 @@
     includes = [ "/etc/swanctl/conf.d/lab.conf" ];
   };
 
+  # IKE (udp 500/4500) is a new flow to the stock firewall and gets dropped, which
+  # presents as "peer not responding" and zero IKE_SAs, never as a firewall block. ESP
+  # has no port and is a new untracked flow, so it also needs an explicit accept. This
+  # host runs the iptables backend (its iptables is the nf_tables variant, but the
+  # firewall module builds the ip filter table), where the option is extraCommands --
+  # extraInputRules is nftables-only and was silently ignored here. Delete this rule
+  # and the 500/4500 entries in allowedUDPPorts above at cutover.
+  networking.firewall.extraCommands = "iptables -w -A nixos-fw -p esp -j nixos-fw-accept";
+
+  # strongSwan sources the inner packet from the local_ts address; without it the kernel
+  # picks 10.1.0.2 and the outbound policy never matches. NetworkManager owns enp4s0, so
+  # add the address from a unit instead of networking.interfaces. The route to the peer
+  # /32 is installed by charon itself in table 220, so only the address is needed here.
+  systemd.services.gw-lab-tunnel-addr = {
+    description = "Phase 5.8 lab tunnel inner address (remove at cutover)";
+    wantedBy = [ "multi-user.target" ];
+    before = [ "strongswan-swanctl.service" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+    script = "${pkgs.iproute2}/bin/ip addr replace 10.90.0.2/32 dev enp4s0";
+  };
+
   # hw_offload is the kernel-netlink plugin option in strongSwan 6.0.4/6.1.0; neither
   # swanctl exposes an xfrm_offload keyword, so putting it in the child section fails the
   # load. extraConfig is the whole strongswan.conf -- override this one option only, since
@@ -691,7 +719,10 @@
             local_ts = 10.90.0.2/32
             remote_ts = 10.90.0.1/32
             mode = tunnel
-            start_action = start
+            # Responder only: with both ends on start_action = start, each boot races
+            # into its own IKE_SA and the pair ends up with two children fighting over
+            # the same policy/route. Let the gateway initiate.
+            start_action = none
             close_action = restart
           }
         }

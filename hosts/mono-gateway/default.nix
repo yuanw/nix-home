@@ -36,8 +36,19 @@
         address = "10.1.0.1";
         prefixLength = 24;
       }
+      # Inner address of the 5.8 tunnel. /32 on the lab interface, not lo: strongSwan
+      # sources the inner packet from this address and only then does the outbound
+      # policy match; charon installs the route to the peer /32 itself. Delete with the
+      # rest of the 5.8 block.
+      {
+        address = "10.90.0.1";
+        prefixLength = 32;
+      }
     ];
   };
+
+  # charon needs the inner address present before it installs routes/policies.
+  systemd.services.strongswan-swanctl.after = [ "network-addresses-eth1.service" ];
 
   # --- Access ---
   users.users.root.openssh.authorizedKeys.keys = [
@@ -83,6 +94,12 @@
         "/run/current-system/sw/bin/nft insert rule inet nixos-fw rpfilter-allow iifname eth1 accept"
         "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 tcp dport 5201 accept"
         "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth0 tcp dport 5201 accept"
+        # IPsec needs a new-flow accept: conntrack covers the replies to our own
+        # IKE_SA_INIT, but not a fresh one arriving first (misfit reboot). ESP has no
+        # port, hence the raw rule.
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 udp dport 500 accept"
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 udp dport 4500 accept"
+        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 ip protocol esp accept"
       ];
     };
   };
