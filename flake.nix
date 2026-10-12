@@ -28,6 +28,19 @@
       inputs.llm-agents.follows = "llm-agents";
       inputs.home-manager.follows = "home-manager";
     };
+
+    # agent-cat supplies the runner agentic-run and the ext-pi Pi extension;
+    # agent-workflows supplies wf and its Emacs client. Neither follows
+    # nixpkgs: each builds against the Haskell toolchain its own overrides
+    # were written for, and the delta a nixpkgs bump would make is theirs to
+    # pay, not ours.
+    #
+    # agent-workflows declares its outputs with flake-utils eachDefaultSystem,
+    # so its package exists only for the system it is evaluated on. Do not
+    # enable modules.agent-cat on a host whose system the wf flake does not
+    # build; the default of modules.agent-cat.wfPackage would not evaluate.
+    agent-cat.url = "github:jwiegley/agent-cat";
+    agent-workflows.url = "github:jwiegley/agent-workflows";
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -198,6 +211,8 @@
             # try the transcription scripts without switching the whole system
             transcribe = pkgs.transcribe;
             yt-dlp-librewolf = pkgs.yt-dlp-librewolf;
+            agentic-run = inputs.agent-cat.packages.${system}.agentic-run;
+            agent-workflows = inputs.agent-workflows.packages.${system}.default;
             agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
               prompts = agentPrompts;
               tools.pi.enable = true;

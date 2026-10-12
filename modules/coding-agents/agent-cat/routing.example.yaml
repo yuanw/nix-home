@@ -1,0 +1,24 @@
+# A routing file for the local model of hosts/dgx-spark.nix.
+#
+# This is an example and is not installed anywhere. Set it with
+# modules.agent-cat.routing, usually as `lib.fileContents ./routing.yaml`, and
+# put the store path of pkgs.pi-acp into the backend below; nix renders that
+# path for you only in a string built in Nix.
+#
+# The DGX Spark answers /v1/chat/completions and nothing else, so pi-acp is
+# the adapter that fits and nix-home already packages it.
+#
+# Verify a route by hand before using it. Preflight refuses a model or a
+# thinking value that the adapter does not advertise, and the corpus gates
+# never run a live HTTP model:
+#   agentic-run adapter-options --adapter PATH-TO-pi-acp
+version: 1
+routers:
+  - name: pi-acp
+    backend: acp:PATH-TO-pi-acp/bin/pi-acp
+    provider: openai
+profiles:
+  - name: local
+    chain:
+      - router: pi-acp
+        model: Qwen3.8-Flash-Next

@@ -11,6 +11,7 @@
       ./browsers/librewolf.nix
       ./browsers/tor.nix
       ./catppuccin.nix
+      ./coding-agents/agent-cat
       ./coding-agents/cursor
       ./coding-agents/droid.nix
       ./coding-agents/forge.nix

@@ -117,6 +117,11 @@
         cursor-agent.enable = true;
       };
     };
+    # agentic-run and wf on PATH, the environment they read, and the wf
+    # Emacs client. The Pi extension comes with it. No routing file is
+    # generated, so ~/.config/agent-cat/routing.yaml stays hand-managed until
+    # the local model route is verified by hand.
+    agent-cat.enable = true;
     secrets.agenix = {
       enable = true;
     };
