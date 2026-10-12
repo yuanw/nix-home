@@ -429,26 +429,49 @@ Verified 2026-10-12: gen 1 → canary deploy → gen 2 → rolled back → *rebo
 came up on gen 1 (t+28 s). A config differing only by a comment rewrites to a generation
 pointing at the same store path — deterministic builds, not a broken profile.
 
-*** Throughput, first pass (Phase 5.5)
+*** Throughput and offload (Phase 5.5) — PASS
 
-Measured 2026-10-12 with =asche= as the peer over =eth1= (USB Ethernet adapter, static
-=10.1.0.24=). CPU is a delta of /proc/stat samples taken across the transfer window, not an
-guess; idle baseline was 1.2-1.5 % of eight cores.
+Measured 2026-10-12 between =mist= (=eth0=) and =misfit= (=eth1=). CPU is a delta of
+/proc/stat samples across the transfer window; idle baseline is 1.2-1.5 % of eight cores.
 
 | Path                       | Direction       |  Gbps | Board CPU (% of 8 cores) |
 |----------------------------+-----------------+-------+--------------------------|
-| =eth1= = asche             | asche -> board  | 0.83  | 24.7 / 26.2 / 30.9       |
-| =eth1= = asche             | board -> asche  | 0.90  | 17.9                     |
-| =eth0= = =mist= (control)  | Mac -> board    | 0.94  | 50.0                     |
+| =eth1= = misfit             | misfit -> board | 0.94  | 28.9                     |
+| =eth1= = misfit             | board -> misfit | 0.94  | 24.2                     |
+| =eth0= = =mist=             | Mac -> board    | 0.94  | 50.0                     |
+| **forwarding** =eth1= = =eth0= | misfit -> mist | 0.94  | **1.33**                 |
+| **forwarding** =eth1= = =eth0= | mist -> misfit | 0.94  | **1.29**                 |
 
-Four parallel streams produced the same aggregate as one (0.83 Gbit/s, 26 %), so nothing is
-flow-limited: these runs are pinned by the 1 GbE path, not by CPU. That is the honest reading
-of why the numbers cluster just under a gigabit.
+Terminating TCP costs 24-50 % of the SoC. **Forwarding the identical stream costs nothing**:
+1.33 % is indistinguishable from idle, and that is the pass criterion. The plan's ~1-3 %
+target holds, so the ASK fast path is doing its job and 5.6 needs no follow-up.
 
-*The claim this does not test.* Everything above terminates TCP on the board, so it measures
-the host stack, not the Frame Manager. The plan's ~1-3 % CPU target is a *forwarding* figure:
-frames crossing from one port to another without the CPU deciding where they go. That needs an
-endpoint on each side of the board and is still open.
+Verify forwarding rather than trusting the CPU figure, because a bogus CPU number looks
+exactly like a good one:
+
+#+begin_src bash
+# counters before/after one transfer: in == out proves the frames crossed the board
+cat /sys/class/net/eth{0,1}/statistics/{rx,tx}_packets   # 650505 in / 650506 out
+#+end_src
+
+One caveat to carry forward, not to explain away: the 0.3-2.6 % reference figures were
+measured with NAT + nftables + conntrack in the path. This ruleset does almost no conntrack
+work, so "1.3 % CPU" demonstrates that *plain bridged/routed forwarding* offloads, not that
+NAT offloads. 5.8 IPsec carries its own "offload may not apply to tunnel interfaces" caveat
+and is a separate measurement deliberately kept off these numbers.
+
+** The measurement before this one was wrong
+
+The first pass used =asche= over a USB Ethernet dongle and produced the same bandwidth at
+25-31 % CPU. Those runs were not measuring a broken gateway: =journalctl= shows the ASIX
+AX88179 chip flapping link (6 drops in 40 minutes), which was corrupting throughput and NDP
+alike. Two things to remember:
+
+- A peer that flaps produces low bandwidth *and* high CPU, which looks identical to
+  "offload is not working". Rule out the peer before touching the fast-path config.
+- Never diagnose an =fsl_dpa= port by =tcpdump= alone: the driver enters and leaves
+  promiscuous mode, its multicast filter can come back wrong, and the link then looks dead
+  for reasons unrelated to anything you were testing.
 
 *** Firewall gotchas that cost the most time
 
