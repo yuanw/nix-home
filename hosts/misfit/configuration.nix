@@ -657,6 +657,20 @@
     includes = [ "/etc/swanctl/conf.d/lab.conf" ];
   };
 
+  # hw_offload is the kernel-netlink plugin option in strongSwan 6.0.4/6.1.0; neither
+  # swanctl exposes an xfrm_offload keyword, so putting it in the child section fails the
+  # load. extraConfig is the whole strongswan.conf -- override this one option only, since
+  # adding load_modular alongside it replaced the compiled defaults and broke charon.
+  services.strongswan-swanctl.strongswan.extraConfig = ''
+    charon {
+      plugins {
+        kernel-netlink {
+          hw_offload = yes
+        }
+      }
+    }
+  '';
+
   environment.etc."swanctl/conf.d/lab.conf".text = ''
     connections {
       lab {
@@ -677,7 +691,6 @@
             local_ts = 10.90.0.2/32
             remote_ts = 10.90.0.1/32
             mode = tunnel
-            xfrm_offload = yes
             start_action = start
             close_action = restart
           }
