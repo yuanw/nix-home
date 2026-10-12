@@ -713,7 +713,7 @@ ceiling, so this measures the link, not the crypto -- the CPU figure is the usef
 one. This was measured while =cmm= was crash-looping, i.e. with the ASK fast path
 dead; see the correction below, which changes the interpretation.
 
-*** Correction (2026-10-12, later): cmm runs now, and the fast path fights IPsec
+*** Correction (2026-10-12, later): cmm runs, and the kernel no longer feeds it IPsec
 
 =cmm='s crash ("ctnetlink kernel ABI is broken", =parse_mnl.c:884=, ERANGE) was
 mono-nix's =libnetfilter_conntrack= patch validating the nested
@@ -729,15 +729,23 @@ changes two earlier conclusions:
 rate. The 1.33 % in the 5.5 table is non-reproducible only because it was taken
 before the board rebooted into the =cmm= crash; with =cmm= alive it is confirmed
 /and/ extended to NAT.
-+ *The fast path and the policy-based IPsec tunnel conflict.* With =cmm= running,
-the tunnel stops passing traffic: the child SAs sit at 0 bytes and the outbound
-XFRM policy is not applied. It works only while =cmm= is stopped (charon still
-initialises fine either way, and ordering charon first does not help -- =cmm=
-breaks it as soon as it starts). =cmm= is built with =CONFIG_IPSEC_ESP_PASSTHRU=
-(=via=-DLS1043=) and /should/ skip ESP, so this is an open interaction, not a knob.
-For the router the fast path wins -- forwarding and NAT are the job -- so treat
-the 5.8 tunnel as a lab artefact that requires stopping =cmm=, not something to
-enable at cutover.
++ *The fast path and the policy-based IPsec tunnel now coexist.* With =cmm= running
+the tunnel initially died (child SAs at 0 bytes, no ESP). The cause was not
+conntrack: two kernel paths push SAs to userspace over a =NETLINK_KEY= socket and
+=cmm= programs =FPP_CMD_IPSEC_SA_TNL_ROUTE= from them -- =net/xfrm/xfrm_policy.c=
+(=ipsec_flow_add=/=ipsec_nlkey_flow=) and =net/key/af_key.c= (=pfkey_send_notify=
+->=ipsec_nlkey_send=). Both assume a *forwarded* SA, so for a locally-terminated
+tunnel =__cmmRouteRegister= fails ("route sa entry add failed") yet the FPP
+command is still issued and the datapath breaks; =cmm='s own =ESP_PASSTHRU= never
+applies because the offload is key-engine driven, not conntrack driven. =cmm= has
+no runtime switch, and disabling =CONFIG_INET_IPSEC_OFFLOAD= does not build (NXP
+reads =skb->ipsec_offload= unguarded from a =dev_queue_xmit= helper), so the kernel
+overlay short-circuits both call sites. =cmm= then has no SA for the ESP flow, sets
+=FLOW_NO_*_SA= and skips it. Verified after a clean reboot: =cmm= active with an
+empty SA table, tunnel established / 6-of-6 ping / ESP flowing with =cmm= running,
+tunnel 906 Mbit/s at ~32 % of four cores in software, and plain+NAT forwarding
+still offloaded at ~0.4 %. So the router keeps hardware NAT offload /and/ can
+terminate IPsec -- just in software, not in hardware.
 
 Three non-obvious blockers, all invisible from =swanctl --list-conns= and all now
 handled in the host configs:
