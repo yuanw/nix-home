@@ -8,13 +8,13 @@
 
 melpaBuild {
   pname = "acp";
-  version = "0.15.1-unstable-2026-09-14";
+  version = "0.17.1-unstable-2026-10-10";
 
   src = fetchFromGitHub {
     owner = "xenodium";
     repo = "acp.el";
-    rev = "242cef63d76cc1073485847f67a21f6d8406d158";
-    sha256 = "sha256-Gz8u3p+eaO2d/lD3u5i85ucNijwSATyfdndY+iJxKgg=";
+    rev = "5b3abb2956d16f39ed76bc53fe31d3c2ee7fecfd";
+    sha256 = "sha256-vRvUAP3Al7itI6iaqUaRXNifYp4vfGvbSATfUYCrHHg=";
   };
 
   packageRequires = [ ];

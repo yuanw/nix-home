@@ -7,14 +7,14 @@
   ...
 }:
 let
-  rev = "72c17bf6121a53a1d0aa85719944a020bd3a7b8b";
-  version = "4.11.0-unstable-2026-10-04";
+  rev = "9b58c1ffb790c075ca32e70a89cf1d80588f4abf";
+  version = "5.1.0-unstable-2026-10-10";
 
   src = fetchFromGitHub {
     owner = "DietrichGebert";
     repo = "ponytail";
     inherit rev;
-    hash = "sha256-PDuDaB+vRk/OXgTlJezBH8/d2K+Ayc0jMl5qX258dCY=";
+    hash = "sha256-S2gHV4/c8XPDqpf0jS8Q5r22//6skZjITf2T9CVhVRE=";
   };
 
   skillNames = [
