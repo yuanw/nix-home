@@ -36,6 +36,44 @@
         '';
       });
     })
+    # --- Phase 5.8 fix: stop the kernel handing IPsec SAs to cmm ---
+    # With cmm running, the policy-based IPsec tunnel dies: the child SAs sit at 0
+    # bytes and no ESP is sent. Cause is not conntrack -- it is the NXP IPsec fast
+    # path. net/xfrm/xfrm_policy.c (guarded by IPSEC_FLOW_CACHE, defined in net/xfrm/
+    # via ipsec_flow.h, plus CONFIG_INET_IPSEC_OFFLOAD) pushes every SA's handles and
+    # tunnel header to userspace over a NETLINK_KEY socket; keytrack.c picks that up
+    # and cmmSASetTunnel -> __cmmSATunnelRegister programs FPP_CMD_IPSEC_SA_TNL_ROUTE
+    # into the FMan. That assumes a *forwarded* SA, so for a locally-terminated tunnel
+    # __cmmRouteRegister fails ("route sa entry add failed") yet the FPP command is
+    # still issued, and the datapath is broken. cmm's ESP_PASSTHRU/LOCAL_PROTO path
+    # never runs because the offload is key-engine driven, not conntrack driven.
+    #
+    # cmm has no runtime switch, so cut it at the source. There are two paths that
+    # tell cmm about SAs: the flow-cache hook in xfrm_policy.c (two ipsec_flow_add
+    # calls) and the state notify in af_key.c (pfkey_send_notify -> ipsec_nlkey_send).
+    # Both must go -- patching only the first still left two handles in cmm's table.
+    # Disabling CONFIG_INET_IPSEC_OFFLOAD instead does NOT build (NXP reads
+    # skb->ipsec_offload unguarded from a dev_queue_xmit helper), so short-circuit
+    # instead. With both cut the kernel neither fills its IPsec flow cache nor
+    # notifies cmm, so the SA stays software and cmm's FLOW_NO_*_SA path skips the
+    # ESP flow. Forwarding/NAT offload is CPE_FAST_PATH/CDX, a different path.
+    # grep guards make a silent no-op a build failure.
+    (_final: prev: {
+      mono-gateway-kernel = prev.mono-gateway-kernel.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          sed -i 's/if (ipsec_flow_add(/if (0 \&\& ipsec_flow_add(/g' net/xfrm/xfrm_policy.c
+          sed -i 's/ipsec_nlkey_send(net, x, c);/if (0) ipsec_nlkey_send(net, x, c);/' net/key/af_key.c
+          test "$(grep -c 'if (0 && ipsec_flow_add(' net/xfrm/xfrm_policy.c)" -ge 2 || {
+            echo "FAILED: xfrm_policy.c ipsec_flow_add call sites not short-circuited"
+            exit 1
+          }
+          grep -q 'if (0) ipsec_nlkey_send(net, x, c);' net/key/af_key.c || {
+            echo "FAILED: af_key.c ipsec_nlkey_send not short-circuited"
+            exit 1
+          }
+        '';
+      });
+    })
   ];
 
   # --- LAN ---
