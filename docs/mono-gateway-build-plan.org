@@ -710,12 +710,34 @@ single stream.
 =ip xfrm state= reports =flag af-unspec=, i.e. no offload flag. The tunnel runs in
 software: ~1.3 cores of AES-GCM at 0.9 Gbps. 0.9 Gbps is the 1 Gb/s lab link's
 ceiling, so this measures the link, not the crypto -- the CPU figure is the useful
-one. Affirms the documented caveat: XFRM offload does not apply to this tunnel.
+one. This was measured while =cmm= was crash-looping, i.e. with the ASK fast path
+dead; see the correction below, which changes the interpretation.
 
-Related and pre-existing: =cmm.service= (ASK fast-path connection manager) is in a
-permanent crash loop, =ctnetlink kernel ABI is broken= against kernel 6.12.49
-(150 failures on record). Not caused by the tunnel, but it /is/ the fast-path
-manager, so on-board offload claims should be read with that in mind.
+*** Correction (2026-10-12, later): cmm runs now, and the fast path fights IPsec
+
+=cmm='s crash ("ctnetlink kernel ABI is broken", =parse_mnl.c:884=, ERANGE) was
+mono-nix's =libnetfilter_conntrack= patch validating the nested
+=CTA_COMCERTO_FP_XFRM_HANDLE= attribute as 16 bytes while the kernel in the same
+flake emits 8 (=u16 xfrm_handle[2*2]=, =MAX_SUPPORTED_XFRMS_PER_DIR = 2=). =cmm=
+reads the field as =uint16_t*=, so the library was the odd one out. Fixed with an
+overlay in =hosts/mono-gateway/default.nix= (struct to =u16[4]=, validator to 8);
+=cmm= now runs, =NRestarts=0=, across a reboot. That makes the fast path real, and
+changes two earlier conclusions:
+
++ *5.5's caveat is closed.* Plain forwarding went 42% -> 0.4 % of four cores once
+=cmm= ran, NAT+conntrack 58% -> 0.4 %, and NAT holds the full 941 Mbit/s line
+rate. The 1.33 % in the 5.5 table is non-reproducible only because it was taken
+before the board rebooted into the =cmm= crash; with =cmm= alive it is confirmed
+/and/ extended to NAT.
++ *The fast path and the policy-based IPsec tunnel conflict.* With =cmm= running,
+the tunnel stops passing traffic: the child SAs sit at 0 bytes and the outbound
+XFRM policy is not applied. It works only while =cmm= is stopped (charon still
+initialises fine either way, and ordering charon first does not help -- =cmm=
+breaks it as soon as it starts). =cmm= is built with =CONFIG_IPSEC_ESP_PASSTHRU=
+(=via=-DLS1043=) and /should/ skip ESP, so this is an open interaction, not a knob.
+For the router the fast path wins -- forwarding and NAT are the job -- so treat
+the 5.8 tunnel as a lab artefact that requires stopping =cmm=, not something to
+enable at cutover.
 
 Three non-obvious blockers, all invisible from =swanctl --list-conns= and all now
 handled in the host configs:
