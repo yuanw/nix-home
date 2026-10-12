@@ -703,6 +703,9 @@
     connections {
       lab {
         version = 2
+        # One SA only; see the gateway's copy. A hard restart on either end leaves
+        # the old IKE_SA installed and each retry would add another child.
+        unique = replace
         local_addrs = 10.1.0.2
         remote_addrs = 10.1.0.1
         local {

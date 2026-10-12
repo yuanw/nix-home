@@ -696,6 +696,40 @@ offloaded, so an IPsec/WireGuard tunnel carrying all traffic may run in
 software at ~CPU speed. Measure tunnel throughput separately; do not assume
 the 10G figure applies there.
 
+*** Result (measured 2026-10-12)
+
+Tunnel is the board's =eth1= (10.1.0.1) to =misfit= (10.1.0.2), inner /32s
+10.90.0.1 <-< 10.90.0.2, strongSwan 6.0.4 (board) / 6.1.0 (misfit), ESP AES_GCM_16-128,
+single stream.
+
+| Path            |  Gbps | Board CPU (% of 4 cores) |
+|-----------------+-------+--------------------------|
+| board -> misfit | 0.906 | 32.7                     |
+
+=hw_offload = yes= and =no= give the same number and the same 32-33 % CPU, and
+=ip xfrm state= reports =flag af-unspec=, i.e. no offload flag. The tunnel runs in
+software: ~1.3 cores of AES-GCM at 0.9 Gbps. 0.9 Gbps is the 1 Gb/s lab link's
+ceiling, so this measures the link, not the crypto -- the CPU figure is the useful
+one. Affirms the documented caveat: XFRM offload does not apply to this tunnel.
+
+Related and pre-existing: =cmm.service= (ASK fast-path connection manager) is in a
+permanent crash loop, =ctnetlink kernel ABI is broken= against kernel 6.12.49
+(150 failures on record). Not caused by the tunnel, but it /is/ the fast-path
+manager, so on-board offload claims should be read with that in mind.
+
+Three non-obvious blockers, all invisible from =swanctl --list-conns= and all now
+handled in the host configs:
+
++ IKE (udp 500/4500) and ESP are new flows to both stock firewalls. misfit needed
+the ESP rule via =extraCommands=, not =extraInputRules= -- the latter is
+nftables-only and is silently ignored on misfit's iptables backend.
++ =local_ts=/=remote_ts= are inner /32s. Without those addresses on an interface the
+kernel sources the packet from the outer address, the outbound policy never
+matches, and traffic leaves in the clear. The /32s live on the lab interfaces;
+charon installs the peer route in table 220 itself.
++ Both ends defaulted to =start_action = start=, so each boot raced into its own
+IKE_SA. The peer is now responder-only and =unique = replace= bounds it to one.
+
 ** 5.9 Fan Control
 
 #+begin_src bash

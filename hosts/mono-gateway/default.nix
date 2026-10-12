@@ -134,6 +134,10 @@
     connections {
       lab {
         version = 2
+        # One SA only. Without this, a restart on either end leaves the old IKE_SA
+        # alive (neither side sends a DELETE on a hard restart) and every retry or
+        # rekey adds another child fighting over the same policy and table-220 route.
+        unique = replace
         local_addrs = 10.1.0.1
         remote_addrs = 10.1.0.2
         local {
