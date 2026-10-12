@@ -776,6 +776,11 @@ sensors
 cat /etc/fancontrol
 #+end_src
 
+*Result (2026-10-12): PASS.* =fancontrol= active, =emc2305= hwmon present with
+=pwm1=77=, =sensors= shows 42-46 degrees C. =/etc/fancontrol= does not exist -- the
+config lives in the fancontrol unit's store path, which is why =cat /etc/fancontrol=
+finds nothing.
+
 ** 5.10 LED Matrix (LP5812)
 
 #+begin_src bash
@@ -794,6 +799,10 @@ ls -la /sys/class/leds/
 status-led.sh --help
 #+end_src
 
+*Result (2026-10-12): PASS.* =leds_lp5812= loaded; =/sys/class/leds/= has
+=status:{blue,green,red,white}= plus =mmc0=; =status-led.sh= present. It takes no
+=--help=, so the plan's probe prints nothing -- not a failure.
+
 ** 5.11 SFP+ LED Monitoring
 
 #+begin_src bash
@@ -805,6 +814,11 @@ lsmod | grep sfp_led
 ls -la /sys/class/leds/ | grep sfp
 # Should show SFP transceiver link/activity LEDs
 #+end_src
+
+*Result (2026-10-12): PASS.* =sfp_led= and =nvmem_layerscape_sfp= loaded;
+=/sys/class/leds/= has =sfp0/sfp1:{link,activity}=. No transceiver attached (no
+=/sys/bus/sfp/devices=), so this only proves the driver and LED plumbing; the
+link/activity *behaviour* waits on a DAC.
 
 ** 5.12 eMMC and Filesystem
 
@@ -831,6 +845,11 @@ journalctl --verify
 # Should confirm volatile storage
 #+end_src
 
+*Result (2026-10-12): PASS.* =/dev/mmcblk0p1= (30 G) mounted =/ ext4
+rw,noatime,commit=60=; =fstrim.timer= active (=fstrim= itself inactive, oneshot by
+design); =journalctl --verify= clean. Partition table is =mmcblk0=, =mmcblk0p1=,
+plus =mmcblk0boot0/1=.
+
 ** 5.13 NixOS-Specific Features
 
 #+begin_src bash
@@ -845,6 +864,12 @@ ls /nix/store/ | wc -l
 # Nix commands work
 nix eval nixpkgs#lib.version
 #+end_src
+
+*Result (2026-10-12): PASS.* nix 2.31.2, 688 store paths, =nix eval= works.
+=nix-daemon= reads =inactive= but the socket is =enabled= -- it is socket-activated
+and idle until a client connects, which is correct. The plan's =nix eval
+nixpkgs#lib.version= cannot work here: the board is air-gapped, so eval a local
+expression instead (=nix eval --expr '1 + 1'=).
 
 ** 5.14 Stability Test
 
