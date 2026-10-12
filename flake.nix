@@ -101,6 +101,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
+    mono-nix.url = "github:we-are-mono/nix";
     # Private modules live in a separate repo; see nix-home-private/README.md.
     #
     # git+https, not github:, deliberately: a github: input is fetched as a tarball
@@ -194,7 +195,43 @@
               prompts = agentPrompts;
               tools.pi.enable = true;
             };
-          };
+          }
+          // (
+            if system == "aarch64-linux" then
+              let
+                # Rootfs ext4 image for the Mono Gateway DK (NXP LS1046A) — the
+                # derivation output IS the ~2 GB .img file, so `result` is a file
+                # symlink, good enough to curl/dd.
+                #
+                # Built from the NATIVE config. Upstream's
+                # .#packages.aarch64-linux.rootfsImage is the same builder via
+                # `gateway`, which forces nixpkgs.localSystem = x86_64-linux and
+                # only makes sense when cross-compiling off an x86_64 host.
+                #
+                # The we-are-mono/nix flake pins its own nixpkgs (25.11); this is
+                # intentionally NOT a follows — the mono kernel patches need their
+                # own nixpkgs revision, unaffected by our nixos-unstable churn.
+                mono-rootfs = inputs.mono-nix.nixosConfigurations.gateway-native.config.system.build.rootfsImage;
+
+                # Our own layer, so LAN addressing / root keys / nix-daemon live in
+                # git instead of being hand-edited on the device. extendModules keeps
+                # upstream's overlay and module list intact and just appends ours, so
+                # there is nothing to maintain when we bump mono-nix.
+                mono-gateway-config = inputs.mono-nix.nixosConfigurations.gateway-native.extendModules {
+                  modules = [ ./hosts/mono-gateway/default.nix ];
+                };
+              in
+              {
+                rootfsImage = mono-rootfs;
+                mono-gateway-image = mono-rootfs; # old name, kept
+                # The running system: build this and run switch-to-configuration on
+                # the board. Far smaller delta than rootfsImage, since it reuses the
+                # ~561 store paths already flashed.
+                mono-gateway-system = mono-gateway-config.config.system.build.toplevel;
+              }
+            else
+              { }
+          );
           treefmt.imports = [ ./treefmt.nix ];
           pre-commit.settings.hooks.treefmt.enable = true;
           pre-commit.settings.package = pkgs.prek;

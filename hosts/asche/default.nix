@@ -55,6 +55,13 @@
   };
 
   services.openssh.enable = true;
+
+  # asche is the Phase 5.5 throughput peer on the lab link, so mist needs to drive it
+  # without a password prompt. Same key dgx-spark already trusts; nothing else on this
+  # host declared authorizedKeys, so this adds rather than replaces.
+  users.users.${config.my.username}.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+  ];
   services.autorandr = {
     enable = true;
     defaultTarget = "home";
@@ -84,7 +91,10 @@
       };
     };
   };
-  my.mullvad.enable = true;
+  # Off for the Phase 5.5 run: with the tunnel up, Mullvad's own firewall can drop
+  # inbound connections from the lab link, which would read as a broken gateway rather
+  # than a missing exception. Re-enable when the throughput baseline is taken.
+  my.mullvad.enable = false;
 
   modules = {
 
