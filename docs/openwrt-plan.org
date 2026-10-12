@@ -501,17 +501,25 @@ one:
   /proc/uptime)= makes it worse, because uptime resets every boot, so those lines cannot
   be attributed to any particular boot. A per-boot witness has to live in =tmpfs=.
 
-So: failsafe is *plausible and instrumentless*, not broken, and not proven. What would
-settle it, cheapest first:
+So: failsafe is *plausible*, not broken, and not yet proven. The earlier
+"instrumentless" conclusion was wrong on two counts, both from the OpenWrt wiki:
 
-1. log button presses to =/tmp/buttonlog= (wiped per boot), press from before the
-   reboot through ~40 s, and prefer holding through the reboot then releasing over
-   mashing — a driver that reports state rather than edges sees that and not the mash.
-2. =failsafe== on the kernel cmdline, which =failsafe_wait= also honors — deterministic,
-   but =fw_setenv= twice on a board with the OKD bootloader history.
-3. serial: =fs_wait_for_key f= reads a keypress, so with a console attached, =f= enters
-   failsafe on demand, and the same cable is the documented unbrick path for this
-   device. This is the option that buys both, and the only reliable view of the window.
+- **failsafe is reachable over SSH.** It starts at =192.168.1.1= with DHCP and wireless
+  off, so no serial console is needed to *use* it — a static =192.168.1.10= on the laptop
+  and =ssh -oRSAMinSize=1024 root@192.168.1.1= is enough, then =mount_root=. Serial is
+  only needed to watch preinit or to unbrick the bootloader, not to recover config.
+- **there is a timing oracle.** During the 4s window (24.10+) the box broadcasts
+  =Please press button now to enter failsafe= to =192.168.1.255:4919=. =tcpdump -Ani <lan>
+  port 4919 and udp= makes the window visible from the laptop, so the press no longer has
+  to be guessed from LED blink patterns. This is what the ~7 blind attempts lacked, and
+  it also distinguishes "no broadcast" (preinit never got there) from "broadcast but no
+  press registered" (the button/hotplug half).
+
+To settle it (no cable): LAN1 wired, laptop static at =192.168.1.10=, =tcpdump= on the
+UDP/4919 broadcast, reboot the router, press WPS the moment the packet appears, then
+=ssh= to =192.168.1.1= (clear the stale known_hosts entry first — the failsafe host key
+differs), =mount_root=, fix, =reboot=. =failsafe=1= on the kernel cmdline (more
+=fw_setenv= on a board with the OKD history) and serial are the fallbacks.
 
 Until one of those is done, treat the watchdog as the only measured protection: one
 plane per apply, and be present.
