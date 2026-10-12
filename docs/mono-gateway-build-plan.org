@@ -432,9 +432,10 @@ pointing at the same store path — deterministic builds, not a broken profile.
 *** Throughput and offload (Phase 5.5) — PASS
 
 Measured 2026-10-12 between =mist= (=eth0=) and =misfit= (=eth1=). CPU is a delta of
-/proc/stat samples across the transfer window; idle baseline is 1.2-1.5 % of eight cores.
+/proc/stat samples across the transfer window; idle baseline is 1.2-1.5 % of four cores
+(the LS1046A in this DK has 4, not 8).
 
-| Path                       | Direction       |  Gbps | Board CPU (% of 8 cores) |
+| Path                       | Direction       |  Gbps | Board CPU (% of 4 cores) |
 |----------------------------+-----------------+-------+--------------------------|
 | =eth1= = misfit             | misfit -> board | 0.94  | 28.9                     |
 | =eth1= = misfit             | board -> misfit | 0.94  | 24.2                     |
