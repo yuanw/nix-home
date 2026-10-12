@@ -86,4 +86,58 @@
       ];
     };
   };
+
+  # --- Phase 5.8 IPsec lab tunnel (temporary) ---
+  # The other end of the 5.8 test is misfit, which carries the mirrored connection
+  # definition in its own host config. Inner addressing is a pair of /32s rather than the
+  # 10.1.0.0/24 the tunnel rides on: tunneling a subnet over itself is a routing loop.
+  #
+  # Keys are on disk under /etc/swanctl and never in this file, because the module builds
+  # swanctl.conf with pkgs.writeText and anything placed in its options ends up
+  # world-readable in the store. Delete this block with gw-lab-firewall once 5.8 is closed.
+  services.strongswan-swanctl.includes = [ "/etc/swanctl/conf.d/lab.conf" ];
+
+  # hw_offload is the plugin option in this build -- the child section has no xfrm_offload
+  # keyword, and 6.0.4's swanctl exposes no offload keyword at all, so it belongs here and
+  # nowhere else. extraConfig is the *whole* strongswan.conf: the first version of this
+  # block set load_modular explicitly and broke charon-systemd with
+  # "failed to load 3 critical plugin features" -- that replaced the compiled defaults
+  # instead of adding to them. Leave the defaults alone and override just this.
+  services.strongswan-swanctl.strongswan.extraConfig = ''
+    charon {
+      plugins {
+        kernel-netlink {
+          hw_offload = yes
+        }
+      }
+    }
+  '';
+
+  environment.etc."swanctl/conf.d/lab.conf".text = ''
+    connections {
+      lab {
+        version = 2
+        local_addrs = 10.1.0.1
+        remote_addrs = 10.1.0.2
+        local {
+          auth = pubkey
+          id = 10.1.0.1
+          certs = gateway-ca
+        }
+        remote {
+          auth = pubkey
+          id = 10.1.0.2
+        }
+        children {
+          lab {
+            local_ts = 10.90.0.1/32
+            remote_ts = 10.90.0.2/32
+            mode = tunnel
+            start_action = start
+            close_action = restart
+          }
+        }
+      }
+    }
+  '';
 }

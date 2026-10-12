@@ -644,6 +644,48 @@
   # and migrated your data accordingly.
   #
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
+  # --- Phase 5.8 IPsec lab peer (temporary) ---
+  # misfit is the tunnel peer for measuring IPsec throughput and whether XFRM offload
+  # applies to tunnels. Delete this whole block alongside the gateway's gw-lab-firewall
+  # service once 5.8 is closed out.
+  #
+  # Private keys stay on disk under /etc/swanctl and are deliberately NOT declared here:
+  # this module builds swanctl.conf with pkgs.writeText, so anything placed in its options
+  # lands in the world-readable Nix store and in Git. Only public certs are referenced.
+  services.strongswan-swanctl = {
+    enable = true;
+    includes = [ "/etc/swanctl/conf.d/lab.conf" ];
+  };
+
+  environment.etc."swanctl/conf.d/lab.conf".text = ''
+    connections {
+      lab {
+        version = 2
+        local_addrs = 10.1.0.2
+        remote_addrs = 10.1.0.1
+        local {
+          auth = pubkey
+          id = 10.1.0.2
+          certs = misfit-ca
+        }
+        remote {
+          auth = pubkey
+          id = 10.1.0.1
+        }
+        children {
+          lab {
+            local_ts = 10.90.0.2/32
+            remote_ts = 10.90.0.1/32
+            mode = tunnel
+            xfrm_offload = yes
+            start_action = start
+            close_action = restart
+          }
+        }
+      }
+    }
+  '';
+
   system.stateVersion = "25.05"; # Did you read the comment?
 
 }
