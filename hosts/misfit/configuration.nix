@@ -524,6 +524,46 @@
     ];
   };
 
+  # ─── ZFS snapshots (sanoid) ─────────────────────────────────────────
+  # Retention for the two persistence datasets and the media library.
+  # Deliberately *not* managed here:
+  #   zroot/root   — ephemeral, rolled back to @blank every boot, so a
+  #                  sanoid snapshot of it is always stale by definition.
+  #                  (@blank stays ours: sanoid only ever prunes snapshots
+  #                  named autosnap_*, so a foreign name is invisible to it
+  #                  — checked against the sanoid 2.3.0 source.)
+  #   zroot/root/nix  — the store is rebuildable, snapshots buy nothing
+  #   zroot/root/swap — zvol, nothing to roll back to
+  services.sanoid = {
+    # hourly snap+prune pass (module default interval = "hourly")
+    enable = true;
+
+    templates.default = {
+      autosnap = true;
+      autoprune = true;
+      hourly = 24;
+      daily = 14;
+      monthly = 6;
+    };
+
+    # Media library: mostly static, so hourlies add metadata with no
+    # recovery value. 30 daily + 12 monthly covers "someone deleted an
+    # episode" without eating the pool.
+    templates.media = {
+      autosnap = true;
+      autoprune = true;
+      hourly = 0;
+      daily = 30;
+      monthly = 12;
+    };
+
+    datasets = {
+      "zroot/root/persist".useTemplate = [ "default" ];
+      "zroot/root/persistSave".useTemplate = [ "default" ];
+      "zroot/data".useTemplate = [ "media" ];
+    };
+  };
+
   services.openssh.hostKeys = [
     {
       path = "/sshkeys/ssh_host_ed25519_key";
