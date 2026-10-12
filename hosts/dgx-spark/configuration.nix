@@ -180,6 +180,10 @@
     enable = true;
     openFirewall = true;
     environmentFile = config.age.secrets.hf-token.path;
+    # Recipe patch 0010 (issue #33): keep the ATS-locked system-memory caches and
+    # native VMM rings, instead of the keeper pool, so steady load does not emit
+    # NV_ERR_NO_MEMORY. ringCache stays available but off.
+    systemMemoryCache = true;
   };
 
   # (the tensorfold state/kernels/HF-cache dir rules live in

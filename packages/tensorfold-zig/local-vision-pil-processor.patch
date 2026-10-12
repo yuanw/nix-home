@@ -1,0 +1,20 @@
+diff --git a/src/tensorfold/vision/qwen_processing.py b/src/tensorfold/vision/qwen_processing.py
+index cd7fbfc..8e7f6f3 100644
+--- a/src/tensorfold/vision/qwen_processing.py
++++ b/src/tensorfold/vision/qwen_processing.py
+@@ -139,7 +139,14 @@ def _processor_options(model_dir: Path, vision: dict) -> dict:
+ 
+ def _processor_runtime():
+     try:
+-        from transformers import AutoTokenizer, Qwen2VLImageProcessor
++        from transformers import AutoTokenizer
++        # transformers 5.17's `Qwen2VLImageProcessor` is the torchvision backend; without
++        # torchvision it emits a one-time warning and falls back to `Qwen2VLImageProcessorPil`.
++        # Import that class directly: same pixels, no warning, no torchvision dependency.
++        try:
++            from transformers import Qwen2VLImageProcessorPil as Qwen2VLImageProcessor
++        except ImportError:
++            from transformers import Qwen2VLImageProcessor
+     except ImportError as error:
+         raise ValueError("Qwen image preprocessing requires the optional vision dependencies") from error
+     return AutoTokenizer, Qwen2VLImageProcessor

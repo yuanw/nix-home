@@ -1,0 +1,121 @@
+diff --git a/zig/src/server/vision.zig b/zig/src/server/vision.zig
+index 49ec1d4..32f2519 100644
+--- a/zig/src/server/vision.zig
++++ b/zig/src/server/vision.zig
+@@ -73,6 +73,9 @@ pub const Helper = struct {
+     to: c_int,
+     from: c_int,
+     io: std.Io,
++    /// the model directory and environment the child was started with, so it can be respawned after a failure
++    dir: []const u8 = "",
++    environ: ?*const std.process.Environ.Map = null,
+     mutex: std.Io.Mutex = .init,
+     dead: bool = false,
+     settings: Settings,
+@@ -95,13 +98,27 @@ pub const Helper = struct {
+ 
+     /// Starts the helper and waits for its ready frame (the tower loaded and warm on this GPU).
+     pub fn start(gpa: Allocator, io: std.Io, dir: []const u8, settings: Settings, environ: ?*const std.process.Environ.Map, problem: *[]const u8) !*Helper {
+-        const a = gpa;
++        const h = try gpa.create(Helper);
++        h.* = .{ .gpa = gpa, .io = io, .child = undefined, .to = 0, .from = 0, .settings = settings, .dir = dir, .environ = environ };
++        h.load(problem) catch |e| {
++            gpa.destroy(h);
++            return e;
++        };
++        return h;
++    }
++
++    /// Spawns the child (replacing any previous one) and waits for its ready frame. A failure stops the child; the
++    /// caller decides whether it is fatal (start) or retryable (a later request's restart).
++    fn load(h: *Helper, problem: *[]const u8) !void {
++        const a = h.gpa;
++        const io = h.io;
++        const environ = h.environ;
+         const python = if (environ) |m| m.get("TENSORFOLD_VISION_PYTHON") orelse "python3" else "python3";
+         var argv: std.ArrayList([]const u8) = .empty;
+         defer argv.deinit(a);
+         var nums: [3][16]u8 = undefined;
+-        try argv.appendSlice(a, &.{ python, "-m", "tensorfold.vision.native_helper", "--model", dir, "--max-images", try std.fmt.bufPrint(&nums[0], "{d}", .{settings.max_images}), "--image-tokens", try std.fmt.bufPrint(&nums[1], "{d}", .{settings.image_tokens}), "--max-videos", try std.fmt.bufPrint(&nums[2], "{d}", .{settings.max_videos}) });
+-        if (settings.allow_urls) try argv.append(a, "--urls");
++        try argv.appendSlice(a, &.{ python, "-m", "tensorfold.vision.native_helper", "--model", h.dir, "--max-images", try std.fmt.bufPrint(&nums[0], "{d}", .{h.settings.max_images}), "--image-tokens", try std.fmt.bufPrint(&nums[1], "{d}", .{h.settings.image_tokens}), "--max-videos", try std.fmt.bufPrint(&nums[2], "{d}", .{h.settings.max_videos}) });
++        if (h.settings.allow_urls) try argv.append(a, "--urls");
+         // TENSORFOLD_VISION_PYTHONPATH: where TensorFold's Python tree is (the image puts it beside the binary)
+         var env_copy: ?std.process.Environ.Map = null;
+         defer if (env_copy) |*m| m.deinit();
+@@ -112,33 +129,35 @@ pub const Helper = struct {
+             defer a.free(joined);
+             try env_copy.?.put("PYTHONPATH", joined);
+         };
+-        const child = std.process.spawn(io, .{ .argv = argv.items, .stdin = .pipe, .stdout = .pipe, .stderr = .inherit, .environ_map = if (env_copy) |*m| m else environ }) catch |e| {
++        h.child = std.process.spawn(io, .{ .argv = argv.items, .stdin = .pipe, .stdout = .pipe, .stderr = .inherit, .environ_map = if (env_copy) |*m| m else environ }) catch |e| {
+             problem.* = try std.fmt.allocPrint(a, "--vision: cannot start {s} -m tensorfold.vision.native_helper ({s})", .{ python, @errorName(e) });
+             return error.VisionHelper;
+         };
+-        const h = try gpa.create(Helper);
+-        h.* = .{ .gpa = gpa, .io = io, .child = child, .to = child.stdin.?.handle, .from = child.stdout.?.handle, .settings = settings };
++        h.to = h.child.stdin.?.handle;
++        h.from = h.child.stdout.?.handle;
++        h.dead = false;
+         // loading the tower takes seconds; importing torch and transformers the first time can take a minute
+         h.timeout_s = 900;
+         h.deadline = now() + @as(i128, h.timeout_s) * std.time.ns_per_s;
+-        var arena: std.heap.ArenaAllocator = .init(gpa);
++        var arena: std.heap.ArenaAllocator = .init(a);
+         defer arena.deinit();
+         const frame = h.readFrame(arena.allocator()) catch |e| {
+             problem.* = try std.fmt.allocPrint(a, "--vision: the helper stopped before it was ready ({s}); see its lines above", .{@errorName(e)});
+-            h.stop(io);
++            h.child.kill(io);
+             return error.VisionHelper;
+         };
+         const head = frame.header;
+         if (head.get("ready") == null or head.get("ready").? != .bool or !head.get("ready").?.bool) {
+             problem.* = try std.fmt.allocPrint(a, "--vision: the helper could not load the vision tower: {s}", .{head.strField("error") orelse "unknown"});
+-            h.stop(io);
++            h.child.kill(io);
+             return error.VisionHelper;
+         }
+         h.timeout_s = 600;
+-        h.selftest = try gpa.dupe(u8, head.strField("selftest_sha256") orelse "");
++        if (h.selftest.len > 0) h.gpa.free(h.selftest);
++        h.selftest = try a.dupe(u8, head.strField("selftest_sha256") orelse "");
+         if (environ) |m| if (m.get("TENSORFOLD_VISION_SELFTEST")) |want| if (want.len > 0 and !std.mem.eql(u8, want, h.selftest)) {
+             problem.* = try std.fmt.allocPrint(a, "--vision: the helper's self-test features sha {s} is not TENSORFOLD_VISION_SELFTEST {s}: another Python, torch, transformers, Pillow or PyAV stack than the reference's", .{ h.selftest, want });
+-            h.stop(io);
++            h.child.kill(io);
+             return error.VisionHelper;
+         };
+         h.videos = if (head.get("videos")) |v| v == .bool and v.bool else false;
+@@ -146,7 +165,6 @@ pub const Helper = struct {
+         h.tower_bytes = @intCast(if (head.get("tower_bytes")) |v| v.int64() orelse 0 else 0);
+         const versions = if (head.get("versions")) |v| json.stringify(arena.allocator(), v, .{ .compact = true }) catch "" else "";
+         log.line("vision: image{s} input on this GPU, a {d:.2} GiB tower (helper pid {d}; {s}; self-test {s})", .{ if (h.videos) " and video" else "", @as(f64, @floatFromInt(h.tower_bytes)) / (1 << 30), if (head.get("pid")) |p| p.int64() orelse 0 else 0, versions, h.selftest });
+-        return h;
+     }
+ 
+     /// Stops the helper (killed and reaped: a stuck one cannot hold the server's exit).
+@@ -281,11 +299,18 @@ pub const Helper = struct {
+             h.writeAll(body) catch |e| break :blk e;
+             break :blk h.readFrame(a);
+         } catch |e| {
+-            h.dead = true;
+-            // a stuck helper is killed (it holds GPU memory and would hold the server's exit)
+-            if (h.child.id) |pid| std.posix.kill(pid, std.posix.SIG.KILL) catch {};
+-            log.line("vision: the helper is gone ({s}); image and video requests are refused from now on", .{@errorName(e)});
+-            return .{ .refused = .{ .status = 503, .message = "the vision helper stopped; image and video requests are unavailable until the server restarts" } };
++            // a single stuck request must not disable vision for the server's lifetime: kill the helper and
++            // start a fresh one (the tower reloads, so this request is refused and the client retries).
++            log.line("vision: the helper failed ({s}); restarting it", .{@errorName(e)});
++            h.child.kill(h.io);
++            var problem: []const u8 = "";
++            if (h.load(&problem)) |_| {
++                return .{ .refused = .{ .status = 503, .message = "the vision helper was restarted after a failure; retry the request" } };
++            } else |_| {
++                h.dead = true;
++                log.line("vision: the helper could not be restarted; image and video requests are refused from now on", .{});
++                return .{ .refused = .{ .status = 503, .message = "the vision helper stopped; image and video requests are unavailable until the server restarts" } };
++            }
+         };
+         const head = frame.header;
+         const ok = head.get("ok");

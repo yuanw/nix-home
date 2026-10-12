@@ -195,6 +195,22 @@ in
       description = "TENSORFOLD_MEMORY_RESERVE_GIB: GiB kept free when sizing the KV pool.";
     };
 
+    systemMemoryCache = mkOption {
+      type = types.bool;
+      default = false;
+      description = ''
+        TF_FLASHNEXT_SYSTEM_CACHE=1: register ATS-locked system-memory base-page
+        caches/state and use native VMM rings (recipe patch 0010, issue #33's
+        NV_ERR_NO_MEMORY mitigation). Needs the native VMM (single device).
+      '';
+    };
+
+    ringCache = mkOption {
+      type = types.bool;
+      default = false;
+      description = "TF_FLASHNEXT_RING_CACHE=1: reuse native VMM ring regions (needs systemMemoryCache).";
+    };
+
     stateDir = mkOption {
       type = types.path;
       default = "/var/lib/tensorfold-zig";
@@ -244,6 +260,12 @@ in
         TENSORFOLD_VISION_PYTHON = "${visionPython}/bin/python3";
         TENSORFOLD_VISION_PYTHONPATH = "${pkgs.tensorfold-zig}/share/tensorfold/python";
         TENSORFOLD_VISION_WORKSPACE_MIB = toString cfg.visionWorkspaceMib;
+      }
+      // optionalAttrs cfg.systemMemoryCache {
+        TF_FLASHNEXT_SYSTEM_CACHE = "1";
+      }
+      // optionalAttrs cfg.ringCache {
+        TF_FLASHNEXT_RING_CACHE = "1";
       };
 
       # First start: the ~122 GiB checkpoint, resumable, skipped once the
