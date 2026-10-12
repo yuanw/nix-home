@@ -71,8 +71,11 @@ in
       ++ optional cfg.enableGpu (pkgs.cockpit-gpu.override { nvidiaDriverPkg = nvidiaPkg; });
     };
 
-    # Allow access from LAN hostnames (merges with nixpkgs default localhost origin)
+    # Allow access from LAN hostnames (merges with nixpkgs default localhost origin).
+    # The *.yuanw.me entry is the caddy reverse proxy on misfit; without it
+    # cockpit rejects the proxied login/websocket.
     services.cockpit.allowed-origins = [
+      "https://cockpit.yuanw.me"
       "https://${config.networking.hostName}.local:${toString cfg.port}"
       "http://${config.networking.hostName}.local:${toString cfg.port}"
       "https://${config.networking.hostName}:${toString cfg.port}"
