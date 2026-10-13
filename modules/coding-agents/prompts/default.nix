@@ -18,7 +18,6 @@ let
 
   claudeSkills = pkgs.claude-plugins;
   emacsSkillsDir = claudeSkills.emacs-skills;
-  ponytailSkills = pkgs.pi-extensions.pi-ponytail.passthru.skills;
 
   emacsSkill =
     {
@@ -35,15 +34,6 @@ let
     // lib.optionalAttrs (elisp != null) {
       files."${elisp}".text = builtins.readFile "${emacsSkillsDir}/${name}/${elisp}";
     };
-
-  ponytailSkill = name: description: {
-    type = "skill";
-    inherit name description;
-    extraFrontmatter = {
-      license = "MIT";
-    };
-    body = skillBody "${ponytailSkills.${name}}/SKILL.md";
-  };
 
   orgAgendaTodoBody = ''
     # Add TODO items to org agenda files
@@ -422,13 +412,6 @@ in
     };
     elisp = "agent-skill-select.el";
   })
-
-  (ponytailSkill "ponytail" "Lazy senior dev mode: force the simplest solution that actually works, prefer stdlib/native features, and stop before over-engineering.")
-  (ponytailSkill "ponytail-audit" "Whole-repo audit for over-engineering: a ranked list of what to delete, simplify, or replace with stdlib/native equivalents.")
-  (ponytailSkill "ponytail-debt" "Harvest every ponytail deferral comment into a debt ledger. One-shot report, changes nothing.")
-  (ponytailSkill "ponytail-gain" "Show ponytail's measured impact as a compact scoreboard. One-shot display, not a persistent mode.")
-  (ponytailSkill "ponytail-help" "Quick-reference card for all ponytail modes, skills, and commands.")
-  (ponytailSkill "ponytail-review" "Review a diff for over-engineering only: what to delete, simplify, or replace with stdlib/native equivalents.")
 
   {
     type = "skill";
