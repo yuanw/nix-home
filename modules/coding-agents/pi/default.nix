@@ -155,7 +155,6 @@ in
         micsSkillNames = [
           "browser-cli"
           "kagi-search"
-          "pexpect-cli"
           "screenshot-cli"
         ];
       in
