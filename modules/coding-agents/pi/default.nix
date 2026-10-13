@@ -220,9 +220,7 @@ in
           rawSkills = cfg.rawSkills;
           providers =
             (lib.optionalAttrs cfg.localModel {
-              dgx-spark = import ./providers/dgx-spark.nix {
-                inherit inputs pkgs;
-              };
+              dgx-spark = import ./providers/dgx-spark.nix;
             })
             # Runtime-registered providers must be present for defaultProvider assertions.
             //
