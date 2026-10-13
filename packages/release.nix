@@ -133,11 +133,12 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText;
   };
 
-  pi-coding-agent = pkgs.callPackage ./emacs/pi-coding-agent.nix {
+  pilish = pkgs.callPackage ./emacs/pilish.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub writeText;
     inherit md-ts-mode markdown-table-wrap;
     transient = pkgs.emacs.pkgs.elpaPackages.transient;
+    magit-section = pkgs.emacs.pkgs.melpaPackages.magit-section;
   };
 
   agent-shell = pkgs.callPackage ./emacs/agent-shell.nix {

@@ -51,13 +51,14 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
-  pi-coding-agent = (
-    pkgs.callPackage "${packagePath}/pi-coding-agent.nix" {
+  pilish = (
+    pkgs.callPackage "${packagePath}/pilish.nix" {
       inherit (pkgs) fetchFromGitHub writeText;
       inherit lib;
       inherit (self)
         melpaBuild
         transient
+        magit-section
         md-ts-mode
         markdown-table-wrap
         ;
