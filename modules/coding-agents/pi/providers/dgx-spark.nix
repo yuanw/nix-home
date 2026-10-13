@@ -1,11 +1,8 @@
-# DGX Spark / TensorFold OpenAI-compatible endpoint as a nixpi provider.
+# DGX Spark / TensorFold OpenAI-compatible endpoint, declared as a
+# programs.pi.providers entry (freeform fields reach models.json untouched).
 {
-  inputs,
-  pkgs,
 }:
-inputs.nixpi.lib.nixpi.mkPiProvider {
-  inherit pkgs;
-  name = "dgx-spark";
+{
   api = "openai-completions";
   apiKey = "not-needed";
   baseUrl = "http://dgx-spark.local:8888/v1";

@@ -17,10 +17,17 @@
     };
 
     llm-agents.url = "github:numtide/llm-agents.nix";
-    # Declarative Pi host module (programs.pi). Fork of mateusdcc/nixpi; pin
-    # here so we can diverge. Consumed as a HM module — uses the host pkgs, so
-    # no nixpkgs.follows (nixpi pins an older stable channel for its own CI).
-    nixpi.url = "github:yuanwang-wf/nixpi";
+    # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
+    # servers and extension packages. Follows this repo's nixpkgs/flake-prompt
+    # and the llm-agents already used for pkgs.llm-agents.pi, so Pi stays one
+    # derivation across the two flakes.
+    pi-flake = {
+      url = "github:yuanw/pi-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-prompt.follows = "flake-prompt";
+      inputs.llm-agents.follows = "llm-agents";
+      inputs.home-manager.follows = "home-manager";
+    };
     nix-darwin = {
       url = "github:nix-darwin/nix-darwin/master";
       inputs.nixpkgs.follows = "nixpkgs";
