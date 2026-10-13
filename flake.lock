@@ -1328,11 +1328,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791859362,
-        "narHash": "sha256-8C7RSCqcfui6+sU4v7eVYAtqrbVpsazxjIBAsCU61u0=",
+        "lastModified": 1791860139,
+        "narHash": "sha256-uPdDrOQ/Yxrdn8eOqukaJZ+SDVKCpCo5nvMtGPuTMJM=",
         "owner": "yuanw",
         "repo": "pi-flake",
-        "rev": "912d3a9ff3a664dcdc8ea13bc57e021898630168",
+        "rev": "af79012a86718f66a35880fba6133300125357d8",
         "type": "github"
       },
       "original": {
