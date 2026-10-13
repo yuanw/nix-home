@@ -218,19 +218,13 @@ in
           ) cfg.extensions;
 
           rawSkills = cfg.rawSkills;
-          providers =
-            (lib.optionalAttrs cfg.localModel {
-              dgx-spark = import ./providers/dgx-spark.nix;
-            })
-            # Runtime-registered providers must be present for defaultProvider assertions.
-            //
-              lib.optionalAttrs
-                (cfg.defaultProvider != null && !(cfg.localModel && cfg.defaultProvider == "dgx-spark"))
-                {
-                  ${cfg.defaultProvider} = {
-                    enable = true;
-                  };
-                };
+          # Only declare providers that have real models.json fields here.
+          # Extension-registered ones (e.g. cursor-agent via pi-cursor-agent)
+          # must not get an empty stub — Pi rejects `providers.<name>: {}` with
+          # "must specify baseUrl, headers, compat, modelOverrides, or models".
+          providers = lib.optionalAttrs cfg.localModel {
+            dgx-spark = import ./providers/dgx-spark.nix;
+          };
         };
 
         home.file = lib.optionalAttrs permissionGateEnabled {
