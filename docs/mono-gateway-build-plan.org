@@ -123,20 +123,27 @@ cores) — builds natively with no cross-compilation overhead. This is the
 primary build target.
 
 #+begin_src bash
-# On DGX Spark (SSH in) — the sync'd build tree, NOT /etc/nixos
+# From macOS: this machine evaluates the flake and the Spark's store builds it.
+just mono-gateway-build      # leaves the image in the Spark's store
+just mono-gateway-fetch      # copies it into this machine's store as ./result-mono-gateway
+just mono-gateway-serve      # serves it via HTTP from the Spark for the mono to curl
+#+end_src
+
+There is no rsync of the working tree and no ~/nix-mono copy: `nix build --store
+ssh-ng://yuanw@dgx-spark.local --eval-store auto` ships the dirty working tree as
+derivations and streams the result back. Building on the Spark by hand (from a
+checkout, NOT /etc/nixos, which is a stale deployed copy with no mono-nix input)
+still works:
+
+#+begin_src bash
 ssh yuanw@dgx-spark.local
-cd nix-mono        # created by `just mono-gateway-sync`; /etc/nixos is a stale
-                   # deployed copy with no mono-nix input
+cd nix-mono
 nix build .#rootfsImage -L
 #+end_src
 
-Or from macOS via justfile:
-
-#+begin_src bash
-just mono-gateway-build      # builds on dgx-spark via SSH, leaves result/ there
-just mono-gateway-fetch      # rsyncs result/ to ./result-mono-gateway locally
-just mono-gateway-serve      # serves result/ via HTTP for the mono to curl
-#+end_src
+Note the Spark also serves tensorfold-zig (~100 GiB resident); the justfile caps
+the remote build at `--max-jobs 1 --cores 6` so a cold kernel rebuild cannot
+OOM-kill the model. Raise `--cores` when no model is loaded.
 
 ** Option A: Cross-Compile from x86_64 Linux
 
@@ -179,9 +186,8 @@ nix build .#rootfsImage -L
 Or from macOS via justfile:
 
 #+begin_src bash
-just mono-gateway-sync       # rsyncs the working tree to ~/nix-mono on the Spark
-just mono-gateway-build      # builds there via SSH (runs sync first)
-just mono-gateway-fetch      # rsyncs result to ./result-mono-gateway
+just mono-gateway-build      # builds in the Spark's store (dirty tree included, no rsync)
+just mono-gateway-fetch      # copies the image into this machine's store as ./result-mono-gateway
 #+end_src
 
 Output: =result= → ext4 image. =result= is a symlink to one =.img= file, not a

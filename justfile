@@ -81,11 +81,6 @@ update-wk:
 	@{{nix}} run .#bump-semver-git-sources
 	just prefetch-work-sources
 
-# The DGX Spark box never has nix-home-private: its URL is a Mac-local path and the
-# repo is not anonymously fetchable. The system needs none of it, so disable it there
-# rather than pretend the box can resolve it (blank/ is carried by the rsync below).
-spark_disable_private := "--override-input nix-home-private path:/etc/nixos/blank"
-
 # Run colmena against one host from the hive, with an ssh agent available to the
 # target (private flake inputs get fetched there when buildOnTarget is set).
 colmena-run ACTION HOST:
@@ -143,30 +138,35 @@ push-all:
 sys-diff:
     @nix store diff-closures /run/current-system ./result
 
-# build tree for the mono gateway on dgx-spark. NOT /etc/nixos: that is a stale
-# deployed copy (no .git, no mono-nix input), so building there gives
-# "attribute missing".
+# Build on dgx-spark by pointing Nix at its store directly. This Mac evaluates
+# the flake -- dirty working tree and local inputs included -- and only the
+# derivations and results travel, so there is no rsync of the tree and
+# nix-home-private never has to exist on the Spark.
+spark_store := "ssh-ng://yuanw@dgx-spark.local"
+
+# The Spark also serves tensorfold-zig (~100 GiB resident); an unbounded kernel
+# rebuild OOM-killed the model on 2026-10-14. Cap it. Raise --cores if the model
+# is stopped (or point --store at another aarch64-linux builder).
+spark_build := "--eval-store auto --max-jobs 1 --cores 6"
+
+# where mono-gateway-serve parks the image on the Spark for the board to curl
 mono-work-dir := "nix-mono"
 
-# sync the working tree (uncommitted edits included) to dgx-spark
-mono-gateway-sync:
-    @rsync -az --delete --filter=':- .gitignore' --exclude .git --exclude 'result*' \
-        ./ yuanw@dgx-spark.local:{{mono-work-dir}}/
-
 # build mono-gateway rootfs image on dgx-spark (native aarch64-linux).
-# Leaves result/ (the ~2 GB ext4 .img) on the dgx-spark filesystem.
-mono-gateway-build: mono-gateway-sync
-    @ssh yuanw@dgx-spark.local "cd {{mono-work-dir}} && {{nix}} build '.#rootfsImage' -L"
+# The result stays in the Spark's store; fetch it with mono-gateway-fetch.
+mono-gateway-build:
+    @{{nix}} build '.#packages.aarch64-linux.rootfsImage' --store {{spark_store}} {{spark_build}} -L
 
-# result is a symlink into /nix/store, so -L is required:
-# rsync the image to ./result-mono-gateway
+# copy the image into this machine's store and point ./result-mono-gateway at it
 mono-gateway-fetch:
-    @rsync -avPL yuanw@dgx-spark.local:{{mono-work-dir}}/result ./result-mono-gateway
+    @P=$({{nix}} build '.#packages.aarch64-linux.rootfsImage' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
+     {{nix}} copy --from '{{spark_store}}' "$P" && ln -sfn "$P" ./result-mono-gateway && echo ./result-mono-gateway
 
-# python >= 3.11 http.server 404s on result (realpath escapes the dir),
-# so serve a dereferenced rootfs.img for the mono to curl in Recovery Linux
+# python >= 3.11 http.server 404s on a symlink out of the served dir, so park a
+# dereferenced rootfs.img for the mono to curl in Recovery Linux
 mono-gateway-serve:
-    @ssh -t yuanw@dgx-spark.local "cd {{mono-work-dir}} && cp -L -f result rootfs.img && python3 -m http.server 8000"
+    @P=$({{nix}} build '.#packages.aarch64-linux.rootfsImage' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
+     ssh -t yuanw@dgx-spark.local "mkdir -p {{mono-work-dir}} && cp -Lf '$P' {{mono-work-dir}}/rootfs.img && cd {{mono-work-dir}} && exec python3 -m http.server 8000"
 
 
 
@@ -177,10 +177,9 @@ mono-gateway-host := "10.0.0.2"
 # board. Cheaper than re-flashing: the closure reuses the ~561 store paths already
 # on the eMMC, so a config change normally moves a few kilobytes. The copy is
 # relayed through this Mac because dgx-spark has no route to 10.0.0.0/24.
-mono-gateway-redeploy: mono-gateway-sync
-    @ssh yuanw@dgx-spark.local "cd {{mono-work-dir}} && {{nix}} build '.#mono-gateway-system' -L"
-    @P=$(ssh yuanw@dgx-spark.local "readlink -f {{mono-work-dir}}/result"); \
-     {{nix}} copy --from 'ssh://yuanw@dgx-spark.local' --to 'ssh://root@{{mono-gateway-host}}' "$P" && \
+mono-gateway-redeploy:
+    @P=$({{nix}} build '.#packages.aarch64-linux.mono-gateway-system' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
+     {{nix}} copy --from '{{spark_store}}' --to 'ssh://root@{{mono-gateway-host}}' "$P" && \
      ssh root@{{mono-gateway-host}} "nix-env --profile /nix/var/nix/profiles/system --set \"$P\" && \
       \"$P/bin/switch-to-configuration\" switch"
 
