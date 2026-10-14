@@ -9,6 +9,13 @@ box is replacing, the target roles, and the decisions that have to be made befor
 any of it becomes =hosts/mono-gateway/default.nix=. Phase 5 is closed, so this is
 the next real milestone.
 
+Two efforts meet here: the board side is
+[[file:mono-gateway-build-plan.org][the build plan]], and the box being replaced is declared by the
+[[file:openwrt-plan.org][OpenWrt nix-module work]] (=openwrt/=, PR #361 merged =6b0b6292=, Phase 1/2
+applied and in daily use). The interlock is spelled out in *Cross-link: the
+OpenWrt track* below and in that plan's *Cross-reference: the mono-gateway
+cutover*.
+
 * Goal
 
 Move the *routing* role off the OpenWrt e8450 and onto the Mono Gateway, without
@@ -42,6 +49,9 @@ Two facts that matter:
 - The e8450 is also the *WiFi access point*. The board has no WiFi support (the
   =mwifiex= port was deferred). So the cutover cannot remove the e8450's radio
   role — it can only demote it to a dumb AP, or a third box has to be the AP.
+
+It is a specification, not a dependency: the OpenWrt nix-module work is not on
+the cutover's critical path (see *Cross-link: the OpenWrt track*).
 
 * Target topology
 
@@ -107,6 +117,11 @@ Three steps, each independently reversible.
    re-number. Keep the e8450 powered and configured as the AP (and as the
    fallback router) until a quiet week has passed.
 
+   This step is also an *OpenWrt-side apply*: demoting the e8450 to a dumb AP and
+   switching its DHCP/RA off is a =network=/=wireless= change to
+   =openwrt/routers/e8450.nix= — the lockout class in Phase 3 of the
+   [[file:openwrt-plan.org][OpenWrt plan]]. Settle failsafe before this step, not during it.
+
 * Rollback
 
 Trivially: re-cable the ISP drop to the e8450's =wan= and power the board down.
@@ -114,6 +129,10 @@ The e8450's config is declarative and pinned in =openwrt/routers/e8450.nix=, so
 it comes back exactly as it is now. Nothing in this design should mutate the
 e8450's routing role (turn its DHCP server off in step 3 only, and only once the
 board's is proven).
+
+The assumption behind that lives in the OpenWrt track: the back-out works only
+while =just openwrt-diff= stays clean against =openwrt/routers/e8450.nix=, so no
+hand-edits on the e8450 during the swap.
 
 * Open decisions (need a human)
 
@@ -133,3 +152,31 @@ board's is proven).
 - Serial console access while making the change (already have it: UART ttyS0).
 - The board's clock skew resolved or at least understood before TLS/logs depend
   on it (see the agenda item).
+
+* Cross-link: the OpenWrt track
+
+The other router effort is declarative management of the e8450 —
+[[file:openwrt-plan.org][docs/openwrt-plan.org]], tooling under =openwrt/= (=nix-uci=, PR #361 merged
+=6b0b6292=, Phase 1/2 applied and in daily use, first real firewall change already
+applied with the rollback armed).
+
+| Direction       | What moves across                                                                                       |
+|-----------------+---------------------------------------------------------------------------------------------------------|
+| OpenWrt -> here | The config being reproduced: WAN =proto dhcp=, =br-lan= LAN, dnsmasq static leases, =ra server= + PD,   |
+|                 | fw4 zones. All of it reads off =routers/e8450.nix=, already declared 1:1 — that is the lease list.       |
+| Here -> OpenWrt | Nothing, until step 3. The board never drives uci; the demotion is a manual apply from this side.        |
+| Shared          | Failsafe on the e8450, before step 3.                                                                    |
+
+Two things that are *not* required from that track, so it does not hold this one up:
+
+- The nix module work is complete for this purpose. Phase 4 (=opkg=, =sysupgrade=,
+  imagebuilder, crontab/sysctl/authorized_keys files) is explicitly deferred and the
+  cutover needs none of it.
+- The e8450 keeps its own config either way. Declaring it is what makes the rollback
+  exact; it is not a prerequisite for anything the board does.
+
+The one real dependency, and the only item on that side's critical path: step 3 edits
+the e8450's =network= and =wireless=, and its failsafe has never been entered. The
+cable-free experiment (static IP on LAN1, =tcpdump= on UDP/4919, press WPS on the
+broadcast, then =ssh= to =192.168.1.1= and =mount_root=) settles it, and is written up
+in that plan's *Failsafe rehearsal*. Run it whenever — it must land before step 3.
