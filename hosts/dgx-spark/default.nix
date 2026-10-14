@@ -7,7 +7,6 @@
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
     ../../modules/ds4.nix
-    ../../modules/lance.nix
     ../../modules/tensorfold.nix
     ../../modules/tensorfold-zig.nix
     ../../modules/red-snow.nix
@@ -31,7 +30,7 @@
     inputs.nixified-ai.overlays.comfyui
     inputs.nixified-ai.overlays.models
     inputs.nixified-ai.overlays.fetchers
-    # Package overrides (flash-attn-4, lance, comfyui)
+    # Package overrides (flash-attn-4, comfyui)
     (import ../../packages)
   ];
 

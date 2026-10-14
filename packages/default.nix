@@ -220,9 +220,6 @@ in
 
   cockpit-gpu = prev.callPackage ./cockpit-gpu.nix { };
 
-  lance = prev.callPackage ./lance { };
-  lance-download-model = prev.callPackage ./lance-download-model { };
-
   llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
 
   # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes

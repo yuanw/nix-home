@@ -126,25 +126,6 @@
   # ─── PCP (Performance Co-Pilot) — required by cockpit
   services.pcp.enable = true;
 
-  # ─── Lance Multimodal AI ────────────────────────────────────────────
-  services.lance = {
-    enable = false;
-    instances = {
-      video = {
-        enable = true;
-        model = "video";
-        gradioTask = "t2v";
-        gradioPort = 7860;
-      };
-      image = {
-        enable = false;
-        model = "image";
-        gradioTask = "t2i";
-        gradioPort = 7861;
-      };
-    };
-  };
-
   # ─── Firewall ───────────────────────────────────────────────────────
   # (TensorFold's API port 8888 is opened by services.tensorfold.openFirewall)
 
