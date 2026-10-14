@@ -17,6 +17,30 @@ use uci's native stage/review/commit split instead of blind apply.
 First wins are low-risk, additive settings (hostname, dropbear, wifi, ddns).
 Network/firewall only after the rollback path is proven.
 
+* Cross-reference: the mono-gateway cutover
+
+The other half of the router work is bringing the NixOS Mono Gateway up as the
+house router. Design: =docs/mono-gateway-cutover.org= (branch =mono-gateway=, not
+yet merged); agenda item *Bring up the Mono Gateway DK as the home router on
+NixOS* in =~/org/agenda/homelab.org=. How the two tracks interlock:
+
+- *That side reads this one; it does not depend on it.* What the swap needs from
+  OpenWrt is the running config as a specification, and =routers/e8450.nix= already
+  is one: =proto dhcp= WAN, =br-lan= =192.168.1.1/24=, dnsmasq static leases,
+  =ra server= + PD, fw4 zones. The board re-implements all of it as
+  =networking.*= / =services.*=. Nothing in Phase 3 or 4 is on its critical path.
+- *Rollback lives here.* The cutover's only back-out is re-cabling to the e8450 and
+  having it return exactly as declared. That holds only while =just openwrt-diff=
+  stays clean against the box; a hand-edit during the swap turns "re-cable and
+  you're back" into manual recovery.
+- *One apply is shared, and it is the dangerous one.* Cutover step 3 demotes the
+  e8450 to a dumb AP and switches its DHCP/RA off — a =network=/=wireless= change of
+  exactly the lockout class in Phase 3. Settle failsafe before that step (the
+  UDP/4919 =tcpdump= experiment in *Failsafe rehearsal* is free and needs no cable).
+- *Phase 4 stays deferred.* The cutover needs no =opkg=, no =sysupgrade=, no
+  imagebuilder. Building it "because the router is changing anyway" solves a
+  different box's lifecycle problem.
+
 * What the upstream mechanism actually does
 
 ~openwrt/nix/default.nix~ :
