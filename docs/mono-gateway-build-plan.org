@@ -892,6 +892,20 @@ dmesg --level=err,warn
 nohup iperf3 -c <gateway-ip> -t 86400 -i 60 --logfile /tmp/iperf-24h.log &
 #+end_src
 
+*Result (2026-10-14): PASS.* Ran 24 h (86,400 s) of forwarded traffic (=misfit= ->
+board -> Mac, i.e. straight through the ASK fast path): 9.25 TBytes, 941 Mbit/s
+sustained, and **0 retransmits, 0 stalled intervals, 0 kernel messages** in
+=dmesg -W=. Board 43.5-47.0 degrees C, fan 1684-2774 RPM, both flat for the whole
+run, so no thermal throttling. Board CPU stayed ~0.5 % of four cores throughout:
+the fast path held for 24 h.
+
+The first attempt failed at ~27 min, and it was the *harness*, not the board: the
+Mac far end went to sleep (AC =sleep 1= minute, =displaysleep 10=), which suspends
+the network stack and kills the TCP flow; the board's links and thermals never
+moved. Restarted with =caffeinate -dimsu= on the Mac plus a durable =iperf3 -s=
+and it ran clean end to end. For any long soak: prove the far end stays awake, or
+the result says nothing about the board.
+
 * Phase 6: Quick Fixes for Missing NixOS Features
 
 Per the [[file:/Users/yuan/org/denote/20250913T140000--mono-gateway-dk-opnsense-vs-nixos-evaluation.org][evaluation document]], three of four gaps are trivially fixable.
