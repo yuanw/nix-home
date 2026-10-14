@@ -1,0 +1,135 @@
+#+TITLE: Mono Gateway cutover — design
+#+DATE: 2026-10-14
+#+OPTIONS: toc:t
+
+* Status
+
+First draft, 2026-10-14. This is a design pass, not a config. It records what the
+box is replacing, the target roles, and the decisions that have to be made before
+any of it becomes =hosts/mono-gateway/default.nix=. Phase 5 is closed, so this is
+the next real milestone.
+
+* Goal
+
+Move the *routing* role off the OpenWrt e8450 and onto the Mono Gateway, without
+an outage that can't be backed out of, and without losing what the LAN already
+does: DHCP leases, IPv6 prefix delegation, NAT/firewall, DNS, WiFi.
+
+The board is already flashed, booting, generational, air-gapped-capable, and its
+fast path + thermals are proven (Phases 1–5). Nothing here touches the boot or
+offload work; it is all =networking.*= and a handful of =services.*=.
+
+* What exists today (the thing being replaced)
+
+From =openwrt/routers/e8450.nix= (declared 1:1 from the live box) and a probe of
+the Mac:
+
+| Role     | Today |
+|----------+-------|
+| Router   | OpenWrt e8450 (Linksys E8450 / Belkin RT3200) at =192.168.1.1=, LuCI |
+| LAN      | =br-lan= bridge over =lan1..lan4=, static =192.168.1.1/24=, =ip6assign 60= |
+| WAN      | =wan= device, =proto dhcp= — *plain DHCPv4, no PPPoE* |
+| WAN6     | =proto dhcpv6= (prefix delegation) |
+| ULA      | =fd1f:26e2:8ef1::/48= |
+| DHCP     | dnsmasq; static leases for Mac (…212), dgx-spark, misfit (…190) |
+| RA       | =ra server=, =managed-config + other-config= |
+| Firewall | fw4: zones =lan= (accept) / =wan= (reject in, =masq=), =lan -> wan=, plus DHCP-renew/ping/IGMP rules |
+| DNS      | dnsmasq on 192.168.1.1 |
+
+Two facts that matter:
+
+- WAN is DHCPv4/v6, so there is no PPPoE/PPPoA to reimplement. Good.
+- The e8450 is also the *WiFi access point*. The board has no WiFi support (the
+  =mwifiex= port was deferred). So the cutover cannot remove the e8450's radio
+  role — it can only demote it to a dumb AP, or a third box has to be the AP.
+
+* Target topology
+
+The board has 3× 1G RJ45 (=eth0..eth2=) and 2× 10G SFP+ (=eth3/eth4=; the latter
+need a DAC before they can carry anything). A recommended mapping:
+
+| Port        | Role          | Notes |
+|-------------+---------------+-------|
+| =eth2=      | WAN           | cable to whatever feeds the e8450's =wan= today (modem/ONT) |
+| =eth0=,=eth1= | LAN bridge  | =br-lan=; the 1G switch ports |
+| =eth3=/=eth4= | 10G LAN/trunk | *blocked on the DAC*; leave down for now |
+| WiFi        | e8450 as dumb AP | board stays routing-only; AP uplinks a LAN port |
+
+Which physical port is which is a decision, not a fact yet — the board's RJ45
+order is not the same as the kernel names (the lab work found =eth0= is the third
+port from the left). Confirm by cable before committing the file.
+
+* Addressing
+
+| Net | Choice | Why |
+|-----+--------+-----|
+| LAN | keep =192.168.1.0/24=? | zero re-addressing; but the board must *not* hold =192.168.1.1= while the e8450 still does |
+| IPv6 | delegate a /64 to LAN from the /60 PD | matches today's =ip6assign 60= |
+| ULA | reuse =fd1f:26e2:8ef1::/48= | keeps stable addresses when the ISP prefix changes |
+
+The landmine already recorded in the build plan stands: never bridge the board's
+LAN ports onto the house LAN while it is configured with the default
+=192.168.1.1=. Stage it on a different address (e.g. =192.168.1.2=) or on an
+isolated segment first.
+
+* Services to reproduce
+
+| Need | NixOS mechanism | Notes |
+|------+-----------------+-------|
+| NAT + stateful firewall | =networking.nat= + =networking.firewall= (nftables) | map the fw4 zones/rules; RP-filter flat, unlike the lab =rpfilter= chain |
+| WAN DHCPv4 | =networking.interfaces.<wan>.useDHCP= / systemd-networkd | |
+| WAN DHCPv6 + PD | systemd-networkd =DHCP=yes= / =IPv6AcceptRA= | *the hard part* (see below) |
+| LAN static + bridge | =networking.bridges.br-lan= + =networking.interfaces= | |
+| DHCP server | =services.kea= or =services.dnsmasq= | dnsmasq matches today; kea is more declarative |
+| DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here |
+| RAs | systemd-networkd or radvd | must announce the delegated /64 |
+
+**The IPv6 PD gap.** NixOS's declarative networking does not derive a LAN /64
+from a delegated prefix out of the box. Today OpenWrt's =odhcpd= does it. Options,
+roughly in order of preference: (a) systemd-networkd + a small script/dispatcher
+that picks the PD /64 and assigns it to =br-lan=; (b) radvd with a PD hook;
+(c) accept IPv4-first and treat IPv6 as a second cutover. This is the single
+piece most likely to need custom code, so decide it deliberately rather than
+discovering it during the swap.
+
+* Migration strategy
+
+Three steps, each independently reversible.
+
+1. *Stage, don't swap.* Park the board at a spare LAN address and the same WAN
+   (or a test segment), with the full router config loaded. Prove DHCP, DNS,
+   NAT, RA/PD, and the firewall from a client that points at it. The house still
+   runs on the e8450.
+2. *Move the WAN.* Cable the ISP drop to the board's WAN port and cut over
+   routing. This is the one step with a real outage — minutes, and the whole
+   point of step 1 is that nothing *else* is being debugged at the same time.
+3. *Move the authority.* DHCP/DNS/RA move with the router; clients renew and
+   re-number. Keep the e8450 powered and configured as the AP (and as the
+   fallback router) until a quiet week has passed.
+
+* Rollback
+
+Trivially: re-cable the ISP drop to the e8450's =wan= and power the board down.
+The e8450's config is declarative and pinned in =openwrt/routers/e8450.nix=, so
+it comes back exactly as it is now. Nothing in this design should mutate the
+e8450's routing role (turn its DHCP server off in step 3 only, and only once the
+board's is proven).
+
+* Open decisions (need a human)
+
+1. LAN subnet: keep =192.168.1.0/24=, or move to a fresh one while we're
+   renumbering anyway?
+2. Physical port map: which board port is WAN? Which are the LAN switch ports?
+3. WiFi: e8450 demoted to dumb AP (recommended) or a different AP?
+4. DHCP/DNS: dnsmasq 1:1, or move to kea + resolved/unbound?
+5. IPv6 PD: implement (a)/(b) now, or make IPv4 the first cutover and IPv6 the
+   second?
+6. Do the 10G SFP+ ports land in this cutover (once the DAC arrives) or later?
+
+* Prerequisites
+
+- A **DAC** for the SFP+ ports if they're part of this cutover; otherwise they
+  stay dark. Still the only hardware blocker.
+- Serial console access while making the change (already have it: UART ttyS0).
+- The board's clock skew resolved or at least understood before TLS/logs depend
+  on it (see the agenda item).
