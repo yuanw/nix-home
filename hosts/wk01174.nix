@@ -80,8 +80,8 @@
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
     pi = {
       enable = true;
-      defaultProvider = "cursor-agent";
-      defaultModel = "default";
+      defaultProvider = "anthropic";
+      defaultModel = "claude-opus-5";
       extensions.cursor-agent.enable = true;
       rawSkills = [
         pkgs.pi-extensions.pi-interactive-shell
