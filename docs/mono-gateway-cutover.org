@@ -4,10 +4,12 @@
 
 * Status
 
-First draft, 2026-10-14. This is a design pass, not a config. It records what the
-box is replacing, the target roles, and the decisions that have to be made before
-any of it becomes =hosts/mono-gateway/default.nix=. Phase 5 is closed, so this is
-the next real milestone.
+Second draft, 2026-10-14. The design is settled and the staging config now exists:
+=hosts/mono-gateway/default.nix= attaches the =networking.*= and =services.*=
+below to upstream's =gateway-native= via =extendModules=. It is *not deployed* --
+the board still runs the pre-cutover generation on =10.0.0.2=, and activating it
+is the cutover, not a way to inspect it. Phase 5 is closed, so this is the next
+real milestone.
 
 Two efforts meet here: the board side is
 [[file:mono-gateway-build-plan.org][the build plan]], and the box being replaced is declared by the
@@ -38,7 +40,7 @@ the Mac:
 | WAN      | =wan= device, =proto dhcp= — *plain DHCPv4, no PPPoE* |
 | WAN6     | =proto dhcpv6= (prefix delegation) |
 | ULA      | =fd1f:26e2:8ef1::/48= |
-| DHCP     | dnsmasq; static leases for Mac (…212), dgx-spark, misfit (…190) |
+| DHCP     | dnsmasq; static IPv4 leases for the Mac (…212) and misfit (…190); dgx-spark by DUID only |
 | RA       | =ra server=, =managed-config + other-config= |
 | Firewall | fw4: zones =lan= (accept) / =wan= (reject in, =masq=), =lan -> wan=, plus DHCP-renew/ping/IGMP rules |
 | DNS      | dnsmasq on 192.168.1.1 |
@@ -56,31 +58,56 @@ the cutover's critical path (see *Cross-link: the OpenWrt track*).
 * Target topology
 
 The board has 3× 1G RJ45 (=eth0..eth2=) and 2× 10G SFP+ (=eth3/eth4=; the latter
-need a DAC before they can carry anything). A recommended mapping:
+need a DAC before they can carry anything). The staged config commits to this
+mapping:
 
-| Port        | Role          | Notes |
-|-------------+---------------+-------|
-| =eth2=      | WAN           | cable to whatever feeds the e8450's =wan= today (modem/ONT) |
-| =eth0=,=eth1= | LAN bridge  | =br-lan=; the 1G switch ports |
+| Port          | Role          | Notes |
+|---------------+---------------+-------|
+| =eth2=        | WAN           | cable to whatever feeds the e8450's =wan= today (modem/ONT) |
+| =eth1=        | LAN bridge    | =br-lan= while staged; plugs into the house switch at the swap |
+| =eth0=        | management    | static =10.0.0.2/24= to this Mac; folds into =br-lan= at the swap |
 | =eth3=/=eth4= | 10G LAN/trunk | *blocked on the DAC*; leave down for now |
-| WiFi        | e8450 as dumb AP | board stays routing-only; AP uplinks a LAN port |
+| WiFi          | e8450 as dumb AP | board stays routing-only; AP uplinks a LAN port |
 
-Which physical port is which is a decision, not a fact yet — the board's RJ45
-order is not the same as the kernel names (the lab work found =eth0= is the third
-port from the left). Confirm by cable before committing the file.
+The board's RJ45 order is not the same as the kernel names (the lab work found
+=eth0= is the third port from the left), so confirm the map by cable before the
+swap.
 
 * Addressing
 
 | Net | Choice | Why |
 |-----+--------+-----|
-| LAN | keep =192.168.1.0/24=? | zero re-addressing; but the board must *not* hold =192.168.1.1= while the e8450 still does |
+| LAN | keep =192.168.1.0/24= | zero re-addressing; the board just must *not* hold =192.168.1.1= on a live L2 while the e8450 still does |
 | IPv6 | delegate a /64 to LAN from the /60 PD | matches today's =ip6assign 60= |
 | ULA | reuse =fd1f:26e2:8ef1::/48= | keeps stable addresses when the ISP prefix changes |
 
-The landmine already recorded in the build plan stands: never bridge the board's
-LAN ports onto the house LAN while it is configured with the default
-=192.168.1.1=. Stage it on a different address (e.g. =192.168.1.2=) or on an
-isolated segment first.
+The landmine already recorded in the build plan stands, and the staging config
+handles it by *not* moving the LAN: the board's =br-lan= carries =192.168.1.1=
+(the same address the e8450 holds), with only =eth1= as a member, and =eth1= stays
+unplugged from the house switch until the swap. Management is the separate
+=10.0.0.2= on =eth0=, so the board is reachable throughout without touching the
+house subnet. Do not cable =eth1= to the house LAN while the e8450 still owns
+=192.168.1.1=.
+
+* The staging config (as built)
+
+=hosts/mono-gateway/default.nix=, layered on upstream's =gateway-native= with
+=extendModules= (nothing upstream is forked):
+
+| Piece | As built |
+|-------+----------|
+| WAN | =eth2=, =useDHCP= (DHCPv4 only) |
+| LAN | =br-lan= over =eth1=, static =192.168.1.1/24= |
+| Management | =eth0= static =10.0.0.2/24=, kept through staging |
+| DHCP/DNS | =services.dnsmasq= on =br-lan= only; lease range =.100-.249=, 12h; the two e8450 static leases; options 3 and 6 both =192.168.1.1= |
+| NAT/firewall | =networking.nat= (=eth2= external, =br-lan= internal) plus the NixOS firewall; DHCP-renew (UDP 68) allowed from WAN |
+| IPv6 | *absent on purpose* (decision 5): no RA, no PD |
+| Kernel | two Phase-5 overlays ride in the same file (cmm ctnetlink ABI; short-circuit the IPsec SA notify) -- not part of the cutover |
+
+The =dnsmasq= settings are the file the service passes via =--conf-file=, not
+=/etc/dnsmasq.conf=. Verified against the built closure: ~interface=br-lan~,
+~dhcp-range=192.168.1.100,192.168.1.249,12h~, both ~dhcp-host~ leases, options 3
+and 6 both =192.168.1.1=.
 
 * Services to reproduce
 
@@ -88,11 +115,15 @@ isolated segment first.
 |------+-----------------+-------|
 | NAT + stateful firewall | =networking.nat= + =networking.firewall= (nftables) | map the fw4 zones/rules; RP-filter flat, unlike the lab =rpfilter= chain |
 | WAN DHCPv4 | =networking.interfaces.<wan>.useDHCP= / systemd-networkd | |
-| WAN DHCPv6 + PD | systemd-networkd =DHCP=yes= / =IPv6AcceptRA= | *the hard part* (see below) |
+| WAN DHCPv6 + PD | systemd-networkd ~DHCP=yes~ / =IPv6AcceptRA= | *the hard part* (see below) |
 | LAN static + bridge | =networking.bridges.br-lan= + =networking.interfaces= | |
 | DHCP server | =services.kea= or =services.dnsmasq= | dnsmasq matches today; kea is more declarative |
 | DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here |
 | RAs | systemd-networkd or radvd | must announce the delegated /64 |
+
+As built: WAN DHCPv4, NAT, firewall, DHCP and DNS are implemented and verified in
+the built closure. WAN DHCPv6/PD, the LAN /64 and RAs, and =resolved=/=kea= are
+*not* -- decision 5 makes IPv4 the first cutover.
 
 **The IPv6 PD gap.** NixOS's declarative networking does not derive a LAN /64
 from a delegated prefix out of the box. Today OpenWrt's =odhcpd= does it. Options,
@@ -106,44 +137,82 @@ discovering it during the swap.
 
 Three steps, each independently reversible.
 
-1. *Stage, don't swap.* Park the board at a spare LAN address and the same WAN
-   (or a test segment), with the full router config loaded. Prove DHCP, DNS,
-   NAT, RA/PD, and the firewall from a client that points at it. The house still
-   runs on the e8450.
-2. *Move the WAN.* Cable the ISP drop to the board's WAN port and cut over
-   routing. This is the one step with a real outage — minutes, and the whole
-   point of step 1 is that nothing *else* is being debugged at the same time.
-3. *Move the authority.* DHCP/DNS/RA move with the router; clients renew and
-   re-number. Keep the e8450 powered and configured as the AP (and as the
-   fallback router) until a quiet week has passed.
+1. *Stage, don't swap.* Activate the config with =eth1= still unplugged from the
+   house. Prove DHCP, DNS, NAT and the firewall from a client plugged into
+   =eth1=; the house runs untouched on the e8450 and =just openwrt-diff= still
+   says the e8450 is as declared.
+2. *Swap.* Cable the ISP drop to =eth2=, plug =eth1= into the house switch, and
+   demote the e8450 to a dumb AP with its DHCP/DNS/RA off -- all in one window,
+   because the board and the e8450 cannot both hold =192.168.1.1=. Drop =eth0=
+   into =br-lan= and delete its staging =10.0.0.2= address. This is the one step
+   with a real outage (minutes); step 1 exists so nothing *else* is being
+   debugged during it.
 
-   This step is also an *OpenWrt-side apply*: demoting the e8450 to a dumb AP and
-   switching its DHCP/RA off is a =network=/=wireless= change to
-   =openwrt/routers/e8450.nix= — the lockout class in Phase 3 of the
+   The e8450 half is an *OpenWrt-side apply*: =network=/=wireless= in
+   =openwrt/routers/e8450.nix=, the lockout class in Phase 3 of the
    [[file:openwrt-plan.org][OpenWrt plan]]. Settle failsafe before this step, not during it.
+3. *Settle.* Keep the e8450 powered and declared as the fallback router and AP.
+   Rehearse =just mono-gateway-rollback= once, then leave both alone for a quiet
+   week before retiring the e8450's routing role.
+
+* Cutover runbook
+
+Pre-swap, with nothing cabled to the house:
+
+#+begin_src bash
+just mono-gateway-build                      # staging config -> dgx-spark's store
+# the dnsmasq config the unit actually reads (not /etc/dnsmasq.conf):
+ssh yuanw@dgx-spark.local \
+  'grep -oE "/nix/store/[a-z0-9]+-dnsmasq.conf" /nix/store/*-nixos-system-gateway-*/etc/systemd/system/dnsmasq.service | head -1 | xargs cat'
+just mono-gateway-redeploy                   # activate staged; eth1 still dark
+#+end_src
+
+Checks with =eth1= dark (serial, or =ssh root@10.0.0.2=): =ip -br addr= shows
+=br-lan 192.168.1.1/24= and =eth0 10.0.0.2/24=, and =eth2= has no carrier;
+=systemctl status dnsmasq= is active; =nft list ruleset= has the =br-lan -> eth2=
+forward and the =masquerade= rule; a laptop on =eth1= gets a =.100-.249= lease
+with gateway and DNS =192.168.1.1=, and reaches the board.
+
+Swap, in one window:
+
+#+begin_src bash
+# on the e8450: apply the dumb-AP config (DHCP/DNS/RA off), then cable the
+# ISP drop to eth2 and eth1 to a house switch. If eth0 also folds into br-lan in
+# this window the switch drops this Mac's 10.0.0.2 path -- serial in hand.
+just mono-gateway-redeploy
+# from a house client:
+curl -4 https://ifconfig.me; nslookup example.com 192.168.1.1
+#+end_src
+
+Rollback at any point: re-cable the ISP drop to the e8450's =wan= and power the
+board down. If the board is still reachable, =just mono-gateway-rollback= moves it
+one generation back.
 
 * Rollback
 
 Trivially: re-cable the ISP drop to the e8450's =wan= and power the board down.
 The e8450's config is declarative and pinned in =openwrt/routers/e8450.nix=, so
 it comes back exactly as it is now. Nothing in this design should mutate the
-e8450's routing role (turn its DHCP server off in step 3 only, and only once the
-board's is proven).
+e8450's routing role (turn its DHCP server off at the swap only, and only once
+the board's is proven).
 
 The assumption behind that lives in the OpenWrt track: the back-out works only
 while =just openwrt-diff= stays clean against =openwrt/routers/e8450.nix=, so no
 hand-edits on the e8450 during the swap.
 
-* Open decisions (need a human)
+* Decisions
 
-1. LAN subnet: keep =192.168.1.0/24=, or move to a fresh one while we're
-   renumbering anyway?
-2. Physical port map: which board port is WAN? Which are the LAN switch ports?
-3. WiFi: e8450 demoted to dumb AP (recommended) or a different AP?
-4. DHCP/DNS: dnsmasq 1:1, or move to kea + resolved/unbound?
-5. IPv6 PD: implement (a)/(b) now, or make IPv4 the first cutover and IPv6 the
-   second?
-6. Do the 10G SFP+ ports land in this cutover (once the DAC arrives) or later?
+The staging config settles 1--5; 6 is still open. Each is one line (or a few) in
+=hosts/mono-gateway/default.nix= and reversible by reverting that line.
+
+| # | Question | Settled as |
+|---+----------+------------|
+| 1 | LAN subnet | keep =192.168.1.0/24= -- zero renumbering |
+| 2 | Port map | =eth2= WAN, =eth1= LAN bridge, =eth0= management (folds into =br-lan= at the swap) |
+| 3 | WiFi | e8450 demoted to dumb AP |
+| 4 | DHCP/DNS | dnsmasq 1:1 now; kea/resolved later |
+| 5 | IPv6 PD | deferred -- IPv4 first, IPv6 is a second cutover |
+| 6 | 10G SFP+ | *open* -- gated on the DAC; leave dark until it arrives |
 
 * Prerequisites
 
@@ -164,8 +233,8 @@ applied with the rollback armed).
 |-----------------+---------------------------------------------------------------------------------------------------------|
 | OpenWrt -> here | The config being reproduced: WAN =proto dhcp=, =br-lan= LAN, dnsmasq static leases, =ra server= + PD,   |
 |                 | fw4 zones. All of it reads off =routers/e8450.nix=, already declared 1:1 — that is the lease list.       |
-| Here -> OpenWrt | Nothing, until step 3. The board never drives uci; the demotion is a manual apply from this side.        |
-| Shared          | Failsafe on the e8450, before step 3.                                                                    |
+| Here -> OpenWrt | Nothing, until the swap (step 2). The board never drives uci; the demotion is a manual apply from this side. |
+| Shared          | Failsafe on the e8450, before the swap (step 2).                                                         |
 
 Two things that are *not* required from that track, so it does not hold this one up:
 
@@ -175,8 +244,8 @@ Two things that are *not* required from that track, so it does not hold this one
 - The e8450 keeps its own config either way. Declaring it is what makes the rollback
   exact; it is not a prerequisite for anything the board does.
 
-The one real dependency, and the only item on that side's critical path: step 3 edits
+The one real dependency, and the only item on that side's critical path: step 2 edits
 the e8450's =network= and =wireless=, and its failsafe has never been entered. The
 cable-free experiment (static IP on LAN1, =tcpdump= on UDP/4919, press WPS on the
 broadcast, then =ssh= to =192.168.1.1= and =mount_root=) settles it, and is written up
-in that plan's *Failsafe rehearsal*. Run it whenever — it must land before step 3.
+in that plan's *Failsafe rehearsal*. Run it whenever -- it must land before the swap.
