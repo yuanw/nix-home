@@ -142,6 +142,19 @@ the private input; if so, use the existing escape hatch
 
 * Step 4 — partition and install
 
+First, from the live ISO, confirm the device name and size (the config default
+is a guess until this runs):
+
+#+begin_src shell
+lsblk -o NAME,SIZE,MODEL,TYPE,FSTYPE,MOUNTPOINT
+free -h
+nproc
+#+end_src
+
+The internal disk is the ~250/500/1000 GB one: =sda= for the stock 2014
+Apple PCIe-AHCI SSD, =nvme0n1= if an NVMe was fitted. Pass it explicitly to
+disko, which overrides =disk-config.nix=:
+
 Preferred: drive it from another machine over SSH. Boot the ISO (root SSH is
 allowed, empty password), set one with =passwd=, then from the control box:
 
@@ -271,8 +284,9 @@ This part is not just a copy of dgx-spark; decide the role first:
 1. ~~=MacBookPro11,2= vs =11,3=~~ — resolved: both Iris Pro and GT 750M present,
    so =MacBookPro11,3= → =apple-macbook-pro-11-5=.
 2. ~~Hostname~~ — resolved: =silver=.
-3. Disk device for disko: =/dev/sda= is the 11,2 default but confirm with
-   =lsblk= from the installer; also decide disk/RAM sizing (root sizing, zram
-   vs swap partition, LUKS or plain ext4).
+3. Disk device for disko: run =lsblk -o NAME,SIZE,MODEL= on the live ISO
+   (Step 4) — =sda= is the 11,3 default but an aftermarket NVMe would be
+   =nvme0n1=. Sizing: 1G ESP + ext4 root at 100%; =zramSwap= covers swap at
+   8–16 GB RAM (add a swap partition only for 4 GB).
 4. Does =silver= take over caddy from misfit, or only gather/display
    telemetry alongside it?
