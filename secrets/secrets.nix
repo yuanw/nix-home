@@ -49,4 +49,9 @@ in
     yuanwang_ca
     dgx-spark
   ];
+  # PSK for the NoneAndVoid Wi-Fi, consumed by
+  # networking.networkmanager.ensureProfiles on silver. silver itself is added
+  # as a recipient after its first install; see docs/nixos-macbook-pro-plan.org
+  # Step 6 for the rekey commands.
+  "wifi.age".publicKeys = users ++ systems;
 }

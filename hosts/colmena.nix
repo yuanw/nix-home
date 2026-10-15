@@ -66,6 +66,15 @@ in
         nixpkgs.hostPlatform = "x86_64-linux";
       };
 
+    silver =
+      { ... }:
+      {
+        imports = [
+          ./silver
+        ];
+        nixpkgs.hostPlatform = "x86_64-linux";
+      };
+
     dgx-spark =
       { ... }:
       {

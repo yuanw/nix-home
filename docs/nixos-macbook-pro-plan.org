@@ -1,0 +1,274 @@
+#+TITLE: Repurpose the old Intel MacBook Pro as a NixOS host — plan
+#+DATE: 2026-10-14
+#+OPTIONS: toc:t
+
+* TL;DR
+
+Turn the old Intel MacBook Pro (the box =~/org/agenda/homelab.org= calls
+=x86_darin=) into a new NixOS host =silver= in this flake:
+
+  nixos-hardware =apple-macbook-pro-?= profile → disko GPT layout (ESP + ext4) →
+  colmena deploy (build on target) → caddy + telemetry.
+
+No new abstractions. It is a copy of the =dgx-spark= host shape with the
+Apple profile swapped in. The only genuinely Mac-specific work is picking the
+right model profile and the install medium; everything after that is the
+existing repo machinery.
+
+* Cross-references
+
+- Agenda: =~/org/agenda/homelab.org= line 119, *re-purpose x86_darin to nixos
+  for caddy and telemetry gathering and display*.
+- Host template: =hosts/dgx-spark/{default.nix,disk-config.nix,configuration.nix,readme.org}=.
+- Deploy: =just remote-build|remote-apply silver= (=justfile=) → =hosts/colmena.nix=.
+- Caddy: =modules/caddy.nix=. Telemetry: =modules/cockpit.nix=,
+  =modules/services/monitoring/pcp.nix=.
+- Upstream: [[https://github.com/NixOS/nixos-hardware/tree/master/apple/macbook-pro][nixos-hardware/apple/macbook-pro]].
+
+* Step 0 — identify the exact model (resolved: =MacBookPro11,3= → =apple-macbook-pro-11-5=)
+
+The box is a Retina 15" Mid 2014 with *both* an Intel Iris Pro and an NVIDIA
+GeForce GT 750M, which is =MacBookPro11,3= and takes the
+=apple-macbook-pro-11-5= profile (the dual-GPU 15" sibling; the Iris-Pro-only
+=11,2= would have taken =11-4=).
+
+#+begin_src shell
+# On the Mac, before erasing:
+system_profiler SPHardwareDataType | grep -E 'Model Identifier|Chip|Processor|Memory'
+# Also on the underside of the case: "MacBook Pro (15-inch, Mid 2014)"
+# and the storage device (drives the /dev/... name):
+diskutil list
+#+end_src
+
+Model identifier → the =nixos-hardware= module to import:
+
+| Apple model id                                                        | Marketing                 | module                             |
+|------------------------------------------------------------------------+---------------------------+------------------------------------|
+| MacBookPro8,1                                                          | Early 2011 13"            | =apple-macbook-pro-8-1=            |
+| MacBookPro10,1                                                         | Mid 2012 15" Retina       | =apple-macbook-pro-10-1=           |
+| MacBookPro11,1                                                         | Late 2013 13"             | =apple-macbook-pro-11-1=            |
+| MacBookPro11,2                                                         | Mid 2014 15" (Iris Pro)   | =apple-macbook-pro-11-4= (no own dir) |
+| MacBookPro11,3                                                         | Mid 2014 15" (+GT 750M)   | =apple-macbook-pro-11-5= (no own dir) |
+| MacBookPro11,4                                                         | Mid 2015 15"              | =apple-macbook-pro-11-4=           |
+| MacBookPro11,5                                                         | Mid 2015 15" (R9 M370X)   | =apple-macbook-pro-11-5=           |
+| MacBookPro12,1                                                         | Early 2015 13"            | =apple-macbook-pro-12-1=           |
+| MacBookPro14,1                                                         | 2017 13" (no Touch Bar)   | =apple-macbook-pro-14-1=           |
+| 8,2 / 8,3 / 10,2 / 14,2 / 14,3 (not in nixos-hardware)                | —                         | use generic =apple-macbook-pro=    |
+
+The intended target is a *Retina 15" Mid 2014*: either =MacBookPro11,2= (Intel
+Iris Pro only) or =MacBookPro11,3= (Iris Pro + NVIDIA GT 750M). Neither has its
+own directory. Pick by GPU:
+
+- =11,2 → apple-macbook-pro-11-4=. =11-4= is the Iris-Pro-only 15" and the best
+  fit: it imports =common/cpu/intel/haswell=, =common/pc/ssd=,
+  =broadcom-43xx.nix=, and sets =hardware.graphics.enable=.
+- =11,3 → apple-macbook-pro-11-5=. =11-5= is the dual-GPU 15" chassis sibling
+  (adds the XHC1 suspend-wakeup rule) but is *thinner* than =11-4=: it does not
+  import =haswell= or set =hardware.graphics.enable=, and gets Broadcom firmware
+  via =enableRedistributableFirmware=. Add those by hand if needed.
+- The CPUs are Haswell in both cases (Apple kept Haswell/Crystal Well in the
+  15" through Mid 2015), so =haswell= is right either way.
+
+Disambiguate before writing the host file:
+
+#+begin_src shell
+sysctl -n hw.model                                    # MacBookPro11,2 / 11,3
+system_profiler SPDisplaysDataType | grep -i chipset  # GT 750M present?
+#+end_src
+
+Record the chosen module name in the host =default.nix=; it is the one thing
+that must not be guessed.
+
+* Step 1 — repo shape (mirror dgx-spark, not the workstation stack)
+
+=hosts/dgx-spark= is the repo's purpose-built server pattern: a self-contained
+=configuration.nix= instead of the heavy personal =myModules.common/linux=
+stack (emacs, browsers, coding agents, home-manager). =silver= is a caddy +
+telemetry box, so it mirrors =dgx-spark=.
+
+New files (already created):
+
+- =hosts/silver/default.nix= — Apple profile, disko, =cockpit.nix=, =pcp.nix=,
+  the repo =packages= overlay, and the colmena =deployment= block.
+- =hosts/silver/disk-config.nix= — GPT: 1G ESP (vfat, =/boot=) + ext4 root.
+  =device= defaults to =/dev/sda= (11,2 PCIe AHCI SSD); verify with =lsblk=,
+  the =disko-install --disk main /dev/...= override wins anyway.
+- =hosts/silver/configuration.nix= — bootloader, =networkmanager=, user, SSH,
+  Avahi, Cockpit, PCP, zram.
+- =hosts/silver/hardware-configuration.nix= — placeholder; regenerate on the
+  target once installed.
+
+The =packages= overlay is load-bearing: =pkgs.pcp= was removed from upstream
+nixpkgs, and =packages/default.nix:274= re-adds it. A host that enables
+=services.pcp= without the overlay fails with ='pcp' has been removed=.
+
+Wiring (three places, all mechanical) is done:
+
+- =hosts/colmena.nix= gets a =silver= node.
+- =hosts/default.nix= gets the =withSystem "x86_64-linux"= block (copied from
+  =misfit=) and =packages.silver = self.nixosConfigurations.silver.config.system.build.toplevel=.
+
+=nix build .#silver= on the aarch64-darwin control box may pull the private
+input; use the documented escape hatch =--override-input nix-home-private
+path:$PWD/blank= (see =justfile=). Deploys build on the target
+
+(`buildOnTarget = true`) so the private input is fetched there with the
+forwarded ssh-agent.
+
+* Step 2 — build before touching the Mac
+
+#+begin_src shell
+nix build .#silver
+# optional, if nixos-anywhere VM test is convenient:
+# nix run github:nix-community/nixos-anywhere -- --flake .#silver --vm-test
+#+end_src
+
+Fix evaluation/build errors here. =nix build .#silver= on the Mac may pull
+the private input; if so, use the existing escape hatch
+=--override-input nix-home-private path:$PWD/blank= (see =justfile=). Build on
+=asche= instead if that is less painful.
+
+* Step 3 — install medium
+
+- NixOS installer ISO. The installer sets =hardware.enableAllHardware = true=,
+  which pulls in =hardware.enableRedistributableFirmware= → the Broadcom
+  (=brcmfmac=) firmware the Mac's Wi-Fi needs is on the ISO. Wi-Fi should work
+  from the live environment; still bring a USB-Ethernet adaptor as a fallback,
+  since WiFi can be flaky on these chips.
+- Write it with =dd= (the ISO is EFI-bootable, =isoImage.makeEfiBootable=).
+- Boot: hold *Option (⌥)* at the chime, pick *EFI Boot*. Intel Macs have no
+  Secure Boot, so there is nothing to disable in firmware.
+
+* Step 4 — partition and install
+
+Preferred: drive it from another machine over SSH. Boot the ISO (root SSH is
+allowed, empty password), set one with =passwd=, then from the control box:
+
+#+begin_src shell
+nix run github:nix-community/nixos-anywhere -- \
+  --flake .#silver --build-on remote root@<iso-ip>
+#+end_src
+
+=--build-on remote= builds on the target, so the private input is fetched there
+with the forwarded agent, the same model colmena uses. This runs the disko
+config, installs, and reboots.
+
+Fallback, entirely on the Mac from the live ISO (no second machine):
+
+#+begin_src shell
+sudo nix --extra-experimental-features "nix-command flakes" \
+  run github:nix-community/disko/latest#disko-install -- \
+  --flake .#silver --disk main /dev/sda
+#+end_src
+
+Verify the flag names against the versions actually used (=nixos-anywhere=
+renamed =--build-on-target= to =--build-on=; the kexec step can be surprising
+when the target is already the NixOS installer). If the flake fetch fights the
+private input, fall back to: partition with =disko --mode destroy,format,mount=,
+then =nixos-install=n with a locally overridden flake.
+
+* Step 5 — Apple hardware, what the profile already does
+
+=nixos-hardware= handles most of it; do not hand-roll these:
+
+- generic =apple-macbook-pro=: imports =common/cpu/intel= and =common/pc/laptop=,
+  and the apple base sets =services.mbpfan.enable= and =hardware.facetimehd.enable=
+  (the latter only with =allowUnfree=). =facetimehd= firmware is extracted from
+  macOS; if you also wipe the recovery partition this stops being possible.
+- =11-5= adds the XHC1 wakeup-disable udev rule (stops wake right after suspend).
+- =12-1= adds the Broadcom module, a =conservative= CPU governor, and unloading
+  =brcmfmac= around suspend.
+- SSD: the per-model profiles (=11-5=, =12-1=, …) import =common/pc/ssd= (fstrim).
+  The generic =apple-macbook-pro= does not — add =common/pc/ssd= yourself if Step 0
+  falls back to it.
+
+Handle directly in =configuration.nix=:
+
+#+begin_src nix
+boot.kernelParams = [ "hid_apple.swap_opt_cmd=1" ];  # Cmd <-> Alt like macOS
+# boot.kernelParams = [ "hid_apple.fnmode=2" ];      # if fn keys feel wrong
+#+end_src
+
+Also verify on first boot: suspend/resume, Wi-Fi reconnect, fan (mbpfan), and
+the camera. This is a dual-GPU =11,3=, so also check that the Intel Iris Pro
+drives the display and the GT 750M (Kepler/nouveau) is not causing hangs or
+random wakeups. There is no tested gmux=force-IGD recipe here; if nouveau
+misbehaves, blacklisting =nouveau= (or =nomodeset= as a last resort) is the
+escape hatch. Always boot with the charger attached the first time.
+
+* Step 6 — caddy + telemetry (the actual purpose)
+
+This part is not just a copy of dgx-spark; decide the role first:
+
+- =modules/caddy.nix= is written for *misfit*: it serves =localhost= services
+  there (jellyfin, home-assistant) and proxies =dgx-spark.lan= for cockpit.
+  Reusing it on =silver= needs a choice: does this box *take over* the caddy
+  role (then the vhosts and the ACME =security.acme= + agenix secrets move too),
+  or does it only add telemetry vhosts? Do not run one =yuanw.me= ACME host on
+  two boxes.
+- DNS floors this: =openwrt/routers/e8450.nix= sends every =*.yuanw.me= to
+  misfit, and nothing forwards WAN 443 → misfit. A caddy on =silver= is only
+  reachable on the LAN until that changes.
+- Telemetry display is already here: =modules/cockpit.nix= and
+  =modules/services/monitoring/pcp.nix= (as used by dgx-spark). Reuse them; no
+  new dashboard.
+- *Wi-Fi (done).* =secrets/wifi.age= holds =WIFI_PSK=...= and silver's
+  =networking.networkmanager.ensureProfiles= declares both =NoneAndVoid= and
+  =NoneAndVoid-5G=, substituting the PSK at activation. The secret is encrypted
+  to =users ++ systems=; silver is *not* a recipient yet, so the profile cannot
+  decrypt on its first boot. After the install (on ethernet/console):
+
+  #+begin_src shell
+  ssh silver cat /etc/ssh/ssh_host_ed25519_key.pub   # add as silver in secrets/secrets.nix
+  agenix -r                                          # re-encrypt all secrets
+  just remote-apply silver
+  #+end_src
+
+  With =silver= in =systems=, the PSK decrypts to =/run/agenix/wifi= and
+  NetworkManager joins the network on the next boot. Until then, first boot
+  needs the USB-Ethernet adaptor.
+
+- agenix generally: register the new host's SSH host key as a recipient before
+  deploying secrets, or the deploy will fail on decryption.
+
+* Step 7 — checklist
+
+- [ ] Model id recorded; profile chosen (Step 0)
+- [ ] Host files added; =hosts/{default.nix,colmena.nix}= wired; =nix build .#silver= green
+- [ ] macOS backup / macOS USB installer kept if it may ever return
+- [ ] ISO booted, installed, reboots into NixOS
+- [ ] Wi-Fi + suspend/resume + fan + camera verified
+- [ ] =just remote-apply silver= succeeds from the control box
+- [ ] Caddy/telemetry role decided and deployed
+- [ ] Agenda item closed
+
+* Risks / rollback
+
+- *Erasing macOS is irreversible* for practical purposes here. 2010+ Macs have
+  Internet Recovery, but keep a macOS installer USB if the machine might ever
+  go back. This is also the one-way step: NixOS itself disko-coerces the disk.
+- *Private flake input.* =nix-home-private= must be reachable on the target at
+  build time; =buildOnTarget = true= plus a forwarded ssh-agent is the repo's
+  answer. Expect a failed first deploy if the agent is not forwarded.
+- *Caddy cutover is a separate change.* Bringing up caddy on the new box while
+  misfit still serves the same names is the lockout class of mistake; do the
+  install and the caddy move as two deploys.
+- *Hardware risk* on 2011 dual-GPU machines (above). Not worth much effort.
+- *11,3 dual GPU.* The GT 750M has no good Linux story and the box is a server,
+  so it will run on the Iris Pro; the dGPU is expected to sit idle or be
+  blacklisted. Verify on first boot (Step 5).
+- *First-boot networking.* The Wi-Fi profile is declared but =-wifi.age=- is not
+  yet encrypted to =silver=, so it cannot decrypt on the first boot. Keep a
+  USB-Ethernet adaptor plugged in, add silver's host key (Step 6), =agenix -r=,
+  then the Wi-Fi profile takes over.
+
+* Open questions
+
+1. ~~=MacBookPro11,2= vs =11,3=~~ — resolved: both Iris Pro and GT 750M present,
+   so =MacBookPro11,3= → =apple-macbook-pro-11-5=.
+2. ~~Hostname~~ — resolved: =silver=.
+3. Disk device for disko: =/dev/sda= is the 11,2 default but confirm with
+   =lsblk= from the installer; also decide disk/RAM sizing (root sizing, zram
+   vs swap partition, LUKS or plain ext4).
+4. Does =silver= take over caddy from misfit, or only gather/display
+   telemetry alongside it?

@@ -101,6 +101,32 @@
           ];
         }
       );
+      silver = withSystem "x86_64-linux" (
+        {
+          config,
+          inputs',
+          system,
+          ...
+        }:
+        inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            isDarwin = false;
+            isNixOS = true;
+            packages = config.packages;
+            nurNoPkg = import inputs.nur {
+              nurpkgs = import inputs.nixpkgs { localSystem.system = system; };
+            };
+            inherit inputs inputs';
+          };
+          modules = [
+            {
+              nixpkgs.hostPlatform = system;
+            }
+            inputs.colmena.nixosModules.deploymentOptions
+            ./silver
+          ];
+        }
+      );
       dgx-spark = withSystem "aarch64-linux" (
         {
           config,
@@ -188,6 +214,7 @@
     {
       packages.asche = self.nixosConfigurations.asche.config.system.build.toplevel;
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
+      packages.silver = self.nixosConfigurations.silver.config.system.build.toplevel;
       packages.dgx-spark = self.nixosConfigurations.dgx-spark.config.system.build.toplevel;
       # darwinConfigurations.yuanw is disabled above; keep this in sync if you re-enable it.
       # packages.yuanw = self.darwinConfigurations.yuanw.system;
