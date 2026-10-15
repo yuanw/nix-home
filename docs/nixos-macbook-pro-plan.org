@@ -142,8 +142,13 @@ the private input; if so, use the existing escape hatch
 
 * Step 4 — partition and install
 
-First, from the live ISO, confirm the device name and size (the config default
-is a guess until this runs):
+=diskutil list= on the Mac shows the disk already held a macOS APFS container
+(+ its =Nix Store= volume) and an old Linux install — =sda1= macOS EFI,
+=sda2= macOS, =sda3= Linux ESP, =sda4=/=sda5= Linux filesystems. *This install
+wipes all of it.* New layout: 1G ESP + ext4 root at ~100% (~499G of 500G).
+
+First, from the live ISO, confirm the device name (the config default is a
+guess until this runs):
 
 #+begin_src shell
 lsblk -o NAME,SIZE,MODEL,TYPE,FSTYPE,MOUNTPOINT
@@ -261,9 +266,11 @@ This part is not just a copy of dgx-spark; decide the role first:
 
 * Risks / rollback
 
-- *Erasing macOS is irreversible* for practical purposes here. 2010+ Macs have
-  Internet Recovery, but keep a macOS installer USB if the machine might ever
-  go back. This is also the one-way step: NixOS itself disko-coerces the disk.
+- *Erasing the disk is irreversible.* The Mac currently dual-boots macOS and
+  an old Linux; the install wipes both plus the macOS =Nix Store= volume. 2010+
+  Macs have Internet Recovery, but back up anything you need and keep a macOS
+  installer USB if the machine might ever go back. NixOS itself disko-coerces
+  the disk.
 - *Private flake input.* =nix-home-private= must be reachable on the target at
   build time; =buildOnTarget = true= plus a forwarded ssh-agent is the repo's
   answer. Expect a failed first deploy if the agent is not forwarded.
@@ -284,9 +291,9 @@ This part is not just a copy of dgx-spark; decide the role first:
 1. ~~=MacBookPro11,2= vs =11,3=~~ — resolved: both Iris Pro and GT 750M present,
    so =MacBookPro11,3= → =apple-macbook-pro-11-5=.
 2. ~~Hostname~~ — resolved: =silver=.
-3. Disk device for disko: run =lsblk -o NAME,SIZE,MODEL= on the live ISO
-   (Step 4) — =sda= is the 11,3 default but an aftermarket NVMe would be
-   =nvme0n1=. Sizing: 1G ESP + ext4 root at 100%; =zramSwap= covers swap at
-   8–16 GB RAM (add a swap partition only for 4 GB).
+3. ~~Disk device for disko~~ — resolved: full wipe of the 500G internal disk,
+   =/dev/sda= (stock PCIe-AHCI SSD, confirm with =lsblk= on the ISO). 1G ESP +
+   ext4 root at 100%; =zramSwap= covers swap at 8–16 GB RAM (add a swap
+   partition only for 4 GB).
 4. Does =silver= take over caddy from misfit, or only gather/display
    telemetry alongside it?
