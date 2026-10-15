@@ -4,16 +4,38 @@
 
 * TL;DR
 
+Status: the host is *written and evaluating*; the Mac has *not* been installed
+yet. Remaining work is the physical install (Step 3/4), the host-key rekey for
+the Wi-Fi secret (Step 6), and the caddy-role decision (Step 6).
+
 Turn the old Intel MacBook Pro (the box =~/org/agenda/homelab.org= calls
 =x86_darin=) into a new NixOS host =silver= in this flake:
 
-  nixos-hardware =apple-macbook-pro-?= profile → disko GPT layout (ESP + ext4) →
-  colmena deploy (build on target) → caddy + telemetry.
+  nixos-hardware =apple-macbook-pro-11-5= profile → disko GPT layout (ESP +
+  ext4) → colmena deploy (build on target) → caddy + telemetry.
 
 No new abstractions. It is a copy of the =dgx-spark= host shape with the
 Apple profile swapped in. The only genuinely Mac-specific work is picking the
 right model profile and the install medium; everything after that is the
 existing repo machinery.
+
+* Implementation status
+
+Done and committed (=feat(silver): add NixOS host for the Mid-2014 MacBook Pro=):
+
+- =hosts/silver/{default,configuration,disk-config,hardware-configuration}.nix=
+  (profile, disko, Cockpit, PCP, zram, Wi-Fi)
+- wired into =hosts/default.nix= (=nixosConfigurations.silver=, =packages.silver=)
+  and =hosts/colmena.nix= (=silver= node)
+- =secrets/wifi.age= + the =wifi.age= rule in =secrets/secrets.nix=
+- =nix eval .#nixosConfigurations.silver…= and =.#colmenaHive.nodes.silver…=
+  both produce derivations
+
+Not done:
+
+- the physical install (Step 3/4) and the =agenix -r= rekey that lets Wi-Fi
+  decrypt on =silver= (Step 6)
+- the caddy role decision (Step 6, open question 4)
 
 * Cross-references
 
@@ -25,22 +47,14 @@ existing repo machinery.
   =modules/services/monitoring/pcp.nix=.
 - Upstream: [[https://github.com/NixOS/nixos-hardware/tree/master/apple/macbook-pro][nixos-hardware/apple/macbook-pro]].
 
-* Step 0 — identify the exact model (resolved: =MacBookPro11,3= → =apple-macbook-pro-11-5=)
+* Step 0 — identify the exact model (done: =MacBookPro11,3= → =apple-macbook-pro-11-5=)
 
-The box is a Retina 15" Mid 2014 with *both* an Intel Iris Pro and an NVIDIA
-GeForce GT 750M, which is =MacBookPro11,3= and takes the
-=apple-macbook-pro-11-5= profile (the dual-GPU 15" sibling; the Iris-Pro-only
-=11,2= would have taken =11-4=).
+The box is a Retina 15" Mid 2014, =MacBookPro11,3=: Intel Iris Pro *and* an
+NVIDIA GeForce GT 750M. It takes =apple-macbook-pro-11-5=, the dual-GPU 15"
+profile. (The Iris-Pro-only =11,2= would have taken =11-4=.) Neither has its
+own directory; see the mapping table below for the rest of the range.
 
-#+begin_src shell
-# On the Mac, before erasing:
-system_profiler SPHardwareDataType | grep -E 'Model Identifier|Chip|Processor|Memory'
-# Also on the underside of the case: "MacBook Pro (15-inch, Mid 2014)"
-# and the storage device (drives the /dev/... name):
-diskutil list
-#+end_src
-
-Model identifier → the =nixos-hardware= module to import:
+Mapping for the rest of the range (reference for the next machine):
 
 | Apple model id                                                        | Marketing                 | module                             |
 |------------------------------------------------------------------------+---------------------------+------------------------------------|
@@ -55,29 +69,16 @@ Model identifier → the =nixos-hardware= module to import:
 | MacBookPro14,1                                                         | 2017 13" (no Touch Bar)   | =apple-macbook-pro-14-1=           |
 | 8,2 / 8,3 / 10,2 / 14,2 / 14,3 (not in nixos-hardware)                | —                         | use generic =apple-macbook-pro=    |
 
-The intended target is a *Retina 15" Mid 2014*: either =MacBookPro11,2= (Intel
-Iris Pro only) or =MacBookPro11,3= (Iris Pro + NVIDIA GT 750M). Neither has its
-own directory. Pick by GPU:
-
 - =11,2 → apple-macbook-pro-11-4=. =11-4= is the Iris-Pro-only 15" and the best
   fit: it imports =common/cpu/intel/haswell=, =common/pc/ssd=,
   =broadcom-43xx.nix=, and sets =hardware.graphics.enable=.
-- =11,3 → apple-macbook-pro-11-5=. =11-5= is the dual-GPU 15" chassis sibling
-  (adds the XHC1 suspend-wakeup rule) but is *thinner* than =11-4=: it does not
-  import =haswell= or set =hardware.graphics.enable=, and gets Broadcom firmware
-  via =enableRedistributableFirmware=. Add those by hand if needed.
+- =11,3 → apple-macbook-pro-11-5= *(this machine)*. =11-5= is the dual-GPU 15"
+  chassis sibling (adds the XHC1 suspend-wakeup rule) but is *thinner* than
+  =11-4=: it does not import =haswell= or set =hardware.graphics.enable=, so
+  =hardware.graphics.enable = true= is set by hand in =configuration.nix=. It
+  gets Broadcom firmware via =enableRedistributableFirmware=.
 - The CPUs are Haswell in both cases (Apple kept Haswell/Crystal Well in the
   15" through Mid 2015), so =haswell= is right either way.
-
-Disambiguate before writing the host file:
-
-#+begin_src shell
-sysctl -n hw.model                                    # MacBookPro11,2 / 11,3
-system_profiler SPDisplaysDataType | grep -i chipset  # GT 750M present?
-#+end_src
-
-Record the chosen module name in the host =default.nix=; it is the one thing
-that must not be guessed.
 
 * Step 1 — repo shape (mirror dgx-spark, not the workstation stack)
 
@@ -91,8 +92,8 @@ New files (already created):
 - =hosts/silver/default.nix= — Apple profile, disko, =cockpit.nix=, =pcp.nix=,
   the repo =packages= overlay, and the colmena =deployment= block.
 - =hosts/silver/disk-config.nix= — GPT: 1G ESP (vfat, =/boot=) + ext4 root.
-  =device= defaults to =/dev/sda= (11,2 PCIe AHCI SSD); verify with =lsblk=,
-  the =disko-install --disk main /dev/...= override wins anyway.
+  =device= defaults to =/dev/sda= (11,3 internal PCIe AHCI SSD); verify with
+  =lsblk=, the =disko-install --disk main /dev/...= override wins anyway.
 - =hosts/silver/configuration.nix= — bootloader, =networkmanager=, user, SSH,
   Avahi, Cockpit, PCP, zram.
 - =hosts/silver/hardware-configuration.nix= — placeholder; regenerate on the
@@ -182,7 +183,8 @@ then =nixos-install=n with a locally overridden flake.
   The generic =apple-macbook-pro= does not — add =common/pc/ssd= yourself if Step 0
   falls back to it.
 
-Handle directly in =configuration.nix=:
+Handle directly in =configuration.nix= (optional, not currently set — the box
+is headless and the built-in keyboard is rarely used):
 
 #+begin_src nix
 boot.kernelParams = [ "hid_apple.swap_opt_cmd=1" ];  # Cmd <-> Alt like macOS
@@ -233,12 +235,14 @@ This part is not just a copy of dgx-spark; decide the role first:
 
 * Step 7 — checklist
 
-- [ ] Model id recorded; profile chosen (Step 0)
-- [ ] Host files added; =hosts/{default.nix,colmena.nix}= wired; =nix build .#silver= green
+- [X] Model id recorded; profile chosen (Step 0)
+- [X] Host files added; =hosts/{default.nix,colmena.nix}= wired; =nix eval .#silver= green
+- [X] Wi-Fi secret created and profiles declared (Step 6)
 - [ ] macOS backup / macOS USB installer kept if it may ever return
 - [ ] ISO booted, installed, reboots into NixOS
 - [ ] Wi-Fi + suspend/resume + fan + camera verified
 - [ ] =just remote-apply silver= succeeds from the control box
+- [ ] =agenix -r= after adding silver's host key
 - [ ] Caddy/telemetry role decided and deployed
 - [ ] Agenda item closed
 
