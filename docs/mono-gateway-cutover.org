@@ -4,12 +4,11 @@
 
 * Status
 
-Second draft, 2026-10-14. The design is settled and the staging config now exists:
-=hosts/mono-gateway/default.nix= attaches the =networking.*= and =services.*=
-below to upstream's =gateway-native= via =extendModules=. It is *not deployed* --
-the board still runs the pre-cutover generation on =10.0.0.2=, and activating it
-is the cutover, not a way to inspect it. Phase 5 is closed, so this is the next
-real milestone.
+Third draft, 2026-10-14. The design is settled, the staging config exists, and it
+is *activated* on the board (generation 15, =eth1= dark): the =networking.*= and
+=services.*= below attach to upstream's =gateway-native= via =extendModules=. It
+is staged, not cut over -- the WAN drop has not moved (=eth2= dark) and =eth1= is
+not on the house switch. Phase 5 is closed, so this is the next real milestone.
 
 Two efforts meet here: the board side is
 [[file:mono-gateway-build-plan.org][the build plan]], and the box being replaced is declared by the
@@ -100,7 +99,7 @@ house subnet. Do not cable =eth1= to the house LAN while the e8450 still owns
 | LAN | =br-lan= over =eth1=, static =192.168.1.1/24= |
 | Management | =eth0= static =10.0.0.2/24=, kept through staging |
 | DHCP/DNS | =services.dnsmasq= on =br-lan= only; lease range =.100-.249=, 12h; the two e8450 static leases; options 3 and 6 both =192.168.1.1= |
-| NAT/firewall | =networking.nat= (=eth2= external, =br-lan= internal) plus the NixOS firewall; DHCP-renew (UDP 68) allowed from WAN |
+| NAT/firewall | =networking.nat= (=eth2= external, =br-lan= internal) plus the NixOS firewall; DHCP-renew (UDP 68) from WAN, DHCP server (UDP 67) on =br-lan= |
 | IPv6 | *absent on purpose* (decision 5): no RA, no PD |
 | Kernel | two Phase-5 overlays ride in the same file (cmm ctnetlink ABI; short-circuit the IPsec SA notify) -- not part of the cutover |
 
@@ -137,10 +136,15 @@ discovering it during the swap.
 
 Three steps, each independently reversible.
 
-1. *Stage, don't swap.* Activate the config with =eth1= still unplugged from the
-   house. Prove DHCP, DNS, NAT and the firewall from a client plugged into
-   =eth1=; the house runs untouched on the e8450 and =just openwrt-diff= still
-   says the e8450 is as declared.
+1. *Stage, don't swap.* *Done 2026-10-14* (board generation 15): the config is
+   activated with =eth1= dark, and =eth0= keeps =10.0.0.2=, so management
+   survived. Verified end to end: a laptop on =eth1= gets a =.100-.249= lease, the
+   board pings it, =dnsmasq= serves on =br-lan=, the NAT/input rules are in place,
+   and the lab units are gone. One bug the client test caught and fixed: the
+   config never opened the DHCP *server* port, so the NixOS input policy dropped
+   udp/67 and dnsmasq never saw the DISCOVER -- now
+   ~interfaces."br-lan".allowedUDPPorts = [ 67 ]~. The house runs untouched on the
+   e8450 and =just openwrt-diff= still says the e8450 is as declared.
 2. *Swap.* Cable the ISP drop to =eth2=, plug =eth1= into the house switch, and
    demote the e8450 to a dumb AP with its DHCP/DNS/RA off -- all in one window,
    because the board and the e8450 cannot both hold =192.168.1.1=. Drop =eth0=
@@ -156,6 +160,10 @@ Three steps, each independently reversible.
    week before retiring the e8450's routing role.
 
 * Cutover runbook
+
+Staged 2026-10-14: board generation 15 is this config, =eth1= dark, management
+still =10.0.0.2=, with =dnsmasq=/NAT/firewall verified and a laptop on =eth1=
+holding a lease. What remains before the swap is the e8450 failsafe.
 
 Pre-swap, with nothing cabled to the house:
 

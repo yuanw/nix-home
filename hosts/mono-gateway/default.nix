@@ -2,15 +2,16 @@
   # Our layer on top of we-are-mono/nix's gateway-native config.
   #
   # This file is the board's *router* config: WAN on eth2, the LAN bridge on
-  # eth0+eth1, NAT, dnsmasq 1:1 with what the e8450 serves today. It is the
-  # cutover design of docs/mono-gateway-cutover.org turned into =networking.*= and
-  # =services.*=, and it replaces the lab scaffolding the earlier phases used.
+  # eth1 (eth0 stays the management link), NAT, dnsmasq 1:1 with what the e8450
+  # serves today. It is the cutover design of docs/mono-gateway-cutover.org
+  # turned into =networking.*= and =services.*=, and it replaces the lab
+  # scaffolding the earlier phases used.
   #
-  # Not deployed. Until the WAN drop is physically moved, eth2 has no carrier, and
-  # activating this also moves the board's address off 10.0.0.2 onto the LAN, so
-  # =just mono-gateway-redeploy= is the act of cutting over, not a way to look at
-  # the config. Stage it deliberately: serial or UART in hand, one interface at a
-  # time. The staging address below is what keeps the old management path alive.
+  # Staged 2026-10-14: activated on the board with eth1 unplugged.
+  # eth0 keeps 10.0.0.2/24 through activation, so the management path survives;
+  # eth2 has no carrier until the WAN drop is physically moved. The swap is then
+  # the physical act: WAN to eth2, eth1 into the house switch, and the e8450
+  # demoted to a dumb AP (docs/mono-gateway-cutover.org, *Cutover runbook*).
   #
   # IPv6 is deliberately absent (cutover decision 5: IPv4 first, PD second).
   # Today's e8450 does hand out RAs and a delegated /64, so this is a known
@@ -180,7 +181,13 @@
   # forwarding accepted between the bridge and the WAN. Ping stays allowed from
   # everywhere, where fw4 only allowed it from wan.
   networking.firewall = {
-    # Allow-DHCP-Renew. Without this the lease renews on .100 but never commits.
+    # Allow-DHCP-Renew: the WAN client's replies. Without this the lease renews
+    # on .100 but never commits.
     allowedUDPPorts = [ 68 ];
+    # DHCP server requests from LAN clients. NixOS's input policy drops udp/67
+    # unless it is opened, and without it dnsmasq never sees the DISCOVER (the
+    # first staging boot took no lease because of exactly this). Scoped to
+    # =br-lan= so the WAN side never runs a DHCP server.
+    interfaces."br-lan".allowedUDPPorts = [ 67 ];
   };
 }
