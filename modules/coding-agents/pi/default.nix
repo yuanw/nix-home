@@ -18,6 +18,7 @@ let
   piExtensionPackages = {
     custom-footer = ./extensions/custom-footer.ts;
     direnv = ./extensions/direnv.ts;
+    exit = ./extensions/exit.ts;
     notify = ./extensions/notify.ts;
     web-fetch = ./extensions/web-fetch.ts;
     cursor-agent = pkgs.pi-extensions.pi-cursor-agent;
@@ -139,6 +140,7 @@ in
     modules.pi.extensions = {
       notify.enable = lib.mkDefault true;
       custom-footer.enable = lib.mkDefault true;
+      exit.enable = lib.mkDefault true;
       slow-mode.enable = lib.mkDefault true;
       permission-gate.enable = lib.mkDefault true;
       interactive-shell.enable = lib.mkDefault true;
