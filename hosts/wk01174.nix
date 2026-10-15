@@ -146,6 +146,7 @@
     work = {
       enable = true;
       datadogMcp.enable = true;
+      slackMcp.enable = true;
       includeTrio = true;
       atlassianMcp.enable = true;
       atlassianMcp.readOnly = false;
