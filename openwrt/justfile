@@ -94,7 +94,22 @@ openwrt-apply:
         exit 0
     fi
 
-    ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz' || true
+    # Take the router's config backup and pull it off the box: /tmp is RAM, and this
+    # is the only copy of the drift git does not cover (authorized_keys, shadow,
+    # adguardhome.yaml, nftables.d, crontabs). It contains secrets, so it lands under
+    # a gitignored path and never gets committed. Best-effort: the apply continues.
+    ts=$(date +%Y%m%dT%H%M%S)
+    backup="$PWD/state/openwrt/backups/{{router}}-pre-apply-$ts.tar.gz"
+    mkdir -p "$(dirname "$backup")"
+    if ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz'; then
+        if ssh -n "$host" 'cat /tmp/pre-apply.tar.gz' > "$backup"; then
+            echo "pre-apply backup: $backup ($(wc -c <"$backup") bytes)"
+        else
+            echo 'warning: backup made on the router but not pulled off' >&2
+        fi
+    else
+        echo 'warning: sysupgrade -b failed; proceeding without a backup' >&2
+    fi
 
     # Arm the undo *before* the commit, and disarm it only if the router answers
     # afterwards. Both halves matter: armed after the commit it cannot cover a config
