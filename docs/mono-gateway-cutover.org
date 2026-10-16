@@ -42,7 +42,7 @@ the Mac:
 | DHCP     | dnsmasq; static IPv4 leases for the Mac (…212) and misfit (…190); dgx-spark by DUID only |
 | RA       | =ra server=, =managed-config + other-config= |
 | Firewall | fw4: zones =lan= (accept) / =wan= (reject in, =masq=), =lan -> wan=, plus DHCP-renew/ping/IGMP rules |
-| DNS      | dnsmasq on 192.168.1.1 |
+| DNS      | dnsmasq on 192.168.1.1, forwarding to AdGuardHome on localhost (adblocking + DoH) |
 
 Two facts that matter:
 
@@ -117,7 +117,7 @@ and 6 both =192.168.1.1=.
 | WAN DHCPv6 + PD | systemd-networkd ~DHCP=yes~ / =IPv6AcceptRA= | *the hard part* (see below) |
 | LAN static + bridge | =networking.bridges.br-lan= + =networking.interfaces= | |
 | DHCP server | =services.kea= or =services.dnsmasq= | dnsmasq matches today; kea is more declarative |
-| DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here |
+| DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here. The e8450 also runs **AdGuardHome** (adblocking/DoH) and the design has not decided where that lands -- see decision 7 |
 | RAs | systemd-networkd or radvd | must announce the delegated /64 |
 
 As built: WAN DHCPv4, NAT, firewall, DHCP and DNS are implemented and verified in
@@ -214,7 +214,7 @@ hand-edits on the e8450 during the swap.
 
 * Decisions
 
-The staging config settles 1--5; 6 is still open. Each is one line (or a few) in
+The staging config settles 1--5; 6 and 7 are open. Each is one line (or a few) in
 =hosts/mono-gateway/default.nix= and reversible by reverting that line.
 
 | # | Question | Settled as |
@@ -225,6 +225,7 @@ The staging config settles 1--5; 6 is still open. Each is one line (or a few) in
 | 4 | DHCP/DNS | dnsmasq 1:1 now; kea/resolved later |
 | 5 | IPv6 PD | deferred -- IPv4 first, IPv6 is a second cutover |
 | 6 | 10G SFP+ | *open* -- gated on the DAC; leave dark until it arrives |
+| 7 | AdGuardHome / adblocking | *open* -- the e8450 runs AdGuardHome plus a ~dnsmasq -> 127.0.0.1#5053/5054~ chain; the board hands out DNS =.1=, so the LAN loses adblocking unless it moves to the board -- or the board's dnsmasq forwards to an AdGuardHome that listens on the LAN, which today binds localhost only |
 
 * Prerequisites
 
