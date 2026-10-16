@@ -22,7 +22,21 @@
 # fix landed in the apply copy, so the diff was showing a clean run against state the
 # apply was not going to reload.
 router_host := "192.168.1.1"
-router := "e8450"
+# Overridable so the dumb-AP target reuses every recipe below unchanged:
+# OPENWRT_TARGET=e8450-ap just openwrt-diff (or the openwrt-ap-* wrappers).
+router := env("OPENWRT_TARGET", "e8450")
+
+# Cutover step 2: the same box as a dumb AP. e8450-ap.nix imports e8450.nix and
+# overrides only the router bits, so e8450.nix stays the router config the
+# back-out relies on.
+openwrt-ap-diff:
+    @OPENWRT_TARGET=e8450-ap just openwrt-diff
+
+openwrt-ap-apply:
+    @OPENWRT_TARGET=e8450-ap just openwrt-apply
+
+openwrt-ap-revert:
+    @OPENWRT_TARGET=e8450-ap just openwrt-revert
 
 # Both sides of the comparison get sorted, because a wipe-and-re-add moves the
 # sections it touches to the end of the file and an unsorted diff would call that a
