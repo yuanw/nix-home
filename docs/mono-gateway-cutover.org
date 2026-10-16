@@ -68,9 +68,19 @@ mapping:
 | =eth3=/=eth4= | 10G LAN/trunk | *blocked on the DAC*; leave down for now |
 | WiFi          | e8450 as dumb AP | board stays routing-only; AP uplinks a LAN port |
 
-The board's RJ45 order is not the same as the kernel names (the lab work found
-=eth0= is the third port from the left), so confirm the map by cable before the
-swap.
+The board's RJ45 order is not the same as the kernel names. The build plan's panel
+order, left to right, is =USB-C power | USB-C data | USB-C UART | eth1 | eth2 |
+eth0 | eth3 SFP+ | eth4 SFP+=, so the swap cabling is:
+
+- leftmost RJ45 = =eth1= -- house switch (LAN)
+- middle RJ45 = =eth2= -- ISP drop (WAN)
+- rightmost RJ45 = =eth0= -- this Mac / management
+
+Still owed, once at the board and before the swap: a one-time plug check. With the
+board up and everything else dark, plug a cable into one RJ45 at a time and read
+=ip -br link= (via the Mac's direct link, =ssh root@10.0.0.2=, or the UART console);
+only the documented interface should gain carrier. =eth0= already carries the Mac
+link, so start with =eth1=/=eth2=.
 
 * Addressing
 
