@@ -154,7 +154,9 @@ Three steps, each independently reversible.
 
    The e8450 half is an *OpenWrt-side apply*: =network=/=wireless= in
    =openwrt/routers/e8450.nix=, the lockout class in Phase 3 of the
-   [[file:openwrt-plan.org][OpenWrt plan]]. Settle failsafe before this step, not during it.
+   [[file:openwrt-plan.org][OpenWrt plan]]. Failsafe was retried on 2026-10-16 and is *not reachable* on this
+   unit (see that plan's *Failsafe rehearsal*), so the protection here is the uci
+   rollback watchdog: one plane per apply, physically present, serial cable in hand.
 3. *Settle.* Keep the e8450 powered and declared as the fallback router and AP.
    Rehearse =just mono-gateway-rollback= once, then leave both alone for a quiet
    week before retiring the e8450's routing role.
@@ -163,7 +165,9 @@ Three steps, each independently reversible.
 
 Staged 2026-10-14: board generation 15 is this config, =eth1= dark, management
 still =10.0.0.2=, with =dnsmasq=/NAT/firewall verified and a laptop on =eth1=
-holding a lease. What remains before the swap is the e8450 failsafe.
+holding a lease. The e8450 failsafe was then retried (2026-10-16) and is *not
+reachable* on this unit; the swap's e8450 half is protected by the uci rollback
+watchdog and physical presence, with a serial cable as the only true fallback.
 
 Pre-swap, with nothing cabled to the house:
 
@@ -252,8 +256,9 @@ Two things that are *not* required from that track, so it does not hold this one
 - The e8450 keeps its own config either way. Declaring it is what makes the rollback
   exact; it is not a prerequisite for anything the board does.
 
-The one real dependency, and the only item on that side's critical path: step 2 edits
-the e8450's =network= and =wireless=, and its failsafe has never been entered. The
-cable-free experiment (static IP on LAN1, =tcpdump= on UDP/4919, press WPS on the
-broadcast, then =ssh= to =192.168.1.1= and =mount_root=) settles it, and is written up
-in that plan's *Failsafe rehearsal*. Run it whenever -- it must land before the swap.
+The one real dependency on that side: step 2 edits the e8450's =network= and
+=wireless=, and its failsafe has never been entered. The cable-free experiment was run
+on 2026-10-16 and *does not work on this unit* (the UDP/4919 broadcast is lost while
+=lan1='s link is down for the whole window, and the WPS button never lands) -- see that
+plan's *Failsafe rehearsal*. Until serial is available, the swap leans on the uci
+rollback watchdog and being physically present.

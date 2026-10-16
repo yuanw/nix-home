@@ -35,8 +35,9 @@ NixOS* in =~/org/agenda/homelab.org=. How the two tracks interlock:
   you're back" into manual recovery.
 - *One apply is shared, and it is the dangerous one.* Cutover step 3 demotes the
   e8450 to a dumb AP and switches its DHCP/RA off — a =network=/=wireless= change of
-  exactly the lockout class in Phase 3. Settle failsafe before that step (the
-  UDP/4919 =tcpdump= experiment in *Failsafe rehearsal* is free and needs no cable).
+  exactly the lockout class in Phase 3. Failsafe was retried on 2026-10-16 and is
+  *not reachable* on this unit (see *Failsafe rehearsal*); the watchdog is the
+  protection, and serial is the only real recovery path.
 - *Phase 4 stays deferred.* The cutover needs no =opkg=, no =sysupgrade=, no
   imagebuilder. Building it "because the router is changing anyway" solves a
   different box's lifecycle problem.
@@ -441,11 +442,11 @@ anything touching `network`.
 
 *Safety, in the order that matters:*
 
-- **The button failsafe is unproven and should be treated as unavailable.** It was
-  rehearsed about seven times on 2026-10-11 and never entered failsafe once; details
-  and the three ways to settle it are in *Failsafe rehearsal* below. Serial is the
-  option that also covers the device's known unbrick failure mode. =/tmp= is RAM:
-  =sysupgrade -b= must be =scp='d off the router to count as a backup.
+- **The button failsafe is unavailable on this unit.** Rehearsed ~7× on 2026-10-11 and
+  retried on 2026-10-16 with root SSH and a real UDP listener: neither the WPS button nor
+  the UDP/4919 broadcast lands (details in *Failsafe rehearsal*). Serial is the option
+  that also covers the device's known unbrick failure mode. =/tmp= is RAM: =sysupgrade
+  -b= must be =scp='d off the router to count as a backup.
 - first apply must be a no-op — translate exactly what is there, get an empty
   =openwrt-diff=, and change nothing. Risk starts with the first real change, not with
   declaring.
@@ -532,21 +533,56 @@ So: failsafe is *plausible*, not broken, and not yet proven. The earlier
   off, so no serial console is needed to *use* it — a static =192.168.1.10= on the laptop
   and =ssh -oRSAMinSize=1024 root@192.168.1.1= is enough, then =mount_root=. Serial is
   only needed to watch preinit or to unbrick the bootloader, not to recover config.
-- **there is a timing oracle.** During the 4s window (24.10+) the box broadcasts
-  =Please press button now to enter failsafe= to =192.168.1.255:4919=. =tcpdump -Ani <lan>
-  port 4919 and udp= makes the window visible from the laptop, so the press no longer has
-  to be guessed from LED blink patterns. This is what the ~7 blind attempts lacked, and
-  it also distinguishes "no broadcast" (preinit never got there) from "broadcast but no
-  press registered" (the button/hotplug half).
+- **there *should* be a timing oracle.** During the 4s window (24.10+) the box
+  broadcasts =Please press button now to enter failsafe= to =192.168.1.255:4919=.
+  =tcpdump -Ani <lan> port 4919 and udp= makes the window visible from the laptop, so
+  the press no longer has to be guessed from LED blink patterns. *Retried 2026-10-16
+  with a root SSH login and an unprivileged UDP listener: the broadcast exists but never
+  reaches the wire — =lan1='s link is down for the whole window. See the dated
+  subsection below.*
 
 To settle it (no cable): LAN1 wired, laptop static at =192.168.1.10=, =tcpdump= on the
 UDP/4919 broadcast, reboot the router, press WPS the moment the packet appears, then
 =ssh= to =192.168.1.1= (clear the stale known_hosts entry first — the failsafe host key
-differs), =mount_root=, fix, =reboot=. =failsafe=1= on the kernel cmdline (more
-=fw_setenv= on a board with the OKD history) and serial are the fallbacks.
+differs), =mount_root=, fix, =reboot=. *This paragraph is the 2026-10-16 attempt, and it
+does not work on this unit* — the broadcast is dropped before it reaches the wire and the
+button never lands. =failsafe=1= on the kernel cmdline (more =fw_setenv= on a board with
+the OKD history) and serial are the fallbacks; serial also covers the unbrick case.
 
 Until one of those is done, treat the watchdog as the only measured protection: one
 plane per apply, and be present.
+
+**** 2026-10-16: retried with root SSH + a real listener; both routes fail
+
+The cable-free route above was retried properly, with none of the earlier blind spots:
+root SSH from asche to the e8450, asche wired to the physical **lan1** port, its NixOS
+firewall opened for UDP/4919, and a real UDP listener (not =tcpdump=) bound on 4919.
+It failed, for a reason that also explains the button's seven misses.
+
+- **The timing oracle cannot work.** Preinit really does broadcast "Please press button
+  now to enter failsafe" to =192.168.1.255:4919= on raw =lan1=, but =lan1='s PHY link is
+  still down for the whole 4s window and only returns afterwards:
+
+  #+begin_example
+  05:39:31 carrier=0   # reboot
+  05:39:37 carrier=0   # ← the 4s window; frames are dropped here
+  05:39:42 carrier=1   # link returns, window already closed
+  #+end_example
+
+  A manual =netmsg 192.168.1.255= arrives fine once the link is up, which is why the
+  probe-loop test looked promising while the actual boot never delivered.
+
+- **The WPS button still does not enter failsafe.** It is genuinely wired:
+  =/proc/device-tree/gpio-keys/wps= has =gpios= (12 B) and =linux,code= (4 B),
+  =gpio_button_hotplug= loads at 3.7 s, and =/etc/hotplug-preinit.json= routes
+  ~SUBSYSTEM=button~ to =/etc/rc.button/failsafe= (which writes =/tmp/failsafe_button=).
+  A single press, and then one press a second for ~20 s across the window, both booted
+  normally (=hostname OpenWrt=, no =/tmp/failsafe=).
+
+So the no-cable route is closed on this unit. The remaining ways are serial (also the
+device's only real unbrick path) and =failsafe=1= via =fw_setenv= (rejected here: a bad
+=bootargs= on a box with no serial needs TFTP recovery). Treat failsafe as
+*unavailable*, and the watchdog as the only measured protection.
 
 ** Phase 4 — deferred, do not build yet
 
