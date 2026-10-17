@@ -4,11 +4,14 @@
 
 * Status
 
-Third draft, 2026-10-14. The design is settled, the staging config exists, and it
-is *activated* on the board (generation 15, =eth1= dark): the =networking.*= and
-=services.*= below attach to upstream's =gateway-native= via =extendModules=. It
-is staged, not cut over -- the WAN drop has not moved (=eth2= dark) and =eth1= is
-not on the house switch. Phase 5 is closed, so this is the next real milestone.
+*Cut over 2026-10-17.* The board is the house router (generation 17: WAN =eth2=
+with the ISP lease, =br-lan= =192.168.1.1= over =eth1= + =eth0=, NAT and dnsmasq
+serving), and the e8450 is a dumb AP at =192.168.1.2=. What follows is still the
+design that got us here, with the window's findings folded in.
+
+Before that: the staging config was activated on generation 15 with =eth1= dark,
+and the =networking.*= and =services.*= below attach to upstream's
+=gateway-native= via =extendModules=. Phase 5 is closed.
 
 Two efforts meet here: the board side is
 [[file:mono-gateway-build-plan.org][the build plan]], and the box being replaced is declared by the
@@ -130,7 +133,7 @@ and 6 both =192.168.1.1=.
 | WAN DHCPv6 + PD | systemd-networkd ~DHCP=yes~ / =IPv6AcceptRA= | *the hard part* (see below) |
 | LAN static + bridge | =networking.bridges.br-lan= + =networking.interfaces= | |
 | DHCP server | =services.kea= or =services.dnsmasq= | dnsmasq matches today; kea is more declarative |
-| DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here. The e8450 also runs **AdGuardHome** (adblocking/DoH) and the design has not decided where that lands -- see decision 7 |
+| DNS | =services.resolved= (agenda) or dnsmasq/unbound | agenda says resolved DNS; MagicDNS also lives here. The e8450 also runs **AdGuardHome** (adblocking/DoH) and the design has not decided where that lands -- see decision 7. *As built:* dnsmasq answers =192.168.1.1:53= and forwards to the ISP resolver; the rule that makes that reachable at all is in *The input-rule gap the swap exposed* |
 | RAs | systemd-networkd or radvd | must announce the delegated /64 |
 
 As built: WAN DHCPv4, NAT, firewall, DHCP and DNS are implemented and verified in
@@ -170,6 +173,10 @@ Three steps, each independently reversible.
    [[file:openwrt-plan.org][OpenWrt plan]]. Failsafe was retried on 2026-10-16 and is *not reachable* on this
    unit (see that plan's *Failsafe rehearsal*), so the protection here is the uci
    rollback watchdog: one plane per apply, physically present, serial cable in hand.
+   *Done 2026-10-17*, second attempt: apply -> ISP drop to =eth2= -> =eth1= to the
+   house switch -> redeploy the fold, and the board took =.1= without the watchdog
+   firing. The first attempt went differently -- see the watchdog note below and
+   *The input-rule gap the swap exposed*.
    (2026-10-17: that watchdog was itself a no-op until that day's fix in
    =openwrt/justfile= -- =ssh -n= landed a 0-byte script and the guard's =pgrep=
    matched its own wrapper. The first AP apply proved it: box left at =.2=, no
@@ -222,7 +229,8 @@ Checks with =eth1= dark (serial, or =ssh root@10.0.0.2=): =ip -br addr= shows
 forward and the =masquerade= rule; a laptop on =eth1= gets a =.100-.249= lease
 with gateway and DNS =192.168.1.1=, and reaches the board.
 
-Swap, in one window:
+Swap, in one window (*done 2026-10-17*; =mono-gateway-host= is now
+=192.168.1.1= by default, since the staging =10.0.0.2= died with the fold):
 
 #+begin_src bash
 # on the e8450: apply the dumb-AP config (DHCP/DNS/RA off), then cable the
@@ -281,6 +289,26 @@ The staging config settles 1--5; 6 and 7 are open. Each is one line (or a few) i
 | 5 | IPv6 PD | deferred -- IPv4 first, IPv6 is a second cutover |
 | 6 | 10G SFP+ | *open* -- gated on the DAC; leave dark until it arrives |
 | 7 | AdGuardHome / adblocking | *open* -- the e8450 runs AdGuardHome plus a ~dnsmasq -> 127.0.0.1#5053/5054~ chain; the board hands out DNS =.1=, so the LAN loses adblocking unless it moves to the board -- or the board's dnsmasq forwards to an AdGuardHome that listens on the LAN, which today binds localhost only |
+
+**The input-rule gap the swap exposed.** The e8450 never needed a rule opening port
+53, and that is easy to miss when copying its behaviour: fw4's =lan= zone is
+=input ACCEPT=, and =https-dns-proxy= with =force_dns=1= installs
+~udp dport 53 redirect to :53~ plus the ~5053 notrack~ pair, so every LAN query was
+hijacked to the box's own resolver whether or not the client asked for it. NixOS's
+firewall is the inverse -- =policy drop= plus an explicit allow list -- so
+*nothing* reaches dnsmasq unless told. After the swap the house routed, NATed and
+served leases while resolving nothing, which from a sofa looks like dead internet.
+The fix is scoped to =br-lan= in =hosts/mono-gateway/default.nix=:
+
+#+begin_src nix
+interfaces."br-lan".allowedUDPPorts = [ 67 53 ];   # 67 opened on 10-14, 53 was missed
+interfaces."br-lan".allowedTCPPorts = [ 53 ];      # answers over 512 bytes
+#+end_src
+
+The e8450's ~force_dns~ redirect is *not* reproduced. A client that hardcodes
+1.1.1.1 or 8.8.8.8 can now bypass the board, and decision 7 is what decides
+whether that matters: if AdGuardHome lands on the board and owns resolution,
+a redirect is the only way to make it apply to every client.
 
 * Prerequisites
 
