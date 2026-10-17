@@ -21,10 +21,14 @@
 # openwrt-apply. Keeping two copies of that block is how the reload bug survived: the
 # fix landed in the apply copy, so the diff was showing a clean run against state the
 # apply was not going to reload.
-router_host := "192.168.1.1"
 # Overridable so the dumb-AP target reuses every recipe below unchanged:
 # OPENWRT_TARGET=e8450-ap just openwrt-diff (or the openwrt-ap-* wrappers).
 router := env("OPENWRT_TARGET", "e8450")
+# Cutover: after the dumb-AP apply the e8450 lives at 192.168.1.2 (the board takes
+# .1), so the rollback that side is `OPENWRT_ROUTER_HOST=192.168.1.2 just
+# openwrt-apply` -- the default target is the router declaration, which restores its
+# role at .1. Post-swap .1 is the board, and uci revert cannot undo a committed apply.
+router_host := env("OPENWRT_ROUTER_HOST", "192.168.1.1")
 
 # Cutover step 2: the same box as a dumb AP. e8450-ap.nix imports e8450.nix and
 # overrides only the router bits, so e8450.nix stays the router config the
@@ -123,16 +127,21 @@ openwrt-apply:
         esac
     done
     if [ -n "$risky" ] || [ -n "${OPENWRT_FORCE_ROLLBACK:-}" ]; then
-        ssh -n "$host" 'cat > /tmp/rollback.sh' < "$PWD/openwrt/rollback.sh"
+        # NOT ssh -n here: -n forces stdin from /dev/null and lands a 0-byte script --
+        # exactly the silent no-op the 2026-10-17 run armed.
+        ssh "$host" 'cat > /tmp/rollback.sh' < "$PWD/openwrt/rollback.sh"
         # setsid, not nohup: busybox has no nohup. Disarm is deleting the marker file,
         # which the script checks after its sleep -- busybox setsid forks, so a recorded
-        # PID would not reliably point at the thing we want to stop.
+        # PID would not reliably point at the thing we want to stop. The guard checks
+        # the landed bytes and an *anchored* pgrep: unanchored it matches this very
+        # sh -c cmdline and always passes.
         ssh -n "$host" '
+            [ -s /tmp/rollback.sh ] || exit 1
             tar cf /etc/rollback.tar -C /etc/config . || exit 1
             touch /tmp/rollback.armed
             setsid sh /tmp/rollback.sh >/dev/null 2>&1 </dev/null &
             sleep 1
-            pgrep -f rollback.sh >/dev/null || exit 1'
+            pgrep -f "^sh /tmp/rollback.sh\$" >/dev/null || exit 1'
         echo 'rollback armed: restores /etc/config ~90s from now unless disarmed'
     fi
 
@@ -174,7 +183,7 @@ openwrt-apply:
         esac
         if ! ssh -n "$host" "[ -x /etc/init.d/$svc ]" 2>/dev/null; then
             echo "NOT reloaded $cfg: no /etc/init.d/$svc"
-        elif ssh -n "$host" "/etc/init.d/$svc reload" >/dev/null 2>&1; then
+        elif ssh -n -o ServerAliveInterval=15 -o ServerAliveCountMax=4 "$host" "/etc/init.d/$svc reload" >/dev/null 2>&1; then
             echo "reloaded $svc (for $cfg)"
         else
             # A reload that drops the session exits non-zero and is fine; the poll below
@@ -183,16 +192,24 @@ openwrt-apply:
         fi
     done
 
-    if ssh -n "$host" 'echo router answers' >/dev/null 2>&1; then
-        ssh -n "$host" 'rm -f /tmp/rollback.armed /tmp/rollback.sh /etc/rollback.tar'
+    # The dumb-AP apply moves the box off router_host (network.lan.ipaddr is in the
+    # batch), so poll, disarm and verify at the address it declared, not the one it
+    # left. Keepalives on every post-commit ssh: a reload that drops the session must
+    # fail in ~60s, not hang the recipe open on a dead connection.
+    keep="-o ServerAliveInterval=15 -o ServerAliveCountMax=4"
+    apip=$(printf '%s\n' "$batch" | sed -n "s/^set network\.lan\.ipaddr='\([0-9.]*\)'.*$/\1/p")
+    pollhost="$host"
+    if [ -n "$apip" ]; then pollhost="root@$apip"; fi
+    if ssh -n $keep "$pollhost" 'echo router answers' >/dev/null 2>&1; then
+        ssh -n $keep "$pollhost" 'rm -f /tmp/rollback.armed /tmp/rollback.sh /etc/rollback.tar'
         echo 'rollback disarmed, apply stands'
     else
-        echo 'no answer from the router; the armed rollback restores /etc/config in ~90s' >&2
+        echo "no answer from $pollhost; the armed rollback restores /etc/config in ~90s" >&2
         exit 1
     fi
-    ssh -n "$host" 'sync'
+    ssh -n $keep "$pollhost" 'sync'
     echo '--- verifying: the diff should come back clean'
-    just openwrt-diff
+    if [ -n "$apip" ]; then OPENWRT_ROUTER_HOST="$apip" just openwrt-diff; else just openwrt-diff; fi
 
 # discard staged-but-uncommitted changes in the configs we declare, and nothing
 # else (the router had an unrelated `dhcp` delta that is not ours to undo).

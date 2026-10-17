@@ -38,6 +38,15 @@ NixOS* in =~/org/agenda/homelab.org=. How the two tracks interlock:
   exactly the lockout class in Phase 3. Failsafe was retried on 2026-10-16 and is
   *not reachable* on this unit (see *Failsafe rehearsal*); the watchdog is the
   protection, and serial is the only real recovery path.
+  2026-10-17 correction: that protection did not exist until that day. The arm
+  step was =ssh -n ... 'cat > /tmp/rollback.sh'= -- and =ssh -n= forces stdin
+  from =/dev/null=, so a *0-byte* script landed, the 90s timer never waited, and
+  the guard's =pgrep= matched only its own wrapper cmdline. Proven by the first
+  dumb-AP apply (2026-10-17), which left the e8450 at =192.168.1.2= with no
+  watchdog running; recovered by hand from the box's own =/etc/rollback.tar=.
+  =openwrt/justfile= now lands the script without =-n=, guards on a non-empty
+  anchored file, and puts keepalives plus the *declared* post-apply address
+  (=network.lan.ipaddr=) on every post-commit ssh.
 - *Phase 4 stays deferred.* The cutover needs no =opkg=, no =sysupgrade=, no
   imagebuilder. Building it "because the router is changing anyway" solves a
   different box's lifecycle problem.
