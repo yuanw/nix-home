@@ -248,18 +248,19 @@
         # lists, so anything added in the UI would vanish on the next rebuild.
         # These ids are ours; don't let the UI reuse them. Nothing to migrate --
         # the e8450's AGH never sat in a DNS path.
+        #
+        # shortcut: AdGuard Home 0.107.71 silently refuses the AdAway list
+        # (filter_2.txt): declared in nix it downloads id=1 and never touches
+        # id=2, and the same URL set enabled through the API is stored back as
+        # enabled: false with 0 rules. One list for now; add the second when
+        # 0.107.x's filter handling is known to accept it (it is not the URL --
+        # curl on the board fetches it fine, 200/243 KB).
         filters = [
           {
             enabled = true;
             id = 1;
             name = "AdGuard DNS filter";
             url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
-          }
-          {
-            enabled = true;
-            id = 2;
-            name = "AdAway Default Blocklist";
-            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
           }
         ];
         cache_size = 4194304;

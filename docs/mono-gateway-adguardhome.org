@@ -602,29 +602,24 @@ because it is what the query log shows.
             name = "AdGuard DNS filter";
             url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
           }
-          {
-            enabled = true;
-            id = 2;
-            name = "AdAway Default Blocklist";
-            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
-          }
         ];
 #+end_src
 
-Two lists, not five. And not =blocked_services= for tiktok/9gag/the rest the old
-AWS config dreamed about — that is a bigger and separately reversible decision.
-The only feedback loop is the query log, so the first cut wants the smallest rule
-set that proves the plumbing.
+Two lists were intended; only the first one loads, so id 2 is not declared any
+more (*Phase 3 as run*). Its id stays reserved rather than being recycled. And not
+=blocked_services= for tiktok/9gag/the rest the old AWS config dreamed about —
+that is a bigger and separately reversible decision. The only feedback loop is the
+query log, so the first cut wants the smallest rule set that proves the plumbing.
 
-*What those two lists are* (measured today, not folklore):
+*What the two lists are* (measured today, not folklore):
 
 | List | Size | Notes |
-|------+------|-------|
-| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | and it is the house precedent — the commented example in =modules/adguard.nix= |
-| filter_2, AdAway Default Blocklist | 10,596 lines | Android-leaning, overlaps filter_1 heavily |
+|------+------+-------|
+| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | loaded, 185,868 of them. The house precedent — the commented example in =modules/adguard.nix= |
+| filter_2, AdAway Default Blocklist | 10,596 lines / 243 KB | *will not load on 0.107.71*, though curl fetches it fine |
 
-~195k rules costs roughly 100-200 MB resident against ~7 GB free (2.0), so this is
-a measure-once item, not a risk:
+185,868 rules cost 40 MB resident against ~7 GB free (2.0) — a fifth of the
+100-200 MB this file expected, so this is a measure-once item, not a risk:
 
 #+begin_src bash
 ssh root@192.168.1.1 'systemctl show adguardhome -p MemoryCurrent --value'
@@ -770,6 +765,41 @@ not make the house's DNS private while dnsmasq still has a plaintext fallback,
 and an nft redirect is only meaningful once that fallback is gone — so the order
 that actually moves things is **4, then 1, then 3**. Doing 1 first buys encrypted
 upstreams on half the traffic and a false sense of having fixed it.
+
+*Two corrections from the Phase-3 run.* First, that ordering assumed a leak; the
+leak was measured and is not there. 12/12 unique cache-missed names from a client
+reached AGH and its ~/etc/resolv.conf~ resolvers answered none of them, so
+"dnsmasq is still leaking to the ISP" is only true when =127.0.0.1#5354= *refuses*
+— the gen-21 case. Decision 4 is therefore about guaranteeing filtering during an
+AGH outage, not about stopping a leak that is happening. Second, decision 1 is
+already half-made, by someone else: see the next section.
+
+** Decision 1 has been made for you, by =94.140.14.14=
+
+=94.140.14.14= is not a plain recursive resolver — it is AdGuard's own *filtering*
+service. Measured 2026-10-17, before this file had any filters declared:
+
+#+begin_src bash
+dig +short doubleclick.net     @94.140.14.14   # -> 0.0.0.0
+dig +short google-analytics.com @94.140.14.14  # -> 0.0.0.0
+dig +short google-analytics.com @1.1.1.1       # -> 142.250.73.68 (real)
+#+end_src
+
+So three things this plan said need restating:
+
+- *The house was never unfiltered.* It has been ad-blocked server-side by AdGuard's
+  DNS since decision 1 shipped, silently, with no declarative trace and no rule
+  list anyone chose. Phase 3 is *less* mystery and *more* determinism than what it
+  replaces, not more blocking.
+- *=upstream_dns= currently pairs a blocking resolver with an unfiltered one under
+  =load_balance= (confirmed in the =journalctl= startup line). For any name not in
+  our own list, the answer depends on which one answers first. That is an
+  accidental policy, not a design.
+- *The DoH question should be asked against a non-blocking resolver.* Swapping to
+  =https://dns.cloudflare.com/dns-query= (or quad9/nextdns, unfiltered) is the
+  version of decision 1 that keeps the semantics and drops the plaintext; keeping
+  an AdGuard DoH endpoint would just relocate the same undeclared server-side
+  filtering into TLS.
 
 For 4 the cheap half is: stop feeding dnsmasq the ISP's resolvers and give it
 nothing but AGH (=no-resolv = true= in the same =settings= block that already
