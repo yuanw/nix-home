@@ -31,15 +31,18 @@
         '';
       };
 
-      # LAN-only names.  dnsmasq sends *every* *.yuanw.me to misfit
-      # (openwrt/routers/e8450.nix), so these just need a vhost here; no DNS
-      # change.  Nothing forwards WAN 443 -> misfit, so they stay LAN-only.
+      # LAN-only names. The board's dnsmasq sends *every* *.yuanw.me to misfit
+      # (hosts/mono-gateway/default.nix -- the override moved here from the e8450 at
+      # the swap), so these just need a vhost here; no DNS change.
       # If that ever changes, gate these: a router admin UI, a Cockpit root
       # shell, and an unauthenticated inference API must not be internet-facing.
       "openwrt.yuanw.me" = {
         useACMEHost = "yuanw.me";
+        # The e8450, which is the AP now: it gave up .1 to the Mono board at the
+        # swap and answers LuCI on .2. Hardcoding .1 here would proxy to the
+        # gateway's sshd instead, which is both wrong and silently useless.
         extraConfig = ''
-          reverse_proxy http://192.168.1.1
+          reverse_proxy http://192.168.1.2
         '';
       };
 

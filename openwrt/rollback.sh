@@ -11,7 +11,7 @@
 # sleep is. If the router reboots, /tmp is RAM, so both the script and the marker are
 # gone and nothing fires -- this is not a boot-time rollback. A box with 31 days of
 # uptime is far more likely to get an unreachable LAN than to lose power mid-apply,
-# and state/openwrt/e8450/live is the manual path back for that.
+# and openwrt/state/e8450/live is the manual path back for that.
 
 sleep 90
 
@@ -19,6 +19,6 @@ sleep 90
 
 tar xf /etc/rollback.tar -C /etc/config/ 2>/dev/null
 for s in network firewall dnsmasq; do
-	[ -x /etc/init.d/$s ] && /etc/init.d/$s reload 2>/dev/null
+  [ -x /etc/init.d/$s ] && /etc/init.d/$s reload 2>/dev/null
 done
 sync

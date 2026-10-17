@@ -1,15 +1,21 @@
 {
   # Our layer on top of we-are-mono/nix's gateway-native config.
   #
-  # Upstream's configurations/gateway.nix imports hardware/networking/ask-offload
-  # and deliberately leaves interfaces unconfigured -- with no interface declared,
-  # NixOS enables DHCP on all of them. That is fine on a real LAN and useless on
-  # the direct link this board is currently cabled to, where it falls back to
-  # 169.254/16 and the board is unreachable after a reboot.
+  # This file is the board's *router* config: WAN on eth2, the LAN bridge on
+  # eth1 (eth0 stays the management link), NAT, dnsmasq 1:1 with what the e8450
+  # serves today. It is the cutover design of docs/mono-gateway-cutover.org
+  # turned into =networking.*= and =services.*=, and it replaces the lab
+  # scaffolding the earlier phases used.
   #
-  # This file is also the home for the root SSH key: upstream keeps the list empty
-  # and comments that it is "managed manually on the device". Hand-editing
-  # /root/.ssh/authorized_keys does not survive a rebuild, so put the key here.
+  # Staged 2026-10-14: activated on the board with eth1 unplugged.
+  # eth0 keeps 10.0.0.2/24 through activation, so the management path survives;
+  # eth2 has no carrier until the WAN drop is physically moved. The swap is then
+  # the physical act: WAN to eth2, eth1 into the house switch, and the e8450
+  # demoted to a dumb AP (docs/mono-gateway-cutover.org, *Cutover runbook*).
+  #
+  # IPv6 is deliberately absent (cutover decision 5: IPv4 first, PD second).
+  # Today's e8450 does hand out RAs and a delegated /64, so this is a known
+  # regression for one cutover window, not an oversight.
 
   # --- Phase 5.6 fix: stop cmm crash-looping on the ctnetlink ABI ---
   # cmm was failing on every boot with:
@@ -76,154 +82,166 @@
     })
   ];
 
-  # --- LAN ---
-  # Point-to-point with the development Mac (10.0.0.1), no gateway on this link.
-  # eth0 is the third RJ-45 from the left -- see Phase 3 of the build plan.
+  # Nothing here asks for DHCP, so declare it per interface. Without this line
+  # NixOS enables DHCP on every interface that is unconfigured, which on this box
+  # means the SFP+ ports and the lab links.
   networking.useDHCP = false;
-  networking.interfaces.eth0 = {
-    ipv4.addresses = [
-      {
-        address = "10.0.0.2";
-        prefixLength = 24;
-      }
-    ];
+
+  # --- WAN (cutover decision 2) ---
+  # eth2. The board's physical port order is not the kernel's: the 2026-10-17 plug
+  # check (first true gen-15 boot) found left -> right = eth0 | eth1 | eth2, so eth2
+  # is the rightmost RJ-45. Identify a port by carrier, not position. Plain
+  # DHCPv4 exactly like the e8450's =proto dhcp= -- there is no PPPoE
+  # anywhere in this path. Until the ISP drop is moved to this port it has no
+  # carrier and contributes nothing, which is why this is safe to deploy today.
+  networking.interfaces.eth2.useDHCP = true;
+
+  # --- LAN (cutover decisions 1 and 2) ---
+  # br-lan over eth1, same subnet as the house so nothing renumbers. From the
+  # swap on, eth0 (the Mac's mgmt port) is a member too: the fold drops it into
+  # the bridge and deletes its staging address, which makes 192.168.1.1 the
+  # board's only address. Two consequences: activating this from the Mac kills
+  # the 10.0.0.2 ssh path mid-activation (serial in hand, runbook), and until
+  # eth1 has a house uplink this config leaves br-lan with no carrier -- so it
+  # is build-only until the window, never staged-activated.
+  networking.bridges.br-lan.interfaces = [
+    "eth1"
+    "eth0"
+  ];
+  networking.interfaces.br-lan.ipv4.addresses = [
+    {
+      address = "192.168.1.1";
+      prefixLength = 24;
+    }
+  ];
+
+  # --- Management (staging): deleted at the swap ---
+  # The 10.0.0.2/24 on eth0 was the staging path to this Mac; the fold puts eth0
+  # in br-lan, so the address is gone and nothing replaces it: the board is
+  # reachable at 192.168.1.1 (house LAN) or the ttyS0 console afterwards. No
+  # defaultGateway/nameservers were ever set here on purpose -- air-gapped
+  # (decided 2026-10-11); closures are pushed, nothing on the board pulls.
+
+  # --- Nix garbage collection ---
+  # Nothing cleaned the store: gc.automatic was never set and there is no
+  # nix-gc.timer on the board, so every redeploy left a generation behind
+  # (~15 MB of unique paths). Same knobs as modules/nixos_system.nix, the house
+  # default. Weekly is plenty for a box that redeploys a handful of times a
+  # month, and 10d keeps the current generation plus whatever was live last
+  # week for rollback. 10.0.0.x/air-gapped: GC runs locally, no substituters.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 10d";
   };
 
-  # --- Phase 5.5 test link ---
-  # eth1 to the throughput client (asche, 10.1.0.24). Declared rather than left to
-  # `ip link set up`, because an unconfigured interface is never brought up, and
-  # carrier reports from the FMan driver cannot be trusted without it. Nothing here
-  # is production addressing -- this subnet exists for iperf3 and should be replaced
-  # when the cutover assigns real WAN/LAN roles.
-  networking.interfaces.eth1 = {
-    ipv4.addresses = [
-      {
-        address = "10.1.0.1";
-        prefixLength = 24;
-      }
-      # Inner address of the 5.8 tunnel. /32 on the lab interface, not lo: strongSwan
-      # sources the inner packet from this address and only then does the outbound
-      # policy match; charon installs the route to the peer /32 itself. Delete with the
-      # rest of the 5.8 block.
-      {
-        address = "10.90.0.1";
-        prefixLength = 32;
-      }
-    ];
-  };
-
-  # charon needs the inner address present before it installs routes/policies.
-  systemd.services.strongswan-swanctl.after = [ "network-addresses-eth1.service" ];
-
-  # --- Access ---
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY"
   ];
 
-  # Air-gapped on purpose (decided 2026-10-11): eth0 has only the on-link route, no
-  # gateway, no DNS. Closures are pushed from dgx-spark via `just
-  # mono-gateway-redeploy`, which is all this board needs; nothing here ever pulls.
-  # Do not "fix" this by adding defaultGateway/DNS -- the day this becomes the
-  # router, WAN addressing falls out of that config properly and the stopgap NAT
-  # through the Mac stops mattering. The only reason to want internet here is
-  # on-device kernel iteration (build plan Option C), deferred until we hit a bug a
-  # rebuild cannot reproduce.
-  #
-  # Separately, there is no `nix.enable` here: it already defaults to true and the
-  # daemon is socket-activated, so it reads "inactive" until a client connects.
+  # --- NAT ---
+  # What the e8450 does with `masq` and `mtu_fix` on its wan zone. The NixOS nat
+  # module also emits the forwarding rule lan -> wan, which is the equivalent of
+  # OpenWrt's firewall.forwarding entry.
+  networking.nat = {
+    enable = true;
+    externalInterface = "eth2";
+    internalInterfaces = [ "br-lan" ];
+  };
 
-  # --- Phase 5.5 lab firewall exceptions ---
-  # Two rules, both needed before any iperf traffic moves, and both invisible until
-  # you go looking. The generated ruleset RP-filters via `fib saddr . iif check` in a
-  # chain whose policy is drop and whose exception chain is empty, so a link-local
-  # source is dropped in prerouting before any accept rule is consulted. Its input
-  # chain accepts tcp 22 and the temp-port set only, so iperf's port falls through to
-  # the drop policy. Both present as "the gateway is broken", never "packet dropped".
-  #
-  # Temporary scaffolding. Delete this whole service at cutover, when zones carry real
-  # subnets and RP-filter has something real to match against.
-  systemd.services.gw-lab-firewall = {
-    description = "Phase 5.5 lab firewall exceptions (remove at cutover)";
-    after = [
-      "nftables.service"
-      "network-addresses-eth1.service"
-    ];
+  # --- DNS + DHCP (cutover decision 4: dnsmasq 1:1, kea/resolved later) ---
+  # Only on the LAN: without `interface` dnsmasq binds 0.0.0.0 and would answer
+  # on the WAN side too. Upstream servers are not listed here on purpose -- the
+  # NixOS module feeds dnsmasq whatever the WAN's DHCP hands out, which is what
+  # the e8450's dnsmasq forwards to.
+  services.dnsmasq = {
+    enable = true;
+    # false on purpose. With the default (true) NixOS rewrites the router's own
+    # resolv.conf to 127.0.0.1 and feeds dnsmasq through resolvconf; here the WAN
+    # already puts the ISP resolvers in /etc/resolv.conf via dhcpcd, which is
+    # exactly what the e8450's dnsmasq forwards to.
+    resolveLocalQueries = false;
+    settings = {
+      interface = "br-lan";
+      bind-interfaces = true;
+      domain-needed = true;
+      bogus-priv = true;
 
-    wantedBy = [ "multi-user.target" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      # List form, so nft's arguments go straight to argv. There is no shell here and
-      # therefore nothing to quote -- ruleset names contain no spaces.
-      ExecStart = [
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw rpfilter-allow iifname eth1 accept"
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 tcp dport 5201 accept"
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth0 tcp dport 5201 accept"
-        # IPsec needs a new-flow accept: conntrack covers the replies to our own
-        # IKE_SA_INIT, but not a fresh one arriving first (misfit reboot). ESP has no
-        # port, hence the raw rule.
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 udp dport 500 accept"
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 udp dport 4500 accept"
-        "/run/current-system/sw/bin/nft insert rule inet nixos-fw input-allow iifname eth1 ip protocol esp accept"
+      # start 100 + limit 150 + 12h, the same window as the e8450's dhcp.lan
+      # (.100 through .249), so a lease that survives the swap comes back from the
+      # same pool.
+      dhcp-range = "192.168.1.100,192.168.1.249,12h";
+
+      # Static leases, read 1:1 out of openwrt/routers/e8450.nix. dgx-spark has no
+      # IPv4 reservation there (only a DUID and hostid, which is IPv6), so it is
+      # intentionally not in this list; it keeps landing on .185 via DHCP.
+      #
+      # ...which is why =dgx-spark.lan= resolved on the e8450 and not here: OpenWrt
+      # appended =.lan= to every lease hostname (=local=/lan/= + =domain=lan= +
+      # =add_local_hostname=) and misfit's caddy proxies two vhosts at that name.
+      # A name built off a lease cannot be pinned to an address that is itself a
+      # lease, so dgx-spark gets a reservation here and the two pieces come together.
+      dhcp-host = [
+        "DA:E4:6A:44:49:09,192.168.1.212,Mac"
+        "58:47:CA:7E:C0:05,192.168.1.190,misfit"
+        "4C:BB:47:29:81:69,192.168.1.185,dgx-spark"
       ];
+
+      # the =.lan= half: dnsmasq serves =<hostname>.lan= for every name it knows.
+      domain = "lan";
+      expand-hosts = true;
+
+      # option 3 = gateway, 6 = dnsmasq itself on .1, the same two the e8450 hands out.
+      dhcp-option = [
+        "3,192.168.1.1"
+        "6,192.168.1.1"
+      ];
+
+      # The wildcard override that lived on the e8450 -- its
+      # =dhcp.@dnsmasq[0].address= was =/.yuanw.me/192.168.1.190=, which the dumb-AP
+      # apply switched off with the rest of that box's dnsmasq. Nothing under
+      # =*.yuanw.me= resolves on the LAN without it: misfit's caddy serves the
+      # LAN-only names behind that wildcard, so this is what makes
+      # openwrt./cockpit./tensorfold. reach it again.
+      address = "/.yuanw.me/192.168.1.190";
     };
   };
 
-  # --- Phase 5.8 IPsec lab tunnel (temporary) ---
-  # The other end of the 5.8 test is misfit, which carries the mirrored connection
-  # definition in its own host config. Inner addressing is a pair of /32s rather than the
-  # 10.1.0.0/24 the tunnel rides on: tunneling a subnet over itself is a routing loop.
-  #
-  # Keys are on disk under /etc/swanctl and never in this file, because the module builds
-  # swanctl.conf with pkgs.writeText and anything placed in its options ends up
-  # world-readable in the store. Delete this block with gw-lab-firewall once 5.8 is closed.
-  services.strongswan-swanctl.includes = [ "/etc/swanctl/conf.d/lab.conf" ];
+  # --- Firewall ---
+  # Only the two rules that change behaviour, both copied from fw4's wan zone.
+  # Everything else is already what NixOS does: input denied from WAN, masquerade,
+  # forwarding accepted between the bridge and the WAN. Ping stays allowed from
+  # everywhere, where fw4 only allowed it from wan.
+  networking.firewall = {
+    # Allow-DHCP-Renew: the WAN client's replies. Without this the lease renews
+    # on .100 but never commits.
+    allowedUDPPorts = [ 68 ];
+    # DHCP server requests and DNS from LAN clients. NixOS's input policy drops
+    # both unless they are opened, and without udp/67 dnsmasq never sees the
+    # DISCOVER (the first staging boot took no lease because of exactly this).
+    # Scoped to =br-lan= so the WAN side never runs a DHCP server or a resolver.
+    #
+    # tcp/53 is for answers over 512 bytes -- the other half of what the e8450
+    # gave us for free, where fw4's =lan= zone was =input ACCEPT= and
+    # https-dns-proxy's force_dns redirected every LAN query. On NixOS nothing
+    # accepts 53 unless we say so, so after the swap the house resolved nothing.
+    #
+    # tcp/22 is ssh. It belongs here, not in sshd's own rule, for the same reason
+    # as 53 and 67: that rule is global, so with eth2 lit and
+    # =permitrootlogin prohibit-password= root was key-authable from the WAN link.
+    interfaces."br-lan".allowedUDPPorts = [
+      67
+      53
+    ];
+    interfaces."br-lan".allowedTCPPorts = [
+      53
+      22
+    ];
+  };
 
-  # hw_offload is the plugin option in this build -- the child section has no xfrm_offload
-  # keyword, and 6.0.4's swanctl exposes no offload keyword at all, so it belongs here and
-  # nowhere else. extraConfig is the *whole* strongswan.conf: the first version of this
-  # block set load_modular explicitly and broke charon-systemd with
-  # "failed to load 3 critical plugin features" -- that replaced the compiled defaults
-  # instead of adding to them. Leave the defaults alone and override just this.
-  services.strongswan-swanctl.strongswan.extraConfig = ''
-    charon {
-      plugins {
-        kernel-netlink {
-          hw_offload = yes
-        }
-      }
-    }
-  '';
-
-  environment.etc."swanctl/conf.d/lab.conf".text = ''
-    connections {
-      lab {
-        version = 2
-        # One SA only. Without this, a restart on either end leaves the old IKE_SA
-        # alive (neither side sends a DELETE on a hard restart) and every retry or
-        # rekey adds another child fighting over the same policy and table-220 route.
-        unique = replace
-        local_addrs = 10.1.0.1
-        remote_addrs = 10.1.0.2
-        local {
-          auth = pubkey
-          id = 10.1.0.1
-          certs = gateway-ca
-        }
-        remote {
-          auth = pubkey
-          id = 10.1.0.2
-        }
-        children {
-          lab {
-            local_ts = 10.90.0.1/32
-            remote_ts = 10.90.0.2/32
-            mode = tunnel
-            start_action = start
-            close_action = restart
-          }
-        }
-      }
-    }
-  '';
+  # sshd's openFirewall default is an unscoped =tcp dport 22= accept, which is
+  # why 22 answered on eth2's network. Off, and the =br-lan= rule above is the
+  # only way in. ttyS0 is the way back if a generation ever moves br-lan's
+  # address out from under us.
+  services.openssh.openFirewall = false;
 }

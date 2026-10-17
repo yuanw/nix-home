@@ -100,6 +100,7 @@
 
     ai.enableOllama = true;
     pi.enable = true;
+    herdr.enable = true;
     secrets.agenix = {
       enable = true;
     };

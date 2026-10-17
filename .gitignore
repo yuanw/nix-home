@@ -55,3 +55,7 @@ __pycache__/
 
 rootfs.img
 .mono-serve/
+
+# Router config backups (openwrt-apply) hold secrets -- shadow, wifi key,
+# AdGuardHome state -- so they are kept but never committed.
+openwrt/state/backups/

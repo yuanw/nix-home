@@ -1,6 +1,6 @@
 # Declared state for the Linksys E8450 router (192.168.1.1).
 #
-# Translated 1:1 from state/openwrt/e8450/live, so `just openwrt-diff` comes back
+# Translated 1:1 from openwrt/state/e8450/live, so `just openwrt-diff` comes back
 # empty. Change values here to change the router.
 #
 # Named sections are edited in place, so a section missing from this file is left
@@ -96,7 +96,7 @@
       encryption = "psk2";
       key = "@wireless_key@";
     };
-    # --- everything else, translated 1:1 from state/openwrt/e8450/live ------------
+    # --- everything else, translated 1:1 from openwrt/state/e8450/live ------------
     # Declared so drift shows up as a diff instead of disappearing. None of these
     # can lock us out: worst case is a service restart. `firewall` is declared last
     # and is the one config that can; see docs/openwrt-plan.org,
@@ -245,7 +245,9 @@
     };
 
     # Empty section: it exists so LuCI has a place to write languages.
-    luci.languages = { _type = "internal"; };
+    luci.languages = {
+      _type = "internal";
+    };
 
     luci.sauth = {
       _type = "internal";
@@ -403,7 +405,12 @@
         _type = "device";
         name = "br-lan";
         type = "bridge";
-        ports = [ "lan1" "lan2" "lan3" "lan4" ];
+        ports = [
+          "lan1"
+          "lan2"
+          "lan3"
+          "lan4"
+        ];
       }
     ];
 
@@ -467,7 +474,10 @@
       {
         _type = "zone";
         name = "wan";
-        network = [ "wan" "wan6" ];
+        network = [
+          "wan"
+          "wan6"
+        ];
         input = "REJECT";
         output = "ACCEPT";
         forward = "REJECT";
@@ -520,7 +530,12 @@
         src = "wan";
         proto = "icmp";
         src_ip = "fe80::/10";
-        icmp_type = [ "130/0" "131/0" "132/0" "143/0" ];
+        icmp_type = [
+          "130/0"
+          "131/0"
+          "132/0"
+          "143/0"
+        ];
         family = "ipv6";
         target = "ACCEPT";
       }

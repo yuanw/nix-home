@@ -123,20 +123,27 @@ cores) — builds natively with no cross-compilation overhead. This is the
 primary build target.
 
 #+begin_src bash
-# On DGX Spark (SSH in) — the sync'd build tree, NOT /etc/nixos
+# From macOS: this machine evaluates the flake and the Spark's store builds it.
+just mono-gateway-build      # leaves the image in the Spark's store
+just mono-gateway-fetch      # copies it into this machine's store as ./result-mono-gateway
+just mono-gateway-serve      # serves it via HTTP from the Spark for the mono to curl
+#+end_src
+
+There is no rsync of the working tree and no ~/nix-mono copy: `nix build --store
+ssh-ng://yuanw@dgx-spark.local --eval-store auto` ships the dirty working tree as
+derivations and streams the result back. Building on the Spark by hand (from a
+checkout, NOT /etc/nixos, which is a stale deployed copy with no mono-nix input)
+still works:
+
+#+begin_src bash
 ssh yuanw@dgx-spark.local
-cd nix-mono        # created by `just mono-gateway-sync`; /etc/nixos is a stale
-                   # deployed copy with no mono-nix input
+cd nix-mono
 nix build .#rootfsImage -L
 #+end_src
 
-Or from macOS via justfile:
-
-#+begin_src bash
-just mono-gateway-build      # builds on dgx-spark via SSH, leaves result/ there
-just mono-gateway-fetch      # rsyncs result/ to ./result-mono-gateway locally
-just mono-gateway-serve      # serves result/ via HTTP for the mono to curl
-#+end_src
+Note the Spark also serves tensorfold-zig (~100 GiB resident); the justfile caps
+the remote build at `--max-jobs 1 --cores 6` so a cold kernel rebuild cannot
+OOM-kill the model. Raise `--cores` when no model is loaded.
 
 ** Option A: Cross-Compile from x86_64 Linux
 
@@ -179,9 +186,8 @@ nix build .#rootfsImage -L
 Or from macOS via justfile:
 
 #+begin_src bash
-just mono-gateway-sync       # rsyncs the working tree to ~/nix-mono on the Spark
-just mono-gateway-build      # builds there via SSH (runs sync first)
-just mono-gateway-fetch      # rsyncs result to ./result-mono-gateway
+just mono-gateway-build      # builds in the Spark's store (dirty tree included, no rsync)
+just mono-gateway-fetch      # copies the image into this machine's store as ./result-mono-gateway
 #+end_src
 
 Output: =result= → ext4 image. =result= is a symlink to one =.img= file, not a
@@ -256,10 +262,12 @@ This is a one-time operation done over UART console on the board.
   not the power port — see the panel order below. FTDI chips enumerate natively on
   macOS as =/dev/cu.usbserial-*=.
 - Boot the board into U-Boot and hit any key during the countdown.
-- Panel order, left to right: =USB-C power | USB-C (data) | USB-C UART | eth1 | eth2
-  | eth0 | eth3 SFP+ | eth4 SFP+=. So =eth0= is the **third** RJ-45. The case labels
-  match what the OS reports; identify a port by link state, not by what sits next to
-  it — there are two reset buttons, and the first is described as being "near the USB
+- Panel order, left to right: =USB-C power | USB-C (data) | USB-C UART | eth0 | eth1 |
+  | eth2 | eth3 SFP+ | eth4 SFP+=. So =eth0= is the **first** RJ-45. Proven by the
+  2026-10-17 mono-gateway plug check (one cable at a time, read carrier), which
+  corrected the order recorded here earlier (=eth1 | eth2 | eth0=, the pre-cutover
+  kernel's names). Identify a port by link state, not by what sits next to it —
+  there are two reset buttons, and the first is described as being "near the USB
   and network ports", i.e. near all of them.
 - Status LED during boot: green = hardware self-test passed, red = a test failed (U-Boot
   names the chip), orange pulsing = Recovery Linux, white = OpenWrt. One glance answers
@@ -432,9 +440,10 @@ pointing at the same store path — deterministic builds, not a broken profile.
 *** Throughput and offload (Phase 5.5) — PASS
 
 Measured 2026-10-12 between =mist= (=eth0=) and =misfit= (=eth1=). CPU is a delta of
-/proc/stat samples across the transfer window; idle baseline is 1.2-1.5 % of eight cores.
+/proc/stat samples across the transfer window; idle baseline is 1.2-1.5 % of four cores
+(the LS1046A in this DK has 4, not 8).
 
-| Path                       | Direction       |  Gbps | Board CPU (% of 8 cores) |
+| Path                       | Direction       |  Gbps | Board CPU (% of 4 cores) |
 |----------------------------+-----------------+-------+--------------------------|
 | =eth1= = misfit             | misfit -> board | 0.94  | 28.9                     |
 | =eth1= = misfit             | board -> misfit | 0.94  | 24.2                     |
@@ -775,6 +784,11 @@ sensors
 cat /etc/fancontrol
 #+end_src
 
+*Result (2026-10-12): PASS.* =fancontrol= active, =emc2305= hwmon present with
+=pwm1=77=, =sensors= shows 42-46 degrees C. =/etc/fancontrol= does not exist -- the
+config lives in the fancontrol unit's store path, which is why =cat /etc/fancontrol=
+finds nothing.
+
 ** 5.10 LED Matrix (LP5812)
 
 #+begin_src bash
@@ -793,6 +807,10 @@ ls -la /sys/class/leds/
 status-led.sh --help
 #+end_src
 
+*Result (2026-10-12): PASS.* =leds_lp5812= loaded; =/sys/class/leds/= has
+=status:{blue,green,red,white}= plus =mmc0=; =status-led.sh= present. It takes no
+=--help=, so the plan's probe prints nothing -- not a failure.
+
 ** 5.11 SFP+ LED Monitoring
 
 #+begin_src bash
@@ -804,6 +822,11 @@ lsmod | grep sfp_led
 ls -la /sys/class/leds/ | grep sfp
 # Should show SFP transceiver link/activity LEDs
 #+end_src
+
+*Result (2026-10-12): PASS.* =sfp_led= and =nvmem_layerscape_sfp= loaded;
+=/sys/class/leds/= has =sfp0/sfp1:{link,activity}=. No transceiver attached (no
+=/sys/bus/sfp/devices=), so this only proves the driver and LED plumbing; the
+link/activity *behaviour* waits on a DAC.
 
 ** 5.12 eMMC and Filesystem
 
@@ -830,6 +853,11 @@ journalctl --verify
 # Should confirm volatile storage
 #+end_src
 
+*Result (2026-10-12): PASS.* =/dev/mmcblk0p1= (30 G) mounted =/ ext4
+rw,noatime,commit=60=; =fstrim.timer= active (=fstrim= itself inactive, oneshot by
+design); =journalctl --verify= clean. Partition table is =mmcblk0=, =mmcblk0p1=,
+plus =mmcblk0boot0/1=.
+
 ** 5.13 NixOS-Specific Features
 
 #+begin_src bash
@@ -844,6 +872,12 @@ ls /nix/store/ | wc -l
 # Nix commands work
 nix eval nixpkgs#lib.version
 #+end_src
+
+*Result (2026-10-12): PASS.* nix 2.31.2, 688 store paths, =nix eval= works.
+=nix-daemon= reads =inactive= but the socket is =enabled= -- it is socket-activated
+and idle until a client connects, which is correct. The plan's =nix eval
+nixpkgs#lib.version= cannot work here: the board is air-gapped, so eval a local
+expression instead (=nix eval --expr '1 + 1'=).
 
 ** 5.14 Stability Test
 
@@ -865,6 +899,20 @@ dmesg --level=err,warn
 # Run iperf3 in background for 24h, check for drops
 nohup iperf3 -c <gateway-ip> -t 86400 -i 60 --logfile /tmp/iperf-24h.log &
 #+end_src
+
+*Result (2026-10-14): PASS.* Ran 24 h (86,400 s) of forwarded traffic (=misfit= ->
+board -> Mac, i.e. straight through the ASK fast path): 9.25 TBytes, 941 Mbit/s
+sustained, and **0 retransmits, 0 stalled intervals, 0 kernel messages** in
+=dmesg -W=. Board 43.5-47.0 degrees C, fan 1684-2774 RPM, both flat for the whole
+run, so no thermal throttling. Board CPU stayed ~0.5 % of four cores throughout:
+the fast path held for 24 h.
+
+The first attempt failed at ~27 min, and it was the *harness*, not the board: the
+Mac far end went to sleep (AC =sleep 1= minute, =displaysleep 10=), which suspends
+the network stack and kills the TCP flow; the board's links and thermals never
+moved. Restarted with =caffeinate -dimsu= on the Mac plus a durable =iperf3 -s=
+and it ran clean end to end. For any long soak: prove the far end stays awake, or
+the result says nothing about the board.
 
 * Phase 6: Quick Fixes for Missing NixOS Features
 

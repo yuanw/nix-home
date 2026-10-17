@@ -65,6 +65,7 @@
                   inputs.mics-skills.homeModules.default
                   inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
+                  inputs.pi-flake.homeModules.default
                   (import ../modules/helpers/mergetools.nix)
                 ];
                 backupFileExtension = "hm-bak";
@@ -168,6 +169,7 @@
                   inputs.mics-skills.homeModules.default
                   inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
+                  inputs.pi-flake.homeModules.default
                   (import ../modules/helpers/mergetools.nix)
                 ];
                 backupFileExtension = "hm-bak";

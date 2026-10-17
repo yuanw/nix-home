@@ -35,8 +35,18 @@ NixOS* in =~/org/agenda/homelab.org=. How the two tracks interlock:
   you're back" into manual recovery.
 - *One apply is shared, and it is the dangerous one.* Cutover step 3 demotes the
   e8450 to a dumb AP and switches its DHCP/RA off — a =network=/=wireless= change of
-  exactly the lockout class in Phase 3. Settle failsafe before that step (the
-  UDP/4919 =tcpdump= experiment in *Failsafe rehearsal* is free and needs no cable).
+  exactly the lockout class in Phase 3. Failsafe was retried on 2026-10-16 and is
+  *not reachable* on this unit (see *Failsafe rehearsal*); the watchdog is the
+  protection, and serial is the only real recovery path.
+  2026-10-17 correction: that protection did not exist until that day. The arm
+  step was =ssh -n ... 'cat > /tmp/rollback.sh'= -- and =ssh -n= forces stdin
+  from =/dev/null=, so a *0-byte* script landed, the 90s timer never waited, and
+  the guard's =pgrep= matched only its own wrapper cmdline. Proven by the first
+  dumb-AP apply (2026-10-17), which left the e8450 at =192.168.1.2= with no
+  watchdog running; recovered by hand from the box's own =/etc/rollback.tar=.
+  =openwrt/justfile= now lands the script without =-n=, guards on a non-empty
+  anchored file, and puts keepalives plus the *declared* post-apply address
+  (=network.lan.ipaddr=) on every post-commit ssh.
 - *Phase 4 stays deferred.* The cutover needs no =opkg=, no =sysupgrade=, no
   imagebuilder. Building it "because the router is changing anyway" solves a
   different box's lifecycle problem.
@@ -111,8 +121,8 @@ openwrt/
   rollback.sh          # the undo for an apply that costs us the session
   flake-module.nix     # packages.openwrt-<router> = the uci-command script
 justfile               # root recipes; ends with import 'openwrt/justfile'
-state/openwrt/<router>/live/   # drift baseline, secrets redacted
-state/openwrt/<router>/config.txt  # first snapshot, taken before there was a recipe
+openwrt/state/<router>/live/   # drift baseline, secrets redacted
+openwrt/state/<router>/config.txt  # first snapshot, taken before there was a recipe
 #+end_src
 
 Mic92 keeps his router code self-contained under =openwrt/= with its own
@@ -201,7 +211,7 @@ Rules that keep this boring and safe:
   waits 90 s, and restores it unless the router has answered ssh by then. It is armed
   only when the change touches =network=, =wireless= or =firewall= (=OPENWRT_FORCE_ROLLBACK=1=
   forces it for testing). There is deliberately no boot-time hook: =/tmp= is RAM, so the
-  watchdog cannot cover a power loss mid-apply. =state/openwrt/<router>/live= is the
+  watchdog cannot cover a power loss mid-apply. =openwrt/state/<router>/live= is the
   manual path back for that, and =sysupgrade -b= must be =scp='d off the box to count.
   The failsafe button is *not* part of this story yet, and should not be leaned on;
   see *Failsafe rehearsal*.
@@ -210,13 +220,20 @@ Rules that keep this boring and safe:
 
 ** drift detection (cheaper than a diff engine)
 
-~state/openwrt/<router>/live/*= checked into git, with secrets replaced by =@name@=
+~openwrt/state/<router>/live/*= checked into git, with secrets replaced by =@name@=
 placeholders. =openwrt= has busybox =tar= and no =rsync=, so the copy is a tar pipe:
 
 #+begin_src makefile
 openwrt-facts:
-    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C state/openwrt/{{router}}/live
+    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C openwrt/state/{{router}}/live
 #+end_src
+
+Redaction runs as part of that recipe, and it is fail-closed: an option that looks
+secret but is not in the declared name list is redacted *and* exits non-zero, so an
+unknown key cannot reach a public commit on a silent placeholder. The fix is to name
+it in =SECRET_OPTIONS= (=openwrt/redact-config.py=) and re-run. The rule and its
+exceptions are asserted by =python3 openwrt/selfcheck.py=, which lands in
+=checks.openwrt-serialization=.
 
 =git diff= against that is the "what did I change in LuCI last week" answer, and
 =just openwrt-diff= is the "what will this apply change" answer. Two different
@@ -225,7 +242,7 @@ questions, no clever code needed for either.
 Caveat found on 2026-10-11: once =openwrt-apply= has touched a config, that file
 rewrites itself — comments are dropped and every value comes out quoted, so
 =option input REJECT= becomes =option input 'REJECT'=. =openwrt-diff= still reads it
-as clean, but =git diff state/= does not. Expect cosmetic churn in the snapshot after
+as clean, but =git diff openwrt/state/= does not. Expect cosmetic churn in the snapshot after
 any apply, and read the diff as *content* rather than as line-for-line.
 
 * Phase 1/2 status (applied, in daily use)
@@ -310,7 +327,7 @@ the rest — the day LuCI writes a =firewall= rule we know nothing about, the di
 only catches it if =firewall= is declared. Until then =openwrt-facts= + =git diff=
 is the drift check.
 
-* Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
+* Phase 0 findings (2026-10-10, committed in =openwrt/state/e8450/config.txt=)
 
 - Linksys E8450 (UBI), =mediatek/mt7622=, 512 MiB RAM, kernel 6.12, **OpenWrt
   25.12.5** (r33051), 30d uptime. Hostname is still the default =OpenWrt=.
@@ -353,7 +370,7 @@ read yet — every decision below depends on it.
 - translate: =ssh root@r 'uci show network' # -> write openwrt/routers/*.nix, section by section=
 
 Exit criteria: model, OpenWrt version, installed packages, and the full
-=/etc/config= in =state/=. Everything after this is a diff away from this.
+=/etc/config= in =openwrt/state/=. Everything after this is a diff away from this.
 
 ** Phase 1 — vendored tool + trivial config apply (~2h)
 
@@ -381,7 +398,7 @@ to declared, with =just openwrt-diff= clean afterwards.
 
 ** Phase 3 — =network= + =firewall= (the lockout configs)
 
-What is actually on the box (`state/openwrt/e8450/live/`):
+What is actually on the box (`openwrt/state/e8450/live/`):
 
 | config    | options | sections | anonymous                                   |
 |-----------|---------|----------|---------------------------------------------|
@@ -423,7 +440,7 @@ alphabetical (`default_radio0` before `radio0`) rather than in declaration order
 Rule order is precedence, so declare rules as an **anonymous list**, where JSON array
 order is preserved. Benign for `wireless`; fatal for `firewall`.
 
-That reordering is also the proof that `state/` still earns its keep: the sorted diff
+That reordering is also the proof that `openwrt/state/` still earns its keep: the sorted diff
 could not see it, the snapshot's `git diff` could.
 
 **What is left is the first real change** to `network` or `firewall`. That happened on
@@ -441,11 +458,11 @@ anything touching `network`.
 
 *Safety, in the order that matters:*
 
-- **The button failsafe is unproven and should be treated as unavailable.** It was
-  rehearsed about seven times on 2026-10-11 and never entered failsafe once; details
-  and the three ways to settle it are in *Failsafe rehearsal* below. Serial is the
-  option that also covers the device's known unbrick failure mode. =/tmp= is RAM:
-  =sysupgrade -b= must be =scp='d off the router to count as a backup.
+- **The button failsafe is unavailable on this unit.** Rehearsed ~7× on 2026-10-11 and
+  retried on 2026-10-16 with root SSH and a real UDP listener: neither the WPS button nor
+  the UDP/4919 broadcast lands (details in *Failsafe rehearsal*). Serial is the option
+  that also covers the device's known unbrick failure mode. =/tmp= is RAM: =sysupgrade
+  -b= must be =scp='d off the router to count as a backup.
 - first apply must be a no-op — translate exactly what is there, get an empty
   =openwrt-diff=, and change nothing. Risk starts with the first real change, not with
   declaring.
@@ -474,7 +491,7 @@ anything touching `network`.
   again, disarmed = NEW-STATE stands.
   - *deliberately not built*: the boot-time =S15= hook. =/tmp= is RAM, so this watchdog
     dies with a reboot and cannot cover power loss mid-apply. On a box with 31 days of
-    uptime, that is a far smaller risk than a bad rule, and =state/openwrt/e8450/live=
+    uptime, that is a far smaller risk than a bad rule, and =openwrt/state/e8450/live=
     is the manual path back for it. Add the hook if that ever stops being true.
 - reloads are still synchronous. openwrt-nix detaches them
   (=( sleep 1; <reload>) >/dev/null 2>&1 &=) so ssh exits 0 before the interface
@@ -532,21 +549,223 @@ So: failsafe is *plausible*, not broken, and not yet proven. The earlier
   off, so no serial console is needed to *use* it — a static =192.168.1.10= on the laptop
   and =ssh -oRSAMinSize=1024 root@192.168.1.1= is enough, then =mount_root=. Serial is
   only needed to watch preinit or to unbrick the bootloader, not to recover config.
-- **there is a timing oracle.** During the 4s window (24.10+) the box broadcasts
-  =Please press button now to enter failsafe= to =192.168.1.255:4919=. =tcpdump -Ani <lan>
-  port 4919 and udp= makes the window visible from the laptop, so the press no longer has
-  to be guessed from LED blink patterns. This is what the ~7 blind attempts lacked, and
-  it also distinguishes "no broadcast" (preinit never got there) from "broadcast but no
-  press registered" (the button/hotplug half).
+- **there *should* be a timing oracle.** During the 4s window (24.10+) the box
+  broadcasts =Please press button now to enter failsafe= to =192.168.1.255:4919=.
+  =tcpdump -Ani <lan> port 4919 and udp= makes the window visible from the laptop, so
+  the press no longer has to be guessed from LED blink patterns. *Retried 2026-10-16
+  with a root SSH login and an unprivileged UDP listener: the broadcast exists but never
+  reaches the wire — =lan1='s link is down for the whole window. See the dated
+  subsection below.*
 
 To settle it (no cable): LAN1 wired, laptop static at =192.168.1.10=, =tcpdump= on the
 UDP/4919 broadcast, reboot the router, press WPS the moment the packet appears, then
 =ssh= to =192.168.1.1= (clear the stale known_hosts entry first — the failsafe host key
-differs), =mount_root=, fix, =reboot=. =failsafe=1= on the kernel cmdline (more
-=fw_setenv= on a board with the OKD history) and serial are the fallbacks.
+differs), =mount_root=, fix, =reboot=. *This paragraph is the 2026-10-16 attempt, and it
+does not work on this unit* — the broadcast is dropped before it reaches the wire and the
+button never lands. =failsafe=1= on the kernel cmdline (more =fw_setenv= on a board with
+the OKD history) and serial are the fallbacks; serial also covers the unbrick case.
 
 Until one of those is done, treat the watchdog as the only measured protection: one
 plane per apply, and be present.
+
+**** 2026-10-16: retried with root SSH + a real listener; both routes fail
+
+The cable-free route above was retried properly, with none of the earlier blind spots:
+root SSH from asche to the e8450, asche wired to the physical **lan1** port, its NixOS
+firewall opened for UDP/4919, and a real UDP listener (not =tcpdump=) bound on 4919.
+It failed, for a reason that also explains the button's seven misses.
+
+- **The timing oracle cannot work.** Preinit really does broadcast "Please press button
+  now to enter failsafe" to =192.168.1.255:4919= on raw =lan1=, but =lan1='s PHY link is
+  still down for the whole 4s window and only returns afterwards:
+
+  #+begin_example
+  05:39:31 carrier=0   # reboot
+  05:39:37 carrier=0   # ← the 4s window; frames are dropped here
+  05:39:42 carrier=1   # link returns, window already closed
+  #+end_example
+
+  A manual =netmsg 192.168.1.255= arrives fine once the link is up, which is why the
+  probe-loop test looked promising while the actual boot never delivered.
+
+- **The WPS button still does not enter failsafe.** It is genuinely wired:
+  =/proc/device-tree/gpio-keys/wps= has =gpios= (12 B) and =linux,code= (4 B),
+  =gpio_button_hotplug= loads at 3.7 s, and =/etc/hotplug-preinit.json= routes
+  ~SUBSYSTEM=button~ to =/etc/rc.button/failsafe= (which writes =/tmp/failsafe_button=).
+  A single press, and then one press a second for ~20 s across the window, both booted
+  normally (=hostname OpenWrt=, no =/tmp/failsafe=).
+
+So the no-cable route is closed on this unit. The remaining ways are serial (also the
+device's only real unbrick path) and =failsafe=1= via =fw_setenv= (rejected here: a bad
+=bootargs= on a box with no serial needs TFTP recovery). Treat failsafe as
+*unavailable*, and the watchdog as the only measured protection -- until the
+2026-10-17 re-read and retry below says otherwise.
+
+**** 2026-10-17: re-read on the live box -- the wire route is a lost race, not a dead port
+
+Every failsafe file was re-read on the unit (25.12.5, deploy key, read-only), and the
+2026-10-16 conclusion needs one correction: preinit *does* bring the failsafe port up.
+The wire failure is a carrier race, and the direct cable loses it by a second or two:
+
+- =10_indicate_preinit=::=preinit_ip= runs before the window and does
+  ~ip link set dev lan1 up~ plus =192.168.1.1/24= on it; =30_failsafe_wait= then
+  broadcasts ~netmsg~ once a second for ~fs_failsafe_wait_timeout=4~. Nothing on the
+  disk is broken; upstream master is the same.
+- =init: - preinit -= logs at 3.8 s kernel time on this box, so the window sits at
+  ~kernel 4-8 s (wall +5-10 s after =reboot=) -- the 1/s press schedule *did* cover it,
+  which makes the button's silence unexplained and, with preinit =/etc= being squashfs,
+  unobservable without serial.
+- The carrier samples (link back only ~+11 s) are the MT7531 PHY and the Mac's USB-C
+  NIC renegotiating from cold, ~4-6 s. The four broadcasts end right around when
+  carrier first appears, so a direct asche-->lan1 cable gets zero packets without the
+  script being wrong. The margin varies per boot and per link partner, so the race can
+  be won by changing the partner (see the protocol).
+- Two new facts for any retry: this device tree has *no* function LEDs, so =/etc/diag.sh=
+  shows nothing in failsafe -- there is no LED oracle. And the recessed *reset* button on
+  a booted box *reboots it on a short tap and factory-resets at >=5 s hold*
+  (=/etc/rc.button/reset=) -- never tap reset blind; WPS is the only safe button
+  (=rc.button/wps= =exit 5=).
+- Success oracle without serial: entering failsafe sets the hostname to
+  =OpenWrt-failsafe= (=10_indicate_failsafe=), and the failsafe boot runs a default
+  =br-lan= 192.168.1.1 with DHCP and ssh on the lan ports. =ssh root@192.168.1.1=
+  answering with that banner is proof; =mount_root= then reaches the real overlay.
+
+Retry protocol (no unboxing, ~5 min per boot, house LAN down for ~1 min per boot):
+
+1. Put a *switch* between asche and physical =lan1= -- the house switch or any dumb
+   switch. asche's own carrier then survives the reboot, and the only renegotiation
+   left is switch<->lan1, which finishes well inside the window. This is the one
+   variable the 2026-10-16 run lacked.
+2. asche: static =192.168.1.10/24= (or keep its lease), firewall open for UDP/4919, run
+   =python3 openwrt/failsafe-listen.py= (add =--speak= if the screen is out of sight).
+   Sanity-check the receive path first: with the router up,
+   ~ssh root@192.168.1.1 netmsg 192.168.1.255 test~ must print in the listener.
+3. =ssh root@192.168.1.1 reboot=. From wall +4 s, tap WPS about twice a second until
+   +12 s; when the listener prints, tap once more. Taps only -- never reset.
+4. If the router answers: =ssh root@192.168.1.1= and read the banner. =OpenWrt-failsafe=
+   -- failsafe reached, =mount_root=, fix, =reboot=. Normal banner and no
+   =/tmp/failsafe= -- do boot 2: repeat once *holding* WPS down from +3 s to +12 s
+   (a hold guarantees a press event inside the window if dispatch works at all).
+5. Both boots fail -- the finding stands as before, failsafe is unavailable on this
+   build without serial, and the permanent no-unbox fix is one line at the next
+   sysupgrade: an imagebuilder image with ~fs_failsafe_wait_timeout=10~ in
+   =00_preinit.conf= (Phase 4 material). The window being shorter than PHY bring-up
+   on DSA boards is worth an upstream ticket either way.
+
+**Boot 1 result (same day): inconclusive -- the box hung; and the rescue story changed for the better.**
+The run followed the protocol (switch between asche and lan1, listener armed,
+receive path proven with a manual netmsg, reboot fired at 14:20:16, WPS tapped).
+The router never came back: ~3.5 minutes dark, recovered by a manual power cycle.
+The listener received zero packets the whole time with a live receive path, so
+preinit never ran and no failsafe window ever opened -- the taps were never given
+a chance; the soft reboot itself hung.
+
+**Not OKD.** Reading =/dev/mtd0= afterwards shows the bootloader already runs the
+fixed TF-A: =v2.10.0 (release):OpenWrt v2024.01.17~bacca82a-3= -- exactly the
+build the device page ships as the OKD fix. So the hang was a one-off, unexplained
+boot failure (power cycle recovered it, first occurrence observed), not the known
+disease, and flashing a newer =bl2= buys nothing.
+
+**The rescue path that actually exists: the installer's recovery system.** This box
+has a =recovery= UBI volume (and =boot_backup= with the vendor bootchain, both
+confirmed present), and two documented ways into it, neither needing serial:
+
+- *PSTORE trigger, keeps configuration*: from a running OpenWrt,
+  ~echo c > /proc/sysrq-trigger~ panics the box; U-Boot sees the ramoops record
+  and boots the recovery system, which serves ssh/http/tftp for restore or
+  upgrade. ~rm /sys/fs/pstore/*~ and reboot returns to production. Verified armed
+  on this box: ~kernel.sysrq=1~, =/sys/fs/pstore= empty, recovery volume present.
+- *Reset at power-on, wipes configuration*: hold reset while powering up, release
+  when the power LED turns orange. Last resort for a box that cannot boot; the
+  declarative config makes the wipe survivable.
+
+This covers the swap's real risk class (boots fine, config locks us out) better
+than failsafe ever could -- it keeps the config and needs no button, no window,
+no carrier race. It was found in the installer README, hiding in plain sight since
+the original install.
+
+**What is left of the failsafe track:** the button's silence stays unexplained and
+unobservable without serial; the wire oracle stays a carrier race. Neither is worth
+more blind reboots now that recovery mode is the safety net of record. The one-line
+~fs_failsafe_wait_timeout=10~ imagebuilder fix remains queued as Phase 4 material,
+to ride along the next sysupgrade that happens anyway -- not as a standalone flash.
+The rehearsal of the PSTORE path is the runbook immediately below.
+
+**** PSTORE recovery rehearsal (runbook, not yet run)
+
+Goal: make the rescue path *measured* the way the watchdog is, not just documented.
+Preconditions all verified on the box 2026-10-17: =kernel.sysrq=1=, ramoops backend
+registered at boot (~pstore: Registered ramoops as persistent store backend=,
+0x10000@0x42ff0000), and the =recovery= UBI volume begins with a valid
+=ARM64 OpenWrt FIT= image. Plan for ~5-8 min of house downtime (WiFi + internet down
+the whole time; the one unexplained boot hang earlier today puts a small chance on
+needing a power cycle, so stay near the box).
+
+Pre-flight (2 min):
+
+1. Pull a full backup off the box (the rehearsal keeps config, but that is the
+   claim being tested):
+   #+begin_src bash
+   ts=$(date +%Y%m%dT%H%M%S)
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'sysupgrade -b /tmp/pre-pstore.tar.gz'
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'cat /tmp/pre-pstore.tar.gz' \
+     > openwrt/state/backups/e8450-pre-pstore-$ts.tar.gz
+   #+end_src
+2. Clear the known_hosts entry now -- recovery has its own host key, and it flips
+   again on the way back: ~ssh-keygen -R 192.168.1.1~.
+
+The run:
+
+3. Fire the deliberate panic from a running system (the session dies instantly --
+   that is the crash, not an error):
+   #+begin_src bash
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'sync; echo c > /proc/sysrq-trigger'
+   #+end_src
+4. U-Boot sees the ramoops record and boots the =recovery= volume instead of =fit=.
+   Expect asche (wired via the switch to lan1) to get a DHCP lease from 192.168.1.1
+   within ~1-3 min: watch ~ip -br addr show enp0s13f0u3c2~. WiFi stays down --
+   recovery has no wireless.
+   - No lease after ~3 min: set a static =192.168.1.10/24= on the wired NIC and try
+     ssh/http anyway; if still nothing after another minute, power-cycle -- the
+     pstore record persists, so it boots recovery again.
+5. Enter recovery and confirm it is what it claims: ~ssh -i ~/.ssh/id_deploy
+   root@192.168.1.1~ answers, and =cat /proc/cmdline= does *not* show
+   =ubi.block=0,fit= (that is the production boot; recovery boots its own FIT).
+   The http://192.168.1.1 firmware-upload page should also answer.
+6. Optional proof the config is intact: ~mkdir -p /tmp/r && mount -t ubifs -o ro
+   ubi0:rootfs_data /tmp/r && ls /tmp/r/upper/etc/config~ -- read-only, unmount
+   after.
+7. Clear the panic record -- the switch back to production. Skipping this makes
+   *every* subsequent boot re-enter recovery:
+   #+begin_src bash
+   rm /sys/fs/pstore/*
+   #+end_src
+8. ~reboot~ -- production boot (~1 min, WiFi returns).
+
+Post-checks (the part that makes it measured):
+
+9. =ssh root@192.168.1.1= answers with the *production* host key again (flip
+   known_hosts back), =uptime= is fresh, ~just openwrt-diff~ is clean, asche's
+   lease =192.168.1.200= is back, internet is up, and =ls /sys/fs/pstore= is
+   empty on the production side too.
+
+Abort paths:
+
+- Hang on the way in (the failure mode seen earlier today): power-cycle; the record
+  persists, recovery is the destination again -- keep trying.
+- Want out any time after step 7: that *was* the way out.
+- Recovery volume unbootable: the reset-at-power-on entry lands in the same volume,
+  so it does not help; that is the one tail risk of this rehearsal and its only
+  exit is serial. The pre-flight volume check makes this unlikely, not impossible.
+
+Decision 2026-10-17: the swap does not gate on this rehearsal. The e8450 half of
+the swap is a uci apply -- config-plane only, it cannot make the box unbootable
+-- and the failure class it can create is what the *tested* watchdog plus the
+pulled pre-apply backup already cover. Recovery mode stays the armed deep
+fallback (preconditions verified read-only today). The bet in skipping: if the
+boot-plane class hits mid-swap anyway, the no-unbox rescue is unexercised and
+the last resort is opening the case for serial. Run the rehearsal at any calm
+moment later; it is insurance, not a gate.
 
 ** Phase 4 — deferred, do not build yet
 
