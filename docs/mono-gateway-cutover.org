@@ -183,8 +183,12 @@ Three steps, each independently reversible.
    timer, recovered by hand from =/etc/rollback.tar=. Details in the OpenWrt
    plan's cross-reference.)
 3. *Settle.* Keep the e8450 powered and declared as the fallback router and AP.
-   Rehearse =just mono-gateway-rollback= once, then leave both alone for a quiet
-   week before retiring the e8450's routing role.
+   *Rehearsed 2026-10-17*: =just mono-gateway-rollback= moved the board to
+   generation 16 and back to 17 over ssh, with the house never losing routing --
+   the delta between those two generations is only the =br-lan= =udp/53= rule, so
+   what the rehearsal actually proves is the ssh path and the profile switch, not
+   that generation 16 is a sane router. Then leave both alone for a quiet week
+   before retiring the e8450's routing role.
 
 * Cutover runbook
 
