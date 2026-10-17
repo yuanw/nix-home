@@ -4,7 +4,8 @@
 
 *TL;DR as of 2026-10-17: running at generation 27, filtering guaranteed.* The hop
 works — 12/12 fresh names from a client land in AGH's query log, dnsmasq still owns
-=.lan= and =*.yuanw.me=, the admin UI is loopback-only, and two declared lists are
+=.lan= and =*.yuanw.me=, the admin UI is on =br-lan= behind a login and served as
+https://agh.yuanw.me, and two declared lists are
 loading 192,408 rules between them at 58 MB. Two things this file did not know,
 both in *Phase 3 as run*: =dns.filters= is the wrong *location* for 0.107.71 — the
 list belongs at the top level of =settings=, and ours was nested inside =dns=,
@@ -193,31 +194,25 @@ One line against a rewrite. Take the line.
   =127.0.0.1:53= would be free. Using =5354= anyway keeps AGH from ever racing
   dnsmasq for =:53= across a restart, which is the failure mode that would look
   like "the house resolves nothing".
-- *The web UI goes on loopback too.* =host = 127.0.0.1= and =port = 3000= are
-  options on the service, *not* keys in =settings= — current nixpkgs asserts
-  =settings.bind_host= away as "superseded by =services.adguardhome.host=", and
-  since =host= defaults to =0.0.0.0=, setting it explicitly *is* the exposure
-  decision. Reached over ssh:
+- *The web UI's bind is the exposure decision.* =host = 127.0.0.1= and
+  =port = 3000= are options on the service, *not* keys in =settings= — current
+  nixpkgs asserts =settings.bind_host= away as "superseded by
+  =services.adguardhome.host=", and since =host= defaults to =0.0.0.0=, setting it
+  explicitly *is* the decision. Phase 1 confirmed the mapping: at schema 32 they
+  land on =http.address:=, and no =bind_host= key exists anywhere.
 
-  #+begin_src bash
-  ssh -N -L 3000:127.0.0.1:3000 root@192.168.1.1     # then http://localhost:3000
-  #+end_src
+  The first version kept the UI on loopback and read it over
+  =ssh -N -L 3000:127.0.0.1:3000 root@192.168.1.1=: no =openFirewall =  true=
+  (that is a global =tcp dport 3000=, exactly the class of unscoped rule that
+  already put ssh on the WAN side), no =br-lan= rule, no =host = "192.168.1.1"=
+  coupling the service to an address a future generation might move. Its cost
+  turned out to be the runbooks: every check in this file is an ssh session, and
+  nobody reads a log that needs a tunnel to open.
 
-  No =openFirewall =  true= (that is a global =tcp dport 3000=, exactly the class
-  of unscoped rule that already put ssh on the WAN side), no =br-lan= rule, no
-  =host = 192.168.1.1= coupling the service to an address that a future
-  generation might move.
-
-  That is what 1.4 built and confirmed: =host=/=port= are mapped onto
-  =http.address = 127.0.0.1:3000= at this schema version, with no =bind_host= key
-  anywhere.
-
-  If the tunnel is too much ceremony, the LAN-click version is =host =
-  "192.168.1.1"= + =interfaces."br-lan".allowedTCPPorts = [ 3000 ]= and a vhost on
-  misfit's caddy next to =openwrt.yuanw.me=
-  (~reverse_proxy http://192.168.1.1:3000~). That trades the loopback bound for
-  convenience, and then the =auth.users= hash above is *required*, not optional —
-  a hostname on =*.yuanw.me= is a wider reach than =127.0.0.1=.
+  *Decision 2 as run* settled that, and two things stayed true across the move:
+  =dns.bind_hosts= is still 127.0.0.1, so moving the UI did not move the DNS
+  listener, and the argument against =openFirewall =  true= is unchanged — the
+  rule that came in is scoped to =br-lan=.
 
 ** The config
 
@@ -711,16 +706,19 @@ ssh root@192.168.1.1 'journalctl -u adguardhome -n 60 --no-pager | grep -iE "fil
 #+end_src
 
 Want: a line per list with a rule count, and no =failed to=. Then confirm what AGH
-actually loaded — the UI answers without a login while decision 2 is open, so this
-is readable from the board, no tunnel:
+actually loaded — and since *Decision 2* that needs a session, because anonymous
+=/control= endpoints answer =401=:
 
 #+begin_src bash
-ssh root@192.168.1.1 "curl -s localhost:3000/control/filtering/status | head -c 500"
+# JSON body, not a form -- form-encoded returns 400 "json decode" and reads like
+# a broken endpoint. Cookie jar afterwards.
+ssh root@192.168.1.1 "curl -s -c /tmp/a -X POST -H 'Content-Type: application/json' \
+  -d '{\"name\":\"yuan\",\"password\":\"…\"}' localhost:3000/control/login" >/dev/null
+curl -s -b /tmp/a http://192.168.1.1:3000/control/filtering/status | head -c 300
 #+end_src
 
-If that 404s, the path moved in 0.107.71 the way =/control/querylog_search= did in
-Phase 2 — read the filtering page through the tunnel rather than trusting the
-command.
+The =journalctl= line above needs no session, which is why the rule count is read
+there rather than from the API.
 
 *** 3.3 Two tables, and the second one is the point
 
@@ -912,7 +910,7 @@ must be unaffected by the new forward.
 | # | Question | Options |
 |---+----------+---------|
 | 1 | Upstream | public IPs (works today, plaintext) vs DoH/DoT — the half the cutover actually lost, and what survives a later VPN client |
-| 2 | Admin credentials | loopback + ssh, unauthenticated (default: nothing in git, nothing to rotate) vs declarative =settings.auth.users= with a bcrypt hash |
+| 2 | Admin credentials | *closed 2026-10-17*: a bcrypt =users= entry plus https://agh.yuanw.me through misfit's caddy. The password lives in =pass:monogateway/agh/password= and in nothing else. See *Decision 2 as run* — the key name was the whole exercise |
 | 3 | Bypass | a client hardcoding 8.8.8.8 skips the board entirely. The e8450 closed that with =force_dns=1= (a real redirect). Close it later with a =br-lan= nft redirect to =.1:53= |
 | 4 | Advisory or authoritative | *closed 2026-10-17* (gen 27): ~services.dnsmasq.settings.no-resolv = true~. dnsmasq logs ~using nameserver 127.0.0.1#5354~ and no other upstream, so AGH is the only path and filtering is guaranteed. The consequence is now the shape of the failure: a dead AGH means external names do not resolve, while =.lan=, static leases and =*.yuanw.me= keep answering. What made this worth doing was measured: 12s of stopping AGH put real traffic on the ONT path and the cached answers outlived the restart |
 
@@ -978,10 +976,12 @@ stale.
   ="adguardhome"= would not be readable by the service anyway. So the
   agenix-+-overlay-+=extendModules= route is not merely heavy, it is broken.
 
-So: do not import it. If the UI needs a password, declare
-=settings.auth.users= with a bcrypt hash — no fork, no agenix, no overlay, no
-rekey. The trade is a crackable bcrypt hash in git for a router admin UI; if that
-is unacceptable, keep loopback + ssh and stay unauthenticated.
+So: do not import it. If the UI needs a password, declare it — no fork, no
+agenix, no overlay, no rekey. On 0.107.71 that means a top-level =users= entry with
+a bcrypt hash; =settings.auth.users= is the 1.x spelling and parses away here, see
+*Decision 2 as run*. The trade is a crackable bcrypt hash in git for a router admin
+UI, against the password itself in =pass:monogateway/agh/password= and in nothing
+else. Closed on 2026-10-17, so this note is the rationale rather than a choice.
 
 Both the fork and =modules/adguard.nix= are dead code: the only reference was the
 commented-out =adguard= stanza in =hosts/default.nix=, and that stanza sets
@@ -1047,6 +1047,44 @@ upstream does not already buy. Pick one as "who I ask last".
 
 Suggested order: AGH now → WG remote access → (only on a real reason) a VPN
 client → unbound last, and only if the client stays off.
+
+** Decision 2 as run — a login and one https URI
+
+Wanted: log in to the UI, and reach it as an https URL rather than a tunnel. What
+that took, in order of how much it cost to find out:
+
+1. *The key is =users=, not =auth.users=.* This is the whole story. On 0.107.71
+   the list is a *top-level* =users:= key — the =auth { realm, session_ttl,
+   users }= block belongs to AGH 1.x. Declared the newer way it is parsed away in
+   exactly the shape *Phase 3 as run* found for =filters=: =--check-config= says
+   "configuration file is ok", the unit logs
+   =no users in the configuration file; authentication is disabled=, the UI keeps
+   answering =200= to anonymous =/control/status=, and the state file comes back
+   holding AGH's own =users: []=. Nothing distinguishes a working declaration from
+   a dropped one except that log line and the status code.
+
+   The same lesson twice in two days, in the same config. The pattern is that
+   0.107.71 is *silently tolerant*: it parses what it knows and drops the rest,
+   so a wrong location or a wrong key name cannot fail the build and cannot fail
+   the service — only the security property is lost, quietly. When a setting here
+   does not visibly do something, the question to ask is "where does this binary
+   read it", and the answer is on the box: what AGH *writes back* into
+   =/var/lib/AdGuardHome/AdGuardHome.yaml= is the layout it reads.
+
+2. *The login endpoint wants JSON.* =POST /control/login= with a form body returns
+   =400 json decode=, which looks like a broken endpoint. The cookie is
+   =agh_session= afterwards.
+
+3. *The module's own pre-start check lies about this one thing.* It runs
+   =--check-config= on the state file *before* merging, so every start logs
+   =no users ... authentication is disabled= even when it is configured. Judge it
+   by the unit process's log, not the pre-start's.
+
+4. *Binding br-lan retires the tunnel form.* =host = "192.168.1.1"= means 3000 no
+   longer answers on =127.0.0.1=, so the tunnel is
+   =ssh -N -L 3000:192.168.1.1:3000 root@192.168.1.1=, not the =127.0.0.1= form
+   this file used to show. =dns.bind_hosts= stayed =127.0.0.1=, so =5354= is
+   unchanged — and =udp 127.0.0.1:5354= remains the check that matters.
 
 ** What the query log can say about a client
 
@@ -1125,6 +1163,19 @@ concern, not something a poller can recover from this endpoint.
   Ours was nested, and got no signal for it. Re-check the location on every
   =adguardhome= bump; =grep -a 'yaml:"filters"'= the binary is the cheap way to
   find where it reads.
+- *Port 3000 is open to the whole LAN, and the direct path is plain http.* The
+  rule is scoped to =br-lan= (so not eth2) but not to misfit, because
+  source-scoping needs an nft rule of our own and there is no precedent for one in
+  this repo. Anything on the LAN can reach the login page over http without going
+  through =https://agh.yuanw.me= — the bcrypt hash is what guards that, and
+  sniffing the login is the residual risk. Tightening =192.168.1.190= alone is a
+  small nft table, and it is the right change if a device on the LAN ever matters
+  enough to worry about.
+- *The =users= key name is binary-specific.* =auth.users= parses away on 0.107.71
+  and works on 1.x; see *Decision 2 as run*. Re-check after any
+  =adguardhome= bump, the same way =filters= location gets re-checked.
+- *Every =/control= check needs a session now.* The runbooks in this file were
+  written against an open UI; anonymous calls are =401=, and the login is JSON.
 - No =blocking_mode= is declared, so =blocking_mode: default= applies — and
   *measured, that answers a blocked name with =0.0.0.0=*, not NXDOMAIN; the
   hosts-format AdAway entries come back as =127.0.0.1= for the same reason. A
