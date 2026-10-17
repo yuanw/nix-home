@@ -2,6 +2,11 @@
 #+DATE: 2026-10-17
 #+OPTIONS: toc:t
 
+*TL;DR as of 2026-10-17: running at generation 22.* The hop works — 10/10 client
+queries land in AGH's query log, dnsmasq still owns =.lan= and =*.yuanw.me=, and
+the admin UI is loopback-only. What is *not* in place yet is blocking: no rule
+lists are declared. What remains is decisions 4→1→3 and the lists themselves.
+
 * TL;DR
 
 Settle [[file:mono-gateway-cutover.org][cutover decision 7]] (adblocking). dnsmasq stays the LAN's front door;
@@ -43,6 +48,19 @@ left open: =schema_version: 32=, so the admin bind is
 at generation 20.
 
 Nothing moves the house until someone runs ~just mono-gateway-redeploy~ (Phase 2).
+
+** Phase 2 is done: live at generation 22
+
+2026-10-17, gen 20 → 21 → 22. Gen 21 exposed a bug no read-only check could see
+(=dns.bind_port= is ignored by 0.107.71, so AGH bound =:53= and crash-looped
+against dnsmasq); one key — =dns.port = 5354= — fixed it as gen 22, which is the
+running system. Proof, the two facts the runbook commands missed, and the
+advisory-fallback discovery are in *Phase 2 as run*.
+
+So decision 7 is settled as designed: dnsmasq is still the front door, AGH is a
+loopback filter hop behind it, no firewall rule, nothing for clients to
+configure. Filtering is still off (=filters = [ ]=), which was deliberate — see
+*2.6* for why the lists go in =default.nix= rather than the UI.
 
 ** The premise of decision 7 does not hold: the e8450 never filtered
 
@@ -150,14 +168,15 @@ is not enabled, and its wg/iptables/age pieces belong to the retired AWS box.
 
 * Rollout
 
-Three phases. Phase 2 is the only one that touches the house. There is no Phase 0
-now that the AP has been confirmed to be running no rules.
+Three phases: 1 and 2 are done, 3 (rule lists) is not. Phase 2 is the only one
+that touched the house. There is no Phase 0 now that the AP has been confirmed to
+be running no rules.
 
 | # | Do | Proof |
 |---+----+-------|
 | 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
 | 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *done 2026-10-17* — gen 21 (buggy) → 22 = running system; see *Phase 2 as run* below |
-| 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
+| 3 | Declare rule lists ([*Phase 3 in detail*](#phase-3-in-detail--rule-lists-declared-in-nix)) | *not run* — rule counts in ~journalctl~, blocked and do-not-block tables both clean from a client, lists survive a rebuild |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
 nixpkgs pin (25.11, not our =nixos-unstable=), so both ~pkgs.adguardhome~ and the
@@ -201,7 +220,7 @@ choices from *Decisions still open* left explicit:
     host = "127.0.0.1"; port = 3000;   # service options, NOT settings.bind_host
     settings = {
       dns = {
-        bind_hosts = [ "127.0.0.1" ]; bind_port = 5354;
+        bind_hosts = [ "127.0.0.1" ]; port = 5354;   # NOT bind_port, see below
         upstream_dns  = [ "94.140.14.14" "1.1.1.1" ];   # decision 1
         bootstrap_dns = [ "1.1.1.1" ];
         filtering_enabled = true;
@@ -270,7 +289,7 @@ ssh $S "grep -oE '/nix/store/[a-z0-9]+-dnsmasq.conf' $U/dnsmasq.service | head -
 | Confirm | Why |
 |---------+-----|
 | =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | *N = 32* in the 25.11 pin, so =http.address=. That answers *Known limits* with zero risk; it is also in the commit message |
-| =bind_hosts: [127.0.0.1]= and =bind_port: 5354= under =dns:= | without a bind list the resolver listens on =0.0.0.0= and would answer on eth2 once the firewall is opened |
+| =bind_hosts: [127.0.0.1]= and =port: 5354= under =dns:= | without a bind list the resolver listens on =0.0.0.0= and would answer on eth2 once the firewall is opened. *A =bind_port= here is the trap*, not a fact: 0.107.71 ignores it and binds =:53= |
 | no =bind_host: 0.0.0.0= anywhere | =host=' default leaking through, which would put the admin UI on the WAN link |
 | =server=/#/127.0.0.1#5354= in =dnsmasq.conf= | the forward is actually there and not just declared |
 | =interface=br-lan=, =dhcp-range=192.168.1.100,192.168.1.249,12h=, =address=/.yuanw.me/192.168.1.190= still present | the 1:1 was not disturbed — the whole reason 1.2(a) is one line |
@@ -309,6 +328,12 @@ and the three =dhcp-host= entries.
 
 What 1.2(b) did *not* declare, and so takes AGH's own defaults: =blocking_mode=
 (NXDOMAIN), =querylog_type= (csv) and =ratelimit=. None are known problems here.
+
+*But read this baseline as a look, not a check.* It was valid yaml and
+=checkPhase= liked it, and it was still wrong: 0.107.71 reads =dns.port= and
+ignores =bind_port=, so =bind_port: 5354= means "port = 0 = 53". Phase 2 found
+that as gen 21 crash-looping on =:53= next to dnsmasq. Nothing in Phase 1 could
+see it — the only proof of a DNS bind is ~ss -lunp~ on the box.
 
 *** 1.5 Commit, and prove the board was not touched
 
@@ -469,10 +494,12 @@ rehearsal the earlier note asked for: after the house is stable again, run
 comes back. Doing both halves in one quiet window proves the path across this
 delta; skipping it leaves the claim as stale as it was on 2026-10-17.
 
-Note a trap specific to this change: =systemctl stop adguardhome= does **not**
-restore resolution. The =server= line stays in dnsmasq's config, so queries simply
-fail — the only two ways back are a working AGH or the previous generation.
-If ssh were somehow lost (it should not be — no address moved), =ttyS0= and the
+Note a trap specific to this change, corrected by the run itself: stopping AGH
+*does* restore resolution, because dnsmasq falls back to ~/etc/resolv.conf~ when
+5354 refuses — which is exactly why gen 21 crash-looping was invisible to the
+house. =systemctl stop adguardhome= is therefore the fast lever back to
+unfiltered DNS (and, per *Decision 4*, the reason that lever exists at all). If
+ssh were somehow lost (it should not be — no address moved), =ttyS0= and the
 extlinux generation menu are the fallback.
 
 *** 2.5 Triage
@@ -527,18 +554,189 @@ whether the rollback half of 2.4 was run. Keep decision 1 marked open if the
 upstream is still plain IPs — the house is now filtered *and* observable, but the
 privacy half is still behind the e8450's old behaviour.
 
+** Phase 3 in detail — rule lists, declared in nix
+
+Everything so far is mechanism: the hop works, nothing is blocked. Phase 3 is the
+one line that makes the plan's title true, and it is the shortest change in the
+whole rollout — but it is the first step that can *break a house service*, so it
+is staged.
+
+Two things to start settled:
+
+- *Phase 3 does not wait on decision 4.* The fallback only fires when AGH is
+  *unreachable*: dnsmasq tries 5354, gets refused, asks the ISP. A *blocked*
+  answer is an answer — NXDOMAIN comes back through dnsmasq and nothing else is
+  consulted. So the lists work as well today as they would after =no-resolv =
+  true=; what changes later is only what happens when AGH is down.
+- *Declare them, do not click them.* =yaml-merge= replaces lists, so a list added
+  in the UI is wiped by the next rebuild (*2.6*, verified). The house convention
+  is that router policy is reviewable in git, and this is policy.
+
+*** 3.1 The config
+
+In =hosts/mono-gateway/default.nix=, replace =filters = [ ]= with the list set.
+Ids are declared so a later UI-add cannot collide with one, and =name= is set
+because it is what the query log shows.
+
+#+begin_src nix
+        # Phase 3: rule lists. Declarative on purpose -- yaml-merge replaces
+        # lists, so anything added in the UI would vanish on the next rebuild.
+        # These ids are ours; don't let the UI reuse them.
+        filters = [
+          {
+            enabled = true;
+            id = 1;
+            name = "AdGuard DNS filter";
+            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+          }
+          {
+            enabled = true;
+            id = 2;
+            name = "AdAway Default Blocklist";
+            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
+          }
+        ];
+#+end_src
+
+Two lists, not five. And not =blocked_services= for tiktok/9gag/the rest the old
+AWS config dreamed about — that is a bigger and separately reversible decision.
+The only feedback loop is the query log, so the first cut wants the smallest rule
+set that proves the plumbing.
+
+*What those two lists are* (measured today, not folklore):
+
+| List | Size | Notes |
+|------+------|-------|
+| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | and it is the house precedent — the commented example in =modules/adguard.nix= |
+| filter_2, AdAway Default Blocklist | 10,596 lines | Android-leaning, overlaps filter_1 heavily |
+
+~195k rules costs roughly 100-200 MB resident against ~7 GB free (2.0), so this is
+a measure-once item, not a risk:
+
+#+begin_src bash
+ssh root@192.168.1.1 'systemctl show adguardhome -p MemoryCurrent --value'
+#+end_src
+
+*** 3.2 Build, activate, and the failure the build will not catch
+
+Same mechanics as Phase 2: tiny closure delta, no kernel, no address moves.
+
+#+begin_src bash
+just mono-gateway-redeploy
+#+end_src
+
+New failure mode: =checkPhase= validates the yaml, *not* the URLs. A list that
+has moved, 404s, or is blocked upstream shows up as a runtime error while
+everything else looks healthy — the exact shape of "filtering is quietly not
+happening". So look at the journal before looking at a client:
+
+#+begin_src bash
+ssh root@192.168.1.1 'journalctl -u adguardhome -n 60 --no-pager | grep -iE "filter|rule|updat"
+                     systemctl show adguardhome -p NRestarts -p MemoryCurrent --value'
+#+end_src
+
+Want: a line per list with a rule count, and no =failed to=. Then confirm what AGH
+actually loaded — the UI answers without a login while decision 2 is open, so this
+is readable from the board, no tunnel:
+
+#+begin_src bash
+ssh root@192.168.1.1 "curl -s localhost:3000/control/filtering/status | head -c 500"
+#+end_src
+
+If that 404s, the path moved in 0.107.71 the way =/control/querylog_search= did in
+Phase 2 — read the filtering page through the tunnel rather than trusting the
+command.
+
+*** 3.3 Two tables, and the second one is the point
+
+*Must be blocked* — verified present as entries in filter_1 today:
+
+#+begin_src bash
+for d in doubleclick.net google-analytics.com pagead2.googlesyndication.com afs.googlesyndication.com; do
+  printf '%-34s %s\n' "$d" "$(dig +short $d @192.168.1.1)"
+done   # want: empty answer on every line
+#+end_src
+
+*Must resolve* — checked against the downloaded list: none of these are entries,
+so a failure here is AGH over-blocking, not the list being correct:
+
+| Query | Expect | Why this one |
+|-------+--------+--------------|
+| =example.com @192.168.1.1= | an address | the mechanism |
+| =dgx-spark.lan= | =192.168.1.185= | dnsmasq-owned; must never reach AGH |
+| =openwrt.yuanw.me= | =192.168.1.190= | misfit's vhosts via the =.yuanw.me= override |
+| =github.com= | an address | filter_1 blocks =collector.github.com= only — a genuine test of subdomain vs apex |
+| =google.com=, =apple.com= | addresses | apexes absent; 31 =apple.com= hits are all subdomains |
+| =ifconfig.me=, =tailscale.com= | addresses | the WAN check and the tailnet must keep working |
+| =curl -4 -s https://ifconfig.me= | the WAN address | end to end, not just DNS |
+
+One specific thing to watch: if the blocked names start answering *with addresses*
+after a rebuild, someone added a list in the UI with a colliding id and it replaced
+yours. Check =filters= in =/var/lib/AdGuardHome/AdGuardHome.yaml=, and fix it by
+declaring, per *2.6*.
+
+*** 3.4 The first day, and what to do when a real service breaks
+
+A day of real traffic before widening anything — one browser tells you nothing
+about the TV, and the query log is the only evidence available.
+
+#+begin_src bash
+# from the board, newest first (the ring is ?limit=N, the search endpoint is 404)
+ssh root@192.168.1.1 "curl -s 'localhost:3000/control/querylog?limit=100&response_type=json' | tail -c 800"
+# or the UI over the tunnel: ssh -N -f -L 3000:127.0.0.1:3000 root@192.168.1.1
+#+end_src
+
+This is where =REJECTED= entries for something like a push domain or a login node
+turn up before anyone says "the internet is slow".
+
+When something real breaks, three levers, fastest first:
+
+1. **Pause filtering.** The UI's protection switch, or now:
+   #+begin_src bash
+   ssh root@192.168.1.1 systemctl stop adguardhome
+   #+end_src
+   The house is back on unfiltered DNS in seconds because of dnsmasq's fallback
+   (*2.4*). Both forms are temporary — the next rebuild reasserts the declaration.
+   This is decision 4 being *useful*, and it is why 4 can stay open during Phase 3.
+2. **Allowlist the domain properly.** Where user rules actually live is *not
+   verified*: the UI writes them under =/var/lib/AdGuardHome/data/filters/= rather
+   than into the yaml, so whether one survives a rebuild is an open question.
+   Discover it the way everything else here has been discovered — add it in the UI
+   once, then look:
+   #+begin_src bash
+   ssh root@192.168.1.1 'grep -rn "<the-domain>" /var/lib/AdGuardHome/data/ /var/lib/AdGuardHome/AdGuardHome.yaml | head'
+   #+end_src
+   Whatever key or file that turns up is what gets declared. Until then lever (1)
+   is the fix, and never rebuild onto an allowlist whose persistence is unknown.
+3. **Drop the list.** Revert one entry in =filters= and redeploy. With two lists
+   this is a real option, which is another reason 3.1 starts at two.
+
+*** 3.5 Widen, or stop
+
+After the day: clean log, both tables pass → add a third list declaratively and
+repeat 3.2-3.4. Anything real blocked → fix per 3.4 and do not widen until it has
+been quiet. There is no goal that says how many lists the house needs; the
+mechanism is already live, and "two lists, boring, no incidents" is a legitimate
+place for this plan to end. If the log never fills with anything worth blocking,
+that is the answer, not a failure to have done more.
+
+Record afterwards: rule counts from =journalctl=, =MemoryCurrent=, both tables run
+from a client (not the board), whether lever (1) was needed by anyone in the
+house, and the generation. Then decisions 4 and 1 — closing the fallback and
+moving upstream to DoH — are what make the filtering mean something, and they are
+deliberately not Phase 3.
+
 ** Phase 3 checks
 
-Only meaningful once rule lists exist — see *2.6*: =filters = [ ]= means Phase 2
-alone blocks nothing. Lines one and three are the ones to run straight after
-Phase 2; the blocked-domain line needs lists.
+Only meaningful once rule lists exist — see *Phase 3 in detail*. What follows is
+the Phase 2 gate, which stays useful as a smoke test after every deploy.
 
 #+begin_src bash
 # from a house client
 dig +short example.com @192.168.1.1           # want: an address, fast
-dig +short ads.example.com @192.168.1.1       # want: nothing (blocked)
+dig +short doubleclick.net @192.168.1.1       # want: nothing (blocked, once lists exist)
 dig +short dgx-spark.lan @192.168.1.1         # want: 192.168.1.185  -- dnsmasq local wins
-nslookup -type=A some-filtered.site 127.0.0.1 # want: no answer
+nslookup -type=A doubleclick.net 127.0.0.1    # want: no answer
 #+end_src
 
 The third line is the regression check that matters: dnsmasq's own data must
@@ -549,14 +747,22 @@ must be unaffected by the new forward.
 
 | # | Question | Options |
 |---+----------+---------|
-| 1 | Upstream | public IPs (one line, works today) vs DoH/DoT (keeps what https-dns-proxy gave us; needs =bootstrap_dns= and is what survives a later VPN) |
-| 2 | Admin credentials | first-run wizard over the loopback UI (nothing in git, survives restarts in =/var/lib/AdGuardHome/data=) vs declarative =passwordFile= via agenix |
-| 3 | Bypass | a client hardcoding 8.8.8.8 skips the board entirely. The e8450 closed that with =force_dns=1= (a real redirect). Close it later with a =br-lan= nft redirect to =.1:53=, once AGH earns its place |
+| 1 | Upstream | public IPs (works today, plaintext) vs DoH/DoT — the half the cutover actually lost, and what survives a later VPN client |
+| 2 | Admin credentials | loopback + ssh, unauthenticated (default: nothing in git, nothing to rotate) vs declarative =settings.auth.users= with a bcrypt hash |
+| 3 | Bypass | a client hardcoding 8.8.8.8 skips the board entirely. The e8450 closed that with =force_dns=1= (a real redirect). Close it later with a =br-lan= nft redirect to =.1:53= |
+| 4 | Advisory or authoritative | dnsmasq's ~/etc/resolv.conf~ fallback means AGH is advisory: 5354 refuses → the ISP resolvers answer. Keep it (dead AGH ≠ outage) or close it with =no-resolv= (AGH becomes the only path — filtering is guaranteed, and an AGH outage now means no resolution) |
 
-Decision 1 is the one the cutover actually owes the house: the AP had encrypted
-upstream + a forced redirect, the board has neither, so =public IPs= is the
-choice that leaves DNS *less* private than before the swap. =DoH/DoT= costs one
-=bootstrap_dns= line and is also what survives a later VPN client.
+Decisions 1, 3 and 4 are one decision wearing three hats. DoH on AGH alone does
+not make the house's DNS private while dnsmasq still has a plaintext fallback,
+and an nft redirect is only meaningful once that fallback is gone — so the order
+that actually moves things is **4, then 1, then 3**. Doing 1 first buys encrypted
+upstreams on half the traffic and a false sense of having fixed it.
+
+For 4 the cheap half is: stop feeding dnsmasq the ISP's resolvers and give it
+nothing but AGH (=no-resolv = true= in the same =settings= block that already
+carries =bogus-priv= and =bind-interfaces=), then confirm from a client that a
+name resolves only via AGH's upstreams. The risk of that switch is in *Known
+limits*: it converts an AGH failure into an internet outage for the house.
 
 Decision 2 is settled by the upstream module: the fork is obsolete, not just
 stale.
@@ -640,11 +846,59 @@ upstream does not already buy. Pick one as "who I ask last".
 Suggested order: AGH now → WG remote access → (only on a real reason) a VPN
 client → unbound last, and only if the client stays off.
 
+** Client names in the query log
+
+The log identifies clients by IP today, not by machine — and it is not that AGH
+lacks the hook. All the discovery sources are already on:
+
+#+begin_src yaml
+clients.runtime_sources: {arp: true, rdns: true, dhcp: true}   # whois too
+dns.local_ptr_upstreams: []      # nothing to ask for PTR of 192.168.1.x
+dhcp: {enabled: false}           # so no lease file is read
+#+end_src
+
+and the result is uniform:
+
+#+begin_src bash
+ssh root@192.168.1.1 'curl -s localhost:3000/control/clients | head -c 300'
+# {"clients":null,"auto_clients":[{"ip":"192.168.1.180","name":"","source":"ARP"}, …
+
+ls -l /var/lib/dnsmasq/dnsmasq.leases   # present, 1.4 KB, one filesystem away
+#+end_src
+
+=ARP= wins by default because =rdns= has nowhere to ask and the =dhcp= source has
+no path. Two fixes, neither tested here:
+
+1. =dns.local_ptr_upstreams = [ "127.0.0.1:53" ]= — dnsmasq answers PTR for every
+   lease it owns, so names come back from the one thing that actually knows the
+   answer. That is the co-location upside, and it is a rebuild rather than a
+   second source of truth.
+2. give the =dhcp= source a lease path — a second copy of the same facts, in the
+   block that also holds AGH's own (disabled) DHCP server, so read the keys
+   carefully before setting anything there.
+
+Names are what the log is actually for, so this is worth doing once the filtering
+is quiet — and it is not a reason to move AGH anywhere else.
+
+** Shipping the log off the board
+
+Not this plan. AGH has no push, so the design is to pull =GET /control/querylog=
+from the log box on a timer (=/control/querylog_search= 404s on 0.107.71); the
+rest of the reasoning and the alternatives are the agenda item linked in
+*Cross-links*. What this file does own is the two facts that pull design has to
+survive: the retention interval below, and the fact that the rows are keyed by IP
+until 1 above is done.
+
 * Known limits
 
 - `shortcut: filter lists update on AGH's own daily timer over HTTPS, so a board
   without WAN egress serves an empty block cache; upgrade to a nix-provided cache
   dir (or a timer-fed fetch) if filtering must work with eth2 dark.`
+- *The query log file rotates far more slowly than the shipping plan assumes.*
+  Shipped is =querylog.interval: 2160h= — 90 days — with =size_memory: 1000=
+  matching the ring. =data/querylog.json= is a file that almost never rotates:
+  fine to poll, but declare =querylog_interval= if 24h is what the design wants,
+  and choose the retention rather than discovering it later.
 - No =blocking_mode= is declared, so AGH's default (NXDOMAIN) applies.
   =refused=/=null_ip=/=custom_ip= exist, but the exact spelling is
   version-dependent — and the module's =checkPhase= runs
@@ -664,7 +918,27 @@ client → unbound last, and only if the client stays off.
   running.
 - Declaring =filters = [ ]= while adding lists in the UI is a slow wipe: the
   declarative key wins the merge and replaces the list on the next rebuild
-  (=yaml-merge= replaces lists, verified). Fix and options in *2.6*.
+  (=yaml-merge= replaces lists, verified). Fix and options in *2.6*, and the
+  declarative form in *3.1*.
+- *Rule-list membership is a fact about the day it was measured.* The 185,488
+  rules and the four blocked domains in 3.3 are from a download on 2026-10-17.
+  Lists are re-fetched daily; do not treat that table as a permanent oracle, and
+  re-run both directions of it after any long gap rather than trusting the
+  numbers.
+- *Allowlist persistence is unknown.* UI user rules land under
+  =/var/lib/AdGuardHome/data/filters/=, not in the yaml, so whether one survives
+  a rebuild has not been tested. Lever (1) in *3.4* is the known-good response
+  until that is answered.
+- *The generated yaml does not prove the DNS bind.* =dns.port= is the key
+  0.107.71 reads; =bind_port= is accepted, ignored, and leaves =:53=. That is the
+  one Phase-1 blind spot the run had to catch (gen 21 crash-looped), so after any
+  change here the check is ~ss -lunp | grep :5354~ on the board, not the yaml.
+- *AGH is advisory today, not a gate.* dnsmasq still reads ~/etc/resolv.conf~, so
+  when 5354 refuses it falls back to the ISP resolvers — observed as
+  "external names still resolved" while AGH was down. Good news: a dead AGH costs
+  filtering, not resolution. The cost: filtering is not guaranteed, and any
+  decision about DoH (1) or a redirect (3) has to account for a path that already
+  bypasses AGH inside dnsmasq itself. See *Decisions still open*.
 - ~blocking_mode = "refused"~ would be quieter than NXDOMAIN but tells a probing
   client *that* it was blocked rather than *that it does not exist*. Not declared
   here, so NXDOMAIN applies; flip it deliberately if that ever matters.
@@ -675,4 +949,6 @@ client → unbound last, and only if the client stays off.
   why =:53= must be opened explicitly, and the rollback rehearsal.
 - [[file:openwrt-plan.org][openwrt-plan.org]] — the e8450 half, and the AP config that leaves AGH running.
 - =hosts/mono-gateway/default.nix= — where this lands.
-- Agenda: *Bring up the Mono Gateway DK as the home router on NixOS*.
+- Agenda: *AdGuard Home on mono-gateway — mechanism shipped, log shipping open*
+  (=~/org/agenda/homelab.org=). Shipping the query log off the board is not
+  covered here; see *Shipping the log off the board*.
