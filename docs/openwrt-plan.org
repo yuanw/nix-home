@@ -582,7 +582,59 @@ It failed, for a reason that also explains the button's seven misses.
 So the no-cable route is closed on this unit. The remaining ways are serial (also the
 device's only real unbrick path) and =failsafe=1= via =fw_setenv= (rejected here: a bad
 =bootargs= on a box with no serial needs TFTP recovery). Treat failsafe as
-*unavailable*, and the watchdog as the only measured protection.
+*unavailable*, and the watchdog as the only measured protection -- until the
+2026-10-17 re-read and retry below says otherwise.
+
+**** 2026-10-17: re-read on the live box -- the wire route is a lost race, not a dead port
+
+Every failsafe file was re-read on the unit (25.12.5, deploy key, read-only), and the
+2026-10-16 conclusion needs one correction: preinit *does* bring the failsafe port up.
+The wire failure is a carrier race, and the direct cable loses it by a second or two:
+
+- =10_indicate_preinit=::=preinit_ip= runs before the window and does
+  ~ip link set dev lan1 up~ plus =192.168.1.1/24= on it; =30_failsafe_wait= then
+  broadcasts ~netmsg~ once a second for ~fs_failsafe_wait_timeout=4~. Nothing on the
+  disk is broken; upstream master is the same.
+- =init: - preinit -= logs at 3.8 s kernel time on this box, so the window sits at
+  ~kernel 4-8 s (wall +5-10 s after =reboot=) -- the 1/s press schedule *did* cover it,
+  which makes the button's silence unexplained and, with preinit =/etc= being squashfs,
+  unobservable without serial.
+- The carrier samples (link back only ~+11 s) are the MT7531 PHY and the Mac's USB-C
+  NIC renegotiating from cold, ~4-6 s. The four broadcasts end right around when
+  carrier first appears, so a direct asche-->lan1 cable gets zero packets without the
+  script being wrong. The margin varies per boot and per link partner, so the race can
+  be won by changing the partner (see the protocol).
+- Two new facts for any retry: this device tree has *no* function LEDs, so =/etc/diag.sh=
+  shows nothing in failsafe -- there is no LED oracle. And the recessed *reset* button on
+  a booted box *reboots it on a short tap and factory-resets at >=5 s hold*
+  (=/etc/rc.button/reset=) -- never tap reset blind; WPS is the only safe button
+  (=rc.button/wps= =exit 5=).
+- Success oracle without serial: entering failsafe sets the hostname to
+  =OpenWrt-failsafe= (=10_indicate_failsafe=), and the failsafe boot runs a default
+  =br-lan= 192.168.1.1 with DHCP and ssh on the lan ports. =ssh root@192.168.1.1=
+  answering with that banner is proof; =mount_root= then reaches the real overlay.
+
+Retry protocol (no unboxing, ~5 min per boot, house LAN down for ~1 min per boot):
+
+1. Put a *switch* between asche and physical =lan1= -- the house switch or any dumb
+   switch. asche's own carrier then survives the reboot, and the only renegotiation
+   left is switch<->lan1, which finishes well inside the window. This is the one
+   variable the 2026-10-16 run lacked.
+2. asche: static =192.168.1.10/24= (or keep its lease), firewall open for UDP/4919, run
+   =python3 openwrt/failsafe-listen.py= (add =--speak= if the screen is out of sight).
+   Sanity-check the receive path first: with the router up,
+   ~ssh root@192.168.1.1 netmsg 192.168.1.255 test~ must print in the listener.
+3. =ssh root@192.168.1.1 reboot=. From wall +4 s, tap WPS about twice a second until
+   +12 s; when the listener prints, tap once more. Taps only -- never reset.
+4. If the router answers: =ssh root@192.168.1.1= and read the banner. =OpenWrt-failsafe=
+   -- failsafe reached, =mount_root=, fix, =reboot=. Normal banner and no
+   =/tmp/failsafe= -- do boot 2: repeat once *holding* WPS down from +3 s to +12 s
+   (a hold guarantees a press event inside the window if dispatch works at all).
+5. Both boots fail -- the finding stands as before, failsafe is unavailable on this
+   build without serial, and the permanent no-unbox fix is one line at the next
+   sysupgrade: an imagebuilder image with ~fs_failsafe_wait_timeout=10~ in
+   =00_preinit.conf= (Phase 4 material). The window being shorter than PHY bring-up
+   on DSA boards is worth an upstream ticket either way.
 
 ** Phase 4 — deferred, do not build yet
 
