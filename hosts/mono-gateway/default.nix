@@ -225,10 +225,23 @@
     # gave us for free, where fw4's =lan= zone was =input ACCEPT= and
     # https-dns-proxy's force_dns redirected every LAN query. On NixOS nothing
     # accepts 53 unless we say so, so after the swap the house resolved nothing.
+    #
+    # tcp/22 is ssh. It belongs here, not in sshd's own rule, for the same reason
+    # as 53 and 67: that rule is global, so with eth2 lit and
+    # =permitrootlogin prohibit-password= root was key-authable from the WAN link.
     interfaces."br-lan".allowedUDPPorts = [
       67
       53
     ];
-    interfaces."br-lan".allowedTCPPorts = [ 53 ];
+    interfaces."br-lan".allowedTCPPorts = [
+      53
+      22
+    ];
   };
+
+  # sshd's openFirewall default is an unscoped =tcp dport 22= accept, which is
+  # why 22 answered on eth2's network. Off, and the =br-lan= rule above is the
+  # only way in. ttyS0 is the way back if a generation ever moves br-lan's
+  # address out from under us.
+  services.openssh.openFirewall = false;
 }
