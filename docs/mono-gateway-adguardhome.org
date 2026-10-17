@@ -2,12 +2,16 @@
 #+DATE: 2026-10-17
 #+OPTIONS: toc:t
 
-*TL;DR as of 2026-10-17: running at generation 22.* The hop works — 10/10 client
-queries land in AGH's query log, dnsmasq still owns =.lan= and =*.yuanw.me=, and
-the admin UI is loopback-only. Blocking is now *declared* — two lists in
-=default.nix=, built and read back, but *not activated*, so no client is filtered
-until someone runs ~just mono-gateway-redeploy~. What remains is that switch,
-then decisions 4→1→3.
+*TL;DR as of 2026-10-17: running at generation 26, filtering.* The hop works — 12/12
+fresh names from a client land in AGH's query log, dnsmasq still owns =.lan= and
+=*.yuanw.me=, the admin UI is loopback-only, and two declared lists are loading
+192,408 rules between them at 58 MB. Two things this file did not know, both in
+*Phase 3 as run*: =dns.filters= is the wrong *location* for 0.107.71 — the list
+belongs at the top level of =settings=, and ours was nested inside =dns=, where it
+is parsed and dropped. All 15 public Nix configs found by code search get this
+right, so the bug was ours and not the ecosystem's. The other surprise:
+=94.140.14.14= has been ad-blocking this house by itself since decision 1 shipped.
+What remains is decisions 1 and 4 (and 3 after them).
 
 * TL;DR
 
@@ -64,16 +68,63 @@ loopback filter hop behind it, no firewall rule, nothing for clients to
 configure. Filtering was still off (=filters = [ ]=), which was deliberate — see
 *2.6* for why the lists go in =default.nix= rather than the UI.
 
-** Phase 3 is declared and built, not yet live
+** Phase 3 is run: blocking is live, and the lists were in the wrong place
 
-The =filters = [ ]= of Phase 2 is replaced by the two lists from *3.1*, declared in
-=default.nix= as that section requires. Proof this time came from the build, not
-the box: =checkPhase= accepted the yaml, both URLs are 200 today, and the
-generated =AdGuardHome.yaml= in *dgx-spark's* store carries both entries with
-their ids next to the unchanged =port: 5354= / =bind_hosts: [127.0.0.1]=.
+2026-10-17, gen 22 → 23 → 24 → 25 → 26. Gen 23 declared both lists *under*
+=settings.dns=, loaded one of them, and refused to budge for four activations after
+that. The cause was never AdAway and never the version:
 
-Nothing was copied to the board and nothing is activated, so the house is
-unfiltered exactly as it was at gen 22. Activating is *3.2*.
+*In schema 32 the filter list is a top-level key.* =/var/lib/AdGuardHome/AdGuardHome.yaml=
+puts =filters:= next to =whitelist_filters:= and =user_rules:=, all three of them
+outside =dns:=, which is where 0.107.71 reads them. A list declared inside
+=settings.dns.filters= is parsed and dropped, and AGH then falls back to the
+filter pair it has compiled in — AdGuard DNS filter (enabled) + AdAway Default
+Blocklist (disabled). That is the whole of the "AdAway will not load" and
+"removing a filter declaratively does not remove it" behaviour, and it is worth
+noting that =yaml-merge= was innocent both times: its list rule is =return b=, a
+plain replacement, which the tool's 30 lines of Python say in one line. The *2.6*
+experiment that "proved" the merge was decisive was a test of the merge, not of
+AGH.
+
+*This was our bug, not the ecosystem's.* The same code search that prompted this
+section found 15 configs with a =filters= key and all 15 declare it as a sibling of
+=dns=, where AGH reads it. One of them is worth reading as a reference for shape,
+not for content: =mx42/homelab='s =config/dns-adguardhome.nix= puts =filters= first,
+then =dns=, exactly as the yaml ends up. So the correct answer to "do people
+declare more than one list?" is yes, and they declare them in the place that
+works; the failure here was that we wrote ours one nesting level too deep and got
+no signal for it.
+
+The proof, run on dgx-spark so no house client was in the loop — same binary,
+state dirs created fresh, config built from this closure:
+
+| declared | result |
+|----------+--------|
+| =settings.dns.filters= = [1,3,4]= | nothing. Storage ends up {id 1 = AdGuard DNS filter, id 2 = AdAway disabled}, and the declared ids 3 and 4 never appear in =filtering/status= at all |
+| =settings.filters= = [1,3,4]= | all three download: 185,868 + 6,540 + 13,085 rules, =data/filters/= gets 1.txt, 3.txt and 4.txt |
+| =settings.dns.filters= = [Dan Pollock], one list | same default pair. It is not adopting *any* declaration |
+
+And on the board at gen 26:
+
+| Proof | Result |
+|-------+--------|
+| =filtering/status= | id 1 = 185,868 rules, id 2 (AdAway) = 6,540 rules, both enabled, =interval: 24=, protection on |
+| client, must-be-blocked | doubleclick/google-analytics/googlesyndication → =0.0.0.0=, and six entries pulled out of *AdAway alone* (so list 2 is doing work list 1 is not): =epom.com=, =tracker.marinsm.com=, =androidads4-8.adcolony.com=, =tnc16-alisg.isnssdk.com=, =ums.acuityplatform.com= → =0.0.0.0= |
+| client, must-resolve | =.lan= → .185, =.yuanw.me= → .190, =github=/=google=/=apple=/=ifconfig=/=tailscale= answering, WAN curl 71.17.19.228 |
+| hop coverage | 12/12 unique cache-missed names reached AGH — the ~/etc/resolv.conf~ fallback answered none, so decision 4 is about guaranteeing filtering through an AGH outage, not stopping a live leak |
+| cost | 58 MB at 192,408 rules, =NRestarts=0, 0 failed units |
+
+Three things this file said that the run corrected, restated where they belong:
+
+- =blocking_mode= is undeclared and its =default= answers a blocked name with
+  =0.0.0.0=, not NXDOMAIN (*Known limits*). The hosts-format AdAway entries answer
+  =127.0.0.1= for the same reason.
+- AdAway's file is *hosts* format (`127.0.0.1 host`), and its own header says
+  *last modified 2023-11-21* — 6,540 rules that are three years old. It loads now,
+  but it is the weakest list available; HaGeZi/OISD is what the community configs
+  in *3.6* actually use.
+- The house was already filtered server-side by AdGuard's resolver before any of
+  this, so Phase 3 is *determinism* gained, not blocking gained.
 
 ** The premise of decision 7 does not hold: the e8450 never filtered
 
@@ -190,7 +241,7 @@ be running no rules.
 |---+----+-------|
 | 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
 | 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *done 2026-10-17* — gen 21 (buggy) → 22 = running system; see *Phase 2 as run* below |
-| 3 | Declare rule lists ([*Phase 3 in detail*](#phase-3-in-detail--rule-lists-declared-in-nix)) | *declared 2026-10-17*: two lists in =default.nix=, =checkPhase= passed, the generated yaml read back from *dgx-spark* with both ids present. **Not activated** — rule counts in ~journalctl~, both tables from a client, and the rebuild-wipe check are still ahead |
+| 3 | Declare rule lists ([*Phase 3 in detail*](#phase-3-in-detail--rule-lists-declared-in-nix)) | *done 2026-10-17*, gen 26: 192,408 rules across two lists, both tables clean from a client, 12/12 hop coverage, 58 MB. The four activations it took are in *Phase 3 as run* — the key was the list's *location* |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
 nixpkgs pin (25.11, not our =nixos-unstable=), so both ~pkgs.adguardhome~ and the
@@ -341,7 +392,8 @@ and =dnsmasq.conf= with the new line next to the untouched ones —
 and the three =dhcp-host= entries.
 
 What 1.2(b) did *not* declare, and so takes AGH's own defaults: =blocking_mode=
-(NXDOMAIN), =querylog_type= (csv) and =ratelimit=. None are known problems here.
+(which answers a blocked name with =0.0.0.0=, not NXDOMAIN, despite the name
+"default"), =querylog_type= (csv) and =ratelimit=. None are known problems here.
 
 *But read this baseline as a look, not a check.* It was valid yaml and
 =checkPhase= liked it, and it was still wrong: 0.107.71 reads =dns.port= and
@@ -584,42 +636,51 @@ Two things to start settled:
   true=; what changes later is only what happens when AGH is down.
 - *Declare them, do not click them.* =yaml-merge= replaces lists, so a list added
   in the UI is wiped by the next rebuild (*2.6*, verified). The house convention
-  is that router policy is reviewable in git, and this is policy.
+  is that router policy is reviewable in git, and this is policy. Read that with
+  the *Phase 3 as run* correction attached: the merge claim is true of the file,
+  and until the declaration lands at the *top level* there is nothing for it to
+  replace, which is why UI additions seemed to survive for so long.
 
 *** 3.1 The config
 
-In =hosts/mono-gateway/default.nix=, replace =filters = [ ]= with the list set.
-Ids are declared so a later UI-add cannot collide with one, and =name= is set
-because it is what the query log shows.
+In =hosts/mono-gateway/default.nix=, declare the list set. Ids are declared so a
+later UI-add cannot collide with one, and =name= is set because it is what the
+query log shows.
 
 #+begin_src nix
-        # Phase 3: rule lists. Declarative on purpose -- yaml-merge replaces
-        # lists, so anything added in the UI would vanish on the next rebuild.
-        # These ids are ours; don't let the UI reuse them.
-        filters = [
-          {
-            enabled = true;
-            id = 1;
-            name = "AdGuard DNS filter";
-            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
-          }
-        ];
+  # TOP LEVEL: a sibling of settings.dns, not a key inside it. In schema 32
+  # (AdGuard Home 0.107.x) filters/whitelist_filters/user_rules all live next to
+  # dns:, so the same list written under settings.dns is parsed away and AGH
+  # substitutes the pair it compiles in.
+  filters = [
+    {
+      enabled = true;
+      id = 1;
+      name = "AdGuard DNS filter";
+      url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+    }
+    {
+      enabled = true;
+      id = 2;
+      name = "AdAway Default Blocklist";
+      url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
+    }
+  ];
 #+end_src
 
-Two lists were intended; only the first one loads, so id 2 is not declared any
-more (*Phase 3 as run*). Its id stays reserved rather than being recycled. And not
-=blocked_services= for tiktok/9gag/the rest the old AWS config dreamed about —
-that is a bigger and separately reversible decision. The only feedback loop is the
-query log, so the first cut wants the smallest rule set that proves the plumbing.
+Two lists, not five. And not =blocked_services= for tiktok/9gag/the rest the old
+AWS config dreamed about — that is a bigger and separately reversible decision.
+The only feedback loop is the query log, so the first cut wants the smallest rule
+set that proves the plumbing.
 
 *What the two lists are* (measured today, not folklore):
 
 | List | Size | Notes |
 |------+------+-------|
-| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | loaded, 185,868 of them. The house precedent — the commented example in the deleted =modules/adguard.nix= |
-| filter_2, AdAway Default Blocklist | 10,596 lines / 243 KB | *will not load on 0.107.71*, though curl fetches it fine |
+| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | loaded: 185,868. The house precedent — the commented example in the deleted =modules/adguard.nix= |
+| filter_2, AdAway Default Blocklist | 6,540 rules | loads now that it is in the right place, but it is *hosts*-format and its header says 2023-11-21 — the oldest list in the set |
 
-185,868 rules cost 40 MB resident against ~7 GB free (2.0) — a fifth of the
+192,408 rules cost 58 MB resident against ~7 GB free (2.0) — nowhere near the
 100-200 MB this file expected, so this is a measure-once item, not a risk:
 
 #+begin_src bash
@@ -663,7 +724,7 @@ command.
 #+begin_src bash
 for d in doubleclick.net google-analytics.com pagead2.googlesyndication.com afs.googlesyndication.com; do
   printf '%-34s %s\n' "$d" "$(dig +short $d @192.168.1.1)"
-done   # want: empty answer on every line
+done   # want: 0.0.0.0 on every line (that is what blocking_mode: default answers)
 #+end_src
 
 *Must resolve* — checked against the downloaded list: none of these are entries,
@@ -734,6 +795,34 @@ from a client (not the board), whether lever (1) was needed by anyone in the
 house, and the generation. Then decisions 4 and 1 — closing the fallback and
 moving upstream to DoH — are what make the filtering mean something, and they are
 deliberately not Phase 3.
+
+*** 3.6 What everyone else declares, and which of it we should copy
+
+Prompted by a GitHub code search for adguard+filters in Nix — 30 configs, 10 read
+in full. Two facts fall out of it, and the second is the useful one.
+
+*They all declare it as a sibling of =dns=,* which is exactly where *Phase 3 as run*
+says AGH reads it. I had assumed the opposite from reading their filter blocks in
+isolation, so to settle it I classified all 15 by indentation: 15/15 =
+=settings.filters=, 0 nested. The lesson is the other way round from what this
+section first said: the code search proves the shape is right, and gives no
+evidence at all about whether a given box is *loading* it — =rules_count= is the
+only thing that answers that, on any config, ours or theirs.
+
+*They mostly declare HaGeZi and OISD, not AdAway.* The lists that recur:
+
+| List | Rules | Why it shows up so often |
+|------+------+------------------------|
+| HaGeZi Pro / Pro+ / Ultimate | ~80k / ~150k / ~330k | the community default: current, ABP-format, tiers you can pick by how aggressive you want |
+| OISD Big (=https://big.oisd.nl=) | ~100k+ | one URL, broad, famous for low false positives |
+| 1Hosts Lite / mini, Dan Pollock, the malware/phishing registry lists | small | cheap second entries, several of the sampled configs use one as a privacy add-on |
+| AdAway Default Blocklist | 6,540 | ours, because *this plan* started from the registry's filter_2. Oldest and smallest thing in the set |
+
+So the honest read on our own list pair is: filter_1 is carrying the house, and
+AdAway is a 2023 hosts-format extra that mostly overlaps it. If Phase 3 widens, it
+should widen to HaGeZi Pro+ or OISD in place of AdAway, not alongside it —
+two rules of thumb from the sampled configs: keep the total under roughly 300k
+rules, and don't stack lists from the same vendor line.
 
 ** Phase 3 checks
 
@@ -946,7 +1035,22 @@ until 1 above is done.
   matching the ring. =data/querylog.json= is a file that almost never rotates:
   fine to poll, but declare =querylog_interval= if 24h is what the design wants,
   and choose the retention rather than discovering it later.
-- No =blocking_mode= is declared, so AGH's default (NXDOMAIN) applies.
+- *The filter list is =settings.filters=, not =settings.dns.filters=.* This is the
+  most expensive fact in the file. At schema 32 the key is a sibling of =dns=, and
+  the same list nested inside =settings.dns= raises no error, no log line and no
+  blocklist: AGH parses it, never sees it, and writes back the pair it compiles
+  in. Both spellings evaluate, =--check-config= likes both, and
+  =/control/filtering/status= looks plausible either way, so the only tell is the
+  rule count. Note that the ecosystem is *not* the cautionary tale here — all 15
+  public configs found by code search declare it as a sibling of =dns=, correctly.
+  Ours was nested, and got no signal for it. Re-check the location on every
+  =adguardhome= bump; =grep -a 'yaml:"filters"'= the binary is the cheap way to
+  find where it reads.
+- No =blocking_mode= is declared, so =blocking_mode: default= applies — and
+  *measured, that answers a blocked name with =0.0.0.0=*, not NXDOMAIN; the
+  hosts-format AdAway entries come back as =127.0.0.1= for the same reason. A
+  client told "here, 0.0.0.0" fails a little more quietly than one told "no such
+  domain", which is good or bad depending on what you want the log to show.
   =refused=/=null_ip=/=custom_ip= exist, but the exact spelling is
   version-dependent — and the module's =checkPhase= runs
   =AdGuardHome -c … --check-config=, so a wrong value fails the *build*, not the

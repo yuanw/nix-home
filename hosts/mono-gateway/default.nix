@@ -244,31 +244,42 @@
         ];
         bootstrap_dns = [ "1.1.1.1" ];
         filtering_enabled = true;
-        # Phase 3: rule lists, declared rather than clicked. yaml-merge replaces
-        # lists, so anything added in the UI would vanish on the next rebuild.
-        # These ids are ours; don't let the UI reuse them. Nothing to migrate --
-        # the e8450's AGH never sat in a DNS path.
-        #
-        # shortcut: AdGuard Home 0.107.71 silently refuses the AdAway list
-        # (filter_2.txt): declared in nix it downloads id=1 and never touches
-        # id=2, and the same URL set enabled through the API is stored back as
-        # enabled: false with 0 rules. One list for now; add the second when
-        # 0.107.x's filter handling is known to accept it (it is not the URL --
-        # curl on the board fetches it fine, 200/243 KB).
-        filters = [
-          {
-            enabled = true;
-            id = 1;
-            name = "AdGuard DNS filter";
-            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
-          }
-        ];
         cache_size = 4194304;
         cache_ttl_min = 300;
         cache_optimistic = true;
         querylog_enabled = true;
         querylog_file_enabled = true;
       };
+
+      # Phase 3: rule lists, declared rather than clicked. yaml-merge replaces
+      # lists, so anything added in the UI would vanish on the next rebuild, and
+      # these ids are ours -- don't let the UI reuse them. Nothing to migrate,
+      # the e8450's AGH never sat in a DNS path.
+      #
+      # TOP LEVEL, not under dns -- that is the part every Nix example gets
+      # wrong. In schema 32 / AGH 0.107.71 `filters` sits next to `dns`,
+      # alongside whitelist_filters and user_rules; a list declared inside
+      # settings.dns is parsed away and AGH silently falls back to its own
+      # compiled-in default pair (AdGuard DNS filter + AdAway, the second
+      # disabled). That was the real cause of the Phase 3 "AdAway refuses to
+      # load" mystery, which this commit's predecessor blamed on the version.
+      # Verified on dgx-spark: top-level -> 185868 + 6540 + 13085 rules; under
+      # dns -> nothing but the defaults, on a clean state dir, twice.
+      filters = [
+        {
+          enabled = true;
+          id = 1;
+          name = "AdGuard DNS filter";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+        }
+        {
+          enabled = true;
+          id = 2;
+          name = "AdAway Default Blocklist";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
+        }
+      ];
+
       # decision 2: close the UI if loopback + ssh stops being enough. Recent AGH
       # wants a bcrypt hash here; no fork, no agenix.
       # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
