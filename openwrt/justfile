@@ -21,14 +21,14 @@
 # openwrt-apply. Keeping two copies of that block is how the reload bug survived: the
 # fix landed in the apply copy, so the diff was showing a clean run against state the
 # apply was not going to reload.
-# Overridable so the dumb-AP target reuses every recipe below unchanged:
-# OPENWRT_TARGET=e8450-ap just openwrt-diff (or the openwrt-ap-* wrappers).
-router := env("OPENWRT_TARGET", "e8450")
-# Cutover: after the dumb-AP apply the e8450 lives at 192.168.1.2 (the board takes
-# .1), so the rollback that side is `OPENWRT_ROUTER_HOST=192.168.1.2 just
-# openwrt-apply` -- the default target is the router declaration, which restores its
-# role at .1. Post-swap .1 is the board, and uci revert cannot undo a committed apply.
-router_host := env("OPENWRT_ROUTER_HOST", "192.168.1.1")
+# Both defaults describe the box as it is now: a dumb AP at .2 (post-swap .1 is the
+# Mono board, and uci revert cannot undo a committed apply). The back-out to
+# router role is therefore explicit, not a default flip:
+#   OPENWRT_TARGET=e8450 OPENWRT_ROUTER_HOST=192.168.1.2 just openwrt-apply
+# e8450-ap.nix imports e8450.nix and overrides only the router bits, so e8450.nix
+# stays the router config that back-out relies on.
+router := env("OPENWRT_TARGET", "e8450-ap")
+router_host := env("OPENWRT_ROUTER_HOST", "192.168.1.2")
 
 # Cutover step 2: the same box as a dumb AP. e8450-ap.nix imports e8450.nix and
 # overrides only the router bits, so e8450.nix stays the router config the

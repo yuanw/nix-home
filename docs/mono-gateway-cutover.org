@@ -259,17 +259,20 @@ e8450's routing role (turn its DHCP server off at the swap only, and only once
 the board's is proven).
 
 One correction the dumb-AP apply forces: after step 2 the e8450 lives at
-=192.168.1.2=, not =.1=, and the recipes' default =router_host= points at =.1=
--- post-swap that is the board. So the e8450 half of the back-out is not
-=re-declare and apply= blind:
+=192.168.1.2=, not =.1= -- and post-swap =.1= *is* the board, so a blind
+=re-declare and apply= would run =uci= on NixOS. The recipes' defaults now
+describe the box as it stands (=e8450-ap= at =.2=), which makes the e8450 half of
+the back-out an explicit act rather than a default flip:
 
 #+begin_src bash
-OPENWRT_ROUTER_HOST=192.168.1.2 just openwrt-apply   # router declaration restores its .1 role
+OPENWRT_TARGET=e8450 OPENWRT_ROUTER_HOST=192.168.1.2 just openwrt-apply   # router role, back at .1
 #+end_src
 
-(=openwrt-apply= defaults to the router target; =uci revert= cannot undo a
-committed apply. Every recipe takes the same =OPENWRT_ROUTER_HOST=, which lives
-in =openwrt/justfile= for exactly this reason.)
+(=uci revert= cannot undo a committed apply. Both axes of that command matter now:
+the target picks which declaration gets applied, and =OPENWRT_ROUTER_HOST= picks
+the box. Both live in =openwrt/justfile=, and both were verified after the change:
+the default diff is clean against =e8450-ap=, and a diff with
+=OPENWRT_TARGET=e8450= shows exactly the AP-to-router delta and nothing else.)
 
 The assumption behind that lives in the OpenWrt track: the back-out works only
 while =just openwrt-diff= stays clean against =openwrt/routers/e8450.nix=, so no
