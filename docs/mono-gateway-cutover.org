@@ -68,19 +68,22 @@ mapping:
 | =eth3=/=eth4= | 10G LAN/trunk | *blocked on the DAC*; leave down for now |
 | WiFi          | e8450 as dumb AP | board stays routing-only; AP uplinks a LAN port |
 
-The board's RJ45 order is not the same as the kernel names. The build plan's panel
-order, left to right, is =USB-C power | USB-C data | USB-C UART | eth1 | eth2 |
-eth0 | eth3 SFP+ | eth4 SFP+=, so the swap cabling is:
+The board's RJ45 order is not the same as the kernel names. Panel order, left to
+right: =USB-C power | USB-C data | USB-C UART | eth0 | eth1 | eth2 | eth3 SFP+ |
+eth4 SFP+=, so the swap cabling is:
 
-- leftmost RJ45 = =eth1= -- house switch (LAN)
-- middle RJ45 = =eth2= -- ISP drop (WAN)
-- rightmost RJ45 = =eth0= -- this Mac / management
+- leftmost RJ45 = =eth0= -- this Mac / management (folds into =br-lan= at the swap)
+- middle RJ45 = =eth1= -- house switch (LAN)
+- rightmost RJ45 = =eth2= -- ISP drop (WAN)
 
-Still owed, once at the board and before the swap: a one-time plug check. With the
-board up and everything else dark, plug a cable into one RJ45 at a time and read
-=ip -br link= (via the Mac's direct link, =ssh root@10.0.0.2=, or the UART console);
-only the documented interface should gain carrier. =eth0= already carries the Mac
-link, so start with =eth1=/=eth2=.
+Plug check *done 2026-10-17*, on the first true gen-15 boot (see the runbook note
+about =switch=-only deploys). One RJ45 at a time with everything else dark, reading
+=ip -br link= via =ssh root@10.0.0.2= (or the UART console): each cable move moved
+exactly its documented interface -- Mac -> =eth0= up, laptop -> =eth1= up (and
+=br-lan=), laptop -> =eth2= up at 1G, dark again on unplug. The check also caught
+that this page and the build plan had recorded the *reverse* order
+(=eth1 | eth2 | eth0=), inherited from the pre-cutover kernel's port names; both
+are now corrected. Identify a port by carrier, not by position.
 
 * Addressing
 
@@ -167,17 +170,41 @@ Three steps, each independently reversible.
    [[file:openwrt-plan.org][OpenWrt plan]]. Failsafe was retried on 2026-10-16 and is *not reachable* on this
    unit (see that plan's *Failsafe rehearsal*), so the protection here is the uci
    rollback watchdog: one plane per apply, physically present, serial cable in hand.
+   (2026-10-17: that watchdog was itself a no-op until that day's fix in
+   =openwrt/justfile= -- =ssh -n= landed a 0-byte script and the guard's =pgrep=
+   matched its own wrapper. The first AP apply proved it: box left at =.2=, no
+   timer, recovered by hand from =/etc/rollback.tar=. Details in the OpenWrt
+   plan's cross-reference.)
 3. *Settle.* Keep the e8450 powered and declared as the fallback router and AP.
    Rehearse =just mono-gateway-rollback= once, then leave both alone for a quiet
    week before retiring the e8450's routing role.
 
 * Cutover runbook
 
+** A deploy that touches kernel or DTB needs a power cycle.**
+=just mono-gateway-redeploy= runs =switch-to-configuration switch=, which swaps
+userspace but not the kernel or DTB -- and the port *names* come from the DTB.
+Learned 2026-10-17: the 2026-10-14 gen-15 activation only became real at that
+day's power cycle. Until then the board ran gen-15 userspace on the pre-cutover
+kernel's port names (=10.0.0.2= answered ARP from the port gen 15 calls =eth2=,
+and ping/ssh were filtered by half-matched rules), and the plug check caught the
+mismatch. After any deploy that changes kernel/DTB, power-cycle before trusting
+the port map.
+
 Staged 2026-10-14: board generation 15 is this config, =eth1= dark, management
 still =10.0.0.2=, with =dnsmasq=/NAT/firewall verified and a laptop on =eth1=
 holding a lease. The e8450 failsafe was then retried (2026-10-16) and is *not
 reachable* on this unit; the swap's e8450 half is protected by the uci rollback
 watchdog and physical presence, with a serial cable as the only true fallback.
+
+Console fallback, verified 2026-10-17 on gen 15: there is *no autologin* -- the
+=--autologin root= unit is overridden by the =serial-getty= drop-in (a stale copy
+in =/etc/systemd/system= still shows it, so =systemctl cat= lies) -- but =root=
+has an empty password and =ttyS0= logs straight into a root shell. One trap:
+once a username is typed at the prompt, =login= exits after 60s idle and the unit
+is =Restart=no=, so the console stays dead until =systemctl start
+serial-getty@ttyS0= is run over ssh -- type the login in one go, and keep the
+Mac's =uartctl.py= daemon up (and never rm =/tmp/uart-out.log= out from under it).
 
 Pre-swap, with nothing cabled to the house:
 
@@ -222,6 +249,19 @@ installer's recovery system (PSTORE trigger keeps config; see the OpenWrt plan's
 *Failsafe rehearsal*), not the button failsafe. Nothing in this design should mutate the
 e8450's routing role (turn its DHCP server off at the swap only, and only once
 the board's is proven).
+
+One correction the dumb-AP apply forces: after step 2 the e8450 lives at
+=192.168.1.2=, not =.1=, and the recipes' default =router_host= points at =.1=
+-- post-swap that is the board. So the e8450 half of the back-out is not
+=re-declare and apply= blind:
+
+#+begin_src bash
+OPENWRT_ROUTER_HOST=192.168.1.2 just openwrt-apply   # router declaration restores its .1 role
+#+end_src
+
+(=openwrt-apply= defaults to the router target; =uci revert= cannot undo a
+committed apply. Every recipe takes the same =OPENWRT_ROUTER_HOST=, which lives
+in =openwrt/justfile= for exactly this reason.)
 
 The assumption behind that lives in the OpenWrt track: the back-out works only
 while =just openwrt-diff= stays clean against =openwrt/routers/e8450.nix=, so no

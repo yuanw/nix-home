@@ -262,10 +262,12 @@ This is a one-time operation done over UART console on the board.
   not the power port — see the panel order below. FTDI chips enumerate natively on
   macOS as =/dev/cu.usbserial-*=.
 - Boot the board into U-Boot and hit any key during the countdown.
-- Panel order, left to right: =USB-C power | USB-C (data) | USB-C UART | eth1 | eth2
-  | eth0 | eth3 SFP+ | eth4 SFP+=. So =eth0= is the **third** RJ-45. The case labels
-  match what the OS reports; identify a port by link state, not by what sits next to
-  it — there are two reset buttons, and the first is described as being "near the USB
+- Panel order, left to right: =USB-C power | USB-C (data) | USB-C UART | eth0 | eth1 |
+  | eth2 | eth3 SFP+ | eth4 SFP+=. So =eth0= is the **first** RJ-45. Proven by the
+  2026-10-17 mono-gateway plug check (one cable at a time, read carrier), which
+  corrected the order recorded here earlier (=eth1 | eth2 | eth0=, the pre-cutover
+  kernel's names). Identify a port by link state, not by what sits next to it —
+  there are two reset buttons, and the first is described as being "near the USB
   and network ports", i.e. near all of them.
 - Status LED during boot: green = hardware self-test passed, red = a test failed (U-Boot
   names the chip), orange pulsing = Recovery Linux, white = OpenWrt. One glance answers
