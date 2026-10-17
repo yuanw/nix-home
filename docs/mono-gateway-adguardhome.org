@@ -4,8 +4,10 @@
 
 *TL;DR as of 2026-10-17: running at generation 22.* The hop works — 10/10 client
 queries land in AGH's query log, dnsmasq still owns =.lan= and =*.yuanw.me=, and
-the admin UI is loopback-only. What is *not* in place yet is blocking: no rule
-lists are declared. What remains is decisions 4→1→3 and the lists themselves.
+the admin UI is loopback-only. Blocking is now *declared* — two lists in
+=default.nix=, built and read back, but *not activated*, so no client is filtered
+until someone runs ~just mono-gateway-redeploy~. What remains is that switch,
+then decisions 4→1→3.
 
 * TL;DR
 
@@ -59,8 +61,19 @@ advisory-fallback discovery are in *Phase 2 as run*.
 
 So decision 7 is settled as designed: dnsmasq is still the front door, AGH is a
 loopback filter hop behind it, no firewall rule, nothing for clients to
-configure. Filtering is still off (=filters = [ ]=), which was deliberate — see
+configure. Filtering was still off (=filters = [ ]=), which was deliberate — see
 *2.6* for why the lists go in =default.nix= rather than the UI.
+
+** Phase 3 is declared and built, not yet live
+
+The =filters = [ ]= of Phase 2 is replaced by the two lists from *3.1*, declared in
+=default.nix= as that section requires. Proof this time came from the build, not
+the box: =checkPhase= accepted the yaml, both URLs are 200 today, and the
+generated =AdGuardHome.yaml= in *dgx-spark's* store carries both entries with
+their ids next to the unchanged =port: 5354= / =bind_hosts: [127.0.0.1]=.
+
+Nothing was copied to the board and nothing is activated, so the house is
+unfiltered exactly as it was at gen 22. Activating is *3.2*.
 
 ** The premise of decision 7 does not hold: the e8450 never filtered
 
@@ -176,7 +189,7 @@ be running no rules.
 |---+----+-------|
 | 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
 | 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *done 2026-10-17* — gen 21 (buggy) → 22 = running system; see *Phase 2 as run* below |
-| 3 | Declare rule lists ([*Phase 3 in detail*](#phase-3-in-detail--rule-lists-declared-in-nix)) | *not run* — rule counts in ~journalctl~, blocked and do-not-block tables both clean from a client, lists survive a rebuild |
+| 3 | Declare rule lists ([*Phase 3 in detail*](#phase-3-in-detail--rule-lists-declared-in-nix)) | *declared 2026-10-17*: two lists in =default.nix=, =checkPhase= passed, the generated yaml read back from *dgx-spark* with both ids present. **Not activated** — rule counts in ~journalctl~, both tables from a client, and the rebuild-wipe check are still ahead |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
 nixpkgs pin (25.11, not our =nixos-unstable=), so both ~pkgs.adguardhome~ and the

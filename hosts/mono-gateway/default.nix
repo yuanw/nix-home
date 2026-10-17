@@ -244,10 +244,24 @@
         ];
         bootstrap_dns = [ "1.1.1.1" ];
         filtering_enabled = true;
-        # Nothing to migrate -- the e8450's AGH never sat in a DNS path. Pick
-        # lists in the UI (mutableSettings defaults to true, so UI edits survive
-        # restarts while these declared keys win at every start).
-        filters = [ ];
+        # Phase 3: rule lists, declared rather than clicked. yaml-merge replaces
+        # lists, so anything added in the UI would vanish on the next rebuild.
+        # These ids are ours; don't let the UI reuse them. Nothing to migrate --
+        # the e8450's AGH never sat in a DNS path.
+        filters = [
+          {
+            enabled = true;
+            id = 1;
+            name = "AdGuard DNS filter";
+            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+          }
+          {
+            enabled = true;
+            id = 2;
+            name = "AdAway Default Blocklist";
+            url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
+          }
+        ];
         cache_size = 4194304;
         cache_ttl_min = 300;
         cache_optimistic = true;
