@@ -174,7 +174,8 @@ file (the in-repo fork is obsolete — see *Decisions still open*). =mutableSett
 defaults to =true=, so UI-side changes survive restarts while the keys we declare
 win at every start.
 
-Deliberately *not* copied from [[file:../modules/adguard.nix][modules/adguard.nix]]: that config's
+Deliberately *not* copied from =modules/adguard.nix= (deleted, along with the
+fork): that config's
 ~cache_size = 536870912~ is 512 MB of cache on a box whose RAM budget is not
 known here, its ~upstream_dns = [ "127.0.0.1:5335" ]~ points at an unbound that
 is not enabled, and its wg/iptables/age pieces belong to the retired AWS box.
@@ -615,7 +616,7 @@ query log, so the first cut wants the smallest rule set that proves the plumbing
 
 | List | Size | Notes |
 |------+------+-------|
-| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | loaded, 185,868 of them. The house precedent — the commented example in =modules/adguard.nix= |
+| filter_1, AdGuard DNS filter | 185,488 rules across ~186k lines | loaded, 185,868 of them. The house precedent — the commented example in the deleted =modules/adguard.nix= |
 | filter_2, AdAway Default Blocklist | 10,596 lines / 243 KB | *will not load on 0.107.71*, though curl fetches it fine |
 
 185,868 rules cost 40 MB resident against ~7 GB free (2.0) — a fifth of the
@@ -827,12 +828,15 @@ So: do not import it. If the UI needs a password, declare
 rekey. The trade is a crackable bcrypt hash in git for a router admin UI; if that
 is unacceptable, keep loopback + ssh and stay unauthenticated.
 
-Both the fork and [[file:../modules/adguard.nix][modules/adguard.nix]] are dead code: the only reference is the
+Both the fork and =modules/adguard.nix= are dead code: the only reference was the
 commented-out =adguard= stanza in =hosts/default.nix=, and that stanza sets
-=services.adguardhome-with-user.*=, so if the fork goes, that stanza goes with
-it. Say so in the same commit rather than deleting one and breaking the other —
-=873d2f99= did exactly that: it flags them as dead, and changes nothing. Deleting
-them is a separate commit with its own =nix eval= proof.
+=services.adguardhome-with-user.*=, so the two go together. *Both files and that
+stanza are now deleted* (they sit in git history if unbound's ~do-query-localhost~
+code ever needs reading again). =nix eval '.#nixosConfigurations' still yields
+=asche dgx-spark misfit silver=, and
+=.#packages.aarch64-linux.mono-gateway-system= still evaluates to a =.drv=, so
+nothing that is actually deployed referenced them. =873d2f99= flagged them without
+changing anything; this is the commit that did not.
 
 * Later additions, and what they change
 
@@ -845,7 +849,7 @@ the point of the loopback hop.
 load-bearing: it must be =dnsmasq → AGH → unbound → root=. Anything that puts
 unbound *ahead* of AGH deletes filtering silently.
 
-Copy from [[file:../modules/adguard.nix][modules/adguard.nix]] with care: unbound drops loopback-sourced
+Copy from =modules/adguard.nix= with care (deleted; it is in git history): unbound drops loopback-sourced
 queries under ~do-not-query-localhost~ (its default), so that =127.0.0.1:5335=
 pair may fall through rather than work. Verify it before trusting it.
 
