@@ -155,7 +155,7 @@ now that the AP has been confirmed to be running no rules.
 
 | # | Do | Proof |
 |---+----+-------|
-| 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | **done 2026-10-17** (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
+| 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
 | 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers; ~ss -ltnp~ shows =127.0.0.1:3000= and no =0.0.0.0:3000= |
 | 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
 
@@ -269,13 +269,13 @@ ssh $S "grep -oE '/nix/store/[a-z0-9]+-dnsmasq.conf' $U/dnsmasq.service | head -
 
 | Confirm | Why |
 |---------+-----|
-| =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | **N = 32** in the 25.11 pin, so =http.address=. That answers *Known limits* with zero risk; it is also in the commit message |
+| =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | *N = 32* in the 25.11 pin, so =http.address=. That answers *Known limits* with zero risk; it is also in the commit message |
 | =bind_hosts: [127.0.0.1]= and =bind_port: 5354= under =dns:= | without a bind list the resolver listens on =0.0.0.0= and would answer on eth2 once the firewall is opened |
 | no =bind_host: 0.0.0.0= anywhere | =host=' default leaking through, which would put the admin UI on the WAN link |
 | =server=/#/127.0.0.1#5354= in =dnsmasq.conf= | the forward is actually there and not just declared |
 | =interface=br-lan=, =dhcp-range=192.168.1.100,192.168.1.249,12h=, =address=/.yuanw.me/192.168.1.190= still present | the 1:1 was not disturbed — the whole reason 1.2(a) is one line |
 
-**What the 2026-10-17 build generated**
+*What the 2026-10-17 build generated*
 
 Keep this as the baseline Phase 2 has to match. The generated yaml
 (=0.107.71=, =checkPhase= said valid):
@@ -457,8 +457,8 @@ client → unbound last, and only if the client stays off.
   router. That is also the fastest way to learn what this AGH accepts.
 - ~services.adguardhome~'s *module* is 25.11's too, not ours, and whether it maps
   =host=/=port= onto =http.address= or the old =bind_host= keys depends on the
-  schema version that release carries. **The build answered that:**
-  =schema_version: 32=, so the yaml carries =http.address: 127.0.0.1:3000=. What is
+  schema version that release carries. The Phase-1 build answered that: at
+  =schema_version: 32= the yaml carries =http.address: 127.0.0.1:3000=. What is
   still only provable on the box is that the bind actually took:
   ~ss -ltnp | grep 3000~ after the deploy — =0.0.0.0:3000= there means it did not,
   and the firewall is the only thing left.
