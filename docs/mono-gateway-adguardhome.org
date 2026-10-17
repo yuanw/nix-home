@@ -156,7 +156,7 @@ now that the AP has been confirmed to be running no rules.
 | # | Do | Proof |
 |---+----+-------|
 | 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
-| 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers; ~ss -ltnp~ shows =127.0.0.1:3000= and no =0.0.0.0:3000= |
+| 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *not run yet* — ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers; ~ss -ltnp~ shows =127.0.0.1:3000= and no =0.0.0.0:3000= |
 | 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
@@ -336,7 +336,177 @@ the house never losing routing, but the delta between those two generations was
 *only* the =br-lan= ~udp/53~ rule. A rollback that drops AGH crosses a bigger
 delta than what has been rehearsed.
 
+** Phase 2 in detail — the one that touches the house
+
+One command activates this. Everything below is about being able to say, inside
+about a minute, whether to keep it or go back — which is the whole difference
+between this change and the ones before it: this one is the first to put a new
+hop in the path every client in the house uses.
+
+What is still at stake, exactly: =dnsmasq= gains a =server= line, so every query
+it does not already own an answer for now travels to =127.0.0.1:5354=. Addresses,
+interfaces, routes, NAT and the firewall are untouched, and =filters = [ ]= means
+*nothing is blocked yet* — this phase is mechanism only.
+
+*** 2.0 Baseline, taken read-only (two minutes)
+
+Measured 2026-10-17, after Phase 1, so these are the numbers to compare against.
+Re-take them if the window is later than that day.
+
+#+begin_src bash
+ssh root@192.168.1.1 'readlink /run/current-system; readlink -f /run/booted-system/kernel
+                      uptime; df -h / | sed 1d; free -m | sed 1n'
+#+end_src
+
+| Item | Value | Why it matters |
+|------+-------+----------------|
+| running system | =d1xfvn524wsh8hkl1zirjbn1lxabbx6m-nixos-system-gateway-25.11…= (gen =20=) | the rollback target |
+| closure to be activated | =32ibqr0vk9pb1i0g8ni9k49ryfpgjwhn-…= — built, already in *dgx-spark's* store (=copying 0 paths=) | Phase 2 is only a copy + a switch |
+| kernel in both | =…gid5v5snxw5x884z6drfkp8wz66m3g4l-linux-6.12.49/Image= — *identical* | no kernel or DTB delta, so **no power cycle** (the cutover runbook's rule), and the port map cannot change under the deploy |
+| root | 1.7 G of 30 G used, 27 G free | =/var/lib/AdGuardHome= (logs, later blocklists) cannot fill the eMMC here |
+| memory | 7832 MB total, ~7031 free | the 4 MB =cache_size= is noise on this box |
+| from a house client | =dig +short example.com @192.168.1.1= answers, =dgx-spark.lan= → =.185= | you need a "was already broken" answer to tell apart a regression |
+
+Serial console is *not* required for this window: nothing here moves =br-lan= or
+=eth2=, so =just mono-gateway-activate='s poll of =192.168.1.1= stays valid and
+the ssh path survives the activation. Contrast the fold, which changed all three.
+
+*** 2.1 Deploy
+
+#+begin_src bash
+just mono-gateway-redeploy
+#+end_src
+
+Builds on dgx-spark, copies to the board, registers the generation *before*
+activating, then activates under =setsid= and polls. Expect: the closure delta is
+small (the ~561-path base is reused, so a few hundred KB), generation 21 appears,
+and the activation prints its running-system path + =activation exit: 0= + failed
+unit count. If =activation exit= is missing after ~2 minutes, that is the justfile
+shortcut's known blind spot (it only polls =192.168.1.1=) — not evidence the board
+broke. Look at the board instead:
+
+#+begin_src bash
+ssh root@192.168.1.1 'readlink /run/current-system; systemctl --failed --no-legend | wc -l'
+#+end_src
+
+*** 2.2 The first 30 seconds — on the board, before touching a client
+
+#+begin_src bash
+ssh root@192.168.1.1 'systemctl status adguardhome --no-pager | head -8
+                     journalctl -u adguardhome -n 25 --no-pager | tail -25
+                     journalctl -u dnsmasq   -n 10 --no-pager
+                     ss -lunp | grep -E ":(53|5354) "
+                     ss -ltnp | grep :3000
+                     head -20 /var/lib/AdGuardHome/AdGuardHome.yaml'
+#+end_src
+
+| Want | Means |
+|------+-------|
+| =adguardhome.service loaded active=, no restart counter climbing | the unit is up and not crash-looping |
+| =udp 127.0.0.1:5354= and =tcp 127.0.0.1:3000=, both =adguardhome= | the binds took. =0.0.0.0:3000= would mean =host= leaked and eth2 can now reach the admin UI — stop the service and fix before anything else |
+| =udp 192.168.1.1:53= still =dnsmasq= | dnsmasq still owns the front door |
+| =journalctl -u dnsmasq= clean (no =all nameservers failed to answer=) | the forward resolves |
+| the state yaml equals the Phase-1 baseline | =installFresh= ran. The wizard did not run — if the UI is waiting for setup, something is wrong with the state dir, not with DNS |
+
+Board-side proof that the hop works, before blaming clients:
+
+#+begin_src bash
+ssh root@192.168.1.1 'dig +short example.com @127.0.0.1 -p 5354   # AGH alone
+                     dig +short example.com @127.0.0.1             # dnsmasq -> AGH
+                     dig +short dgx-spark.lan @127.0.0.1'          # dnsmasq, must not go out
+#+end_src
+
+The third is the one that proves dnsmasq's own data never reaches AGH.
+
+*** 2.3 The gate — from a house client
+
+#+begin_src bash
+dig +short example.com     @192.168.1.1    # want: an address, fast
+dig +short dgx-spark.lan   @192.168.1.1    # want: 192.168.1.185
+dig +short openwrt.yuanw.me @192.168.1.1   # want: 192.168.1.190  (the .yuanw.me override)
+curl -4 -s https://ifconfig.me            # want: the WAN address
+#+end_src
+
+*Pass:* all four, first try. *Fail:* any external name fails for more than ~60
+seconds while the =.lan= names answer — that signature says "dnsmasq works, AGH or
+its upstream does not", and the correct move is 2.4, not debugging on a live
+router. If the =.lan= names fail too, dnsmasq itself is hurt; same action.
+
+*** 2.4 Rollback
+
+#+begin_src bash
+just mono-gateway-rollback     # gen 21 -> gen 20 = the closure recorded in 2.0
+#+end_src
+
+This is the first rollback whose delta is a real feature, so treat it as the
+rehearsal the earlier note asked for: after the house is stable again, run
+=just mono-gateway-activate= on the generation you just left and confirm DNS
+comes back. Doing both halves in one quiet window proves the path across this
+delta; skipping it leaves the claim as stale as it was on 2026-10-17.
+
+Note a trap specific to this change: =systemctl stop adguardhome= does **not**
+restore resolution. The =server= line stays in dnsmasq's config, so queries simply
+fail — the only two ways back are a working AGH or the previous generation.
+If ssh were somehow lost (it should not be — no address moved), =ttyS0= and the
+extlinux generation menu are the fallback.
+
+*** 2.5 Triage
+
+| Symptom | Likely cause | Action |
+|---------+--------------+--------|
+| external names =SERVFAIL=, =.lan= fine, AGH log says upstream failures | WAN cannot reach =94.140.14.14= / =1.1.1.1= over udp/53 (ISP blocks plain DNS, or eth2 is down) | =dig +short example.com @1.1.1.1= on the board. If that fails, decision 1 is no longer optional: switch =upstream_dns= to DoH |
+| =adguardhome= active but nothing on =5354= | bind failed, or the process is a different config | =journalctl -u adguardhome -n 50=; then rollback — a silent no-listener is the worst failure mode, because the house still works *until* someone opens the firewall |
+| =address already in use= on =3000= or =5354= | something else grabbed the port | =ss -lunp= to see what; rollback |
+| AGH active, UI over the tunnel refuses =Host= or 403s | AGH's rebinding/Host check | not a DNS problem; see *Known limits*. DNS is fine, keep it and fix the UI separately |
+| house fine, board load jumps, =journalctl= noisy | query log churn | query logging is declaratively on; =querylog_enabled = false= in the next rebuild is a legitimate first mitigation |
+
+*** 2.6 What Phase 2 must NOT be followed by
+
+No rule lists are declared (=filters = [ ]=), so the natural next move is to add
+them in the UI. *Before doing that*, read this: =mutableSettings = true= merges
+declarative config *over* the state file with =yaml-merge=, and =yaml-merge=
+replaces lists rather than unioning them. Verified on dgx-spark with the
+=yaml-merge= this closure uses (the store path is the same derivation the
+=adguardhome= unit runs):
+
+#+begin_src bash
+Y=/nix/store/l185hixf1zn5bx04frv2kcwrfqf4c3s5-yaml-merge-0-unstable-2022-01-12/bin/yaml-merge
+# state file with a UI-added list, then the declarative config
+$Y <(printf 'dns:\n  filters:\n  - {enabled: true, id: 1, url: https://a.txt}\n  cache_size: 4194304\n') \
+   <(printf 'dns:\n  filters: []\n')
+# -> dns: {cache_size: 4194304, filters: []}        the UI's list is gone
+
+# control: declare nothing about filters and the list survives
+$Y <(printf 'dns:\n  filters:\n  - {enabled: true, id: 1, url: https://a.txt}\n  cache_size: 4194304\n') \
+   <(printf 'dns:\n  cache_ttl_min: 300\n')
+# -> dns: {cache_size: 4194304, cache_ttl_min: 300, filters: [{…https://a.txt}]}
+#+end_src
+
+=dnsmasq.conf= is unaffected by this, so nothing in 2.0–2.5 changes — but every
+=switch-to-configuration= would silently wipe whatever the UI added. Pick one
+before adding lists:
+
+1. drop =filters = [ ]= from =hosts/mono-gateway/default.nix= and manage lists in
+   the UI, where they then persist; or
+2. declare the lists there, which keeps the whole filter set in a diff and is
+   the only variant that survives a re-flash.
+
+Option 2 is what this file's own conventions point to. It is a Phase 3 change,
+not a Phase 2 one.
+
+*** 2.7 Afterwards
+
+Record in the doc and the commit: new generation (=21= unless something else
+landed first), =systemctl is-active adguardhome=, the four checks from 2.3, and
+whether the rollback half of 2.4 was run. Keep decision 1 marked open if the
+upstream is still plain IPs — the house is now filtered *and* observable, but the
+privacy half is still behind the e8450's old behaviour.
+
 ** Phase 3 checks
+
+Only meaningful once rule lists exist — see *2.6*: =filters = [ ]= means Phase 2
+alone blocks nothing. Lines one and three are the ones to run straight after
+Phase 2; the blocked-domain line needs lists.
 
 #+begin_src bash
 # from a house client
@@ -467,9 +637,12 @@ client → unbound last, and only if the client stays off.
   board's AGH is working, remove the package and its service there — an
   =openwrt/routers/e8450-ap.nix= decision, same class as leaving its dnsmasq
   running.
-- ~blocking_mode = "refused"~ is quieter than NXDOMAIN but tells a probing client
-  *that* it was blocked rather than *that it does not exist*. Flip to =default=
-  if that ever matters.
+- Declaring =filters = [ ]= while adding lists in the UI is a slow wipe: the
+  declarative key wins the merge and replaces the list on the next rebuild
+  (=yaml-merge= replaces lists, verified). Fix and options in *2.6*.
+- ~blocking_mode = "refused"~ would be quieter than NXDOMAIN but tells a probing
+  client *that* it was blocked rather than *that it does not exist*. Not declared
+  here, so NXDOMAIN applies; flip it deliberately if that ever matters.
 
 * Cross-links
 
