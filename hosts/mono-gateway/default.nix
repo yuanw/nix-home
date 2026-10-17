@@ -162,10 +162,21 @@
       # Static leases, read 1:1 out of openwrt/routers/e8450.nix. dgx-spark has no
       # IPv4 reservation there (only a DUID and hostid, which is IPv6), so it is
       # intentionally not in this list; it keeps landing on .185 via DHCP.
+      #
+      # ...which is why =dgx-spark.lan= resolved on the e8450 and not here: OpenWrt
+      # appended =.lan= to every lease hostname (=local=/lan/= + =domain=lan= +
+      # =add_local_hostname=) and misfit's caddy proxies two vhosts at that name.
+      # A name built off a lease cannot be pinned to an address that is itself a
+      # lease, so dgx-spark gets a reservation here and the two pieces come together.
       dhcp-host = [
         "DA:E4:6A:44:49:09,192.168.1.212,Mac"
         "58:47:CA:7E:C0:05,192.168.1.190,misfit"
+        "4C:BB:47:29:81:69,192.168.1.185,dgx-spark"
       ];
+
+      # the =.lan= half: dnsmasq serves =<hostname>.lan= for every name it knows.
+      domain = "lan";
+      expand-hosts = true;
 
       # option 3 = gateway, 6 = dnsmasq itself on .1, the same two the e8450 hands out.
       dhcp-option = [
