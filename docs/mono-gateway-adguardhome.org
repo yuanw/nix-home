@@ -2,7 +2,7 @@
 #+DATE: 2026-10-17
 #+OPTIONS: toc:t
 
-*TL;DR as of 2026-10-17: running at generation 27, filtering guaranteed.* The hop
+*TL;DR as of 2026-10-17: running at generation 29, filtering guaranteed.* The hop
 works — 12/12 fresh names from a client land in AGH's query log, dnsmasq still owns
 =.lan= and =*.yuanw.me=, the admin UI is on =br-lan= behind a login and served as
 https://agh.yuanw.me, and two declared lists are
