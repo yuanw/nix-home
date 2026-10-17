@@ -232,7 +232,9 @@
     settings = {
       dns = {
         bind_hosts = [ "127.0.0.1" ];
-        bind_port = 5354;
+        # AGH 0.107 (schema 32) listens on dns.port; bind_port is legacy and is read
+        # as 0 -> defaults to 53 -> collides with dnsmasq and the unit crash-loops.
+        port = 5354;
         # decision 1, public IPs for now. DoH is the half the cutover actually
         # lost (the AP had https-dns-proxy + force_dns); that is a later swap of
         # these two lists, not a redesign.

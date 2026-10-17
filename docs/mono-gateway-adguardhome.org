@@ -156,7 +156,7 @@ now that the AP has been confirmed to be running no rules.
 | # | Do | Proof |
 |---+----+-------|
 | 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | *done 2026-10-17* (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
-| 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *not run yet* — ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers; ~ss -ltnp~ shows =127.0.0.1:3000= and no =0.0.0.0:3000= |
+| 2 | ~just mono-gateway-redeploy~ ([*Phase 2 in detail*](#phase-2-in-detail--the-one-that-touches-the-house)) | *done 2026-10-17* — gen 21 (buggy) → 22 = running system; see *Phase 2 as run* below |
 | 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
@@ -388,6 +388,31 @@ broke. Look at the board instead:
 #+begin_src bash
 ssh root@192.168.1.1 'readlink /run/current-system; systemctl --failed --no-legend | wc -l'
 #+end_src
+
+*** Phase 2 as run — 2026-10-17
+
+Gen 20 → 21 → 22. The first activation exposed a bug Phase 1's read could not
+see: the generated yaml carried =dns.bind_port: 5354=, but the 0.107.71 binary
+reads =dns.port= and ignores =bind_port= — so AGH bound =127.0.0.1:53=, collided
+with dnsmasq, and crash-looped until the restart timer. =server=/#/…= was live
+by then, but external names still resolved: dnsmasq falls back to its global
+(resolv.conf) nameservers when 5354 refuses, so the house never lost DNS, only
+would have lost the hop silently. The fix is one key — =dns.port = 5354= — built
+and activated as gen 22; =bind_port= is not re-declared since it is ignored.
+
+| Proof (2.2/2.3) | Result |
+|-----------------+--------|
+| =adguardhome= | active, =NRestarts=0; =udp+tcp 127.0.0.1:5354= =AdGuardHome=, =tcp 127.0.0.1:3000= only, =udp 192.168.1.1:53= still =dnsmasq= |
+| client: =example.com= / =.lan= / =.yuanw.me= / WAN | all first try: addresses, .185, .190, =71.17.19.228= |
+| the forward is all-or-nothing, not round-robin | 10 unique names from a client, 10/10 in AGH's =/control/querylog= — no leak to the ISP resolvers |
+| rollback half of 2.4 | *not run* — gen 21 → 22 exercised the reverse direction only |
+
+Two facts the runbook's own commands would have missed: the board has no =dig=
+(the proof commands need =host=, or run =dig= from a client), and
+=/control/querylog_search= is 404 in 0.107.71 — the ring is
+=/control/querylog?limit=100=, and it flushes to
+=/var/lib/AdGuardHome/data/querylog.json= once the 1000-entry memory ring
+wraps, so the file appearing is normal but not immediate.
 
 *** 2.2 The first 30 seconds — on the board, before touching a client
 
