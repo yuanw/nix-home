@@ -1,0 +1,324 @@
+#+TITLE: AdGuard Home on the Mono Gateway — plan
+#+DATE: 2026-10-17
+#+OPTIONS: toc:t
+
+* TL;DR
+
+Settle [[file:mono-gateway-cutover.org][cutover decision 7]] (adblocking). dnsmasq stays the LAN's front door;
+AdGuard Home joins behind it as a *loopback-only* filter hop, and dnsmasq gets one
+forwarding line pointing at it.
+
+| Piece | Change |
+|-------+--------|
+| dnsmasq | +1 line: ~server = [ "/#/127.0.0.1#5354" ]~ |
+| AdGuard Home | ~services.adguardhome~ (upstream module), bound to =127.0.0.1= |
+| Firewall | nothing. Loopback binds cannot be reached from eth2, so no new input rule |
+| DHCP | nothing. Clients already get DNS =192.168.1.1= via option 6 |
+| New files | none |
+| New dependencies | none beyond ~pkgs.adguardhome~, which rides in the closure the deploy copies |
+
+The whole change is ~25 lines in =hosts/mono-gateway/default.nix=. It is one
+generation wide from rollback, which is what makes it safe to run on a live router.
+
+Blocking is net-new — the e8450 never filtered (see *The premise of decision 7*
+below). The thing the cutover *did* leave behind is upstream privacy: the AP sent
+DoH, the board sends plaintext UDP to the ISP. That is decision 1, and it is the
+more important half of this plan.
+
+* Status
+
+The board has been the house router since today ([[file:mono-gateway-cutover.org][cutover]], =Done 2026-10-17=):
+WAN =eth2= with the ISP lease, =br-lan= =192.168.1.1=, NAT, dnsmasq serving DHCP
+and DNS. The e8450 is a dumb AP at =192.168.1.2=. Decision 7 has been open since
+the design was written; this plan closes it.
+
+** The premise of decision 7 does not hold: the e8450 never filtered
+
+*AdGuard Home is installed on the e8450 and is not in any DNS path* (confirmed
+2026-10-17; worth a re-check if this doc outlives the AP). The cutover's
+"What exists today" table says dnsmasq forwards to AdGuardHome — it does not. The
+live dhcp config is ~server = 127.0.0.1#5053 / 127.0.0.1#5054~, which is
+https-dns-proxy doing Cloudflare DoH, and =openwrt/routers/e8450.nix= declares
+only the UCI stub (workdir + config_file), no filters and no upstream. Nothing
+routes to an AGH listen port.
+
+That changes the shape of this work:
+
+- *Decision 7 is net-new, not a parity requirement.* No house behaviour depends
+  on AGH today, so nothing here is at risk of being lost in the migration, and
+  there is no "the swap broke adblocking" incident to recover from. Declare
+  =filters = [ ]= and the change is a no-op for every client.
+- *Nothing to migrate.* =/etc/adguardhome/adguardhome.yaml= on the AP is the
+  default/no-rule config, so there is no state to copy and no rules to diff
+  against. The lists are a fresh choice.
+- *The parity item is privacy, not blocking, and the board is behind.* The AP
+  resolved over Cloudflare DoH and =force_dns=1= redirected everything into it;
+  the board forwards plaintext UDP to whatever the ISP hands out in
+  ~/etc/resolv.conf~. That is the property actually lost at the swap — which is
+  why decision 1 below is the more important half of this plan, not the filters.
+
+#+begin_src bash
+# confirm it, if the AP is reachable — expect no :53/:3000 listener owned by agh
+ssh 192.168.1.2 'netstat -luntp | grep -E ":(53|5053|5054|3000) "
+                 sed -n 1,50p /etc/adguardhome/adguardhome.yaml'
+#+end_src
+
+* Design
+
+** The hop order
+
+Clients → =dnsmasq 192.168.1.1:53= → =AGH 127.0.0.1:5354= → upstream
+
+dnsmasq keeps answering everything it answers today: leases and their =.lan=
+names (=dgx-spark.lan=, needed by misfit's caddy vhosts), the two static leases,
+~address = /.yuanw.me/192.168.1.190~, =local=/lan/=, =bogus-priv=. Only queries
+it does not already own an answer for move on to AGH. AGH is therefore *purely
+additive*: if it dies, resolution still works, just unfiltered.
+
+** Why not put AGH on =:53= instead
+
+The alternative is AGH owning port 53 and dnsmasq dropping to =port = 0= (DHCP
+only). Rejected:
+
+- Everything dnsmasq serves from leases/statics/=address=/ has to be rebuilt
+  inside AGH (=local_dns_hosts= + rewrites), and a name built off a lease cannot
+  be pinned there — that is the exact =dgx-spark.lan= problem the cutover already
+  had to solve once.
+- It changes two things at once on a router one day into service, for a feature
+  with no measured need yet.
+- It costs the loopback property, which is what makes the later VPN/unbound work
+  cheap (see *Later additions*).
+
+One line against a rewrite. Take the line.
+
+** Two details that are not obvious from the module docs
+
+- *Non-53 port on purpose.* dnsmasq binds =br-lan= only (=bind-interfaces=), so
+  =127.0.0.1:53= would be free. Using =5354= anyway keeps AGH from ever racing
+  dnsmasq for =:53= across a restart, which is the failure mode that would look
+  like "the house resolves nothing".
+- *The web UI goes on loopback too.* =host = 127.0.0.1= and =port = 3000= are
+  options on the service, *not* keys in =settings= — current nixpkgs asserts
+  =settings.bind_host= away as "superseded by =services.adguardhome.host=", and
+  since =host= defaults to =0.0.0.0=, setting it explicitly *is* the exposure
+  decision. Reached over ssh:
+
+  #+begin_src bash
+  ssh -N -L 3000:127.0.0.1:3000 root@192.168.1.1     # then http://localhost:3000
+  #+end_src
+
+  No =openFirewall =  true= (that is a global =tcp dport 3000=, exactly the class
+  of unscoped rule that already put ssh on the WAN side), no =br-lan= rule, no
+  =host = 192.168.1.1= coupling the service to an address that a future
+  generation might move.
+
+  If the tunnel is too much ceremony, the LAN-click version is =host =
+  "192.168.1.1"= + =interfaces."br-lan".allowedTCPPorts = [ 3000 ]= and a vhost on
+  misfit's caddy next to =openwrt.yuanw.me=
+  (~reverse_proxy http://192.168.1.1:3000~). That trades the loopback bound for
+  convenience, and then the =auth.users= hash above is *required*, not optional —
+  a hostname on =*.yuanw.me= is a wider reach than =127.0.0.1=.
+
+** The config
+
+~services.adguardhome~ is an upstream NixOS module: import nothing, add no
+module file. =mutableSettings= defaults to =true=, so UI-side changes survive
+restarts while the keys we declare win at every start.
+
+#+begin_src nix
+  # --- AdGuard Home (cutover decision 7) ---
+  # dnsmasq stays the front door; AGH is a loopback filter hop behind it.
+  services.dnsmasq.settings.server = [ "/#/127.0.0.1#5354" ];
+
+  services.adguardhome = {
+    enable = true;
+    openFirewall = false;            # loopback only; nothing to open
+    host = "127.0.0.1"; port = 3000;   # service options, NOT settings.bind_host
+    settings = {
+      # close the UI with a password if loopback + ssh stops being enough:
+      # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
+      dns = {
+        bind_hosts = [ "127.0.0.1" ]; bind_port = 5354;
+        upstream_dns  = [ "94.140.14.14" "1.1.1.1" ];
+        bootstrap_dns = [ "1.1.1.1" ];
+        filtering_enabled = true;
+        # nothing to migrate (the AP's AGH was never configured); pick lists
+        filters = [ ];
+        cache_size = 4194304;        # bytes. NOT the 512 MB in modules/adguard.nix
+        cache_ttl_min = 300;
+        cache_optimistic = true;
+        querylog_enabled = true; querylog_file_enabled = true;
+      };
+    };
+  };
+#+end_src
+
+Deliberately *not* copied from [[file:../modules/adguard.nix][modules/adguard.nix]]: that config's
+~cache_size = 536870912~ is 512 MB of cache on a box whose RAM budget is not
+known here, its ~upstream_dns = [ "127.0.0.1:5335" ]~ points at an unbound that
+is not enabled, and its wg/iptables/age pieces belong to the retired AWS box.
+
+* Rollout
+
+Three phases. Phase 2 is the only one that touches the house. There is no Phase 0
+now that the AP has been confirmed to be running no rules.
+
+| # | Do | Proof |
+|---+----+-------|
+| 1 | Write the config, build only | ~just mono-gateway-build~ resolves ~pkgs.adguardhome~ in the board's nixpkgs |
+| 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers |
+| 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
+
+Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
+nixpkgs pin (25.11, not our =nixos-unstable=), so ~pkgs.adguardhome~ here is that
+version's — check `nix eval` of the version and its platform before Phase 2.
+
+Back-out is a generation:
+
+#+begin_src bash
+just mono-gateway-rollback      # proven 2026-10-17 during the step-3 rehearsal
+#+end_src
+
+Note what that rehearsal proved, though: it moved =gen 17 → 16 → 17= over ssh with
+the house never losing routing, but the delta between those two generations was
+*only* the =br-lan= ~udp/53~ rule. A rollback that drops AGH crosses a bigger
+delta than what has been rehearsed.
+
+** Phase 3 checks
+
+#+begin_src bash
+# from a house client
+dig +short example.com @192.168.1.1           # want: an address, fast
+dig +short ads.example.com @192.168.1.1       # want: nothing (blocked)
+dig +short dgx-spark.lan @192.168.1.1         # want: 192.168.1.185  -- dnsmasq local wins
+nslookup -type=A some-filtered.site 127.0.0.1 # want: no answer
+#+end_src
+
+The third line is the regression check that matters: dnsmasq's own data must
+still be answered *without* reaching AGH, so the =.lan= names and =*.yuanw.me=
+must be unaffected by the new forward.
+
+* Decisions still open
+
+| # | Question | Options |
+|---+----------+---------|
+| 1 | Upstream | public IPs (one line, works today) vs DoH/DoT (keeps what https-dns-proxy gave us; needs =bootstrap_dns= and is what survives a later VPN) |
+| 2 | Admin credentials | first-run wizard over the loopback UI (nothing in git, survives restarts in =/var/lib/AdGuardHome/data=) vs declarative =passwordFile= via agenix |
+| 3 | Bypass | a client hardcoding 8.8.8.8 skips the board entirely. The e8450 closed that with =force_dns=1= (a real redirect). Close it later with a =br-lan= nft redirect to =.1:53=, once AGH earns its place |
+
+Decision 1 is the one the cutover actually owes the house: the AP had encrypted
+upstream + a forced redirect, the board has neither, so =public IPs= is the
+choice that leaves DNS *less* private than before the swap. =DoH/DoT= costs one
+=bootstrap_dns= line and is also what survives a later VPN client.
+
+Decision 2 is settled by the upstream module: the fork is obsolete, not just
+stale.
+
+- It exists because 2019-era AGH ran a setup wizard and kept its credential in
+  =user.json=. Upstream's =preStart= now writes the generated yaml before the
+  first start (=installFresh=), so *the wizard skip is not the fork's trick
+  any more* — any =settings != null= skips it, which is what this plan does.
+- Upstream deleted the =user.json= write. Recent AGH wants =auth.users= with a
+  bcrypt hash in the yaml, so the fork's =passwordFile= path can only ever look
+  configured while leaving the UI unauthenticated.
+- Upstream now sets =DynamicUser = true=, which removes the persistent
+  =adguardhome= user the fork creates — and an age secret owned by
+  ="adguardhome"= would not be readable by the service anyway. So the
+  agenix-+-overlay-+=extendModules= route is not merely heavy, it is broken.
+
+So: do not import it. If the UI needs a password, declare
+=settings.auth.users= with a bcrypt hash — no fork, no agenix, no overlay, no
+rekey. The trade is a crackable bcrypt hash in git for a router admin UI; if that
+is unacceptable, keep loopback + ssh and stay unauthenticated.
+
+Both the fork and [[file:../modules/adguard.nix][modules/adguard.nix]] are dead code: the only reference is the
+commented-out =adguard= stanza in =hosts/default.nix=, and that stanza sets
+=services.adguardhome-with-user.*=, so if the fork goes, that stanza goes with
+it. Say so in the same commit rather than deleting one and breaking the other.
+
+* Later additions, and what they change
+
+Both of the things on the agenda next move one line, not the design — which is
+the point of the loopback hop.
+
+** unbound as AGH's upstream
+
+~dns.upstream_dns = [ "127.0.0.1:5335" ]~ and nothing else. Chain order is
+load-bearing: it must be =dnsmasq → AGH → unbound → root=. Anything that puts
+unbound *ahead* of AGH deletes filtering silently.
+
+Copy from [[file:../modules/adguard.nix][modules/adguard.nix]] with care: unbound drops loopback-sourced
+queries under ~do-not-query-localhost~ (its default), so that =127.0.0.1:5335=
+pair may fall through rather than work. Verify it before trusting it.
+
+** VPN, server-side (remote access into the LAN)
+
+AGH does not move. dnsmasq grows a listener:
+
+#+begin_src nix
+  services.dnsmasq.settings.interface = [ "br-lan" "wg0" ];   # + listen-address
+  networking.nat.internalInterfaces = [ "br-lan" "wg0" ];
+  networking.firewall.interfaces."wg0".allowedUDPPorts = [ 53 67 ];
+#+end_src
+
+That last line is not optional: the =:53=/=67= opens are scoped to =br-lan=, so a
+tunnel peer would get routing but no DNS. It is also why binding AGH =0.0.0.0=
+would have been the wrong shortcut — per-interface DNS is dnsmasq's job, not
+AGH's.
+
+** VPN, client-side (the board's own traffic through a tunnel)
+
+This is the one that edits the plan rather than appending to it:
+
+- "upstream = public IPs, reachable via NAT" stops being true, and plain-UDP DNS
+  either goes to the provider's resolver or leaks around the tunnel with no
+  kill-switch. It makes decision 1 a DoH/DoT decision.
+- ~networking.nat~ gains a second masquerade path and ~/etc/resolv.conf~ stops
+  meaning what it means today (same reason =resolveLocalQueries = false= is fine
+  now, and the same reason a =tailscaled --accept-dns= would rewrite it).
+- On this board a tunnel is not just =services.*=: the Phase-5.6/5.8 kernel
+  patches in =hosts/mono-gateway/default.nix= exist because policy-based IPsec
+  SAs were being handed to cmm and breaking ESP, and =docs/mono-gateway-build-plan.org=
+  measures tunnels at *software* speed because the FMan offload does not cover
+  tunnel interfaces. WireGuard is the cheap path; strongSwan inherits the kernel fight.
+
+** unbound + a VPN client, together
+
+Mostly counterproductive: recursion through a tunnel is visible to that tunnel's
+network anyway, costs root-server latency, and buys nothing a trusted DoH
+upstream does not already buy. Pick one as "who I ask last".
+
+Suggested order: AGH now → WG remote access → (only on a real reason) a VPN
+client → unbound last, and only if the client stays off.
+
+* Known limits
+
+- `shortcut: filter lists update on AGH's own daily timer over HTTPS, so a board
+  without WAN egress serves an empty block cache; upgrade to a nix-provided cache
+  dir (or a timer-fed fetch) if filtering must work with eth2 dark.`
+- No =blocking_mode= is declared, so AGH's default (NXDOMAIN) applies.
+  =refused=/=null_ip=/=custom_ip= exist, but the exact spelling is
+  version-dependent — and the module's =checkPhase= runs
+  =AdGuardHome -c … --check-config=, so a wrong value fails the *build*, not the
+  router. That is also the fastest way to learn what this AGH accepts.
+- ~services.adguardhome~'s *module* is 25.11's too, not ours: whether it maps
+  =host=/=port= onto the old =bind_host= keys or onto =http.address= depends on the
+  schema version that release carries. Confirm the result with
+  =ss -ltnp | grep 3000= after the deploy — =0.0.0.0:3000= there means the bind
+  did not take and the firewall is the only thing left.
+- The AP's AGH is installed and inert for DNS, but not free: if its init service
+  is enabled it still fetches list updates and writes to the flash. Once the
+  board's AGH is working, remove the package and its service there — an
+  =openwrt/routers/e8450-ap.nix= decision, same class as leaving its dnsmasq
+  running.
+- ~blocking_mode = "refused"~ is quieter than NXDOMAIN but tells a probing client
+  *that* it was blocked rather than *that it does not exist*. Flip to =default=
+  if that ever matters.
+
+* Cross-links
+
+- [[file:mono-gateway-cutover.org][mono-gateway-cutover.org]] — decision 7, the =input-rule gap= that explains
+  why =:53= must be opened explicitly, and the rollback rehearsal.
+- [[file:openwrt-plan.org][openwrt-plan.org]] — the e8450 half, and the AP config that leaves AGH running.
+- =hosts/mono-gateway/default.nix= — where this lands.
+- Agenda: *Bring up the Mono Gateway DK as the home router on NixOS*.
