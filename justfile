@@ -182,17 +182,39 @@ mono-gateway-host := "192.168.1.1"
 mono-gateway-redeploy:
     @P=$({{nix}} build '.#packages.aarch64-linux.mono-gateway-system' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
      {{nix}} copy --from '{{spark_store}}' --to 'ssh://root@{{mono-gateway-host}}' "$P" && \
-     ssh root@{{mono-gateway-host}} "nix-env --profile /nix/var/nix/profiles/system --set \"$P\" && \
-      \"$P/bin/switch-to-configuration\" switch"
+     ssh root@{{mono-gateway-host}} "nix-env --profile /nix/var/nix/profiles/system --set \"$P\"" && \
+     just mono-gateway-activate "$P"
+
+# Activate a closure without letting this ssh session be what keeps it alive.
+#
+# shortcut: the poll only checks the configured mono-gateway-host. A generation that
+# moves the address will not answer there -- if this reports no marker or times out,
+# the board is fine, you are just not looking at its new address. Upgrade: poll the
+# address the new generation declares, or boot-menu over UART.
+#
+# switch-to-configuration runs as a child of the session that invokes it, so an
+# activation that changes the network this session is riding in on kills itself
+# halfway -- leaving a half-activated board and no way back in. That is exactly what
+# the fold needed hand-held with setsid on 2026-10-17; this makes it the normal path
+# for every deploy, and polls the board instead of trusting the session held.
+mono-gateway-activate PROFILE:
+    @ssh -n root@{{mono-gateway-host}} "rm -f /tmp/activate.exit /tmp/activate.log; setsid sh -c '{{PROFILE}}/bin/switch-to-configuration switch >/tmp/activate.log 2>&1; echo \$? >/tmp/activate.exit' </dev/null >/dev/null 2>&1 &"
+    @for _ in $(seq 30); do sleep 4; ssh -o ConnectTimeout=5 -o ServerAliveInterval=15 root@{{mono-gateway-host}} 'test -f /tmp/activate.exit' 2>/dev/null && break; done
+    @ssh -o ConnectTimeout=10 root@{{mono-gateway-host}} 'echo "running: $(readlink /run/current-system)"; echo "activation exit: $(cat /tmp/activate.exit 2>/dev/null || echo no-marker)"; echo "failed units: $(systemctl --failed --no-legend | wc -l)"; tail -2 /tmp/activate.log 2>/dev/null'
 
 # Roll the board back to the previous generation and activate it. Works because the
 # deploy target registers a profile. Note nixos-rebuild --rollback does NOT work here:
 # it nix-builds its own wrapper from <nixpkgs>, and this board has no route. So this
 # uses the primitives. Switching back twice is idempotent (it re-points at the older
-# generation, it does not create a new one).
+# generation, it does not create a new one). Activates through the recipe above, since
+# an old generation may well change the network.
 mono-gateway-rollback:
-    @ssh root@{{mono-gateway-host}} 'G=$(readlink /nix/var/nix/profiles/system | sed -E "s/.*system-([0-9]+)-link/\\1/"); echo "from generation $G"; nix-env --profile /nix/var/nix/profiles/system --switch-generation $((G>1 ? G-1 : 1)) && /nix/var/nix/profiles/system/bin/switch-to-configuration switch'
-    @ssh root@{{mono-gateway-host}} 'readlink /run/current-system'
+    @P=$(ssh root@{{mono-gateway-host}} 'G=$(readlink /nix/var/nix/profiles/system | sed -E "s/.*system-([0-9]+)-link/\\1/"); nix-env --profile /nix/var/nix/profiles/system --switch-generation $((G>1 ? G-1 : 1)) 2>&1 | head -1; echo "from generation $G" >&2; readlink -f /nix/var/nix/profiles/system'); just mono-gateway-activate "$P"
+
+# Roll forward to a generation by number without rebuilding -- the other half of a
+# rehearsal. Also activates detached, so it survives its own network change.
+mono-gateway-switch-generation NUM:
+    @P=$(ssh root@{{mono-gateway-host}} 'nix-env --profile /nix/var/nix/profiles/system --switch-generation {{NUM}} 2>&1 | head -1; readlink -f /nix/var/nix/profiles/system'); just mono-gateway-activate "$P"
 
 # Router management lives in openwrt/justfile, reachable as `just openwrt-...`.
 import 'openwrt/justfile'
