@@ -88,20 +88,26 @@
   networking.useDHCP = false;
 
   # --- WAN (cutover decision 2) ---
-  # eth2. The board's physical port order is not the kernel's, and Phase 3 found
-  # eth0 is the third RJ-45 from the left, so confirm this map by cable before the
-  # swap. Plain DHCPv4 exactly like the e8450's =proto dhcp= -- there is no PPPoE
+  # eth2. The board's physical port order is not the kernel's: the 2026-10-17 plug
+  # check (first true gen-15 boot) found left -> right = eth0 | eth1 | eth2, so eth2
+  # is the rightmost RJ-45. Identify a port by carrier, not position. Plain
+  # DHCPv4 exactly like the e8450's =proto dhcp= -- there is no PPPoE
   # anywhere in this path. Until the ISP drop is moved to this port it has no
   # carrier and contributes nothing, which is why this is safe to deploy today.
   networking.interfaces.eth2.useDHCP = true;
 
   # --- LAN (cutover decisions 1 and 2) ---
-  # br-lan over eth1, same subnet as the house so nothing renumbers. eth0 is NOT a
-  # member: it is still the point-to-point link to this Mac at 10.0.0.2, and that
-  # is how we reach the board while it is staged. Step 2 of the cutover drops eth0
-  # into this bridge and deletes the static address below -- that is the act that
-  # makes 192.168.1.1 the board's only address.
-  networking.bridges.br-lan.interfaces = [ "eth1" ];
+  # br-lan over eth1, same subnet as the house so nothing renumbers. From the
+  # swap on, eth0 (the Mac's mgmt port) is a member too: the fold drops it into
+  # the bridge and deletes its staging address, which makes 192.168.1.1 the
+  # board's only address. Two consequences: activating this from the Mac kills
+  # the 10.0.0.2 ssh path mid-activation (serial in hand, runbook), and until
+  # eth1 has a house uplink this config leaves br-lan with no carrier -- so it
+  # is build-only until the window, never staged-activated.
+  networking.bridges.br-lan.interfaces = [
+    "eth1"
+    "eth0"
+  ];
   networking.interfaces.br-lan.ipv4.addresses = [
     {
       address = "192.168.1.1";
@@ -109,18 +115,12 @@
     }
   ];
 
-  # Management link, unchanged from the lab config so the deploy path survives
-  # being staged. No defaultGateway and no nameservers on it: the board is
-  # air-gapped on purpose (decided 2026-10-11) and closures are pushed from
-  # dgx-spark, so nothing here should ever pull.
-  networking.interfaces.eth0 = {
-    ipv4.addresses = [
-      {
-        address = "10.0.0.2";
-        prefixLength = 24;
-      }
-    ];
-  };
+  # --- Management (staging): deleted at the swap ---
+  # The 10.0.0.2/24 on eth0 was the staging path to this Mac; the fold puts eth0
+  # in br-lan, so the address is gone and nothing replaces it: the board is
+  # reachable at 192.168.1.1 (house LAN) or the ttyS0 console afterwards. No
+  # defaultGateway/nameservers were ever set here on purpose -- air-gapped
+  # (decided 2026-10-11); closures are pushed, nothing on the board pulls.
 
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY"
