@@ -233,8 +233,8 @@ is not enabled, and its wg/iptables/age pieces belong to the retired AWS box.
 
 * Rollout
 
-Three phases: 1 and 2 are done, 3 (rule lists) is not. Phase 2 is the only one
-that touched the house. There is no Phase 0 now that the AP has been confirmed to
+Three phases: all three are run on 2026-10-17, and Phase 2 is the only one that
+touched the house. There is no Phase 0 now that the AP has been confirmed to
 be running no rules.
 
 | # | Do | Proof |
@@ -906,7 +906,7 @@ must be unaffected by the new forward.
 | 1 | Upstream | public IPs (works today, plaintext) vs DoH/DoT — the half the cutover actually lost, and what survives a later VPN client |
 | 2 | Admin credentials | loopback + ssh, unauthenticated (default: nothing in git, nothing to rotate) vs declarative =settings.auth.users= with a bcrypt hash |
 | 3 | Bypass | a client hardcoding 8.8.8.8 skips the board entirely. The e8450 closed that with =force_dns=1= (a real redirect). Close it later with a =br-lan= nft redirect to =.1:53= |
-| 4 | Advisory or authoritative | dnsmasq's ~/etc/resolv.conf~ fallback means AGH is advisory: 5354 refuses → the ISP resolvers answer. Keep it (dead AGH ≠ outage) or close it with =no-resolv= (AGH becomes the only path — filtering is guaranteed, and an AGH outage now means no resolution) |
+| 4 | Advisory or authoritative | dnsmasq's ~/etc/resolv.conf~ fallback means AGH is advisory: 5354 refuses → the ISP resolvers answer. Keep it (dead AGH ≠ outage) or close it with =no-resolv= (AGH becomes the only path — filtering is guaranteed, and an AGH outage now means no resolution). *Measured 2026-10-17:* stopping AGH for ~12s was enough for real traffic to use the ONT path, and the cached answers outlived the restart — ad names were still answering from dnsmasq's cache after filtering was back |
 
 Decisions 1, 3 and 4 are one decision wearing three hats. DoH on AGH alone does
 not make the house's DNS private while dnsmasq still has a plaintext fallback,
@@ -1040,10 +1040,22 @@ upstream does not already buy. Pick one as "who I ask last".
 Suggested order: AGH now → WG remote access → (only on a real reason) a VPN
 client → unbound last, and only if the client stays off.
 
-** Client names in the query log
+** What the query log can say about a client
 
-The log identifies clients by IP today, not by machine — and it is not that AGH
-lacks the hook. All the discovery sources are already on:
+The log's client field is =127.0.0.1= for every row. Not mostly — the last two
+hundred, and the reason is structural rather than a missing flag:
+
+#+begin_src bash
+ssh root@192.168.1.1 'curl -s "localhost:3000/control/querylog?limit=200&response_type=json" \
+  | grep -o "\"client\":\"[^\"]*\"" | sort | uniq -c'
+#      200 "client":"127.0.0.1"
+#+end_src
+
+dnsmasq forwards from its own socket, so the source address that reaches AGH is
+the resolver's, and no address for a house machine was ever in the packet. AGH's
+log therefore answers *what the house asked* and cannot answer *who asked*.
+
+The =auto_clients= list looks like it should fix that, and is a separate thing:
 
 #+begin_src yaml
 clients.runtime_sources: {arp: true, rdns: true, dhcp: true}   # whois too
@@ -1051,37 +1063,34 @@ dns.local_ptr_upstreams: []      # nothing to ask for PTR of 192.168.1.x
 dhcp: {enabled: false}           # so no lease file is read
 #+end_src
 
-and the result is uniform:
-
-#+begin_src bash
-ssh root@192.168.1.1 'curl -s localhost:3000/control/clients | head -c 300'
-# {"clients":null,"auto_clients":[{"ip":"192.168.1.180","name":"","source":"ARP"}, …
-
-ls -l /var/lib/dnsmasq/dnsmasq.leases   # present, 1.4 KB, one filesystem away
-#+end_src
-
-=ARP= wins by default because =rdns= has nowhere to ask and the =dhcp= source has
-no path. Two fixes, neither tested here:
+It is populated from ARP — ={"ip":"192.168.1.180","name":"","source":"ARP"}= —
+which is a host inventory, not attribution. =rdns= has nowhere to ask and the
+=dhcp= source has no path, even though the lease file is one filesystem away
+(=/var/lib/dnsmasq/dnsmasq.leases=). So two edits are worth making for the
+dashboard's own sake, and neither has been tested:
 
 1. =dns.local_ptr_upstreams = [ "127.0.0.1:53" ]= — dnsmasq answers PTR for every
-   lease it owns, so names come back from the one thing that actually knows the
-   answer. That is the co-location upside, and it is a rebuild rather than a
-   second source of truth.
-2. give the =dhcp= source a lease path — a second copy of the same facts, in the
-   block that also holds AGH's own (disabled) DHCP server, so read the keys
-   carefully before setting anything there.
+   lease it owns, which is the one thing here that knows the answer.
+2. a lease path for the =dhcp= source — the same facts twice, in the block that
+   also holds AGH's own (disabled) DHCP server, so read the keys first.
 
-Names are what the log is actually for, so this is worth doing once the filtering
-is quiet — and it is not a reason to move AGH anywhere else.
+Neither puts a house IP into a query row, because that is a consequence of the
+hop order, not a setting. Getting per-client rows means AGH being the front door
+— which is precisely the trade *Why not put AGH on =:53=* declines — or taking
+the client view from dnsmasq's own =log_queries= and treating AGH's log as what
+the house asked. The usual answer is the second one. If per-machine attribution
+ever matters enough to want the first, reopen that decision rather than
+tuning keys, because nothing else closes it.
 
 ** Shipping the log off the board
 
 Not this plan. AGH has no push, so the design is to pull =GET /control/querylog=
 from the log box on a timer (=/control/querylog_search= 404s on 0.107.71); the
 rest of the reasoning and the alternatives are the agenda item linked in
-*Cross-links*. What this file does own is the two facts that pull design has to
-survive: the retention interval below, and the fact that the rows are keyed by IP
-until 1 above is done.
+*Cross-links*. What this file does own is the two facts that design has to
+survive: the retention interval below, and that every row belongs to
+=127.0.0.1= — which is why the per-machine view is dnsmasq's =log_queries=
+concern, not something a poller can recover from this endpoint.
 
 * Known limits
 
@@ -1093,6 +1102,10 @@ until 1 above is done.
   matching the ring. =data/querylog.json= is a file that almost never rotates:
   fine to poll, but declare =querylog_interval= if 24h is what the design wants,
   and choose the retention rather than discovering it later.
+- *Every query row belongs to =127.0.0.1=,* because dnsmasq is upstream of AGH.
+  "the log is quiet" therefore says nothing about which machine was quiet, and a
+  per-client view needs a different topology or dnsmasq's =log_queries= — see
+  *What the query log can say about a client*.
 - *The filter list is =settings.filters=, not =settings.dns.filters=.* This is the
   most expensive fact in the file. At schema 32 the key is a sibling of =dns=, and
   the same list nested inside =settings.dns= raises no error, no log line and no
