@@ -19,6 +19,6 @@ sleep 90
 
 tar xf /etc/rollback.tar -C /etc/config/ 2>/dev/null
 for s in network firewall dnsmasq; do
-	[ -x /etc/init.d/$s ] && /etc/init.d/$s reload 2>/dev/null
+  [ -x /etc/init.d/$s ] && /etc/init.d/$s reload 2>/dev/null
 done
 sync
