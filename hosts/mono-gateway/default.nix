@@ -172,6 +172,14 @@
         "3,192.168.1.1"
         "6,192.168.1.1"
       ];
+
+      # The wildcard override that lived on the e8450 -- its
+      # =dhcp.@dnsmasq[0].address= was =/.yuanw.me/192.168.1.190=, which the dumb-AP
+      # apply switched off with the rest of that box's dnsmasq. Nothing under
+      # =*.yuanw.me= resolves on the LAN without it: misfit's caddy serves the
+      # LAN-only names behind that wildcard, so this is what makes
+      # openwrt./cockpit./tensorfold. reach it again.
+      address = "/.yuanw.me/192.168.1.190";
     };
   };
 
