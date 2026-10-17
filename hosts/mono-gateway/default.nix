@@ -154,7 +154,9 @@
   # on the WAN side too. Upstream servers are not listed here on purpose -- the
   # NixOS module feeds dnsmasq whatever the WAN's DHCP hands out, which is what
   # the e8450's dnsmasq forwards to. (Since AdGuard Home, the =server= catch-all
-  # below wins over those, so this is only what AGH asks last.)
+  # below wins over those, so this is only what AGH asks last.) *Superseded:*
+  # decision 4 set ~no-resolv = true~, so those DHCP-provided resolvers are no
+  # longer read at all and AGH is the only upstream.
   services.dnsmasq = {
     enable = true;
     # false on purpose. With the default (true) NixOS rewrites the router's own
@@ -206,11 +208,24 @@
       # openwrt./cockpit./tensorfold. reach it again.
       address = "/.yuanw.me/192.168.1.190";
 
+      # Decision 4, closed 2026-10-17: do not import /etc/resolv.conf as upstream
+      # servers. Without it dnsmasq still held the WAN resolvers, so a dead AGH
+      # meant *unfiltered* resolution -- and the fallback is not hypothetical: a
+      # 12s stop during testing let real traffic out through the ONT, and the
+      # cached answers kept serving after AGH came back. With this, the =server=
+      # catch-all below is the only path, so filtering is guaranteed and an AGH
+      # outage is a resolution outage. That is the trade; the lever back is
+      # ~just mono-gateway-rollback~, not ~systemctl stop adguardhome~, and
+      # =dnsmasq --test= in preStart fails activation rather than the house if the
+      # catch-all is ever dropped.
+      no-resolv = true;
+
       # AdGuard Home as a filter hop behind dnsmasq (cutover decision 7). Only
       # queries dnsmasq does not already own an answer for reach it, so leases,
-      # =.lan= names and =*.yuanw.me= are untouched and a dead AGH degrades to
-      # unfiltered resolution instead of killing DNS. Port 5354, not 53, so AGH
-      # can never race dnsmasq for =:53= across a restart.
+      # =.lan= names and =*.yuanw.me= are untouched. Port 5354, not 53, so AGH can
+      # never race dnsmasq for =:53= across a restart. Together with =no-resolv=
+      # above this makes AGH the only external path: a dead AGH is a resolution
+      # outage for external names, which is what decision 4 chose.
       server = [ "/#/127.0.0.1#5354" ];
     };
   };
