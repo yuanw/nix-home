@@ -153,7 +153,8 @@
   # Only on the LAN: without `interface` dnsmasq binds 0.0.0.0 and would answer
   # on the WAN side too. Upstream servers are not listed here on purpose -- the
   # NixOS module feeds dnsmasq whatever the WAN's DHCP hands out, which is what
-  # the e8450's dnsmasq forwards to.
+  # the e8450's dnsmasq forwards to. (Since AdGuard Home, the =server= catch-all
+  # below wins over those, so this is only what AGH asks last.)
   services.dnsmasq = {
     enable = true;
     # false on purpose. With the default (true) NixOS rewrites the router's own
@@ -204,6 +205,56 @@
       # LAN-only names behind that wildcard, so this is what makes
       # openwrt./cockpit./tensorfold. reach it again.
       address = "/.yuanw.me/192.168.1.190";
+
+      # AdGuard Home as a filter hop behind dnsmasq (cutover decision 7). Only
+      # queries dnsmasq does not already own an answer for reach it, so leases,
+      # =.lan= names and =*.yuanw.me= are untouched and a dead AGH degrades to
+      # unfiltered resolution instead of killing DNS. Port 5354, not 53, so AGH
+      # can never race dnsmasq for =:53= across a restart.
+      server = [ "/#/127.0.0.1#5354" ];
+    };
+  };
+
+  # --- AdGuard Home (cutover decision 7) ---
+  # dnsmasq stays the front door; AGH is a loopback-only filter hop behind it, so
+  # there is no firewall rule to add and nothing for clients to configure. Loopback
+  # binds cannot be reached from eth2, hence openFirewall = false.
+  #
+  # host/port are service options, NOT settings.bind_host -- current nixpkgs
+  # asserts bind_host away, and host's default is 0.0.0.0, so declaring it *is*
+  # the exposure decision. The UI is reached over a tunnel:
+  #   ssh -N -L 3000:127.0.0.1:3000 root@192.168.1.1
+  services.adguardhome = {
+    enable = true;
+    openFirewall = false;
+    host = "127.0.0.1";
+    port = 3000;
+    settings = {
+      dns = {
+        bind_hosts = [ "127.0.0.1" ];
+        bind_port = 5354;
+        # decision 1, public IPs for now. DoH is the half the cutover actually
+        # lost (the AP had https-dns-proxy + force_dns); that is a later swap of
+        # these two lists, not a redesign.
+        upstream_dns = [
+          "94.140.14.14"
+          "1.1.1.1"
+        ];
+        bootstrap_dns = [ "1.1.1.1" ];
+        filtering_enabled = true;
+        # Nothing to migrate -- the e8450's AGH never sat in a DNS path. Pick
+        # lists in the UI (mutableSettings defaults to true, so UI edits survive
+        # restarts while these declared keys win at every start).
+        filters = [ ];
+        cache_size = 4194304;
+        cache_ttl_min = 300;
+        cache_optimistic = true;
+        querylog_enabled = true;
+        querylog_file_enabled = true;
+      };
+      # decision 2: close the UI if loopback + ssh stops being enough. Recent AGH
+      # wants a bcrypt hash here; no fork, no agenix.
+      # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
     };
   };
 
