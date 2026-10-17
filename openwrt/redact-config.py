@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Replace secrets in a live /etc/config dump with @placeholders.
 
-The snapshot under state/openwrt/<router>/live is both the drift baseline and the
+The snapshot under openwrt/state/<router>/live is both the drift baseline and the
 secret map: every @name@ there is something nix-uci fills in from 1Password.
 Keeping the dump git-safe is the point, because a router config *is* a secrets
 file if you copy all of it.

@@ -121,8 +121,8 @@ openwrt/
   rollback.sh          # the undo for an apply that costs us the session
   flake-module.nix     # packages.openwrt-<router> = the uci-command script
 justfile               # root recipes; ends with import 'openwrt/justfile'
-state/openwrt/<router>/live/   # drift baseline, secrets redacted
-state/openwrt/<router>/config.txt  # first snapshot, taken before there was a recipe
+openwrt/state/<router>/live/   # drift baseline, secrets redacted
+openwrt/state/<router>/config.txt  # first snapshot, taken before there was a recipe
 #+end_src
 
 Mic92 keeps his router code self-contained under =openwrt/= with its own
@@ -211,7 +211,7 @@ Rules that keep this boring and safe:
   waits 90 s, and restores it unless the router has answered ssh by then. It is armed
   only when the change touches =network=, =wireless= or =firewall= (=OPENWRT_FORCE_ROLLBACK=1=
   forces it for testing). There is deliberately no boot-time hook: =/tmp= is RAM, so the
-  watchdog cannot cover a power loss mid-apply. =state/openwrt/<router>/live= is the
+  watchdog cannot cover a power loss mid-apply. =openwrt/state/<router>/live= is the
   manual path back for that, and =sysupgrade -b= must be =scp='d off the box to count.
   The failsafe button is *not* part of this story yet, and should not be leaned on;
   see *Failsafe rehearsal*.
@@ -220,12 +220,12 @@ Rules that keep this boring and safe:
 
 ** drift detection (cheaper than a diff engine)
 
-~state/openwrt/<router>/live/*= checked into git, with secrets replaced by =@name@=
+~openwrt/state/<router>/live/*= checked into git, with secrets replaced by =@name@=
 placeholders. =openwrt= has busybox =tar= and no =rsync=, so the copy is a tar pipe:
 
 #+begin_src makefile
 openwrt-facts:
-    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C state/openwrt/{{router}}/live
+    ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C openwrt/state/{{router}}/live
 #+end_src
 
 =git diff= against that is the "what did I change in LuCI last week" answer, and
@@ -235,7 +235,7 @@ questions, no clever code needed for either.
 Caveat found on 2026-10-11: once =openwrt-apply= has touched a config, that file
 rewrites itself — comments are dropped and every value comes out quoted, so
 =option input REJECT= becomes =option input 'REJECT'=. =openwrt-diff= still reads it
-as clean, but =git diff state/= does not. Expect cosmetic churn in the snapshot after
+as clean, but =git diff openwrt/state/= does not. Expect cosmetic churn in the snapshot after
 any apply, and read the diff as *content* rather than as line-for-line.
 
 * Phase 1/2 status (applied, in daily use)
@@ -320,7 +320,7 @@ the rest — the day LuCI writes a =firewall= rule we know nothing about, the di
 only catches it if =firewall= is declared. Until then =openwrt-facts= + =git diff=
 is the drift check.
 
-* Phase 0 findings (2026-10-10, committed in =state/openwrt/e8450/config.txt=)
+* Phase 0 findings (2026-10-10, committed in =openwrt/state/e8450/config.txt=)
 
 - Linksys E8450 (UBI), =mediatek/mt7622=, 512 MiB RAM, kernel 6.12, **OpenWrt
   25.12.5** (r33051), 30d uptime. Hostname is still the default =OpenWrt=.
@@ -363,7 +363,7 @@ read yet — every decision below depends on it.
 - translate: =ssh root@r 'uci show network' # -> write openwrt/routers/*.nix, section by section=
 
 Exit criteria: model, OpenWrt version, installed packages, and the full
-=/etc/config= in =state/=. Everything after this is a diff away from this.
+=/etc/config= in =openwrt/state/=. Everything after this is a diff away from this.
 
 ** Phase 1 — vendored tool + trivial config apply (~2h)
 
@@ -391,7 +391,7 @@ to declared, with =just openwrt-diff= clean afterwards.
 
 ** Phase 3 — =network= + =firewall= (the lockout configs)
 
-What is actually on the box (`state/openwrt/e8450/live/`):
+What is actually on the box (`openwrt/state/e8450/live/`):
 
 | config    | options | sections | anonymous                                   |
 |-----------|---------|----------|---------------------------------------------|
@@ -433,7 +433,7 @@ alphabetical (`default_radio0` before `radio0`) rather than in declaration order
 Rule order is precedence, so declare rules as an **anonymous list**, where JSON array
 order is preserved. Benign for `wireless`; fatal for `firewall`.
 
-That reordering is also the proof that `state/` still earns its keep: the sorted diff
+That reordering is also the proof that `openwrt/state/` still earns its keep: the sorted diff
 could not see it, the snapshot's `git diff` could.
 
 **What is left is the first real change** to `network` or `firewall`. That happened on
@@ -484,7 +484,7 @@ anything touching `network`.
   again, disarmed = NEW-STATE stands.
   - *deliberately not built*: the boot-time =S15= hook. =/tmp= is RAM, so this watchdog
     dies with a reboot and cannot cover power loss mid-apply. On a box with 31 days of
-    uptime, that is a far smaller risk than a bad rule, and =state/openwrt/e8450/live=
+    uptime, that is a far smaller risk than a bad rule, and =openwrt/state/e8450/live=
     is the manual path back for it. Add the hook if that ever stops being true.
 - reloads are still synchronous. openwrt-nix detaches them
   (=( sleep 1; <reload>) >/dev/null 2>&1 &=) so ssh exits 0 before the interface
@@ -702,7 +702,7 @@ Pre-flight (2 min):
    ts=$(date +%Y%m%dT%H%M%S)
    ssh -i ~/.ssh/id_deploy root@192.168.1.1 'sysupgrade -b /tmp/pre-pstore.tar.gz'
    ssh -i ~/.ssh/id_deploy root@192.168.1.1 'cat /tmp/pre-pstore.tar.gz' \
-     > state/openwrt/backups/e8450-pre-pstore-$ts.tar.gz
+     > openwrt/state/backups/e8450-pre-pstore-$ts.tar.gz
    #+end_src
 2. Clear the known_hosts entry now -- recovery has its own host key, and it flips
    again on the way back: ~ssh-keygen -R 192.168.1.1~.

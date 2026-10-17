@@ -1,6 +1,6 @@
 # Declared state for the Linksys E8450 router (192.168.1.1).
 #
-# Translated 1:1 from state/openwrt/e8450/live, so `just openwrt-diff` comes back
+# Translated 1:1 from openwrt/state/e8450/live, so `just openwrt-diff` comes back
 # empty. Change values here to change the router.
 #
 # Named sections are edited in place, so a section missing from this file is left
@@ -96,7 +96,7 @@
       encryption = "psk2";
       key = "@wireless_key@";
     };
-    # --- everything else, translated 1:1 from state/openwrt/e8450/live ------------
+    # --- everything else, translated 1:1 from openwrt/state/e8450/live ------------
     # Declared so drift shows up as a diff instead of disappearing. None of these
     # can lock us out: worst case is a service restart. `firewall` is declared last
     # and is the one config that can; see docs/openwrt-plan.org,

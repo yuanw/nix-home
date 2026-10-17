@@ -103,7 +103,7 @@ openwrt-apply:
     # adguardhome.yaml, nftables.d, crontabs). It contains secrets, so it lands under
     # a gitignored path and never gets committed. Best-effort: the apply continues.
     ts=$(date +%Y%m%dT%H%M%S)
-    backup="$PWD/state/openwrt/backups/{{router}}-pre-apply-$ts.tar.gz"
+    backup="$PWD/openwrt/state/backups/{{router}}-pre-apply-$ts.tar.gz"
     mkdir -p "$(dirname "$backup")"
     if ssh -n "$host" 'sysupgrade -b /tmp/pre-apply.tar.gz'; then
         if ssh -n "$host" 'cat /tmp/pre-apply.tar.gz' > "$backup"; then
@@ -220,10 +220,10 @@ openwrt-revert:
     ssh -n "root@{{router_host}}" "for c in $configs; do uci revert \$c 2>/dev/null; done"
     ssh -n "root@{{router_host}}" 'uci changes | wc -l' | xargs echo 'staged lines remaining:'
 
-# snapshot the live config into state/ for drift detection. openwrt has busybox
+# snapshot the live config into openwrt/state/ for drift detection. openwrt has busybox
 # tar, not rsync, so the copy is a tar pipe rather than an rsync.
 openwrt-facts:
-    @rm -rf "$PWD/state/openwrt/{{router}}/live" && mkdir -p "$PWD/state/openwrt/{{router}}/live"
-    @ssh -n "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/state/openwrt/{{router}}/live"
-    @python3 "$PWD/openwrt/redact-config.py" "$PWD/state/openwrt/{{router}}/live"
-    @echo "snapshot in state/openwrt/{{router}}/live -- git diff it to see what LuCI changed"
+    @rm -rf "$PWD/openwrt/state/{{router}}/live" && mkdir -p "$PWD/openwrt/state/{{router}}/live"
+    @ssh -n "root@{{router_host}}" 'tar cf - -C /etc/config .' | tar xf - -C "$PWD/openwrt/state/{{router}}/live"
+    @python3 "$PWD/openwrt/redact-config.py" "$PWD/openwrt/state/{{router}}/live"
+    @echo "snapshot in openwrt/state/{{router}}/live -- git diff it to see what LuCI changed"
