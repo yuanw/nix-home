@@ -122,6 +122,19 @@
   # defaultGateway/nameservers were ever set here on purpose -- air-gapped
   # (decided 2026-10-11); closures are pushed, nothing on the board pulls.
 
+  # --- Nix garbage collection ---
+  # Nothing cleaned the store: gc.automatic was never set and there is no
+  # nix-gc.timer on the board, so every redeploy left a generation behind
+  # (~15 MB of unique paths). Same knobs as modules/nixos_system.nix, the house
+  # default. Weekly is plenty for a box that redeploys a handful of times a
+  # month, and 10d keeps the current generation plus whatever was live last
+  # week for rollback. 10.0.0.x/air-gapped: GC runs locally, no substituters.
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 10d";
+  };
+
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY"
   ];
