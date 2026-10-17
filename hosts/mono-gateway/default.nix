@@ -227,6 +227,16 @@
       # above this makes AGH the only external path: a dead AGH is a resolution
       # outage for external names, which is what decision 4 chose.
       server = [ "/#/127.0.0.1#5354" ];
+
+      # The *who* half of the client view: AGH's log can only ever say 127.0.0.1,
+      # so per-machine rows have to come from the front door (see
+      # docs/mono-gateway-adguardhome.org, *What the query log can say about a
+      # client*). Read it as =journalctl -u dnsmasq -f=; the line that names the
+      # asker is =query[A] example.com from 192.168.1.155=.
+      # shortcut: 2.91 has no =log-queries-nomisc=/=freq=, so PTR and mDNS chatter
+      # ride along, and journald's 50M runtime window is hours rather than days.
+      # Delete this key to stop the trial.
+      log-queries = true;
     };
   };
 

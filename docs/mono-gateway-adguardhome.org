@@ -1128,6 +1128,18 @@ the house asked. The usual answer is the second one. If per-machine attribution
 ever matters enough to want the first, reopen that decision rather than
 tuning keys, because nothing else closes it.
 
+That second answer is what shipped, 2026-10-17, gen 30: ~log-queries = true~ in
+~services.dnsmasq.settings~ (=hosts/mono-gateway/default.nix=), so
+=journalctl -u dnsmasq= carries the per-machine view
+(=query[A] example.com from 192.168.1.155=) while AGH's log stays the record of
+what the house asked. Measured on the way in: six distinct askers in the first
+three minutes, ~17 KB of journal per 10 min, and =doubleclick.net= =0.0.0.0=,
+=dgx-spark.lan= =.185= and =example.com= still answering — this key cannot change
+the data path, only describe it. The cost is volume: 2.91 here has no
+=log-queries-nomisc= or =freq=, so PTR and mDNS chatter ride along, and
+journald's 50M runtime window is hours of history rather than days. Deleting the
+key is the whole un-install.
+
 ** Shipping the log off the board
 
 Not this plan. AGH has no push, so the design is to pull =GET /control/querylog=
@@ -1150,8 +1162,8 @@ concern, not something a poller can recover from this endpoint.
   and choose the retention rather than discovering it later.
 - *Every query row belongs to =127.0.0.1=,* because dnsmasq is upstream of AGH.
   "the log is quiet" therefore says nothing about which machine was quiet, and a
-  per-client view needs a different topology or dnsmasq's =log_queries= — see
-  *What the query log can say about a client*.
+  per-client view needs a different topology or dnsmasq's =log_queries= — the
+  second is enabled since gen 30, see *What the query log can say about a client*.
 - *The filter list is =settings.filters=, not =settings.dns.filters=.* This is the
   most expensive fact in the file. At schema 32 the key is a sibling of =dns=, and
   the same list nested inside =settings.dns= raises no error, no log line and no
