@@ -170,8 +170,10 @@ mono-gateway-serve:
 
 
 
-# Address the board answers at while it is cabled straight to this Mac.
-mono-gateway-host := "10.0.0.2"
+# Address the board answers at. Since the swap it is the house router, so
+# 192.168.1.1 -- the staging 10.0.0.2 went away with the fold (generation 16).
+# For a board cabled straight to this Mac, override it: mono-gateway-host=10.0.0.2.
+mono-gateway-host := "192.168.1.1"
 
 # Build the gateway's NixOS system closure on dgx-spark and switch the running
 # board. Cheaper than re-flashing: the closure reuses the ~561 store paths already

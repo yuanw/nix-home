@@ -184,10 +184,19 @@
     # Allow-DHCP-Renew: the WAN client's replies. Without this the lease renews
     # on .100 but never commits.
     allowedUDPPorts = [ 68 ];
-    # DHCP server requests from LAN clients. NixOS's input policy drops udp/67
-    # unless it is opened, and without it dnsmasq never sees the DISCOVER (the
-    # first staging boot took no lease because of exactly this). Scoped to
-    # =br-lan= so the WAN side never runs a DHCP server.
-    interfaces."br-lan".allowedUDPPorts = [ 67 ];
+    # DHCP server requests and DNS from LAN clients. NixOS's input policy drops
+    # both unless they are opened, and without udp/67 dnsmasq never sees the
+    # DISCOVER (the first staging boot took no lease because of exactly this).
+    # Scoped to =br-lan= so the WAN side never runs a DHCP server or a resolver.
+    #
+    # tcp/53 is for answers over 512 bytes -- the other half of what the e8450
+    # gave us for free, where fw4's =lan= zone was =input ACCEPT= and
+    # https-dns-proxy's force_dns redirected every LAN query. On NixOS nothing
+    # accepts 53 unless we say so, so after the swap the house resolved nothing.
+    interfaces."br-lan".allowedUDPPorts = [
+      67
+      53
+    ];
+    interfaces."br-lan".allowedTCPPorts = [ 53 ];
   };
 }
