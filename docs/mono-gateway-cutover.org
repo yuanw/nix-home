@@ -214,7 +214,12 @@ one generation back.
 
 Trivially: re-cable the ISP drop to the e8450's =wan= and power the board down.
 The e8450's config is declarative and pinned in =openwrt/routers/e8450.nix=, so
-it comes back exactly as it is now. Nothing in this design should mutate the
+it comes back exactly as it is now. Caveat added 2026-10-17: one soft reboot of
+this box has hung and needed a manual power cycle (cause unknown; its =bl2= is
+already the OKD-fixed build, so not that disease) -- plan hands-on time around
+anything that reboots the e8450, and know that its no-serial rescue is the
+installer's recovery system (PSTORE trigger keeps config; see the OpenWrt plan's
+*Failsafe rehearsal*), not the button failsafe. Nothing in this design should mutate the
 e8450's routing role (turn its DHCP server off at the swap only, and only once
 the board's is proven).
 

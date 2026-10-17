@@ -636,6 +636,121 @@ Retry protocol (no unboxing, ~5 min per boot, house LAN down for ~1 min per boot
    =00_preinit.conf= (Phase 4 material). The window being shorter than PHY bring-up
    on DSA boards is worth an upstream ticket either way.
 
+**Boot 1 result (same day): inconclusive -- the box hung; and the rescue story changed for the better.**
+The run followed the protocol (switch between asche and lan1, listener armed,
+receive path proven with a manual netmsg, reboot fired at 14:20:16, WPS tapped).
+The router never came back: ~3.5 minutes dark, recovered by a manual power cycle.
+The listener received zero packets the whole time with a live receive path, so
+preinit never ran and no failsafe window ever opened -- the taps were never given
+a chance; the soft reboot itself hung.
+
+**Not OKD.** Reading =/dev/mtd0= afterwards shows the bootloader already runs the
+fixed TF-A: =v2.10.0 (release):OpenWrt v2024.01.17~bacca82a-3= -- exactly the
+build the device page ships as the OKD fix. So the hang was a one-off, unexplained
+boot failure (power cycle recovered it, first occurrence observed), not the known
+disease, and flashing a newer =bl2= buys nothing.
+
+**The rescue path that actually exists: the installer's recovery system.** This box
+has a =recovery= UBI volume (and =boot_backup= with the vendor bootchain, both
+confirmed present), and two documented ways into it, neither needing serial:
+
+- *PSTORE trigger, keeps configuration*: from a running OpenWrt,
+  ~echo c > /proc/sysrq-trigger~ panics the box; U-Boot sees the ramoops record
+  and boots the recovery system, which serves ssh/http/tftp for restore or
+  upgrade. ~rm /sys/fs/pstore/*~ and reboot returns to production. Verified armed
+  on this box: ~kernel.sysrq=1~, =/sys/fs/pstore= empty, recovery volume present.
+- *Reset at power-on, wipes configuration*: hold reset while powering up, release
+  when the power LED turns orange. Last resort for a box that cannot boot; the
+  declarative config makes the wipe survivable.
+
+This covers the swap's real risk class (boots fine, config locks us out) better
+than failsafe ever could -- it keeps the config and needs no button, no window,
+no carrier race. It was found in the installer README, hiding in plain sight since
+the original install.
+
+**What is left of the failsafe track:** the button's silence stays unexplained and
+unobservable without serial; the wire oracle stays a carrier race. Neither is worth
+more blind reboots now that recovery mode is the safety net of record. The one-line
+~fs_failsafe_wait_timeout=10~ imagebuilder fix remains queued as Phase 4 material,
+to ride along the next sysupgrade that happens anyway -- not as a standalone flash.
+The rehearsal of the PSTORE path is the runbook immediately below.
+
+**** PSTORE recovery rehearsal (runbook, not yet run)
+
+Goal: make the rescue path *measured* the way the watchdog is, not just documented.
+Preconditions all verified on the box 2026-10-17: =kernel.sysrq=1=, ramoops backend
+registered at boot (~pstore: Registered ramoops as persistent store backend=,
+0x10000@0x42ff0000), and the =recovery= UBI volume begins with a valid
+=ARM64 OpenWrt FIT= image. Plan for ~5-8 min of house downtime (WiFi + internet down
+the whole time; the one unexplained boot hang earlier today puts a small chance on
+needing a power cycle, so stay near the box).
+
+Pre-flight (2 min):
+
+1. Pull a full backup off the box (the rehearsal keeps config, but that is the
+   claim being tested):
+   #+begin_src bash
+   ts=$(date +%Y%m%dT%H%M%S)
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'sysupgrade -b /tmp/pre-pstore.tar.gz'
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'cat /tmp/pre-pstore.tar.gz' \
+     > state/openwrt/backups/e8450-pre-pstore-$ts.tar.gz
+   #+end_src
+2. Clear the known_hosts entry now -- recovery has its own host key, and it flips
+   again on the way back: ~ssh-keygen -R 192.168.1.1~.
+
+The run:
+
+3. Fire the deliberate panic from a running system (the session dies instantly --
+   that is the crash, not an error):
+   #+begin_src bash
+   ssh -i ~/.ssh/id_deploy root@192.168.1.1 'sync; echo c > /proc/sysrq-trigger'
+   #+end_src
+4. U-Boot sees the ramoops record and boots the =recovery= volume instead of =fit=.
+   Expect asche (wired via the switch to lan1) to get a DHCP lease from 192.168.1.1
+   within ~1-3 min: watch ~ip -br addr show enp0s13f0u3c2~. WiFi stays down --
+   recovery has no wireless.
+   - No lease after ~3 min: set a static =192.168.1.10/24= on the wired NIC and try
+     ssh/http anyway; if still nothing after another minute, power-cycle -- the
+     pstore record persists, so it boots recovery again.
+5. Enter recovery and confirm it is what it claims: ~ssh -i ~/.ssh/id_deploy
+   root@192.168.1.1~ answers, and =cat /proc/cmdline= does *not* show
+   =ubi.block=0,fit= (that is the production boot; recovery boots its own FIT).
+   The http://192.168.1.1 firmware-upload page should also answer.
+6. Optional proof the config is intact: ~mkdir -p /tmp/r && mount -t ubifs -o ro
+   ubi0:rootfs_data /tmp/r && ls /tmp/r/upper/etc/config~ -- read-only, unmount
+   after.
+7. Clear the panic record -- the switch back to production. Skipping this makes
+   *every* subsequent boot re-enter recovery:
+   #+begin_src bash
+   rm /sys/fs/pstore/*
+   #+end_src
+8. ~reboot~ -- production boot (~1 min, WiFi returns).
+
+Post-checks (the part that makes it measured):
+
+9. =ssh root@192.168.1.1= answers with the *production* host key again (flip
+   known_hosts back), =uptime= is fresh, ~just openwrt-diff~ is clean, asche's
+   lease =192.168.1.200= is back, internet is up, and =ls /sys/fs/pstore= is
+   empty on the production side too.
+
+Abort paths:
+
+- Hang on the way in (the failure mode seen earlier today): power-cycle; the record
+  persists, recovery is the destination again -- keep trying.
+- Want out any time after step 7: that *was* the way out.
+- Recovery volume unbootable: the reset-at-power-on entry lands in the same volume,
+  so it does not help; that is the one tail risk of this rehearsal and its only
+  exit is serial. The pre-flight volume check makes this unlikely, not impossible.
+
+Decision 2026-10-17: the swap does not gate on this rehearsal. The e8450 half of
+the swap is a uci apply -- config-plane only, it cannot make the box unbootable
+-- and the failure class it can create is what the *tested* watchdog plus the
+pulled pre-apply backup already cover. Recovery mode stays the armed deep
+fallback (preconditions verified read-only today). The bet in skipping: if the
+boot-plane class hits mid-swap anyway, the no-unbox rescue is unexercised and
+the last resort is opening the case for serial. Run the rehearsal at any calm
+moment later; it is insurance, not a gate.
+
 ** Phase 4 — deferred, do not build yet
 
 - =opkg= package management (declarative install/remove). Needed when the
