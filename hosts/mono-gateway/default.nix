@@ -231,18 +231,23 @@
   };
 
   # --- AdGuard Home (cutover decision 7) ---
-  # dnsmasq stays the front door; AGH is a loopback-only filter hop behind it, so
-  # there is no firewall rule to add and nothing for clients to configure. Loopback
-  # binds cannot be reached from eth2, hence openFirewall = false.
+  # dnsmasq stays the front door; AGH is a filter hop behind it and there is
+  # nothing for clients to configure. DNS stays loopback-bound -- =dns.bind_hosts=
+  # is 127.0.0.1, so 5354 never hears the LAN and filtering cannot be bypassed by
+  # asking AGH directly.
   #
   # host/port are service options, NOT settings.bind_host -- current nixpkgs
   # asserts bind_host away, and host's default is 0.0.0.0, so declaring it *is*
-  # the exposure decision. The UI is reached over a tunnel:
-  #   ssh -N -L 3000:127.0.0.1:3000 root@192.168.1.1
+  # the exposure decision. Decision 2 moved the *UI* to br-lan so misfit's caddy
+  # can serve it as https://agh.yuanw.me (modules/caddy.nix), gated by the login
+  # below rather than by a loopback bind. eth2 is still shut: input is dropped
+  # from the WAN side and every accept rule here names an interface. Note that
+  # binding br-lan stops loopback from answering 3000, so the tunnel form is
+  #   ssh -N -L 3000:192.168.1.1:3000 root@192.168.1.1
   services.adguardhome = {
     enable = true;
     openFirewall = false;
-    host = "127.0.0.1";
+    host = "192.168.1.1";
     port = 3000;
     settings = {
       dns = {
@@ -295,14 +300,35 @@
         }
       ];
 
-      # decision 2: close the UI if loopback + ssh stops being enough. Recent AGH
-      # wants a bcrypt hash here; no fork, no agenix.
-      # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
+      # Decision 2, closed: the UI answers on br-lan now, so it needs a login.
+      # bcrypt hash only -- the password lives in pass:monogateway/agh/password
+      # and in nothing else. After a rotation, regenerate the hash with:
+      #   pass show monogateway/agh/password | htpasswd -nBi -C 10 yuan | cut -d: -f2
+      #
+      # KEY NAME, measured the hard way: in 0.107.71 the list is a TOP-LEVEL
+      # =users= key, not =auth.users= -- that block is 1.x. Written the newer way
+      # it is parsed away exactly like =filters= was: --check-config still says
+      # "configuration file is ok", the unit still logs "no users in the
+      # configuration file; authentication is disabled", and the UI still answers
+      # 200 to anonymous /control/status. So this is the one shape that works on
+      # this binary; re-check it on any adguardhome bump. The rest of the block
+      # (http.session_ttl at 720h, auth_attempts, block_auth_min) stays at its
+      # defaults -- session_ttl is deliberately not declared here because the
+      # =http= map also holds the bind address the module derives from =host=.
+      #
+      # Consequence: every /control endpoint needs a session now, so the curl
+      # checks in this repo's runbooks need a login first.
+      users = [
+        {
+          name = "yuan";
+          password = "$2y$10$Yq7UPL6vtEJGxPqRX75W6O/o4F/cGk5C5br9oRO0F2DUPUO0eJ55C";
+        }
+      ];
     };
   };
 
   # --- Firewall ---
-  # Only the two rules that change behaviour, both copied from fw4's wan zone.
+  # Three rules change behaviour now, two of them copied from fw4's wan zone.
   # Everything else is already what NixOS does: input denied from WAN, masquerade,
   # forwarding accepted between the bridge and the WAN. Ping stays allowed from
   # everywhere, where fw4 only allowed it from wan.
@@ -330,6 +356,12 @@
     interfaces."br-lan".allowedTCPPorts = [
       53
       22
+      # The AGH UI. It is the one port here opened for a service rather than for
+      # the LAN's own traffic, and it is gated by =auth= instead of by a bind --
+      # any LAN host can reach the login page, and reaching it over plain http is
+      # still possible. Tightening it to 192.168.1.190 alone needs an nft rule of
+      # our own; there is no precedent for that in this repo yet.
+      3000
     ];
   };
 
