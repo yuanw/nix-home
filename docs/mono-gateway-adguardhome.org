@@ -121,37 +121,11 @@ One line against a rewrite. Take the line.
 
 ** The config
 
-~services.adguardhome~ is an upstream NixOS module: import nothing, add no
-module file. =mutableSettings= defaults to =true=, so UI-side changes survive
-restarts while the keys we declare win at every start.
-
-#+begin_src nix
-  # --- AdGuard Home (cutover decision 7) ---
-  # dnsmasq stays the front door; AGH is a loopback filter hop behind it.
-  services.dnsmasq.settings.server = [ "/#/127.0.0.1#5354" ];
-
-  services.adguardhome = {
-    enable = true;
-    openFirewall = false;            # loopback only; nothing to open
-    host = "127.0.0.1"; port = 3000;   # service options, NOT settings.bind_host
-    settings = {
-      # close the UI with a password if loopback + ssh stops being enough:
-      # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
-      dns = {
-        bind_hosts = [ "127.0.0.1" ]; bind_port = 5354;
-        upstream_dns  = [ "94.140.14.14" "1.1.1.1" ];
-        bootstrap_dns = [ "1.1.1.1" ];
-        filtering_enabled = true;
-        # nothing to migrate (the AP's AGH was never configured); pick lists
-        filters = [ ];
-        cache_size = 4194304;        # bytes. NOT the 512 MB in modules/adguard.nix
-        cache_ttl_min = 300;
-        cache_optimistic = true;
-        querylog_enabled = true; querylog_file_enabled = true;
-      };
-    };
-  };
-#+end_src
+The block itself is in [*1.2 The edit*](#the-edit--two-places-in-hostsmono-gatewaydefaulnix).
+~services.adguardhome~ is an upstream NixOS module: import nothing, add no module
+file (the in-repo fork is obsolete — see *Decisions still open*). =mutableSettings=
+defaults to =true=, so UI-side changes survive restarts while the keys we declare
+win at every start.
 
 Deliberately *not* copied from [[file:../modules/adguard.nix][modules/adguard.nix]]: that config's
 ~cache_size = 536870912~ is 512 MB of cache on a box whose RAM budget is not
@@ -165,13 +139,124 @@ now that the AP has been confirmed to be running no rules.
 
 | # | Do | Proof |
 |---+----+-------|
-| 1 | Write the config, build only | ~just mono-gateway-build~ resolves ~pkgs.adguardhome~ in the board's nixpkgs |
+| 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | the closure builds, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
 | 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers |
 | 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
-nixpkgs pin (25.11, not our =nixos-unstable=), so ~pkgs.adguardhome~ here is that
-version's — check `nix eval` of the version and its platform before Phase 2.
+nixpkgs pin (25.11, not our =nixos-unstable=), so both ~pkgs.adguardhome~ and the
+*module* driving this config come from that pin — and Phase 1 is the only place
+where that can be checked without touching a house client.
+
+** Phase 1 in detail — build only, nothing on the board
+
+If nobody is free to do the whole rollout, this is the step to pick up. Roughly
+15 minutes with a cached eval, and *it never touches =192.168.1.1=*: nothing is
+copied to the board and =switch-to-configuration= never runs. Doing Phase 1 and
+stopping leaves the house exactly as it was.
+
+*** 1.1 Branch
+
+#+begin_src bash
+git switch -c mono-gateway-agh     # off mono-gateway, like the other feature branches
+#+end_src
+
+*** 1.2 The edit — two places in =hosts/mono-gateway/default.nix=
+
+(a) As the last key *inside* the existing =services.dnsmasq.settings = { ... }=
+block: one line. Everything else in that block stays byte-for-byte — the DHCP
+range, the static leases, =domain = lan= and the =.yuanw.me= override are live
+behaviour that other boxes depend on.
+
+#+begin_src nix
+      server = [ "/#/127.0.0.1#5354" ];
+#+end_src
+
+(b) After that block, before =networking.firewall=. The full block, with the
+choices from *Decisions still open* left explicit:
+
+#+begin_src nix
+  # --- AdGuard Home (cutover decision 7) ---
+  # dnsmasq stays the front door; AGH is a loopback filter hop behind it, so
+  # there is no firewall rule to add and nothing for clients to configure.
+  services.adguardhome = {
+    enable = true;
+    openFirewall = false;
+    host = "127.0.0.1"; port = 3000;   # service options, NOT settings.bind_host
+    settings = {
+      dns = {
+        bind_hosts = [ "127.0.0.1" ]; bind_port = 5354;
+        upstream_dns  = [ "94.140.14.14" "1.1.1.1" ];   # decision 1
+        bootstrap_dns = [ "1.1.1.1" ];
+        filtering_enabled = true;
+        filters = [ ];                 # nothing to migrate; pick lists
+        cache_size = 4194304; cache_ttl_min = 300; cache_optimistic = true;
+        querylog_enabled = true; querylog_file_enabled = true;
+      };
+      # decision 2: close the UI if loopback + ssh stops being enough
+      # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
+    };
+  };
+#+end_src
+
+Two rules: no =bind_host= / =bind_port= keys inside =settings= (the module asserts
+them away), and no firewall change unless the =host = "192.168.1.1"= route from
+*The config* is taken — that one also adds
+=interfaces."br-lan".allowedTCPPorts = [ 3000 ]= and a vhost on misfit.
+
+*** 1.3 Build the closure, deploy nothing
+
+#+begin_src bash
+nix build '.#packages.aarch64-linux.mono-gateway-system' \
+  --store ssh-ng://yuanw@dgx-spark.local --eval-store auto --max-jobs 1 --cores 6 \
+  --no-link --print-out-paths
+# then: P=<the printed path>
+#+end_src
+
+Same flags as =just mono-gateway-redeploy= (=spark_store= / =spark_build= in
+=justfile=), on purpose: the closure is aarch64 and this Mac cannot build it. Do
+*not* run =just mono-gateway-redeploy= to get the build — that target copies and
+activates, which is Phase 2. Also not ~just mono-gateway-build~: that target builds
+the ~rootfsImage~, not the running system.
+
+| Failure | What it means | Do |
+|-------+---------------+----|
+| ~adguardhome~ undefined / unsupported on =aarch64-linux= | 25.11's nixpkgs does not ship it for this platform | Stop. Do not vendor a tarball. It needs a =mono-nix= bump or this plan is off |
+| assertion ~settings.bind_host has been superseded by services.adguardhome.host~ | used the settings keys | Move them to =host= / =port= per 1.2(b) |
+| ~AdGuardHome -c … --check-config= fails in =checkPhase= | the yaml is not valid for that binary; the log names the key | Fix the key. This is the fastest way to learn what that version accepts — it is why the guesses (cache sizes, schema) can be corrected here instead of on the box |
+| evals fine but =services.adguardhome= ends up =enable = false= | the module never reached this config | Check the =extendModules= list still points at this file (=flake.nix= ~line 227~) |
+
+*** 1.4 Read what the build generated — the actual point of Phase 1
+
+Both configs are store paths referenced by the unit files, exactly the technique
+the cutover used to read =dnsmasq.conf=:
+
+#+begin_src bash
+grep -oE '/nix/store/[a-z0-9]+-AdGuardHome.yaml' "$P/etc/systemd/system/adguardhome.service" | head -1 | xargs cat
+grep -oE '/nix/store/[a-z0-9]+-dnsmasq.conf'     "$P/etc/systemd/system/dnsmasq.service"     | head -1 | xargs cat
+#+end_src
+
+| Confirm | Why |
+|---------+-----|
+| =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | Either is correct; this answers the open question in *Known limits* with zero risk. Write the number in the commit message |
+| =bind_hosts: [127.0.0.1]= and =bind_port: 5354= under =dns:= | without a bind list the resolver listens on =0.0.0.0= and would answer on eth2 once the firewall is opened |
+| no =bind_host: 0.0.0.0= anywhere | =host=' default leaking through, which would put the admin UI on the WAN link |
+| =server=/#/127.0.0.1#5354= in =dnsmasq.conf= | the forward is actually there and not just declared |
+| =interface=br-lan=, =dhcp-range=192.168.1.100,192.168.1.249,12h=, =address=/.yuanw.me/192.168.1.190= still present | the 1:1 was not disturbed — the whole reason 1.2(a) is one line |
+
+*** 1.5 Commit, and prove the board was not touched
+
+pre-commit runs treefmt (nixfmt), so the formatting arrives by itself. Message
+style here is =<area>: <what>=, e.g. =mono-gateway: add AdGuard Home as dnsmasq's
+filter upstream=.
+
+#+begin_src bash
+ssh root@192.168.1.1 'systemctl is-active adguardhome; ls -l /nix/var/nix/profiles/ | grep -- -link'
+#+end_src
+
+Expect =inactive= and the same generations as before the session. That is the
+proof this step changed nothing on the box — Phase 2 begins when someone runs
+~just mono-gateway-redeploy~.
 
 Back-out is a generation:
 
