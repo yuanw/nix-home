@@ -768,27 +768,41 @@ When something real breaks, three levers, fastest first:
    The house is back on unfiltered DNS in seconds because of dnsmasq's fallback
    (*2.4*). Both forms are temporary — the next rebuild reasserts the declaration.
    This is decision 4 being *useful*, and it is why 4 can stay open during Phase 3.
-2. **Allowlist the domain properly.** Where user rules actually live is *not
-   verified*: the UI writes them under =/var/lib/AdGuardHome/data/filters/= rather
-   than into the yaml, so whether one survives a rebuild is an open question.
-   Discover it the way everything else here has been discovered — add it in the UI
-   once, then look:
-   #+begin_src bash
-   ssh root@192.168.1.1 'grep -rn "<the-domain>" /var/lib/AdGuardHome/data/ /var/lib/AdGuardHome/AdGuardHome.yaml | head'
+2. **Allowlist the domain properly.** This is now verified: the UI's rule box writes
+   the *top-level* =user_rules:= key in =/var/lib/AdGuardHome/AdGuardHome.yaml=
+   (line 109 today), not a file under =data/filters/=. That page said "unverified"
+   because the earlier guess was wrong -- =data/= contains nothing but the two rule
+   files, =querylog.json=, =sessions.db= and =stats.db=. So the persistence question
+   has a clean answer: **a UI-added rule survives a rebuild**, because =settings=
+   declares neither =user_rules= nor =whitelist_filters= and the merge only touches
+   keys the declaration declares. Declaring them is a different story:
+
+   #+begin_src nix
+     # top level, siblings of filters -- inside settings.dns they do nothing,
+     # exactly as filters do there. A declared list REPLACES whatever the UI
+     # added, so declare it before anyone edits the box, not after.
+     user_rules = [ "@@||example.org^" ];      # the UI's own rule syntax
+     whitelist_filters = [ ];                   # allowlist *lists*, not domains
    #+end_src
-   Whatever key or file that turns up is what gets declared. Until then lever (1)
-   is the fix, and never rebuild onto an allowlist whose persistence is unknown.
+
+   Which is the whole trade: undeclared, the box is convenient and the rule lives
+   outside =git diff= forever. Declared, it is reviewed like any other router
+   policy and wins every rebuild. Per the house convention, policy goes in git --
+   so if you find yourself adding a permanent rule, move it here, and check
+   =grep -n '^user_rules:' /var/lib/AdGuardHome/AdGuardHome.yaml= afterwards to be
+   sure the two did not diverge.
 3. **Drop the list.** Revert one entry in =filters= and redeploy. With two lists
    this is a real option, which is another reason 3.1 starts at two.
 
 *** 3.5 Widen, or stop
 
-After the day: clean log, both tables pass → add a third list declaratively and
-repeat 3.2-3.4. Anything real blocked → fix per 3.4 and do not widen until it has
-been quiet. There is no goal that says how many lists the house needs; the
-mechanism is already live, and "two lists, boring, no incidents" is a legitimate
-place for this plan to end. If the log never fills with anything worth blocking,
-that is the answer, not a failure to have done more.
+After the day: clean log, both tables pass → widen. There is one follow-up already
+booked for that, and it is a swap rather than an addition: *3.7*. Anything real
+blocked → fix per 3.4 and do not widen until it has been quiet. There is no goal
+that says how many lists the house needs; the mechanism is already live, and "two
+lists, boring, no incidents" is a legitimate place for this plan to end. If the log
+never fills with anything worth blocking, that is the answer, not a failure to have
+done more.
 
 Record afterwards: rule counts from =journalctl=, =MemoryCurrent=, both tables run
 from a client (not the board), whether lever (1) was needed by anyone in the
@@ -823,6 +837,50 @@ AdAway is a 2023 hosts-format extra that mostly overlaps it. If Phase 3 widens, 
 should widen to HaGeZi Pro+ or OISD in place of AdAway, not alongside it —
 two rules of thumb from the sampled configs: keep the total under roughly 300k
 rules, and don't stack lists from the same vendor line.
+
+*** 3.7 Follow-up: swap AdAway out for HaGeZi Pro+ or OISD
+
+The one booked next step. Not urgent, and it should wait for a quiet day like
+everything else here does.
+
+*Why:* =filter_2.txt= is the weakest thing we run. It is *hosts* format, its own
+header says *last modified 2023-11-21*, its 6,540 rules lean Android and overlap
+filter_1 heavily, and because it is hosts-format, an entry it blocks answers
+=127.0.0.1= rather than =0.0.0.0= (measured: =nym1-ib.adnxs-simple.com=) -- the
+client is pointed at itself, which fails fast locally but is a different class of
+answer from every other block on the box. HaGeZi is what the sampled configs
+actually run: current, ABP-format, and tiered so you can pick the aggression.
+
+*The change is one entry,* and it keeps id 2 so AGH updates the existing storage
+entry instead of adopting a new one:
+
+#+begin_src nix
+  filters = [
+    { enabled = true; id = 1; name = "AdGuard DNS filter";
+      url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt"; }
+    { enabled = true; id = 2; name = "HaGeZi Pro+";
+      url = "https://cdn.jsdelivr.net/gh/hagezi/dns-blocklists@latest/adblock/pro.plus.txt"; }
+  ];
+#+end_src
+
+OISD Big (=https://big.oisd.nl=) is the alternative if Pro+ turns out too sharp --
+it has the better reputation for false positives and costs about the same. Pick
+*one*: HaGeZi and OISD together roughly double the rule count for the same
+coverage, and stacking two tiers from one vendor line buys noise, not reach.
+
+*Cost:* measured 58 MB for 192,408 rules, call it ~300 bytes per rule, so Pro+
+(+~150k) is around +45 MB against 7 GB. Measure once after the swap, as in *3.1*.
+
+*How to tell it went well:* =filtering/status= shows the new =rules_count= under a
+minute of startup, =data/filters/2.txt= is replaced not added to, and then the day
+rules -- both tables from a client, plus the query log for =REJECTED= rows against
+anything a device here actually needs. The six AdAway-only names from *Phase 3 as
+run* (=epom.com=, =tracker.marinsm.com=, and friends) are the interesting control:
+if they come back answering *with addresses*, HaGeZi is narrower on those, which
+is a coverage judgement to make knowingly rather than a bug.
+
+*Rollback:* revert the entry. Both halves are one redeploy, and =systemctl stop
+adguardhome= is the lever in between.
 
 ** Phase 3 checks
 
@@ -1076,10 +1134,13 @@ until 1 above is done.
   Lists are re-fetched daily; do not treat that table as a permanent oracle, and
   re-run both directions of it after any long gap rather than trusting the
   numbers.
-- *Allowlist persistence is unknown.* UI user rules land under
-  =/var/lib/AdGuardHome/data/filters/=, not in the yaml, so whether one survives
-  a rebuild has not been tested. Lever (1) in *3.4* is the known-good response
-  until that is answered.
+- *Allowlist rules live in the yaml, not in a file.* =user_rules= (and
+  =whitelist_filters=) are top-level keys alongside =filters=, so what the UI adds
+  survives every rebuild -- =settings= declares neither, and =yaml-merge= only
+  touches keys the declaration declares. The corollary is the one to remember:
+  the moment you declare =user_rules=, the declaration *replaces* whatever is in
+  the box, so declare a permanent rule instead of pasting one in, and expect the
+  UI's copy to disappear. Details and the nix shape in *3.4* lever (2).
 - *The generated yaml does not prove the DNS bind.* =dns.port= is the key
   0.107.71 reads; =bind_port= is accepted, ignored, and leaves =:53=. That is the
   one Phase-1 blind spot the run had to catch (gen 21 crash-looped), so after any
