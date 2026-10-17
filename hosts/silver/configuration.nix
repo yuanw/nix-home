@@ -145,6 +145,13 @@
   # No camera on a telemetry box, and its firmware is extracted from macOS.
   hardware.facetimehd.enable = false;
 
+  # Headless: logind suspends on lid close by default. The ExternalPower variant
+  # defaults to "user" (= follows this one) and Docked defaults to "ignore", so
+  # this covers the closed-lid case on its own. shortcut: still suspends if
+  # someone flips those back; add them if the box ever runs docked with the lid
+  # closed.
+  services.logind.settings.Login.HandleLidSwitch = "ignore";
+
   # ─── System packages ────────────────────────────────────────────────
   environment.systemPackages = with pkgs; [
     curl
