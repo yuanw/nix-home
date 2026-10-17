@@ -91,3 +91,57 @@ except nix_uci.ConfigError:
 else:
     raise AssertionError("raw accepted a non-uci command")
 os.unlink(_doc.name); os.unlink(_bad.name)
+
+# --- redact-config: the wall between /etc/config and a public repo ------------
+# It fails in the check rather than on the box, like everything else here. Run as
+# openwrt-facts runs it: a directory of live configs, in place, plus an exit code.
+import pathlib
+import subprocess
+import tempfile
+
+_here = os.path.dirname(os.path.abspath(__file__))
+
+
+def run_redactor(files: dict) -> tuple:
+    outdir = pathlib.Path(tempfile.mkdtemp())
+    for name, body in files.items():
+        (outdir / name).write_text(body)
+    proc = subprocess.run(
+        [sys.executable, os.path.join(_here, "redact-config.py"), str(outdir)],
+        capture_output=True,
+        text=True,
+    )
+    return proc.returncode, {name: (outdir / name).read_text() for name in files}, proc.stderr
+
+
+# A declared name is redacted however long it is, and that is the path nix-uci
+# fills back in from `pass`.
+rc, got, _ = run_redactor({"wireless": "option ssid 'NoneAndVoid'\noption key '0123456789abcdef'\n"})
+assert rc == 0, (rc, got)
+assert "option ssid 'NoneAndVoid'" in got["wireless"], got
+assert "option 'key' '@wireless_key@'" in got["wireless"], got
+
+# An undeclared name that only *looks* secret must not be stopped or rewritten:
+# key_type is config, not a key, and stopping the snapshot over it is a false alarm.
+rc, got, _ = run_redactor({"uhttpd": "option key_type 'ec'\noption key '/etc/uhttpd.key'\n"})
+assert rc == 0, (rc, got, "key_type must not trip the net")
+assert "option key_type 'ec'" in got["uhttpd"], got
+assert "option key '/etc/uhttpd.key'" in got["uhttpd"], got
+
+# An undeclared name that *is* holding key material has to be redacted and has to
+# fail the run. This is the case the eight-name list cannot see coming.
+secret = "aB3dEf6gHi9jKl2mNo"
+rc, got, err = run_redactor({"ipsec": f"option presharedkey '{secret}'\n"})
+assert rc == 1, (rc, "an undeclared secret option must exit non-zero")
+assert "option 'presharedkey' '@ipsec_presharedkey@'" in got["ipsec"], got
+assert secret not in str(got.values()), "the secret value is still in the tree"
+assert "ipsec.presharedkey" in err, err
+
+# The rpcd reference into /etc/shadow and an already-redacted value stay put, so
+# re-running facts on a snapshot does not chew through its own placeholders.
+rc, got, _ = run_redactor({"rpcd": "option password '$p$root'\noption key '@rpcd_key@'\n"})
+assert rc == 0, (rc, got)
+assert got["rpcd"] == "option password '$p$root'\noption key '@rpcd_key@'\n", got
+
+print("redact-config selfcheck: ok")
+

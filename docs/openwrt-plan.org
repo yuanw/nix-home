@@ -228,6 +228,13 @@ openwrt-facts:
     ssh root@{{router_host}} 'tar cf - -C /etc/config .' | tar xf - -C openwrt/state/{{router}}/live
 #+end_src
 
+Redaction runs as part of that recipe, and it is fail-closed: an option that looks
+secret but is not in the declared name list is redacted *and* exits non-zero, so an
+unknown key cannot reach a public commit on a silent placeholder. The fix is to name
+it in =SECRET_OPTIONS= (=openwrt/redact-config.py=) and re-run. The rule and its
+exceptions are asserted by =python3 openwrt/selfcheck.py=, which lands in
+=checks.openwrt-serialization=.
+
 =git diff= against that is the "what did I change in LuCI last week" answer, and
 =just openwrt-diff= is the "what will this apply change" answer. Two different
 questions, no clever code needed for either.
