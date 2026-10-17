@@ -32,6 +32,18 @@ WAN =eth2= with the ISP lease, =br-lan= =192.168.1.1=, NAT, dnsmasq serving DHCP
 and DNS. The e8450 is a dumb AP at =192.168.1.2=. Decision 7 has been open since
 the design was written; this plan closes it.
 
+** Phase 1 is done: built, read, committed, board untouched
+
+2026-10-17, branch =mono-gateway-agh= (off =mono-gateway=), commit =873d2f99=. The
+25.11 pin ships ~pkgs.adguardhome~ 0.107.71 and its NixOS module, both build for
+=aarch64-linux=, =checkPhase= accepted every key in 1.2(b), and the two generated
+configs read as itemised in *1.4* — including the one thing *Known limits* had
+left open: =schema_version: 32=, so the admin bind is
+=http.address: 127.0.0.1:3000=. The board is untouched: the service is =inactive=
+at generation 20.
+
+Nothing moves the house until someone runs ~just mono-gateway-redeploy~ (Phase 2).
+
 ** The premise of decision 7 does not hold: the e8450 never filtered
 
 *AdGuard Home is installed on the e8450 and is not in any DNS path* (confirmed
@@ -112,6 +124,10 @@ One line against a rewrite. Take the line.
   =host = 192.168.1.1= coupling the service to an address that a future
   generation might move.
 
+  That is what 1.4 built and confirmed: =host=/=port= are mapped onto
+  =http.address = 127.0.0.1:3000= at this schema version, with no =bind_host= key
+  anywhere.
+
   If the tunnel is too much ceremony, the LAN-click version is =host =
   "192.168.1.1"= + =interfaces."br-lan".allowedTCPPorts = [ 3000 ]= and a vhost on
   misfit's caddy next to =openwrt.yuanw.me=
@@ -139,8 +155,8 @@ now that the AP has been confirmed to be running no rules.
 
 | # | Do | Proof |
 |---+----+-------|
-| 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | the closure builds, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
-| 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers |
+| 1 | Write the config, build only ([*Phase 1 in detail*](#phase-1-in-detail--build-only-nothing-on-the-board)) | **done 2026-10-17** (=mono-gateway-agh= / =873d2f99=): the closure built, and the generated =AdGuardHome.yaml= + =dnsmasq.conf= read as itemised there |
+| 2 | ~just mono-gateway-redeploy~ | ~systemctl status adguardhome~ active; ~dig @127.0.0.1 -p 5354 example.com~ answers; ~ss -ltnp~ shows =127.0.0.1:3000= and no =0.0.0.0:3000= |
 | 3 | From a LAN client | blocked domain NXDOMAIN/refused below; =dgx-spark.lan= still → .185; ~journalctl -u adguardhome~ quiet |
 
 Phase 1 matters more than it looks: ~extendModules~ inherits mono-nix's own
@@ -226,23 +242,73 @@ the ~rootfsImage~, not the running system.
 | ~AdGuardHome -c … --check-config= fails in =checkPhase= | the yaml is not valid for that binary; the log names the key | Fix the key. This is the fastest way to learn what that version accepts — it is why the guesses (cache sizes, schema) can be corrected here instead of on the box |
 | evals fine but =services.adguardhome= ends up =enable = false= | the module never reached this config | Check the =extendModules= list still points at this file (=flake.nix= ~line 227~) |
 
+The Phase-1 run tripped none of these, and the toplevel landed in *dgx-spark's*
+store rather than this Mac's — which is why 1.4 reads it over ssh.
+
 *** 1.4 Read what the build generated — the actual point of Phase 1
 
 Both configs are store paths referenced by the unit files, exactly the technique
-the cutover used to read =dnsmasq.conf=:
+the cutover used to read =dnsmasq.conf=. The Phase-1 run needed two corrections to
+that recipe:
+
+- the closure is in dgx-spark's store, so every read here is an ~ssh~;
+- =AdGuardHome.yaml= is *not* referenced by =adguardhome.service= — with
+  =mutableSettings = true= (the default) the unit's =ExecStartPre= script is what
+  merges or copies the generated yaml into =/var/lib/AdGuardHome/=, so grep the
+  pre-start script, not the unit. Grepping the unit returns nothing and the
+  command looks empty rather than wrong.
 
 #+begin_src bash
-grep -oE '/nix/store/[a-z0-9]+-AdGuardHome.yaml' "$P/etc/systemd/system/adguardhome.service" | head -1 | xargs cat
-grep -oE '/nix/store/[a-z0-9]+-dnsmasq.conf'     "$P/etc/systemd/system/dnsmasq.service"     | head -1 | xargs cat
+S=yuanw@dgx-spark.local
+U=$P/etc/systemd/system
+
+ssh $S "A=\$(grep -oE '/nix/store/[a-z0-9]+-unit-script-adguardhome-pre-start' $U/adguardhome.service | head -1)
+        grep -oE '/nix/store/[a-z0-9]+-AdGuardHome.yaml' \$A/bin/adguardhome-pre-start | head -1 | xargs cat"
+ssh $S "grep -oE '/nix/store/[a-z0-9]+-dnsmasq.conf' $U/dnsmasq.service | head -1 | xargs cat"
 #+end_src
 
 | Confirm | Why |
 |---------+-----|
-| =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | Either is correct; this answers the open question in *Known limits* with zero risk. Write the number in the commit message |
+| =schema_version: N= — at N ≥ 23 the web bind is =http.address: 127.0.0.1:3000=, below that =bind_host:=/=bind_port:= | **N = 32** in the 25.11 pin, so =http.address=. That answers *Known limits* with zero risk; it is also in the commit message |
 | =bind_hosts: [127.0.0.1]= and =bind_port: 5354= under =dns:= | without a bind list the resolver listens on =0.0.0.0= and would answer on eth2 once the firewall is opened |
 | no =bind_host: 0.0.0.0= anywhere | =host=' default leaking through, which would put the admin UI on the WAN link |
 | =server=/#/127.0.0.1#5354= in =dnsmasq.conf= | the forward is actually there and not just declared |
 | =interface=br-lan=, =dhcp-range=192.168.1.100,192.168.1.249,12h=, =address=/.yuanw.me/192.168.1.190= still present | the 1:1 was not disturbed — the whole reason 1.2(a) is one line |
+
+**What the 2026-10-17 build generated**
+
+Keep this as the baseline Phase 2 has to match. The generated yaml
+(=0.107.71=, =checkPhase= said valid):
+
+#+begin_src yaml
+dns:
+  bind_hosts:
+  - 127.0.0.1
+  bind_port: 5354
+  bootstrap_dns:
+  - 1.1.1.1
+  cache_optimistic: true
+  cache_size: 4194304
+  cache_ttl_min: 300
+  filtering_enabled: true
+  filters: []
+  querylog_enabled: true
+  querylog_file_enabled: true
+  upstream_dns:
+  - 94.140.14.14
+  - 1.1.1.1
+http:
+  address: 127.0.0.1:3000
+schema_version: 32
+#+end_src
+
+and =dnsmasq.conf= with the new line next to the untouched ones —
+=server=/#/127.0.0.1#5354=, =interface=br-lan=,
+=dhcp-range=192.168.1.100,192.168.1.249,12h=, =address=/.yuanw.me/192.168.1.190=
+and the three =dhcp-host= entries.
+
+What 1.2(b) did *not* declare, and so takes AGH's own defaults: =blocking_mode=
+(NXDOMAIN), =querylog_type= (csv) and =ratelimit=. None are known problems here.
 
 *** 1.5 Commit, and prove the board was not touched
 
@@ -256,7 +322,8 @@ ssh root@192.168.1.1 'systemctl is-active adguardhome; ls -l /nix/var/nix/profil
 
 Expect =inactive= and the same generations as before the session. That is the
 proof this step changed nothing on the box — Phase 2 begins when someone runs
-~just mono-gateway-redeploy~.
+~just mono-gateway-redeploy~. Recorded: =inactive=, 20 generations, current
+=system-20-link=, all the same as before the build.
 
 Back-out is a generation:
 
@@ -319,7 +386,9 @@ is unacceptable, keep loopback + ssh and stay unauthenticated.
 Both the fork and [[file:../modules/adguard.nix][modules/adguard.nix]] are dead code: the only reference is the
 commented-out =adguard= stanza in =hosts/default.nix=, and that stanza sets
 =services.adguardhome-with-user.*=, so if the fork goes, that stanza goes with
-it. Say so in the same commit rather than deleting one and breaking the other.
+it. Say so in the same commit rather than deleting one and breaking the other —
+=873d2f99= did exactly that: it flags them as dead, and changes nothing. Deleting
+them is a separate commit with its own =nix eval= proof.
 
 * Later additions, and what they change
 
@@ -386,11 +455,13 @@ client → unbound last, and only if the client stays off.
   version-dependent — and the module's =checkPhase= runs
   =AdGuardHome -c … --check-config=, so a wrong value fails the *build*, not the
   router. That is also the fastest way to learn what this AGH accepts.
-- ~services.adguardhome~'s *module* is 25.11's too, not ours: whether it maps
-  =host=/=port= onto the old =bind_host= keys or onto =http.address= depends on the
-  schema version that release carries. Confirm the result with
-  =ss -ltnp | grep 3000= after the deploy — =0.0.0.0:3000= there means the bind
-  did not take and the firewall is the only thing left.
+- ~services.adguardhome~'s *module* is 25.11's too, not ours, and whether it maps
+  =host=/=port= onto =http.address= or the old =bind_host= keys depends on the
+  schema version that release carries. **The build answered that:**
+  =schema_version: 32=, so the yaml carries =http.address: 127.0.0.1:3000=. What is
+  still only provable on the box is that the bind actually took:
+  ~ss -ltnp | grep 3000~ after the deploy — =0.0.0.0:3000= there means it did not,
+  and the firewall is the only thing left.
 - The AP's AGH is installed and inert for DNS, but not free: if its init service
   is enabled it still fetches list updates and writes to the flash. Once the
   board's AGH is working, remove the package and its service there — an
