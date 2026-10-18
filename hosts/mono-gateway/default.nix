@@ -17,70 +17,11 @@
   # Today's e8450 does hand out RAs and a delegated /64, so this is a known
   # regression for one cutover window, not an oversight.
 
-  # --- Phase 5.6 fix: stop cmm crash-looping on the ctnetlink ABI ---
-  # cmm was failing on every boot with:
-  #   ctnetlink kernel ABI is broken, contact your vendor.
-  #   parse_mnl.c:884 reason: Numerical result out of range
-  # Root cause: mono-nix's libnetfilter_conntrack patch validates the nested
-  # CTA_COMCERTO_FP_XFRM_HANDLE attribute as 16 bytes (its struct is uint32_t[4]),
-  # but the kernel in the same flake emits it as 8 bytes -- u16 xfrm_handle[2*2]
-  # (MAX_SUPPORTED_XFRMS_PER_DIR = 2). mnl_attr_validate2() therefore returns
-  # ERANGE and abi_breakage() exits, so the ASK fast path never gets programmed
-  # and every flow silently falls back to software forwarding. cmm itself reads
-  # the handle as uint16_t*, so the library is the odd one out: fix the struct to
-  # u16[4] and the validator to 8. grep guards make a silent no-op a build error.
-  nixpkgs.overlays = [
-    (_final: prev: {
-      mono-gateway-libnetfilter_conntrack = prev.mono-gateway-libnetfilter_conntrack.overrideAttrs (old: {
-        postPatch = (old.postPatch or "") + ''
-          sed -i 's/uint32_t[[:space:]]*xfrm_handle\[4\]/uint16_t xfrm_handle[4]/' \
-            include/internal/object.h
-          sed -i '/nfct_parse_comcerto_fp_attr_cb/,/^}/ s/MNL_TYPE_UNSPEC, 16/MNL_TYPE_UNSPEC, 8/' \
-            src/conntrack/parse_mnl.c
-          grep -q 'uint16_t xfrm_handle\[4\]' include/internal/object.h
-          grep -q 'mnl_attr_validate2(attr, MNL_TYPE_UNSPEC, 8)' src/conntrack/parse_mnl.c
-        '';
-      });
-    })
-    # --- Phase 5.8 fix: stop the kernel handing IPsec SAs to cmm ---
-    # With cmm running, the policy-based IPsec tunnel dies: the child SAs sit at 0
-    # bytes and no ESP is sent. Cause is not conntrack -- it is the NXP IPsec fast
-    # path. net/xfrm/xfrm_policy.c (guarded by IPSEC_FLOW_CACHE, defined in net/xfrm/
-    # via ipsec_flow.h, plus CONFIG_INET_IPSEC_OFFLOAD) pushes every SA's handles and
-    # tunnel header to userspace over a NETLINK_KEY socket; keytrack.c picks that up
-    # and cmmSASetTunnel -> __cmmSATunnelRegister programs FPP_CMD_IPSEC_SA_TNL_ROUTE
-    # into the FMan. That assumes a *forwarded* SA, so for a locally-terminated tunnel
-    # __cmmRouteRegister fails ("route sa entry add failed") yet the FPP command is
-    # still issued, and the datapath is broken. cmm's ESP_PASSTHRU/LOCAL_PROTO path
-    # never runs because the offload is key-engine driven, not conntrack driven.
-    #
-    # cmm has no runtime switch, so cut it at the source. There are two paths that
-    # tell cmm about SAs: the flow-cache hook in xfrm_policy.c (two ipsec_flow_add
-    # calls) and the state notify in af_key.c (pfkey_send_notify -> ipsec_nlkey_send).
-    # Both must go -- patching only the first still left two handles in cmm's table.
-    # Disabling CONFIG_INET_IPSEC_OFFLOAD instead does NOT build (NXP reads
-    # skb->ipsec_offload unguarded from a dev_queue_xmit helper), so short-circuit
-    # instead. With both cut the kernel neither fills its IPsec flow cache nor
-    # notifies cmm, so the SA stays software and cmm's FLOW_NO_*_SA path skips the
-    # ESP flow. Forwarding/NAT offload is CPE_FAST_PATH/CDX, a different path.
-    # grep guards make a silent no-op a build failure.
-    (_final: prev: {
-      mono-gateway-kernel = prev.mono-gateway-kernel.overrideAttrs (old: {
-        postPatch = (old.postPatch or "") + ''
-          sed -i 's/if (ipsec_flow_add(/if (0 \&\& ipsec_flow_add(/g' net/xfrm/xfrm_policy.c
-          sed -i 's/ipsec_nlkey_send(net, x, c);/if (0) ipsec_nlkey_send(net, x, c);/' net/key/af_key.c
-          test "$(grep -c 'if (0 && ipsec_flow_add(' net/xfrm/xfrm_policy.c)" -ge 2 || {
-            echo "FAILED: xfrm_policy.c ipsec_flow_add call sites not short-circuited"
-            exit 1
-          }
-          grep -q 'if (0) ipsec_nlkey_send(net, x, c);' net/key/af_key.c || {
-            echo "FAILED: af_key.c ipsec_nlkey_send not short-circuited"
-            exit 1
-          }
-        '';
-      });
-    })
-  ];
+  # Both ASK fixes this box needed from upstream live in the fork now: the
+  # ctnetlink ABI fix (libnetfilter_conntrack sized CTA_COMCERTO_FP_XFRM_HANDLE
+  # as 16 bytes while the kernel sends 8, so cmm crash-looped and the fast path
+  # never got programmed) and the option below. See the flake input.
+  mono-gateway.ask.ipsecOffload = false;
 
   # Nothing here asks for DHCP, so declare it per interface. Without this line
   # NixOS enables DHCP on every interface that is unconfigured, which on this box

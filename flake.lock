@@ -779,16 +779,16 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1770916696,
-        "narHash": "sha256-bqgenGlQL6yaUX2UjxQmNrjkCEOS7FmveTxVka+ExCI=",
-        "owner": "we-are-mono",
-        "repo": "nix",
-        "rev": "37d452e35b328dd19535ebabdc77cb6fc15d71e6",
+        "lastModified": 1792352713,
+        "narHash": "sha256-MAkN2qfBcD124WLrDXUFV4qH8nZNSz3PdR18AGgsT2g=",
+        "owner": "yuanw",
+        "repo": "mono-gateway-nix",
+        "rev": "11071e2502634ca224378bc68012d98fcd8cf2a7",
         "type": "github"
       },
       "original": {
-        "owner": "we-are-mono",
-        "repo": "nix",
+        "owner": "yuanw",
+        "repo": "mono-gateway-nix",
         "type": "github"
       }
     },

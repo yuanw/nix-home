@@ -108,7 +108,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
-    mono-nix.url = "github:we-are-mono/nix";
+    # Fork of we-are-mono/nix carrying the two ASK fixes this board needs --
+    # libnetfilter_conntrack's 8-byte CTA_COMCERTO_FP_XFRM_HANDLE and
+    # mono-gateway.ask.ipsecOffload (see hosts/mono-gateway/default.nix). Both
+    # are open upstream (we-are-mono/nix#4, #5); flip this back to
+    # github:we-are-mono/nix once they merge.
+    mono-nix.url = "github:yuanw/mono-gateway-nix";
     # Private modules live in a separate repo; see nix-home-private/README.md.
     #
     # git+https, not github:, deliberately: a github: input is fetched as a tarball
