@@ -154,8 +154,11 @@
   # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
   # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
   # TensorFold's Zig engine (branch zig-flashnext) packaged natively,
-  # serving Qwen3.8 Flash Next (INT4-AutoRound) on :8888. The CUDA
-  # fatbins + Triton AOT cubins are baked in (no first-start JIT).
+  # serving Qwen3.8 Flash Next from NVIDIA's FP4 QAD checkpoint
+  # (nvidia/Qwen3.8-Flash-Next-FP4-Local, ~96 GiB: the unit downloads it on
+  # first start) on :8888. The CUDA fatbins + Triton AOT cubins are baked in
+  # (no first-start JIT). The former INT4-AutoRound checkpoint (~122 GiB) is
+  # still in the HF cache; prune it by hand if the disk needs the space.
   # Plan: docs/tensorfold-zig-plan.org
   services.tensorfold-zig = {
     enable = true;

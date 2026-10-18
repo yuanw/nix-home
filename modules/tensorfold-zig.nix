@@ -1,7 +1,8 @@
 # tensorfold-native — TensorFold's Zig CUDA engine, packaged natively
-# (packages/tensorfold-zig). Serves Qwen3.8 Flash Next (INT4-AutoRound) on
-# :8890, beside the Python TensorFold (:8888) and RED-SNOW (:8899); one
-# model at a time on 128 GB unified memory.
+# (packages/tensorfold-zig). Serves Qwen3.8 Flash Next from NVIDIA's FP4 QAD
+# checkpoint (nvidia/Qwen3.8-Flash-Next-FP4-Local) on :8888, beside RED-SNOW
+# (:8899); one model at a time on 128 GB unified memory. The recipe's earlier
+# INT4-AutoRound checkpoint still works: override modelId + modelRevision.
 #
 # Unlike the Python TensorFold there is no first-start JIT: the CUDA fatbins
 # and the Triton AOT cubins are baked into the package, so the unit only
@@ -116,13 +117,13 @@ in
 
     modelId = mkOption {
       type = types.str;
-      default = "azampatti/Qwen3.8-Flash-Next-125B-A5B-INT4-AutoRound";
-      description = "HuggingFace repo of the checkpoint the Zig engine serves.";
+      default = "nvidia/Qwen3.8-Flash-Next-FP4-Local";
+      description = "HuggingFace repo of the checkpoint the Zig engine serves (the recipe's INT4-AutoRound is azampatti/Qwen3.8-Flash-Next-125B-A5B-INT4-AutoRound).";
     };
 
     modelRevision = mkOption {
       type = types.str;
-      default = "1464274120d36a4d8fcaa934552334a7d83ce0fd";
+      default = "b9ce18a6887e18c089fdea8509a33e63429a3300";
       description = "Pinned checkpoint revision (the snapshot directory).";
     };
 
@@ -134,8 +135,8 @@ in
 
     parallel = mkOption {
       type = types.ints.positive;
-      default = 8;
-      description = "Requests admitted at once (the engine refuses ones that do not fit).";
+      default = 5;
+      description = "Requests admitted at once (the engine refuses ones that do not fit). 5 fills NVIDIA-FP4's ~24 GiB fp8 pool with full windows.";
     };
 
     kvDtype = mkOption {
@@ -253,6 +254,11 @@ in
         LD_LIBRARY_PATH = "/run/opengl-driver/lib:${cudaHome}/lib64:${cudaHome}/lib";
         HOME = cfg.stateDir;
         TENSORFOLD_MEMORY_RESERVE_GIB = toString cfg.memoryReserveGib;
+        # The recipe's FP4 tuning (scripts/config.sh): 6 MTP drafts a round and
+        # the product stop rule up to 5 streams; the engine's own defaults are
+        # 15/2. On INT4 these are the wrong trade (INT4's numbers predate them).
+        TF_FLASHNEXT_DEPTH = "6";
+        TF_FLASHNEXT_PRODUCT_STREAMS = "5";
       }
       // optionalAttrs cfg.vision {
         # --vision runs a helper process (python3 -m tensorfold.vision.native_helper)
@@ -268,7 +274,7 @@ in
         TF_FLASHNEXT_RING_CACHE = "1";
       };
 
-      # First start: the ~122 GiB checkpoint, resumable, skipped once the
+      # First start: the ~96 GiB checkpoint, resumable, skipped once the
       # pinned snapshot is present. HF_HUB_OFFLINE=1 above is overridden so
       # the download can reach the Hub.
       preStart = ''
@@ -278,7 +284,7 @@ in
           echo "checkpoint present: ${snapshotDir}"
           exit 0
         fi
-        echo "downloading ${cfg.modelId} (~122 GiB) into ${cfg.hfCache}/hub (resumes if interrupted)"
+        echo "downloading ${cfg.modelId} (~96 GiB) into ${cfg.hfCache}/hub (resumes if interrupted)"
         HF_HUB_OFFLINE=0 ${pkgs.python313Packages.huggingface-hub}/bin/hf download \
           ${cfg.modelId} --revision ${cfg.modelRevision} --cache-dir ${cfg.hfCache}/hub
       '';
