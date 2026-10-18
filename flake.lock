@@ -155,11 +155,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1791923730,
-        "narHash": "sha256-8oEPqIIGK77JHaeVxyS1rF5eoxgeMf8zZeGNng2xJCs=",
+        "lastModified": 1792323391,
+        "narHash": "sha256-Clc/pPZw8qRsFWVaDvJvKQRZgaiWrSAvAhVbcKPZGZU=",
         "owner": "graham33",
         "repo": "nixos-dgx-spark",
-        "rev": "e60b996ed581bf2148907df1188662d23ae00026",
+        "rev": "a5062227efab24d1517c89eb5efbee5d1c28ea51",
         "type": "github"
       },
       "original": {
@@ -1279,11 +1279,11 @@
     },
     "nixpkgs_9": {
       "locked": {
-        "lastModified": 1791956154,
-        "narHash": "sha256-jBYGPi4udQ9uo4KQp9m2J0546nJVQitG15gvZSaVVAs=",
+        "lastModified": 1792222494,
+        "narHash": "sha256-w0sd4cT0tWQV4wsyodiBn49/y3N644guKTjkWhg6oLA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "55bfb4d7437bd4e09ab7cba58a43bd68eb310044",
+        "rev": "9e917916cbdf311e86efc277d54a0410f7948b43",
         "type": "github"
       },
       "original": {
