@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
@@ -10,60 +10,9 @@
 
   # ─── Networking ─────────────────────────────────────────────────────
   networking.hostName = "silver";
-  # Laptop: needs to join Wi-Fi. Works with NetworkManager's wifi backend.
+  # Wired: the box lives on the USB-Ethernet dongle, so NetworkManager only ever
+  # manages the cable. No Wi-Fi, so no agenix secret and no declarative profile.
   networking.networkmanager.enable = true;
-
-  # Declarative Wi-Fi. The PSK is not in the (public) repo: secrets/wifi.age
-  # holds "WIFI_PSK=..." and envsubst substitutes it into both profiles at
-  # activation (EnvironmentFile below). Create it from the shared password
-  # store: printf 'WIFI_PSK=%s\n' "$(pass show openwrt/wifipw)" | agenix -e
-  # secrets/wifi.age
-  age.secrets.wifi.file = ../../secrets/wifi.age;
-  networking.networkmanager.ensureProfiles = {
-    environmentFiles = [ config.age.secrets.wifi.path ];
-    profiles = {
-      NoneAndVoid = {
-        connection = {
-          id = "NoneAndVoid";
-          type = "wifi";
-          permissions = "";
-        };
-        wifi = {
-          ssid = "NoneAndVoid";
-          mode = "infrastructure";
-        };
-        "wifi-security" = {
-          key-mgmt = "wpa-psk";
-          psk = "$WIFI_PSK";
-        };
-        ipv4.method = "auto";
-        ipv6 = {
-          method = "auto";
-          addr-gen-mode = "stable-privacy";
-        };
-      };
-      "NoneAndVoid-5G" = {
-        connection = {
-          id = "NoneAndVoid-5G";
-          type = "wifi";
-          permissions = "";
-        };
-        wifi = {
-          ssid = "NoneAndVoid-5G";
-          mode = "infrastructure";
-        };
-        "wifi-security" = {
-          key-mgmt = "wpa-psk";
-          psk = "$WIFI_PSK";
-        };
-        ipv4.method = "auto";
-        ipv6 = {
-          method = "auto";
-          addr-gen-mode = "stable-privacy";
-        };
-      };
-    };
-  };
 
   # ─── Time zone / locale ─────────────────────────────────────────────
   time.timeZone = "America/Regina";
