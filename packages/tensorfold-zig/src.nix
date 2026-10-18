@@ -24,8 +24,8 @@
   recipeSrc = fetchFromGitHub {
     owner = "MiaAI-Lab";
     repo = "Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold";
-    rev = "763f39fc8c2dd327563a5f6f9094ce19c652d4ea"; # main: 0001…0013 (0011 vision NVFP4, 0012 engine NVFP4, 0013 tune)
-    hash = "sha256-rY0Rdp3yyjU9IqNjLJuoUJWghc98hVLT6LHnjJqyJ90=";
+    rev = "656879fd752749bbd11a6e1a065a326c00940911"; # main: 0001…0015 (0011-0013 NVFP4/tune, 0014 prompt expert tile, 0015 fair prefill)
+    hash = "sha256-CpQzJIj1qLNm5E2ouSI4QAqCwQFmKUbt7wbUL247rXk=";
   };
 
   zigSrc = fetchurl {

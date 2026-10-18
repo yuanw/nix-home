@@ -11,7 +11,7 @@
 #    resulting cubins are valid but not byte-identical to the container's
 #    capture — see docs/tensorfold-zig-plan.org.
 #
-# local-*.patch (ours, on top of the recipe's 0001…0013):
+# local-*.patch (ours, on top of the recipe's 0001…0015):
 #  - vision-helper-restart: a single stuck image/video request used to set the
 #    helper permanently dead; now the helper is killed and respawned, so vision
 #    recovers. (Zig)
@@ -25,11 +25,11 @@
 #    full 600 s transaction; past 180 s it is killed and reloaded, so a wedge
 #    costs 3 min of refused images instead of 10. (Zig)
 #
-# Validated before the 0001…0013 bump: `nix build` yields bin/tensorfold-native,
+# Validated before the 0001…0015 bump: `nix build` yields bin/tensorfold-native,
 # 34 fatbins and a 302-cubin sm121 AOT set (see docs/tensorfold-zig-plan.org).
-# 0012 adds CUDA kernels, so the fatbin/cubin counts may change; re-check the
-# build log. The sandbox needs HOME/cache dirs under $TMPDIR (Triton otherwise
-# hits /homeless-shelter).
+# 0012 adds CUDA kernels and 0014 one more, so the fatbin/cubin counts may
+# change; re-check the build log. The sandbox needs HOME/cache dirs under
+# $TMPDIR (Triton otherwise hits /homeless-shelter).
 {
   lib,
   stdenv,
