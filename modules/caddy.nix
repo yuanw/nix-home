@@ -65,6 +65,18 @@
           reverse_proxy http://dgx-spark.lan:8888
         '';
       };
+
+      # AdGuard Home's UI. The board binds 3000 on br-lan (hosts/mono-gateway/default.nix)
+      # and gates it with auth.users, so this is the only path where the login
+      # travels over TLS -- the direct http://192.168.1.1:3000 path still exists
+      # for any LAN host. No DNS change: the board's =.yuanw.me= wildcard already
+      # lands any name on misfit.
+      "agh.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy http://192.168.1.1:3000
+        '';
+      };
     };
   };
 }

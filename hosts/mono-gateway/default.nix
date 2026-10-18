@@ -94,7 +94,10 @@
   # DHCPv4 exactly like the e8450's =proto dhcp= -- there is no PPPoE
   # anywhere in this path. Until the ISP drop is moved to this port it has no
   # carrier and contributes nothing, which is why this is safe to deploy today.
-  networking.interfaces.eth2.useDHCP = true;
+  networking.interfaces.eth2 = {
+    useDHCP = true;
+    macAddress = "80:69:1a:1f:28:de";
+  };
 
   # --- LAN (cutover decisions 1 and 2) ---
   # br-lan over eth1, same subnet as the house so nothing renumbers. From the
@@ -151,9 +154,10 @@
 
   # --- DNS + DHCP (cutover decision 4: dnsmasq 1:1, kea/resolved later) ---
   # Only on the LAN: without `interface` dnsmasq binds 0.0.0.0 and would answer
-  # on the WAN side too. Upstream servers are not listed here on purpose -- the
-  # NixOS module feeds dnsmasq whatever the WAN's DHCP hands out, which is what
-  # the e8450's dnsmasq forwards to.
+  # on the WAN side too. Two things changed since this block was copied from the
+  # e8450: decision 4 set ~no-resolv = true~ so the WAN's DHCP-provided resolvers
+  # in /etc/resolv.conf are never read, and since 2026-10-18 dnsmasq is the last
+  # hop rather than the first -- its ~server= list below is the only way out.
   services.dnsmasq = {
     enable = true;
     # false on purpose. With the default (true) NixOS rewrites the router's own
@@ -204,11 +208,162 @@
       # LAN-only names behind that wildcard, so this is what makes
       # openwrt./cockpit./tensorfold. reach it again.
       address = "/.yuanw.me/192.168.1.190";
+
+      # Decision 4, closed 2026-10-17: do not import /etc/resolv.conf as upstream
+      # servers. Without it dnsmasq still held the WAN resolvers, so a dead AGH
+      # meant *unfiltered* resolution -- and the fallback is not hypothetical: a
+      # 12s stop during testing let real traffic out through the ONT, and the
+      # cached answers kept serving after AGH came back. What survives this key is
+      # decision 4's guarantee: with the ONT path shut off, the only way out is
+      # through a service that filters. Since 2026-10-18 the guarantee is stronger
+      # than it was -- dnsmasq answers only AGH -- and so is the failure: either
+      # service going down takes external resolution, and dnsmasq alone takes
+      # =.lan= and =*.yuanw.me= with it. The lever back is
+      # ~just mono-gateway-rollback~, and =dnsmasq --test= in preStart fails
+      # activation rather than the house if this key ever loses its upstream.
+      no-resolv = true;
+
+      # Last hop now, not the front door: AGH owns :53 and asks dnsmasq on 5354.
+      # The port is what makes the swap possible. Measured here with a throwaway
+      # instance: =bind-interfaces= + =interface = br-lan= binds =192.168.1.1:53=
+      # whatever =listen-address= says, so dnsmasq cannot be pushed onto loopback
+      # and stay on :53 -- it would only win the port from AGH. On 5354 no LAN
+      # client can reach it: =chain input= is =policy drop= and no rule opens it.
+      # shortcut: "unreachable from the LAN" is firewall default here, not a bind.
+      # Give 5354 an accept rule and dnsmasq becomes a resolver the house can use
+      # around the filter.
+      port = 5354;
+
+      # The external path is dnsmasq's decision now, not AGH's. The same public
+      # pair AGH had, so decision 1 keeps its meaning (plaintext IPv4, still), and
+      # =no-resolv = true= keeps decision 4 shut: the ONT resolvers in
+      # /etc/resolv.conf are never read, so nothing leaves for the WAN except by
+      # way of AGH. 2.91 has no DoT/DoH upstream, so moving decision 1 is an
+      # unbound/proxy job in front of this key, not a change to it.
+      #
+      # The catch-all that pointed back at AGH is gone -- it would be a loop now
+      # that AGH stands upstream of dnsmasq. Deleting it is the whole cycle check;
+      # =dnsmasq --test= in preStart still fails activation rather than the house.
+      server = [
+        "94.140.14.14"
+        "1.1.1.1"
+      ];
+    };
+  };
+
+  # AGH has to release 5354 before dnsmasq can take it, so dnsmasq goes after it.
+  # The retry is the load-bearing part: dnsmasq failed on "address already in use"
+  # is the whole house offline -- local names, external names and DHCP are all in
+  # that one unit now.
+  systemd.services.dnsmasq = {
+    after = [ "adguardhome.service" ];
+    serviceConfig.RestartSec = 2;
+    serviceConfig.StartLimitIntervalSec = 0;
+  };
+
+  # --- AdGuard Home (front door since 2026-10-18) ---
+  # AGH answers the LAN on :53 and dnsmasq is what it asks. Clients still
+  # configure nothing: option 6 in DHCP is still 192.168.1.1, and only the port
+  # moved.
+  #
+  # AGH has exactly ONE upstream list on this binary -- probed: no
+  # domain-specific-upstream keys and no =local_dns_hosts=, both of which are 1.x
+  # -- so that list has to be dnsmasq. That is what keeps leases, =.lan= names and
+  # =*.yuanw.me= answering with nothing rebuilt. The old decision against owning
+  # :53 counted on the 1.x escape hatch; this is the swap that works without it.
+  #
+  # host/port are service options, NOT settings.bind_host -- current nixpkgs
+  # asserts bind_host away, and host's default is 0.0.0.0, so declaring it *is*
+  # the exposure decision. Decision 2 moved the *UI* to br-lan so misfit's caddy
+  # can serve it as https://agh.yuanw.me (modules/caddy.nix), gated by the login
+  # below rather than by a loopback bind. eth2 is still shut: input is dropped
+  # from the WAN side and every accept rule here names an interface. Note that
+  # binding br-lan stops loopback from answering 3000, so the tunnel form is
+  #   ssh -N -L 3000:192.168.1.1:3000 root@192.168.1.1
+  services.adguardhome = {
+    enable = true;
+    openFirewall = false;
+    host = "192.168.1.1";
+    port = 3000;
+    settings = {
+      dns = {
+        # Front door: =192.168.1.1:53=, which the firewall already accepts from
+        # br-lan on udp and tcp. =::= would put a resolver on eth2, which is what
+        # =bind_hosts= is for.
+        bind_hosts = [ "192.168.1.1" ];
+        # AGH 0.107 (schema 32) listens on dns.port; bind_port is legacy and is
+        # read as 0 -> defaults to 53 -> collides and the unit crash-loops.
+        port = 53;
+        # dnsmasq, not a public resolver -- see the single-upstream note above.
+        # The public pair now lives in =services.dnsmasq.settings.server=, and
+        # decision 1 moved there with it.
+        upstream_dns = [ "127.0.0.1:5354" ];
+        filtering_enabled = true;
+        cache_size = 4194304;
+        cache_ttl_min = 300;
+        cache_optimistic = true;
+        querylog_enabled = true;
+        querylog_file_enabled = true;
+      };
+
+      # Phase 3: rule lists, declared rather than clicked. yaml-merge replaces
+      # lists, so anything added in the UI would vanish on the next rebuild, and
+      # these ids are ours -- don't let the UI reuse them. Nothing to migrate,
+      # the e8450's AGH never sat in a DNS path.
+      #
+      # TOP LEVEL, not under dns -- that is the part every Nix example gets
+      # wrong. In schema 32 / AGH 0.107.71 `filters` sits next to `dns`,
+      # alongside whitelist_filters and user_rules; a list declared inside
+      # settings.dns is parsed away and AGH silently falls back to its own
+      # compiled-in default pair (AdGuard DNS filter + AdAway, the second
+      # disabled). That was the real cause of the Phase 3 "AdAway refuses to
+      # load" mystery, which this commit's predecessor blamed on the version.
+      # Verified on dgx-spark: top-level -> 185868 + 6540 + 13085 rules; under
+      # dns -> nothing but the defaults, on a clean state dir, twice.
+      filters = [
+        {
+          enabled = true;
+          id = 1;
+          name = "AdGuard DNS filter";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_1.txt";
+        }
+        {
+          enabled = true;
+          id = 2;
+          name = "AdAway Default Blocklist";
+          url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
+        }
+      ];
+
+      # Decision 2, closed: the UI answers on br-lan now, so it needs a login.
+      # bcrypt hash only -- the password lives in pass:monogateway/agh/password
+      # and in nothing else. After a rotation, regenerate the hash with:
+      #   pass show monogateway/agh/password | htpasswd -nBi -C 10 yuan | cut -d: -f2
+      #
+      # KEY NAME, measured the hard way: in 0.107.71 the list is a TOP-LEVEL
+      # =users= key, not =auth.users= -- that block is 1.x. Written the newer way
+      # it is parsed away exactly like =filters= was: --check-config still says
+      # "configuration file is ok", the unit still logs "no users in the
+      # configuration file; authentication is disabled", and the UI still answers
+      # 200 to anonymous /control/status. So this is the one shape that works on
+      # this binary; re-check it on any adguardhome bump. The rest of the block
+      # (http.session_ttl at 720h, auth_attempts, block_auth_min) stays at its
+      # defaults -- session_ttl is deliberately not declared here because the
+      # =http= map also holds the bind address the module derives from =host=.
+      #
+      # Consequence: every /control endpoint needs a session now, so the curl
+      # checks in this repo's runbooks need a login first.
+      users = [
+        {
+          name = "yuan";
+          password = "$2y$10$Yq7UPL6vtEJGxPqRX75W6O/o4F/cGk5C5br9oRO0F2DUPUO0eJ55C";
+        }
+      ];
     };
   };
 
   # --- Firewall ---
-  # Only the two rules that change behaviour, both copied from fw4's wan zone.
+  # Three rules change behaviour now, two of them copied from fw4's wan zone.
   # Everything else is already what NixOS does: input denied from WAN, masquerade,
   # forwarding accepted between the bridge and the WAN. Ping stays allowed from
   # everywhere, where fw4 only allowed it from wan.
@@ -236,6 +391,12 @@
     interfaces."br-lan".allowedTCPPorts = [
       53
       22
+      # The AGH UI. It is the one port here opened for a service rather than for
+      # the LAN's own traffic, and it is gated by =auth= instead of by a bind --
+      # any LAN host can reach the login page, and reaching it over plain http is
+      # still possible. Tightening it to 192.168.1.190 alone needs an nft rule of
+      # our own; there is no precedent for that in this repo yet.
+      3000
     ];
   };
 
