@@ -94,7 +94,10 @@
   # DHCPv4 exactly like the e8450's =proto dhcp= -- there is no PPPoE
   # anywhere in this path. Until the ISP drop is moved to this port it has no
   # carrier and contributes nothing, which is why this is safe to deploy today.
-  networking.interfaces.eth2.useDHCP = true;
+  networking.interfaces.eth2 = {
+    useDHCP = true;
+    macAddress = "80:69:1a:1f:28:de";
+  };
 
   # --- LAN (cutover decisions 1 and 2) ---
   # br-lan over eth1, same subnet as the house so nothing renumbers. From the
