@@ -302,8 +302,6 @@
         cache_size = 4194304;
         cache_ttl_min = 300;
         cache_optimistic = true;
-        querylog_enabled = true;
-        querylog_file_enabled = true;
       };
 
       # Phase 3: rule lists, declared rather than clicked. yaml-merge replaces
@@ -334,6 +332,23 @@
           url = "https://adguardteam.github.io/HostlistsRegistry/assets/filter_2.txt";
         }
       ];
+
+      # TOP LEVEL, for the same reason as filters and by the same mechanism: at
+      # schema 32 the query-log keys live in a `querylog:` map next to `dns:`
+      # (state yaml: enabled, file_enabled, interval, size_memory, ignored,
+      # dir_path), and the flat `querylog_*` names exist in the 0.107.71 binary
+      # only on the schema-migration path. Declared under `dns` they are parsed
+      # away, so the log ran on AGH's own defaults and not on this declaration --
+      # which made the docs' "querylog_enabled = false" mitigation a no-op. The
+      # rest stays at AGH's defaults: size_memory 1000 (the in-memory ring) and
+      # interval 2160h, which is this binary's only retention knob -- 0.107.71 has
+      # no `retention` key (grep'd: yaml:"interval" yes, yaml:"retention" no). At
+      # the measured ~26 MB of querylog.json a day, 90 days is ~2.3 GB on 27 GB
+      # free, so bound `interval` here rather than discovering it later.
+      querylog = {
+        enabled = true;
+        file_enabled = true;
+      };
 
       # Decision 2, closed: the UI answers on br-lan now, so it needs a login.
       # bcrypt hash only -- the password lives in pass:monogateway/agh/password

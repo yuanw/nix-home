@@ -17,7 +17,11 @@ this right, so the bug was ours and not the ecosystem's. The other surprise:
 =94.140.14.14= has been ad-blocking this house by itself since decision 1 shipped.
 Decision 4 closed the same day (~no-resolv=), so dnsmasq's only upstream is AGH and
 nothing skips the filter — that is also why an AGH outage is now an outage for
-external names. What remains is decision 1 (upstream transport) and 3.
+external names. What remains is decision 1 (upstream transport) and 3. Two follow-ups since: gen
+33 moved the query-log keys out of =settings.dns=, where they had been inert since
+Phase 1 (*The query-log keys are top level too*), and the eMMC-wear worry about
+the log on the board was measured and dismissed (*The eMMC-wear argument is
+measured*).
 
 * TL;DR
 
@@ -347,7 +351,7 @@ choices from *Decisions still open* left explicit:
         filtering_enabled = true;
         filters = [ ];                 # nothing to migrate; pick lists
         cache_size = 4194304; cache_ttl_min = 300; cache_optimistic = true;
-        querylog_enabled = true; querylog_file_enabled = true;
+        querylog_enabled = true; querylog_file_enabled = true;   # WRONG LOCATION, see *The query-log keys are top level too*
       };
       # decision 2: close the UI if loopback + ssh stops being enough
       # auth.users = [ { name = "yuan"; password = "<bcrypt: htpasswd -B -n yuan>"; } ];
@@ -638,7 +642,7 @@ are the fallback.
 | =adguardhome= active but nothing on =5354= | bind failed, or the process is a different config | =journalctl -u adguardhome -n 50=; then rollback — a silent no-listener is the worst failure mode, because the house still works *until* someone opens the firewall |
 | =address already in use= on =3000= or =5354= | something else grabbed the port | =ss -lunp= to see what; rollback |
 | AGH active, UI over the tunnel refuses =Host= or 403s | AGH's rebinding/Host check | not a DNS problem; see *Known limits*. DNS is fine, keep it and fix the UI separately |
-| house fine, board load jumps, =journalctl= noisy | query log churn | query logging is declaratively on; =querylog_enabled = false= in the next rebuild is a legitimate first mitigation |
+| house fine, board load jumps, =journalctl= noisy | query log churn | query logging was on but *not* declaratively — the key was in the wrong map (*The query-log keys are top level too*), so until gen 33 the mitigation written here (=querylog_enabled = false=) was a no-op. Since gen 33 it is =querylog.enabled = false= |
 
 *** 2.6 What Phase 2 must NOT be followed by
 
@@ -1216,13 +1220,42 @@ leases it owns, and it is now one hop away behind AGH rather than one hop in fro
 
 ** Shipping the log off the board
 
-Not this plan. AGH has no push, so the design is to pull =GET /control/querylog=
-from the log box on a timer (=/control/querylog_search= 404s on 0.107.71); the
-rest of the reasoning and the alternatives are the agenda item linked in
-*Cross-links*. What this file does own is the two facts that design has to
-survive: the retention interval below, and that every row belongs to
-=127.0.0.1= — which is why the per-machine view is dnsmasq's =log_queries=
-concern, not something a poller can recover from this endpoint.
+Not this plan, and as of 2026-10-18 *not for eMMC wear either* — see the
+measurement below, which is what closed that concern. AGH has no push, so the
+design is to pull =GET /control/querylog= from the log box on a timer
+(=/control/querylog_search= 404s on 0.107.71); the rest of the reasoning and the
+alternatives are the agenda item linked in *Cross-links*. What this file does own
+are the facts that design has to survive: the retention interval below, that rows
+carry house addresses only since gen 31 (*What the query log can say about a
+client*), and now the write cost.
+
+*** The eMMC-wear argument is measured, and it is not a reason (2026-10-18)
+
+Someone asked whether the board should ship its query log off the eMMC to spare
+the flash. It should not, and the numbers are the answer:
+
+| Written per day | Source |
+|-----------------+--------|
+| ~26 MB | =data/querylog.json= — 72,856 entries over 25.5 h, 360 B/entry (so ~68k queries/day) |
+| ~4.6 MB | the daily filter refresh (=1.txt= 4.4 MB + =2.txt= 0.2 MB, =filters_update_interval: 24=) |
+| 279 MB total, all writers | =/proc/diskstats= mmcblk0 over the 29.5 h since boot |
+| 4 KB | what a 60 s sample wrote — the log appends on the ring's 1000-entry wrap, not per query |
+
+The board is =/dev/mmcblk0p1=, 32 GB ext4 mounted =rw,noatime,commit=60=, and
+journald is volatile (=/var/log/journal= does not exist), so the mitigations that
+matter for flash wear are already on. At the log's ~9.5 GB/year, and granting a
+hostile write-amplification factor of 4 against a pessimistic 1000 P/E cycles on
+32 GB (~8 TBW), the query log is worth ~0.12% of endurance a year. Shipping it
+buys a daemon, credentials and a failure mode to save a rounding error.
+
+What is worse: the only variant that removes the write is the lossy one.
+=querylog.file_enabled = false= leaves the in-memory ring, and =size_memory=
+1000 entries is ~20 minutes of traffic at this query rate — so a poller would run
+constantly and still drop bursts, which destroys the one use the log exists for
+(*3.4*: a day of real traffic, and per-client rows since gen 31). If history that
+survives a re-flash is what is actually wanted, pull it — a timer on misfit
+copying the day's =querylog.json=, or curling the ring — because a pull leaves the
+board's write pattern exactly as it is, and that is the point.
 
 * Known limits
 
@@ -1232,8 +1265,27 @@ concern, not something a poller can recover from this endpoint.
 - *The query log file rotates far more slowly than the shipping plan assumes.*
   Shipped is =querylog.interval: 2160h= — 90 days — with =size_memory: 1000=
   matching the ring. =data/querylog.json= is a file that almost never rotates:
-  fine to poll, but declare =querylog_interval= if 24h is what the design wants,
-  and choose the retention rather than discovering it later.
+  fine to poll, but declare =querylog.interval= if 24h is what the design wants
+  (spelling matters: =querylog_interval= is the pre-schema-32 flat name, it is in
+  the binary only on the migration path), and choose the retention rather than
+  discovering it later. =interval= is this binary's only retention knob —
+  =grep -a 'yaml:"retention"'= the 0.107.71 binary finds nothing, so there is no
+  separate keep-window to set. 90 days at the measured 26 MB/day is ~2.3 GB
+  against 27 GB free.
+- *The query-log keys are top level too, and were in =dns:= since Phase 1.* Same
+  trap, same mechanism, third time: at schema 32 the log's settings are a
+  top-level =querylog:= map (=enabled=, =file_enabled=, =interval=,
+  =size_memory=, =ignored=, =dir_path=), so =settings.dns.querylog_enabled=
+  parses away silently and AGH runs the block off its own defaults. It sat that
+  way from gen 22 to gen 33 unnoticed because the defaults happen to match what
+  we declared — the tell is that the state yaml's =dns:= map never grew the keys,
+  and the consequence was that *2.5*'s "turn the log off in a rebuild" mitigation
+  could not have worked. Fixed 2026-10-18 (gen 33) by declaring
+  ~settings.querylog = { enabled = true; file_enabled = true; }~ beside
+  ~filters~. =checkPhase= accepts both spellings, so as with =filters= and
+  =users=, the location is re-checked on every =adguardhome= bump by reading the
+  keys AGH wrote into =/var/lib/AdGuardHome/AdGuardHome.yaml=, not by reading the
+  generated yaml.
 - *Per-client rows exist only since gen 31,* and the mirror image of the old
   problem is now the limit: AGH's log names the asker, and *dnsmasq's* log is the
   one that says =127.0.0.1= for every row, because AGH is its only client. So
