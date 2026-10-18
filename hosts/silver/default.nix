@@ -18,7 +18,10 @@
 
   # colmena deployment configuration
   deployment = {
-    targetHost = "silver.local";
+    # "silver.local" needs mDNS, which is not reliable here (another box on the
+    # LAN also calls itself silver, so the name conflict makes the lookup fail or
+    # land wrong). Plain "silver" resolves through the router's DNS as silver.lan.
+    targetHost = "silver";
     targetUser = "yuanw";
     # No x86_64-linux builder on the aarch64-darwin control box, so build the
     # closure on the target. Also how the private flake input gets fetched there
