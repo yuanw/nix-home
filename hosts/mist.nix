@@ -17,10 +17,13 @@
   # 1Password comes from modules/_1password.nix now (pkgs._1password-gui into
   # /Applications, op into /usr/local/bin) - a cask copy here would register the
   # same bundle twice and fight the CLI integration.
+
+  # No racket cask: nix-casks fetches it from mirror.racket-lang.org, which
+  # rebuilt the 9.3 DMG in place, so the pinned hash can never match (still
+  # broken upstream).  For Racket use pkgs.racket / modules.dev.racket instead.
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
     godot
-    racket
     vlc
   ];
   # determinate system
