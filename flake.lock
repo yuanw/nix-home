@@ -779,11 +779,11 @@
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1792352713,
-        "narHash": "sha256-MAkN2qfBcD124WLrDXUFV4qH8nZNSz3PdR18AGgsT2g=",
+        "lastModified": 1792353843,
+        "narHash": "sha256-doE+lZLGSlLo2xG5k3nxmCO/b1ScOMkWKv45T+gw/as=",
         "owner": "yuanw",
         "repo": "mono-gateway-nix",
-        "rev": "11071e2502634ca224378bc68012d98fcd8cf2a7",
+        "rev": "aeb8349cd45c603250c1b52ae225999fce11d5ab",
         "type": "github"
       },
       "original": {
