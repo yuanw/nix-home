@@ -1,0 +1,169 @@
+#+TITLE: Plan: TensorFold Zig recipe upgrade to the latest (→ 656879f, FP4) + vision fixes
+#+AUTHOR: Yuan Wang
+#+TODO: TODO IN-PROGRESS | DONE CANCELLED
+
+* Goal
+
+Bump the pinned MiaAI-Lab recipe
+(=MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold=) from the revision
+=packages/tensorfold-zig/src.nix= pins today to the current =main=
+(=656879fd752749bbd11a6e1a065a326c00940911=), move the served checkpoint to
+NVIDIA's FP4 QAD export, and carry the two local Zig fixes for the image/video
+capacity failure:
+
+- =local-capacity-status.patch=: the vision path's transient capacity refusal is
+  sent as 503 (retry) instead of 400 =invalid_request_error=.
+- =local-vision-request-timeout.patch=: a stuck vision helper is killed and
+  reloaded after 180 s instead of 600 s.
+
+Both are already written and wired into =packages/tensorfold-zig/default.nix=
+(uncommitted). The plan is the build/deploy path and the decisions in between.
+
+Context for the fixes: see the 2026-10-17 outage — a helper spun 100% CPU for
+the full 600 s transaction, so every image turn in that chat was refused for
+10 min and then the helper reloaded for ~5 min. The 400 made clients treat a
+retryable condition as a bad request.
+
+* What changes
+
+| | today | target |
+|--+-------+--------|
+| recipe rev | =4e1239ddb9d9a4cc3c748e771ae4725335c46a95= | =656879fd752749bbd11a6e1a065a326c00940911= |
+| recipe hash | =sha256-U2URsdeH4PktOcl0PpNyqFPKPwA9kwBKgRtevE9+t1w== | =sha256-CpQzJIj1qLNm5E2ouSI4QAqCwQFmKUbt7wbUL247rXk== |
+| patches | 0001…0010 | 0001…0015 (0011-0013 NVFP4/tune, 0014 prompt expert tile, 0015 fair prefill) |
+| local patches | helper-restart, pil-processor | + capacity-status, vision-request-timeout |
+| checkpoint | INT4-AutoRound (azampatti) | NVIDIA FP4 QAD (nvidia/Qwen3.8-Flash-Next-FP4-Local) |
+
+The new patches touch neither =zig/src/server/vision.zig= nor
+=zig/src/server/openai.zig= nor =src/tensorfold/vision/qwen_processing.py=, so
+all four local patches still apply. Verified by applying 0001…0015 + the four
+local patches onto =db281878= in a scratch worktree (=git apply --check= clean).
+
+The recipe's build steps are unchanged (same =zig build fatbins install native=
+and =tools/zig/flashnext_aot.py=); 0012 and 0014 add CUDA kernels but not
+=zig/tests/cuda/flashnext/kernels.json= or =jit.json=, so the AOT set is the
+same shape. =check_mx8.py= is a validation tool, not part of the build.
+
+* Out of scope
+
+- The ~96 GiB NVIDIA FP4 QAD download itself; =preStart= fetches it on first
+  start. The old INT4 checkpoint stays in the HF cache until pruned by hand.
+- Finding the vision-helper wedge itself. These two fixes shorten and label the
+  outage, they do not prevent it. A follow-up should add
+  =PYTHONFAULTHANDLER=1= to the helper env and =kill -ABRT= the next wedge for a
+  Python stack.
+
+* Phase 0 — prep
+
+- Fetch the target rev and re-check the local patches:
+  =nix flake prefetch github:…/763f39f…=; apply 0001…0013 + the four local
+  patches in a =db281878= worktree.
+- Confirm =git apply --check= is clean for all four local patches (done).
+
+* Phase 1 — local patches DONE, uncommitted
+
+- =packages/tensorfold-zig/local-capacity-status.patch= (=Run.fail= in
+  =zig/src/server/openai.zig= uses =cx.status()=).
+- =packages/tensorfold-zig/local-vision-request-timeout.patch= (=timeout_s= 600
+  → 180 in =zig/src/server/vision.zig=; startup ready-frame 900 s unchanged).
+- Both listed in =default.nix= =postPatch= after the recipe glob.
+
+* Phase 2 — bump the pin
+
+In =packages/tensorfold-zig/src.nix=:
+
+#+begin_src nix
+  recipeSrc = fetchFromGitHub {
+    owner = "MiaAI-Lab";
+    repo = "Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold";
+    rev = "656879fd752749bbd11a6e1a065a326c00940911"; # main: 0001…0015
+    hash = "sha256-CpQzJIj1qLNm5E2ouSI4QAqCwQFmKUbt7wbUL247rXk=";
+  };
+#+end_src
+
+Also update the =default.nix= header comment ("on top of the recipe's
+0001…0010" → =0001…0015=).
+
+* Phase 3 — checkpoint and tuning (decided: FP4)
+
+- *Checkpoint*: move to NVIDIA's FP4 QAD export
+  (=nvidia/Qwen3.8-Flash-Next-FP4-Local= @
+  =b9ce18a6887e18c089fdea8509a33e63429a3300=, ~96 GiB) — the recipe's default.
+  =modules/tensorfold-zig.nix= sets it as the default =modelId= /
+  =modelRevision=; the INT4-AutoRound checkpoint still works as an override.
+- *Tuning*: mirror the recipe's FP4 config — =PARALLEL=5=,
+  =TF_FLASHNEXT_DEPTH=6=, =TF_FLASHNEXT_PRODUCT_STREAMS=5= — in the module,
+  since the engine's own defaults (8, 15, 2) are the pre-FP4 values.
+  =TF_FLASHNEXT_PREFILL_TAIL=512=, =TF_FLASHNEXT_ADMIT_WAIT_MS=3=,
+  =TF_FLASHNEXT_REPEAT_CACHE=1= and the 0014 expert tile are already the engine
+  defaults; no env needed. 0015 fair prefill stays off (opt-in =FILL_FAIR=1=).
+
+* Phase 4 — build
+
+- The package is =aarch64-linux= only and =buildOnTarget = true=, so it builds
+  on the Spark: =just colmena-spark-build=.
+- *Build while the model is stopped*, or on a separate aarch64 builder. The
+  justfile caps the Spark build at =--max-jobs 1 --cores 6= because an unbounded
+  rebuild OOM-killed the resident model on 2026-10-14; 0012 is ~5000 added lines
+  of kernels, so it is a real rebuild, not a cache hit.
+- Build failure modes to watch: patch 0012's new CUDA kernels
+  (=fn_qmmf_ld.cu=, CSF/MXFP8) against the nixpkgs CUDA/nvcc on =sm121=, and the
+  Triton AOT capture (unchanged spec, but a new triton/cuda can shift cubins).
+  The package only checks that =aot.json= and cubins exist; the recipe also
+  fails on =PROBLEM= lines, so check the build log for =PROBLEM=.
+
+* Phase 5 — deploy and verify
+
+- =just colmena-spark-apply=. This restarts =tensorfold-zig= and reloads the
+  vision helper (~2.5–5 min).
+- Smoke, text: =curl :8888/v1/models=, a short chat 200.
+- Smoke, image: a data-URL image request returns 200 and the journal logs
+  =vision: 1 image(s) …=.
+- *capacity-status check* (the point of the patch): fire a burst of ~20 tiny
+  image requests at once. The ones past the server's =max_waiting=8 are refused
+  at once and must come back =HTTP 503 image request queue is full; retry
+  shortly= — before the patch they are 400. This exercises the same
+  =r.status == 503 → .capacity → cx.status()= path as "image processing capacity
+  is busy".
+- *timeout check*: can't be forced cheaply, and =timeout_s= is a numeric
+  constant, so =strings= on the built binary cannot confirm it. Rely on the
+  local patch applying at build time (a failed =git apply= fails the build).
+- Watch =journalctl -u tensorfold-zig -f= for =refused … image …= during normal
+  use; the next wedge should now log the failure at ~180 s and recover in ~3 min.
+
+* Phase 6 — rollback
+
+- =nix-env --rollback= / the boot menu still has the pre-upgrade system
+  generation; =colmena apply= of the previous commit also works.
+- The two local patches are independent of the pin bump and can be reverted one
+  at a time: =local-capacity-status= is behavior-neutral for text, and
+  =local-vision-request-timeout= only changes the stuck-helper cutoff.
+
+* Risks / open questions
+
+- *Decode behavior*: 0013 changes =lane_host=, =prompt_cache=, =cuda_lanes=,
+  =cuda_native= and =cuda.zig=. Even with depth/product_streams left alone, the
+  INT4 decode/quality can move. Take a before/after with the repo's
+  =tensorfold-tools= (or the recipe's =tools/bench_streams.py=) on the same
+  checkpoint.
+- *NVFP4 code on INT4*: 0012 is dead weight for the INT4 checkpoint but must
+  still compile and load; the first apply proves it.
+- *Wedge not fixed*: a helper that hangs for a non-timeout reason still costs
+  3 min + reload. The 400→503 fix only makes the client retry.
+- *No validation of the pinned upgrade yet*: only the patch application is
+  checked; the =nix build= itself is Phase 4.
+
+* Upstream track (optional)
+
+The two fixes are generic and small enough to send to MiaAI-Lab / TensorFold:
+
+- =(1) capacity status=: =Run.fail= hardcodes 400; =cx.status()= is the one-line
+  fix (=cx.status()= already returns 503 for =.capacity=).
+- =(2) helper timeout=: 600 s per request is long for a single-helper design;
+  180 s bounds a wedge.
+- A third, separate issue is worth reporting: the helper wedged at 100% CPU and
+  held the vision lock for the whole transaction (2026-10-17 logs); the two
+  patches mitigate but do not explain it.
+
+Keep the local patches until an upstream release carries them; then drop them
+from =default.nix=.
