@@ -11,13 +11,19 @@
 #    resulting cubins are valid but not byte-identical to the container's
 #    capture — see docs/tensorfold-zig-plan.org.
 #
-# local-vision-*.patch (ours, on top of the recipe's 0001…0010):
+# local-*.patch (ours, on top of the recipe's 0001…0010):
 #  - vision-helper-restart: a single stuck image/video request used to set the
 #    helper permanently dead; now the helper is killed and respawned, so vision
 #    recovers. (Zig)
 #  - vision-pil-processor: import `Qwen2VLImageProcessorPil` directly, since
 #    transformers 5.17's `Qwen2VLImageProcessor` is the torchvision backend and
 #    warns once, then falls back, without torchvision. (Python)
+#  - capacity-status: a transient image/video capacity refusal (the helper is
+#    busy past the wait, or restarting) was sent as 400 invalid_request_error by
+#    Run.fail; send its kind's status, so a client retries the 503. (Zig)
+#  - vision-request-timeout: a stuck helper held the one vision lock for the
+#    full 600 s transaction; past 180 s it is killed and reloaded, so a wedge
+#    costs 3 min of refused images instead of 10. (Zig)
 #
 # Validated: `nix build` yields bin/tensorfold-native, 34 fatbins and a
 # 302-cubin sm121 AOT set (see docs/tensorfold-zig-plan.org). The sandbox
@@ -105,7 +111,7 @@ stdenv.mkDerivation (_finalAttrs: {
 
   postPatch = ''
     git init -q .
-    for p in ${recipeSrc}/patches/*.patch ${./local-vision-helper-restart.patch} ${./local-vision-pil-processor.patch}; do
+    for p in ${recipeSrc}/patches/*.patch ${./local-vision-helper-restart.patch} ${./local-vision-pil-processor.patch} ${./local-capacity-status.patch} ${./local-vision-request-timeout.patch}; do
       echo "applying $(basename "$p")"
       git apply "$p"
     done

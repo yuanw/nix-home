@@ -1,0 +1,18 @@
+With the vision (image/video) path, chat.prepare can refuse with .capacity
+(waiting for / restarting the vision helper). Run.fail sent every structured
+refusal as 400, so a transient capacity refusal came back as
+"400 invalid_request_error" and clients kept resending instead of retrying.
+Send the kind's own status: .capacity is 503, .request/.context_length stay 400.
+
+diff --git a/zig/src/server/openai.zig b/zig/src/server/openai.zig
+--- a/zig/src/server/openai.zig
++++ b/zig/src/server/openai.zig
+@@ -314,7 +314,7 @@
+         const a = r.a;
+         const kind_ok = cx.kind != .other and cx.kind != .server;
+         const body = (if (kind_ok) errorBody(a, cx, field) else errorOther(a, cx.message)) catch return;
+-        r.out.vt.reply(r.out.ctx, if (kind_ok) 400 else 500, wrapError(a, body) catch return);
++        r.out.vt.reply(r.out.ctx, if (kind_ok) cx.status() else 500, wrapError(a, body) catch return);
+     }
+ 
+     /// A reply that ended before anything was sent: a refusal's 400, a failure's 500, nothing when the client left.

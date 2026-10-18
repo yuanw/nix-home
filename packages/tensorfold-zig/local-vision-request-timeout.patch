@@ -1,0 +1,30 @@
+A stuck vision helper (seen 2026-10-17: 100% CPU for the whole transaction)
+held the one vision lock for timeout_s, so every image/video request in that
+window was refused for 10 min before the helper was killed and reloaded.
+180 s is ~5x the recipe's documented worst case (a 5,107-token image: 35 s),
+so it still clears any legitimate request but recovers a wedge in 3 min.
+
+diff --git a/zig/src/server/vision.zig b/zig/src/server/vision.zig
+--- a/zig/src/server/vision.zig
++++ b/zig/src/server/vision.zig
+@@ -83,8 +83,9 @@
+     width: u32 = 0,
+     tower_bytes: u64 = 0,
+     /// seconds a request may take (writing it, decoding, the tower, reading the answer); past it the helper is
+-    /// taken as stuck: killed, and media requests refused from then on
+-    timeout_s: u32 = 600,
++    /// taken as stuck: killed, and media requests refused from then on. 180 s is ~5x the documented worst case
++    /// (a 5,107-token image: 35 s) and cuts a wedge's outage from the recipe's 10 min to 3
++    timeout_s: u32 = 180,
+     /// requests waiting for the helper (each holds its body in host memory): past `max_waiting` a request is refused
+     /// at once with 503, and none waits past `wait_s` (Python's bounded image slots and 60 s wait)
+     waiting: std.atomic.Value(u32) = .init(0),
+@@ -152,7 +153,7 @@
+             h.child.kill(io);
+             return error.VisionHelper;
+         }
+-        h.timeout_s = 600;
++        h.timeout_s = 180;
+         if (h.selftest.len > 0) h.gpa.free(h.selftest);
+         h.selftest = try a.dupe(u8, head.strField("selftest_sha256") orelse "");
+         if (environ) |m| if (m.get("TENSORFOLD_VISION_SELFTEST")) |want| if (want.len > 0 and !std.mem.eql(u8, want, h.selftest)) {
