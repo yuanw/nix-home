@@ -151,12 +151,10 @@
 
   # --- DNS + DHCP (cutover decision 4: dnsmasq 1:1, kea/resolved later) ---
   # Only on the LAN: without `interface` dnsmasq binds 0.0.0.0 and would answer
-  # on the WAN side too. Upstream servers are not listed here on purpose -- the
-  # NixOS module feeds dnsmasq whatever the WAN's DHCP hands out, which is what
-  # the e8450's dnsmasq forwards to. (Since AdGuard Home, the =server= catch-all
-  # below wins over those, so this is only what AGH asks last.) *Superseded:*
-  # decision 4 set ~no-resolv = true~, so those DHCP-provided resolvers are no
-  # longer read at all and AGH is the only upstream.
+  # on the WAN side too. Two things changed since this block was copied from the
+  # e8450: decision 4 set ~no-resolv = true~ so the WAN's DHCP-provided resolvers
+  # in /etc/resolv.conf are never read, and since 2026-10-18 dnsmasq is the last
+  # hop rather than the first -- its ~server= list below is the only way out.
   services.dnsmasq = {
     enable = true;
     # false on purpose. With the default (true) NixOS rewrites the router's own
@@ -212,39 +210,64 @@
       # servers. Without it dnsmasq still held the WAN resolvers, so a dead AGH
       # meant *unfiltered* resolution -- and the fallback is not hypothetical: a
       # 12s stop during testing let real traffic out through the ONT, and the
-      # cached answers kept serving after AGH came back. With this, the =server=
-      # catch-all below is the only path, so filtering is guaranteed and an AGH
-      # outage is a resolution outage. That is the trade; the lever back is
-      # ~just mono-gateway-rollback~, not ~systemctl stop adguardhome~, and
-      # =dnsmasq --test= in preStart fails activation rather than the house if the
-      # catch-all is ever dropped.
+      # cached answers kept serving after AGH came back. What survives this key is
+      # decision 4's guarantee: with the ONT path shut off, the only way out is
+      # through a service that filters. Since 2026-10-18 the guarantee is stronger
+      # than it was -- dnsmasq answers only AGH -- and so is the failure: either
+      # service going down takes external resolution, and dnsmasq alone takes
+      # =.lan= and =*.yuanw.me= with it. The lever back is
+      # ~just mono-gateway-rollback~, and =dnsmasq --test= in preStart fails
+      # activation rather than the house if this key ever loses its upstream.
       no-resolv = true;
 
-      # AdGuard Home as a filter hop behind dnsmasq (cutover decision 7). Only
-      # queries dnsmasq does not already own an answer for reach it, so leases,
-      # =.lan= names and =*.yuanw.me= are untouched. Port 5354, not 53, so AGH can
-      # never race dnsmasq for =:53= across a restart. Together with =no-resolv=
-      # above this makes AGH the only external path: a dead AGH is a resolution
-      # outage for external names, which is what decision 4 chose.
-      server = [ "/#/127.0.0.1#5354" ];
+      # Last hop now, not the front door: AGH owns :53 and asks dnsmasq on 5354.
+      # The port is what makes the swap possible. Measured here with a throwaway
+      # instance: =bind-interfaces= + =interface = br-lan= binds =192.168.1.1:53=
+      # whatever =listen-address= says, so dnsmasq cannot be pushed onto loopback
+      # and stay on :53 -- it would only win the port from AGH. On 5354 no LAN
+      # client can reach it: =chain input= is =policy drop= and no rule opens it.
+      # shortcut: "unreachable from the LAN" is firewall default here, not a bind.
+      # Give 5354 an accept rule and dnsmasq becomes a resolver the house can use
+      # around the filter.
+      port = 5354;
 
-      # The *who* half of the client view: AGH's log can only ever say 127.0.0.1,
-      # so per-machine rows have to come from the front door (see
-      # docs/mono-gateway-adguardhome.org, *What the query log can say about a
-      # client*). Read it as =journalctl -u dnsmasq -f=; the line that names the
-      # asker is =query[A] example.com from 192.168.1.155=.
-      # shortcut: 2.91 has no =log-queries-nomisc=/=freq=, so PTR and mDNS chatter
-      # ride along, and journald's 50M runtime window is hours rather than days.
-      # Delete this key to stop the trial.
-      log-queries = true;
+      # The external path is dnsmasq's decision now, not AGH's. The same public
+      # pair AGH had, so decision 1 keeps its meaning (plaintext IPv4, still), and
+      # =no-resolv = true= keeps decision 4 shut: the ONT resolvers in
+      # /etc/resolv.conf are never read, so nothing leaves for the WAN except by
+      # way of AGH. 2.91 has no DoT/DoH upstream, so moving decision 1 is an
+      # unbound/proxy job in front of this key, not a change to it.
+      #
+      # The catch-all that pointed back at AGH is gone -- it would be a loop now
+      # that AGH stands upstream of dnsmasq. Deleting it is the whole cycle check;
+      # =dnsmasq --test= in preStart still fails activation rather than the house.
+      server = [
+        "94.140.14.14"
+        "1.1.1.1"
+      ];
     };
   };
 
-  # --- AdGuard Home (cutover decision 7) ---
-  # dnsmasq stays the front door; AGH is a filter hop behind it and there is
-  # nothing for clients to configure. DNS stays loopback-bound -- =dns.bind_hosts=
-  # is 127.0.0.1, so 5354 never hears the LAN and filtering cannot be bypassed by
-  # asking AGH directly.
+  # AGH has to release 5354 before dnsmasq can take it, so dnsmasq goes after it.
+  # The retry is the load-bearing part: dnsmasq failed on "address already in use"
+  # is the whole house offline -- local names, external names and DHCP are all in
+  # that one unit now.
+  systemd.services.dnsmasq = {
+    after = [ "adguardhome.service" ];
+    serviceConfig.RestartSec = 2;
+    serviceConfig.StartLimitIntervalSec = 0;
+  };
+
+  # --- AdGuard Home (front door since 2026-10-18) ---
+  # AGH answers the LAN on :53 and dnsmasq is what it asks. Clients still
+  # configure nothing: option 6 in DHCP is still 192.168.1.1, and only the port
+  # moved.
+  #
+  # AGH has exactly ONE upstream list on this binary -- probed: no
+  # domain-specific-upstream keys and no =local_dns_hosts=, both of which are 1.x
+  # -- so that list has to be dnsmasq. That is what keeps leases, =.lan= names and
+  # =*.yuanw.me= answering with nothing rebuilt. The old decision against owning
+  # :53 counted on the 1.x escape hatch; this is the swap that works without it.
   #
   # host/port are service options, NOT settings.bind_host -- current nixpkgs
   # asserts bind_host away, and host's default is 0.0.0.0, so declaring it *is*
@@ -261,18 +284,17 @@
     port = 3000;
     settings = {
       dns = {
-        bind_hosts = [ "127.0.0.1" ];
-        # AGH 0.107 (schema 32) listens on dns.port; bind_port is legacy and is read
-        # as 0 -> defaults to 53 -> collides with dnsmasq and the unit crash-loops.
-        port = 5354;
-        # decision 1, public IPs for now. DoH is the half the cutover actually
-        # lost (the AP had https-dns-proxy + force_dns); that is a later swap of
-        # these two lists, not a redesign.
-        upstream_dns = [
-          "94.140.14.14"
-          "1.1.1.1"
-        ];
-        bootstrap_dns = [ "1.1.1.1" ];
+        # Front door: =192.168.1.1:53=, which the firewall already accepts from
+        # br-lan on udp and tcp. =::= would put a resolver on eth2, which is what
+        # =bind_hosts= is for.
+        bind_hosts = [ "192.168.1.1" ];
+        # AGH 0.107 (schema 32) listens on dns.port; bind_port is legacy and is
+        # read as 0 -> defaults to 53 -> collides and the unit crash-loops.
+        port = 53;
+        # dnsmasq, not a public resolver -- see the single-upstream note above.
+        # The public pair now lives in =services.dnsmasq.settings.server=, and
+        # decision 1 moved there with it.
+        upstream_dns = [ "127.0.0.1:5354" ];
         filtering_enabled = true;
         cache_size = 4194304;
         cache_ttl_min = 300;
