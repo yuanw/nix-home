@@ -170,27 +170,6 @@ in
           ];
         };
 
-        # Old modules.pi.skills linked whole store packages as
-        # ~/.pi/agent/skills/<name> -> /nix/store/... . pi-flake keeps skills in
-        # the store and lists them in settings.json, so those links are stale.
-        # Keep mics-skills whole-dir links; remove other store dir symlinks.
-        home.activation.removeLegacyAgentPmSkillDirLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-          skillsDir="$HOME/${agentConfigDir}/skills"
-          if [ -d "$skillsDir" ]; then
-            for path in "$skillsDir"/*; do
-              [ -L "$path" ] || continue
-              name="''${path##*/}"
-              case "$name" in
-                ${lib.concatMapStringsSep "|" lib.escapeShellArg micsSkillNames}) continue ;;
-              esac
-              target="$(readlink "$path" || true)"
-              case "$target" in
-                /nix/store/*) run rm -f "$path" ;;
-              esac
-            done
-          fi
-        '';
-
         programs.pi = {
           enable = true;
           package = lib.mkDefault pkgs.llm-agents.pi;
@@ -218,17 +197,10 @@ in
             }
           ) cfg.extensions;
 
-          # The herdr skill ships in the herdr source tree, not its output: our
-          # pinned herdr (0.9.3) installs only bin/ and share/herdr/integrations.
-          # llm-agents.nix main adds the nixpkgs `installAgentSkills` setup hook
-          # to herdr (0.9.5), which copies skills/herdr to
-          # $out/share/skills/herdr/herdr. After bumping the llm-agents input,
-          # switch to "${config.modules.herdr.package}/share/skills/herdr/herdr"
-          # and drop the .src dependency.
           rawSkills =
             cfg.rawSkills
             ++ lib.optional (config.modules.herdr.enable or false
-            ) "${config.modules.herdr.package.src}/skills/herdr";
+            ) "${config.modules.herdr.package}/share/skills/herdr/herdr";
           # Only declare providers that have real models.json fields here.
           # Extension-registered ones (e.g. cursor-agent via pi-cursor-agent)
           # must not get an empty stub — Pi rejects `providers.<name>: {}` with
