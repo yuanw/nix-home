@@ -1,0 +1,262 @@
+#+TITLE: Home network VLAN segmentation — plan
+#+DATE: 2026-10-18
+#+OPTIONS: toc:t
+
+* Status
+
+*Draft, not started.* No config here is applied. Two things decide the shape of
+this work and neither is in the repo yet: the switch (VLAN-aware or not) and
+whether the e8450 will tag. Answer *Questions* at the bottom before Phase 1.
+
+This is the layer above [[file:mono-gateway-cutover.org][the cutover design]] and [[file:mono-gateway-adguardhome.org][the AGH plan]] — the board is the
+router at =192.168.1.1= (generation 31+), the e8450 is a dumb AP at =.2= with one
+SSID pair, dnsmasq answers =.lan= and =*.yuanw.me=, AGH owns =:53=. Nothing here
+reopens those decisions; it adds segments on top of them.
+
+* Goal
+
+Two things, and they are independent — do not expect one to buy the other.
+
+- *Privacy:* a device that joins (IoT, guest, a friend's phone) gets internet and
+  nothing else. It cannot reach the Mac, dgx-spark, misfit, the board's UI, or
+  the AP's UI. It cannot hear mDNS/SSDP from the rest of the house and it cannot
+  look up internal names.
+- *Speed:* mostly *not* what VLANs do. See the next section — the real speed
+  items are the DAC and keeping high-bandwidth pairs on one L2 segment.
+
+* What VLANs buy, and what they cost (be honest about speed)
+
+| Path | Today | After this plan |
+|---------------------------------+---------------------+
+| WiFi -> internet | e8450 -> 1G trunk -> board, NAT offloaded (~1–3 % CPU) | unchanged — still one 1G trunk |
+| WiFi -> dgx-spark / misfit (SMB, Jellyfin) | L2 on the house switch, never touches the board | *unchanged if both stay on the trusted VLAN* — the one thing not to break |
+| dgx-spark <-> misfit | 1G | *10G, with a DAC directly between them* — no router, no switch, no VLAN |
+| trusted -> iot (casting, device control) | L2, free | through the board's CPU (forward chain). Re-measure. |
+| iot/guest -> internet | same as LAN | same path, one more bridge, one more match |
+
+The measured baseline to protect is in the build plan §5.5: gigabit NAT +
+nftables + conntrack at 0.3–2.6 % CPU. Every phase ends with an iperf3 re-run; a
+phase that takes CPU from ~2 % to ~40 % has silently broken the ASK fast path
+and is a rollback, not a "works".
+
+Three things VLANs genuinely cost:
+
+- Inter-VLAN traffic is routed by the board, so a cast device on =iot= talking to
+  a phone on =trusted= is no longer L2-local. Keep high-bandwidth pairs together.
+- Each extra SSID costs beacon/probe airtime. Two SSIDs × 2 radios is the
+  practical ceiling before WiFi throughput is what you sacrificed.
+- Every service you *do* want reachable across a segment is a firewall rule,
+  forever. That is the tax; the trust matrix below keeps it small and fixed.
+
+* The segments (three, not six)
+
+| VLAN | Bridge | Net | Carries | WiFi |
+|------+--------+-----+---------+------|
+| =trusted= | =br-lan= | =192.168.1.0/24= (unchanged) | Mac, silver, asche, dgx-spark, misfit, the AP, and anything that casts/screenshares | =NoneAndVoid= / =-5G= (as today) |
+| =iot= | =br-iot= | =192.168.20.0/24= | plugs, bulbs, TV, camera, speaker | =NoneAndVoid-IoT= |
+| =guest= | =br-guest= | =192.168.30.0/24= | anything that is not ours | =NoneAndVoid-Guest= |
+
+Deliberately *not* created:
+
+- *A server VLAN.* Separating dgx-spark/misfit from the Mac would route SMB and
+  Jellyfin through the board for a privacy gain nobody asked for. They stay on
+  =trusted= and get speed from the 10G DAC instead.
+- *A management VLAN.* The board's =22= and =3000= are already =br-lan=-scoped in
+  =hosts/mono-gateway/default.nix=; with =trusted= as the only LAN that can route,
+  a fourth segment adds a trunk and buys nothing. Revisit if the switch gets a
+  web UI that must be hidden from =trusted=.
+
+* Trust matrix
+
+The whole rule set. Default is deny; anything not here is blocked, and return
+traffic (=established,related=) is always allowed.
+
+| From \ To | internet | trusted | iot | guest | board/AP UI |
+|-----------+----------+---------+-----+-------+-------------|
+| =trusted= | yes | yes | *yes* (initiate) | no | yes (22, 3000, 80/443) |
+| =iot= | yes | *no* | intra-VLAN yes | no | no |
+| =guest= | yes | no | no | *no (client isolation)* | no |
+
+Exceptions, and they are the only ones:
+
+- =iot= -> =br-iot= :=53 only (its own resolver), never =192.168.1.1:53=.
+- =guest= -> =br-guest= :=53 only. =guest= -> any RFC1918 =drop=, so it cannot even
+  probe the other segments.
+- =trusted= -> =iot= allowed, =iot= -> =trusted= denied. This is the asymmetric pair
+  that lets the phone control the bulb but not the bulb reach the Mac.
+- No mDNS/SSDP crosses a segment. =avahi= reflection is *not* enabled. If a cast
+  device needs discovery from =trusted=, the lazy answer is: that device belongs
+  on =trusted=, not another rule.
+
+* Board-side config shape
+
+All of it is =networking.*= in =hosts/mono-gateway/default.nix=, in the same
+layered-on-=gateway-native= style as the cutover. No custom code expected.
+
+#+begin_src nix
+# eth1 becomes a hybrid trunk: untagged = trusted (so 192.168.1.0/24 and every
+# dumb device keep working with zero renumbering), tagged 20/30 = the new
+# segments. The 8021q link on eth1 alongside eth1's br-lan membership is the
+# standard hybrid port; br-lan keeps eth0 so a direct-plug rescue path survives
+# a bad switch config.
+networking.vlans.br-iot = { id = 20; interface = "eth1"; };
+networking.vlans.br-guest = { id = 30; interface = "eth1"; };
+networking.bridges.br-iot.interfaces = [ "eth1.20" ];
+networking.bridges.br-guest.interfaces = [ "eth1.30" ];
+networking.interfaces.br-iot.ipv4.addresses = [ { address = "192.168.20.1"; prefixLength = 24; } ];
+networking.interfaces.br-guest.ipv4.addresses = [ { address = "192.168.30.1"; prefixLength = 24; } ];
+
+# NAT is per-internal-interface: a bridge missing here has NO internet, in the
+# same family as the cutover's udp/67 and udp/53 misses.
+networking.nat.internalInterfaces = [ "br-lan" "br-iot" "br-guest" ];
+
+# Every new bridge needs the full set or the segment boots dead: leases, DNS,
+# ssh. Copy br-lan's five keys, do not "trim" them.
+networking.firewall.interfaces."br-iot" = {
+  allowedUDPPorts = [ 67 53 ];
+  allowedTCPPorts = [ 53 ];
+};
+networking.firewall.interfaces."br-guest" = {
+  allowedUDPPorts = [ 67 53 ];
+  allowedTCPPorts = [ 53 ];
+};
+#+end_src
+
+Inter-VLAN deny needs its own forward rules (NixOS's forward chain is not a
+policy drop between two =br-*= interfaces — *verify, do not assume*, Phase 1 gate
+#3). Add the matrix as nftables, one chain, source-interface matched:
+
+#+begin_src nix
+networking.firewall.extraForwardRules = ''
+  ip saddr 192.168.20.0/24 oifname "br-lan" drop
+  ip saddr 192.168.20.0/24 oifname "br-iot"   drop   # no lateral movement
+  ip saddr 192.168.30.0/24 .oifname { "br-lan", "br-iot", "br-guest" } drop
+  ip saddr 192.168.30.0/24 ip daddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } drop
+'';
+#+end_src
+
+* DNS per segment — the part that will bite
+
+The cutover doc's lesson generalises badly: one resolver, bound to one address,
+reachable by one firewall rule. Four separate things break per segment.
+
+1. *dnsmasq binds =br-lan= only* (=interface = "br-lan"=). It needs every bridge,
+   with interface tags so internal names stay inside =trusted=:
+
+   #+begin_src nix
+   settings = {
+     interface = [ "br-lan,#trusted" "br-iot,#iot" "br-guest,#guest" ];
+     dhcp-range = [
+       "192.168.1.100,192.168.1.249,12h"
+       "192.168.20.100,192.168.20.200,12h"
+       "192.168.30.100,192.168.30.200,12h"
+     ];
+     # option 6 must name each segment's own gateway; handing out 192.168.1.1 to
+     # an IoT client is a resolver it is firewalled from.
+     dhcp-option = [
+       "3,192.168.1.1" "6,192.168.1.1"
+       "tag:#iot,3,192.168.20.1" "tag:#iot,6,192.168.20.1"
+       "tag:#guest,3,192.168.30.1" "tag:#guest,6,192.168.30.1"
+     ];
+     # the wildcard override, now trusted-only
+     address = "/.yuanw.me/192.168.1.190,#trusted";
+   };
+   #+end_src
+
+   *Verify before deploying:* whether =settings.interface= and =settings.dhcp-option=
+   accept lists in this nixpkgs' option type, and that the tags bind as expected.
+   Read the generated conf-file the way the cutover runbook does — the built
+   closure, not =/etc/dnsmasq.conf= — and =dnsmasq --test= (already wired into
+   =preStart=, so a bad key fails activation instead of the house).
+
+2. *AGH binds =192.168.1.1= only* (=bind_hosts=). Add =192.168.20.1= and
+   =192.168.30.1=, or the new segments get connection-refused and look like dead
+   internet from a sofa.
+3. *DHCP option 6* per segment (above).
+4. *Internal names* =.lan= and =*.yuanw.me= must not answer for =guest=. The
+   interface tag does the wildcard; =.lan= comes from =expand-hosts= + =domain= and
+   is harmless-to-useful on =iot=, so leave it.
+
+*Force DNS — closes the hole the cutover left open.* The cutover doc records that
+a client hardcoding =1.1.1.1= bypasses the filter because =force_dns= was not
+reproduced. With per-segment gateways this becomes cheap, and it only needs to
+apply where it matters:
+
+#+begin_src nix
+networking.firewall.extraPreroutingRules = ''
+  iifname { "br-iot", "br-guest" } meta l4proto { udp, tcp } th dport 53 ip daddr != { 192.168.20.1, 192.168.30.1 } dnat to ip daddr . udp dport map @dns_hijack
+'';
+#+end_src
+
+That map form is likely too clever for a first pass — the plain version is two
+=dnat to 192.168.20.1:53= / =dnat to 192.168.30.1:53= lines, and the option names
+(=extraForwardRules=, =extraPreroutingRules=) are the nftables-era ones: read the
+generated =nft list ruleset= after a build-only pass before trusting either.
+
+Then the DoH escape, which no port-block can cover: =drop= =iot= and =guest= to a small nft set of
+public-resolver addresses (=94.140.14.14=, =1.1.1.1=, =1.0.0.1=, =8.8.8.8=,
+=8.8.4.4=, =9.9.9.9=, =208.67.222.222=). ~shortcut:~ an IP list of public resolvers,
+current as of 2026-10; refresh if a device "resolves everything" on one segment.
+
+* AP side (the e8450) — the risky half
+
+Two more SSIDs (=iot=, =guest=) each pinned to a VLAN, tagged over the single GbE
+uplink, declared in =openwrt/routers/e8450-ap.nix= next to the existing
+=wireless.default_radio*= blocks. The e8450 is an MT7622 with an internal DSA
+switch, so =network.device= switch-VLAN entries + one bridge per SSID is the
+normal shape — *unverified on this unit*, and this is the box whose failsafe was
+proven unreachable on 2026-10-16 and whose rollback watchdog was a no-op until
+2026-10-17. So the rules from the cutover bind here: one plane per apply,
+physically present, =just openwrt-diff= clean against the declaration before and
+after, serial or the installer recovery path known.
+
+Keep the SSID count at three (main / IoT / guest) × 2 radios. If only 2.4G
+hardware is involved for IoT, put the IoT SSID on =radio0= only and leave 5G
+alone — less airtime, and most of these devices are 2.4G anyway.
+
+* Phases
+
+Each phase is one deploy, has a gate, and backs out by itself. Nothing here
+moves the LAN off =192.168.1.0/24=, so the board's own management path never
+changes — that is what makes this safer than the cutover.
+
+| # | What | Gate (pass = continue) | Back out |
+|---+------+------------------------+----------|
+| 0 | Inventory + hardware. Classify every device into the three segments; list what must be reachable from where. iperf3 baseline (build plan §5.5): WiFi->server, server->server, and CPU during it. | every device has a segment; baseline CPU recorded | n/a |
+| 1 | Board only: =br-iot= with a *laptop*, nothing of the house's. =eth1.20= dark from the switch, laptop cabled to =eth0= or a spare port on a bench. | lease from =.20.100-=, gateway/DNS =.20.1=, external name resolves *only* via =.20.1= (=nslookup x 1.1.1.1= fails or is hijacked), =ping 192.168.1.1= from =iot= fails, =iperf3= iot->trusted shows routed CPU, =nft list ruleset= shows the forward drops, house unaffected throughout | =just mono-gateway-rollback= one generation |
+| 2 | Move *one* real IoT device (the least-loved plug) to =iot=. | that device still works after re-pairing; nothing on =trusted= notices | re-join it to the main SSID |
+| 3 | AP: publish =NoneAndVoid-IoT=, migrate IoT in batches of ~5, one batch per day. | each batch keeps working; =trusted= unaffected; no AP lockout (=openwrt-diff= clean) | disable that SSID in the declaration, re-apply with the watchdog |
+| 4 | =guest=: VLAN 30, SSID, RFC1918 drop, client isolation. Test with a phone: no =.lan=, no =*.yuanw.me=, no =192.168.x.x=, internet fine. | as stated | disable SSID |
+| 5 | Force-DNS + DoH-escape set on =iot=/=guest= only. | =nslookup example.com 8.8.8.8= from =iot= still filtered; =trusted= unchanged | revert the two nft blocks |
+| 6 | Speed, independent of all of the above: DAC =dgx-spark <-> misfit= (or both to one SFP+ switch). Never touches the board. | iperf3 ~9.4 Gbps between them, CPU sane on both | unplug the DAC |
+
+Phase 6 has no dependency on 1–5 and should not wait for them.
+
+* Prerequisites / blockers
+
+- *A VLAN-aware switch*, or the board's ports become the segments by hand. This
+  is the fork in the road: with an unmanaged switch the honest answer is
+  physical segmentation — one bridge per free port (=eth0=, the dark SFP+ after
+  the DAC), which gets you the same isolation with no VLAN config and no new
+  silicon, at the cost of port count and no WiFi segments at all. Decide this
+  from the Phase 0 inventory; do not buy a switch to segment three IoT plugs.
+- *e8450 VLAN/DSA behaviour unknown* — see the AP section. A cheap managed switch
+  makes this moot for wired devices and shrinks the AP work to SSID→port
+  assignment.
+- The board's clock skew resolved (cutover doc's prerequisite) — per-segment
+  query logs and any TLS work depend on it.
+- Hands-on time for the AP applies, and serial in reach for the board applies.
+
+* Questions (blocking, answer before Phase 1)
+
+1. What is the "house switch" — make/model, managed or not, how many ports, any
+   SFP+? Nothing above survives contact with an unmanaged switch.
+2. Which devices are actually on WiFi vs wired, and how many are IoT? Three IoT
+   plugs is not a VLAN project; forty is.
+3. Anything that must cross a segment? (Casting to a TV, HomeKit/Home Assistant
+   hubs, printers, Chromecast.) Each is one permanent rule or a re-homing.
+4. Do you want per-segment *filtering* (kid-proofing, no-ads on IoT) or is one
+   filter policy for the house enough? Per-segment policy is the expensive axis
+   on AGH 0.107.71 — which has exactly one upstream list and no
+   domain-specific-upstream (probed, in the board config's comment).
+5. Is the 10G DAC in the house yet? It gates the speed half and nothing else.
