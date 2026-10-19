@@ -85,17 +85,7 @@ in
     homepage = "https://calibre-ebook.com/";
     # postInsall ln -s "$out/Applications/calibre.app/Contents/MacOS/ebook-convert" "$out/bin/ebook-convert"
   };
-  ghostty-mac = _final.installApplication rec {
-    name = "ghostty";
-    version = "1.0.0";
-    src = prev.fetchurl {
-      url = "https://release.files.ghostty.org/1.0.0/Ghostty.dmg";
-      #hash = prev.lib.fakeHash;
-      hash = "sha256-CR96Kz9BYKFtfVKygiEku51XFJk4FfYqfXACeYQ3JlI=";
-    };
-    homepage = "a";
-    description = "ghostty";
-  };
+
   alerter = prev.callPackage ./alerter { };
   dart = prev.callPackage ./dart.nix { };
   hosts = prev.callPackage ./hosts.nix { };
