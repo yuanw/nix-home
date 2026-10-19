@@ -218,7 +218,17 @@ in
             }
           ) cfg.extensions;
 
-          rawSkills = cfg.rawSkills;
+          # The herdr skill ships in the herdr source tree, not its output: our
+          # pinned herdr (0.9.3) installs only bin/ and share/herdr/integrations.
+          # llm-agents.nix main adds the nixpkgs `installAgentSkills` setup hook
+          # to herdr (0.9.5), which copies skills/herdr to
+          # $out/share/skills/herdr/herdr. After bumping the llm-agents input,
+          # switch to "${config.modules.herdr.package}/share/skills/herdr/herdr"
+          # and drop the .src dependency.
+          rawSkills =
+            cfg.rawSkills
+            ++ lib.optional (config.modules.herdr.enable or false
+            ) "${config.modules.herdr.package.src}/skills/herdr";
           # Only declare providers that have real models.json fields here.
           # Extension-registered ones (e.g. cursor-agent via pi-cursor-agent)
           # must not get an empty stub — Pi rejects `providers.<name>: {}` with
