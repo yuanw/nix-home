@@ -1,0 +1,211 @@
+#+TITLE: IoT zone on the house network — plan
+#+DATE: 2026-10-18
+#+OPTIONS: toc:t
+
+* Status
+
+*Draft, nothing applied.* Renamed from =home-vlan-plan.org= on 2026-10-18: the
+ask is a *zone* for IoT, and on this hardware the cheapest way to get one is a
+dedicated physical port, not 802.1Q VLANs. Scope is one new zone. Guest, server
+and management zones are out — same recipe when asked for.
+
+Sits on top of [[file:mono-gateway-cutover.org][the cutover design]] and [[file:mono-gateway-adguardhome.org][the AGH plan]]: the board is the router at
+=192.168.1.1=, the e8450 is a dumb AP at =.2=, dnsmasq answers =.lan= /
+=*.yuanw.me=, AGH owns =:53=. None of that is reopened.
+
+* The one idea this plan turns on
+
+A *zone is a policy, and it can only be enforced on traffic that reaches the
+router.* Two devices on the same bridge talk through the switch and never touch
+the board — so no amount of nftables on the router can stop a bulb from
+knocking on the Mac's door. The word for what you want is a zone; the
+requirement it imposes is that the zone has *its own L2 segment*.
+
+Three ways to get that segment here:
+
+| Mechanism | Needs | Zones | Cost |
+|-----------+-------+-------+------|
+| *A physical port per zone* (recommended start) | nothing — the board has a spare port, the AP has spare LAN ports | 1–2, then out of ports | one cable between the AP and the board |
+| 802.1Q VLAN trunk over one cable | the e8450 to tag (unverified on this unit), a VLAN-aware switch if the trunk fans out | unlimited | config + the switch/AP risk |
+| Managed switch doing the segmentation | buying a switch | unlimited | money, and a second thing to declare |
+
+A dumb switch in the middle merges everything back into one segment, so the
+physical-port route means a *point-to-point cable*, not a patch to the house
+switch. That is the whole trade: fewer zones, no new silicon, and no dependency
+on whether the e8450 will tag.
+
+* Design
+
+| Zone | Bridge | Net | Board port | AP side |
+|------|--------+-----+------------+---------|
+| =trusted= (today, unchanged) | =br-lan= | =192.168.1.0/24= | =eth1= | =br-lan=, =NoneAndVoid= / =-5G= |
+| =iot= (new) | =br-iot= | =192.168.20.0/24= | =eth0= (freed from =br-lan=) | =br-iot= over =lan3= + a new SSID |
+
+The house subnet does not move, so nothing renumbers and the board's management
+path never changes.
+
+** Policy (the zone itself)
+
+Default deny between zones; return traffic (=established,related=) always
+allowed. This is fw4's =zone= + =forwarding= model, expressed in nftables on the
+board.
+
+| From | To | Rule |
+|------+----+------|
+| trusted | iot | allow (the phone controls the bulb) |
+| iot | trusted | *drop* (the bulb never reaches the Mac) |
+| iot | iot | allow (local control keeps working) |
+| iot | internet | allow |
+| iot | =192.168.1.1:22=/=:3000=, the AP's UI | drop |
+| iot | any other resolver than =192.168.20.1:53= | drop / hijack (Phase 4) |
+
+No mDNS/SSDP crosses the boundary and no Avahi reflection. If a cast device or
+a Chromecast needs to be discovered from =trusted=, the lazy answer is *that
+device belongs on =trusted=* — not another rule. Decide those devices in Phase 0.
+
+** Board side
+
+#+begin_src nix
+# hosts/mono-gateway/default.nix — all of it is networking.*/services.*, no custom code.
+# eth0 leaves br-lan (it was folded in at the swap; its staging 10.0.0.2 is already gone).
+networking.bridges.br-lan.interfaces = [ "eth1" ];
+networking.bridges.br-iot.interfaces = [ "eth0" ];
+networking.interfaces.br-iot.ipv4.addresses = [
+  { address = "192.168.20.1"; prefixLength = 24; }
+];
+
+# A bridge missing here has NO internet — same family of bug as the cutover's
+# udp/67 and udp/53 misses.
+networking.nat.internalInterfaces = [ "br-lan" "br-iot" ];
+
+# The full set or the zone boots dead. Copy br-lan's, do not trim.
+networking.firewall.interfaces."br-iot" = {
+  allowedUDPPorts = [ 67 53 ];
+  allowedTCPPorts = [ 53 ];
+};
+
+networking.firewall.extraForwardRules = ''
+  ip saddr 192.168.20.0/24 oifname "br-lan" drop
+  ip saddr 192.168.20.0/24 oifname "eth2"  accept   # iot -> internet
+'';
+#+end_src
+
+Verify, do not assume: NixOS's forward chain between two =br-*= interfaces may or
+may not default to drop, and =extraForwardRules= / the nftables-era option names
+should be read off =nft list ruleset= after a build-only pass.
+
+** DNS — four things break per zone, not one
+
+The cutover's =udp/53= miss generalises: one resolver, bound to one address,
+opened by one rule.
+
+1. dnsmasq binds =br-lan= only (=interface = "br-lan"=). Give it both bridges with
+   tags, per-zone pools, per-zone option 6, and keep the internal wildcard on
+   =trusted= only:
+
+   #+begin_src nix
+   settings = {
+     interface = [ "br-lan,#trusted" "br-iot,#iot" ];
+     dhcp-range = [
+       "192.168.1.100,192.168.1.249,12h"
+       "192.168.20.100,192.168.20.200,12h"
+     ];
+     # option 6 must name the zone's own gateway — 192.168.1.1 is a resolver an
+     # IoT client is firewalled from.
+     dhcp-option = [
+       "3,192.168.1.1" "6,192.168.1.1"
+       "tag:#iot,3,192.168.20.1" "tag:#iot,6,192.168.20.1"
+     ];
+     address = "/.yuanw.me/192.168.1.190,#trusted";
+   };
+   #+end_src
+
+   Check that =settings.interface= / =settings.dhcp-option= accept lists in this
+   nixpkgs' option type, and read the generated conf-file out of the built
+   closure the way the cutover runbook does (=preStart= runs =dnsmasq --test=, so a
+   bad key fails activation rather than the house).
+2. *AGH binds =192.168.1.1= only* (=bind_hosts=). Add =192.168.20.1= or the zone gets
+   connection-refused, which from a sofa is indistinguishable from dead internet.
+3. *DHCP option 6* per zone (above).
+4. =*.yuanw.me= must stop answering for IoT — the tag does it. =.lan= is harmless,
+   leave it.
+
+Per-zone *filtering policy* (different blocklists for IoT) is the expensive axis
+and is not in scope: AGH 0.107.71 has exactly one upstream list and no
+domain-specific-upstream, probed, per the comment in the board config.
+
+** AP side (=openwrt/routers/e8450-ap.nix=)
+
+A second bridge on the e8450, purely L2 — the board is the only L3 in the
+house. This is the same anonymous =config device= list =e8450.nix= already uses
+for =br-lan=, so it is declarable, and no VLAN tagging is involved:
+
+#+begin_src nix
+network.device = [
+  { _type = "device"; name = "br-lan"; type = "bridge";
+    ports = [ "lan1" "lan2" "lan4" ]; }          # lan3 moves out
+  { _type = "device"; name = "br-iot"; type = "bridge";
+    ports = [ "lan3" ]; }                        # + the new wifi-iface below
+];
+network.iot = { _type = "interface"; device = "br-iot"; proto = "none"; };
+wireless.iot_radio0 = {
+  _type = "wifi-iface"; device = "radio0"; network = "iot"; mode = "ap";
+  ssid = "NoneAndVoid-IoT"; encryption = "psk2"; key = "@wireless_key@";
+};
+#+end_src
+
+Deliberate choices: IoT on =radio0= (2.4G) only — these devices are 2.4G and it
+keeps 5G's airtime clean; =proto none= and *no firewall zone* on =network.iot=, so
+the AP never becomes a gateway for it; =lan1/lan2/lan4= stay on =trusted=, so
+wired devices keep their ports.
+
+*What this costs*, said plainly:
+
+- *netifd tears br-lan down and rebuilds it* when =lan3= leaves it — a few seconds
+  of LAN blip on every apply of this block. =e8450.nix= already flags that as the
+  dangerous part of the config.
+- This is the box whose *failsafe is proven unreachable* (2026-10-16) and whose
+  uci rollback watchdog was a no-op until 2026-10-17. So: one plane per apply,
+  physically present, watchdog armed, =just openwrt-diff= clean before and after,
+  and the installer recovery path known.
+- *A second cable from the AP to the board.* If the AP is not within reach of the
+  board, that cable is the real cost of this plan — see Questions.
+- =eth0= stops being the direct-plug rescue port. The documented way back is
+  already =ttyS0= serial (cutover doc), so this is a convenience lost, not a
+  safety net. If you want to keep it, the alternative is spending an SFP+ cage
+  with an RJ45 module instead.
+
+* Phases
+
+Each is one deploy, one gate, one independent back-out.
+
+| # | What | Gate | Back out |
+|---+------+------+----------|
+| 0 | Inventory: list every IoT device, its radio (2.4G?), and anything that must be reachable across the boundary (cast, HA hub, printer). Decide which of those just move to =trusted=. | every device has a zone; the cross-zone list is short and named | n/a |
+| 1 | Board only: add =br-iot= on =eth0=, nothing cabled to the AP. Test with a laptop. | lease from =.20.100-=, gw+DNS =.20.1=; external name resolves via =.20.1=; =nslookup x 8.8.8.8= from the laptop fails or is hijacked (Phase 4) or is allowed (Phases 1–3 — know which); =ping= a =trusted= host (misfit =.190=) gets no reply.
+   Do *not* test with =ping 192.168.1.1= — that is the board's own input path on
+   =br-iot= and answers without being a leak. =nft list ruleset= shows the forward drop; house untouched | =just mono-gateway-rollback= one generation |
+| 2 | Re-cable =eth0= off the house side, AP apply: =br-iot= + =lan3= + SSID, one test device | the AP is still reachable at =.2=, =br-lan= comes back, main SSID unaffected, the test device joins =NoneAndVoid-IoT= and gets =.20.x= | re-apply the previous declaration with the watchdog; re-join the device to the main SSID |
+| 3 | Migrate in batches of ~5, one batch a day | each batch works after re-pairing; nothing on =trusted= notices | re-join the batch to the main SSID |
+| 4 | Optional hardening: force DNS (nft =dnat= of :53 to =.20.1= on =br-iot=) plus a drop set of public-resolver IPs, to close the "device hardcodes 1.1.1.1" bypass the cutover left open | filtered even when the client asks for 8.8.8.8 | revert the two nft blocks |
+
+Re-run the build plan §5.5 iperf3/CPU check at the end of Phase 1 and Phase 2:
+the baseline is gigabit NAT + conntrack at 0.3–2.6 % CPU, and a jump toward tens
+of percent means the ASK fast path stopped offloading — that is a rollback, not
+a "works".
+
+Unrelated to all of the above, and still the only real speed item in the house:
+a DAC between dgx-spark and misfit.
+
+* Questions (blocking)
+
+1. *How many IoT devices, and are they 2.4G?* Three plugs is not a zone project.
+   Forty is.
+2. *Can you run a second cable from the e8450 to the board?* If not, the options
+   are: an SFP+ RJ45 module in the board, a cheap managed switch, or wired-only
+   segmentation.
+3. What must be reachable across the boundary — TV, Chromecast, Home Assistant,
+   printer? Each is one permanent rule or a re-homing to =trusted=.
+4. Is =iot= = "no inbound from the LAN at all" acceptable, or do you want to be
+   able to SSH/ping a device from the Mac for debugging? The plan allows
+   trusted→iot; the reverse needs a jump rule per port.
