@@ -722,11 +722,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1792441036,
-        "narHash": "sha256-WTgCgoYtD9FtZbTvcHjZ2yuqqGlKu8MW4tMa7p9++D0=",
+        "lastModified": 1792442633,
+        "narHash": "sha256-sqhvyOp4pUANZxdb3aTy/JkNTJUFVG5td0fiE9k+Fik=",
         "owner": "yuanwang-wf",
         "repo": "llm-agents.nix",
-        "rev": "de8891e3bee2295aaf013524ffc9233d8a5143e3",
+        "rev": "5de4334e830231df7852f62d662bf1ffebe15ff1",
         "type": "github"
       },
       "original": {
