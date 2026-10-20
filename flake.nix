@@ -9,9 +9,12 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
-    # Rust evaluator + direnv integration (modules/home/iets.nix). Keeps its own
-    # nixpkgs on purpose: its packages must not follow ours.
-    iets.url = "github:numtide/iets";
+    # Rust evaluator + direnv integration (modules/home/iets.nix). Forked:
+    # upstream's print-dev-env resolves devShells.x86_64-linux on every host
+    # ("eval: default to the system this build is for"), so `use flake` cannot
+    # work off linux at all. Point this back at numtide/iets when that lands.
+    # Keeps its own nixpkgs on purpose: its packages must not follow ours.
+    iets.url = "github:yuanwang-wf/iets/eval-default-system";
 
     mics-skills.url = "github:Mic92/mics-skills";
 
