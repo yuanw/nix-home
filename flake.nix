@@ -9,6 +9,10 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
+    # Rust evaluator + direnv integration (modules/home/iets.nix). Keeps its own
+    # nixpkgs on purpose: its packages must not follow ours.
+    iets.url = "github:numtide/iets";
+
     mics-skills.url = "github:Mic92/mics-skills";
 
     flake-prompt = {

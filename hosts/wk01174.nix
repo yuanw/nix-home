@@ -35,6 +35,8 @@
     "/opt/homebrew/sbin"
   ];
   home-manager.users.${config.my.username} = {
+    # trial: direnv's use flake through iets (modules/home/iets.nix)
+    iets.direnv.enable = true;
     programs.git = {
       settings = {
         github.user = "yuanwang-wf";
