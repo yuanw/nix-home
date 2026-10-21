@@ -9,6 +9,7 @@
     inputs.declarative-jellyfin.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     ../../modules/isponsorblocktv.nix
+    ../../modules/healthsave-observatory.nix
     ../../modules/caddy.nix
     ./configuration.nix
   ];
