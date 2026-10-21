@@ -51,6 +51,7 @@
     betterdisplay
     ungoogled-chromium
     slack
+    vlc
   ];
   modules = {
     # common = {
