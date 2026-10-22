@@ -3,6 +3,9 @@
 # deps from nixpkgs, source from the reviewed tarball hash the module already uses.
 {
   system ? builtins.currentSystem,
+  # Phase 1: the derivation under test lives in the repo (packages/); copy it
+  # next to this file when shipping the harness to a box.
+  pkgPath ? ./healthsave-observatory.nix,
 }:
 let
   flake = builtins.getFlake "github:NixOS/nixpkgs/494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25";
@@ -33,6 +36,15 @@ let
   # py3.12.15). Upstream supports >=3.12,<3.14, so the spike runs 3.13.
   pythonEnv = pkgs.python313.withPackages deps;
 
+  # Phase 1: the real derivation, plus the env the Phase 3 units will start
+  # (`${pkgEnv}/bin/python -m uvicorn server:app ...`).
+  # Elastic-2.0 is an unfree license, so building needs NIXPKGS_ALLOW_UNFREE=1
+  # (the deployed system sets nixpkgs.config.allowUnfree).
+  hsPkg = pkgs.python313Packages.callPackage pkgPath {
+    inherit (pkgs) fetchzip;
+  };
+  pkgEnv = pkgs.python313.withPackages (_ps: [ hsPkg ]);
+
   src = pkgs.fetchzip {
     url = "https://github.com/umutkeltek/healthsave-observatory/archive/refs/tags/v1.1.0.tar.gz";
     hash = "sha256-Lyw+Ec6tCytZPNQTHN0jWJCA7mtrdbJT0dxzPASLwqQ=";
@@ -40,5 +52,6 @@ let
 in
 {
   env = pythonEnv;
-  inherit src;
+  inherit src pkgEnv;
+  pkg = hsPkg;
 }

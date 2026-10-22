@@ -64,13 +64,14 @@ worker-on)
   exec timeout 60 python -m worker.main
   ;;
 smoke)
+  port="${2:-8010}" # Phase 1's pkg-api binds 8011 so both can run side by side
   cd "$HS_SRC"
   for u in /health /ready; do
-    printf '%s -> %s\n' "$u" "$(curl -sS -o /tmp/hs-spike/work/out.json -w '%{http_code}' "http://127.0.0.1:8010$u") $(head -c 300 /tmp/hs-spike/work/out.json)"
+    printf '%s -> %s\n' "$u" "$(curl -sS -o /tmp/hs-spike/work/out.json -w '%{http_code}' "http://127.0.0.1:$port$u") $(head -c 300 /tmp/hs-spike/work/out.json)"
   done
-  printf 'no-key series -> %s\n' "$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:8010/api/v2/metrics/vital.heart_rate/series?range=30d")"
+  printf 'no-key series -> %s\n' "$(curl -sS -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/api/v2/metrics/vital.heart_rate/series?range=30d")"
   for u in "/api/v2/metrics/vital.heart_rate/series?range=30d" "/api/v2/insights/latest"; do
-    code=$(curl -sS -o /tmp/hs-spike/work/out.json -w '%{http_code}' -H "x-api-key: $API_KEY" "http://127.0.0.1:8010$u")
+    code=$(curl -sS -o /tmp/hs-spike/work/out.json -w '%{http_code}' -H "x-api-key: $API_KEY" "http://127.0.0.1:$port$u")
     printf '%s -> %s %s\n' "$u" "$code" "$(head -c 400 /tmp/hs-spike/work/out.json)"
   done
   ;;
@@ -109,6 +110,53 @@ install-prefix)
     echo "NOTE non-editable: parity.json NOT found -> Phase 1 postInstall must copy it into site-packages"
   env -u PYTHONPATH PYTHONPATH="$PP" "$WORK/venv/bin/python" -c 'from plugin_sdk.discovery import find_plugin_manifest as f; print("plugin:", f("whoop", kind="source"))' ||
     echo "NOTE non-editable: plugin dir needs HDH_PLUGINS_DIR (it is set)"
+  ;;
+pkg-parity)
+  # The two upstream packaging bugs, tested the way the units will run: the
+  # *installed* tree only (no PYTHONPATH, cwd=/), so parity.json and
+  # observability have to be inside $out's site-packages.
+  : "${HS_PKG_ENV:?}"
+  echo "pkg=$HS_PKG"
+  cd /
+  env -u PYTHONPATH "$HS_PKG_ENV/bin/python" -c '
+import observability, server
+from storage.timescale.sync_readiness import known_contract_metrics as k
+from plugin_sdk.discovery import find_plugin_manifest as f
+print("installed import ok (observability + server)")
+print("parity metrics:", len(k()))
+print("whoop plugin:", f("whoop", kind="source"))
+'
+  ;;
+pkg-migrate)
+  # scripts/ is not installed (it sits outside every `where` root), so this is
+  # the reason the migrate unit gets WorkingDirectory = the source tree.
+  : "${HS_PKG_ENV:?}"
+  cd "$HS_SRC"
+  exec env -u PYTHONPATH "$HS_PKG_ENV/bin/python" -m scripts.migrate
+  ;;
+pkg-api)
+  # cwd=/ on purpose: `python -m` puts cwd first on sys.path, so running from
+  # $HS_SRC would silently serve the *source* tree and hide any packaging gap
+  # (that is how the image's flat /app hides upstream's two bugs).
+  : "${HS_PKG_ENV:?}"
+  cd /
+  exec env -u PYTHONPATH "$HS_PKG_ENV/bin/python" -m uvicorn server:app \
+    --host 127.0.0.1 --port 8011
+  ;;
+pkg-worker)
+  : "${HS_PKG_ENV:?}"
+  cd /
+  exec env -u PYTHONPATH timeout 60 "$HS_PKG_ENV/bin/python" -m worker.main
+  ;;
+pkg-worker-on)
+  : "${HS_PKG_ENV:?}"
+  cd /
+  export ANALYSIS_ANOMALY_DETECTION_ENABLED=1 ANALYSIS_RECOVERY_ENABLED=1
+  exec env -u PYTHONPATH timeout 60 "$HS_PKG_ENV/bin/python" -m worker.main
+  ;;
+pkg-smoke)
+  : "${HS_PKG_ENV:?}"
+  "$0" smoke 8011
   ;;
 *)
   echo "unknown cmd" >&2

@@ -104,6 +104,69 @@ paths and builds nothing. Phase 1 should use `python313`.
   `apps/worker/worker/main.py:40` and `apps/agents/agents/main.py:83` — one env
   var covers api + worker + agents.
 - cwd can be the read-only store path: nothing wrote to it during the spike.
+  (Phase 1 goes further: api/worker run from `/` — see below.)
 - Nothing on the live stack was changed: the container units stayed `active`,
   the container api still answered `/health` 200 afterwards, and the spike bound
   8010 only.
+
+## Phase 1 — the derivation (misfit, 2026-10-22)
+
+The artifact is `packages/healthsave-observatory.nix` (registered in
+`packages/default.nix`). `spike.nix -A pkg` builds it and `-A pkgEnv` is
+`python313.withPackages [ pkg ]`, the env the Phase 3 units will start.
+
+    scp spike.nix spike.sh run.sh ../../packages/healthsave-observatory.nix misfit:/tmp/hs-spike/
+    ssh misfit 'sudo /tmp/hs-spike/run.sh pkg-build'     # imports check + contract subset
+    ssh misfit 'sudo /tmp/hs-spike/run.sh pkg-parity'    # installed tree, cwd=/, no PYTHONPATH
+    ssh misfit 'sudo /tmp/hs-spike/run.sh pkg-migrate'
+    ssh misfit 'sudo nohup /tmp/hs-spike/run.sh pkg-api > logs/pkg-api.log 2>&1 &'
+    ssh misfit 'sudo /tmp/hs-spike/run.sh pkg-smoke'     # 8011, so 8010 stays free
+    ssh misfit 'sudo /tmp/hs-spike/run.sh pkg-worker; sudo /tmp/hs-spike/run.sh pkg-worker-on'
+    ssh misfit 'sudo pkill -u healthsave -f "uvicorn server:app"'
+
+**Verdict: done.** Everything below is measured against the live container
+ database, with `ANALYSIS_CONFIG` = the container's config and
+`HDH_PLUGINS_DIR=<src>/plugins`.
+
+| check | result |
+|-------|--------|
+| `nix-build -A pkg` | ok — `pythonImportsCheck` (18 names) and pytest `6 passed` on `tests/contract/test_parity_manifest_valid.py` |
+| `pkg-parity` (cwd=/, no PYTHONPATH) | `installed import ok`, `parity metrics: 194`, whoop `plugin.yaml` resolved |
+| `pkg-migrate` | `schema already up-to-date (27 tracked)` |
+| `pkg-api` + `pkg-smoke` | `/health` 200, `/ready` `{"database":"ok"}`, series 401 without key / 200 with real points, Apple Health plugin loaded |
+| `pkg-worker`, `pkg-worker-on` | clean 60 s runs; with jobs on, apscheduler registers `anomaly_check` + `recovery_check` |
+
+Findings that changed the derivation (each one was a silent failure):
+
+1. **`plugins/` is not installed either** — a third upstream packaging bug, not
+   in the plan. `server/api/v2_sources.py:38` imports
+   `plugins.sources.whoop` at module level and `agents/main.py:59` the anomaly
+   feed, and `plugins/` sits at the repo root with no `__init__.py` (PEP 420), so
+   `packages.find` cannot reach it even from a `.` root. `postInstall` copies the
+   252K tree, as the Dockerfile's `COPY` does. It only stayed hidden in Phase 0
+   because the editable install put the repo root on `sys.path`.
+2. **`python -m` puts cwd first on `sys.path`**, so running the units with
+   `WorkingDirectory = <src>` would serve the *source* tree and hide every
+   packaging gap. The units should start from `/`; only the migrate oneshot needs
+   `WorkingDirectory = <src>` (`scripts/` is genuinely not installed).
+3. **`buildPythonApplication` is invisible to `withPackages`.**
+   `toPythonApplication` sets `passthru.pythonModule = false` and
+   `requiredPythonModules` filters on it, so the env built for the units had an
+   empty `site-packages` (every import failed). `buildPythonPackage` is the right
+   combinator here; there is no console script to own.
+4. **`nativeBuildInputs = [ pytest ]` runs no tests.** At this pin only the
+   separate `pytestCheckHook` adds the phase, and `pytestFlagsArray` is a hard
+   error — use `enabledTestPaths`. Without that the "contract subset runs" bullet
+   was satisfied by a build that never invoked pytest.
+5. **`pythonRuntimeDepsCheck` refuses the five exact pins**, so
+   `pythonRelaxDeps = [ fastapi pydantic uvicorn sqlalchemy asyncpg ]` (the house
+   pattern from `chroma-mcp.nix`). That closes the pinning branch: nixpkgs
+   versions, no `fetchPypi`.
+6. `litellm` fetches its model-cost map at import: in the sandbox it warns and
+   retries 3× then imports fine. Keeping it in `pythonImportsCheck` is still the
+   only build-time coverage of it, since upstream forbids a top-level import.
+
+`modules/healthsave-observatory.nix` now takes `observatorySrc` from this
+package's `src` (the identical store path as its old own `fetchzip`) and asserts
+the package `version` against the image tag, so dashboards and api/worker cannot
+come from different releases. `just remote-build misfit` passes.
