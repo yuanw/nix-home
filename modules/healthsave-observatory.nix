@@ -34,12 +34,31 @@ let
 
   podman = "${pkgs.podman}/bin/podman";
 
+  # The api/worker/migrate Python derivation (packages/healthsave-observatory.nix).
+  # Instantiated here rather than taken from pkgs: colmena evaluates this node
+  # against hosts/colmena.nix's meta.nixpkgs, which carries no packages/ overlay
+  # (only dgx-spark has a nodeNixpkgs entry), while `nix build .#misfit` uses
+  # lib/mk-pkgs.nix, which does.  callPackage gives the identical derivation on
+  # either path.  Elastic-2.0 is unfree, hence the allowUnfree in both.
+  healthsavePkg = pkgs.python313Packages.callPackage ../packages/healthsave-observatory.nix {
+    inherit (pkgs) fetchzip;
+  };
+
+  # Upstream's grafana provisioning (6 dashboards: overview, heart, sleep,
+  # activity, workouts, insights) comes from the same tag as the image. fetchzip
+  # strips the archive's single top-level directory. We reuse the *package's*
+  # source rather than fetching the tarball a second time, so the dashboards, the
+  # plugins, db/migrations and the api/worker code can never come from different
+  # releases (the assertion below ties that release to the image tag).
+  observatorySrc = healthsavePkg.src;
+
   dbUser = "healthsave";
   dbName = "healthsave";
 
   runDir = "/run/healthsave";
   appEnv = "${runDir}/app.env";
   dbEnv = "${runDir}/db.env";
+  grafanaEnv = "${runDir}/grafana.env";
 
   # The db container's first boot runs schema.sql through the postgres
   # entrypoint, whose *temporary* server accepts connections long before the
@@ -175,9 +194,37 @@ in
       default = defaultAnalysisConfig;
       description = "config.yaml mounted read-only at /app/config.yaml (upstream ships every job off).";
     };
+
+    grafana = mkEnableOption "Grafana dashboards over the observatory database (nixpkgs grafana, loopback + caddy)";
+
+    grafanaAdminEnvFile = mkOption {
+      type = types.nullOr types.path;
+      default = null;
+      example = "/run/agenix/healthsave-grafana";
+      description = ''
+        Env file with GF_SECURITY_ADMIN_USER and GF_SECURITY_ADMIN_PASSWORD. The
+        grafana module has no admin_passwordFile-style option, so this goes in as
+        a systemd EnvironmentFile; nothing secret lands in the store.
+      '';
+    };
+
+    grafanaPort = mkOption {
+      type = types.port;
+      default = 3000;
+    };
   };
 
   config = mkIf cfg.enable {
+    # The Python derivation carries its own version + tarball hash; if it ever
+    # disagrees with the image tag above, fail activation rather than serve the
+    # dashboards from one release and the api/worker from another.
+    assertions = [
+      {
+        assertion = healthsavePkg.version == version;
+        message = "packages/healthsave-observatory.nix is not on services.healthsave-observatory's release v${version}";
+      }
+    ];
+
     # Rootful on purpose. Upstream ships a docker-compose stack whose containers
     # are rootful too, and on this nixpkgs (podman 5.8.9 / netavark) a rootless
     # deployment was measured broken both ways: a `--network=host` client could
@@ -249,8 +296,10 @@ in
           } > ${appEnv}
           printf 'POSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
             '${dbName}' '${dbUser}' "$DB_PASSWORD" > ${dbEnv}
-          chmod 600 ${appEnv} ${dbEnv}
-          chown ${cfg.user}:${cfg.group} ${appEnv} ${dbEnv}
+          printf 'DB_PASSWORD=%s\nHDH_GRAFANA_DATASOURCE_URL=%s:%s\n' \
+            "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' > ${grafanaEnv}
+          chmod 600 ${appEnv} ${dbEnv} ${grafanaEnv}
+          chown ${cfg.user}:${cfg.group} ${appEnv} ${dbEnv} ${grafanaEnv}
         '';
       };
     };
@@ -344,6 +393,57 @@ in
       after = [ "healthsave-migrate.service" ];
       requires = [ "healthsave-migrate.service" ];
       unitConfig.StartLimitIntervalSec = 0;
+    };
+
+    # nixpkgs grafana rather than upstream's container: the only thing that
+    # surface needs is a postgres connection, and the repo's dashboards are plain
+    # JSON files that the module can provision straight off the store.
+    services.grafana = mkIf cfg.grafana {
+      enable = true;
+      settings = {
+        server = {
+          http_addr = "127.0.0.1";
+          http_port = cfg.grafanaPort;
+          domain = "grafana.yuanw.me";
+          root_url = "https://%(domain)s/";
+        };
+        analytics = {
+          reporting_enabled = false;
+          check_for_updates = false;
+          check_for_plugin_updates = false;
+        };
+      };
+      provision.datasources.settings.datasources = [
+        {
+          name = "HealthSave";
+          uid = "healthsave-pg";
+          type = "postgres";
+          # expanded by grafana from the unit's EnvironmentFiles
+          url = "\${HDH_GRAFANA_DATASOURCE_URL}";
+          user = dbUser;
+          secureJsonData.password = "\${DB_PASSWORD}";
+          jsonData = {
+            database = dbName;
+            sslmode = "disable";
+            timescaledb = true;
+            postgresVersion = 1600;
+          };
+          isDefault = true;
+          editable = true;
+        }
+      ];
+      provision.dashboards.path = "${observatorySrc}/deploy/grafana/dashboards";
+    };
+
+    systemd.services.grafana = mkIf cfg.grafana {
+      after = [ "healthsave-env.service" ];
+      requires = [ "healthsave-env.service" ];
+      # grafana reads these before dropping to its own user, so they can stay
+      # root-owned 0600
+      serviceConfig.EnvironmentFiles = [
+        cfg.grafanaAdminEnvFile
+        grafanaEnv
+      ];
     };
   };
 }
