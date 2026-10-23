@@ -74,7 +74,7 @@
     enable = true;
     #https://github.com/georgewhewell/nixos-host/blob/329266870c2b382cc8a57bd7658e3e32752dc14c/services/home-assistant/default.nix
     # Reflect incoming mDNS requests to all allowed network interfaces.for homekit bridge
-    reflector = true;
+    settings.reflector.enable-reflector = true;
     openFirewall = true;
 
   };
