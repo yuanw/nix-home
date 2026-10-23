@@ -104,19 +104,6 @@
       url = "github:nix-community/preservation";
     };
     dgx-spark.url = "github:graham33/nixos-dgx-spark";
-    # The nixpkgs graham33's own lock pins, so the Spark runs the revision his
-    # CI tests against.  It also decides whether CUDA torch is a download: the
-    # only prebuilt aarch64 CUDA torch anywhere is on cache.flox.dev, published
-    # per nixpkgs revision, and this rev (c46e6c9) has it while the Oct-4 rev
-    # this input sat on did not.  graham33.cachix.org, though it is a
-    # substituter here, has none -- probed with `nix path-info --store`.
-    # So after `nix flake update dgx-spark`, run `just spark-torch`: if it does
-    # not print True with everything copied, the new rev has no torch and the
-    # box will spend hours building one.
-    nixpkgs-dgx = {
-      url = "github:NixOS/nixpkgs";
-      follows = "dgx-spark/nixpkgs";
-    };
     nixified-ai = {
       url = "github:nixified-ai/flake";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -187,30 +174,6 @@
             inherit pkgs;
             lib = inputs.nixpkgs.lib;
           };
-
-          # The CUDA package set that cache.flox.dev publishes a prebuilt torch
-          # for: nixpkgs' own cudaPackages and nixpkgs' default
-          # cudaCapabilities.  The Spark's system set pins both --
-          # hosts/dgx-spark/cuda-fixes.nix repins cudaPackages to 13.2 and
-          # hosts/default.nix sets cudaCapabilities = [ "12.0" "12.1" ] -- and
-          # either pin alone rewrites torch's derivation hash, which is what
-          # costs the multi-hour source build.  This set applies none of ours.
-          # Measured at nixpkgs-dgx c46e6c9: all 93 runtime-closure paths of
-          # python3Packages.torch substitute, nothing is built (3.7 GB).
-          cudaPkgs = import inputs.nixpkgs-dgx {
-            inherit system;
-            config = {
-              allowUnfree = true;
-              cudaSupport = true;
-            };
-          };
-
-          # A python with torch in it, not just the torch package: `nix shell`
-          # on the bare torch output puts no python3 on PATH.
-          torchEnv = cudaPkgs.python3.withPackages (ps: [
-            ps.torch
-            ps.numpy
-          ]);
         in
         {
           _module.args.pkgs = import ./lib/mk-pkgs.nix {
@@ -219,10 +182,7 @@
             # what is measured there is that a caller outside a flake-parts
             # module of this flake cannot bind the primed input set the modules
             # read -- see the note in lib/mk-pkgs.nix.
-            # aarch64-linux is the Spark alone (see hosts/default.nix), so the
-            # pinned set below is the Spark's package set, not a second set for
-            # some other host.
-            nixpkgs = if system == "aarch64-linux" then inputs.nixpkgs-dgx else inputs.nixpkgs;
+            nixpkgs = inputs.nixpkgs;
             fixesOverlay = inputs.dgx-spark.overlays.fixes;
             inherit system;
           };
@@ -281,23 +241,10 @@
                 # the board. Far smaller delta than rootfsImage, since it reuses the
                 # ~561 store paths already flashed.
                 mono-gateway-system = mono-gateway-config.config.system.build.toplevel;
-
-                # `just spark-torch` builds this on the Spark and smoke-tests it.
-                torch-cuda = torchEnv;
               }
             else
               { }
           );
-          # `nix develop .#devShells.aarch64-linux.torch-cuda` on the Spark.
-          devShells =
-            if system == "aarch64-linux" then
-              {
-                torch-cuda = cudaPkgs.mkShell {
-                  packages = [ torchEnv ];
-                };
-              }
-            else
-              { };
           treefmt.imports = [ ./treefmt.nix ];
           pre-commit.settings.hooks.treefmt.enable = true;
           pre-commit.settings.package = pkgs.prek;

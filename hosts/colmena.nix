@@ -12,9 +12,7 @@ in
         overlays = [ ];
       };
       nodeNixpkgs = {
-        # Same pin as the system itself (flake.nix nixpkgs-dgx), so the agent and
-        # the closure are not two nixpkgs revisions apart.
-        dgx-spark = import inputs.nixpkgs-dgx {
+        dgx-spark = import inputs.nixpkgs {
           localSystem.system = "aarch64-linux";
           config.allowUnfree = true;
           overlays = [ (import ../packages) ];

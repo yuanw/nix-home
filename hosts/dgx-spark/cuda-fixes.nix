@@ -1,10 +1,6 @@
 _final: prev: {
-  # No cudaPackages repin here.  This overlay used to force cudaPackages_13_2
-  # "for Blackwell/sm121 support, g++ 15 compatible", which was true of an older
-  # nixpkgs: at the rev the Spark builds on now nixpkgs' own default is 13.4, and
-  # 13.2 is not what cache.nixos.org publishes for the CUDA 13 line at nixpkgs'
-  # default capability list — keeping the repin cost cuda13.2-nccl,
-  # cuda13.2-libnvshmem and cuda13.2-gdrcopy as source builds on the box.
+  # Switch to CUDA 13.2 (Blackwell/sm121 support, g++ 15 compatible)
+  cudaPackages = prev.cudaPackages_13_2;
 
   # Fix _cuda extensions for aarch64: cuda_compat fails on linux-sbsa (aarch64 servers)
   _cuda = prev._cuda.extend (

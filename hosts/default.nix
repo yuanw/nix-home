@@ -123,15 +123,14 @@
           system,
           ...
         }:
-        # nixpkgs-dgx, not nixpkgs: see the note on that input in flake.nix.
-        inputs.nixpkgs-dgx.lib.nixosSystem {
+        inputs.nixpkgs.lib.nixosSystem {
           specialArgs = {
             isDarwin = false;
             isNixOS = true;
             hostname = "dgx-spark";
             packages = config.packages;
             nurNoPkg = import inputs.nur {
-              nurpkgs = import inputs.nixpkgs-dgx { localSystem.system = system; };
+              nurpkgs = import inputs.nixpkgs { localSystem.system = system; };
             };
             inherit inputs inputs';
           };
@@ -140,8 +139,10 @@
               nixpkgs.hostPlatform = system;
               nixpkgs.config.allowUnfree = true;
               nixpkgs.config.cudaSupport = true;
-              # cudaCapabilities: set in hosts/dgx-spark/default.nix, which both
-              # this config and the colmena hive import.
+              nixpkgs.config.cudaCapabilities = [
+                "12.0"
+                "12.1"
+              ];
             }
             inputs.colmena.nixosModules.deploymentOptions
             inputs.home-manager.nixosModules.home-manager
