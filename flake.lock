@@ -700,16 +700,15 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1792501853,
-        "narHash": "sha256-WzslGbUmZyG1oClsxy9U/HVcgSiyiMOlG6MRscnyxp0=",
-        "owner": "yuanwang-wf",
+        "lastModified": 1792774602,
+        "narHash": "sha256-yMy/BtiVDv/+eZ/c/HBkhM5rqxaP8tksoEWCFH6+Zr4=",
+        "owner": "numtide",
         "repo": "iets",
-        "rev": "0537ce7fc8e6ff249344989ee5d600e74b326d36",
+        "rev": "4bd80e2b6a7623523cb54c4de9419a7a2617992b",
         "type": "github"
       },
       "original": {
-        "owner": "yuanwang-wf",
-        "ref": "eval-default-system",
+        "owner": "numtide",
         "repo": "iets",
         "type": "github"
       }
