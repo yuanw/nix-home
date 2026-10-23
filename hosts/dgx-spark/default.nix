@@ -49,6 +49,19 @@
     (import ../../packages)
   ];
 
+  # Distrust the eMudhra roots (CVE-2026-111943). nixpkgs hardcodes these in
+  # nixos/modules/security/ca.nix, but only on unstable/26.05; nixpkgs-dgx
+  # (c46e6c9) predates that, so the names go here. At cacert 3.126 this drops
+  # the system bundle from 121 to 118 blocks. Bumping nixpkgs-dgx instead would
+  # rebuild the CUDA closure; this changes only cacert + its p11kit output, and
+  # both are already on cache.nixos.org (the 4-name list matches newer nixpkgs).
+  security.pki.caCertificateBlacklist = [
+    "Comodo AAA Services root"
+    "emSign ECC Root CA - G3"
+    "emSign Root CA - C1"
+    "emSign ECC Root CA - C3"
+  ];
+
   # colmena deployment configuration
   deployment = {
     targetHost = "dgx-spark.local";
