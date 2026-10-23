@@ -167,6 +167,15 @@ mono-gateway-fetch:
 mono-gateway-serve:
     @P=$({{nix}} build '.#packages.aarch64-linux.rootfsImage' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
      ssh -t yuanw@dgx-spark.local "mkdir -p {{mono-work-dir}} && cp -Lf '$P' {{mono-work-dir}}/rootfs.img && cd {{mono-work-dir}} && exec python3 -m http.server 8000"
+# Build CUDA torch (python 3.14) on dgx-spark from the Flox cache and smoke-test
+# it. Nothing is compiled -- see the cudaPkgs note in flake.nix -- it is a ~3.7 GB
+# fetch. Takes ~10 min on the box the first time, seconds afterwards. For an
+# interactive shell, run it on the Spark:
+#   nix develop .#devShells.aarch64-linux.torch-cuda
+spark-torch:
+    @P=$({{nix}} build '.#packages.aarch64-linux.torch-cuda' --store {{spark_store}} {{spark_build}} --no-link --print-out-paths); \
+     echo "$P"; \
+     ssh yuanw@dgx-spark.local "nix shell '$P' --command python3 -c 'import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))'"
 
 
 

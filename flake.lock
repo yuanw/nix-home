@@ -155,11 +155,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1792323391,
-        "narHash": "sha256-Clc/pPZw8qRsFWVaDvJvKQRZgaiWrSAvAhVbcKPZGZU=",
+        "lastModified": 1792407240,
+        "narHash": "sha256-kPXXP23gw5KofCpgFxoKITPXUrMPxDoiQeQ8gRRsg6Y=",
         "owner": "graham33",
         "repo": "nixos-dgx-spark",
-        "rev": "a5062227efab24d1517c89eb5efbee5d1c28ea51",
+        "rev": "c646a19a5df3316c1b0e79e2025d59f8deb704de",
         "type": "github"
       },
       "original": {
@@ -1020,11 +1020,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791025544,
-        "narHash": "sha256-Yrkr05U3nydNN9AgOAnW8MmYbF/AGnfeZZoCOPauNUY=",
+        "lastModified": 1792170028,
+        "narHash": "sha256-O1xXS0Q4oCGK6237DN0o2VM+np7VHnuqyQhwjn1oUxo=",
         "owner": "nixified-ai",
         "repo": "flake",
-        "rev": "a6d04b030c99ada4b03a31fb7d110a1e5b1d0f73",
+        "rev": "0532844b4b11021d8c2745e8ee0f876262015911",
         "type": "github"
       },
       "original": {
@@ -1171,11 +1171,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1791081893,
-        "narHash": "sha256-Jkg/9zwv9sOl41KQzzDQzt04jOLAdCXeB/XwpBBOfLE=",
+        "lastModified": 1792287122,
+        "narHash": "sha256-jY2vaJ+Eg7VDaeaoEx5jK/PlzPJQ8O5gLYnNqW/x81g=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "575941f57ac6308dd39abef7803410b8c0d2a67b",
+        "rev": "c46e6c9a80d68a8b92e75a2d2cb078a8f6d8dd81",
         "type": "github"
       },
       "original": {
@@ -1350,11 +1350,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790500375,
-        "narHash": "sha256-XN3sDtn8TU9hAc9xqZ+SqRB/HHm2wjxM6aSWYLJU+oo=",
+        "lastModified": 1791909798,
+        "narHash": "sha256-VAhpCOmrun/KXimYfR8NM88bciKCui7CqHHhThSzgag=",
         "owner": "cachix",
         "repo": "pre-commit-hooks.nix",
-        "rev": "a0e4241b51206fbcbf52fd322eb5f0cd80f153c4",
+        "rev": "1ba1dbfe28738c9a71c266be6efa5b89e75491a9",
         "type": "github"
       },
       "original": {
@@ -1408,6 +1408,10 @@
         "nixified-ai": "nixified-ai_2",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_9",
+        "nixpkgs-dgx": [
+          "dgx-spark",
+          "nixpkgs"
+        ],
         "nixpkgs-master": "nixpkgs-master",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nur": "nur",
