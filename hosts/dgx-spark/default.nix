@@ -23,20 +23,19 @@
     "services/misc/comfyui.nix"
   ];
 
-  # His module pins cudaCapabilities to [ "12.0" "12.1" ] (modules/dgx-spark.nix:321)
-  # so an nvcc build compiles two arches instead of nine. On this box that pin
-  # costs more than it saves: it rewrites the hash of nccl, libnvshmem, ucx, ucc,
-  # openmpi, pmix, prrte, hwloc and gdrcopy, none of which any cache publishes at
-  # a restricted list, so all nine compile here — while all nine *are* cached at
-  # nixpkgs' default list. Full system closure,
-  # measured with `nix build --dry-run`: 150 derivations to build with the pin,
-  # 141 without it. What still builds either way (torch 3.13, magma, triton,
-  # exllamav3, tensorfold-zig) now compiles nine arches rather than two; if one of
-  # those OOMs the 128 GB box — the failure mode his README warns about — restore
-  # the pin instead of losing the nine. [ ] means unset (nixpkgs' own list), not
-  # "no architectures"; the default list does emit sm_121 code that runs here, a
-  # fp16 2048^3 GEMM was checked on the GB10.
-  nixpkgs.config.cudaCapabilities = inputs.nixpkgs-dgx.lib.mkForce [ ];
+  # Keep graham33's cudaCapabilities pin (modules/dgx-spark.nix:321), so an
+  # nvcc build compiles sm_120/sm_121 instead of nixpkgs' ten-arch default.
+  # The default list does not build on CUDA 13.4 once magma is in the closure:
+  # ptxas segfaults (signal 11) on magmablas/zgeqr2_batched_fused_reg_tall.cu
+  # and zgbtrf_batched_sliding_window_sm.cu at 4 workers, and at 1 worker the
+  # 3492-object build takes hours. The pin is not free -- it rewrites the hash of
+  # nccl, libnvshmem, ucx, ucc, openmpi, pmix, prrte, hwloc and gdrcopy, which
+  # no cache publishes at a restricted list (150 derivations for the closure,
+  # vs 141 at the default list) -- but it is what builds.
+  nixpkgs.config.cudaCapabilities = inputs.nixpkgs-dgx.lib.mkForce [
+    "12.0"
+    "12.1"
+  ];
 
   nixpkgs.overlays = [
     # CUDA + aarch64 fixes
