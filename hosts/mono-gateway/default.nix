@@ -66,6 +66,30 @@
   # defaultGateway/nameservers were ever set here on purpose -- air-gapped
   # (decided 2026-10-11); closures are pushed, nothing on the board pulls.
 
+  # --- Distrust the eMudhra roots (CVE-2026-111943) ---
+  # Eight eMudhra intermediate private keys are recoverable from the certificates
+  # themselves, so any chain reaching these roots can be forged. Measured on the
+  # board: curl to dv-g3b-emudhra and dv-g3b-noct-emudhra at
+  # we-have-a-problem.com both answered 200. NixOS hardcodes the blacklist in
+  # nixos/modules/security/ca.nix on nixos-unstable and 26.05 only; this board
+  # builds on mono-nix's nixos-25.11 pin (23d72dab, 2026-02-07), EOL since
+  # 2026-06-30 with no backport, so the names go here.
+  #
+  # Three of the four do work: the emSign trio loses its serverAuth trust in the
+  # built bundle (148 server-auth PEM blocks down to 145, each one now reading
+  # "not trusted for authenticating servers"). "Comodo AAA Services root" is a
+  # no-op -- NSS 3.117 already distrusts it for server auth (emailProtection
+  # only), which is why the -aaa checker host already rejects today. Kept for
+  # parity with what nixpkgs and nix-darwin list. What dials out over TLS on the
+  # board is AdGuard Home's two blocklist fetches; the DNS path has no DoH
+  # (decision 1: upstream is dnsmasq on 127.0.0.1:5354).
+  security.pki.caCertificateBlacklist = [
+    "Comodo AAA Services root"
+    "emSign ECC Root CA - G3"
+    "emSign Root CA - C1"
+    "emSign ECC Root CA - C3"
+  ];
+
   # --- Nix garbage collection ---
   # Nothing cleaned the store: gc.automatic was never set and there is no
   # nix-gc.timer on the board, so every redeploy left a generation behind
