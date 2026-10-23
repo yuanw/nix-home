@@ -212,6 +212,13 @@ in
 
   llama-benchy = prev.python3Packages.callPackage ./llama-benchy.nix { };
 
+  # HealthSave Observatory's api/worker/migrate, built from the same release
+  # tarball the module fetches for Grafana.  python313Packages (not the default
+  # python3) because upstream requires >=3.12,<3.14 — see the header comment.
+  healthsave-observatory = prev.python313Packages.callPackage ./healthsave-observatory.nix {
+    inherit (prev) fetchzip;
+  };
+
   # ComfyUI — built with nixified-ai overlays + CUDA 13.2 fixes
   # Referenced after nixified-ai overlays are applied in dgx-spark/default.nix
   # Uses a fixed wrapper (not the nixified-ai symlinkJoin wrapper) that avoids
