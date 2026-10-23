@@ -24,7 +24,7 @@
     };
 
     # Fork: adds the upstream skills to the open-code-review package.
-    llm-agents.url = "github:yuanwang-wf/llm-agents.nix";
+    llm-agents.url = "github:yuanw/llm-agents.nix";
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
     # servers and extension packages. Follows this repo's nixpkgs/flake-prompt
     # and the llm-agents already used for pkgs.llm-agents.pi, so Pi stays one

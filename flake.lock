@@ -757,15 +757,15 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1792442633,
-        "narHash": "sha256-sqhvyOp4pUANZxdb3aTy/JkNTJUFVG5td0fiE9k+Fik=",
-        "owner": "yuanwang-wf",
+        "lastModified": 1792756502,
+        "narHash": "sha256-08N9DWw9nXFukXdPD5vf1/HSQt32AnC7or581tENPi0=",
+        "owner": "yuanw",
         "repo": "llm-agents.nix",
-        "rev": "5de4334e830231df7852f62d662bf1ffebe15ff1",
+        "rev": "0c3236438f3d0350d1db8a346b487b7be4497123",
         "type": "github"
       },
       "original": {
-        "owner": "yuanwang-wf",
+        "owner": "yuanw",
         "repo": "llm-agents.nix",
         "type": "github"
       }
