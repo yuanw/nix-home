@@ -1,0 +1,223 @@
+#+TITLE: Phase 0 probe results — silver as build hub / LAN cache
+#+DATE: 2026-10-23
+#+OPTIONS: toc:t
+#+STARTUP: overview
+
+* What this is
+
+The exit gate for "Phase 0 — prove the pieces" in [[file:harmonia-build-hub.org][harmonia-build-hub.org]], run
+from =mist= on 2026-10-23. No repo file was changed and no host was deployed; the
+only mutations were a throwaway =authorized_keys= on mist (removed again) and
+probe paths in the builders' stores. Commands and their real output are below
+because the rest of the plan rests on them.
+
+** Verdict
+
+| Probe | Result | Note |
+|-----------------------------------------------+-----------+------------------------------------------------------|
+| 0.1 harmonia builds/runs on silver | PASS | 3.3.0, substituted, no Rust compile |
+| 0.2 silver -> builder daemon (ssh-ng) | PASS x3 | =Trusted: 1= on mist, misfit, dgx-spark |
+| 0.3 one tiny cross-system build | PASS x3 | all three actually *built* (not substituted) |
+| 0.4 private input on silver | SKIPPED | Variant B only; TL;DR picks Variant A |
+| 0.5 disk | PASS | 423G free, =/nix/store= 9.1G |
+
+Go for Phase 1. Lix on mist speaks the Nix 2.34.9 ssh-ng protocol, so
+=protocol = "ssh"= is not needed in Phase 3.
+
+Three findings change later phases (details in "Findings"): silver reaches the
+builders only through a *forwarded ssh agent* (no key of its own), mist has no
+=authorized_keys= at all, and =modules/nix-custom-conf.nix= does not reach
+=misfit= or =dgx-spark=, so the Phase 2 consumer edit is not one file.
+
+* Environment
+
+| Host | Resolves from silver | Nix | ssh user |
+|----------+---------------------+-------------------------+----------|
+| silver | 192.168.1.216 (silver.lan) | Nix 2.34.9 | yuanw |
+| mist | 192.168.1.205 (mist.lan) | Lix 2.95.2 | yuan |
+| misfit | 192.168.1.190 (misfit.lan) | Nix 2.34.9 | yuan |
+| dgx-spark | 192.168.1.185 (dgx-spark.lan) | Nix 2.34.9 | yuanw |
+
+=ssh -o BatchMode=yes= works from mist to all four. Bare =misfit=,
+=dgx-spark= and =mist= also resolve on silver (resolv.conf has
+=search lan=), so Phase 3 does not have to use =.lan= names — =.lan= is
+verified, the short names resolve to the same IPs.
+
+All nix commands on silver needed
+=NIX_CONFIG="extra-experimental-features = nix-command flakes"=: the daemon's
+=/etc/nix/nix.conf= has =experimental-features =~ empty.
+
+* 0.1 harmonia on silver — PASS
+
+#+begin_src bash
+ssh yuanw@silver.lan 'nix build --no-link --print-out-paths nixpkgs#harmonia'
+#+end_src
+
+#+begin_example
+this path will be fetched (10.1 MiB download, 27.4 MiB unpacked):
+  /nix/store/gr4bzs7wk5w3dvvgab0ih13301n9ihqk-harmonia-3.3.0
+copying path '...' from 'https://cache.nixos.org'...
+/nix/store/gr4bzs7wk5w3dvvgab0ih13301n9ihqk-harmonia-3.3.0
+real    0m15.485s
+#+end_example
+
+The plan's =nixpkgs#harmonia= is unpinned, so the same check was repeated at
+the repo's own nixpkgs pin (=494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25=), which
+is what Phase 1 actually deploys — this closes the "whether =pkgs.harmonia=
+builds at this pin" risk left open in [[file:harmonia-silver.org][harmonia-silver.org]]:
+
+#+begin_example
+copying path '/nix/store/6mdk83lxcxwnsa8fimqvwp1kb21rfiqq-harmonia-3.3.0' from 'https://cache.nixos.org'...
+/nix/store/6mdk83lxcxwnsa8fimqvwp1kb21rfiqq-harmonia-3.3.0
+version: 3.3.0
+#+end_example
+
+Nothing compiled; both revisions are on cache.nixos.org. =harmonia.socket= is
+=inactive= on silver today (not yet installed), agenix *is* live
+(=/run/agenix.d/4/wifi=), and =/etc/ssh/ssh_host_ed25519_key.pub= equals the
+=silver= entry in =secrets/secrets.nix=, so a new secret should decrypt on the
+first deploy.
+
+* 0.2 silver -> each builder's daemon — PASS
+
+No key was installed on silver. The probes ran under a *forwarded agent*
+(=ssh -A yuanw@silver.lan=, agent = me@yuanwang.ca,
+=SHA256:RtlUW3Lmr3skc437jk11SFJlLrJBwWrx6C2BSh5A0sg=), which is the key already
+authorized on silver, misfit and dgx-spark:
+
+#+begin_src bash
+ssh -A yuanw@silver.lan
+export NIX_CONFIG="extra-experimental-features = nix-command flakes"
+export NIX_SSHOPTS="-o BatchMode=yes -o StrictHostKeyChecking=accept-new"
+nix store ping --store ssh-ng://yuan@mist.lan
+nix store ping --store ssh-ng://yuan@misfit.lan
+nix store ping --store ssh-ng://yuanw@dgx-spark.lan
+#+end_src
+
+#+begin_example
+Store URL: ssh-ng://yuan@mist.lan       Version: 2.95.2  Trusted: 1
+Store URL: ssh-ng://yuan@misfit.lan     Version: 2.34.9  Trusted: 1
+Store URL: ssh-ng://yuanw@dgx-spark.lan Version: 2.34.9  Trusted: 1
+#+end_example
+
+=Trusted: 1= on all three is what =nix.buildMachines= needs (the build client
+must be a trusted user on the builder). =yuan= on mist/misfit and =yuanw= on
+dgx-spark are =trusted-users=, as the plan assumed.
+
+* 0.3 cross-system build per builder — PASS
+
+The plan's =hello= check substitutes from cache.nixos.org, which proves only
+the copy path, so each builder was also handed a derivation that no cache can
+have. Evaluating on silver, realising in the *remote* store:
+
+#+begin_src bash
+nix build --no-link --print-out-paths --impure --store ssh-ng://<user>@<host> \
+  --expr 'derivation { name = "phase0-probe"; system = "<arch>";
+            builder = "/bin/sh"; args = ["-c" "echo phase0 > $out"]; }'
+#+end_src
+
+| Builder | =hello= | forced build |
+|---------------------------------+---------------------------------------------------+----------------------------------------------|
+| ssh-ng://yuan@mist.lan | =...-hello-2.12.3= (aarch64-darwin) | =building '/nix/store/iavckbg7...-phase0-probe.drv'= → =/nix/store/2nrjlr7j29zdi1c509byrcpbwaap96fb-phase0-probe= |
+| ssh-ng://yuan@misfit.lan | =...-hello-2.12.3= (x86_64-linux, fetched) | =building '/nix/store/c3pi5dig...-phase0-probe-x86.drv'= → =/nix/store/3y9sy7jpk2d39nabjjyfwpy3yprrf7j3-phase0-probe-x86= |
+| ssh-ng://yuanw@dgx-spark.lan | =...-hello-2.12.3= (aarch64-linux, fetched) | =building '/nix/store/6mvmcwxyp...-phase0-probe-arm.drv'= → =/nix/store/9lxvm1j9xiyhh1lsizvclyi9a1gagwga-phase0-probe-arm= |
+
+Every =building ...= line means the derivation was realised on the *remote*
+host over ssh-ng, including the aarch64-darwin one on Lix 2.95.2. That is the
+Phase 0.3 go/no-go and it is a go.
+
+Side effects left behind: the =phase0-probe*= paths and the two =hello= paths
+are in the builders' stores with no root. They are a few hundred bytes each and
+the next =nix-collect-garbage= removes them; =nix-store --delete= them if you
+want them gone now.
+
+* 0.4 private input on silver — SKIPPED
+
+Variant B only (TL;DR picks Variant A: the Mac evaluates, silver schedules).
+Re-test this before any timer work.
+
+* 0.5 disk — PASS
+
+#+begin_example
+ssh yuanw@silver.lan 'df -h / | tail -1; du -sh /nix/store'
+/dev/sda2       457G   11G  423G   3% /
+9.1G    /nix/store
+#+end_example
+
+Matches the plan's 423G / 11G. =ensureFree = "50G"= + 30d retention is fine.
+
+* Findings that change later phases
+
+** 1. silver reaches builders only via a forwarded agent (blocks Phase 3 as written)
+
+=ssh yuanw@silver 'ssh yuan@misfit'= fails on its own; it worked only with
+=ssh -A= from mist. So =nix.buildMachines= with =sshKey =
+config.age.secrets.nix-builder-key.path= (3.1) is still required — nothing
+about 0.2's PASS removes that. 0.2 proves the *builders accept this key and
+this user*, not that silver holds a key.
+
+** 2. mist has no =~/.ssh/authorized_keys= at all
+
+=ssh yuan@mist.lan= is =Permission denied (publickey)= from any machine,
+including mist itself: =/Users/yuan/.ssh/authorized_keys= does not exist even
+though =hosts/mist.nix:74= declares the phone key. For this probe only I wrote
+=ssh-add -L= to that file and =rm='d it afterwards. Phase 3.1 must actually
+land a key there and *verify the file after darwin-rebuild* — otherwise mist
+is not a builder at all and the darwin closures never reach silver.
+
+** 3. =modules/nix-custom-conf.nix= does not reach misfit or dgx-spark (Phase 2)
+
+Only =yuan-mac=, =mist=, =asche= and =wk01174= import =myModules.common=.
+Live =/etc/nix/nix.conf=:
+
+| Host | substituters today |
+|------------------------------------+--------------------------------------------------------------------|
+| mist | from =/etc/nix/nix.custom.conf= (the mkForce'd list) — gets it |
+| misfit | =https://cache.nixos.org/= only |
+| dgx-spark | its own list: nix-community, cuda-maintainers, nixos-cuda, graham33, ai, ... + flox via extra- |
+| silver | =https://cache.nixos.org/= only |
+
+So Phase 2's "one file for both NixOS and nix-darwin" is true only for the
+=myModules.common= hosts. =misfit= has no =nix.settings= block at all and
+=dgx-spark= has one at =hosts/dgx-spark/configuration.nix:82= — add the silver
+substituter + key there too, or import a small cache-consumer module in both
+host trees. Keeping the guard and the key together still matters (=require-sigs=).
+
+** 4. dgx-spark probes a cachix it cannot read
+
+Every miss pays =HTTP error 401= from =https://cuda-maintainers.cachix.org/nix-cache-info=
+("Binary cache cuda-maintainers doesn't exist or you're not authorized").
+Pre-existing, unrelated to harmonia, but it is noise on every build and one more
+round trip per path; drop it or give it a token while touching that block.
+
+** 5. Host keys for Phase 3.2 pinning
+
+=secrets/secrets.nix= has misfit, dgx-spark and silver and all three match
+=~/.ssh/known_hosts=. It has *no mist entry*, and mist's key is not derivable
+from anything in the repo:
+
+#+begin_example
+mist.lan       ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILlqlcgZW05D7AuNfb1dyyH0XrCdIWGBQYgw/KMjcUdP
+misfit.lan     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDx+Da0GK5PP3hskYnLn1zd/2iPnLMKl0S6Q2o+f/DEQ
+dgx-spark.lan  ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBlf8iV/U+IO22PGc6yZMbfwZB7Wpk7L7nD9AZApwQBS
+silver.lan     ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOM+RJXHC7SOXSWpgeG1Tr2Hpfa102G2YDq/C2qSLlQ0
+#+end_example
+
+** 6. silver has no flakes enabled
+
+=/etc/nix/nix.conf= =experimental-features =~ is empty, so a
+=nix build .#= on silver or a Variant B timer unit needs
+=NIX_CONFIG=/=nix.settings.experimental-features= explicitly.
+=nix-store --realise= (Variant A's remote realise, 3.4) does not.
+
+* What is still unproven going into Phase 1+
+
+- =services.harmonia= actually activating (socket unit, =LoadCredential= read
+  of the agenix path, DynamicUser sandbox) — first deploy tells you.
+- =nix copy --derivation --to ssh-ng://yuanw@silver.lan= +
+  =nix-store --realise --max-jobs 0= dispatching to =nix.buildMachines= — that
+  is 3.4's own test, and it needs the 3.1 key first.
+- =nix build <drv>= on the Spark exiting 0 without building (the plan's reason
+  to prefer =nix-store -r=).
+- Whether a consumer prefers silver over cache.nixos.org at =priority = 10=
+  for a path both hold.
