@@ -184,9 +184,9 @@ cache-push TARGET="dgx-spark" CACHE="dgx-spark-nixos":
         | grep -E '/[a-z0-9]{32}-[A-Za-z0-9+._-]*(cuda|nvshmem|magma|cudnn|nccl|cublas|cupti|cufft|curand|cusolver|cusparse|cusparselt|cutensor|cutlass|nvrtc|nvjitlink|nvtx|torch|triton|flash|xformers)[A-Za-z0-9+._-]*$' \
         > "$list"; \
     echo "$(wc -l < "$list") paths for {{TARGET}} -> {{CACHE}}"; \
+    ssh {{silver-ssh}} 'cat > /tmp/cache-push-{{TARGET}}' < "$list"; \
     ssh {{silver-ssh}} 'sudo -n sh -c "CACHIX_AUTH_TOKEN=\$(cat /run/agenix/cachix-auth-token) \
-        exec nix --extra-experimental-features nix-command copy --stdin \
-            --to https://{{CACHE}}.cachix.org"' < "$list"
+        exec xargs -a /tmp/cache-push-{{TARGET}} -d '\\''\\n'\\'' cachix push {{CACHE}}"'
 
 # what is rooted, and how big the store and the free space got
 cache-status:
