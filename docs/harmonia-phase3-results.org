@@ -1,0 +1,137 @@
+#+TITLE: Harmonia build hub — Phase 3 results
+#+STARTUP: showall
+
+What the implementation of [[file:harmonia-build-hub.org][Phase 3]] actually needed. Date: 2026-10-24.
+Commits =db8f13dc=, =4d093245=, =6b82362f=.
+
+* What works
+
+| Leg | Result |
+|-------------------------------------+--------------------------------------------------------|
+| silver -> misfit (ssh-ng, yuan) | authenticated, builds dispatched, outputs copied back |
+| silver -> mist (ssh-ng, yuan) | authenticated, =aarch64-darwin= drvs built on the Mac |
+| misfit closure | 19 s, rooted, served and substituted by mist |
+| mist closure | built on mist over ssh-ng, rooted, served signed by =silver-1= |
+| dgx-spark closure | not warmed, see "The Spark" |
+
+End to end proof for the misfit closure:
+
+#+begin_example
+$ nix-store --realise <hive toplevel drv> --max-jobs 0 \
+    --add-root /nix/var/nix/gcroots/cache/misfit --indirect
+building '/nix/store/...-nixos-system-misfit-26.11pre-git.drv' on 'ssh-ng://yuan@misfit.lan'...
+
+$ curl -s http://127.0.0.1:5000/z8hfiv711flpm142yp6p33yraf2nmlfl.narinfo
+StorePath: /nix/store/z8hfiv711flpm142yp6p33yraf2nmlfl-nixos-system-misfit-26.11pre-git
+URL: nar/1k8j9a25jf8k45m1zp7sah1rss7qzddx61a2ln3nnhq354y0ys2a.nar?hash=z8hfiv...
+Sig: silver-1:lr9aW+PyPki8bpz7DJTJFYfqD36ilGFXuAhnLso4SMe4Eq8yPxsb/fjnaxa3DzHc/a0LnJw9M+g7glRg2a9hAQ==
+
+# from mist, only silver-1 trusted:
+copying 1547 paths ... from 'http://silver.lan:5000'
+#+end_example
+
+* Two traps that cost an hour each
+
+** Narinfo URLs take the digest, not the store path name
+
+=http://silver.lan:5000/z8hfiv…-nixos-system-misfit-26.11pre-git.narinfo= is a 404
+and looks exactly like "Harmonia is broken". The route takes the 32-character
+digest only; harmonia 3.3.0 runs =StorePathHash::decode_digest= over whatever is
+in front of =.narinfo= and rejects the longer string with
+=Invalid hash format: invalid store path hash length=:
+
+#+begin_example
+$ curl -s http://127.0.0.1:5000/z8hfiv711flpm142yp6p33yraf2nmlfl.narinfo | grep Sig
+Sig: silver-1:lr9aW+...
+#+end_example
+
+** Nothing has to run to publish a warmed closure
+
+=harmonia-cache= reads =/nix/var/nix/db/db.sqlite= per request, so a path that
+lands in the store is substitutable immediately. =harmonia-gc.service* is
+retention only (=delete-older-than=, =ensureFree=) and runs weekly; the first
+run after the roots appeared printed "350.63 GiB already free, nothing to do"
+and changed nothing. There is no index step to trigger after =just cache-build=.
+
+* Four things the plan got wrong
+
+** The drv to warm is the hive's, not the flake's
+
+=cache-build-one= started as =nix eval --raw ".#<host>.drvPath"=. That is
+=nixosConfigurations.<host>.config.system.build.toplevel=, built from the
+flake's own =meta.nixpkgs=. =just remote-apply= installs
+=colmenaHive.nodes.<host>.config.system.build.toplevel=, which imports
+=meta.nixpkgs= *and* =meta.nodeNixpkgs= and is a different derivation:
+
+#+begin_example
+flake closure  nixos-system-misfit-26.11.20261017.9e91791.drv
+hive  closure  nixos-system-misfit-26.11pre-git.drv
+#+end_example
+
+Nothing is shared between the two, so warming the flake closure makes a deploy
+substitute exactly nothing and leaves the wrong closure GC-rooted. Fixed by
+trying the hive path first and falling back to =.#<host>= for the darwin hosts,
+which have no hive node. =dgx-spark= shows the same split:
+=nixos-system-dgx-spark-26.11pre-git= from the hive versus
+=nixos-system-dgx-spark-26.11.20260928.5200201= from the flake.
+
+** =builders-use-substitutes = false= makes builders compile what they could fetch
+
+The plan set this so "silver sends the inputs". It does more than that: the
+builder may not use *any* substituter for that build. The aarch64-linux CUDA
+paths that dgx-spark normally pulls from =cache.nixos-cuda.org=,
+=graham33.cachix.org= and =ai.cachix.org= were compiled from source instead.
+Set it to =true= (Nix's own default). Substituted inputs still reach silver,
+because the outputs that reference them are copied back.
+
+** =maxJobs = 1= does not limit one build
+
+=buildMachines.maxJobs= is the scheduler's view of how many drvs silver hands
+to a machine at once. A single drv is then free to use every core the builder's
+daemon allows. The first dgx-spark run reached load 38 on 20 cores — 20 =nvcc=
+plus 20 =ptxas= — while =tensorfold-nati= held 86 G of the box's 121 G RAM with
+34 G spare. That is an OOM waiting to evict the model.
+
+The knob is on the *builder*: =nix.settings.max-jobs = 1= and
+=nix.settings.cores = 8= in =hosts/dgx-spark/configuration.nix=. Both are in
+=/etc/nix/nix.conf= now.
+
+A cgroup guard (=MemoryMax= on =nix-daemon=) does not help here: ssh-ng builds
+are spawned by the =nix-daemon --stdio= child under the sshd session cgroup,
+not the =nix-daemon.service= cgroup.
+
+** The gcroots directory is created per-user, not globally
+
+=--add-root= writes =/nix/var/nix/gcroots/cache/<name>= as the user running the
+trigger (=yuanw=), while =harmonia.gc.gcRootsDirs= points at the global
+directory. Created it with =systemd.tmpfiles= as =root:wheel 0775= so the
+non-root trigger can write it and the daemon-owned GC can read it.
+
+* The Spark
+
+dgx-spark stays a declared builder — it is the only =aarch64-linux= machine —
+but it is out of the default =cache-targets= list. Its closure compiles CUDA
+from source because =cuda-fixes.nix= patches libnvshmem for CUDA 13.2, so no
+public cache has that drv. One attempt ran 60+ minutes and was killed; the
+model kept its 86 G.
+
+Run it deliberately, when inference is idle:
+
+#+begin_example
+just cache-build-one dgx-spark
+#+end_example
+
+* Left as the plan said
+
+- No global =nix.settings.max-jobs = 0= on silver. =buildOnTarget = true= means
+  a silver deploy builds on silver itself, and =max-jobs = 0= would make every
+  silver deploy depend on misfit being up. The trigger passes =--max-jobs 0=
+  instead, which costs nothing when nothing is deployed.
+- =keep-derivations= and =keep-outputs= are *on* on silver
+  (=modules/services/cache/harmonia.nix=), so the closure and its drvs survive
+  even if the GC runs; the gcroot is what keeps them reachable in the first
+  place. Deleting =/nix/var/nix/gcroots/cache/<host>= is what makes a warmed
+  closure collectable.
+- =nix.publicHostKey= wants the whole =ssh-ed25519 AAAA...= line base64'd, not
+  the bare key blob. The first attempt used the blob and nix fell back to
+  interactive host key approval, which hangs a build with no tty.
