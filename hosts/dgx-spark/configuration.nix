@@ -132,17 +132,21 @@
     options = "--delete-older-than 30d";
   };
 
-  # ssh-ng builds are spawned as yuanw ssh sessions, so a dispatched build runs
-  # in this slice -- not in nix-daemon.service's cgroup, which is why a
-  # MemoryMax on that unit does nothing for remote builds.  A weight, not a
-  # quota: an idle Spark still builds at full speed, but nvcc/ptxas never
-  # outranks inference.  A slice unit file is systemd's own way to bound a user's
-  # session scopes; logind starts it and drops the sessions inside it.  Applies
-  # at next boot, or now with `systemctl restart user-yuanw.slice` (which drops
-  # your sessions).
-  systemd.units."user-yuanw.slice".text = ''
+  # ssh-ng builds and colmena's build-on-target runs are yuanw login sessions, so
+  # they live in this slice -- and user slices are named by UID, not username
+  # (`user-1000.slice`; a `user-yuanw.slice` unit is simply never instantiated,
+  # verified against /proc/<ninja>/cgroup).  Not nix-daemon.service's cgroup
+  # either, which is why a MemoryMax on that unit does nothing for remote builds.
+  #
+  # Weight bounds contention, MemoryMax bounds the disaster: a torch build put
+  # four `cicc` at 4 G each on the box with 17 G spare and the 86 G model
+  # resident.  With the cap it is the build that gets OOM-killed, not tensorfold
+  # (which is what died on 2026-10-14).
+  systemd.units."user-${toString config.users.users.yuanw.uid}.slice".text = ''
     [Slice]
     CPUWeight=20
+    MemoryHigh=32G
+    MemoryMax=40G
   '';
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;

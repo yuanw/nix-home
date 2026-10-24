@@ -146,12 +146,27 @@ Two things keep that survivable:
 
 - `nix.settings.cores = 8` on dgx-spark held the deploy build at load 8.8 on a
   20-core box with the model resident (measured, same run).
-- `systemd.units."user-yuanw.slice".text` with `CPUWeight=20`, because ssh-ng
-  builds run as yuanw login sessions, in that slice. Weight, not a quota: an
-  idle Spark still builds at full speed. At this pin `systemd.units.<name>` has
-  no `extraConfig` — a failed deploy found that — so the whole unit goes in
-  `.text`. It lands at next activation or with `systemctl restart
-  user-yuanw.slice`, which drops your sessions.
+- The slice that actually holds the builds is `user-<uid>.slice` — user slices
+  are named by UID, so a `user-yuanw.slice` unit is never instantiated and does
+  nothing (checked against `/proc/<ninja>/cgroup`: sessions land in
+  `/user.slice/user-1000.slice/session-512.scope`). The unit is therefore
+  `systemd.units."user-${toString config.users.users.yuanw.uid}.slice"` with
+  `CPUWeight=20`, `MemoryHigh=32G`, `MemoryMax=40G`. Weight bounds contention;
+  the cap bounds the disaster — torch put four `cicc` at 4 G each on the box
+  with 17 G spare and the 86 G model resident, so without it the OOM killer
+  picks the biggest RSS, which is the model.
+- `systemctl set-property user-<uid>.slice MemoryMax=40G` applies that ceiling
+  *live*, which is what you want mid-build: `cores` is read when the build
+  starts, so lowering it cannot stop a build already running, and waiting for
+  the deploy to activate is too late.
+- At this pin `systemd.units.<name>` has no `extraConfig` — a failed deploy
+  found that — so the whole unit goes in `.text`.
+
+`ptxas` died on signal 11 compiling nvshmem's `reducescatter_and.cu` once,
+which is the failure the plan predicted for CUDA. It is not reproducible — the
+running system already carries `libnvshmem-3.8.0-0`, so the same drv built here
+before — and a plain retry got through it. Treat the first ptxas failure as
+transient and re-run; treat the second as a real bug.
 
 * Why the CUDA outputs also go to Cachix
 
