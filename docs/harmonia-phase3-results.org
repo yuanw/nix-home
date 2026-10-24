@@ -14,6 +14,18 @@ Commits =db8f13dc=, =4d093245=, =6b82362f=.
 | mist closure | built on mist over ssh-ng, rooted, served signed by =silver-1= |
 | dgx-spark closure | not warmed, see "The Spark" |
 
+=just cache-build= over the three default targets takes 46 s once everything is
+already built (it is the same three drvs, so repeat runs cost one eval each).
+A consumer proof, run from mist with no key on the command line — the only
+trusted keys are the two in mist's =/etc/nix/nix.custom.conf=:
+
+#+begin_example
+$ nix copy --from http://silver.lan:5000 /nix/store/555p…-nixos-system-misfit-26.11pre-git
+copying path '/nix/store/gbzdcy…-etc' from 'http://silver.lan:5000'...
+copying path '/nix/store/555p7…-nixos-system-misfit-26.11pre-git' from 'http://silver.lan:5000'...
+# 29 s for the whole closure
+#+end_example
+
 End to end proof for the misfit closure:
 
 #+begin_example
