@@ -204,12 +204,12 @@ plan rests on.
 
 * Phase 1 — Harmonia on silver (~1 hour, one deploy)
 
-/IMPLEMENTED 2026-10-23: =modules/services/cache/harmonia.nix=, the
-=harmonia-sign-key.age= secret and the silver config are in the tree and
-eval-clean (=bind == "[::]:5000"=, =ListenStream == "[::]:5000"=,
-=signKeyPaths == [ /run/agenix/harmonia-sign-key ]=,
-=harmonia-gc.startAt == [ "weekly" ]=, =nix.gc.automatic == false=, no config
-warnings). 1.5 — the deploy — stays with the operator./
+/IMPLEMENTED 2026-10-24: module, secret and silver config are committed,
+silver is deployed and 1.5 passed end to end — the cache serves and signs with
+=silver-1=, and a consumer copies from it with =require-sigs= satisfied.  (The cleartext
+was =shred='d on 2026-10-24.  If the password-manager copy is gone, the only
+way back is a new key: regenerate, =agenix -e= again, redeploy, and rotate the
+=silver-1= entry on every consumer — the public half in use is above.)/
 
 ** 1.1 Signing key (operator only)
 
@@ -378,12 +378,42 @@ ssh yuanw@silver.lan 'curl -s http://127.0.0.1:5000/nix-cache-info'
 
 # silver's daemon config has experimental-features empty (Phase 0), so every
 # nix-command on that box needs NIX_CONFIG -- plain `nix path-info` errors out.
-h=$(ssh yuanw@silver.lan "NIX_CONFIG='extra-experimental-features = nix-command' nix path-info /run/current-system" | sed 's|.*/||')
-ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/$h.narinfo" |
-  grep -E '^(Path|URL|Sig)'
+# The narinfo route takes the 32-char HASH PART only: <hash>-<name>.narinfo is
+# rejected by StorePathHash::decode_digest and comes back as a bare
+# `Not Found` (a real database miss says `missed hash` instead -- 2026-10-24).
+sys=$(ssh yuanw@silver.lan "NIX_CONFIG='extra-experimental-features = nix-command' nix path-info /run/current-system")
+ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/${sys##/*/}.narinfo" | head -1
+ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/$(basename ${sys##/*/} | cut -d- -f1).narinfo" |
+  grep -E '^(URL|NarHash|Sig)'
 # → Sig: silver-1:<...>
 ssh yuanw@silver.lan 'journalctl -u harmonia -u harmonia.socket -b --no-pager | tail -30'
 #+end_src
+
+Signatures are only verified when a path is *copied*, so check the key that
+way — `nix path-info --store http://…` returns the path with a bogus
+=trusted-public-keys= too and proves nothing:
+
+#+begin_src bash
+# from a consumer; the closure must be one only silver has, or cache.nixos.org
+# signs it and the test passes without silver's key ever being used.
+nix copy --from http://silver.lan:5000 <path> \
+  --option trusted-public-keys "silver-1:<base64>"
+#+end_src
+
+Phase 1 ran on 2026-10-24: =harmonia.socket= listening on =[::]:5000= with the
+service started on demand (=active (listening)=, =inactive (dead)= until the
+first request), =/version= =harmonia-cache 3.3.0=, =/health= =OK=,
+=nix-cache-info= =StoreDir: /nix/store= / =WantMassQuery: 1= /
+=Priority: 10=, the =/run/agenix/harmonia-sign-key= credential mounted
+(root:root 0400) with no journal errors, and the running system closure's
+narinfo signed =Sig: silver-1:…= only (a substituted path carries
+=cache.nixos.org-1= alongside it). =nix copy= from mist pulled hello's whole
+closure =from 'http://silver.lan:5000'= with just the =silver-1= key trusted,
+and the same copy against a closure signed only by =silver-1= failed with
+=error: cannot add path '…' because it lacks a signature by a trusted key=
+under a wrong key — =require-sigs= is live.
+
+=harmonia-gc.timer= is active (next run weekly); =nix.gc.automatic= is off.
 
 Phase 1 is done when the socket is listening, =nix-cache-info= reports
 =Priority: 10=, a =.narinfo= carries =Sig: silver-1:...= and
