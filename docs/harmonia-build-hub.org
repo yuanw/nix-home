@@ -562,6 +562,16 @@ just the cache.
 
 * Phase 3 — builders and the Nix job queue (~2 hours, first cross builds)
 
+/IMPLEMENTED 2026-10-24: builder key, =nix.buildMachines= on silver, and
+=just cache-build= are in. 3.2–3.4 passed for silver, misfit and mist — closures
+built on the builders, rooted under =/nix/var/nix/gcroots/cache=, served signed
+with =silver-1=, and substituted by mist over =http://silver.lan:5000=. The
+aarch64-linux closure is not warmed: the Spark's CUDA stack compiles, so that
+target is opt-in (see below). Four findings changed the plan — hive vs flake
+drv, =builders-use-substitutes=, what =maxJobs= really bounds, and the gcroot
+directory — in [[file:harmonia-phase3-results.org][harmonia-phase3-results.org]], which also covers the Cachix
+push and the two 404/false-alarm traps./
+
 ** 3.1 Builder SSH key
 
 Generate on the Mac (operator), encrypt to silver, authorize on builders:

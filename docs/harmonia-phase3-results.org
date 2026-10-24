@@ -133,6 +133,62 @@ Run it deliberately, when inference is idle:
 just cache-build-one dgx-spark
 #+end_example
 
+* The deploy is a CUDA build
+
+`hosts/dgx-spark/default.nix:45` is `buildOnTarget = true`, so a pin bump
+compiles on the inference box as part of `just remote-apply`. Measured on the
+first bump after merging main: magma alone is 3492 build steps
+(`[1497/3492] Building CUDA object CMakeFiles/magma.dir/magmablas/
+spotf2_kernels_var.cu.o`), then ucc/ucx, and my 900 s client timeout fired while
+it was still going. Nix's client died; the builder finished magma anyway.
+
+Two things keep that survivable:
+
+- `nix.settings.cores = 8` on dgx-spark held the deploy build at load 8.8 on a
+  20-core box with the model resident (measured, same run).
+- `systemd.units."user-yuanw.slice".text` with `CPUWeight=20`, because ssh-ng
+  builds run as yuanw login sessions, in that slice. Weight, not a quota: an
+  idle Spark still builds at full speed. At this pin `systemd.units.<name>` has
+  no `extraConfig` — a failed deploy found that — so the whole unit goes in
+  `.text`. It lands at next activation or with `systemctl restart
+  user-yuanw.slice`, which drops your sessions.
+
+* Why the CUDA outputs also go to Cachix
+
+`just cache-push` uploads the CUDA / torch subset of silver's copy of the
+Spark's closure to `dgx-spark-nixos.cachix.org`, which dgx-spark substitutes
+from (priority 41, behind silver's 10).
+
+For a LAN host silver alone would do: every host already trusts `silver-1`. The
+push earns its place on three other counts.
+
+1. **Nobody else moves the outputs.** With `buildOnTarget = true` the deploy
+   builds on the Spark and the results stay there. Silver never sees magma
+   unless something copies it. That copy is the whole job of this recipe.
+2. **Retention.** silver's Harmonia GC is `deleteOlderThan = 30d` /
+   `keepRecent = 1d` / `ensureFree = 50G`, and the root I create is one symlink
+   per host pointing at the *current* toplevel, so magma is only rooted while it
+   is current. A few bumps later it is unrooted and low free space reclaims it.
+   `harmonia-store-gc` builds its keep-set purely from the gcroots dirs
+   (`gc.rs:300`), so nothing outside them is protected. Cachix expires nothing.
+3. **One copy is not a backup.** silver is a MacBookPro11,5 with the store on a
+   single internal SSD; if it dies the only magma is on the Spark, which runs
+   its own weekly `nix.gc --delete-older-than 30d`. And off-LAN — travelling
+   mist, asche, CI — there is no route to `silver.lan` at all.
+
+The alternative considered and rejected: harvest to silver and pin the CUDA
+paths with extra gcroots (no token, LAN speed, never collected). Same traffic,
+but single-copy and unreachable off the LAN.
+
+Filter: upstream CUDA and torch names only (`cuda|nvshmem|magma|cudnn|nccl|…`).
+The cache is public, so our own outputs — tensorfold's Zig engine, vllm-aeon —
+stay out of it deliberately.
+
+The push token lives in pass at `cachix/dgx-spark-nixos` and is encrypted for
+silver by hand into `secrets/cachix-auth-token.age`;
+`modules/services/cache/push.nix` enables the secret only when that file exists,
+so the repo deploys either way.
+
 * Left as the plan said
 
 - No global =nix.settings.max-jobs = 0= on silver. =buildOnTarget = true= means
