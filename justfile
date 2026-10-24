@@ -160,6 +160,27 @@ cache-build-one HOST:
     ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
         --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"
 
+# Copy the CUDA / deep-learning paths silver holds for a target up to Cachix, so
+# the next nixpkgs bump substitutes instead of compiling on the Spark.  Do this
+# after `just cache-build-one dgx-spark` and before the box's weekly GC can
+# collect them; `just cache-status` shows what silver has.
+#
+# The filter is the upstream CUDA and torch stack on purpose: those are the paths
+# nobody else has a copy of (magma alone is 3492 build steps, and the libnvshmem
+# patched for CUDA 13.2 in cuda-fixes.nix is in no public cache) and none of it is
+# our code.  Our own outputs — tensorfold's Zig engine, vllm-aeon — stay out
+# because the cache is public.
+cache-push TARGET="dgx-spark" CACHE="dgx-spark-nixos":
+    @set -e; \
+    list=/tmp/cache-push-{{TARGET}}; \
+    ssh {{silver-ssh}} "nix-store -q --requisites /nix/var/nix/gcroots/cache/{{TARGET}}" \
+        | grep -E '/[a-z0-9]{32}-[A-Za-z0-9+._-]*(cuda|nvshmem|magma|cudnn|nccl|cublas|cupti|cufft|curand|cusolver|cusparse|cusparselt|cutensor|cutlass|nvrtc|nvjitlink|nvtx|torch|triton|flash|xformers)[A-Za-z0-9+._-]*$' \
+        > "$list"; \
+    echo "$(wc -l < "$list") paths for {{TARGET}} -> {{CACHE}}"; \
+    ssh {{silver-ssh}} 'sudo -n sh -c "CACHIX_AUTH_TOKEN=\$(cat /run/agenix/cachix-auth-token) \
+        exec nix --extra-experimental-features nix-command copy --stdin \
+            --to https://{{CACHE}}.cachix.org"' < "$list"
+
 # what is rooted, and how big the store and the free space got
 cache-status:
     @ssh {{silver-ssh}} 'ls -l /nix/var/nix/gcroots/cache/ 2>/dev/null; df -h / | tail -1; du -sh /nix/store'

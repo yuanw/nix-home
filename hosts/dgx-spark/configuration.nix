@@ -104,6 +104,13 @@
       "yuanw"
     ];
     substituters = [
+      # Our own aarch64-linux CUDA outputs, pushed from silver by
+      # `just cache-push` (modules/services/cache/push.nix).  The CUDA stack here
+      # has no public cache entry — magma, and the libnvshmem patched for CUDA
+      # 13.2 in cuda-fixes.nix — so a pin bump recompiles thousands of .cu files
+      # on this box unless they come from here.  A deploy after `nix flake
+      # update` measured 3492 magma build steps alone.
+      "https://dgx-spark-nixos.cachix.org"
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://cache.nixos-cuda.org"
@@ -111,6 +118,7 @@
       "https://ai.cachix.org"
     ];
     trusted-public-keys = [
+      "dgx-spark-nixos.cachix.org-1:Ps3d91fOvYEtxhTS59k2S1Y3P7ld6ahhx7nHKKF3ojc="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cuda-maintainers.cachix.org-1:Zf5/D7lVH62pV3W4pAzbXFPAtdKBKAZnNj4n1XS85i4="
       "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
@@ -123,6 +131,19 @@
     dates = "weekly";
     options = "--delete-older-than 30d";
   };
+
+  # ssh-ng builds are spawned as yuanw ssh sessions, so a dispatched build runs
+  # in this slice -- not in nix-daemon.service's cgroup, which is why a
+  # MemoryMax on that unit does nothing for remote builds.  A weight, not a
+  # quota: an idle Spark still builds at full speed, but nvcc/ptxas never
+  # outranks inference.  A slice unit file is systemd's own way to bound a user's
+  # session scopes; logind starts it and drops the sessions inside it.  Applies
+  # at next boot, or now with `systemctl restart user-yuanw.slice` (which drops
+  # your sessions).
+  systemd.units."user-yuanw.slice".text = ''
+    [Slice]
+    CPUWeight=20
+  '';
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
   # vLLM 0.16 has known CVEs (fixed in 0.23). Permit until vllm-aeon builds.

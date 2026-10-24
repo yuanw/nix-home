@@ -69,4 +69,9 @@ in
   # users.users.*.openssh.authorizedKeys.keys.  Losing it is not fatal —
   # regenerate, agenix -e again, redeploy the three hosts and silver.
   "nix-builder-key.age".publicKeys = [ silver ];
+  # Push token for dgx-spark-nixos.cachix.org, used by `just cache-push` on
+  # silver (modules/services/cache/push.nix).  Cleartext lives in pass at
+  # cachix/dgx-spark-nixos.  The cache is public, so this grants write only, and
+  # rotating it is just a new token — no path hashes depend on it.
+  "cachix-auth-token.age".publicKeys = [ silver ];
 }
