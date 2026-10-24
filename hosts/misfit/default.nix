@@ -35,7 +35,7 @@
   # release from nixos-26.05
   nixpkgs.overlays = [
     (_final: prev: {
-      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.system})
+      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.stdenv.hostPlatform.system})
         jellyfin
         jellyfin-web
         jellyfin-ffmpeg

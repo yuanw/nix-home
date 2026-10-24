@@ -18,6 +18,7 @@ let
   piExtensionPackages = {
     custom-footer = ./extensions/custom-footer.ts;
     direnv = ./extensions/direnv.ts;
+    exit = ./extensions/exit.ts;
     notify = ./extensions/notify.ts;
     web-fetch = ./extensions/web-fetch.ts;
     cursor-agent = pkgs.pi-extensions.pi-cursor-agent;
@@ -139,6 +140,7 @@ in
     modules.pi.extensions = {
       notify.enable = lib.mkDefault true;
       custom-footer.enable = lib.mkDefault true;
+      exit.enable = lib.mkDefault true;
       slow-mode.enable = lib.mkDefault true;
       permission-gate.enable = lib.mkDefault true;
       interactive-shell.enable = lib.mkDefault true;
@@ -167,27 +169,6 @@ in
             "${agentConfigDir}/skills"
           ];
         };
-
-        # Old modules.pi.skills linked whole store packages as
-        # ~/.pi/agent/skills/<name> -> /nix/store/... . pi-flake keeps skills in
-        # the store and lists them in settings.json, so those links are stale.
-        # Keep mics-skills whole-dir links; remove other store dir symlinks.
-        home.activation.removeLegacyAgentPmSkillDirLinks = lib.hm.dag.entryBefore [ "checkLinkTargets" ] ''
-          skillsDir="$HOME/${agentConfigDir}/skills"
-          if [ -d "$skillsDir" ]; then
-            for path in "$skillsDir"/*; do
-              [ -L "$path" ] || continue
-              name="''${path##*/}"
-              case "$name" in
-                ${lib.concatMapStringsSep "|" lib.escapeShellArg micsSkillNames}) continue ;;
-              esac
-              target="$(readlink "$path" || true)"
-              case "$target" in
-                /nix/store/*) run rm -f "$path" ;;
-              esac
-            done
-          fi
-        '';
 
         programs.pi = {
           enable = true;
