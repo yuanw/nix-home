@@ -213,6 +213,31 @@ silver by hand into `secrets/cachix-auth-token.age`;
 `modules/services/cache/push.nix` enables the secret only when that file exists,
 so the repo deploys either way.
 
+Two things about pushing that are not obvious:
+
+- =nix copy --to https://<cache>.cachix.org= fails with =Method not supported=.
+  The binary-cache HTTP protocol is read-only; uploading is the CLI's job, so
+  the recipe runs =cachix push= on silver (installed by the same module) with
+  =CACHIX_AUTH_TOKEN= from the agenix path.
+- What gets pushed is the *runtime* closure — 49 paths: nvshmem, torch, the
+  =cuda13.2-*= libraries — and that is verified in the cache:
+
+  #+begin_example
+  $ curl -s https://dgx-spark-nixos.cachix.org/zsdks…-cuda13.2-libnvshmem-3.8.0-0.narinfo | grep Sig
+  Sig: dgx-spark-nixos.cachix.org-1:lR85Ufsiy5CPs0DpISSZtyXLMWqtb/+Mjg4jzyq6mWO…
+  #+end_example
+
+  which is the key in dgx-spark's =trusted-public-keys=, so the Spark substitutes
+  it rather than compiling.
+
+  The gap: magma was not pushed. It is a build-time input, so it is in no
+  closure =nix-store -q --requisites= can walk, and the toplevel =.drv= is not
+  valid on either box (=keep-derivations= is on silver but the closure arrived by
+  =nix copy=), so there is nothing to enumerate. magma will still rebuild on a
+  bump. If that starts costing real time, the fix is to keep the drvs on the
+  Spark and build the push list from the =.drv= closure instead of the output
+  closure.
+
 * Left as the plan said
 
 - No global =nix.settings.max-jobs = 0= on silver. =buildOnTarget = true= means
