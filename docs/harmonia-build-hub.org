@@ -425,6 +425,12 @@ decrypt, look at =/run/agenix.d/*/harmonia-sign-key= before blaming harmonia.
 
 * Phase 2 — make consumers use it (~30 min, no builds)
 
+/IMPLEMENTED 2026-10-25: =modules/services/cache/consumer.nix= (new) holds the
+URL and the key, =modules/nix-custom-conf.nix= imports it, and
+=hosts/{misfit,dgx-spark}/default.nix= import it directly. =asche= is switched
+off. 2.2 passed from mist before any deploy. Not yet deployed to any host —
+see "2.3 Deploy"./
+
 ** 2.1 Add the substituter and key
 
 =modules/nix-custom-conf.nix= is common to NixOS and nix-darwin. Put silver in
@@ -468,6 +474,41 @@ The existing =environment.etc."nix/nix.custom.conf"= block already renders
 =trusted-users=, =substituters=, =trusted-substituters= and
 =trusted-public-keys= from these lets, so mist gets silver automatically.
 
+What the implementation looks like, and the three places it differs from the
+snippet above:
+
+1. The two constants are options, not a second =let=:
+   =my.silver-cache.{enable,url,publicKey}= in
+   =modules/services/cache/consumer.nix=, which also carries the
+   =connect-timeout= and the =substituters=/=trusted-public-keys= additions.
+   =nix-custom-conf.nix= does =imports = [ ./services/cache/consumer.nix ]=
+   and reads the option values into its =mkForce='d lists — a =mkForce= would
+   silently drop the module's own additions, so on the =myModules.common= hosts
+   that file, not the module's =config=, is what puts silver in the list.
+   One source for the pair either way, which is what =require-sigs= cares
+   about.
+2. Silver is *not* a =trusted-substituter= (=trustedSubstituters =
+   cacheSubstituters= in the snippet would have made it one). Every narinfo
+   harmonia emits is signed with =silver-1= and that key is in
+   =trusted-public-keys=, so =require-sigs= is satisfied without it; listing
+   silver as trusted would waive signature checking for an unauthenticated
+   HTTP endpoint any LAN host can impersonate. 2.2 confirms the stricter form
+   copies.
+3. =connect-timeout = 5= is also written into =nix.custom.conf=. On mist and
+   =ci= =nix.enable = false=, so =nix.settings= reaches nothing there and that
+   file is the only thing their daemon reads.
+
+=asche= sets =my.silver-cache.enable = false;= in =hosts/asche/default.nix=
+(D2: it travels and silver has no tailnet address). =mist= keeps it per the
+plan; if it starts paying the timeout on the road, the same one-liner applies
+there. Silver itself imports neither — it does not need to fetch from itself.
+
+Evaluated values (=nix eval .#nixosConfigurations.<host>.config.nix.settings=,
+2026-10-25): =misfit= =substituters = [ http://silver.lan:5000
+https://cache.nixos.org/ ]= + the =silver-1= key; =dgx-spark= same, prepended
+to its CUDA list; both with =trusted-substituters = [ ]= and
+=connect-timeout = 5=; =asche= has neither the URL nor the key.
+
 ** 2.2 Verify substitution
 
 Pick a path that is on silver but not on the consumer (build one with a
@@ -482,6 +523,42 @@ nix build --no-link --print-out-paths .#packages.<target> -L 2>&1 |
 
 Also check the priority: a fresh closure should prefer silver for paths both
 have, and fall through to cache.nixos.org for everything else.
+
+/ran 2026-10-25 from mist, before deploying anything,/ with the URL and key
+taken from =.my.silver-cache= and two =phase2-probe= outputs built on silver
+(the Phase 0 recipe, =x86_64-linux=, nothing else has them):
+
+#+begin_example
+copying path '/nix/store/zizxz7r4rkxnbp9wlzngfydan1a3py9s-phase2-probe' from 'http://silver.lan:5000'...
+copying path '/nix/store/2y3aa08j03l9l9hw9prlbhqwl5b3a6aw-phase2-probe-2' from 'http://silver.lan:5000'...
+error: cannot add path '/nix/store/2y3aa08j03l9l9hw9prlbhqwl5b3a6aw-phase2-probe-2' because it lacks a signature by a trusted key
+#+end_example
+
+The first line is the good key, the last is the same copy under
+=silver-1:AAAA...== — =require-sigs= rejects it, so the key in the config is
+the one doing the work. Priority went the expected way on a real closure too:
+copying =harmonia-3.3.0='s closure from the cache pulled =glibc=, =gcc=,
+=libidn2= and the rest =from 'http://silver.lan:5000'= rather than
+=cache.nixos.org=, which all of them are also on. Probes were =nix-store
+--delete='d from mist; the copies on silver have no roots and go with the next
+GC (see the =keep-derivations= caveat in "GC and roots").
+
+** 2.3 Deploy
+
+Nothing is live until these run; the eval above only proves the generated
+config.
+
+#+begin_src bash
+just remote-apply misfit
+just remote-apply dgx-spark
+# mist / ci / wk01174 are darwin, not in the colmena hive:
+sudo darwin-rebuild switch --flake .#mist
+#+end_src
+
+Then re-run 2.2 *without* =--option trusted-public-keys= — after the deploy the
+key is in the daemon's own config, so a plain =nix copy --from
+http://silver.lan:5000 <silver-only path>= proves the host is configured, not
+just the cache.
 
 * Phase 3 — builders and the Nix job queue (~2 hours, first cross builds)
 
@@ -730,6 +807,13 @@ cache-build-one HOST:
 - One root per host closure, replaced on every successful build.
 - Harmonia GC =ensureFree = "50G"= is the backstop; =keep-outputs= grows the
   store between GCs.
+- =keep-derivations = true= (Phase 1.3) makes every =.drv= in silver's store a
+  GC root, and =keep-outputs= then keeps what those =.drv=s produce: nothing
+  that was ever built or copied there can be collected, =ensureFree=
+  included — the two =phase2-probe= outputs and their =.drv=s survive
+  =nix-store --delete= for exactly this reason. Fine while the trigger is
+  manual and the closure set is four hosts; if the store stops shrinking, this
+  is the first setting to drop.
 - If a target is dropped from =cache-targets=, delete its root; otherwise the
   closure stays forever.
 - Never enable both =nix.gc.automatic= and =services.harmonia.gc.automatic=.
@@ -804,6 +888,7 @@ a workflow that never checks out untrusted refs.
 | File | Change | Lines |
 |------+--------+-------|
 | =modules/services/cache/harmonia.nix= | new | ~55 |
+| =modules/services/cache/consumer.nix= | new (Phase 2: url, key, timeout) | ~50 |
 | =modules/services/cache/build-hub.nix= | new (optional, Variant B) | ~70 |
 | =secrets/secrets.nix= | two age recipients | 2 |
 | =secrets/harmonia-sign-key.age= | new secret | binary |
