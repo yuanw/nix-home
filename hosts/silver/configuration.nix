@@ -111,10 +111,14 @@
   nix = {
     distributedBuilds = true;
 
-    # silver sends the inputs, so the builder builds from what the hub holds
-    # rather than pulling its own copies (and so the private input source can
-    # reach a builder that has no credentials for it).
-    settings.builders-use-substitutes = false;
+    # Let the builders substitute their own inputs.  The plan had this off so
+    # "silver sends the inputs"; with it off, a builder may not use *any*
+    # substituter, so the aarch64-linux CUDA paths that dgx-spark normally
+    # fetches from cache.nixos-cuda.org / graham33 / ai.cachix were compiled
+    # from source instead — 20 nvcc + 20 ptxas, load 38, an hour in, on the box
+    # holding an 86 G inference model.  Substituted inputs still arrive in
+    # silver's store, because the outputs that depend on them are copied back.
+    settings.builders-use-substitutes = true;
 
     buildMachines = [
       {

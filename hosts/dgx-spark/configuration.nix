@@ -90,6 +90,15 @@
       "flakes"
     ];
     auto-optimise-store = true;
+    # The build hub dispatches aarch64-linux drvs here and colmena builds this
+    # host's closure on itself, while an inference model is resident (tensorfold
+    # measured 86 G RSS of 121 G on 2026-10-24).  buildMachines.maxJobs = 1 on
+    # silver only limits how many drvs it hands over at once; these two are what
+    # cap what a *single* drv does to the box.  Without `cores` the first CUDA
+    # drv spawned 20 nvcc + 20 ptxas (load 38) and ate the headroom the model
+    # needs, which is how a cache warm turns into an OOM.
+    max-jobs = 1;
+    cores = 8;
     trusted-users = [
       "root"
       "yuanw"
