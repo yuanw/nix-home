@@ -1,0 +1,924 @@
+#+TITLE: silver as the build hub and LAN binary cache — implementation plan
+#+DATE: 2026-10-23
+#+OPTIONS: toc:t
+#+STARTUP: overview
+
+* Goal
+
+Make builds reproducible and cheap across the four machines:
+
+- =silver= is the single place where build outputs are collected, rooted, and
+  served as a signed Nix binary cache (Harmonia).
+- =mist= (aarch64-darwin), =misfit= (x86_64-linux) and =dgx-spark=
+  (aarch64-linux) are the only machines that compile.
+- A trigger (manual / timer / CI) submits closures; Nix's distributed-build
+  scheduler acts as the job queue; outputs land in silver's =/nix/store=.
+- Every host, including the macs, substitutes from silver when it is on the
+  LAN, so a deploy of an already-built closure is mostly a copy.
+
+This document is the build-hub counterpart to =docs/harmonia-silver.org=
+(branch =feat/harmonia-silver=), which only plans a read-only cache of whatever
+silver happened to build for itself. Phase 1 below reuses that module; the
+difference is that silver now accumulates aarch64 and darwin paths too, so
+the "x86_64-only cache" limitation in that draft no longer applies.
+
+* TL;DR — shortest path
+
+1. *Phase 0:* prove Harmonia runs on silver and that silver can ssh-ng into
+   mist, misfit and dgx-spark; one tiny =hello= per builder. Stop if Lix on
+   mist does not speak the Nix 2.34 remote protocol.
+2. *Phase 1:* Harmonia on silver with a =silver-1= signing key and roots.
+3. *Phase 2:* add =http://silver.lan:5000= + key to
+   =modules/nix-custom-conf.nix= (guarded; LAN hosts only).
+4. *Phase 3.1–3.4:* builder key, =nix.buildMachines= on silver, and
+   =just cache-build= from the Mac: evaluate there, copy the drv closure to
+   silver, let silver realise it with =--max-jobs 0=. Outputs land on silver
+   and the macs can substitute them.
+5. *Phase 3.5:* only after step 4 works, move evaluation to silver with a
+   systemd timer (needs a repo checkout + the private input on silver).
+6. *Phase 4–5:* keep colmena =buildOnTarget = true=, run =just cache-build=
+   after deploys, and let Harmonia GC/roots handle retention.
+
+Do not enable the timer or change colmena's build location in the same change
+as Phase 1; those are the two places that turn a cache problem into a deploy
+outage.
+
+* Non-goals
+
+- Replacing cache.nixos.org or the public caches. Silver is an *additional*
+  substituter, priority below the public ones, useful for our own drvs and
+  pinned-nixpkgs rebuilds.
+- A web UI, job history, or PR gating. That is Hydra; see "Alternatives".
+- Cross-architecture *emulation*. Every drv is built on a native builder.
+- Serving the cache outside the LAN/tailnet. Harmonia has no auth and can
+  serve any path in silver's store, including the private flake input source.
+
+* Measured facts (2026-10-23, before any change)
+
+| Host       | Arch            | Nix                    | SSH user | Notes |
+|------------+-----------------+------------------------+----------+-------|
+| silver     | x86_64-linux    | Nix 2.34.9             | yuanw    | 8 cores, 15G RAM, 423G free on =/=, 11G used; no tailscale; LAN only |
+| mist       | aarch64-darwin  | Lix 2.95.2             | yuan     | this Mac; =nix.enable = false= (Lix installer owns the daemon); 10 cores |
+| misfit     | x86_64-linux    | Nix 2.34.9             | yuan     | 32 cores, 29G RAM, LAN, always on |
+| dgx-spark  | aarch64-linux   | Nix 2.34.9             | yuanw    | 20 cores, 121G RAM but 81G already resident in inference; keep =maxJobs = 1= |
+
+Facts that shape the plan:
+
+- silver is reachable as =silver.lan= (router DNS) and =silver.local= (mDNS);
+  the draft's note about a duplicate =silver= on the LAN did not reproduce
+  today, but use =silver.lan= in config.
+- silver has *no* SSH access to any builder today: =ssh yuanw@silver.lan
+  'ssh yuanw@dgx-spark'= => Permission denied. Phase 3 creates that key.
+- silver has no tailscale, so =http://silver.lan:5000= is a LAN-only
+  substituter. A traveling host (asche, sometimes mist) must either be
+  excluded or pay =connect-timeout= on every miss.
+- The private flake input is =git+https://github.com/yuanw/nix-home-private=
+  and is currently fetched with the deploying user's credentials, or copied
+  as a store path by colmena. A silver-side evaluator does not have those
+  credentials yet (Phase 3.5).
+- Existing cache settings live in =modules/nix-custom-conf.nix= and are
+  =mkForce='d — but that module reaches only the hosts importing
+  =myModules.common= (=yuan-mac=, =mist=, =asche=, =wk01174=). =misfit='s daemon
+  has =cache.nixos.org= only and =dgx-spark= carries its own CUDA list, so
+  Phase 2 is *not* one file. See "Finding 3" in
+  [[file:harmonia-phase0-results.org][the Phase 0 results]].
+- =nix.gc= is weekly on silver (=hosts/silver/configuration.nix:85=) and
+  dgx-spark, and *absent* on misfit. Do not run it alongside Harmonia's GC.
+- =nixpkgs#harmonia= is 3.3.0 at this pin; its NixOS module has
+  =cache.signKeyPaths=, =cache.settings=, and =gc.gcRootsDirs=. No push API.
+
+* Architecture
+
+#+begin_example
+                 trigger (just / timer / CI)
+                              |
+                              v
+  mist (aarch64-darwin) <- silver: eval + Nix scheduler + store <- Harmonia :5000
+  misfit (x86_64-linux) <-   |         copies outputs back        |
+  dgx-spark (aarch64-linux) <-          and roots them           v
+                                                          consumers:
+                                                          silver, misfit,
+                                                          dgx-spark, mist, ...
+#+end_example
+
+Two possible triggers, same execution path:
+
+- *Variant A — Mac-triggered (recommended first).* The Mac evaluates the
+  flake (it has the private input), copies the derivation closure to silver,
+  and silver realises it with =--max-jobs 0=, dispatching to the builders.
+  No new credentials on silver; works today.
+- *Variant B — silver-triggered (autonomous, Phase 3.5).* A systemd timer on
+  silver does the fetch/build itself. Requires the private input and a repo
+  checkout on silver.
+
+Both end with the same thing: outputs in silver's store, a gcroot per closure,
+and Harmonia signing narinfo for them.
+
+* Decisions to make before Phase 1
+
+| # | Decision | Recommendation |
+|---+----------+----------------|
+| D1 | Trigger | Variant A first (=just cache-build=); add the timer only after it works |
+| D2 | Reachability | LAN only for now; if mist/asche travel a lot, put tailscale on silver and use the tailnet name in Phase 2 |
+| D3 | Retention | 30d / =ensureFree = "50G"=; silver has 423G free and the store is 11G today |
+| D4 | Cache key name | =silver-1=; bake it into the secret and never rename (clients pin it) |
+| D5 | Which closures | =packages.silver=, =packages.misfit=, =packages.dgx-spark=, =packages.mist=; add =asche= / =ci= later |
+| D6 | x86_64 fallback | =max-jobs = 0= on silver at first (misfit only); set 2 if misfit downtime hurts |
+
+* Phase 0 — prove the pieces (no config changes, ~30 min)
+
+/DONE 2026-10-23: 0.1–0.3 and 0.5 passed, 0.4 skipped (Variant A). Actual output
+and the three findings that move later phases are in
+[[file:harmonia-phase0-results.org][harmonia-phase0-results.org]]. The section stays as the re-run recipe./
+
+Do these before writing any module. Each is a go/no-go for the phase that
+depends on it.
+
+** 0.1 Harmonia builds and runs on silver
+
+#+begin_src bash
+ssh yuanw@silver.lan 'nix build --no-link --print-out-paths nixpkgs#harmonia'
+# expected: a /nix/store/...-harmonia-3.3.0 path, no local compile of the Rust
+# tree (it is on cache.nixos.org; if it is not, budget a Rust build).
+#+end_src
+
+** 0.2 silver can reach each builder's daemon
+
+Generate a throwaway key on silver, authorize it on the three builders (or use
+root's existing key for the test only), then:
+
+#+begin_src bash
+ssh -t yuanw@silver.lan
+ssh-keygen -t ed25519 -N '' -f /tmp/probe-key
+# add /tmp/probe-key.pub to the builder users (temporarily or in Phase 3)
+export NIX_SSHOPTS="-i /tmp/probe-key -o StrictHostKeyChecking=accept-new"
+nix store ping --store ssh-ng://yuan@mist
+nix store ping --store ssh-ng://yuan@misfit
+nix store ping --store ssh-ng://yuanw@dgx-spark
+# expected: "Store URL: ssh-ng://..." and "Trusted: 1" (or at least a
+# successful connection; trusted status comes from nix.settings.trusted-users)
+#+end_src
+
+** 0.3 One tiny cross-system build per builder
+
+This tests the remote store protocol, not the =builders= mechanism yet:
+
+#+begin_src bash
+# on silver
+nix build --no-link --print-out-paths --store ssh-ng://yuan@mist \
+  'nixpkgs#legacyPackages.aarch64-darwin.hello'
+nix build --no-link --print-out-paths --store ssh-ng://yuan@misfit \
+  'nixpkgs#legacyPackages.x86_64-linux.hello'
+nix build --no-link --print-out-paths --store ssh-ng://yuanw@dgx-spark \
+  'nixpkgs#legacyPackages.aarch64-linux.hello'
+# expected: /nix/store/...-hello, built on the remote host and copied back
+# (the exact path may already be substitutable from cache.nixos.org; check the
+#  log for "building" vs "copying" if you need proof of a remote build)
+#+end_src
+
+If Lix (mist) refuses the Nix 2.34 ssh-ng client, stop here: use =protocol =
+"ssh"= for mist in Phase 3, or drop mist as a builder and keep using the Mac's
+own Lix for darwin builds.
+
+** 0.4 Private input on silver (only needed for Variant B)
+
+The real test is Phase 3.5. For Variant A this is not needed. If choosing
+Variant B, check that silver can evaluate the locked private input:
+
+#+begin_src bash
+ssh yuanw@silver.lan 'nix flake metadata /var/lib/nix-home \
+  --override-input nix-home-private path:/var/lib/nix-home-private'
+#+end_src
+
+** 0.5 Disk estimate
+
+#+begin_src bash
+ssh yuanw@silver.lan 'df -h /; du -sh /nix/store'
+# 423G free. A full four-host generation is single-digit GB per arch today;
+# 30d retention + =ensureFree = "50G"= leaves plenty of headroom.
+#+end_src
+
+Exit criteria: 0.1–0.3 pass (0.4 only if choosing Variant B). Record the
+actual output of 0.2/0.3 in the PR; they are the assumptions the rest of the
+plan rests on.
+
+* Phase 1 — Harmonia on silver (~1 hour, one deploy)
+
+/IMPLEMENTED 2026-10-24: module, secret and silver config are committed,
+silver is deployed and 1.5 passed end to end — the cache serves and signs with
+=silver-1=, and a consumer copies from it with =require-sigs= satisfied.  (The cleartext
+was =shred='d on 2026-10-24.  If the password-manager copy is gone, the only
+way back is a new key: regenerate, =agenix -e= again, redeploy, and rotate the
+=silver-1= entry on every consumer — the public half in use is above.)/
+
+** 1.1 Signing key (operator only)
+
+This Mac runs Lix, which has =nix key generate-secret= but *not*
+=nix key convert-secret-to-pub= (verified: "'convert-secret-to-pub' is not a
+command"). The classic CLI does both halves at once, needs no
+=experimental-features=, and writes the public half in exactly the
+=silver-1:<base64>= form consumers need:
+
+#+begin_src bash
+umask 077
+nix-store --generate-binary-cache-key silver-1 ~/silver-1.secret ~/silver-1.pub
+cat ~/silver-1.pub            # silver-1:<base64> = the consumers' trusted-public-keys entry
+#+end_src
+
+Back =~/silver-1.secret= up to the password manager *before* the delete — the
+first draft of this section =shred='d it in the same block as the backup step.
+If the secret is lost, every consumer's =trusted-public-keys= entry has to be
+rotated.
+
+#+begin_src bash
+shred -u ~/silver-1.secret ~/silver-1.pub
+#+end_src
+
+=D4=: the name is =silver-1=, it is baked into the =.narinfo= signatures and
+into the =.age= file, and renaming it means regenerating the secret and editing
+every consumer. Do it once, correctly.
+
+Generated 2026-10-23 and encrypted to =silver='s host key (=secrets/harmonia-
+sign-key.age=, recipient tag verified against the key in =secrets/secrets.nix=):
+
+#+begin_example
+silver-1:bdoSIDAWVU3lhL+8T7TrWXcglLi6oGFlFlZAR0iFVQg=
+#+end_example
+
+The public half is written down here because it is not secret and is not
+recoverable once =~/silver-1.pub= is =shred='d — Lix has no
+=convert-secret-to-pub=. It is the value Phase 2.1 puts in
+=trusted-public-keys=; if the secret is ever regenerated, this line and every
+consumer change with it.
+
+** 1.2 agenix secret
+
+Recipients always come from =secrets/secrets.nix= (=agenix='s =keys= evaluates
+that file), so the rule must exist *before* =agenix -e= — a brand-new file gets
+no recipients otherwise. =silver= is already defined there and its value equals
+=/etc/ssh/ssh_host_ed25519_key.pub= on the box (verified in Phase 0), and
+agenix is already active on silver (=/run/agenix.d/4/wifi=), so this is
+silver's first secret but not its first decrypt.
+
+In =secrets/secrets.nix=:
+
+#+begin_src nix
+"harmonia-sign-key.age".publicKeys = [ silver ];
+"nix-builder-key.age".publicKeys = [ silver ];   # Phase 3
+#+end_src
+
+Do *not* copy that file's =users ++ systems= habit onto these two. The other
+entries list personal user keys because a person has to read them; the cache
+signing key is the cache's identity (Phase 5) and only the publishing host
+needs it. Mutual mode is =[ silver misfit ]= and then =agenix -r=.
+
+#+begin_src bash
+# agenix cds into the rules dir, so the FILE is relative to secrets/ and
+# AGENIX_RULES must point at the rules file (this agenix no longer discovers
+# secrets.nix on its own).  Run from the repo root:
+AGENIX_RULES=secrets/secrets.nix agenix -e harmonia-sign-key.age < ~/silver-1.secret   # non-tty stdin becomes the cleartext
+git add secrets/harmonia-sign-key.age secrets/secrets.nix   # git add: the flake is a git tree, untracked files are invisible to eval
+#+end_src
+
+No =mode=, no =owner=: agenix already installs secrets =root:root 0400=, which
+is what the unit wants — it hands the file to systemd with =LoadCredential=
+(root reads it) and runs =User = harmonia= + =DynamicUser = true=, so pinning
+ownership to a *static* service user would make it unreadable. The ="0400"=
+vs ="0600"= disagreement with [[file:harmonia-silver.org]] is moot; both are the
+default.
+
+** 1.3 Module =modules/services/cache/harmonia.nix=
+
+Option names, types and defaults below were read out of
+=nixos/modules/services/networking/harmonia.nix= at this repo's pin
+(=494ce7fd=), not off the harmonia README. Two things from the first draft are
+gone: =age.secrets...mode= (=agenix='s default already matches) and
+=gc.gcRootsDirs= — that option is for roots living *outside* the standard
+gcroots directory, and Phase 3.4 roots at =/nix/var/nix/gcroots/cache/$t=,
+which is inside it.
+
+#+begin_src nix
+{ config, lib, ... }:
+let
+  cfg = config.services.harmonia-cache;
+  port = 5000;
+in
+{
+  options.services.harmonia-cache = {
+    enable = lib.mkEnableOption "LAN Nix binary cache served from this host's /nix/store";
+  };
+
+  config = lib.mkIf cfg.enable {
+    # root:root 0400 is agenix's default and what LoadCredential wants; the
+    # service is DynamicUser, so never pin owner/group to a static user.
+    age.secrets.harmonia-sign-key.file = ../../../secrets/harmonia-sign-key.age;
+
+    services.harmonia = {
+      cache = {
+        enable = true;
+        signKeyPaths = [ config.age.secrets.harmonia-sign-key.path ];
+        settings = {
+          bind = "[::]:${toString port}";
+          # Below cache.nixos.org's 40 so the LAN wins when both have the path.
+          priority = 10;
+        };
+      };
+      # Replaces nix.gc on this host; nixpkgs warns if both are automatic.
+      gc = {
+        enable = true;
+        automatic = true;
+        dates = [ "weekly" ];
+        deleteOlderThan = "30d";
+        ensureFree = "50G";
+        keepRecent = "1d";
+        # No gcRootsDirs: Phase 3.4's roots go under /nix/var/nix/gcroots/cache,
+        # which the standard gcroots scan already covers.
+      };
+    };
+
+    networking.firewall.allowedTCPPorts = [ port ];
+
+    # The cache has nothing to serve that GC already collected.
+    nix.settings = {
+      keep-derivations = true;
+      keep-outputs = true;
+    };
+  };
+}
+#+end_src
+
+Verified in that source, worth knowing before the first deploy: the flat
+=services.harmonia.enable= is only a renamed alias of =cache.enable=;
+=package= stays top level; =bind = "[::]:5000"=, =workers = 4= and
+=priority = 50= are =mkDefault=s, so the settings above win; the socket unit's
+=ListenStream= *is* =settings.bind=, so the firewall port and =bind= must move
+together; =gc.dates= accepts a string or a list of strings (default
+="03:15"=); and running =gc.automatic= next to =nix.gc.automatic= is a declared
+warning, not an error — which is why 1.4 deletes the =nix.gc= block.
+
+** 1.4 Enable on silver
+
+- =hosts/silver/default.nix=: add =../../modules/services/cache/harmonia.nix=
+  to =imports= (next to =../../modules/services/monitoring/pcp.nix=, line 9).
+- =hosts/silver/configuration.nix=: delete the =nix.gc= block (lines 85–89),
+  add =services.harmonia-cache.enable = true;=.
+- Do *not* enable =services.harmonia.daemon=; only the cache is needed.
+- Nothing to declare for the roots directory: =nix-store --realise --add-root
+  <dir>/<name> --indirect= creates =<dir>= itself (verified on silver), and
+  silver's firewall is on by default, so =allowedTCPPorts= is the whole story.
+
+** 1.5 Deploy and verify
+
+#+begin_src bash
+just remote-apply silver        # colmena apply --on silver from this Mac
+ssh yuanw@silver.lan 'systemctl status harmonia.socket harmonia.service --no-pager'
+ssh yuanw@silver.lan 'ss -tlnp | grep 5000'
+ssh yuanw@silver.lan 'curl -s http://127.0.0.1:5000/nix-cache-info'
+# → StoreDir: /nix/store, WantMassQuery: 1, Priority: 10
+
+# silver's daemon config has experimental-features empty (Phase 0), so every
+# nix-command on that box needs NIX_CONFIG -- plain `nix path-info` errors out.
+# The narinfo route takes the 32-char HASH PART only: <hash>-<name>.narinfo is
+# rejected by StorePathHash::decode_digest and comes back as a bare
+# `Not Found` (a real database miss says `missed hash` instead -- 2026-10-24).
+sys=$(ssh yuanw@silver.lan "NIX_CONFIG='extra-experimental-features = nix-command' nix path-info /run/current-system")
+ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/${sys##/*/}.narinfo" | head -1
+ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/$(basename ${sys##/*/} | cut -d- -f1).narinfo" |
+  grep -E '^(URL|NarHash|Sig)'
+# → Sig: silver-1:<...>
+ssh yuanw@silver.lan 'journalctl -u harmonia -u harmonia.socket -b --no-pager | tail -30'
+#+end_src
+
+Signatures are only verified when a path is *copied*, so check the key that
+way — `nix path-info --store http://…` returns the path with a bogus
+=trusted-public-keys= too and proves nothing:
+
+#+begin_src bash
+# from a consumer; the closure must be one only silver has, or cache.nixos.org
+# signs it and the test passes without silver's key ever being used.
+nix copy --from http://silver.lan:5000 <path> \
+  --option trusted-public-keys "silver-1:<base64>"
+#+end_src
+
+Phase 1 ran on 2026-10-24: =harmonia.socket= listening on =[::]:5000= with the
+service started on demand (=active (listening)=, =inactive (dead)= until the
+first request), =/version= =harmonia-cache 3.3.0=, =/health= =OK=,
+=nix-cache-info= =StoreDir: /nix/store= / =WantMassQuery: 1= /
+=Priority: 10=, the =/run/agenix/harmonia-sign-key= credential mounted
+(root:root 0400) with no journal errors, and the running system closure's
+narinfo signed =Sig: silver-1:…= only (a substituted path carries
+=cache.nixos.org-1= alongside it). =nix copy= from mist pulled hello's whole
+closure =from 'http://silver.lan:5000'= with just the =silver-1= key trusted,
+and the same copy against a closure signed only by =silver-1= failed with
+=error: cannot add path '…' because it lacks a signature by a trusted key=
+under a wrong key — =require-sigs= is live.
+
+=harmonia-gc.timer= is active (next run weekly); =nix.gc.automatic= is off.
+
+Phase 1 is done when the socket is listening, =nix-cache-info= reports
+=Priority: 10=, a =.narinfo= carries =Sig: silver-1:...= and
+=systemctl list-units 'harmonia*'= shows no failed unit. The DynamicUser
+sandbox is tight (=PrivateNetwork=, =IPAddressDeny = any=,
+=CapabilityBoundingSet = ""=), so a failure shows up in the journal, not in the
+generation — read the journal before touching =bind=. If the secret fails to
+decrypt, look at =/run/agenix.d/*/harmonia-sign-key= before blaming harmonia.
+
+* Phase 2 — make consumers use it (~30 min, no builds)
+
+/IMPLEMENTED 2026-10-25: =modules/services/cache/consumer.nix= (new) holds the
+URL and the key, =modules/nix-custom-conf.nix= imports it, and
+=hosts/{misfit,dgx-spark}/default.nix= import it directly. =asche= is switched
+off. 2.2 passed from mist before any deploy. Not yet deployed to any host —
+see "2.3 Deploy"./
+
+** 2.1 Add the substituter and key
+
+=modules/nix-custom-conf.nix= is common to NixOS and nix-darwin. Put silver in
+the =let= lists, not only in =nix.settings=, because those lists are also
+rendered into =/etc/nix/nix.custom.conf= for the Lix/Determinate hosts (mist):
+
+/Only for the =myModules.common= hosts./ =misfit= and =dgx-spark= never import
+that module (Phase 0, finding 3), so the same two entries have to be added in
+their host configs too — =misfit= has no =nix.settings= block yet, =dgx-spark=
+has one at =hosts/dgx-spark/configuration.nix:82= — or both need to import one
+small cache-consumer module. =require-sigs= rejects a substituter whose key is
+missing, so keep the URL and the key in the same condition either way.
+
+#+begin_src nix
+let
+  # silver has no tailscale; LAN only. Keep traveling hosts out until/unless
+  # silver joins the tailnet (D2).
+  useSilver = config.my.hostname != "asche";
+  silverUrl = "http://silver.lan:5000";
+  silverKey = "silver-1:<base64>";
+  cacheSubstituters = lib.optionals useSilver [ silverUrl ] ++ [
+    # ... the existing list, unchanged ...
+  ];
+  trustedPublicKeys = lib.optionals useSilver [ silverKey ] ++ [
+    # ... the existing list, unchanged ...
+  ];
+  trustedSubstituters = cacheSubstituters;
+in
+{
+  nix.settings = {
+    substituters = lib.mkForce cacheSubstituters;
+    trusted-substituters = lib.mkForce trustedSubstituters;
+    trusted-public-keys = lib.mkForce trustedPublicKeys;
+    # A powered-off silver must not stall every missing path for a minute.
+    connect-timeout = 5;
+  };
+}
+#+end_src
+
+The existing =environment.etc."nix/nix.custom.conf"= block already renders
+=trusted-users=, =substituters=, =trusted-substituters= and
+=trusted-public-keys= from these lets, so mist gets silver automatically.
+
+What the implementation looks like, and the three places it differs from the
+snippet above:
+
+1. The two constants are options, not a second =let=:
+   =my.silver-cache.{enable,url,publicKey}= in
+   =modules/services/cache/consumer.nix=, which also carries the
+   =connect-timeout= and the =substituters=/=trusted-public-keys= additions.
+   =nix-custom-conf.nix= does =imports = [ ./services/cache/consumer.nix ]=
+   and reads the option values into its =mkForce='d lists — a =mkForce= would
+   silently drop the module's own additions, so on the =myModules.common= hosts
+   that file, not the module's =config=, is what puts silver in the list.
+   One source for the pair either way, which is what =require-sigs= cares
+   about.
+2. Silver is *not* a =trusted-substituter= (=trustedSubstituters =
+   cacheSubstituters= in the snippet would have made it one). Every narinfo
+   harmonia emits is signed with =silver-1= and that key is in
+   =trusted-public-keys=, so =require-sigs= is satisfied without it; listing
+   silver as trusted would waive signature checking for an unauthenticated
+   HTTP endpoint any LAN host can impersonate. 2.2 confirms the stricter form
+   copies.
+3. =connect-timeout = 5= is also written into =nix.custom.conf=. On mist and
+   =ci= =nix.enable = false=, so =nix.settings= reaches nothing there and that
+   file is the only thing their daemon reads.
+
+=asche= sets =my.silver-cache.enable = false;= in =hosts/asche/default.nix=
+(D2: it travels and silver has no tailnet address). =mist= keeps it per the
+plan; if it starts paying the timeout on the road, the same one-liner applies
+there. Silver itself imports neither — it does not need to fetch from itself.
+
+Evaluated values (=nix eval .#nixosConfigurations.<host>.config.nix.settings=,
+2026-10-25): =misfit= =substituters = [ http://silver.lan:5000
+https://cache.nixos.org/ ]= + the =silver-1= key; =dgx-spark= same, prepended
+to its CUDA list; both with =trusted-substituters = [ ]= and
+=connect-timeout = 5=; =asche= has neither the URL nor the key.
+
+** 2.2 Verify substitution
+
+Pick a path that is on silver but not on the consumer (build one with a
+different output on silver first, e.g. the Phase 0 probe), then:
+
+#+begin_src bash
+nix path-info --store http://silver.lan:5000 /nix/store/<hash>-<name>
+# from the consumer
+nix build --no-link --print-out-paths .#packages.<target> -L 2>&1 |
+  grep -m3 "copying path .*silver.lan"
+#+end_src
+
+Also check the priority: a fresh closure should prefer silver for paths both
+have, and fall through to cache.nixos.org for everything else.
+
+/ran 2026-10-25 from mist, before deploying anything,/ with the URL and key
+taken from =.my.silver-cache= and two =phase2-probe= outputs built on silver
+(the Phase 0 recipe, =x86_64-linux=, nothing else has them):
+
+#+begin_example
+copying path '/nix/store/zizxz7r4rkxnbp9wlzngfydan1a3py9s-phase2-probe' from 'http://silver.lan:5000'...
+copying path '/nix/store/2y3aa08j03l9l9hw9prlbhqwl5b3a6aw-phase2-probe-2' from 'http://silver.lan:5000'...
+error: cannot add path '/nix/store/2y3aa08j03l9l9hw9prlbhqwl5b3a6aw-phase2-probe-2' because it lacks a signature by a trusted key
+#+end_example
+
+The first line is the good key, the last is the same copy under
+=silver-1:AAAA...== — =require-sigs= rejects it, so the key in the config is
+the one doing the work. Priority went the expected way on a real closure too:
+copying =harmonia-3.3.0='s closure from the cache pulled =glibc=, =gcc=,
+=libidn2= and the rest =from 'http://silver.lan:5000'= rather than
+=cache.nixos.org=, which all of them are also on. Probes were =nix-store
+--delete='d from mist; the copies on silver have no roots and go with the next
+GC (see the =keep-derivations= caveat in "GC and roots").
+
+** 2.3 Deploy
+
+Nothing is live until these run; the eval above only proves the generated
+config.
+
+#+begin_src bash
+just remote-apply misfit
+just remote-apply dgx-spark
+# mist / ci / wk01174 are darwin, not in the colmena hive:
+sudo darwin-rebuild switch --flake .#mist
+#+end_src
+
+Then re-run 2.2 *without* =--option trusted-public-keys= — after the deploy the
+key is in the daemon's own config, so a plain =nix copy --from
+http://silver.lan:5000 <silver-only path>= proves the host is configured, not
+just the cache.
+
+* Phase 3 — builders and the Nix job queue (~2 hours, first cross builds)
+
+/IMPLEMENTED 2026-10-24: builder key, =nix.buildMachines= on silver, and
+=just cache-build= are in. 3.2–3.4 passed for silver, misfit and mist — closures
+built on the builders, rooted under =/nix/var/nix/gcroots/cache=, served signed
+with =silver-1=, and substituted by mist over =http://silver.lan:5000=. The
+aarch64-linux closure is not warmed: the Spark's CUDA stack compiles, so that
+target is opt-in (see below). Four findings changed the plan — hive vs flake
+drv, =builders-use-substitutes=, what =maxJobs= really bounds, and the gcroot
+directory — in [[file:harmonia-phase3-results.org][harmonia-phase3-results.org]], which also covers the Cachix
+push and the two 404/false-alarm traps./
+
+** 3.1 Builder SSH key
+
+Generate on the Mac (operator), encrypt to silver, authorize on builders:
+
+#+begin_src bash
+ssh-keygen -t ed25519 -N '' -C 'silver-build-hub' -f ~/nix-builder-key
+agenix -e secrets/nix-builder-key.age < ~/nix-builder-key
+# public key: ~/nix-builder-key.pub
+#+end_src
+
+On silver:
+
+#+begin_src nix
+age.secrets.nix-builder-key = {
+  file = ../../../secrets/nix-builder-key.age;
+  mode = "0400";
+};
+#+end_src
+
+Authorize the public key for the SSH user on each builder:
+
+- =hosts/mist.nix=: =users.users.yuan.openssh.authorizedKeys.keys=.
+- =hosts/misfit/configuration.nix=: the existing =users.users.yuan= block.
+- =hosts/dgx-spark/configuration.nix=: the existing =users.users.yuanw= block.
+
+All three already have the right user in =nix.settings.trusted-users=
+(=yuan= on mist/misfit, =yuanw= on dgx-spark); verify before relying on it.
+
+** 3.2 Pin builder host keys
+
+Reuse the host keys already in =secrets/secrets.nix= (they are the SSH host
+keys used by agenix). Add to silver:
+
+#+begin_src nix
+programs.ssh.knownHosts = [
+  { hostNames = [ "mist" ];      publicKey = "ssh-ed25519 AAAA... mist-host"; }
+  { hostNames = [ "misfit" ];    publicKey = "ssh-ed25519 AAAA... misfit-host"; }
+  { hostNames = [ "dgx-spark" ]; publicKey = "ssh-ed25519 AAAA... spark-host"; }
+];
+#+end_src
+
+or put the same string in each =publicHostKey= below (ssh-ng only). Pinning is
+what stops a stale DHCP lease from becoming a builder.
+
+** 3.3 silver as the build client
+
+=hosts/silver/configuration.nix= (or a =modules/services/cache/build-hub.nix=
+if you want the trigger there too):
+
+#+begin_src nix
+nix.distributedBuilds = true;
+nix.settings.max-jobs = 0;            # D6: no local x86_64 compile at first
+nix.settings.builders-use-substitutes = false;  # silver sends the inputs
+
+nix.buildMachines = [
+  {
+    hostName = "mist";
+    system = "aarch64-darwin";
+    protocol = "ssh-ng";
+    sshUser = "yuan";
+    sshKey = config.age.secrets.nix-builder-key.path;
+    maxJobs = 6;
+    speedFactor = 2;
+    publicHostKey = "ssh-ed25519 AAAA... mist-host";
+  }
+  {
+    hostName = "misfit";
+    system = "x86_64-linux";
+    protocol = "ssh-ng";
+    sshUser = "yuan";
+    sshKey = config.age.secrets.nix-builder-key.path;
+    maxJobs = 8;
+    speedFactor = 4;
+    publicHostKey = "ssh-ed25519 AAAA... misfit-host";
+  }
+  {
+    hostName = "dgx-spark";
+    system = "aarch64-linux";
+    protocol = "ssh-ng";
+    sshUser = "yuanw";
+    sshKey = config.age.secrets.nix-builder-key.path;
+    maxJobs = 1;              # inference box; do not let a build eat the GPU box
+    speedFactor = 1;
+    publicHostKey = "ssh-ed25519 AAAA... spark-host";
+  }
+];
+#+end_src
+
+Deploy silver, then confirm the generated file:
+
+#+begin_src bash
+ssh yuanw@silver.lan 'cat /etc/nix/machines'
+# one line per builder; ssh-ng://user@host system /run/agenix/... 6 2 - - key
+ssh yuanw@silver.lan 'nix config show | grep -E "^(builders|max-jobs|cores)"'
+#+end_src
+
+** 3.4 Variant A: trigger from the Mac
+
+Add to =justfile=:
+
+#+begin_src make
+# Build every host closure on silver's builders and root it there.
+# The Mac evaluates (it has the private flake input); silver only schedules.
+cache-targets := "silver misfit dgx-spark mist"
+
+cache-build:
+    @set -e; \
+    for t in {{cache-targets}}; do \
+      echo "== $t"; \
+      drv=$({{nix}} eval --raw ".#packages.$t.drvPath"); \
+      {{nix}} copy --derivation --to ssh-ng://yuanw@silver.lan "$$drv"; \
+      ssh yuanw@silver.lan "nix-store --realise '$$drv' \
+        --max-jobs 0 --keep-going \
+        --add-root /nix/var/nix/gcroots/cache/$t --indirect"; \
+    done
+#+end_src
+
+Why =nix-store --realise= rather than =nix build=: we already measured that
+=nix build <drv)= on the Spark exits 0 without building when handed a .drv
+path; =nix-store -r= is the reliable remote-store form.
+
+Run it once with one target first:
+
+#+begin_src bash
+just cache-build   # four targets; start with packages.misfit if you want a
+                   # smaller first run
+#+end_src
+
+The loop is deliberately serial: each target closure is one system, so it
+only occupies one builder. Once the serial version is proven, a
+=--parallel= mode that backgrounds the four =nix-store --realise= calls and
+waits is the way to keep all three builders busy; do not start there.
+
+Expected: silver dispatches each missing drv to the matching builder, copies
+outputs back, and leaves a root per target:
+
+#+begin_src bash
+ssh yuanw@silver.lan 'ls -l /nix/var/nix/gcroots/cache/'
+ssh yuanw@silver.lan 'nix-store --query --roots /nix/store/<system-path>'
+#+end_src
+
+** 3.5 Variant B: make silver self-triggering (optional, after A works)
+
+Prerequisites:
+
+1. A checkout of the public repo on silver:
+   =git clone https://github.com/yuanw/nix-home /var/lib/nix-home=.
+2. The private input available at evaluation time. Pick one:
+   - *Preferred:* a read-only deploy key for =nix-home-private= on silver,
+     checked out at =/var/lib/nix-home-private=, and pass
+     =--override-input nix-home-private path:/var/lib/nix-home-private=.
+     This is explicit, testable, and needs no daemon credential magic.
+   - Or =nix flake archive --to ssh-ng://silver= from the Mac after each lock
+     update; the store already contains the private source, but verify that
+     evaluation does not refetch.
+   - Not recommended: a GitHub token in the daemon's config. The input is
+     =git+https=, and the current comment in =flake.nix= records why the
+     client-side credential helper was chosen.
+
+Then a systemd service + timer on silver (same targets and roots as 3.4):
+
+#+begin_src nix
+systemd.services.nix-cache-build = {
+  description = "Build nix-home closures on the LAN builders";
+  # serialise with deploys; the service itself is oneshot
+  serviceConfig = {
+    Type = "oneshot";
+    Nice = 10;
+    ExecStart = "/etc/nix-cache-build.sh";
+  };
+};
+
+systemd.timers.nix-cache-build = {
+  wantedBy = [ "timers.target" ];
+  timerConfig = {
+    OnCalendar = "hourly";     # or "*-*-* 04:15"
+    Persistent = true;
+    RandomizedDelaySec = "10min";
+  };
+};
+#+end_src
+
+The script is 3.4's loop plus:
+
+#+begin_src bash
+git -C /var/lib/nix-home fetch --prune origin
+git -C /var/lib/nix-home reset --hard origin/main
+cd /var/lib/nix-home
+# same nix-store --realise loop, with --override-input on the private path
+#+end_src
+
+Do not run the timer until Variant A has produced a successful first cache
+generation; debugging eval + builders + GC at once is how this becomes a
+weekend.
+
+** 3.6 Test the cross-arch queue
+
+After the first =just cache-build=:
+
+#+begin_src bash
+# the newest closure for each arch is in silver's store
+ssh yuanw@silver.lan 'ls /nix/var/nix/gcroots/cache'
+# the same path is served by Harmonia (the root is a symlink to the closure)
+h=$(ssh yuanw@silver.lan 'readlink /nix/var/nix/gcroots/cache/mist | sed "s|.*/||"')
+curl -s "http://silver.lan:5000/$h.narinfo" | grep -E '^(Path|Sig)'
+# a consumer substitutes rather than builds
+nix build --no-link .#packages.mist -L 2>&1 | grep -m1 "silver.lan"
+#+end_src
+
+* Phase 4 — make deploys use the cache (~30 min)
+
+Nothing has to change in colmena yet:
+
+- Hosts have =buildOnTarget = true=, so they still build their own closure,
+  but silver is now a substituter and holds the same drv hashes. The target
+  fetches instead of compiling. This is the low-risk end state.
+- After a deploy, run =just cache-build= to warm the cache for the other
+  hosts and the next rebuild. A failed target only fails that target
+  (=--keep-going=) and does not block the deploy.
+- If you later want silver to be the deploy builder too, run colmena *on
+  silver* with =--no-build-on-target=; silver has the builders and the store.
+  That is a separate change; do not couple it to this one.
+
+Add two read-only recipes:
+
+#+begin_src make
+# what is rooted and how big is the store
+cache-status:
+    @ssh yuanw@silver.lan 'ls -lh /nix/var/nix/gcroots/cache; df -h /; du -sh /nix/store'
+
+# one host at a time (same loop as cache-build, parameterised)
+cache-build-one HOST:
+    @drv=$({{nix}} eval --raw ".#packages.{{HOST}}.drvPath"); \
+     {{nix}} copy --derivation --to ssh-ng://yuanw@silver.lan "$$drv"; \
+     ssh yuanw@silver.lan "nix-store --realise '$$drv' --max-jobs 0 --keep-going \
+       --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"
+#+end_src
+
+* Phase 5 — operations and failure modes
+
+** GC and roots
+
+- One root per host closure, replaced on every successful build.
+- Harmonia GC =ensureFree = "50G"= is the backstop; =keep-outputs= grows the
+  store between GCs.
+- =keep-derivations = true= (Phase 1.3) makes every =.drv= in silver's store a
+  GC root, and =keep-outputs= then keeps what those =.drv=s produce: nothing
+  that was ever built or copied there can be collected, =ensureFree=
+  included — the two =phase2-probe= outputs and their =.drv=s survive
+  =nix-store --delete= for exactly this reason. Fine while the trigger is
+  manual and the closure set is four hosts; if the store stops shrinking, this
+  is the first setting to drop.
+- If a target is dropped from =cache-targets=, delete its root; otherwise the
+  closure stays forever.
+- Never enable both =nix.gc.automatic= and =services.harmonia.gc.automatic=.
+
+** Availability
+
+- mist sleeps: darwin builds fail or wait. If that becomes annoying, either
+  add a second darwin builder (=ci=?) or accept that mist is opportunistic.
+- dgx-spark runs inference: =maxJobs = 1=, and do not schedule a CUDA source
+  build there while a model is resident. The 2026-10-23 CUDA 13.4 experiment
+  showed a build can also fail on ptxas; =--keep-going= keeps it from taking
+  the rest of the cache down.
+- If silver is off, consumers pay =connect-timeout = 5= per miss and fall
+  through. Do not list silver on hosts that are usually off-LAN (D2).
+
+** Security
+
+- Harmonia is unauthenticated and serves any path in silver's store,
+  including =nix-home-private= source and any pinned proprietary source.
+  LAN/tailnet only; never expose it on =*.yuanw.me=.
+- The cache signing key is the cache's identity. Losing it means rotating
+  =trusted-public-keys= everywhere; back it up.
+- The builder key can run builds on all three machines. Root-readable 0400,
+  one key, revoke by removing the authorized_keys entry.
+
+** Upgrades**
+
+- Harmonia comes from the repo's nixpkgs; bump it with the rest of the flake.
+  Its socket unit is derived from =settings.bind=, so the firewall port and
+  =bind= must stay in sync.
+- After changing =nix.buildMachines=, deploy silver and check =/etc/nix/machines=
+  before the next trigger.
+
+* Phase 6 — rollback
+
+1. Disable =services.harmonia-cache.enable= on silver (service, secret mount,
+   firewall port, and GC module all go away with =mkIf=).
+2. Remove the silver substituter/key from =modules/nix-custom-conf.nix=.
+3. Remove =nix.buildMachines= / =nix.distributedBuilds= from silver.
+4. The store paths and roots can stay; they are harmless. Remove
+   =/nix/var/nix/gcroots/cache/*= and let the next GC collect them.
+5. The =nix-builder-key.age= and =harmonia-sign-key.age= secrets can stay;
+   re-enabling later does not need new keys.
+
+* Alternatives considered
+
+** Hydra on silver
+
+Hydra gives a persistent queue, eval history, a UI, per-jobset gating, and its
+own binary cache; it also knows how to use =buildMachines=. It costs
+Postgres + the Hydra web service + a jobset definition, and it is a much
+larger attack surface on a LAN-only box. Adopt it only if you want PR checks
+or "which build failed and why" history. For four hosts and a home LAN, the
+Nix scheduler + a timer is enough.
+
+** attic instead of Harmonia
+
+atticd is a push cache: builders run =attic push= and atticd handles chunking,
+deduplication, and GC. That removes the need for silver to be a build client,
+but adds a client on every builder and a database/storage service on silver.
+Harmonia + Nix distributed builds is fewer moving parts *because* silver is
+already the collection point.
+
+** GitHub Actions self-hosted runner on silver
+
+Gives a queue and logs, but this repo is public: a self-hosted runner that
+executes fork PRs is a remote-code-execution hole. Only with a private repo or
+a workflow that never checks out untrusted refs.
+
+* File inventory (rough)
+
+| File | Change | Lines |
+|------+--------+-------|
+| =modules/services/cache/harmonia.nix= | new | ~55 |
+| =modules/services/cache/consumer.nix= | new (Phase 2: url, key, timeout) | ~50 |
+| =modules/services/cache/build-hub.nix= | new (optional, Variant B) | ~70 |
+| =secrets/secrets.nix= | two age recipients | 2 |
+| =secrets/harmonia-sign-key.age= | new secret | binary |
+| =secrets/nix-builder-key.age= | new secret | binary |
+| =hosts/silver/default.nix= | import module | 1 |
+| =hosts/silver/configuration.nix= | enable, buildMachines, GC | ~40 |
+| =modules/nix-custom-conf.nix= | substituter + key + timeout | ~12 |
+| =hosts/{mist.nix,misfit/configuration.nix,dgx-spark/configuration.nix}= | authorized key | 1 each |
+| =justfile= | cache-build / cache-status | ~20 |
+
+* Open questions
+
+1. Is mist stable enough to be the only darwin builder? If not, use =ci= as a
+   second darwin builder or accept opportunistic darwin caching.
+2. Does silver need to be reachable off-LAN? If yes, tailscale on silver is a
+   one-line service but changes the substituter URL and broadens who can read
+   the store.
+3. Do you want =asche= and =ci=/=WK01174= in the target list? =WK01174= pulls
+   Workiva source through the private input; keep it out of the cache hub
+   unless its paths are reproducible without the work netrc.
+4. Should the hub also build devShells and =.#packages.*=, or only system
+   closures? Start with closures; adding devShells is a second list in the
+   same loop.

@@ -6,6 +6,8 @@
     inputs.disko.nixosModules.disko
     inputs.agenix.nixosModules.default
     ../../modules/cockpit.nix
+    ../../modules/services/cache/harmonia.nix
+    ../../modules/services/cache/push.nix
     ../../modules/services/monitoring/pcp.nix
     ./disk-config.nix
     ./configuration.nix

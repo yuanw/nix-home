@@ -74,8 +74,14 @@
     "${pkgs.whisper-cpp}/bin"
   ];
   # The phone's own key (Termius).  Public, but it does unlock this box.
+  # The silver-build-hub key is here too so silver's nix daemon can log in as
+  # yuan and build aarch64-darwin closures (docs/harmonia-build-hub.org 3.1).
+  # nix-darwin lands these in /etc/ssh/nix_authorized_keys.d/yuan, which sshd
+  # reads through AuthorizedKeysCommand — *not* ~/.ssh/authorized_keys, which
+  # nix-darwin never writes on macOS.  Check that file after darwin-rebuild.
   users.users.${config.my.username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHxznM8gR74HduksHumFTEBN0JjMmKdEIS+dpEyAFoZ5"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeGertBlb+dywvvhHD4vpxH3D7B85q7jkzWSKatVIbJ silver-build-hub"
   ];
 
   home-manager.users.${config.my.username} = {

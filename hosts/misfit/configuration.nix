@@ -385,6 +385,10 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+      # silver's nix daemon logs in as yuan to build x86_64-linux closures here
+      # (docs/harmonia-build-hub.org 3.1); the private half is
+      # secrets/nix-builder-key.age on silver.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeGertBlb+dywvvhHD4vpxH3D7B85q7jkzWSKatVIbJ silver-build-hub"
     ];
     extraGroups = [
       "wheel"

@@ -111,6 +111,87 @@ colmena-spark-build:
 colmena-spark-apply:
     @just remote-apply dgx-spark
 
+# The closures the LAN binary cache keeps warm (docs/harmonia-build-hub.org D5).
+#
+# dgx-spark is left out of the default list: its closure builds CUDA from
+# source (libnvshmem is patched for CUDA 13.2 in cuda-fixes.nix, so its drv
+# matches no cache) and the box holds an 86 G inference model on 121 G of RAM.
+# Run that target by name when inference is idle:
+#     just cache-build-one dgx-spark
+cache-targets := "silver misfit mist"
+silver-ssh := "yuanw@silver.lan"
+
+# Build every host closure on silver's LAN builders and root it there.
+cache-build:
+    @set -e; \
+    for t in {{cache-targets}}; do \
+        echo "== $t"; \
+        just cache-build-one "$t"; \
+    done
+
+# Build one host closure on the builders and root it on silver.
+#
+# The Mac evaluates — it is the only box with the private flake input — and
+# copies just the .drv closure over; silver's daemon realises it with
+# --max-jobs 0, which is what forces every missing drv out to a builder
+# instead of compiling on silver.  `nix build <drv>` is not used because on
+# the Spark it exits 0 without building when handed a .drv path (measured
+# 2026-10-23); `nix-store -r` is the reliable remote-store form.
+#
+# The root lives under /nix/var/nix/gcroots/cache/<host>, which the standard
+# gcroots scan covers, so Harmonia's GC keeps it.  Drop a target from
+# cache-targets and its root has to be deleted by hand.
+#
+# Warm the closure the deploy actually installs.  `.#<host>` is the flake's own
+# nixosConfigurations toplevel, which is a *different* derivation from the one
+# `just remote-apply` puts on the box — the hive imports its own meta.nixpkgs /
+# nodeNixpkgs, so nothing in it shares a hash with the nixosConfigurations
+# build (measured: the two misfit toplevels are
+# nixos-system-misfit-26.11.20261017.9e91791 and nixos-system-misfit-26.11pre-
+# git).  A host substituting its own closure from silver only works if the drv
+# matches, so the hive path is tried first; darwin hosts have no hive node and
+# fall through to `.#<host>` = darwinConfigurations.<host>.system.
+cache-build-one HOST:
+    @set -e; \
+    drv=$({{nix}} eval --raw ".#colmenaHive.nodes.{{HOST}}.config.system.build.toplevel.drvPath" 2>/dev/null \
+        || {{nix}} eval --raw ".#{{HOST}}.drvPath"); \
+    echo "drv: $drv"; \
+    {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
+    for attempt in 1 2 3; do \
+        if ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
+            --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"; then \
+            break; \
+        fi; \
+        [ "$attempt" = 3 ] && exit 1; \
+        echo "attempt $attempt died mid-realise (silver is a laptop on wifi); retrying, valid paths are skipped"; \
+        sleep 5; \
+    done
+
+# Copy the CUDA / deep-learning paths silver holds for a target up to Cachix, so
+# the next nixpkgs bump substitutes instead of compiling on the Spark.  Do this
+# after `just cache-build-one dgx-spark` and before the box's weekly GC can
+# collect them; `just cache-status` shows what silver has.
+#
+# The filter is the upstream CUDA and torch stack on purpose: those are the paths
+# nobody else has a copy of (magma alone is 3492 build steps, and the libnvshmem
+# patched for CUDA 13.2 in cuda-fixes.nix is in no public cache) and none of it is
+# our code.  Our own outputs — tensorfold's Zig engine, vllm-aeon — stay out
+# because the cache is public.
+cache-push TARGET="dgx-spark" CACHE="dgx-spark-nixos":
+    @set -e; \
+    list=/tmp/cache-push-{{TARGET}}; \
+    ssh {{silver-ssh}} "nix-store -q --requisites /nix/var/nix/gcroots/cache/{{TARGET}}" \
+        | grep -E '/[a-z0-9]{32}-[A-Za-z0-9+._-]*(cuda|nvshmem|magma|cudnn|nccl|cublas|cupti|cufft|curand|cusolver|cusparse|cusparselt|cutensor|cutlass|nvrtc|nvjitlink|nvtx|torch|triton|flash|xformers)[A-Za-z0-9+._-]*$' \
+        > "$list"; \
+    echo "$(wc -l < "$list") paths for {{TARGET}} -> {{CACHE}}"; \
+    ssh {{silver-ssh}} 'cat > /tmp/cache-push-{{TARGET}}' < "$list"; \
+    ssh {{silver-ssh}} 'sudo -n sh -c "CACHIX_AUTH_TOKEN=\$(cat /run/agenix/cachix-auth-token) \
+        exec cachix push {{CACHE}} \$(cat /tmp/cache-push-{{TARGET}})"'
+
+# what is rooted, and how big the store and the free space got
+cache-status:
+    @ssh {{silver-ssh}} 'ls -l /nix/var/nix/gcroots/cache/ 2>/dev/null; df -h / | tail -1; du -sh /nix/store'
+
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \

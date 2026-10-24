@@ -57,4 +57,21 @@ in
   # as a recipient after its first install; see docs/nixos-macbook-pro-plan.org
   # Step 6 for the rekey commands.
   "wifi.age".publicKeys = users ++ systems;
+  # Harmonia signs the .narinfo files it serves with this key, so it is the
+  # cache's identity: consumers pin `silver-1:<b64>` in trusted-public-keys and
+  # the name is baked into the secret (docs/harmonia-build-hub.org D4).  Only
+  # the publishing host needs the private half, hence no `users` and no
+  # `systems` here.  Add `misfit` if the cache ever goes mutual, then agenix -r.
+  "harmonia-sign-key.age".publicKeys = [ silver ];
+  # The key silver's nix daemon uses to reach the three builders (Phase 3.1).
+  # Like the signing key it belongs to the hub, not to a person: only silver
+  # decrypts it, and the builders get the public half through
+  # users.users.*.openssh.authorizedKeys.keys.  Losing it is not fatal —
+  # regenerate, agenix -e again, redeploy the three hosts and silver.
+  "nix-builder-key.age".publicKeys = [ silver ];
+  # Push token for dgx-spark-nixos.cachix.org, used by `just cache-push` on
+  # silver (modules/services/cache/push.nix).  Cleartext lives in pass at
+  # cachix/dgx-spark-nixos.  The cache is public, so this grants write only, and
+  # rotating it is just a new token — no path hashes depend on it.
+  "cachix-auth-token.age".publicKeys = [ silver ];
 }
