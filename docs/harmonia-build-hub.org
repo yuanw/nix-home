@@ -77,10 +77,13 @@ Facts that shape the plan:
   as a store path by colmena. A silver-side evaluator does not have those
   credentials yet (Phase 3.5).
 - Existing cache settings live in =modules/nix-custom-conf.nix= and are
-  =mkForce='d, so the cache consumer change is one file for both NixOS and
-  nix-darwin.
-- =nix.gc= is already weekly on silver, misfit, dgx-spark. Do not run it
-  alongside Harmonia's GC.
+  =mkForce='d — but that module reaches only the hosts importing
+  =myModules.common= (=yuan-mac=, =mist=, =asche=, =wk01174=). =misfit='s daemon
+  has =cache.nixos.org= only and =dgx-spark= carries its own CUDA list, so
+  Phase 2 is *not* one file. See "Finding 3" in
+  [[file:harmonia-phase0-results.org][the Phase 0 results]].
+- =nix.gc= is weekly on silver (=hosts/silver/configuration.nix:85=) and
+  dgx-spark, and *absent* on misfit. Do not run it alongside Harmonia's GC.
 - =nixpkgs#harmonia= is 3.3.0 at this pin; its NixOS module has
   =cache.signKeyPaths=, =cache.settings=, and =gc.gcRootsDirs=. No push API.
 
@@ -123,6 +126,10 @@ and Harmonia signing narinfo for them.
 | D6 | x86_64 fallback | =max-jobs = 0= on silver at first (misfit only); set 2 if misfit downtime hurts |
 
 * Phase 0 — prove the pieces (no config changes, ~30 min)
+
+/DONE 2026-10-23: 0.1–0.3 and 0.5 passed, 0.4 skipped (Variant A). Actual output
+and the three findings that move later phases are in
+[[file:harmonia-phase0-results.org][harmonia-phase0-results.org]]. The section stays as the re-run recipe./
 
 Do these before writing any module. Each is a go/no-go for the phase that
 depends on it.
@@ -197,20 +204,61 @@ plan rests on.
 
 * Phase 1 — Harmonia on silver (~1 hour, one deploy)
 
+/IMPLEMENTED 2026-10-23: =modules/services/cache/harmonia.nix=, the
+=harmonia-sign-key.age= secret and the silver config are in the tree and
+eval-clean (=bind == "[::]:5000"=, =ListenStream == "[::]:5000"=,
+=signKeyPaths == [ /run/agenix/harmonia-sign-key ]=,
+=harmonia-gc.startAt == [ "weekly" ]=, =nix.gc.automatic == false=, no config
+warnings). 1.5 — the deploy — stays with the operator./
+
 ** 1.1 Signing key (operator only)
+
+This Mac runs Lix, which has =nix key generate-secret= but *not*
+=nix key convert-secret-to-pub= (verified: "'convert-secret-to-pub' is not a
+command"). The classic CLI does both halves at once, needs no
+=experimental-features=, and writes the public half in exactly the
+=silver-1:<base64>= form consumers need:
 
 #+begin_src bash
 umask 077
-nix key generate-secret --key-name silver-1 > ~/silver-1.secret
-nix key convert-secret-to-pub < ~/silver-1.secret
-# → silver-1:<base64>   (this is the public key that goes to consumers)
-shred -u ~/silver-1.secret
+nix-store --generate-binary-cache-key silver-1 ~/silver-1.secret ~/silver-1.pub
+cat ~/silver-1.pub            # silver-1:<base64> = the consumers' trusted-public-keys entry
 #+end_src
 
-Keep a copy of the secret in the password manager. If it is lost, every
-consumer's =trusted-public-keys= entry must be rotated.
+Back =~/silver-1.secret= up to the password manager *before* the delete — the
+first draft of this section =shred='d it in the same block as the backup step.
+If the secret is lost, every consumer's =trusted-public-keys= entry has to be
+rotated.
+
+#+begin_src bash
+shred -u ~/silver-1.secret ~/silver-1.pub
+#+end_src
+
+=D4=: the name is =silver-1=, it is baked into the =.narinfo= signatures and
+into the =.age= file, and renaming it means regenerating the secret and editing
+every consumer. Do it once, correctly.
+
+Generated 2026-10-23 and encrypted to =silver='s host key (=secrets/harmonia-
+sign-key.age=, recipient tag verified against the key in =secrets/secrets.nix=):
+
+#+begin_example
+silver-1:bdoSIDAWVU3lhL+8T7TrWXcglLi6oGFlFlZAR0iFVQg=
+#+end_example
+
+The public half is written down here because it is not secret and is not
+recoverable once =~/silver-1.pub= is =shred='d — Lix has no
+=convert-secret-to-pub=. It is the value Phase 2.1 puts in
+=trusted-public-keys=; if the secret is ever regenerated, this line and every
+consumer change with it.
 
 ** 1.2 agenix secret
+
+Recipients always come from =secrets/secrets.nix= (=agenix='s =keys= evaluates
+that file), so the rule must exist *before* =agenix -e= — a brand-new file gets
+no recipients otherwise. =silver= is already defined there and its value equals
+=/etc/ssh/ssh_host_ed25519_key.pub= on the box (verified in Phase 0), and
+agenix is already active on silver (=/run/agenix.d/4/wifi=), so this is
+silver's first secret but not its first decrypt.
 
 In =secrets/secrets.nix=:
 
@@ -219,15 +267,35 @@ In =secrets/secrets.nix=:
 "nix-builder-key.age".publicKeys = [ silver ];   # Phase 3
 #+end_src
 
+Do *not* copy that file's =users ++ systems= habit onto these two. The other
+entries list personal user keys because a person has to read them; the cache
+signing key is the cache's identity (Phase 5) and only the publishing host
+needs it. Mutual mode is =[ silver misfit ]= and then =agenix -r=.
+
 #+begin_src bash
-agenix -e secrets/harmonia-sign-key.age < ~/silver-1.secret
-git add secrets/harmonia-sign-key.age secrets/secrets.nix
+# agenix cds into the rules dir, so the FILE is relative to secrets/ and
+# AGENIX_RULES must point at the rules file (this agenix no longer discovers
+# secrets.nix on its own).  Run from the repo root:
+AGENIX_RULES=secrets/secrets.nix agenix -e harmonia-sign-key.age < ~/silver-1.secret   # non-tty stdin becomes the cleartext
+git add secrets/harmonia-sign-key.age secrets/secrets.nix   # git add: the flake is a git tree, untracked files are invisible to eval
 #+end_src
 
-The Harmonia module passes the key to the unit with =LoadCredential=, so it
-must be root-readable (=mode = "0400"=), not owned by a static service user.
+No =mode=, no =owner=: agenix already installs secrets =root:root 0400=, which
+is what the unit wants — it hands the file to systemd with =LoadCredential=
+(root reads it) and runs =User = harmonia= + =DynamicUser = true=, so pinning
+ownership to a *static* service user would make it unreadable. The ="0400"=
+vs ="0600"= disagreement with [[file:harmonia-silver.org]] is moot; both are the
+default.
 
 ** 1.3 Module =modules/services/cache/harmonia.nix=
+
+Option names, types and defaults below were read out of
+=nixos/modules/services/networking/harmonia.nix= at this repo's pin
+(=494ce7fd=), not off the harmonia README. Two things from the first draft are
+gone: =age.secrets...mode= (=agenix='s default already matches) and
+=gc.gcRootsDirs= — that option is for roots living *outside* the standard
+gcroots directory, and Phase 3.4 roots at =/nix/var/nix/gcroots/cache/$t=,
+which is inside it.
 
 #+begin_src nix
 { config, lib, ... }:
@@ -241,10 +309,9 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    age.secrets.harmonia-sign-key = {
-      file = ../../../secrets/harmonia-sign-key.age;
-      mode = "0400";
-    };
+    # root:root 0400 is agenix's default and what LoadCredential wants; the
+    # service is DynamicUser, so never pin owner/group to a static user.
+    age.secrets.harmonia-sign-key.file = ../../../secrets/harmonia-sign-key.age;
 
     services.harmonia = {
       cache = {
@@ -264,8 +331,8 @@ in
         deleteOlderThan = "30d";
         ensureFree = "50G";
         keepRecent = "1d";
-        # Phase 3 puts one indirect root per closure here.
-        gcRootsDirs = [ "/nix/var/nix/gcroots/cache" ];
+        # No gcRootsDirs: Phase 3.4's roots go under /nix/var/nix/gcroots/cache,
+        # which the standard gcroots scan already covers.
       };
     };
 
@@ -280,28 +347,51 @@ in
 }
 #+end_src
 
+Verified in that source, worth knowing before the first deploy: the flat
+=services.harmonia.enable= is only a renamed alias of =cache.enable=;
+=package= stays top level; =bind = "[::]:5000"=, =workers = 4= and
+=priority = 50= are =mkDefault=s, so the settings above win; the socket unit's
+=ListenStream= *is* =settings.bind=, so the firewall port and =bind= must move
+together; =gc.dates= accepts a string or a list of strings (default
+="03:15"=); and running =gc.automatic= next to =nix.gc.automatic= is a declared
+warning, not an error — which is why 1.4 deletes the =nix.gc= block.
+
 ** 1.4 Enable on silver
 
 - =hosts/silver/default.nix=: add =../../modules/services/cache/harmonia.nix=
-  to =imports=.
-- =hosts/silver/configuration.nix=: delete the =nix.gc= block, add
-  =services.harmonia-cache.enable = true;=.
+  to =imports= (next to =../../modules/services/monitoring/pcp.nix=, line 9).
+- =hosts/silver/configuration.nix=: delete the =nix.gc= block (lines 85–89),
+  add =services.harmonia-cache.enable = true;=.
 - Do *not* enable =services.harmonia.daemon=; only the cache is needed.
+- Nothing to declare for the roots directory: =nix-store --realise --add-root
+  <dir>/<name> --indirect= creates =<dir>= itself (verified on silver), and
+  silver's firewall is on by default, so =allowedTCPPorts= is the whole story.
 
 ** 1.5 Deploy and verify
 
 #+begin_src bash
-just remote-apply silver        # or just colmena-spark-apply pattern
+just remote-apply silver        # colmena apply --on silver from this Mac
 ssh yuanw@silver.lan 'systemctl status harmonia.socket harmonia.service --no-pager'
 ssh yuanw@silver.lan 'ss -tlnp | grep 5000'
 ssh yuanw@silver.lan 'curl -s http://127.0.0.1:5000/nix-cache-info'
 # → StoreDir: /nix/store, WantMassQuery: 1, Priority: 10
 
-h=$(ssh yuanw@silver.lan 'nix path-info /run/current-system | sed "s|.*/||"')
+# silver's daemon config has experimental-features empty (Phase 0), so every
+# nix-command on that box needs NIX_CONFIG -- plain `nix path-info` errors out.
+h=$(ssh yuanw@silver.lan "NIX_CONFIG='extra-experimental-features = nix-command' nix path-info /run/current-system" | sed 's|.*/||')
 ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/$h.narinfo" |
   grep -E '^(Path|URL|Sig)'
 # → Sig: silver-1:<...>
+ssh yuanw@silver.lan 'journalctl -u harmonia -u harmonia.socket -b --no-pager | tail -30'
 #+end_src
+
+Phase 1 is done when the socket is listening, =nix-cache-info= reports
+=Priority: 10=, a =.narinfo= carries =Sig: silver-1:...= and
+=systemctl list-units 'harmonia*'= shows no failed unit. The DynamicUser
+sandbox is tight (=PrivateNetwork=, =IPAddressDeny = any=,
+=CapabilityBoundingSet = ""=), so a failure shows up in the journal, not in the
+generation — read the journal before touching =bind=. If the secret fails to
+decrypt, look at =/run/agenix.d/*/harmonia-sign-key= before blaming harmonia.
 
 * Phase 2 — make consumers use it (~30 min, no builds)
 
@@ -310,6 +400,13 @@ ssh yuanw@silver.lan "curl -s http://127.0.0.1:5000/$h.narinfo" |
 =modules/nix-custom-conf.nix= is common to NixOS and nix-darwin. Put silver in
 the =let= lists, not only in =nix.settings=, because those lists are also
 rendered into =/etc/nix/nix.custom.conf= for the Lix/Determinate hosts (mist):
+
+/Only for the =myModules.common= hosts./ =misfit= and =dgx-spark= never import
+that module (Phase 0, finding 3), so the same two entries have to be added in
+their host configs too — =misfit= has no =nix.settings= block yet, =dgx-spark=
+has one at =hosts/dgx-spark/configuration.nix:82= — or both need to import one
+small cache-consumer module. =require-sigs= rejects a substituter whose key is
+missing, so keep the URL and the key in the same condition either way.
 
 #+begin_src nix
 let
