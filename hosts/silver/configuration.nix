@@ -131,6 +131,13 @@
         # gets a speedFactor that loses every tie against misfit.
         maxJobs = 6;
         speedFactor = 2;
+        # nixpkgs tags kernel, LLVM, CUDA and similar drvs with requiredFeatures
+        # = [ "big-parallel" ], and a machine only takes those if it lists the
+        # feature.  With no supportedFeatures anywhere, `nix-store --realise
+        # --max-jobs 0` fails them outright ("Failed to find a machine for remote
+        # build", hit on linux-7.0.14-nvidia).  All three boxes have the cores for
+        # it; the Spark's own build parallelism is capped on the builder side.
+        supportedFeatures = [ "big-parallel" ];
         publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUxscWxjZ1pXMDVEN0F1TmZiMWR5eUgwWHJDZElXR0JRWWd3L0tNamNVZFA=";
       }
       {
@@ -141,6 +148,7 @@
         sshKey = config.age.secrets.nix-builder-key.path;
         maxJobs = 8;
         speedFactor = 4;
+        supportedFeatures = [ "big-parallel" ];
         publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUR4K0RhMEdLNVBQM2hza1luTG4xemQvMmlQbkxNS2wwUzZRMm8rZi9ERVE=";
       }
       {
@@ -151,6 +159,7 @@
         sshKey = config.age.secrets.nix-builder-key.path;
         # Inference box: 20 cores, 81G already resident in a model.  One job.
         maxJobs = 1;
+        supportedFeatures = [ "big-parallel" ];
         speedFactor = 1;
         publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUJsZjhpVi9VK0lPMjJQR2M2eVpNYmZ3WkI3V3BrN0w3bkQ5QVpBcHdRQlM=";
       }

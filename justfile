@@ -157,8 +157,15 @@ cache-build-one HOST:
         || {{nix}} eval --raw ".#{{HOST}}.drvPath"); \
     echo "drv: $drv"; \
     {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
-    ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
-        --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"
+    for attempt in 1 2 3; do \
+        if ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
+            --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"; then \
+            break; \
+        fi; \
+        [ "$attempt" = 3 ] && exit 1; \
+        echo "attempt $attempt died mid-realise (silver is a laptop on wifi); retrying, valid paths are skipped"; \
+        sleep 5; \
+    done
 
 # Copy the CUDA / deep-learning paths silver holds for a target up to Cachix, so
 # the next nixpkgs bump substitutes instead of compiling on the Spark.  Do this
