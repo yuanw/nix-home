@@ -135,9 +135,20 @@ cache-build:
 # The root lives under /nix/var/nix/gcroots/cache/<host>, which the standard
 # gcroots scan covers, so Harmonia's GC keeps it.  Drop a target from
 # cache-targets and its root has to be deleted by hand.
+#
+# Warm the closure the deploy actually installs.  `.#<host>` is the flake's own
+# nixosConfigurations toplevel, which is a *different* derivation from the one
+# `just remote-apply` puts on the box — the hive imports its own meta.nixpkgs /
+# nodeNixpkgs, so nothing in it shares a hash with the nixosConfigurations
+# build (measured: the two misfit toplevels are
+# nixos-system-misfit-26.11.20261017.9e91791 and nixos-system-misfit-26.11pre-
+# git).  A host substituting its own closure from silver only works if the drv
+# matches, so the hive path is tried first; darwin hosts have no hive node and
+# fall through to `.#<host>` = darwinConfigurations.<host>.system.
 cache-build-one HOST:
     @set -e; \
-    drv=$({{nix}} eval --raw ".#packages.{{HOST}}.drvPath"); \
+    drv=$({{nix}} eval --raw ".#colmenaHive.nodes.{{HOST}}.config.system.build.toplevel.drvPath" 2>/dev/null \
+        || {{nix}} eval --raw ".#{{HOST}}.drvPath"); \
     echo "drv: $drv"; \
     {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
     ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \

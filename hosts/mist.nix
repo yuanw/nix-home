@@ -20,7 +20,6 @@
   environment.casks = with inputs'.nix-casks.packages; [
     betterdisplay
     godot
-    racket
     vlc
   ];
   # determinate system
