@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 with lib;
@@ -138,6 +139,10 @@ in
       };
       services.gnome-keyring.enable = true;
       services.trayer = {
+        # shortcut: upstream nixpkgs-unstable throws on trayer (removed 2026-10-07,
+        # gtk2 dep). The pinned nixpkgs-stable still ships it; move this service to
+        # stalonetray (already in linux_packages) if the stable pin drops gtk2 too.
+        package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.trayer;
         enable = true;
         settings = {
           edge = "top";
