@@ -82,11 +82,15 @@
     "root"
     "yuanw"
   ];
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 30d";
-  };
+  # No nix.gc here: services.harmonia-cache brings services.harmonia.gc, which
+  # replaces it with the same 30d retention plus an ensureFree floor.  Running
+  # both is a declared nixpkgs warning.
+
+  # ─── Binary cache │ Harmonia ────────────────────────────────────────
+  # Serves this host's /nix/store to the LAN on :5000, signed with the silver-1
+  # key (secrets/harmonia-sign-key.age).  LAN only: harmonia has no auth and no
+  # TLS.  Plan: docs/harmonia-build-hub.org Phase 1.
+  services.harmonia-cache.enable = true;
 
   # ─── Mac hardware tweaks (profile covers the rest) ──────────────────
   # 11-5 is the dual-GPU 15" profile and, unlike 11-4, does not set this.
