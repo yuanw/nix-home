@@ -149,18 +149,27 @@ Two things keep that survivable:
 - The slice that actually holds the builds is `user-<uid>.slice` — user slices
   are named by UID, so a `user-yuanw.slice` unit is never instantiated and does
   nothing (checked against `/proc/<ninja>/cgroup`: sessions land in
-  `/user.slice/user-1000.slice/session-512.scope`). The unit is therefore
-  `systemd.units."user-${toString config.users.users.yuanw.uid}.slice"` with
-  `CPUWeight=20`, `MemoryHigh=32G`, `MemoryMax=40G`. Weight bounds contention;
-  the cap bounds the disaster — torch put four `cicc` at 4 G each on the box
-  with 17 G spare and the 86 G model resident, so without it the OOM killer
-  picks the biggest RSS, which is the model.
-- `systemctl set-property user-<uid>.slice MemoryMax=40G` applies that ceiling
+  `/user.slice/user-1000.slice/session-512.scope`). It took three attempts to
+  write it declaratively:
+  1. `systemd.units."user-yuanw.slice"` — wrong name, never instantiated.
+  2. `systemd.units."user-1000.slice"` and `systemd.slices."user-1000"` — nixpkgs
+     folds the instance into the `user-.slice` template and **emits no file**;
+     neither appeared in the `system-units` output or `/etc/systemd/system`.
+  3. `environment.etc."systemd/system.control/user-1000.slice.d/50-lan-build-guard.conf"`
+     — where systemd actually looks and where `systemctl set-property` writes its
+     own persistent state. This is what is deployed.
+  Also do not build the path from `config.users.users.yuanw.uid`: that option is
+  `null` on this host (the UID comes from the hardware config), so it silently
+  produced `user-.slice.d` and applied to nothing. `id yuanw` is uid=1000.
+- The settings themselves: `CPUWeight=20`, `MemoryHigh=32G`, `MemoryMax=40G`.
+  Weight bounds contention; the cap bounds the disaster — torch put four `cicc`
+  at 4 G each on the box with 17 G spare and the 86 G model resident, so without
+  it the OOM killer picks the biggest RSS, which is the model.
+- `systemctl set-property user-1000.slice MemoryMax=40G` applies that ceiling
   *live*, which is what you want mid-build: `cores` is read when the build
-  starts, so lowering it cannot stop a build already running, and waiting for
-  the deploy to activate is too late.
-- At this pin `systemd.units.<name>` has no `extraConfig` — a failed deploy
-  found that — so the whole unit goes in `.text`.
+  starts, so lowering it cannot stop a build already running, and waiting for the
+  deploy to activate is too late. It is also the way to check the numbers work
+  before committing to the unit-file route.
 
 `ptxas` died on signal 11 compiling nvshmem's `reducescatter_and.cu` once,
 which is the failure the plan predicted for CUDA. It is not reproducible — the
