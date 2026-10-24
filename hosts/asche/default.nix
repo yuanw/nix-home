@@ -30,6 +30,10 @@
     homeDirectory = "/home/yuanw";
     font = "PragmataPro Liga";
     monoFont = "PragmataPro Mono Liga";
+    # asche travels and silver has no tailscale (D2 in
+    # docs/harmonia-build-hub.org), so off-LAN this substituter would only add a
+    # connect-timeout to every public-cache miss.
+    silver-cache.enable = false;
   };
   home-manager.users.${config.my.username} = {
     home.file = {

@@ -1,0 +1,485 @@
+#+TITLE: Try harmonia (self-hosted Nix binary cache) on silver — draft plan
+#+DATE: 2026-10-15
+#+OPTIONS: toc:t
+#+STARTUP: overview
+
+* TL;DR
+
+Port [[https://github.com/ruiiiijiiiiang/nixos-config/blob/master/modules/services/infra/harmonia/default.nix]][rui's harmonia module]] to =nix-home= conventions and turn it on for
+=silver= (the x86_64-linux MacBook Pro telemetry box, =hosts/silver/=).
+
+Harmonia serves a host's existing =/nix/store= over HTTP as a signed binary
+cache. In the recommended pull-only mode there is no build farm and no upload
+step: whatever silver already has, the LAN can substitute from. (Publishing
+paths the builder *doesn't* keep means SSH push — Step 4b, and rui's whole
+setup.)
+
+Core is roughly 30 lines; the optional push path is ~30 more:
+
+- 1 new module =modules/services/cache/harmonia.nix= (draft below)
+- 1 agenix secret =secrets/harmonia-sign-key.age= (operator generates the key)
+- 1 import + firewall port in =hosts/silver/=
+- 1 substituter + 1 public key on the consumer side in
+  =modules/nix-custom-conf.nix=
+- optional (Step 4b): =scripts/harmonia-push.sh= + =just cache-push= if you need
+  to publish closures the builder does not keep
+
+Deliberately dropped from upstream: nginx vhost, =lib/consts=, =helpers=, and the
+static =harmonia= user. The =gcRoot= pinning trick is *kept* (Step 4b) — it is
+what keeps pushed closures alive. Reasons in the table below.
+
+Recommended shape: *pull-only mutual* between =silver= and =misfit= (each
+publishes its own =/nix/store=, each lists the other), which needs no push, no
+gcroot pins and no extra secrets — profiles already retain the closures. The
+aarch64 hosts (=dgx-spark=, =ci=, =mist=, =WK01174=) stay off the substituter
+list: cross-arch =.narinfo= queries always miss. See "Cross-arch" and "Do you
+need push?".
+
+Read "Decisions needed from you" first — 5 answers, one of which (the cache key
+name) is expensive to change after the secret exists.
+
+*Reality check before spending time on this:* the cache is only worth what
+silver actually holds. =/nix/store= on silver is ~5.2G (818-path system
+closure) and the disk has 428G free. Being x86_64-linux, silver has nothing
+useful for the =aarch64-darwin= macs (=ci=, =mist=, =WK01174=) unless their
+paths are pushed onto it — and =just push-all= → =yuanw-nix-home-macos= already
+does that over cachix. So the consumers are the x86_64-linux NixOS hosts:
+=misfit= (recommended) and =asche= while it is on the LAN. The realistic pair
+is silver ↔ misfit, the two =buildOnTarget = true= x86_64-linux hosts, sharing
+the repo-local =packages/= overlay paths (e.g. the re-added =pcp=) that are on
+no public cache.
+
+*Option 0 (cheaper, name it before saying no):* a second cachix cache for
+x86_64-linux, reusing the existing =just push-all= machinery. Zero new code,
+but it is push-based — you publish only what you explicitly push, and every
+build needs the push step. Harmonia's whole appeal is "publish the store you
+already have", which is what this plan tries.
+
+* Cross-arch: can the aarch64 hosts use silver's cache? (=dgx-spark=, =ci=, =mist=, =WK01174=)
+
+** Pull: cross-arch queries miss unless somebody put the path there first
+
+A client asks for =<store-path-basename>.narinfo=. An aarch64 build's path hash
+is derived from aarch64 inputs (and =system= appears in the derivation), so
+silver — an x86_64-linux store — has never built it: every query is a 404 and
+the client falls through to the next substituter. Net cost is wasted round
+trips; =require-sigs= is unaffected. So do *not* add =dgx-spark= or the macs to
+=cacheSubstituters= just because a cache now exists — silver stays an
+*x86_64-linux* cache for =silver= / =misfit= / =asche=.
+
+The one exception is fixed-output derivations (=fetchurl=, =fetchFromGitHub=):
+their path is name + fixed output hash with no =system= in it, so the same path
+exists on every platform. Silver holds many of those, but cache.nixos.org
+already serves them for all arches, so silver adds nothing.
+
+Push changes the picture: =/nix/store= is arch-agnostic, so a path that arrives
+on silver by other means is served to anyone, whatever arch it was built for.
+
+** Push: not possible — harmonia 3.3.0 has no ingest endpoint.
+
+=harmonia-cache/src/main.rs@harmonia-v3.3.0= registers =web::get()=/=web::head()=
+only: =/=, =/{hash}.ls=, =/{hash}.narinfo=, the nar routes, =/serve/{hash}…=,
+=/log/{drv}=, =/version=, =/health=, =/nix-cache-info=, =/metrics=. No POST or
+PUT anywhere, and =config.rs= has no =trusted_public_keys= field — the push API
+older harmonia had is gone. So =nix copy --to http://silver.lan:5000 --secret-key …=
+gets *405 Method Not Allowed*, signed or not. =services.harmonia.daemon= is not
+a way in either (=ReadOnlyPaths = [ /nix/store ]=).
+
+** Push over SSH: the only way in — and this is what rui actually does
+
+=nix copy --to ssh://yuanw@silver <path>= talks to silver's *nix-daemon*, not to
+harmonia, and the store takes paths for any platform. harmonia then signs and
+serves them (it reads =/nix/store= + the sqlite db and never filters by
+=system=). The pushed paths have no profile and no gcroot of their own, so they
+need the =gcRoot= pinning from the module draft, or =harmonia-gc= collects them.
+
+Reference implementation — rui's nightly
+(=.github/workflows/daily-nix-build.yml=,
+=.github/actions/configure-harmonia/action.yml=, =modules/core/nixos.nix=):
+
+1. A GH Actions matrix builds all 9 host closures (=ubuntu-24.04=, and
+   =ubuntu-24.04-arm= for their aarch64 =pi=).
+2. WireGuard home, =/etc/hosts=-pin =cache.ruijiang.me= to the LAN IP, append
+   =extra-substituters= + =extra-trusted-public-keys=, restart nix-daemon.
+3. Probe: =ssh root@vm-app nix path-info $STORE_PATH= — a hit skips the build
+   *and* the transfer.
+4. Miss → =nix build= *with the cache as a substituter*, then
+   =nix copy --to ssh://root@$VM_APP_IP $STORE_PATH=.
+5. Pin: symlink the closure into =/var/lib/nix-cache-roots/<host>= with =mktemp=
+   + =mv -Tf= (atomic swap, one pin per host).
+6. ntfy alert if any host failed.
+
+Every NixOS host then lists =https://cache.ruijiang.me= *first* in
+=nix.settings.substituters= with =fallback = true=, =http2 = false=,
+=connect-timeout = 10=, =download-attempts = 10= — that is what makes a
+slow/off cache survivable for everyone. Their aarch64 =pi= really does pull
+aarch64 paths from an x86_64 =vm-app=. Note the shape of it: the key name is the
+*cache FQDN* (=cache.ruijiang.me-1=), there is no cachix anywhere, and most of
+the system is the CI job, not the server.
+
+** Do you need push? Probably not — profiles already retain what you serve
+
+rui needs pins because GH runners throw their stores away. On silver and misfit
+the closures live in each host's own profile, and profiles *are* gcroots:
+=/run/current-system= plus the older generations survive GC (silver keeps 10 via
+=boot.loader.systemd-boot.configurationLimit=). So pull-only mutual mode already
+serves the closures you care about. Push + pin earns its extra moving parts only
+for paths the builder does not keep: CI-built closures, throwaway =nix build=s,
+or a host with an aggressive =nix.gc=. Step 4b is the minimal version.
+
+* Pinned-nixpkgs facts (=nixpkgs@494ce7fd=, checked, not built)
+
+| Thing | Value |
+|------------------------------------------------+----------------------------------------------------------|
+| package | =pkgs.harmonia= 3.3.0 (=pkgs/by-name/ha/harmonia=, maintainer mic92) |
+| nixos module | =nixos/modules/services/networking/harmonia.nix= |
+| options | =services.harmonia.{package,cache.{enable,signKeyPaths,settings},gc.{enable,automatic,dates,deleteOlderThan,ensureFree,keepRecent,gcRootsDirs},daemon.*}= |
+| defaults | =bind = "[::]:5000"=, =workers = 4=, =priority = 50= |
+| socket | *socket-activated*: =systemd.sockets.harmonia.ListenStream= is derived from =cache.settings.bind= — the port you open in the firewall must be the port in =bind= |
+| sign keys | passed to the unit via =LoadCredential= + =SIGN_KEY_PATHS=, so *root* reads the key file; =User/Group = harmonia= is paired with =DynamicUser = true= |
+| gc | =services.harmonia.gc= is a faster =nix-collect-garbage=; it *warns* if =nix.gc.automatic= is also on |
+| upstream test | =pkgs.harmonia.passthru.tests.{harmonia,harmonia-gc}= (nixosTests) |
+
+* What upstream does vs what =nix-home= can take
+
+| Upstream piece | Verdict | Why |
+|-----------------------------------------------------+--------------+--------------------------------------------------|
+| =consts.{username,domain,subdomains,ports,oci-uids}= | drop | no =lib/consts.nix= here; ports are hardcoded per module (cf. =pcp.nix=, =cockpit.nix=) |
+| =services.nginx.virtualHosts."$fqdn"= + =helpers.mkVirtualHost= | drop | no nginx on silver; and caddy lives on =misfit= with =*.yuanw.me= routed to it (see the "Caddy is deliberately NOT imported here" note in =hosts/silver/configuration.nix=). A LAN read-only cache needs no TLS or vhost — serve =:5000= directly |
+| =users.users.harmonia= / =users.groups.harmonia= | drop | nixpkgs module runs =DynamicUser = true= |
+| =age.secrets.harmonia-sign-key = { owner/group = "harmonia" }= | drop owner/group | with =DynamicUser= the uid is dynamic, so a file owned by a *static* =harmonia= uid would not be readable. =mode = "0600"= root-owned is what =LoadCredential= wants |
+| =nix.settings.keep-{derivations,outputs} = true= | keep | the served set is "paths this host still has"; without these, =.drv=s and outputs get collected and the cache silently 404s |
+| =tmpfiles= =gcroots/per-user/$username/daily-builds= symlink | keep, simplified | =L+ /nix/var/nix/gcroots/harmonia= → =gcRoot= instead: the nix daemon scans the standard gcroots dir, so no per-user dir and no =services.harmonia.gc.gcRootsDirs= needed |
+| =gcRoot = "/var/lib/nix-cache-roots"= | keep | one symlink per publishing host (Step 4b). Owner = the ssh push user =yuanw= rather than upstream's =oci-uids= |
+
+* Decisions needed from you (blocking, cheap to answer)
+
+1. *Consumers.* Which hosts list =http://silver.lan:5000= as a substituter?
+   Recommendation: =misfit= only. =asche= is a laptop — an off-LAN host with a
+   LAN-only first substituter pays a connect timeout on every build.
+2. *Direction.* Pull-only (silver publishes) or mutual (silver + misfit both
+   publish, both consume)? Mutual is not "2 extra lines": both hosts run the
+   module, so both need to decrypt the signing key — which means adding
+   =misfit='s host key (already in =secrets/secrets.nix=) to
+   =harmonia-sign-key.age='s publicKeys and =agenix -r=. That makes one key
+   shared by two caches, so name it host-neutral (see 4). Mutual is still the
+   better deal here: each host's =/run/current-system= is retained by its own
+   profile, so each side serves what the other is actually missing.
+3. *GC.* Silver currently has =nix.gc = { automatic; --delete-older-than 30d; }=.
+   Recommendation: replace it with =services.harmonia.gc= (same retention +
+   =ensureFree = "50G"=) instead of running two collectors — nixpkgs warns about
+   that combination.
+4. *Cache key name.* =silver-1= if only silver publishes; =lan-1= if mutual
+   (decision 2), because one key then signs for two hosts and a host name in it
+   would be a lie. Either way the name embedded in the =.narinfo= must equal the
+   name in =trusted-public-keys= (see =docs/nix-binary-caches.org=,
+   "Signing keys and cache URLs"), and it is baked into the secret — getting it
+   wrong means regenerating the secret and editing every consumer. rui's
+   convention is *cache FQDN + =-1=* (=cache.ruijiang.me-1=), which is the right
+   choice if this ever moves behind caddy/misfit as =cache.yuanw.me=. Decide now;
+   it is cheap now and expensive later.
+5. *Push or no push.* See "Do you need push?" — recommendation: no, pull-only
+   mutual mode, skip Step 4b until you have a builder that discards its results.
+
+* Step 1 — signing key + secret (operator only)
+
+Secret preparation is manual per repo convention (=modules/agenix.nix= is the
+only agenix surface and =secrets/= is committed encrypted).
+
+#+begin_src bash
+umask 077
+nix key generate-secret --key-name silver-1 > ~/silver-1.secret   # SECRET key, stdout
+nix key convert-secret-to-pub < ~/silver-1.secret                  # → silver-1:<b64> = commit this string
+#+end_src
+
+Then in =secrets/secrets.nix= (=silver= host key already exists at line 17 and
+*verified to match* =/etc/ssh/ssh_host_ed25519_key.pub= on the box):
+
+#+begin_src nix
+"harmonia-sign-key.age".publicKeys = users ++ [ silver misfit ];  # misfit only if mutual (decision 2)
+#+end_src
+
+#+begin_src bash
+agenix -e secrets/harmonia-sign-key.age < ~/silver-1.secret   # agenix encrypts stdin
+shred -u ~/silver-1.secret
+git add secrets/harmonia-sign-key.age secrets/secrets.nix
+#+end_src
+
+Silver decrypts with the default agenix identity (= /etc/ssh/ssh_host_ed25519_key=).
+This is the *first* age secret silver has ever had — if decrypt fails, check
+that =hosts/silver/default.nix= imports =inputs.agenix.nixosModules.default=
+(it does) before debugging harmonia.
+
+* Step 2 — new module (=modules/services/cache/harmonia.nix=)
+
+Option name =services.harmonia-cache= to avoid colliding with nixpkgs'
+=services.harmonia= we configure inside, same trick as =services.cockpit-local=
+in =modules/cockpit.nix=. Style follows =modules/services/monitoring/pcp.nix=.
+
+#+begin_src nix
+{ config, lib, ... }:
+let
+  cfg = config.services.harmonia-cache;
+  # Must match the port we open below; nixpkgs derives the systemd socket's
+  # ListenStream from settings.bind.
+  port = 5000;
+  # Closures pushed in from other hosts (Step 4b) have no profile of their own;
+  # one symlink per publishing host in here is what keeps them out of the GC.
+  # Unused and harmless in pull-only mode.
+  gcRoot = "/var/lib/nix-cache-roots";
+in
+{
+  options.services.harmonia-cache = {
+    enable = lib.mkEnableOption "LAN Nix binary cache served from this host's /nix/store";
+  };
+
+  config = lib.mkIf cfg.enable {
+    # Root-owned 0600: the nixpkgs module hands this to the unit via systemd
+    # LoadCredential (root reads it), and the service runs DynamicUser=yes, so
+    # a static service user would not be able to read it.
+    age.secrets.harmonia-sign-key = {
+      file = ../../../secrets/harmonia-sign-key.age;
+      mode = "0600";
+    };
+
+    services.harmonia = {
+      cache = {
+        enable = true;
+        signKeyPaths = [ config.age.secrets.harmonia-sign-key.path ];
+        settings = {
+          bind = "[::]:${toString port}";
+          # Below cache.nixos.org's 40 so the LAN wins when both have it.
+          priority = 10;
+        };
+      };
+      # Replaces nix.gc on this host (nixpkgs warns if both are automatic).
+      gc = {
+        enable = true;
+        automatic = true;
+        deleteOlderThan = "30d";
+        ensureFree = "50G";
+      };
+    };
+
+    networking.firewall.allowedTCPPorts = [ port ];
+
+    # Published closures are pinned by symlink here, and this dir is hung off
+    # the standard gcroots dir so both the nix daemon and harmonia-gc see it
+    # (gcRootsDirs is only needed for roots that live outside it).
+    systemd.tmpfiles.rules = [
+      # yuanw because that is the ssh push user (targetUser in
+      # hosts/silver/default.nix); this host has no config.my.username --
+      # silver does not import myModules.common.
+      "d ${gcRoot} 0755 yuanw root - -"
+      "L+ /nix/var/nix/gcroots/harmonia - - - - ${gcRoot}"
+    ];
+
+    # The cache has nothing to serve that GC hasn't already collected.
+    nix.settings = {
+      keep-derivations = true;
+      keep-outputs = true;
+    };
+  };
+}
+#+end_src
+
+Not included, on purpose: no =package= override (nixpkgs default), no port
+option (one host, one port), no =daemon.enable= (only =harmonia-cache= is needed
+to serve), no =gcRootsDirs= (the roots dir hangs off the standard gcroots dir),
+no =users.users.harmonia= (the nixpkgs module uses =DynamicUser=).
+
+* Step 3 — enable on silver
+
+In =hosts/silver/default.nix= =imports=, next to the existing =pcp.nix= import:
+
+#+begin_src nix
+../../modules/services/cache/harmonia.nix
+#+end_src
+
+Same import in =hosts/misfit/default.nix= if you chose mutual mode (decision 2) —
+the module is host-agnostic; only the secret's =publicKeys= says who can run it.
+
+In =hosts/silver/configuration.nix=, drop the =nix.gc= block (decision 3) and
+add:
+
+#+begin_src nix
+services.harmonia-cache.enable = true;
+#+end_src
+
+* Step 4 — consumers
+
+=modules/nix-custom-conf.nix= owns all cache settings (=mkForce='d lists, see
+=docs/nix-binary-caches.org=), so consumers are added *there*, not per host — a
+per-host =nix.settings.substituters = [ … ]= would be clobbered by that
+=mkForce=. Per decision 1, name the hosts:
+
+#+begin_src nix
+# silver's harmonia cache: LAN only, x86_64-linux store paths only, and only
+# for hosts that are usually on that LAN (decision 1).
+(lib.optionals (config.networking.hostName == "misfit") [ "http://silver.lan:5000" ])
+#+end_src
+
+#+begin_src nix
+"silver-1:<from convert-secret-to-pub>"
+#+end_src
+
+- The public key has to be listed wherever the substituter is, or =require-sigs=
+  rejects it — keep both entries inside the same condition.
+- Mutual mode (decision 2): one more block, same shape, guard
+  =config.networking.hostName == "silver"= pointing at =http://misfit.lan:5000=.
+  Check that name resolves from silver first (=getent hosts misfit.lan=) — same
+  mDNS caveat as above. Verified from silver: =misfit.lan → 192.168.1.190=,
+  =silver.lan → 192.168.1.216=; still check =silver.lan= from misfit itself.
+- To widen it to every x86_64-linux NixOS host instead of naming them, use
+  =(lib.optionals (pkgs.stdenv.hostPlatform.isLinux && pkgs.stdenv.hostPlatform.isx86_64) [ … ])=
+  and add =pkgs= to the module's function args (it currently takes =config, lib, ...=
+  only). This module is imported by the darwin systems too, so the guard matters
+  either way — =/etc/nix/nix.custom.conf= is written from the same two lists.
+- =silver.lan= is correct, =silver.local= is not: mDNS is unreliable here
+  because another box also claims =silver= — see the =targetHost= comment in
+  =hosts/silver/default.nix=. Verified from the control box:
+  =silver.lan → 192.168.1.216=, =silver.local →= nothing. Still verify from the
+  consumer before committing (=getent hosts silver.lan=); if it is flaky, use
+  the static DHCP IP.
+- Put =nix.settings.connect-timeout = 5;= on the consumer so a powered-off
+  silver doesn't stall builds.
+
+* Step 4b — optional push path (only if you publish what you don't keep)
+
+Skip this for pull-only mutual mode. If you want it, this is the minimum: one
+script + one just target, run *on the host that built the closure*. The macOS
+control box is not the pusher — it cannot build x86_64-linux at all, which is
+why =buildOnTarget = true= is set on silver and misfit.
+
+=new scripts/harmonia-push.sh= (follows the =scripts/= convention, cf.
+=scripts/misfit-unlock=):
+
+#+begin_src bash
+#!/usr/bin/env bash
+# Publish this host's closure to silver's harmonia cache and pin it against GC.
+# Run where the build happened: ssh misfit && scripts/harmonia-push.sh misfit
+set -euo pipefail
+name=${1:?usage: harmonia-push.sh NAME}
+dest=${HARMONIA_PUSH_TO:-yuanw@silver}
+path=$(readlink -f /run/current-system)
+
+# rui's probe: skip the copy when silver already holds it.
+if ssh -o BatchMode=yes "$dest" "nix path-info $path" >/dev/null 2>&1; then
+  echo "already cached: $path"
+else
+  nix copy --to "ssh://$dest" "$path"
+fi
+
+# Atomic pin: link under a temp name, then rename onto the real pin, so readers
+# never see a gap and the previous pin for $name dies in the same step.
+ssh -o BatchMode=yes "$dest" bash -s -- "$name" "$path" <<'REMOTE'
+set -euo pipefail
+name=$1; path=$2
+root=/var/lib/nix-cache-roots
+test -d "$root"
+tmp=$(mktemp -d "$root/.${name}.XXXXXX")
+ln -s "$path" "$tmp/link"
+mv -Tf "$tmp/link" "$root/$name"
+rmdir "$tmp"
+REMOTE
+#+end_src
+
+And in =justfile=, next to =remote-build=:
+
+#+begin_src just
+# publish the current system closure to silver's harmonia cache (run on the builder)
+cache-push NAME:
+    @scripts/harmonia-push.sh {{NAME}}
+#+end_src
+
+Notes:
+
+- =nix copy --to ssh://…= uses silver's nix-daemon over ssh, not harmonia —
+  that is the only ingest path that exists (see "Push over SSH").
+- Only secret needed: an ssh key =yuanw@silver= accepts, i.e. one already in
+  =users.users.yuanw.openssh.authorizedKeys.keys=. That dependency is the reason
+  this stays a manual =just= call rather than a systemd timer; automating it
+  means a deploy-key secret, which is rui's CI job with GitHub taken out.
+- =ensureFree = "50G"= in the module is the backstop if pins pile up; pins are
+  one per =NAME=, so they cannot grow unboundedly, but each drags a whole
+  closure plus its unique deps.
+- Consumers to add =cache-push= for: =misfit= (builds its own closure) and
+  =silver= itself. =asche= is a laptop; its paths are not worth serving.
+
+* Step 5 — checks the agent can run (no builds)
+
+#+begin_src bash
+cd /Users/yuan/workspaces/nix-home-harmonia
+nix eval .#nixosConfigurations.silver.config.services.harmonia.cache.settings.bind
+nix eval .#nixosConfigurations.silver.config.system.build.toplevel.drvPath   # eval only
+nix eval .#colmenaHive.nodes.silver.config.services.harmonia.gc.automatic
+nix eval .#nixosConfigurations.silver.config.systemd.tmpfiles.rules  # gcroots/harmonia present
+nix flake check  # only if you want the tree's own checks
+#+end_src
+
+Per =../nixos-config/AGENTS.md= (and general good sense for this repo): =nix
+build=, =just remote-build silver= and any deploy stay with you.
+
+* Step 6 — verify after you deploy
+
+#+begin_src bash
+# on silver
+systemctl status harmonia.socket harmonia.service
+sudo ss -tlnp | grep 5000
+journalctl -u harmonia -b --no-pager | tail -30
+sudo nix run nixpkgs#curl -- -s http://127.0.0.1:5000/nix-cache-info
+# → StoreDir: /nix/store, WantMassQuery: 1, Priority: 10
+
+# narinfo is signed by silver-1?
+h=$(sudo nix path-info --json /run/current-system | jq -r 'keys[0]' | sed 's|.*/||')
+sudo nix run nixpkgs#curl -- -s "http://127.0.0.1:5000/$h.narinfo" | egrep '^(Sig|URL|Path)'
+
+# from the consumer: is it actually used?
+sudo nix store verify --no-trust  # sanity only
+nix build --no-link .#silver \
+  --option substituters "http://silver.lan:5000 https://cache.nixos.org" \
+  --option trusted-public-keys "silver-1:<b64> cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" \
+  -L 2>&1 | grep -i -m5 'silver.lan\|copied\|substitut'
+#+end_src
+
+The =--option substituters= form needs =trusted-users=, which =yuanw= has on
+both hosts. The declarative check is that a consumer's =nix show-config= lists
+silver first and one =nix build= of a path only silver has shows
+=Copied … from 'http://silver.lan:5000'=.
+
+* Step 7 — rollback
+
+=services.harmonia-cache.enable = false;= on silver (kills service, secret and
+firewall port together, since everything is under =mkIf=), and remove the two
+consumer entries from =modules/nix-custom-conf.nix=. The =.age= file can stay.
+=keep-outputs=/=keep-derivations= also come from the module, so disabling it
+stops the store from ballooning on new builds — but paths already retained
+stay until the next =nix-collect-garbage=.
+
+* Risks / things this plan does not cover
+
+- *GC vs cache.* =keep-outputs= + =keep-derivations= grow the store on every
+  build; =ensureFree = "50G"= is the backstop. 428G free today, so fine — but
+  this is the one thing that can fill the disk.
+- *Read-only over HTTP.* No push endpoint exists in 3.3.0 (see "Cross-arch"), so
+  =nix copy --to http://silver.lan:5000= 405s. Ingest is =nix copy --to
+  ssh://yuanw@silver=, which bypasses harmonia and needs the =gcRoot= pins to
+  survive GC — a pushed path with no pin is a silent 404 waiting to happen.
+- *Anyone on the LAN can push* onto silver's store over ssh if they have a key
+  for =yuanw= there. Pushing does not require the cache secret (harmonia signs
+  on the fly), so the signing key is not the trust boundary — ssh is.
+- *No auth, no TLS.* Anyone on the LAN can enumerate this host's store paths
+  (hashes, names, references). Acceptable for =.lan=; not for =.yuanw.me=.
+- *silver's own rebuilds.* =buildOnTarget = true= means silver builds its own
+  closure, so it does not benefit much from its own cache; the win is consumer
+  side.
+- *harmonia's =DynamicUser= sandbox is tight* (=PrivateNetwork=,
+  =IPAddressDeny = any=, =CapabilityBoundingSet = ""=). If it fails, it fails in
+  the unit, not the config — check the journal before touching =bind=.
+- *Not checked:* =nix flake check= / =nix build= (agent must not build here),
+  whether nix ignores a narinfo =System:= field when substituting (would only
+  matter for Step 4b, where silver serves foreign-arch paths), and =nix copy --to ssh://=
+  behaviour on silver's multi-user daemon,
+  whether =pkgs.harmonia= builds at this pin, whether =harmonia-gc= interacts
+  sanely with =zramSwap= and =nix.optimise=, mDNS/DNS behaviour *from the
+  consumer side*, and whether =misfit= has disk room to keep served paths.
