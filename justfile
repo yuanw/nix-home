@@ -112,7 +112,13 @@ colmena-spark-apply:
     @just remote-apply dgx-spark
 
 # The closures the LAN binary cache keeps warm (docs/harmonia-build-hub.org D5).
-cache-targets := "silver misfit dgx-spark mist"
+#
+# dgx-spark is left out of the default list: its closure builds CUDA from
+# source (libnvshmem is patched for CUDA 13.2 in cuda-fixes.nix, so its drv
+# matches no cache) and the box holds an 86 G inference model on 121 G of RAM.
+# Run that target by name when inference is idle:
+#     just cache-build-one dgx-spark
+cache-targets := "silver misfit mist"
 silver-ssh := "yuanw@silver.lan"
 
 # Build every host closure on silver's LAN builders and root it there.
