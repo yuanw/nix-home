@@ -111,6 +111,42 @@ colmena-spark-build:
 colmena-spark-apply:
     @just remote-apply dgx-spark
 
+# The closures the LAN binary cache keeps warm (docs/harmonia-build-hub.org D5).
+cache-targets := "silver misfit dgx-spark mist"
+silver-ssh := "yuanw@silver.lan"
+
+# Build every host closure on silver's LAN builders and root it there.
+cache-build:
+    @set -e; \
+    for t in {{cache-targets}}; do \
+        echo "== $t"; \
+        just cache-build-one "$t"; \
+    done
+
+# Build one host closure on the builders and root it on silver.
+#
+# The Mac evaluates — it is the only box with the private flake input — and
+# copies just the .drv closure over; silver's daemon realises it with
+# --max-jobs 0, which is what forces every missing drv out to a builder
+# instead of compiling on silver.  `nix build <drv>` is not used because on
+# the Spark it exits 0 without building when handed a .drv path (measured
+# 2026-10-23); `nix-store -r` is the reliable remote-store form.
+#
+# The root lives under /nix/var/nix/gcroots/cache/<host>, which the standard
+# gcroots scan covers, so Harmonia's GC keeps it.  Drop a target from
+# cache-targets and its root has to be deleted by hand.
+cache-build-one HOST:
+    @set -e; \
+    drv=$({{nix}} eval --raw ".#packages.{{HOST}}.drvPath"); \
+    echo "drv: $drv"; \
+    {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
+    ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
+        --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"
+
+# what is rooted, and how big the store and the free space got
+cache-status:
+    @ssh {{silver-ssh}} 'ls -l /nix/var/nix/gcroots/cache/ 2>/dev/null; df -h / | tail -1; du -sh /nix/store'
+
 # build and deploy to local host (macOS or NixOS)
 switch:
     @if [ "$(uname)" = "Darwin" ]; then \

@@ -63,4 +63,10 @@ in
   # the publishing host needs the private half, hence no `users` and no
   # `systems` here.  Add `misfit` if the cache ever goes mutual, then agenix -r.
   "harmonia-sign-key.age".publicKeys = [ silver ];
+  # The key silver's nix daemon uses to reach the three builders (Phase 3.1).
+  # Like the signing key it belongs to the hub, not to a person: only silver
+  # decrypts it, and the builders get the public half through
+  # users.users.*.openssh.authorizedKeys.keys.  Losing it is not fatal —
+  # regenerate, agenix -e again, redeploy the three hosts and silver.
+  "nix-builder-key.age".publicKeys = [ silver ];
 }

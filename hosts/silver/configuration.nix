@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
   imports = [ ./hardware-configuration.nix ];
@@ -91,6 +91,77 @@
   # key (secrets/harmonia-sign-key.age).  LAN only: harmonia has no auth and no
   # TLS.  Plan: docs/harmonia-build-hub.org Phase 1.
   services.harmonia-cache.enable = true;
+
+  # ─── Build hub │ the three LAN builders ─────────────────────────────
+  # silver schedules, mist/misfit/dgx-spark compile (Phase 3).  Variant A: the
+  # Mac evaluates (it has the private flake input), copies the .drv closure
+  # here, and `nix-store --realise --max-jobs 0` dispatches each drv to the
+  # builder matching its system and copies the outputs back for Harmonia to
+  # sign.  No local compile is suppressed by a global max-jobs = 0: that would
+  # make `just remote-apply silver`, which builds on the target, depend on
+  # misfit being up.  The trigger passes --max-jobs 0 instead.
+  #
+  # publicHostKey is the base64 of the whole `ssh-ed25519 AAAA…` line, not the
+  # bare blob — nix base64-decodes it into a single-key known_hosts file and
+  # passes -oUserKnownHostsFile (verified against nix 2.34.9's ssh.cc, and by
+  # connecting with and without a wrong key).  It is what stops a stale DHCP
+  # lease from becoming a builder, so it is not optional.
+  age.secrets.nix-builder-key.file = ../../secrets/nix-builder-key.age;
+
+  nix = {
+    distributedBuilds = true;
+
+    # silver sends the inputs, so the builder builds from what the hub holds
+    # rather than pulling its own copies (and so the private input source can
+    # reach a builder that has no credentials for it).
+    settings.builders-use-substitutes = false;
+
+    buildMachines = [
+      {
+        hostName = "mist.lan";
+        system = "aarch64-darwin";
+        protocol = "ssh-ng";
+        sshUser = "yuan";
+        sshKey = config.age.secrets.nix-builder-key.path;
+        # mist is also the control box and sleeps; it is opportunistic, so it
+        # gets a speedFactor that loses every tie against misfit.
+        maxJobs = 6;
+        speedFactor = 2;
+        publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUxscWxjZ1pXMDVEN0F1TmZiMWR5eUgwWHJDZElXR0JRWWd3L0tNamNVZFA=";
+      }
+      {
+        hostName = "misfit.lan";
+        system = "x86_64-linux";
+        protocol = "ssh-ng";
+        sshUser = "yuan";
+        sshKey = config.age.secrets.nix-builder-key.path;
+        maxJobs = 8;
+        speedFactor = 4;
+        publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUR4K0RhMEdLNVBQM2hza1luTG4xemQvMmlQbkxNS2wwUzZRMm8rZi9ERVE=";
+      }
+      {
+        hostName = "dgx-spark.lan";
+        system = "aarch64-linux";
+        protocol = "ssh-ng";
+        sshUser = "yuanw";
+        sshKey = config.age.secrets.nix-builder-key.path;
+        # Inference box: 20 cores, 81G already resident in a model.  One job.
+        maxJobs = 1;
+        speedFactor = 1;
+        publicHostKey = "c3NoLWVkMjU1MTkgQUFBQUMzTnphQzFsWkRJMU5URTVBQUFBSUJsZjhpVi9VK0lPMjJQR2M2eVpNYmZ3WkI3V3BrN0w3bkQ5QVpBcHdRQlM=";
+      }
+    ];
+  };
+
+  # `nix-store --realise --add-root /nix/var/nix/gcroots/cache/$t --indirect`
+  # creates the symlink client-side, so the trigger's user has to be able to
+  # write the directory: yuanw is in wheel (verified: without this the first
+  # realise died with "creating directory … Permission denied").  Inside
+  # /nix/var/nix/gcroots, so the standard gcroots scan and Harmonia's GC both
+  # see the roots without services.harmonia.gc.gcRootsDirs.
+  systemd.tmpfiles.rules = [
+    "d /nix/var/nix/gcroots/cache 0775 root wheel - -"
+  ];
 
   # ─── Mac hardware tweaks (profile covers the rest) ──────────────────
   # 11-5 is the dual-GPU 15" profile and, unlike 11-4, does not set this.
