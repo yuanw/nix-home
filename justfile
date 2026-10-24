@@ -186,7 +186,7 @@ cache-push TARGET="dgx-spark" CACHE="dgx-spark-nixos":
     echo "$(wc -l < "$list") paths for {{TARGET}} -> {{CACHE}}"; \
     ssh {{silver-ssh}} 'cat > /tmp/cache-push-{{TARGET}}' < "$list"; \
     ssh {{silver-ssh}} 'sudo -n sh -c "CACHIX_AUTH_TOKEN=\$(cat /run/agenix/cachix-auth-token) \
-        exec xargs -a /tmp/cache-push-{{TARGET}} -d '\\''\\n'\\'' cachix push {{CACHE}}"'
+        exec cachix push {{CACHE}} \$(cat /tmp/cache-push-{{TARGET}})"'
 
 # what is rooted, and how big the store and the free space got
 cache-status:
