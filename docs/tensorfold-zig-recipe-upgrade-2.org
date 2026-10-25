@@ -1,0 +1,164 @@
+#+TITLE: Plan: TensorFold Zig — bump recipe to e1f564e (0001…0031), keep local patches (verified)
+#+AUTHOR: Yuan Wang
+#+TODO: TODO IN-PROGRESS | DONE CANCELLED
+
+* Goal
+
+Bump the pinned MiaAI-Lab recipe
+(=MiaAI-Lab/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold=) from
+=656879fd752749bbd11a6e1a065a326c00940911= (patches 0001…0015) to current
+=main= =e1f564eb915bb5272474b6c1c527aec3b9ed3de6= (patches 0001…0031), and
+answer the open question: *are all four =local-*.patch= files still needed?*
+
+**Answer: yes, all four, on the new recipe.** Verified by applying the new
+patch set to the pinned TensorFold base in a scratch worktree (details below);
+none of the new recipe patches touch the files our locals modify.
+
+* What upstream actually changed (verified 2026-10-26)
+
+- *TensorFold src*: the recipe's =config.sh= still pins
+  =TF_REF=db281878ddb836fd0df510d8771ecb7e0fe47d26= — exactly what
+  =packages/tensorfold-zig/src.nix= pins. **No =src= change.**
+  (Note: upstream's =zig-flashnext= branch is deleted; TensorFold =main= is a
+  different codebase the recipe does not follow. The commit itself still
+  fetches fine — verified via =nix flake prefetch=.)
+- *Recipe patches*: exactly four new files since our pin; 0001…0015 are
+  byte-identical (checked with =git diff= on =patches/=):
+  | patch | touches | why it matters here |
+  |-------+---------+---------------------|
+  | 0021 flash-next-sliced-fill-one-at-a-time | =cuda_engine.zig=, =cuda_lanes.zig= | scheduling; no vision/server CLI |
+  | 0029 free-after-drain admission-reclaim | =lane_host.zig=, =prompt_cache.zig=, =cuda_*.zig=, =native/cuda.zig= | prompt-cache room; engine defaults ON at one rank |
+  | 0030 image-prompt-reuse | =build/cuda.zig=, =core/lanes/*=, =server/chat.zig=, =media_match.zig=, =prompt.zig= | media prompts kept in prompt cache; ON by default |
+  | 0031 server-random-seed | =cli.zig=, =serve.zig=, =server.zig= | new opt-in env =TENSORFOLD_RANDOM_SEED=0|1= (default off) |
+- *Zig*: recipe still builds Zig 0.17.0 — same tarball as =src.nix= pins. No
+  change.
+- *AOT spec*: none of 0021–0031 touches =zig/tests/cuda/flashnext/kernels.json=
+  or =jit.json=, so the Triton AOT capture step in =default.nix= is unchanged
+  in shape.
+
+* Local patches — still needed (all four)
+
+Worktree verification (recipe's exact apply order): cloned TensorFold at
+=db281878=, applied =patches/0001…0031=, then the four locals in the
+=default.nix= order (=helper-restart= → =pil-processor= → =capacity-status= →
+=request-timeout=). Result:
+
+| patch | applies on new recipe? | still needed? | evidence (in recipe-only tree) |
+|-------+------------------------+---------------+--------------------------------|
+| local-capacity-status | yes | *yes* | =openai.zig:317= still `if (kind_ok) 400 else 500` |
+| local-vision-helper-restart | yes | *yes* | =vision.zig:287= still "killed, requests refused from now on" |
+| local-vision-request-timeout | yes* | *yes* | =vision.zig= still =timeout_s: u32 = 600= |
+| local-vision-pil-processor | yes | *yes* | =qwen_processing.py= still imports =Qwen2VLImageProcessor= directly |
+
+*=request-timeout= only applies *after* =helper-restart= (its hunk context
+includes a line helper-restart edits). The =default.nix= order already does
+this — keep it, and never reorder.
+
+Upstream note: TensorFold =main= (not used by this recipe) already has the
+=capacity-status= fix (=cx.status()=) in =openai.zig=, so if a future bump
+ever moves off =db281878= to =main=, =local-capacity-status= can be dropped
+first. Meanwhile the recipe stays on =db281878=.
+
+* What changes
+
+| | today | target |
+|--+-------+--------|
+| recipe rev | =656879fd752749bbd11a6e1a065a326c00940911= | =e1f564eb915bb5272474b6c1c527aec3b9ed3de6= |
+| recipe hash | =sha256-CpQzJIj1qLNm5E2ouSI4QAqCwQFmKUbt7wbUL247rXk== | =sha256-en1wtMTL33IG1XmWRuBM4TJg0biIX/9l1HnWWabXvv4== (prefetched 2026-10-26) |
+| recipe patches | 0001…0015 | 0001…0031 (0021/0029/0030/0031 new) |
+| TensorFold src | =db281878= | =db281878= (recipe still pins it) |
+| local patches | 4 | 4 (all still needed, all apply) |
+| module env | DEPTH=6, PRODUCT_STREAMS=5, etc. | same; optionally + RANDOM_SEED (below) |
+
+Files to touch:
+
+- =packages/tensorfold-zig/src.nix=: recipeSrc rev + hash; fix the comment
+  ("0001…0015" → "0001…0031", drop "0011-0013..." guesswork).
+- =packages/tensorfold-zig/default.nix=: header comment "on top of the recipe's
+  =0001…0015=" → =0001…0031=.
+- =modules/tensorfold-zig.nix=: *no required change* (see next section).
+- =docs/tensorfold-zig-recipe-upgrade-plan.org=: mark 0015-era plan done; point
+  to this one.
+
+* Does the module need new env? (checked, mostly no)
+
+The new patches' knobs are **already the engine's default at one rank**, so the
+recipe's =config.sh= exports them only to pin the value:
+
+- =TF_FLASHNEXT_MEDIA_REUSE= (0030): engine =getenv… orelse return true= → on.
+- =TF_FLASHNEXT_ADMIT_RECLAIM=, =TF_FLASHNEXT_SUPERSEDE= (0029): engine reads
+  them as =on= when unset (one rank). The module's single-device service is
+  one rank, so both already apply.
+- =TF_FLASHNEXT_PROMPT_EXPERT_TILE= (0014-era): default 2 at one rank → on.
+- =TF_FLASHNEXT_YARN=: only meaningful past the 262,144 native window; the
+  module's =context= default is exactly 262,144, so YARN stays off. Only a
+  user override above 262,144 would need =TF_FLASHNEXT_YARN=4 — a one-line
+  module option *if* wanted; otherwise leave it out.
+
+The one genuinely new opt-in: =TENSORFOLD_RANDOM_SEED=1= (0031) — a request
+without a =seed= draws a random one instead of keyed-to-prompt. Default off.
+Add as a module option only if anyone wants OpenAI-style random seeds; nothing
+currently sets a seed, so behavior is unchanged either way.
+
+* Phase 1 — bump the pin
+
+In =packages/tensorfold-zig/src.nix=:
+
+#+begin_src nix
+  recipeSrc = fetchFromGitHub {
+    owner = "MiaAI-Lab";
+    repo = "Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold";
+    rev = "e1f564eb915bb5272474b6c1c527aec3b9ed3de6"; # main: 0001…0031
+    hash = "sha256-en1wtMTL33IG1XmWRuBM4TJg0biIX/9l1HnWWabXvv4=";
+  };
+#+end_src
+
+Update the =default.nix=/=src.nix= header comments as above.
+
+* Phase 2 — build
+
+- =aarch64-linux= only, builds on the Spark: =just colmena-spark-build=.
+- Build *while the model is stopped* / on a separate builder; the justfile caps
+  the Spark build at =--max-jobs 1 --cores 6= because an unbounded rebuild
+  OOM-killed the resident model (2026-10-14). 0012-era kernels + 0029/0030's
+  =lane_host/cuda_engine= edits make this a real rebuild, not a cache hit.
+- Watch for: 0029/0030's new =cuda.zig= build code against the nixpkgs
+  CUDA/nvcc on =sm121=, and the Triton AOT capture (spec unchanged, but the
+  toolchain drift can shift cubins — the package only checks =aot.json= and
+  cubins exist).
+- Check the build log for =PROBLEM= lines (the recipe fails on them; our
+  =flashnext_aot.py= runs with =|| true= so it needs eyeballing).
+
+* Phase 3 — deploy and verify
+
+- =just colmena-spark-apply= (restarts =tensorfold-zig=, reloads the vision
+  helper).
+- Text smoke: =curl :8888/v1/models= + a short chat.
+- Image smoke: a data-URL image request 200; journal shows =vision: 1
+  image(s)…=.
+- Behavior stayed the same because the engine behavior changes are all at
+  defaults: short regression on the checkpoint chat with vision on is enough.
+  Optional: burst ~20 tiny image requests and confirm the queue-full refusals
+  stay =503= (capacity-status patch working on the new recipe).
+
+* Phase 4 — rollback
+
+=git revert= of the =src.nix= pin; the boot menu / =colmena apply= of the
+previous commit still serves the old generation. Local patches untouched by
+this bump, so no patch-side rollback story changes.
+
+* Risks / open questions
+
+- *=zig-flashnext= is deleted upstream*: =db281878= still fetches (verified),
+  but it is now an unreferenced commit; a future TensorFold GC or a recipe
+  =-repin= is the only break. If the recipe ever moves off =db281878=, expect a
+  real re-base (upstream =main= restructured vision into =images.zig=/
+  =videos.zig= and dropped =native_helper=).
+- *0029 reclaim vs 0010 system cache*: 0029 frees kept prompt states in the
+  sequence pool; the module's =systemMemoryCache/ringCache= options manage the
+  native VMM rings (patch 0010). Orthogonal, but the first =--system-cache=
+  run on the new engine should get a watching eye.
+- *Decode/quality drift*: 0021/0029/0030 change admission and fill scheduling
+  even at defaults; a quick before/after with the repo's =tensorfold-tools= on
+  the same checkpoint would quantify it (nice-to-have, not required for the
+  bump).
