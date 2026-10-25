@@ -53,6 +53,12 @@
     hostname = "mist";
     workspaceDirectory = "workspaces";
     homeDirectory = "/Users/yuan";
+    # This machine is the colmena control host, and asche's closure cannot even be
+    # evaluated here without an x86_64-linux builder (ghc/IFD in its xmonad
+    # config), so the daemon dispatches those to misfit.
+    nix-builders = [
+      "ssh-ng://yuan@misfit.lan x86_64-linux /etc/nix/misfit-builder-key 8 4 big-parallel"
+    ];
   };
 
   # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and it picks its
