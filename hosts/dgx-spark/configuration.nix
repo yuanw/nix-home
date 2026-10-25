@@ -112,14 +112,12 @@
       # update` measured 3492 magma build steps alone.
       "https://dgx-spark-nixos.cachix.org"
       "https://nix-community.cachix.org"
-      "https://cache.nixos-cuda.org"
       "https://graham33.cachix.org"
       "https://ai.cachix.org"
     ];
     trusted-public-keys = [
       "dgx-spark-nixos.cachix.org-1:Ps3d91fOvYEtxhTS59k2S1Y3P7ld6ahhx7nHKKF3ojc="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
       "graham33.cachix.org-1:DqH72VpwSrACa3+L9eqh4bixjWx9IQUaxQtRh4gtkX8="
       "ai.cachix.org-1:N9dzRK+alWwoKXQlnn0H6aUx0lU/mspIoz8hMvGvbbc="
     ];

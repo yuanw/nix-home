@@ -26,7 +26,7 @@
 #    costs 3 min of refused images instead of 10. (Zig)
 #
 # Validated before the 0001…0031 bump: `nix build` yields bin/tensorfold-native,
-# 34 fatbins and a 302-cubin sm121 AOT set (see docs/tensorfold-zig-plan.org).
+# 36 fatbins and a 320-cubin sm121 AOT set (see docs/tensorfold-zig-plan.org).
 # 0012 adds CUDA kernels and 0014 one more, so the fatbin/cubin counts may
 # change; re-check the build log. The sandbox needs HOME/cache dirs under
 # $TMPDIR (Triton otherwise hits /homeless-shelter).

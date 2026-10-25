@@ -115,7 +115,7 @@ In =packages/tensorfold-zig/src.nix=:
 
 Update the =default.nix=/=src.nix= header comments as above.
 
-* Phase 2 — build
+* Phase 2 — build DONE (2026-10-26; built before the 0001…0031 bump: 36 fatbins, 320 cubins)
 
 - =aarch64-linux= only, builds on the Spark: =just colmena-spark-build=.
 - Build *while the model is stopped* / on a separate builder; the justfile caps
@@ -129,7 +129,29 @@ Update the =default.nix=/=src.nix= header comments as above.
 - Check the build log for =PROBLEM= lines (the recipe fails on them; our
   =flashnext_aot.py= runs with =|| true= so it needs eyeballing).
 
-* Phase 3 — deploy and verify
+* Phase 2b — find: dead =cache.nixos-cuda.org= was bricking every Spark build DONE
+
+First build attempts failed with fatal `unable to download
+'…/cache.nixos-cuda.org/<hash>.narinfo'` for the target output — the cache is
+*down* (connection refused from the Mac and the Spark; the successor
+`nix-cuda.cachix.org` 401s / does not exist publicly). It sat last in the
+Spark's substituter list, so a routine “output not in caches” lookup turned
+into a hard narinfo error. Fix, committed with the plan:
+
+- =hosts/dgx-spark/configuration.nix=: dropped =https://cache.nixos-cuda.org=
+  from =nix.settings.substituters= and its key from =trusted-public-keys=
+  (no public-cache entry is lost: the CUDA stack here comes from silver).
+- Live unblock for the build that applies the config: wrote a fixed
+  =/etc/nix/nix.conf= on the Spark (removing the dead URL) and restarted
+  =nix-daemon=. The next apply regenerates the file from the NixOS config.
+
+Result: =nix build …pkgs.tensorfold-zig= and =just colmena-spark-build= both
+succeed. The recipe's 19 patches (0001…0015 + 0021/0029/0030/0031) and local
+patches applied cleanly in the real build; 202 =PROBLEM= log lines are all the
+expected Triton-hash drift (=!= captured=), none fatal; 36 fatbins / 320
+cubins (same counts as the prior 0001…0015 package).
+
+* Phase 3 — deploy and verify DONE (2026-10-26)
 
 - =just colmena-spark-apply= (restarts =tensorfold-zig=, reloads the vision
   helper).
@@ -140,6 +162,17 @@ Update the =default.nix=/=src.nix= header comments as above.
   defaults: short regression on the checkpoint chat with vision on is enough.
   Optional: burst ~20 tiny image requests and confirm the queue-full refusals
   stay =503= (capacity-status patch working on the new recipe).
+
+Verified on the Spark:
+- service started; =/v1/models= lists =Qwen3.8-Flash-Next= ~80 s after start
+  (FP4 checkpoint already present in the HF cache, no re-download).
+- text: =SMOKE-OK= reply, MTP acceptance 79.5% (depth 6, product rule).
+- image: 1x1 red PNG → =Red=; journal =vision: 1 image(s), 0 video(s): 4
+  visual tokens of 67 prompt tokens= (helper loaded the 0.84 GiB tower in
+  11.3 s; self-test passed).
+- capacity-status: burst of 20 simultaneous image requests → 11× =503 image
+  request queue is full; retry shortly= + 9× 200 — refusals are retryable
+  503, not 400, so the patch works on the new recipe as designed.
 
 * Phase 4 — rollback
 
