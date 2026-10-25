@@ -24,6 +24,14 @@
     targetHost = "asche";
     targetUser = "yuanw";
     buildOnTarget = true;
+    # colmena prefixes its remote nix invocation with `sudo -H --` when the target
+    # user is not root, and asche still asks yuanw for a password, so the build
+    # died with "sudo: a terminal is required to read the password".  Dropping the
+    # escalation is enough here: modules/nix-custom-conf.nix puts my.username in
+    # trusted-users, so yuanw can realise a .drv without becoming root.  The
+    # alternative, security.sudo.wheelNeedsPassword = false (what misfit and
+    # dgx-spark do), would hand passwordless sudo to a laptop that travels.
+    privilegeEscalationCommand = [ ];
   };
 
   my = {
