@@ -61,6 +61,25 @@
     ];
   };
 
+  # Pinning misfit's host key is what lets the daemon build there at all; without
+  # it the ssh-ng session dies with "Host key verification failed", because the
+  # daemon runs as root and root's known_hosts had never seen misfit.  This is the
+  # trick nix-darwin's own linux-builder uses (modules/nix/linux-builder.nix:212):
+  # /etc/ssh/ssh_config has `Include /etc/ssh/ssh_config.d/*`, so a drop-in here
+  # is read by root's ssh too and nothing has to live under /var/root.
+  #
+  # IdentitiesOnly is deliberately not set: the daemon passes its own -i, and
+  # forcing it here would break interactive `ssh misfit` from the agent.
+  environment.etc."nix/misfit-builder-known_hosts".text = ''
+    misfit.lan ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDx+Da0GK5PP3hskYnLn1zd/2iPnLMKl0S6Q2o+f/DEQ
+  '';
+
+  environment.etc."ssh/ssh_config.d/100-misfit-builder.conf".text = ''
+    Host misfit.lan
+      UserKnownHostsFile /etc/nix/misfit-builder-known_hosts
+      StrictHostKeyChecking yes
+  '';
+
   # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and it picks its
   # speech-to-text backend by looking names up on that PATH: $TRANSCRIBE_ASR_CMD
   # if something sets it (nothing here does now), then $WHISPER_MODEL with
