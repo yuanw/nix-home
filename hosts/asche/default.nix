@@ -17,8 +17,13 @@
 
   # colmena deployment configuration
   deployment = {
-    # Local laptop — omit targetHost to deploy locally by default
+    # buildOnTarget like misfit and dgx-spark: without it colmena builds on the
+    # control machine, and the Mac is aarch64-darwin with no x86_64-linux builder,
+    # so a remote apply dies on asche's ghc/IFD xmonad config asking for a
+    # 'x86_64-linux' it cannot get.  Deploying on the laptop itself still works.
+    targetHost = "asche";
     targetUser = "yuanw";
+    buildOnTarget = true;
   };
 
   my = {
@@ -31,9 +36,13 @@
     font = "PragmataPro Liga";
     monoFont = "PragmataPro Mono Liga";
     # asche travels and silver has no tailscale (D2 in
-    # docs/harmonia-build-hub.org), so off-LAN this substituter would only add a
-    # connect-timeout to every public-cache miss.
-    silver-cache.enable = false;
+    # docs/harmonia-build-hub.org), so it cannot sit at Harmonia's advertised
+    # Priority 10 ahead of cache.nixos.org: off-LAN every lookup would pay the
+    # connect-timeout first.  At priority 60 the public cache is tried first and
+    # silver's 5 s timeout is only paid on paths the public cache does not have,
+    # which is what makes it safe to leave on permanently.
+    silver-cache.enable = true;
+    silver-cache.url = "http://silver.lan:5000?priority=60";
   };
   home-manager.users.${config.my.username} = {
     home.file = {
