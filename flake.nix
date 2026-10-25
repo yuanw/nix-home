@@ -14,7 +14,7 @@
     # ("eval: default to the system this build is for"), so `use flake` cannot
     # work off linux at all. Point this back at numtide/iets when that lands.
     # Keeps its own nixpkgs on purpose: its packages must not follow ours.
-    iets.url = "github:yuanwang-wf/iets/eval-default-system";
+    iets.url = "github:numtide/iets";
 
     mics-skills.url = "github:Mic92/mics-skills";
 

@@ -139,10 +139,12 @@ in
       services.gnome-keyring.enable = true;
       # trayer is gone from nixpkgs: pkgs/top-level/aliases.nix throws for it
       # since 2026-10-07 ("depended on the deprecated GTK2 engine") and there is
-      # no GTK3 variant to move to.  stalonetray is an X11 XEmbed tray host with
-      # no GTK dependency and is already in modules/linux_packages.nix.  The tray
-      # is not decorative here: services.pasystray and blueman-applet both need
-      # a host.  trayer's edge=top/align=right/width=10/height=36/tint map to
+      # no GTK3 variant to move to.  The alternative on main pins trayer to
+      # nixpkgs-stable, whose own comment calls that temporary and names this as
+      # the fix, so stalonetray wins: an X11 XEmbed tray host with no GTK
+      # dependency, already in modules/linux_packages.nix.  The tray is not
+      # decorative here -- services.pasystray and blueman-applet both need a
+      # host.  trayer's edge=top/align=right/width=10/height=36/tint map to
       # geometry, grow_gravity, slot_size and background.
       services.stalonetray = {
         enable = true;
