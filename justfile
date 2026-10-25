@@ -158,7 +158,8 @@ cache-build-one HOST:
     echo "drv: $drv"; \
     {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
     for attempt in 1 2 3; do \
-        if ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
+        if ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4 -o ConnectTimeout=15 \
+            {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
             --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"; then \
             break; \
         fi; \
