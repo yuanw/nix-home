@@ -74,7 +74,7 @@
     enable = true;
     #https://github.com/georgewhewell/nixos-host/blob/329266870c2b382cc8a57bd7658e3e32752dc14c/services/home-assistant/default.nix
     # Reflect incoming mDNS requests to all allowed network interfaces.for homekit bridge
-    reflector = true;
+    settings.reflector.enable-reflector = true;
     openFirewall = true;
 
   };
@@ -397,6 +397,14 @@
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMSvr2qkdnG03/pGLo3aCFTnwmvojKO6m/W74ckC1RPW me@yuanwang.ca"
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+      # silver's nix daemon logs in as yuan to build x86_64-linux closures here
+      # (docs/harmonia-build-hub.org 3.1); the private half is
+      # secrets/nix-builder-key.age on silver.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeGertBlb+dywvvhHD4vpxH3D7B85q7jkzWSKatVIbJ silver-build-hub"
+      # mist's own daemon logs in as yuan as well, to remote-build x86_64-linux drvs
+      # it cannot evaluate (hosts/mist.nix nix-builders).  Private half is
+      # /etc/nix/misfit-builder-key on mist, deliberately not in the repo.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJUOVHRIj0Ssus/nrgkatoVcyCi3iPbTNm9E8ElRvi56 mist-nix-builder"
     ];
     extraGroups = [
       "wheel"

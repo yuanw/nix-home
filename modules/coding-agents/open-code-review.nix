@@ -41,6 +41,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    # The ocr package ships both upstream skills; hand them to Pi.
+    modules.pi.rawSkills = map (skill: "${cfg.package}/share/skills/open-code-review/${skill}") [
+      "open-code-review"
+      "open-code-review-delegate"
+    ];
+
     home-manager.users.${config.my.username} = {
       home.packages = [ cfg.package ];
 

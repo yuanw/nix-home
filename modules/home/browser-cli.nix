@@ -14,7 +14,20 @@ let
   enable = cfg.enable or false && lib.elem "browser-cli" (cfg.skills or [ ]);
   micsSkills = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
   serverBin = "${micsSkills.browser-cli}/bin/browser-cli-server";
+  clientBin = "${micsSkills.browser-cli}/bin/browser-cli";
   wrapperPath = "${config.home.homeDirectory}/.local/bin/browser-cli-server-wrapper";
+
+  # browser-cli derives its Unix socket from $TMPDIR, but direnv/`nix develop`
+  # rewrite TMPDIR per shell, so the CLI looks in a different directory than
+  # the bridge the browser spawned. get_socket_path() prefers XDG_RUNTIME_DIR,
+  # so pin it for both ends. The dir must pre-exist mode 0700: only the $TMPDIR
+  # branch of get_socket_path() creates it.
+  runtimeDir = "${config.home.homeDirectory}/.cache/browser-cli/runtime";
+  pinSocketDir = ''
+    export XDG_RUNTIME_DIR="${runtimeDir}"
+    mkdir -p -m 0700 "$XDG_RUNTIME_DIR"
+    chmod 700 "$XDG_RUNTIME_DIR"
+  '';
 
   librewolfCfg = osConfig.modules.browsers.librewolf or { enable = false; };
   librewolfPkg = librewolfCfg.pkg or pkgs.librewolf;
@@ -59,7 +72,18 @@ in
         executable = true;
         text = ''
           #!${pkgs.bash}/bin/bash
+          ${pinSocketDir}
           exec ${serverBin} "$@"
+        '';
+      };
+      # Shadows the profile's browser-cli (~/.local/bin precedes /etc/profiles
+      # in $PATH) so the CLI resolves the socket the bridge is listening on.
+      ".local/bin/browser-cli" = {
+        executable = true;
+        text = ''
+          #!${pkgs.bash}/bin/bash
+          ${pinSocketDir}
+          exec ${clientBin} "$@"
         '';
       };
     }
@@ -77,9 +101,7 @@ in
         exit 0
       fi
       pkill -f '[b]rowser-cli-server' 2>/dev/null || true
-      if [ -n "''${TMPDIR:-}" ] && [ -d "''${TMPDIR}/browser-cli" ]; then
-        rm -f "''${TMPDIR}/browser-cli/browser-cli.sock"
-      fi
+      rm -f "${runtimeDir}/browser-cli.sock"
     '';
   };
 }

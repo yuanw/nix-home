@@ -13,6 +13,10 @@
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
     ../../modules/services/monitoring/pcp.nix
+    # dgx-spark never imports myModules.common and carries its own substituter
+    # list, so the LAN cache consumer has to be imported here
+    # (docs/harmonia-build-hub.org Phase 2, finding 3).
+    ../../modules/services/cache/consumer.nix
     ./disk-config.nix
     ./configuration.nix
   ];

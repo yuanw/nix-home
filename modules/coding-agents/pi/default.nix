@@ -197,13 +197,7 @@ in
             }
           ) cfg.extensions;
 
-          rawSkills =
-            cfg.rawSkills
-            ++ lib.optional (config.modules.herdr.enable or false
-            ) "${config.modules.herdr.package}/share/skills/herdr/herdr"
-            ++
-              lib.optional (config.modules.open-code-review.enable or false)
-                "${config.modules.open-code-review.package}/share/skills/open-code-review/open-code-review-delegate";
+          rawSkills = cfg.rawSkills;
           # Only declare providers that have real models.json fields here.
           # Extension-registered ones (e.g. cursor-agent via pi-cursor-agent)
           # must not get an empty stub — Pi rejects `providers.<name>: {}` with

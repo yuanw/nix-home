@@ -303,6 +303,8 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    modules.pi.rawSkills = [ "${cfg.package}/share/skills/herdr/herdr" ];
+
     home-manager.users.${config.my.username} =
       hm@{
         pkgs,

@@ -53,7 +53,32 @@
     hostname = "mist";
     workspaceDirectory = "workspaces";
     homeDirectory = "/Users/yuan";
+    # This machine is the colmena control host, and asche's closure cannot even be
+    # evaluated here without an x86_64-linux builder (ghc/IFD in its xmonad
+    # config), so the daemon dispatches those to misfit.
+    nix-builders = [
+      "ssh-ng://yuan@misfit.lan x86_64-linux /etc/nix/misfit-builder-key 8 4 big-parallel"
+    ];
   };
+
+  # Pinning misfit's host key is what lets the daemon build there at all; without
+  # it the ssh-ng session dies with "Host key verification failed", because the
+  # daemon runs as root and root's known_hosts had never seen misfit.  This is the
+  # trick nix-darwin's own linux-builder uses (modules/nix/linux-builder.nix:212):
+  # /etc/ssh/ssh_config has `Include /etc/ssh/ssh_config.d/*`, so a drop-in here
+  # is read by root's ssh too and nothing has to live under /var/root.
+  #
+  # IdentitiesOnly is deliberately not set: the daemon passes its own -i, and
+  # forcing it here would break interactive `ssh misfit` from the agent.
+  environment.etc."nix/misfit-builder-known_hosts".text = ''
+    misfit.lan ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDx+Da0GK5PP3hskYnLn1zd/2iPnLMKl0S6Q2o+f/DEQ
+  '';
+
+  environment.etc."ssh/ssh_config.d/100-misfit-builder.conf".text = ''
+    Host misfit.lan
+      UserKnownHostsFile /etc/nix/misfit-builder-known_hosts
+      StrictHostKeyChecking yes
+  '';
 
   # `transcribe` (below) drives yt-dlp and ffmpeg off PATH, and it picks its
   # speech-to-text backend by looking names up on that PATH: $TRANSCRIBE_ASR_CMD
@@ -74,8 +99,14 @@
     "${pkgs.whisper-cpp}/bin"
   ];
   # The phone's own key (Termius).  Public, but it does unlock this box.
+  # The silver-build-hub key is here too so silver's nix daemon can log in as
+  # yuan and build aarch64-darwin closures (docs/harmonia-build-hub.org 3.1).
+  # nix-darwin lands these in /etc/ssh/nix_authorized_keys.d/yuan, which sshd
+  # reads through AuthorizedKeysCommand — *not* ~/.ssh/authorized_keys, which
+  # nix-darwin never writes on macOS.  Check that file after darwin-rebuild.
   users.users.${config.my.username}.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHxznM8gR74HduksHumFTEBN0JjMmKdEIS+dpEyAFoZ5"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeGertBlb+dywvvhHD4vpxH3D7B85q7jkzWSKatVIbJ silver-build-hub"
   ];
 
   home-manager.users.${config.my.username} = {

@@ -2,7 +2,10 @@
 
 with pkgs;
 [
-  #cacert
+  # Nix builds of curl/openssl so the shell does not fall back to Apple's
+  # SecureTransport trust store (eMudhra intermediate CA compromise, 2026-10).
+  curl
+  openssl
   clang
   coreutils-prefixed
   moreutils

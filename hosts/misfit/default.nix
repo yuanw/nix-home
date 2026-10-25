@@ -11,6 +11,9 @@
     ../../modules/isponsorblocktv.nix
     ../../modules/healthsave-observatory.nix
     ../../modules/caddy.nix
+    # misfit never imports myModules.common, so the LAN cache consumer has to be
+    # imported here (docs/harmonia-build-hub.org Phase 2, finding 3).
+    ../../modules/services/cache/consumer.nix
     ./configuration.nix
   ];
 
@@ -33,7 +36,7 @@
   # release from nixos-26.05
   nixpkgs.overlays = [
     (_final: prev: {
-      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.system})
+      inherit (inputs.nixpkgs-stable.legacyPackages.${prev.stdenv.hostPlatform.system})
         jellyfin
         jellyfin-web
         jellyfin-ffmpeg

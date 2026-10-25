@@ -9,6 +9,13 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
+    # Rust evaluator + direnv integration (modules/home/iets.nix). Forked:
+    # upstream's print-dev-env resolves devShells.x86_64-linux on every host
+    # ("eval: default to the system this build is for"), so `use flake` cannot
+    # work off linux at all. Point this back at numtide/iets when that lands.
+    # Keeps its own nixpkgs on purpose: its packages must not follow ours.
+    iets.url = "github:numtide/iets";
+
     mics-skills.url = "github:Mic92/mics-skills";
 
     flake-prompt = {
@@ -17,7 +24,7 @@
     };
 
     # Fork: adds the upstream skills to the open-code-review package.
-    llm-agents.url = "github:yuanwang-wf/llm-agents.nix";
+    llm-agents.url = "github:yuanw/llm-agents.nix";
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
     # servers and extension packages. Follows this repo's nixpkgs/flake-prompt
     # and the llm-agents already used for pkgs.llm-agents.pi, so Pi stays one
@@ -114,7 +121,16 @@
     # mono-gateway.ask.ipsecOffload (see hosts/mono-gateway/default.nix). Both
     # are open upstream (we-are-mono/nix#4, #5); flip this back to
     # github:we-are-mono/nix once they merge.
-    mono-nix.url = "github:yuanw/mono-gateway-nix";
+    #
+    # shortcut: pinned to 11071e2, the merge just before the fork's mkAfter fix
+    # (473e1a3). That fix is what makes ask-offload.nix's postPatch assertion
+    # run, and it fails on the NXP tree ("xfrm_policy.c ipsec_flow_add call
+    # sites not short-circuited"), so the kernel cannot be built at master.
+    # Without mkAfter the override is shadowed by the flake overlay, so
+    # ask.ipsecOffload = false is inert -- the same state the running board's
+    # kernel was built in. Upgrade: teach the sed/assert about
+    # nxp-qoriq/linux@df24f942 and drop the rev here.
+    mono-nix.url = "github:yuanw/mono-gateway-nix/11071e2502634ca224378bc68012d98fcd8cf2a7";
     # Private modules live in a separate repo; see nix-home-private/README.md.
     #
     # git+https, not github:, deliberately: a github: input is fetched as a tarball
