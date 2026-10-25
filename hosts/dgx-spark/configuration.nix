@@ -160,6 +160,18 @@
     MemoryHigh=32G
     MemoryMax=40G
   '';
+
+  # ...and the same cap again for the other way a build arrives.  user-1000.slice
+  # only covers builds started from a yuanw login session (colmena's
+  # buildOnTarget).  When silver dispatches one over ssh-ng, the remote
+  # nix-daemon — root, in system.slice — forks the builder, so the slice cap
+  # never sees it: measured during the 2026-10-25 bump warm, five cc1plus at
+  # 1.2G each with the slice sitting at 542M.  Both paths need a cap.
+  systemd.services.nix-daemon.serviceConfig = {
+    CPUWeight = 20;
+    MemoryHigh = "32G";
+    MemoryMax = "40G";
+  };
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
   # vLLM 0.16 has known CVEs (fixed in 0.23). Permit until vllm-aeon builds.

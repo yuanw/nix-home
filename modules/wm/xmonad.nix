@@ -2,7 +2,6 @@
   config,
   lib,
   pkgs,
-  inputs,
   ...
 }:
 with lib;
@@ -138,23 +137,27 @@ in
         };
       };
       services.gnome-keyring.enable = true;
-      services.trayer = {
-        # shortcut: upstream nixpkgs-unstable throws on trayer (removed 2026-10-07,
-        # gtk2 dep). The pinned nixpkgs-stable still ships it; move this service to
-        # stalonetray (already in linux_packages) if the stable pin drops gtk2 too.
-        package = inputs.nixpkgs-stable.legacyPackages.${pkgs.system}.trayer;
+      # trayer is gone from nixpkgs: pkgs/top-level/aliases.nix throws for it
+      # since 2026-10-07 ("depended on the deprecated GTK2 engine") and there is
+      # no GTK3 variant to move to.  The alternative on main pins trayer to
+      # nixpkgs-stable, whose own comment calls that temporary and names this as
+      # the fix, so stalonetray wins: an X11 XEmbed tray host with no GTK
+      # dependency, already in modules/linux_packages.nix.  The tray is not
+      # decorative here -- services.pasystray and blueman-applet both need a
+      # host.  trayer's edge=top/align=right/width=10/height=36/tint map to
+      # geometry, grow_gravity, slot_size and background.
+      services.stalonetray = {
         enable = true;
-        settings = {
-          edge = "top";
-          align = "right";
-          SetPartialStrut = true;
-          monitor = "primary";
-          expand = true;
-          width = 10;
+        config = {
+          geometry = "10x1-0+0";
+          slot_size = 36;
+          icon_size = 30;
+          background = "#5f5f5f";
           transparent = true;
-          height = 36;
-          SetDockType = true;
-          tint = "0x5f5f5f";
+          sticky = true;
+          below = true;
+          decorations = null;
+          grow_gravity = "NORTH_EAST";
         };
       };
       xresources.properties = {

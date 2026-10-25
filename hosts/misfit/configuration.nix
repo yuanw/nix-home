@@ -389,6 +389,10 @@
       # (docs/harmonia-build-hub.org 3.1); the private half is
       # secrets/nix-builder-key.age on silver.
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILeGertBlb+dywvvhHD4vpxH3D7B85q7jkzWSKatVIbJ silver-build-hub"
+      # mist's own daemon logs in as yuan as well, to remote-build x86_64-linux drvs
+      # it cannot evaluate (hosts/mist.nix nix-builders).  Private half is
+      # /etc/nix/misfit-builder-key on mist, deliberately not in the repo.
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJUOVHRIj0Ssus/nrgkatoVcyCi3iPbTNm9E8ElRvi56 mist-nix-builder"
     ];
     extraGroups = [
       "wheel"

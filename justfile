@@ -83,16 +83,21 @@ update-wk:
 
 # Run colmena against one host from the hive, with an ssh agent available to the
 # target (private flake inputs get fetched there when buildOnTarget is set).
+#
+# NIX_CONFIG has to be passed explicitly: hosts that reach the private flake
+# (asche, the work laptop) evaluate its flake.nix, which uses the |> pipe
+# operator, and colmena does not inherit the feature from nix.conf.
+# darwin-rebuild below already does the same thing for the same reason.
 colmena-run ACTION HOST:
     @set -e; \
     if [ "$(uname)" = "Darwin" ]; then \
         ssh-add -l 2>/dev/null || ssh-add --apple-use-keychain ~/.ssh/id_ed25519; \
-        colmena {{ACTION}} --on {{HOST}}; \
+        env NIX_CONFIG="{{nix_config}}" colmena {{ACTION}} --on {{HOST}}; \
     else \
         eval `ssh-agent -s`; \
         trap 'ssh-agent -k >/dev/null' EXIT; \
         setsid ssh-add ~/.ssh/id_ed25519 < /dev/null; \
-        colmena {{ACTION}} --on {{HOST}}; \
+        env NIX_CONFIG="{{nix_config}}" colmena {{ACTION}} --on {{HOST}}; \
     fi
 
 # build the closure on a remote host (no activation).  HOST is a hive name:
@@ -158,7 +163,8 @@ cache-build-one HOST:
     echo "drv: $drv"; \
     {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
     for attempt in 1 2 3; do \
-        if ssh {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
+        if ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=4 -o ConnectTimeout=15 \
+            {{silver-ssh}} "nix-store --realise '$drv' --max-jobs 0 --keep-going \
             --add-root /nix/var/nix/gcroots/cache/{{HOST}} --indirect"; then \
             break; \
         fi; \
