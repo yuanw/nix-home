@@ -124,10 +124,19 @@ in
           # buildPythonPackage maps `doCheck` → underlying `doInstallCheck`; overrideAttrs on
           # `doCheck` does not skip pytest. Use overridePythonAttrs (all hosts; mcp-atlassian + HM MCP).
           python313Packages = _prev.python313Packages.overrideScope (
-            _pyfinal: pyprev: {
+            pyfinal: pyprev: {
               fastmcp = pyprev.fastmcp.overridePythonAttrs (_: {
                 doCheck = false;
               });
+              # nixpkgs bumped mcp to 2.x, which fastmcp 3.x cannot import (and which marks
+              # fastmcp-slim broken). Keep the stable 1.x sdk until fastmcp 4 lands in nixpkgs.
+              # shortcut: pinned from nixpkgs-stable, drop when unstable's fastmcp supports mcp 2
+              mcp =
+                (pyfinal.callPackage "${inputs.nixpkgs-stable}/pkgs/development/python-modules/mcp" { })
+                .overridePythonAttrs
+                  (_: {
+                    doCheck = false;
+                  });
             }
           );
           #gjs = inputs'.nixpkgs-stable.legacyPackages.gjs;
