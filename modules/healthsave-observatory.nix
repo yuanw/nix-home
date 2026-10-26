@@ -7,6 +7,8 @@
 
 let
   inherit (lib)
+    mkBefore
+    mkDefault
     mkEnableOption
     mkIf
     mkOption
@@ -14,25 +16,17 @@ let
     ;
   cfg = config.services.healthsave-observatory;
 
-  # Upstream publishes no package and its compose file does `build: .`, but the
-  # release workflow *does* push the api/worker image to ghcr on every tag
-  # (.github/workflows/release.yml). schema.sql and the analysis config are
-  # fetched from the same tag so they cannot drift from the image's code.
+  # Upstream publishes no package and its compose file does `build: .`, so the
+  # release tag is the thing we pin: the Python derivation, the dashboards, the
+  # migrations and the analysis config all come from v${version}, one hash.
   version = "1.1.0";
   raw = "https://raw.githubusercontent.com/umutkeltek/healthsave-observatory/v${version}";
-
-  schemaSql = pkgs.fetchurl {
-    url = "${raw}/db/schema.sql";
-    hash = "sha256-sy0OcWw0uWFCdwk5CTMCB+I+fU7DiutCGKFic3ShY/w=";
-  };
 
   # Upstream's example config: every analysis job off, no LLM egress.
   defaultAnalysisConfig = pkgs.fetchurl {
     url = "${raw}/config.yaml.example";
     hash = "sha256-An0CqFEC4v7AN7m2NOU6oLcLBcdc+ZOCqh5xUbpQ7r4=";
   };
-
-  podman = "${pkgs.podman}/bin/podman";
 
   # The api/worker/migrate Python derivation (packages/healthsave-observatory.nix).
   # Instantiated here rather than taken from pkgs: colmena evaluates this node
@@ -57,78 +51,20 @@ let
 
   runDir = "/run/healthsave";
   appEnv = "${runDir}/app.env";
-  dbEnv = "${runDir}/db.env";
   grafanaEnv = "${runDir}/grafana.env";
-
-  # The db container's first boot runs schema.sql through the postgres
-  # entrypoint, whose *temporary* server accepts connections long before the
-  # tables exist. Polling for the first table is what makes "migrate after db is
-  # up" actually mean "after the schema is live".
-  waitForSchema = pkgs.writeText "wait-for-schema.py" ''
-    import asyncio
-    import os
-    import sys
-    import time
-
-    import asyncpg
-
-    # asyncpg is not SQLAlchemy: it rejects the `+asyncpg` scheme that
-    # DATABASE_URL carries for the app. Drop the driver suffix.
-    scheme, _, rest = os.environ["DATABASE_URL"].partition("://")
-    dsn = scheme.split("+")[0] + "://" + rest
-    deadline = time.monotonic() + 300
-
-    async def ready() -> bool:
-        conn = await asyncpg.connect(dsn, timeout=5)
-        try:
-            return bool(
-                await conn.fetchval(
-                    "select count(*) from pg_tables where tablename = 'devices'"
-                )
-            )
-        finally:
-            await conn.close()
-
-    async def main() -> int:
-        while time.monotonic() < deadline:
-            try:
-                # wait_for, not a bare await: a connect that lands on the
-                # entrypoint's temporary server during initdb can stall forever
-                if await asyncio.wait_for(ready(), timeout=15):
-                    return 0
-            except (asyncio.TimeoutError, OSError, asyncpg.PostgresError):
-                pass
-            await asyncio.sleep(2)
-        print("timed out waiting for the healthsave schema", file=sys.stderr)
-        return 1
-
-    sys.exit(asyncio.run(main()))
-  '';
 
 in
 {
   options.services.healthsave-observatory = {
-    enable = mkEnableOption "HealthSave Observatory (TimescaleDB + FastAPI ingest API + analysis worker, podman)";
-
-    image = mkOption {
-      type = types.str;
-      default = "ghcr.io/umutkeltek/healthsave-observatory:v${version}";
-      description = "api/worker/migrate image (one image, three commands).";
-    };
-
-    dbImage = mkOption {
-      type = types.str;
-      default = "docker.io/timescale/timescaledb:2.17.2-pg16";
-      description = "Postgres image carrying the timescaledb extension.";
-    };
+    enable = mkEnableOption "HealthSave Observatory (TimescaleDB + FastAPI ingest API + analysis worker, native nixos services)";
 
     envFile = mkOption {
       type = types.path;
       example = "/run/agenix/healthsave-env";
       description = ''
         Decrypted secret with at least DB_PASSWORD and API_KEY. Read only by the
-        env-rendering unit (as root); the containers get the generated copies
-        under ${runDir}.
+        env-rendering unit (as root); the api/worker/grafana units get the
+        generated copies under ${runDir}.
       '';
     };
 
@@ -136,9 +72,8 @@ in
       type = types.str;
       default = "healthsave";
       description = ''
-        Owns the data dir and the generated env files. The containers themselves
-        run rootful (see the note in the config block): rootless netavark on this
-        nixpkgs drops container-to-container TCP.
+        Owns the data dir and the generated env files, and runs the api/worker
+        units. The database runs as `postgres`, as everywhere else on nixos.
       '';
     };
 
@@ -163,10 +98,8 @@ in
       '';
     };
 
-    # Host networking, as upstream's compose reaches the DB too: everything is on
-    # the host's loopback and nothing is published on a LAN interface. Rootless
-    # `--network=host` does NOT share the host netns here (verified on the box),
-    # which is why these units are rootful.
+    # Loopback only, the way the container stack was: nothing is published on a
+    # LAN interface, and caddy is the only door.
     apiBind = mkOption {
       type = types.str;
       default = "127.0.0.1";
@@ -192,7 +125,7 @@ in
     analysisConfigFile = mkOption {
       type = types.path;
       default = defaultAnalysisConfig;
-      description = "config.yaml mounted read-only at /app/config.yaml (upstream ships every job off).";
+      description = "config.yaml handed to the api/worker as ANALYSIS_CONFIG (upstream ships every job off).";
     };
 
     grafana = mkEnableOption "Grafana dashboards over the observatory database (nixpkgs grafana, loopback + caddy)";
@@ -216,8 +149,9 @@ in
 
   config = mkIf cfg.enable {
     # The Python derivation carries its own version + tarball hash; if it ever
-    # disagrees with the image tag above, fail activation rather than serve the
-    # dashboards from one release and the api/worker from another.
+    # disagrees with the tag this module fetches its source from, fail activation
+    # rather than serve the dashboards from one release and the api/worker from
+    # another.
     assertions = [
       {
         assertion = healthsavePkg.version == version;
@@ -225,16 +159,145 @@ in
       }
     ];
 
-    # Rootful on purpose. Upstream ships a docker-compose stack whose containers
-    # are rootful too, and on this nixpkgs (podman 5.8.9 / netavark) a rootless
-    # deployment was measured broken both ways: a `--network=host` client could
-    # not reach the db's loopback, and a client on a private netavark bridge timed
-    # out on TCP to the db container (DNS resolved, postgres accepted on its own
-    # eth0, so the drop is in netavark's rootless path). Revisit rootless only
-    # with a working nftables/netavark setup — then set `podman.user = cfg.user`.
-    virtualisation.containers.enable = true;
-    virtualisation.podman.enable = true;
+    # Native, not containerised.  The containers existed only because rootless
+    # podman/netavark on this nixpkgs (5.8.9) was measured broken both ways — a
+    # `--network=host` client could not reach the db's loopback, and a client on a
+    # private netavark bridge timed out on TCP while DNS resolved and postgres
+    # accepted on its own eth0 — and running them rootful to work around that put a
+    # PHI workload on root.  Native deletes the runtime and the privilege together.
+    services.postgresql = {
+      enable = true;
 
+      # The extension the container image baked in, from postgresql_16's own
+      # package set.  `withPackages`, not `pkgs.timescaledb` directly: the latter is
+      # the bare extension and has no `psqlSchema`, which the postgresql module
+      # reads (measured: "attribute 'psqlSchema' missing").
+      package = pkgs.postgresql_16.withPackages (ps: [ ps.timescaledb ]);
+
+      # In place on the 62 MB the container left behind: same PG major (16), so the
+      # cluster opens where it was and the plan's dump/restore step collapsed to a
+      # timescaledb version roll-forward.  The tree arrives owned by the image's
+      # uid 70, which healthsave-db-adopt hands to `postgres` before the first
+      # start.
+      dataDir = "${cfg.dataDir}/pgdata";
+
+      settings = {
+        # The image baked this in.  Without it create_hypertable fails, and the
+        # failure looks like a schema bug rather than a missing preload.
+        shared_preload_libraries = "timescaledb";
+        # mkDefault: the postgresql module already mkDefaults listen_addresses to
+        # "localhost", and two equal-priority definitions are an eval error.
+        listen_addresses = mkDefault cfg.dbBind;
+        port = mkDefault cfg.dbPort;
+      };
+    };
+
+    # Both loopback methods stated explicitly, because nixpkgs' default is `md5`
+    # and a PG16 role stores a scram-sha-256 verifier — an md5 rule cannot
+    # authenticate against that, so the api's TCP connection would die with
+    # "password authentication failed".  The role was created by the container
+    # entrypoint and only one of the two verifiers can match; which one is visible
+    # with `select substring(rolpassword,1,14) from pg_authid`, and the loser can
+    # then be deleted.  Socket stays `peer` via the nixos default, which is how the
+    # units below and any administration connect.
+    services.postgresql.authentication = mkBefore ''
+      host    ${dbName} ${dbUser}  127.0.0.1/32  scram-sha-256
+      host    ${dbName} ${dbUser}  127.0.0.1/32  md5
+      host    ${dbName} ${dbUser}  ::1/128       scram-sha-256
+      host    ${dbName} ${dbUser}  ::1/128       md5
+    '';
+
+    # Both already exist inside the PGDATA; these make a rebuilt dataset come up
+    # with the same shape and are no-ops otherwise.
+    services.postgresql.ensureUsers = [
+      {
+        name = dbUser;
+        ensureDBOwnership = true;
+      }
+    ];
+    services.postgresql.ensureDatabases = [ dbName ];
+
+    # The container was killed, not shut down: the tree is 0700 and owned by the
+    # image's uid 70, which the nixos `postgres` user cannot read, and its
+    # postmaster.pid is days stale (postgres refuses to start if that pid has been
+    # reused).  Both are one-shot fixes; the ownership test is what keeps this from
+    # ever chowning behind a running server's back.
+    systemd.services.healthsave-db-adopt = {
+      description = "Hand the healthsave PGDATA to the postgres user";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "healthsave-env.service" ];
+      requires = [ "healthsave-env.service" ];
+      before = [ "postgresql.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "healthsave-db-adopt" ''
+          set -eu
+          pgdata=${cfg.dataDir}/pgdata
+          if [ "$(stat -c %U "$pgdata")" != postgres ]; then
+            chown -R postgres:postgres "$pgdata"
+          fi
+          chmod 700 "$pgdata"
+          rm -f "$pgdata/postmaster.pid"            # container was killed, not stopped
+        '';
+      };
+    };
+
+    # Timescale's library cannot serve a catalog still at 2.17 — the extension has
+    # to be rolled forward before anything writes to a hypertable.  Peer auth over
+    # the socket as `postgres`, so no password in the store or on a command line,
+    # and `ALTER EXTENSION ... UPDATE` is a no-op once current, which makes it safe
+    # on every activation including a nixpkgs bump.
+    systemd.services.healthsave-db-upgrade = {
+      description = "Roll the timescaledb extension forward";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "postgresql.service" ];
+      requires = [ "postgresql.service" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = "postgres";
+        ExecStart = pkgs.writeShellScript "healthsave-db-upgrade" ''
+          set -eu
+          exec ${config.services.postgresql.package}/bin/psql -h /run/postgresql -d ${dbName} \
+            -v ON_ERROR_STOP=1 -c 'ALTER EXTENSION timescaledb UPDATE;'
+        '';
+      };
+    };
+
+    # Dirs are created here rather than by a tmpfiles rule: activation does not
+    # re-run systemd-tmpfiles-setup for a freshly added rule. DB_PASSWORD lives in
+    # one place — DATABASE_URL (asyncpg, for api/worker/migrate) is derived from it
+    # here instead of being pasted into the secret twice.
+    systemd.services.healthsave-env = {
+      description = "HealthSave Observatory directories and environment files";
+      wantedBy = [ "multi-user.target" ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        ExecStart = pkgs.writeShellScript "healthsave-env" ''
+          set -eu
+          # install -d also fixes ownership on a fresh dataset mount, which
+          # arrives root:root from `zfs create`. PGDATA's own ownership is the
+          # adopt unit's business, not this one's.
+          install -d -m 0750 -o ${cfg.user} -g ${cfg.group} ${cfg.dataDir}
+          install -d -m 0700 ${cfg.dataDir}/pgdata
+          . ${cfg.envFile}
+          install -d -m 700 ${runDir}
+          {
+            cat ${cfg.envFile}
+            printf 'DATABASE_URL=postgresql+asyncpg://%s:%s@%s:%s/%s\n' \
+              '${dbUser}' "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' '${dbName}'
+          } > ${appEnv}
+          printf 'DB_PASSWORD=%s\nHDH_GRAFANA_DATASOURCE_URL=%s:%s\n' \
+            "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' > ${grafanaEnv}
+          chmod 600 ${appEnv} ${grafanaEnv}
+          chown ${cfg.user}:${cfg.group} ${appEnv} ${grafanaEnv}
+        '';
+      };
+    };
+
+    # nixpkgs grafana rather than upstream's container: the only thing that
     users.groups.${cfg.group} = { };
     users.users.${cfg.user} = {
       isSystemUser = true;
@@ -261,138 +324,6 @@ in
       script = ''
         zfs create -p -o mountpoint=legacy ${cfg.dataset} || true
       '';
-    };
-
-    # Dirs are created here rather than by a tmpfiles rule: activation does not
-    # re-run systemd-tmpfiles-setup for a freshly added rule. DB_PASSWORD stays in
-    # one place — DATABASE_URL (asyncpg, for api/worker/migrate) and
-    # POSTGRES_PASSWORD (for the db container) are derived here instead of being
-    # pasted into the secret twice.
-    systemd.services.healthsave-env = {
-      description = "HealthSave Observatory directories and environment files";
-      wantedBy = [ "multi-user.target" ];
-      before = [
-        "podman-healthsave-db.service"
-        "podman-healthsave-api.service"
-        "podman-healthsave-worker.service"
-        "healthsave-migrate.service"
-      ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "healthsave-env" ''
-          set -eu
-          # install -d also fixes ownership on a fresh dataset mount, which
-          # arrives root:root from `zfs create`. PGDATA below it is chowned to the
-          # postgres image's own uid by the image entrypoint on first boot.
-          install -d -m 0750 -o ${cfg.user} -g ${cfg.group} ${cfg.dataDir}
-          install -d -m 0700 ${cfg.dataDir}/pgdata
-          . ${cfg.envFile}
-          install -d -m 700 ${runDir}
-          {
-            cat ${cfg.envFile}
-            printf 'DATABASE_URL=postgresql+asyncpg://%s:%s@%s:%s/%s\n' \
-              '${dbUser}' "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' '${dbName}'
-          } > ${appEnv}
-          printf 'POSTGRES_DB=%s\nPOSTGRES_USER=%s\nPOSTGRES_PASSWORD=%s\n' \
-            '${dbName}' '${dbUser}' "$DB_PASSWORD" > ${dbEnv}
-          printf 'DB_PASSWORD=%s\nHDH_GRAFANA_DATASOURCE_URL=%s:%s\n' \
-            "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' > ${grafanaEnv}
-          chmod 600 ${appEnv} ${dbEnv} ${grafanaEnv}
-          chown ${cfg.user}:${cfg.group} ${appEnv} ${dbEnv} ${grafanaEnv}
-        '';
-      };
-    };
-
-    virtualisation.oci-containers.containers = {
-      healthsave-db = {
-        image = cfg.dbImage;
-        networks = [ "host" ];
-        environmentFiles = [ dbEnv ];
-        volumes = [
-          "${cfg.dataDir}/pgdata:/var/lib/postgresql/data"
-          "${schemaSql}:/docker-entrypoint-initdb.d/001_schema.sql:ro"
-        ];
-        # trailing args go to postgres, not to the entrypoint's initdb path
-        cmd = [
-          "postgres"
-          "-c"
-          "listen_addresses=${cfg.dbBind}"
-        ];
-      };
-
-      healthsave-api = {
-        image = cfg.image;
-        networks = [ "host" ];
-        environmentFiles = [ appEnv ];
-        volumes = [ "${cfg.analysisConfigFile}:/app/config.yaml:ro" ];
-        cmd = [
-          "uvicorn"
-          "server:app"
-          "--host"
-          cfg.apiBind
-          "--port"
-          (toString cfg.apiPort)
-        ];
-      };
-
-      healthsave-worker = {
-        image = cfg.image;
-        networks = [ "host" ];
-        environmentFiles = [ appEnv ];
-        volumes = [ "${cfg.analysisConfigFile}:/app/config.yaml:ro" ];
-        cmd = [
-          "python"
-          "-m"
-          "worker.main"
-        ];
-      };
-    };
-
-    # oci-containers has no job type (it always runs `-d --sdnotify`), so the
-    # one-shot migration is its own unit.
-    systemd.services.healthsave-migrate = {
-      description = "HealthSave Observatory schema migrations";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "healthsave-env.service" ];
-      requires = [ "healthsave-env.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        TimeoutStartSec = "10min";
-        ExecStart = pkgs.writeShellScript "healthsave-migrate" ''
-          set -eu
-          ${podman} run --rm --network host \
-            --env-file ${appEnv} \
-            -v ${waitForSchema}:/wait-for-schema.py:ro \
-            ${cfg.image} python /wait-for-schema.py
-          exec ${podman} run --rm --network host \
-            --env-file ${appEnv} \
-            ${cfg.image} python -m scripts.migrate
-        '';
-      };
-      # a first boot pulls ~500 MB, and a pull hiccup must not trip the default
-      # start limit and wedge the stack until a manual reset-failed
-      unitConfig.StartLimitIntervalSec = 0;
-    };
-
-    systemd.services.podman-healthsave-db = {
-      after = [ "healthsave-env.service" ];
-      requires = [ "healthsave-env.service" ];
-      unitConfig.StartLimitIntervalSec = 0;
-    };
-
-    # migrations before anything reads or writes the schema
-    systemd.services.podman-healthsave-api = {
-      after = [ "healthsave-migrate.service" ];
-      requires = [ "healthsave-migrate.service" ];
-      unitConfig.StartLimitIntervalSec = 0;
-    };
-
-    systemd.services.podman-healthsave-worker = {
-      after = [ "healthsave-migrate.service" ];
-      requires = [ "healthsave-migrate.service" ];
-      unitConfig.StartLimitIntervalSec = 0;
     };
 
     # nixpkgs grafana rather than upstream's container: the only thing that

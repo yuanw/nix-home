@@ -31,7 +31,20 @@
   uvicorn,
   sqlalchemy,
   asyncpg,
-  litellm,
+  # No litellm, deliberately.  The narrator is off, and upstream imports it only
+  # inside methods (analysis/llm/client.py:330 and :379; their own
+  # tests/test_llm_client.py greps the source to keep it that way), so it bought
+  # us nothing but risk: litellm was hijacked twice in 2026, and the 1.107.0
+  # wheels (JFrog Security, 2026-10-21) dropped cook.pth + cook.py +
+  # sitecustomize.py into site-packages root, which Python executes at
+  # interpreter startup even when the app never imports litellm -- a credential
+  # stealer plus an hourly remote-code channel, on a box holding PHI and an API
+  # key.  nixpkgs builds from the git-tag tarball rather than those wheels, and
+  # our pin is 1.106.2, so we were never on the payload; removing the dep just
+  # deletes the class.  To get narratives back: re-add `litellm` here, to
+  # `dependencies` and to `pythonImportsCheck`, on a reviewed pinned release,
+  # and set LITELLM_LOCAL_MODEL_COST_MAP=True on the units so importing it does
+  # not reach out to GitHub on every start.
   apscheduler,
   prometheus-client,
   paho-mqtt,
@@ -79,7 +92,6 @@ buildPythonPackage rec {
     uvicorn
     sqlalchemy
     asyncpg
-    litellm
     apscheduler
     prometheus-client
     paho-mqtt
@@ -112,15 +124,21 @@ buildPythonPackage rec {
     "asyncpg"
   ];
 
-  # [tool.setuptools.packages.find] include lists 14 names but packages/py/ holds
+  # upstream's [tool.setuptools.packages.find] include lists 14 names but packages/py/ holds
   # 13 dirs: `observability*` is the one that never ships, so a non-editable
   # install dies on `import server` -> ModuleNotFoundError: observability.
   # Pure .py (2 files, no data), so editing the include list beats a patch file.
   # If upstream ever reorders the list this fails loudly at build time, which is
   # the right failure mode until the bug is fixed upstream and this can die.
+  # The second edit deletes litellm from the declared dependencies: with it gone
+  # from `dependencies`, pythonRuntimeDepsCheck refuses the build ("litellm not
+  # installed") because the wheel's METADATA still asks for it — measured, not
+  # assumed.  Removing the dep means saying so in the metadata too.  sed, because
+  # substituteInPlace has no --remove at this pin (also measured).
   postPatch = ''
     substituteInPlace pyproject.toml \
       --replace-fail '"plugin_sdk*",' '"plugin_sdk*", "observability*",'
+    sed -i '/"litellm>=1.40.0",/d' pyproject.toml
   '';
 
   # Two things sit outside every `where` root and so never get installed:
@@ -139,6 +157,50 @@ buildPythonPackage rec {
     cp -r "$src/plugins" "$out/${python.sitePackages}/plugins"
   '';
 
+  # Interpreter-startup hooks must not exist in the environment the api/worker run
+  # from.  This is the litellm 1.107.0 wheel payload (JFrog Security, 2026-10-21):
+  # cook.pth containing `import cook`, plus cook.py and sitecustomize.py, all
+  # installed into site-packages root and all executed by `site` before any
+  # application code runs -- even in a process that never imports litellm.  The
+  # sdist and the git tag did not contain them, so reviewing source is not enough;
+  # the artifact has to be checked.  nixpkgs builds from the git-tag tarball, so
+  # this should be unreachable -- it is here because a compromised dependency of
+  # *this* package would land exactly here, and because postInstall copies two
+  # things in by hand.  site.py only reads *.pth at the top level of a sys.path
+  # entry, so a top-level scan is the whole surface.  If a legitimate dependency
+  # trips it, allow-list it below — by content fingerprint where possible, not by
+  # name.  CPython from nixpkgs ships its own sitecustomize.py (the NIX_PYTHONPATH
+  # sys.path hook), which is why the name alone proves nothing: the first run of
+  # this guard tripped on exactly that file, and it is allowed only while it says
+  # NIX_PYTHONPATH in it.
+  preCheck = ''
+    python - <<'PY'
+    import os, site, sys
+    root = site.getsitepackages()[0]
+    banned = {"usercustomize.py", "cook.py", "cook.pth"}
+    allowed = {"sitecustomize.py": "NIX_PYTHONPATH", "distutils-precedence.pth": "SETUPTOOLS_USE_DISTUTILS"}
+    found = []
+    for name in sorted(os.listdir(root)):
+        path = os.path.join(root, name)
+        if not os.path.isfile(path):
+            continue
+        if name in banned:
+            found.append(name)
+            continue
+        fingerprint = allowed.get(name)
+        body = ""
+        with open(path, encoding="utf-8", errors="replace") as handle:
+            body = handle.read()
+        if fingerprint:
+            if fingerprint not in body:
+                found.append(name + " (allowed name, unexpected contents)")
+        elif name.endswith(".pth") and any(line.startswith("import") for line in body.splitlines()):
+            found.append(name + " (.pth that imports)")
+    if found:
+        sys.exit("interpreter startup hooks in site-packages: " + ", ".join(found))
+    PY
+  '';
+
   # The full suite needs pytest-asyncio and a live database.  This subset needs
   # neither and covers the one file postInstall hand-copies.  enabledTestPaths
   # (not the removed pytestFlagsArray) aborts the build if upstream renames it.
@@ -147,9 +209,11 @@ buildPythonPackage rec {
 
   # Every top-level package, so the next `include` omission cannot pass silently.
   # `plugins` is in here because it is the one the derivation ships by hand.
-  # litellm and its client are here because upstream imports litellm *inside a
-  # method* (tests/test_llm_client.py greps the source to forbid a top-level
-  # import), so no other build-time check ever touches it.
+  # `analysis.llm.client` is the guard on the litellm removal above: the api builds
+  # a HealthLLMClient at startup (server/main.py:128) and its __init__ promises no
+  # LiteLLM call, so this import has to keep succeeding with litellm absent -- if it
+  # ever fails, upstream moved the deferred import to module scope and the removal
+  # has to be revisited.
   # `scripts` is deliberately absent — it sits at the repo root, outside every
   # `where` root, so it is never installed; `python -m scripts.migrate` only
   # works with WorkingDirectory = the source tree.
@@ -170,7 +234,6 @@ buildPythonPackage rec {
     "replay"
     "plugin_sdk"
     "observability"
-    "litellm"
     "analysis.llm.client"
   ];
 
