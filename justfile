@@ -303,5 +303,42 @@ mono-gateway-rollback:
 mono-gateway-switch-generation NUM:
     @P=$(ssh root@{{mono-gateway-host}} 'nix-env --profile /nix/var/nix/profiles/system --switch-generation {{NUM}} 2>&1 | head -1; readlink -f /nix/var/nix/profiles/system'); just mono-gateway-activate "$P"
 
+# Create, once per machine, the self-signed codesigning identity that
+# modules/neru re-signs Neru.app with. The shipped bundle is ad-hoc (linker)
+# signed, so its designated requirement is a cdhash; TCC pins the Accessibility
+# grant to that hash and every rebuild costs you the permission. A stable
+# certificate makes the grant survive. -legacy is required for pkcs12 on
+# OpenSSL 3: macOS security import cannot read the modern default MAC.
+# The keychain gets an empty password so root's activation script can sign
+# unattended -- anyone who can read /Library/Keychains can then sign with it.
+neru-selfsign-cert:
+    @set -eu; \
+    KC=/Library/Keychains/nix-selfsign.keychain-db; \
+    NAME='Nix Self-Signed Codesign'; \
+    if sudo security find-identity -v -p codesigning | grep -qF "$NAME"; then \
+        echo "identity '$NAME' already present, refreshing its access control"; \
+    else \
+        T=$$(mktemp -d); trap 'rm -rf "$$T"' EXIT; \
+        openssl req -x509 -newkey rsa:2048 -nodes -keyout "$$T/key.pem" -out "$$T/cert.pem" \
+            -days 3650 -subj "/CN=$$NAME/O=Nix Local/C=US" \
+            -addext "keyUsage=critical,digitalSignature" \
+            -addext "extendedKeyUsage=codeSigning" 2>/dev/null; \
+        openssl pkcs12 -export -legacy -inkey "$$T/key.pem" -in "$$T/cert.pem" \
+            -out "$$T/id.p12" -passout pass:nixlocal; \
+        sudo security create-keychain -p "" "$$KC"; \
+        sudo security import "$$T/id.p12" -k "$$KC" -P nixlocal -A -T /usr/bin/codesign; \
+        sudo security add-trusted-cert -r trustRoot -p codeSign -k "$$KC" "$$T/cert.pem"; \
+    fi; \
+    sudo security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" "$$KC" >/dev/null; \
+    sudo security list-keychains -d system -s "$$KC" /Library/Keychains/System.keychain; \
+    sudo security unlock-keychain -p "" "$$KC"; \
+    sudo security find-identity -v -p codesigning | grep -F "$NAME"; \
+    P=$$(mktemp -d)/probe; printf '#!/bin/sh\n' > "$$P"; chmod +x "$$P"; \
+    sudo codesign --force --sign "$$NAME" "$$P"; \
+    echo; \
+    echo "identity works. now: darwin-rebuild switch, then grant Accessibility to Neru ONCE:"; \
+    echo "  sudo sqlite3 '/Library/Application Support/com.apple.TCC/TCC.db' \\\"delete from access where client='com.y3owk1n.neru'\""; \
+    echo "  # then toggle it back on in System Settings > Privacy & Security > Accessibility"
+
 # Router management lives in openwrt/justfile, reachable as `just openwrt-...`.
 import 'openwrt/justfile'
