@@ -49,6 +49,22 @@ let
   dbUser = "healthsave";
   dbName = "healthsave";
 
+  # The cluster came from `initdb` inside the container image, which made
+  # `healthsave` the superuser and never created a `postgres` role. Peer auth maps
+  # OS user -> role, so without it postgresql-setup and any `psql` run as the
+  # postgres user fail with `role "postgres" does not exist`. A separate file
+  # rather than `-c`: the dollar-quoting survives neither psql's startup queries
+  # nor another layer of shell quoting.
+  postgresRoleSql = pkgs.writeText "healthsave-db-role.sql" ''
+    DO $do$
+    BEGIN
+      IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'postgres') THEN
+        CREATE ROLE postgres SUPERUSER LOGIN;
+      END IF;
+    END
+    $do$;
+  '';
+
   runDir = "/run/healthsave";
   appEnv = "${runDir}/app.env";
   grafanaEnv = "${runDir}/grafana.env";
@@ -243,24 +259,44 @@ in
       };
     };
 
-    # Timescale's library cannot serve a catalog still at 2.17 — the extension has
-    # to be rolled forward before anything writes to a hypertable.  Peer auth over
-    # the socket as `postgres`, so no password in the store or on a command line,
-    # and `ALTER EXTENSION ... UPDATE` is a no-op once current, which makes it safe
-    # on every activation including a nixpkgs bump.
+    # `initdb` never ran here, so two things the NixOS postgresql machinery takes
+    # for granted are missing from this cluster: a `postgres` superuser role (see
+    # postgresRoleSql), and an extension that is current in *every* database -- the
+    # image's entrypoint installed timescaledb into template1, so `postgres` and
+    # `template1` each carry their own version. A stale one in `postgres` is the
+    # nasty one: postgresql-setup's readiness probe is `psql -d postgres` with
+    # stderr sent to /dev/null, so it retries forever and activation hangs instead
+    # of failing.
+    #
+    # The roll-forward has to be the first statement of a session, so each database
+    # gets its own psql, and `-X` keeps psql's startup queries from loading the old
+    # library first -- timescaledb then refuses with "cannot be updated after the
+    # old version has already been loaded".
+    #
+    # Runs as `healthsave`, not `postgres`: this unit creates the postgres role, so
+    # it cannot depend on it. Peer auth over the socket either way, so no password
+    # in the store or on a command line. `ALTER EXTENSION ... UPDATE` is a no-op
+    # once current, which makes it safe on every activation including a nixpkgs bump.
     systemd.services.healthsave-db-upgrade = {
       description = "Roll the timescaledb extension forward";
       wantedBy = [ "multi-user.target" ];
       after = [ "postgresql.service" ];
       requires = [ "postgresql.service" ];
+      # Before setup, whose `psql -d postgres` probe otherwise spins on a stale catalog.
+      before = [ "postgresql-setup.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        User = "postgres";
+        User = cfg.user;
         ExecStart = pkgs.writeShellScript "healthsave-db-upgrade" ''
           set -eu
-          exec ${config.services.postgresql.package}/bin/psql -h /run/postgresql -d ${dbName} \
-            -v ON_ERROR_STOP=1 -c 'ALTER EXTENSION timescaledb UPDATE;'
+          PSQL="${config.services.postgresql.package}/bin/psql -X -q -h /run/postgresql -v ON_ERROR_STOP=1"
+          $PSQL -d ${dbName} -f ${postgresRoleSql}
+          for db in $($PSQL -d ${dbName} -Atc "select datname from pg_database where datname <> 'template0' order by 1"); do
+            if [ -n "$($PSQL -d "$db" -Atc "select 1 from pg_extension where extname = 'timescaledb'")" ]; then
+              $PSQL -d "$db" -c 'ALTER EXTENSION timescaledb UPDATE;'
+            fi
+          done
         '';
       };
     };
@@ -280,7 +316,18 @@ in
           # install -d also fixes ownership on a fresh dataset mount, which
           # arrives root:root from `zfs create`. PGDATA's own ownership is the
           # adopt unit's business, not this one's.
-          install -d -m 0750 -o ${cfg.user} -g ${cfg.group} ${cfg.dataDir}
+          #
+          # 0711, not the 0750 you would give a service home: postgresql.service
+          # runs User=postgres and has to *reach* ${cfg.dataDir}/pgdata, and a
+          # 0750 group-only directory gives it no traverse bit -- measured as
+          # pre-start dying on its first command, `rm -f .../pgdata/*.conf`,
+          # with EACCES, then postgresql hitting start-limit-hit. Traverse
+          # rather than membership: adding postgres to ${cfg.group} would work
+          # too, but it hands postgres (and every future member) the group read
+          # bit over a PHI dataset, where all it needs is to walk through. The
+          # entries below stay 0700 -- pgdata belongs to postgres, the rest to
+          # ${cfg.user} -- so the extra x bit leaks path names, nothing more.
+          install -d -m 0711 -o ${cfg.user} -g ${cfg.group} ${cfg.dataDir}
           install -d -m 0700 ${cfg.dataDir}/pgdata
           . ${cfg.envFile}
           install -d -m 700 ${runDir}
