@@ -124,8 +124,13 @@ in
 
       };
       # Grant Accessibility via tccutil (requires Filesystem Protections disabled in SIP).
-      # Runs as root during darwin-rebuild switch; tccutil --enable is idempotent.
-      system.activationScripts.yabaiTCCProfile.text = ''
+      # Runs as root during darwin-rebuild switch; tccutil --insert is idempotent.
+      #
+      # postActivation, not a name of our own: nix-darwin executes only the
+      # hard-coded list in modules/system/activation-scripts.nix, so
+      # `system.activationScripts.yabaiTCCProfile` was accepted by the module
+      # system and never run.
+      system.activationScripts.postActivation.text = mkAfter ''
         TCCUTIL="${pkgs.tccutil-manage}/bin/tccutil-manage"
         YABAI="${pkgs.yabai}/bin/yabai"
         echo "Granting Accessibility to yabai..."

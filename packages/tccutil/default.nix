@@ -12,8 +12,9 @@ buildPythonApplication rec {
   src = fetchFromGitHub {
     owner = "jacobsalmela";
     repo = "tccutil";
-    tag = version;
-    hash = "sha256-gb67xM8daBA03Oq8XCkLdNcPjx5qymz0U859gRaHofs=";
+    # upstream tags are vN.N.N; the bare version 404s
+    tag = "v${version}";
+    hash = "sha256-pEVH8VZp8fsXMpIu/SlZ6JmwH/oKKGm7ANxZZlEPfUk=";
   };
 
   propagatedBuildInputs = [ packaging ];
