@@ -69,6 +69,13 @@ let
   appEnv = "${runDir}/app.env";
   grafanaEnv = "${runDir}/grafana.env";
 
+  # The units start from a python env holding this app and its deps and nothing
+  # else. `withPackages`, not the bare derivation: the app is launched as
+  # `python -m ...`, so it needs a real interpreter with site-packages populated,
+  # and buildPythonPackage (rather than toPythonApplication) is what lets
+  # withPackages collect it at all -- see the note in packages/healthsave-observatory.nix.
+  healthsavePython = pkgs.python313.withPackages (_ps: [ healthsavePkg ]);
+
 in
 {
   options.services.healthsave-observatory = {
@@ -341,6 +348,161 @@ in
           chmod 600 ${appEnv} ${grafanaEnv}
           chown ${cfg.user}:${cfg.group} ${appEnv} ${grafanaEnv}
         '';
+      };
+    };
+
+    # The three app processes. Upstream's compose units are the reference (same
+    # commands, same env), minus the image: `migrate` applies db/migrations/*.sql,
+    # `api` is the FastAPI ingest surface caddy fronts, `worker` is the only home
+    # of scheduled analysis. All of them read DATABASE_URL from app.env.
+    #
+    # One sandbox for all three. Nothing here writes outside /tmp -- uvicorn spills
+    # multipart bulk-sync uploads there, and the storage backend defaults to
+    # postgres (apps/api/server/ingestion/registry.py:132) -- so the rest of the
+    # filesystem is closed to a PHI workload. ProtectHome covers /home, /root and
+    # /run/user only; the data dir under /var/lib stays reachable, which is what
+    # the units need to read ANALYSIS_CONFIG-adjacent files, and pgdata inside it
+    # is 0700 postgres, so it is not readable from here.
+    systemd.services.healthsave-migrate = {
+      description = "Apply HealthSave Observatory schema migrations";
+      wantedBy = [ "multi-user.target" ];
+      # After setup, not just postgresql: setup is what creates the db and role a
+      # rebuilt dataset would be missing. After the roll-forward, because a
+      # migration touching a hypertable needs the extension current.
+      after = [
+        "healthsave-env.service"
+        "healthsave-db-upgrade.service"
+        "postgresql-setup.service"
+      ];
+      requires = [
+        "healthsave-env.service"
+        "healthsave-db-upgrade.service"
+        "postgresql-setup.service"
+      ];
+      # The api and worker must not answer from a schema that is behind.
+      before = [
+        "healthsave-api.service"
+        "healthsave-worker.service"
+      ];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        # `scripts` sits at the tarball root, outside every setuptools `where`
+        # root, so it is the one package never installed (see pythonImportsCheck
+        # in packages/healthsave-observatory.nix): `python -m scripts.migrate`
+        # resolves only with the source tree as cwd. Read-only cwd is fine -- it
+        # reads db/migrations/*.sql and writes nothing.
+        WorkingDirectory = "${healthsavePkg.src}";
+        User = cfg.user;
+        Group = cfg.group;
+        EnvironmentFile = appEnv;
+        UMask = "0077";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        ExecStart = "${healthsavePython}/bin/python -m scripts.migrate";
+      };
+    };
+
+    systemd.services.healthsave-api = {
+      description = "HealthSave Observatory ingest API";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "healthsave-env.service"
+        "healthsave-migrate.service"
+        "postgresql.service"
+        "network-online.target"
+      ];
+      requires = [
+        "healthsave-env.service"
+        "healthsave-migrate.service"
+      ];
+      serviceConfig = {
+        # The api reads ANALYSIS_CONFIG in its lifespan (apps/api/server/main.py:126)
+        # and dies without it, so this is not just the worker's business. Store path,
+        # world-readable, and upstream's default is every job off with no LLM egress.
+        Environment = [
+          "ANALYSIS_CONFIG=${cfg.analysisConfigFile}"
+          # apps/api/server/api/deps.py:20 fails *open* -- ingest and every read
+          # route -- if API_KEY is blank and ALLOW_NO_AUTH says yes, which is what
+          # upstream's compose sets for the zero-config demo. This box publishes
+          # healthsave.yuanw.me to the internet through caddy, so open mode is not
+          # a thing a stale secret can quietly turn on.
+          "ALLOW_NO_AUTH=false"
+        ];
+        EnvironmentFile = appEnv;
+        # --no-access-log: uvicorn's access log would put request paths -- metric
+        # ids, sync run ids -- into the journal, where journalctl and any journal
+        # shipper read them. Caddy already logs the requests, and PHI does not
+        # need a second copy in a second place.
+        ExecStart = "${healthsavePython}/bin/python -m uvicorn server:app --host ${cfg.apiBind} --port ${toString cfg.apiPort} --no-access-log";
+        User = cfg.user;
+        Group = cfg.group;
+        Restart = "always";
+        RestartSec = "5s";
+        UMask = "0077";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        LockPersonality = true;
+        RestrictSUIDSGID = true;
+        # loopback bind + postgres over loopback; AF_INET6 for a v6 dbBind, and
+        # for the LLM egress that stays off by default but can be turned on.
+        RestrictAddressFamilies = [
+          "AF_UNIX"
+          "AF_INET"
+          "AF_INET6"
+        ];
+      };
+    };
+
+    systemd.services.healthsave-worker = {
+      description = "HealthSave Observatory analysis worker and source polls";
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "healthsave-env.service"
+        "healthsave-migrate.service"
+        "postgresql.service"
+        "network-online.target"
+      ];
+      requires = [
+        "healthsave-env.service"
+        "healthsave-migrate.service"
+      ];
+      serviceConfig = {
+        # Same file the api gets: the jobs it registers and the insights the api
+        # serves have to come from one config, and upstream's default leaves every
+        # job off (ANALYSIS_*_ENABLED in the secret flips them).
+        Environment = [ "ANALYSIS_CONFIG=${cfg.analysisConfigFile}" ];
+        EnvironmentFile = appEnv;
+        # `worker.main` is the only home of scheduled work in the v2 layout; the api
+        # no longer starts a scheduler. With every job off and no *_POLL_CRON set it
+        # starts an empty scheduler and waits for SIGTERM, so it is harmless idle.
+        ExecStart = "${healthsavePython}/bin/python -m worker.main";
+        User = cfg.user;
+        Group = cfg.group;
+        Restart = "always";
+        RestartSec = "5s";
+        UMask = "0077";
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        PrivateTmp = true;
+        ProtectKernelTunables = true;
+        ProtectKernelModules = true;
+        ProtectControlGroups = true;
+        LockPersonality = true;
+        RestrictSUIDSGID = true;
+        RestrictAddressFamilies = [
+          "AF_UNIX"
+          "AF_INET"
+          "AF_INET6"
+        ];
       };
     };
 
