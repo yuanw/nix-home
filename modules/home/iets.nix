@@ -10,23 +10,18 @@
 # `nix.package` and `programs.direnv.direnvrcExtra` -- none of which exist in
 # home-manager. Measured, not assumed. The .envrc still says `use flake`.
 {
-  config,
-  lib,
   pkgs,
   inputs,
   ...
 }:
 {
-  options.iets.direnv.enable = lib.mkEnableOption "iets's use flake in direnv, in place of nix-direnv's";
 
-  config = lib.mkIf config.iets.direnv.enable {
-    home.packages = [ inputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default ];
+  home.packages = [ inputs.iets.packages.${pkgs.stdenv.hostPlatform.system}.default ];
 
-    # The repository's own direnvrc, verbatim: it defines use_flake in terms of
-    # `iets print-dev-env`, its --gc-root and its cache watches. direnv reads
-    # lib/*.sh in name order, so this lands after hm-nix-direnv.sh and wins --
-    # the same trick the nixos module plays with direnvrcExtra. nix-direnv stays
-    # enabled for `use nix`.
-    xdg.configFile."direnv/lib/zz-iets.sh".source = "${inputs.iets}/nix/direnvrc";
-  };
+  # The repository's own direnvrc, verbatim: it defines use_flake in terms of
+  # `iets print-dev-env`, its --gc-root and its cache watches. direnv reads
+  # lib/*.sh in name order, so this lands after hm-nix-direnv.sh and wins --
+  # the same trick the nixos module plays with direnvrcExtra. nix-direnv stays
+  # enabled for `use nix`.
+  xdg.configFile."direnv/lib/zz-iets.sh".source = "${inputs.iets}/nix/direnvrc";
 }
