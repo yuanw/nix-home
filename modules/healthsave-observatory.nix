@@ -407,6 +407,10 @@ in
 
     systemd.services.healthsave-api = {
       description = "HealthSave Observatory ingest API";
+      # Activation does not restart a unit when only an EnvironmentFile's *contents*
+      # change -- the path stays the same. Without this trigger, ANALYSIS_ENABLED=true
+      # sat in the regenerated env file while the worker kept its stale process env.
+      restartTriggers = [ cfg.envFile ];
       wantedBy = [ "multi-user.target" ];
       after = [
         "healthsave-env.service"
@@ -463,6 +467,7 @@ in
 
     systemd.services.healthsave-worker = {
       description = "HealthSave Observatory analysis worker and source polls";
+      restartTriggers = [ cfg.envFile ];
       wantedBy = [ "multi-user.target" ];
       after = [
         "healthsave-env.service"
