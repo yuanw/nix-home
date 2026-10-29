@@ -345,9 +345,17 @@ in
           install -d -m 700 ${runDir}
           {
             cat ${cfg.envFile}
+            # A hand-edited secret need not end in a newline, and `agenix -e` will
+            # happily save it that way. Without this separator the DATABASE_URL below
+            # lands on the secret's last line -- measured as
+            # `ANALYSIS_ENABLED=trueDATABASE_URL=postgresql+asyncpg://...`, which loses
+            # both keys and left migrate dying on "DATABASE_URL not set".
+            printf '\n'
             printf 'DATABASE_URL=postgresql+asyncpg://%s:%s@%s:%s/%s\n' \
               '${dbUser}' "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' '${dbName}'
           } > ${appEnv}
+          # Fail at activation rather than in whichever unit reads it first.
+          grep -q '^DATABASE_URL=' ${appEnv}
           printf 'DB_PASSWORD=%s\nHDH_GRAFANA_DATASOURCE_URL=%s:%s\n' \
             "$DB_PASSWORD" '${cfg.dbBind}' '${toString cfg.dbPort}' > ${grafanaEnv}
           chmod 600 ${appEnv} ${grafanaEnv}
