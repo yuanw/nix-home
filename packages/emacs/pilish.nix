@@ -33,6 +33,8 @@ melpaBuild {
     markdown-table-wrap
   ];
 
+  # Every top-level .el that pilish.el requires at compile time must be listed
+  # here, or byte-compiling fails with "Cannot open load file".
   recipe = writeText "recipe" ''
     (pilish
      :repo "dnouri/pilish"
@@ -46,6 +48,7 @@ melpaBuild {
               "pilish-jsonl.el"
               "pilish-menu.el"
               "pilish-render.el"
+              "pilish-snapshot.el"
               "pilish-table.el"
               "pilish-ui.el"))
   '';
