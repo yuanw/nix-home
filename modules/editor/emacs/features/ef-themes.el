@@ -7,14 +7,12 @@
   (defun my/select-light-theme ()
     "Select the light Ef theme."
     (interactive)
-    ;; `ef-themes-select' is the interactive completer since ef-themes 2.0 and
-    ;; takes no argument; the programmatic entry point is this one.
-    (ef-themes-load-theme 'ef-day))
+    (ef-themes-select 'ef-day))
 
   (defun my/select-dark-theme ()
     "Select the dark Ef theme."
     (interactive)
-    (ef-themes-load-theme 'ef-owl))
+    (ef-themes-select 'ef-owl))
 
   :custom
   (custom-safe-themes t)
