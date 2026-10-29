@@ -314,6 +314,11 @@ in
     # here instead of being pasted into the secret twice.
     systemd.services.healthsave-env = {
       description = "HealthSave Observatory directories and environment files";
+      # app.env is `cat` of the secret plus a derived DATABASE_URL, so a re-encrypted
+      # secret must re-run this unit or the apps keep reading yesterday's copy. Neither
+      # /run/agenix/<name> nor ${appEnv} works as a trigger -- both are stable paths --
+      # so key on the .age file itself, which is a content-hashed store path.
+      restartTriggers = [ config.age.secrets.healthsave-env.file ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = {
         Type = "oneshot";
@@ -407,10 +412,9 @@ in
 
     systemd.services.healthsave-api = {
       description = "HealthSave Observatory ingest API";
-      # Activation does not restart a unit when only an EnvironmentFile's *contents*
-      # change -- the path stays the same. Without this trigger, ANALYSIS_ENABLED=true
-      # sat in the regenerated env file while the worker kept its stale process env.
-      restartTriggers = [ cfg.envFile ];
+      # Restart with the env unit, which After=/Requires= order ahead of this one, so
+      # the new process always execs after app.env was regenerated.
+      restartTriggers = [ config.age.secrets.healthsave-env.file ];
       wantedBy = [ "multi-user.target" ];
       after = [
         "healthsave-env.service"
@@ -467,7 +471,7 @@ in
 
     systemd.services.healthsave-worker = {
       description = "HealthSave Observatory analysis worker and source polls";
-      restartTriggers = [ cfg.envFile ];
+      restartTriggers = [ config.age.secrets.healthsave-env.file ];
       wantedBy = [ "multi-user.target" ];
       after = [
         "healthsave-env.service"
