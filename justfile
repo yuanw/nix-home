@@ -315,6 +315,8 @@ neru-selfsign-cert:
     @set -eu; \
     KC=/Library/Keychains/nix-selfsign.keychain-db; \
     NAME='Nix Self-Signed Codesign'; \
+    sudo security list-keychains -d system -s "$KC" /Library/Keychains/System.keychain; \
+    sudo security list-keychains -s "$KC" /Library/Keychains/System.keychain; \
     if sudo security find-identity -v -p codesigning | grep -qF "$NAME"; then \
         echo "identity '$NAME' already present, refreshing its access control"; \
     else \
@@ -330,7 +332,6 @@ neru-selfsign-cert:
         sudo security add-trusted-cert -r trustRoot -p codeSign -k "$KC" "$T/cert.pem"; \
     fi; \
     sudo security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" "$KC" >/dev/null; \
-    sudo security list-keychains -d system -s "$KC" /Library/Keychains/System.keychain; \
     sudo security unlock-keychain -p "" "$KC"; \
     sudo security find-identity -v -p codesigning | grep -F "$NAME"; \
     P=$(mktemp -d)/probe; printf '#!/bin/sh\n' > "$P"; chmod +x "$P"; \

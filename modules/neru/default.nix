@@ -79,7 +79,11 @@ in
       echo "re-signing Neru.app for a stable Accessibility grant..."
       KC=/Library/Keychains/nix-selfsign.keychain-db
       APP='${signedApp}'
+      # Both domains: `security find-identity' and codesign consult the invoking
+      # user's (here root's) user-domain search list, and -d system alone leaves
+      # the identity invisible -- find-identity reports 0 valid identities.
       security list-keychains -d system -s "$KC" /Library/Keychains/System.keychain
+      security list-keychains -s "$KC" /Library/Keychains/System.keychain
       # Checked before unlocking: a missing keychain has to report itself with
       # this hint rather than as a SecKeychainUnlock error.
       if ! security find-identity -v -p codesigning | grep -qF '${cfg.signingIdentity}'; then
