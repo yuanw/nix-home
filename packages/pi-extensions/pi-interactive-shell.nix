@@ -8,13 +8,13 @@
   ...
 }:
 let
-  version = "0.17.0";
+  version = "0.18.0";
 
   src = fetchFromGitHub {
     owner = "nicobailon";
     repo = "pi-interactive-shell";
     rev = "v${version}";
-    hash = "sha256-zugoEOJNhjZ7GeGj+Ak6tptmxd2y7/pH5/1jmj1iG2w=";
+    hash = "sha256-gpiF+9+4TbV4ts/BBnQzCUvPE4OjiTdTUqAywHn3+RM=";
   };
 
   # Upstream package-lock.json resolves the @earendil-works/pi-* peer/dev deps
