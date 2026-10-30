@@ -25,6 +25,7 @@
     betterdisplay
     godot
     vlc
+    brave-browser
   ];
   # determinate system
   nix.enable = false;
