@@ -233,6 +233,18 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  reader = (
+    pkgs.callPackage "${packagePath}/emacs-reader.nix" {
+      inherit (pkgs)
+        lib
+        stdenv
+        fetchFromGitea
+        mupdf-headless
+        pkg-config
+        ;
+      inherit (self) melpaBuild;
+    }
+  );
   ob-racket = (
     pkgs.callPackage "${packagePath}/ob-racket.nix" {
       inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;

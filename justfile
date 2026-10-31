@@ -123,6 +123,14 @@ colmena-spark-apply:
 # matches no cache) and the box holds an 86 G inference model on 121 G of RAM.
 # Run that target by name when inference is idle:
 #     just cache-build-one dgx-spark
+#
+# mono-gateway is likewise run by name, for the same capacity reason: it has no
+# hive node and its aarch64-linux toplevel is packages.aarch64-linux.mono-gateway-
+# system, so it goes to dgx-spark (silver's only aarch64 builder).  Rooting it
+# here is what keeps the 6.12.49 NXP kernel and the ASK userspace out of reach of
+# the Spark's weekly --delete-older-than 30d; the board itself never substitutes
+# from silver (air-gapped, no route), so this buys build time, not deploy time.
+#     just cache-build-one mono-gateway
 cache-targets := "silver misfit mist"
 silver-ssh := "yuanw@silver.lan"
 
@@ -159,7 +167,8 @@ cache-build:
 cache-build-one HOST:
     @set -e; \
     drv=$({{nix}} eval --raw ".#colmenaHive.nodes.{{HOST}}.config.system.build.toplevel.drvPath" 2>/dev/null \
-        || {{nix}} eval --raw ".#{{HOST}}.drvPath"); \
+        || {{nix}} eval --raw ".#{{HOST}}.drvPath" 2>/dev/null \
+        || {{nix}} eval --raw ".#packages.aarch64-linux.{{HOST}}-system.drvPath"); \
     echo "drv: $drv"; \
     {{nix}} copy --derivation --to ssh-ng://{{silver-ssh}} "$drv"; \
     for attempt in 1 2 3; do \
