@@ -813,17 +813,17 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1792352713,
-        "narHash": "sha256-MAkN2qfBcD124WLrDXUFV4qH8nZNSz3PdR18AGgsT2g=",
+        "lastModified": 1792961795,
+        "narHash": "sha256-NH75kt+eNiLgCyICnDJpsfkNHOP278CmiT78xShEC0o=",
         "owner": "yuanw",
         "repo": "mono-gateway-nix",
-        "rev": "11071e2502634ca224378bc68012d98fcd8cf2a7",
+        "rev": "94c2e8ff4fc89470c7c7042cab5232ee23353b56",
         "type": "github"
       },
       "original": {
         "owner": "yuanw",
         "repo": "mono-gateway-nix",
-        "rev": "11071e2502634ca224378bc68012d98fcd8cf2a7",
+        "rev": "94c2e8ff4fc89470c7c7042cab5232ee23353b56",
         "type": "github"
       }
     },
@@ -1317,16 +1317,16 @@
     },
     "nixpkgs_8": {
       "locked": {
-        "lastModified": 1770464364,
-        "narHash": "sha256-z5NJPSBwsLf/OfD8WTmh79tlSU8XgIbwmk6qB1/TFzY=",
+        "lastModified": 1788921488,
+        "narHash": "sha256-8+xWRxEkD6l217cIUdRxfeUGS9lQX0hVtUuNVsBaDzk=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "23d72dabcb3b12469f57b37170fcbc1789bd7457",
+        "rev": "6aefcda9401be8acc2b74244fb3b37520ea1f0a8",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-25.11",
+        "ref": "nixos-26.05",
         "repo": "nixpkgs",
         "type": "github"
       }

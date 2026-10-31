@@ -117,15 +117,17 @@
     # are open upstream (we-are-mono/nix#4, #5); flip this back to
     # github:we-are-mono/nix once they merge.
     #
-    # shortcut: pinned to 11071e2, the merge just before the fork's mkAfter fix
-    # (473e1a3). That fix is what makes ask-offload.nix's postPatch assertion
-    # run, and it fails on the NXP tree ("xfrm_policy.c ipsec_flow_add call
-    # sites not short-circuited"), so the kernel cannot be built at master.
-    # Without mkAfter the override is shadowed by the flake overlay, so
-    # ask.ipsecOffload = false is inert -- the same state the running board's
-    # kernel was built in. Upgrade: teach the sed/assert about
-    # nxp-qoriq/linux@df24f942 and drop the rev here.
-    mono-nix.url = "github:yuanw/mono-gateway-nix/11071e2502634ca224378bc68012d98fcd8cf2a7";
+    # nixos-26.05 branch (94c2e8f) replaces the 11071e2 pin, which existed only
+    # to dodge a broken ipsec_flow_add sed: the unescaped & made the
+    # short-circuit expand to invalid C, so ask-offload.nix's postPatch
+    # assertion failed and 11071e2 dodged it by being shadowed (mkAfter absent),
+    # which left ask.ipsecOffload = false inert. The branch escapes the &, so the
+    # override now runs and the grep assertion is what proves it. It also moves
+    # the fork's own nixpkgs from the EOL nixos-25.11 (23d72da, 2026-02-07) to a
+    # maintained nixos-26.05 (6aefcda, 2026-09-09), rebases the cmm conntrack
+    # patch onto it and fixes the initrd for the newer systemd. Kernel unchanged:
+    # 6.12.49 at nxp-qoriq/linux@df24f94, so this bump fixes no kernel CVE.
+    mono-nix.url = "github:yuanw/mono-gateway-nix/94c2e8ff4fc89470c7c7042cab5232ee23353b56";
     # Private modules live in a separate repo; see nix-home-private/README.md.
     #
     # git+https, not github:, deliberately: a github: input is fetched as a tarball
