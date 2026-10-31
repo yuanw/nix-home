@@ -9,11 +9,6 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
-    # Rust evaluator + direnv integration (modules/home/iets.nix). Forked:
-    # upstream's print-dev-env resolves devShells.x86_64-linux on every host
-    # ("eval: default to the system this build is for"), so `use flake` cannot
-    # work off linux at all. Point this back at numtide/iets when that lands.
-    # Keeps its own nixpkgs on purpose: its packages must not follow ours.
     iets.url = "github:numtide/iets";
 
     mics-skills.url = "github:Mic92/mics-skills";
@@ -24,7 +19,7 @@
     };
 
     # Fork: adds the upstream skills to the open-code-review package.
-    llm-agents.url = "github:yuanw/llm-agents.nix";
+    llm-agents.url = "github:numtide/llm-agents.nix";
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
     # servers and extension packages. Follows this repo's nixpkgs/flake-prompt
     # and the llm-agents already used for pkgs.llm-agents.pi, so Pi stays one
