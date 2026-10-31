@@ -207,6 +207,15 @@
   };
   services.isponsorblocktv.enable = true;
 
+  # Apple Watch -> HealthSave iOS app -> this API. Rootless podman units, all
+  # binding loopback; the phone reaches it through the healthsave.yuanw.me
+  # vhost in modules/caddy.nix. Data lives in its own ZFS dataset (see the
+  # module), not in the ephemeral root that rolls back to @blank every boot.
+  services.healthsave-observatory = {
+    enable = true;
+    envFile = config.age.secrets.healthsave-env.path;
+  };
+
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
     # jellyfin-init `cat`s this to read the admin password hash, and it runs as
@@ -222,6 +231,9 @@
       owner = "hass";
       group = "hass";
     };
+    # read only by healthsave-env.service (root), which renders the per-container
+    # env files under /run/healthsave — the containers never need this file
+    healthsave-env.file = ../../secrets/healthsave-env.age;
 
   };
 
@@ -565,6 +577,9 @@
     datasets = {
       "zroot/root/persist".useTemplate = [ "default" ];
       "zroot/root/persistSave".useTemplate = [ "default" ];
+      # PHI gets its own dataset (services.healthsave-observatory.dataset) so
+      # it can be snapshotted, cloned or zfs-sent without the rest of /persistSave
+      "zroot/root/persistSave/healthsave".useTemplate = [ "default" ];
       "zroot/data".useTemplate = [ "media" ];
     };
   };

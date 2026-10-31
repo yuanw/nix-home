@@ -43,6 +43,9 @@ in
     yuanw_mist
     misfit
   ];
+  # HealthSave Observatory .env: DB_PASSWORD + API_KEY, consumed by
+  # modules/healthsave-observatory.nix as a podman --env-file.
+  "healthsave-env.age".publicKeys = users ++ [ misfit ];
   "hass.age".publicKeys = users ++ systems;
   "adguard-encryption-key.age".publicKeys = users ++ systems;
   "adguard-encryption-certificate.age".publicKeys = users ++ systems;

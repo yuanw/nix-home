@@ -66,6 +66,20 @@
         '';
       };
 
+      # HealthSave Observatory API: the HealthSave iOS app's Server Sync URL is
+      # https://healthsave.yuanw.me (see the note in modules/caddy.nix's other
+      # LAN-only entries — this one *is* internet-reachable, gated only by the
+      # API_KEY in secrets/healthsave-env.age). /metrics is unauthenticated by
+      # design upstream, so it stays on the box.
+      "healthsave.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          @metrics path /metrics /metrics/*
+          respond @metrics "forbidden" 403
+          reverse_proxy localhost:8000
+        '';
+      };
+
       # AdGuard Home's UI. The board binds 3000 on br-lan (hosts/mono-gateway/default.nix)
       # and gates it with auth.users, so this is the only path where the login
       # travels over TLS -- the direct http://192.168.1.1:3000 path still exists

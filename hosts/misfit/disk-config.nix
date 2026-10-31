@@ -65,6 +65,13 @@
             type = "zfs_fs";
             mountpoint = "/persistSave";
           };
+          # HealthSave Observatory data (PGDATA + the rootless podman store).
+          # legacy mountpoint: modules/healthsave-observatory.nix mounts it with
+          # a fileSystems entry, so the property is not declared in two places.
+          "root/persistSave/healthsave" = {
+            type = "zfs_fs";
+            options.mountpoint = "legacy";
+          };
           "root/sshkeys" = {
             type = "zfs_fs";
             mountpoint = "/sshkeys";

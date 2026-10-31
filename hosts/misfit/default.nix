@@ -9,6 +9,7 @@
     inputs.declarative-jellyfin.nixosModules.default
     inputs.impermanence.nixosModules.impermanence
     ../../modules/isponsorblocktv.nix
+    ../../modules/healthsave-observatory.nix
     ../../modules/caddy.nix
     # misfit never imports myModules.common, so the LAN cache consumer has to be
     # imported here (docs/harmonia-build-hub.org Phase 2, finding 3).
