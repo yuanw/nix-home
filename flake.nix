@@ -105,7 +105,11 @@
     preservation = {
       url = "github:nix-community/preservation";
     };
-    dgx-spark.url = "github:graham33/nixos-dgx-spark";
+    # Fork of graham33/nixos-dgx-spark carrying upstream PR #197 (flake.lock
+    # bump, plus the cython/initrd overrides that bump made obsolete) on top of
+    # a nixpkgs bump to 2026-10-31.  Flip back to graham33 once #197 merges
+    # upstream.
+    dgx-spark.url = "github:yuanw/nixos-dgx-spark/pr-197-lock-bump";
     nixified-ai = {
       url = "github:nixified-ai/flake";
       inputs.nixpkgs.follows = "nixpkgs";

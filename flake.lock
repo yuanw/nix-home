@@ -170,15 +170,16 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1792407240,
-        "narHash": "sha256-kPXXP23gw5KofCpgFxoKITPXUrMPxDoiQeQ8gRRsg6Y=",
-        "owner": "graham33",
+        "lastModified": 1793474499,
+        "narHash": "sha256-gtYZd5RcbwyDq4wOv4SO18FtZKorlI4HGT5FoMJRfkI=",
+        "owner": "yuanw",
         "repo": "nixos-dgx-spark",
-        "rev": "c646a19a5df3316c1b0e79e2025d59f8deb704de",
+        "rev": "e4fbc0bcd82c0e235729ea4d9665c158b9f0ea1c",
         "type": "github"
       },
       "original": {
-        "owner": "graham33",
+        "owner": "yuanw",
+        "ref": "pr-197-lock-bump",
         "repo": "nixos-dgx-spark",
         "type": "github"
       }
@@ -211,11 +212,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789770686,
-        "narHash": "sha256-uZkBR7yHdIKUFB5SZdfgh1qkGfI3XmYmI/lTiquxbck=",
+        "lastModified": 1792526520,
+        "narHash": "sha256-3hSJlv8mUVnZPMWK2+CM7a9O+nR6Z4mCh27NfLCmTPc=",
         "owner": "nix-community",
         "repo": "disko",
-        "rev": "725ea35e410ad83be4931d1bff7e090eacaf3563",
+        "rev": "cedd626e11b635470fa6f9fdb8ad79b0075dd7f9",
         "type": "github"
       },
       "original": {
@@ -1055,11 +1056,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792170028,
-        "narHash": "sha256-O1xXS0Q4oCGK6237DN0o2VM+np7VHnuqyQhwjn1oUxo=",
+        "lastModified": 1792826041,
+        "narHash": "sha256-oWXUV4+tBu3LwLTtv9KjXZUvkwgSCgWWGDqJkoDlfSg=",
         "owner": "nixified-ai",
         "repo": "flake",
-        "rev": "0532844b4b11021d8c2745e8ee0f876262015911",
+        "rev": "24e5032628ef0e80ed0a05e9e6879def5dc23d5e",
         "type": "github"
       },
       "original": {
@@ -1222,11 +1223,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1792287122,
-        "narHash": "sha256-jY2vaJ+Eg7VDaeaoEx5jK/PlzPJQ8O5gLYnNqW/x81g=",
+        "lastModified": 1793473869,
+        "narHash": "sha256-FM6ykTZJ1f4eg5trNi033S1cGQ9dg8V2XoeqiHVVoMU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "c46e6c9a80d68a8b92e75a2d2cb078a8f6d8dd81",
+        "rev": "82b4f37580dfea2872d0d49a43b279a73e9df278",
         "type": "github"
       },
       "original": {
