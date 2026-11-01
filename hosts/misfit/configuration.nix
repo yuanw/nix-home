@@ -5,6 +5,7 @@
 {
   pkgs,
   config,
+  inputs,
   ...
 }:
 
@@ -14,6 +15,10 @@
     # ./hardware-configuration.nix
     # "${builtins.fetchTarball "https://github.com/nix-community/disko/archive/master.tar.gz"}/module.nix"
     ./disk-config.nix
+    # The qBittorrent seeder. Kept in the private repo because its serverConfig
+    # holds the WebUI Password_PBKDF2 hash. Plan: nix-home-private/docs/
+    # misfit-torrent.org.
+    (inputs.nix-home-private + "/modules/arr.nix")
   ];
 
   nixpkgs.config.problems.handlers = {
