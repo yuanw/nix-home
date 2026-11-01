@@ -352,6 +352,23 @@
     Environment = "DOTNET_gcServer=0";
   };
 
+  # The two Jellyfin library roots, group-writable for the humans only.
+  # Without these, `mkdir '/data/Movies/Title (2021)'` fails for yuan and yuanw
+  # (both roots were root:root 0755 since the dataset was created), so adding a
+  # title to the library needs sudo.
+  #
+  # `users` and not `data`, deliberately: jellyfin's primary gid *is* `data`
+  # (services.jellyfin.group above), so a group-writable library would hand
+  # write access on the whole media library to a network-facing web server.
+  # `users` (gid 100) has exactly two members, yuan and yuanw, and no service.
+  # Setgid so a new title directory inherits the group instead of the creator's
+  # primary group. Existing content is left alone — it is yuanw:users 0644 and
+  # Jellyfin reads it world-readable, so nothing needs a chgrp -R.
+  systemd.tmpfiles.rules = [
+    "d /data/Movies 2775 root users - -"
+    "d /data/Shows 2775 root users - -"
+  ];
+
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
