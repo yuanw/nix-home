@@ -150,7 +150,12 @@
     # WK-only paths (hosts/wk01174.nix, nix run .#prefetch-work-sources, …)
     # throw from blank/; public hosts never force those imports.
     nix-home-private = {
-      url = "git+https://github.com/yuanw/nix-home-private";
+      # TEMPORARY: tracking the `arr` branch, which is ahead of main by the
+      # misfit-torrent.org write-up (docs only -- same modules as main, so this
+      # does not change any built system). Once arr merges to main, drop the
+      # ?ref= again or future `nix flake update` runs keep tracking a stale
+      # branch.
+      url = "git+https://github.com/yuanw/nix-home-private?ref=refs/heads/arr";
       flake = false;
     };
   };
