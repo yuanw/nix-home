@@ -115,6 +115,42 @@
     enable = true;
     externalInterface = "eth2";
     internalInterfaces = [ "br-lan" ];
+    # docs/arra.org Phase 3 (private repo): the seeder's inbound port.
+    # This is only the *second* hop -- the SaskTel gateway at 172.16.1.254 is
+    # NOT bridged (measured 2026-11-01: NAT Enabled, DHCP lease 71.17.19.228
+    # with an 8 h expiry), so incoming peers must also be mapped there
+    # (WAN 50000 -> 172.16.1.22), and that mapping is not in Nix. Until both
+    # hops exist, no incoming peer can arrive; qBittorrent's firewalled status
+    # is the expected state, not a bug in these rules.
+    #
+    # Destination is the dnsmasq reservation this very board holds
+    # ("58:47:CA:7E:C0:05,192.168.1.190,misfit") -- static by construction.
+    # proto per forwardPorts submodule: no openFirewall field exists; the board
+    # filters no forward traffic (no forward chain in the live ruleset), and
+    # networking.nat.extraCommands is assertion-forbidden with this backend.
+    #
+    # loopbackIPs (NAT reflection) is deliberately NOT set: measured
+    # 2026-11-01, a hairpin flow (br-lan in, br-lan out after DNAT) dies
+    # between the forward hook and postrouting with no conntrack entry and no
+    # trace -- the SYN is DNAT'd, then vanishes, so the reply comes from
+    # misfit directly and the client drops it as wrong-source. ASK fast-path
+    # (cmm active, vwd_fast_path_enable=0 makes no difference; conntrack -L
+    # is blind even for working masqueraded flows) is the only component
+    # between those hooks. Not on the peers path (iif eth2, oif br-lan, no
+    # hairpin), so filed rather than chased; the board's own curl to
+    # 172.16.1.22:50000 completed a full handshake through the same dnat map.
+    forwardPorts = [
+      {
+        sourcePort = 50000;
+        destination = "192.168.1.190:50000";
+        proto = "tcp";
+      }
+      {
+        sourcePort = 50000;
+        destination = "192.168.1.190:50000";
+        proto = "udp";
+      }
+    ];
   };
 
   # --- DNS + DHCP (cutover decision 4: dnsmasq 1:1, kea/resolved later) ---
