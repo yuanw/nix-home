@@ -131,7 +131,7 @@
     # maintained nixos-26.05 (6aefcda, 2026-09-09), rebases the cmm conntrack
     # patch onto it and fixes the initrd for the newer systemd. Kernel unchanged:
     # 6.12.49 at nxp-qoriq/linux@df24f94, so this bump fixes no kernel CVE.
-    mono-nix.url = "github:yuanw/mono-gateway-nix/94c2e8ff4fc89470c7c7042cab5232ee23353b56";
+    mono-nix.url = "github:yuanw/mono-gateway-nix/f6560787c95b95af9d0457d3213e6d2e38770892";
     # Private modules live in a separate repo; see nix-home-private/README.md.
     #
     # git+https, not github:, deliberately: a github: input is fetched as a tarball

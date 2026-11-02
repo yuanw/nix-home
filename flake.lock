@@ -814,17 +814,17 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1792961795,
-        "narHash": "sha256-NH75kt+eNiLgCyICnDJpsfkNHOP278CmiT78xShEC0o=",
+        "lastModified": 1793631565,
+        "narHash": "sha256-/xaKP1oTYXvzdiyWS4PDtUNpJ3bdAhBipjkA4paANdU=",
         "owner": "yuanw",
         "repo": "mono-gateway-nix",
-        "rev": "94c2e8ff4fc89470c7c7042cab5232ee23353b56",
+        "rev": "f6560787c95b95af9d0457d3213e6d2e38770892",
         "type": "github"
       },
       "original": {
         "owner": "yuanw",
         "repo": "mono-gateway-nix",
-        "rev": "94c2e8ff4fc89470c7c7042cab5232ee23353b56",
+        "rev": "f6560787c95b95af9d0457d3213e6d2e38770892",
         "type": "github"
       }
     },
