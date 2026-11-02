@@ -1,3 +1,4 @@
+{ pkgs, ... }:
 {
   # Our layer on top of we-are-mono/nix's gateway-native config.
   #
@@ -421,4 +422,56 @@
   # only way in. ttyS0 is the way back if a generation ever moves br-lan's
   # address out from under us.
   services.openssh.openFirewall = false;
+
+  # --- DHCP blackhole workaround (incident 2026-11-01) ---
+  # The ASK stack's =inet nixos-fw= table carries an rpfilter chain whose
+  # built-in DHCP exemption never matches on this hardware: fresh BOOTP
+  # broadcasts (saddr 0.0.0.0, udp 68 -> 67) hit the chain's =policy drop=
+  # and new clients never reach dnsmasq. Unicast RENEWs pass, so the damage
+  # stayed invisible until the first DISCOVER-needing boot (docs in
+  # nix-home-private/docs/misfit-dhcp-incident-2026-11-01.org). Counter-
+  # proven: with the hand-inserted accepts in place, misfit and a phone got
+  # leases in one retry cycle; without them, nothing arrives at the socket.
+  # The table is vendor-owned (ask replays /var/lib/nftables/deletions.nft),
+  # so we do not fork it — we punch two documented holes after it loads.
+  boot.kernel.sysctl = {
+    # Loose RPF still rejects saddr 0.0.0.0; the rpfilter chain's fib check
+    # is the reverse-path filter we actually want, same pairing as the
+    # misfit readme prescribes ("rp_filter is intentionally disabled").
+    "net.ipv4.conf.all.rp_filter" = 0;
+    "net.ipv4.conf.br-lan.rp_filter" = 0;
+    "net.ipv4.conf.eth1.rp_filter" = 0;
+  };
+
+  systemd.services.dhcp-ask-rpf-bypass = {
+    description = "Open DHCP holes in the ASK nixos-fw table";
+    after = [
+      "nftables.service"
+      "cmm.service"
+    ];
+    requires = [ "nftables.service" ];
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = builtins.toString (
+        pkgs.writeShellScript "dhcp-ask-rpf-bypass" ''
+          set -e
+          # wait for the vendor table to exist at all
+          for i in $(seq 1 30); do
+            ${pkgs.nftables}/bin/nft list table inet nixos-fw >/dev/null 2>&1 && break
+            sleep 1
+          done
+          ${pkgs.nftables}/bin/nft list table inet nixos-fw >/dev/null || { echo "nixos-fw table missing — DHCP needs no bypass, or ASK is broken"; exit 0; }
+          # idempotent: only insert when our hole is not already there
+          ${pkgs.nftables}/bin/nft list chain inet nixos-fw rpfilter | grep -q 'dhcp-ask-bypass' || \
+            ${pkgs.nftables}/bin/nft insert rule inet nixos-fw rpfilter \
+              ip saddr 0.0.0.0 udp sport 68 udp dport 67 accept comment "dhcp-ask-bypass"
+          ${pkgs.nftables}/bin/nft list chain inet nixos-fw input | grep -q 'dhcp-ask-bypass' || \
+            ${pkgs.nftables}/bin/nft insert rule inet nixos-fw input \
+              ip saddr 0.0.0.0 udp sport 68 udp dport 67 accept comment "dhcp-ask-bypass"
+        ''
+      );
+    };
+  };
 }
