@@ -190,11 +190,19 @@
         "DA:E4:6A:44:49:09,192.168.1.212,Mac"
         "58:47:CA:7E:C0:05,192.168.1.190,misfit"
         "4C:BB:47:29:81:69,192.168.1.185,dgx-spark"
+        # silver configures itself statically (.216), so it never DISCOVERs;
+        # this line is what puts its name in dnsmasq's DNS at all.
+        "00:50:B6:E6:A0:AA,192.168.1.216,silver"
       ];
 
       # the =.lan= half: dnsmasq serves =<hostname>.lan= for every name it knows.
       domain = "lan";
       expand-hosts = true;
+
+      # ...but "every name it knows" means *leased* names. silver sets .216 on
+      # itself and never DISCOVERs, so the dhcp-host line above only pins the
+      # reservation — the DNS name has to come from a hosts record.
+      "addn-hosts" = "/etc/dnsmasq-hosts";
 
       # option 3 = gateway, 6 = dnsmasq itself on .1, the same two the e8450 hands out.
       dhcp-option = [
@@ -422,4 +430,5 @@
   # address out from under us.
   services.openssh.openFirewall = false;
 
+  environment.etc."dnsmasq-hosts".text = "192.168.1.216 silver silver.lan\n";
 }
