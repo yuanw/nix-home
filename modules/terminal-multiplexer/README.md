@@ -149,9 +149,17 @@ All keybindings use `Ctrl+n` as the prefix (configurable via `shortcut = "n"`).
 | `W` then `n` / `p` | Next / previous agent |
 | `Ctrl+n` then `C-j` / `C-k` | Next / previous agent, straight from the prefix |
 
-Run `workmux setup` once per machine to install agent status-tracking hooks, and
-`workmux init` in a repo to write a project `.workmux.yaml` (pane layout, hooks,
-file copies).
+Nothing here is set up by hand. The agent skills (`workmux`, `worktree`,
+`coordinator`, `merge`, `rebase`, `open-pr`) ship in the package via
+`installAgentSkills` and reach Pi through `modules.pi.rawSkills`; the pi status
+extension (the working/waiting/done icons in window names and the sidebar) is
+copied out of the same
+source tarball into `programs.pi.extensions`; and `~/.config/workmux/config.yaml`
+is declared, which also skips workmux's first-run nerdfont prompt. So neither
+`workmux setup --hooks` nor `--skills` is needed.
+
+Per repo, `workmux init` still writes a local `.workmux.yaml` (pane layout,
+post-create hooks, file copies) - that one belongs to the project, not to nix.
 
 ### Session Management Menu
 
