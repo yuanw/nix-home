@@ -135,6 +135,24 @@ All keybindings use `Ctrl+n` as the prefix (configurable via `shortcut = "n"`).
 - `Alt+s` → Toggle sidebar (no prefix needed)
 - `Alt+Shift+s` → Focus sidebar (no prefix needed)
 
+### Workmux (worktrees + agents)
+
+[workmux](https://github.com/raine/workmux) pairs git worktrees with tmux windows, one window per parallel agent.
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+n` then `W` | Workmux menu |
+| `W` then `d` | Dashboard (agent TUI in a popup) |
+| `W` then `l` | List worktrees |
+| `W` then `a` | New worktree + window (prompts for a name) |
+| `W` then `s` | Toggle the agent status sidebar |
+| `W` then `n` / `p` | Next / previous agent |
+| `Ctrl+n` then `C-j` / `C-k` | Next / previous agent, straight from the prefix |
+
+Run `workmux setup` once per machine to install agent status-tracking hooks, and
+`workmux init` in a repo to write a project `.workmux.yaml` (pane layout, hooks,
+file copies).
+
 ### Session Management Menu
 
 - `Ctrl+n` then `Tab` → Session menu with options for:

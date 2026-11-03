@@ -62,6 +62,7 @@ with lib;
           td
           tkill
           temacs
+          pkgs.llm-agents.workmux
         ]
 
         ;
@@ -131,6 +132,20 @@ with lib;
                  xargs tmux join-pane -v -s"
 
 
+
+            # workmux — git worktrees + tmux windows for parallel agent work
+            bind-key W display-menu -T "#[align=centre]Workmux" \
+              "Dashboard" d "display-popup -w 90% -h 80% -E \"workmux dashboard\"" \
+              "Worktrees" l "display-popup -w 70% -h 60% -E \"workmux list\"" \
+              "New worktree" a "command-prompt -p \"worktree name\" \"run-shell 'workmux add %1'\"" ${tmuxMenuSeperator} \
+              "Toggle sidebar" s "run-shell 'workmux sidebar'" \
+              "Next agent" n "run-shell 'workmux sidebar next'" \
+              "Previous agent" p "run-shell 'workmux sidebar prev'" ${tmuxMenuSeperator} \
+              Exit q detach
+
+            # Cycle worktree agents without going through the menu
+            bind-key C-j run-shell "workmux sidebar next"
+            bind-key C-k run-shell "workmux sidebar prev"
 
             # tmux-which-key
             ${lib.optionalString cfg.whichKey.enable ''
