@@ -93,6 +93,14 @@ in
       ${toLine "substituters" cacheSubstituters}
       ${toLine "trusted-substituters" trustedSubstituters}
       ${toLine "trusted-public-keys" trustedPublicKeys}
+      # An input of this flake uses the pipe operator (`|>`), and the Lix installer's
+      # /etc/nix/nix.conf enables only nix-command and flakes, so `darwin-rebuild`
+      # running nix as root dies with "Pipe operator is disabled".  Nothing else
+      # reaches root: nix.enable is false on the Darwin hosts, so nix.settings never
+      # writes nix.conf.  SetConfig adds to the parent file instead of replacing it,
+      # and darwin-rebuild's own --extra-experimental-features appends as well.
+      # Lix spells the feature singular; upstream Nix has pipe-operators.
+      extra-experimental-features = nix-command flakes pipe-operator
       # A powered-off silver must not stall every missing path for a minute. It is
       # also Nix's default, spelled out because on the Darwin hosts this file,
       # not nix.settings, is what the daemon reads (nix.enable = false there).
