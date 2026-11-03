@@ -200,8 +200,10 @@
       expand-hosts = true;
 
       # ...but "every name it knows" means *leased* names. silver sets .216 on
-      # itself and never DISCOVERs, so the dhcp-host line above only pins the
-      # reservation — the DNS name has to come from a hosts record.
+      # itself and never DISCOVERs, so the bare name comes from a hosts record
+      # and the FQDN — which hosts entries will not serve in authoritative
+      # mode, tried and verified — from address=, which harmonia's substituter
+      # URLs (modules/services/cache/consumer.nix) need verbatim.
       "addn-hosts" = "/etc/dnsmasq-hosts";
 
       # option 3 = gateway, 6 = dnsmasq itself on .1, the same two the e8450 hands out.
@@ -216,7 +218,10 @@
       # =*.yuanw.me= resolves on the LAN without it: misfit's caddy serves the
       # LAN-only names behind that wildcard, so this is what makes
       # openwrt./cockpit./tensorfold. reach it again.
-      address = "/.yuanw.me/192.168.1.190";
+      address = [
+        "/.yuanw.me/192.168.1.190"
+        "/silver.lan/192.168.1.216"
+      ];
 
       # Decision 4, closed 2026-10-17: do not import /etc/resolv.conf as upstream
       # servers. Without it dnsmasq still held the WAN resolvers, so a dead AGH
@@ -430,5 +435,7 @@
   # address out from under us.
   services.openssh.openFirewall = false;
 
-  environment.etc."dnsmasq-hosts".text = "192.168.1.216 silver silver.lan\n";
+  # Bare name here; the FQDN lives in the address= list above (hosts entries
+  # will not serve dotted names in authoritative mode — tried).
+  environment.etc."dnsmasq-hosts".text = "192.168.1.216 silver\n";
 }
