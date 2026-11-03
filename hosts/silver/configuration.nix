@@ -30,6 +30,22 @@
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpYgmWwtRG7vlRbtWheYrtHl9E9qx84sdU+YlE8w+CZ me@yuanwang.ca"
     ];
   };
+
+  # Same human, house-wide username — misfit/mist call the account yuan, and
+  # tooling (and muscle memory) that assumes it works here now. Same keys as
+  # yuanw above; builder keys (misfit's yuan carries those) intentionally not
+  # copied — add on demand, not on speculation.
+  users.users.yuan = {
+    isNormalUser = true;
+    extraGroups = [
+      "wheel"
+      "video"
+    ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHUg80LmE2cirl2gPfmShkWZh68eIvlD6Uc3swGfcAwY me@yuanwang.ca"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpYgmWwtRG7vlRbtWheYrtHl9E9qx84sdU+YlE8w+CZ me@yuanwang.ca"
+    ];
+  };
   security.sudo.wheelNeedsPassword = false;
 
   # ─── SSH ────────────────────────────────────────────────────────────
