@@ -209,8 +209,12 @@ cache-status:
 
 # build and deploy to local host (macOS or NixOS)
 switch:
+    # darwin: the absolute path and the exact flags have to match the NOPASSWD rule
+    # in modules/macintosh.nix, which is what keeps this off the password prompt.
+    # No NIX_CONFIG here: root gets the experimental features from
+    # /etc/nix/nix.custom.conf (modules/nix-custom-conf.nix).
     @if [ "$(uname)" = "Darwin" ]; then \
-        sudo env NIX_CONFIG="{{nix_config}}" darwin-rebuild switch --flake . --fallback; \
+        sudo /run/current-system/sw/bin/darwin-rebuild switch --flake . --fallback; \
     else \
         env NIX_CONFIG="{{nix_config}}" nixos-rebuild switch --flake '.#{{lowercase(host)}}' --quiet --sudo --fallback; \
         if systemctl is-enabled --quiet emacs.service 2>/dev/null; then sudo systemctl try-restart emacs.service; fi; \

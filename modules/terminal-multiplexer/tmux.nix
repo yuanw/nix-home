@@ -15,6 +15,17 @@ let
   # tmux-which-key integration
   tmuxWhichKeyYaml = builtins.readFile ./tmux-which-key.yaml;
 
+  # Git worktrees + tmux windows for parallel agent work; llm-agents ships it
+  # with installAgentSkills, so the agent skills ride along in the output.
+  workmux = pkgs.llm-agents.workmux;
+
+  # What `workmux setup --hooks` would drop into ~/.pi/agent/extensions/; pi-flake
+  # wraps a bare .ts into a Pi package.  Read out of the same tarball the package
+  # builds from, so it cannot drift from the pinned version.
+  workmuxStatusExtension = pkgs.runCommand "workmux-status.ts" { } ''
+    cp ${workmux.src}/resources/pi/extensions/workmux-status.ts $out
+  '';
+
   tmuxWhichKeyInit =
     pkgs.runCommand "tmux-which-key-init.tmux"
       {
@@ -54,6 +65,25 @@ with lib;
   };
 
   config = mkIf cfg.enable {
+    # The skills `workmux setup --skills` would install are already in the package
+    # output (installAgentSkills); hand them to Pi the way the herdr and
+    # open-code-review modules hand over theirs.
+    modules.pi.rawSkills = map (skill: "${workmux}/share/skills/workmux/${skill}") [
+      "workmux"
+      "worktree"
+      "coordinator"
+      "merge"
+      "rebase"
+      "open-pr"
+    ];
+
+    # Status tracking (the working/waiting/done icons in window names and the
+    # sidebar) needs pi's extension, which is the other half of `workmux setup`.
+    modules.pi.extensions.workmux-status = {
+      enable = true;
+      package = workmuxStatusExtension;
+    };
+
     home-manager.users.${config.my.username} = {
       home = {
         file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
@@ -62,9 +92,21 @@ with lib;
           td
           tkill
           temacs
+          workmux
         ]
 
         ;
+      };
+
+      # workmux writes this itself only when it is missing, and asks about the
+      # nerdfont icons on that first run, so declaring it skips the wizard.
+      # `agent` is the command the <agent> placeholder resolves to.
+      xdg.configFile."workmux/config.yaml" = {
+        force = true; # workmux already created it with just `nerdfont: true`
+        text = ''
+          agent: pi
+          nerdfont: true
+        '';
       };
 
       # tmux-which-key config
@@ -131,6 +173,20 @@ with lib;
                  xargs tmux join-pane -v -s"
 
 
+
+            # workmux - git worktrees + tmux windows for parallel agent work
+            bind-key W display-menu -T "#[align=centre]Workmux" \
+              "Dashboard" d "display-popup -w 90% -h 80% -E \"workmux dashboard\"" \
+              "Worktrees" l "display-popup -w 70% -h 60% -E \"workmux list\"" \
+              "New worktree" a "command-prompt -p \"worktree name\" \"run-shell 'workmux add %1'\"" ${tmuxMenuSeperator} \
+              "Toggle sidebar" s "run-shell 'workmux sidebar'" \
+              "Next agent" n "run-shell 'workmux sidebar next'" \
+              "Previous agent" p "run-shell 'workmux sidebar prev'" ${tmuxMenuSeperator} \
+              Exit q detach
+
+            # Cycle worktree agents without going through the menu
+            bind-key C-j run-shell "workmux sidebar next"
+            bind-key C-k run-shell "workmux sidebar prev"
 
             # tmux-which-key
             ${lib.optionalString cfg.whichKey.enable ''

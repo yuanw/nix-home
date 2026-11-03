@@ -135,6 +135,32 @@ All keybindings use `Ctrl+n` as the prefix (configurable via `shortcut = "n"`).
 - `Alt+s` → Toggle sidebar (no prefix needed)
 - `Alt+Shift+s` → Focus sidebar (no prefix needed)
 
+### Workmux (worktrees + agents)
+
+[workmux](https://github.com/raine/workmux) pairs git worktrees with tmux windows, one window per parallel agent.
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+n` then `W` | Workmux menu |
+| `W` then `d` | Dashboard (agent TUI in a popup) |
+| `W` then `l` | List worktrees |
+| `W` then `a` | New worktree + window (prompts for a name) |
+| `W` then `s` | Toggle the agent status sidebar |
+| `W` then `n` / `p` | Next / previous agent |
+| `Ctrl+n` then `C-j` / `C-k` | Next / previous agent, straight from the prefix |
+
+Nothing here is set up by hand. The agent skills (`workmux`, `worktree`,
+`coordinator`, `merge`, `rebase`, `open-pr`) ship in the package via
+`installAgentSkills` and reach Pi through `modules.pi.rawSkills`; the pi status
+extension (the working/waiting/done icons in window names and the sidebar) is
+copied out of the same
+source tarball into `programs.pi.extensions`; and `~/.config/workmux/config.yaml`
+is declared, which also skips workmux's first-run nerdfont prompt. So neither
+`workmux setup --hooks` nor `--skills` is needed.
+
+Per repo, `workmux init` still writes a local `.workmux.yaml` (pane layout,
+post-create hooks, file copies) - that one belongs to the project, not to nix.
+
 ### Session Management Menu
 
 - `Ctrl+n` then `Tab` → Session menu with options for:

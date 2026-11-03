@@ -185,6 +185,22 @@ in
     };
   };
 
+  # `just switch` needs root (darwin-rebuild refuses to activate as a normal
+  # user), so this one command skips the password prompt.  Everything else still
+  # authenticates.
+  #
+  # The flags are part of the rule rather than a `--flake *` wildcard: darwin-rebuild
+  # pointed at any other flake activates it as root, so a wildcard would be a general
+  # root grant for anything running as this user.  No NIX_CONFIG has to cross the
+  # sudo because root reads the experimental features from /etc/nix/nix.custom.conf
+  # (modules/nix-custom-conf.nix).
+  #
+  # The first switch after adding this still asks for the password: the rule itself
+  # lands in /etc/sudoers.d as part of that activation.
+  security.sudo.extraConfig = lib.mkAfter ''
+    ${config.system.primaryUser} ALL=(root) NOPASSWD: /run/current-system/sw/bin/darwin-rebuild switch --flake . --fallback
+  '';
+
   fonts.packages = with pkgs; [
     fira-code
     font-awesome
