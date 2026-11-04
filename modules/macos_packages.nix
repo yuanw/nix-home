@@ -17,6 +17,9 @@ with pkgs;
   #mcp-server-filesystem
   kanata-with-cmd
   defaultbrowser
+  # macOS has no `timeout`, and coreutils-prefixed (modules/packages.nix) only
+  # names it gtimeout. Unprefixed coreutils would shadow BSD ls/date/du.
+  (writeShellScriptBin "timeout" ''exec ${coreutils}/bin/timeout "$@"'')
   #sbcl
   #claude-code-acp
   #ghostty-mac
