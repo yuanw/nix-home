@@ -86,10 +86,10 @@ enabled = false
 # See https://github.com/y3owk1n/neru/blob/main/docs/CONFIGURATION.md#recursive_grid
 [recursive_grid]
 enabled = true
-grid_cols = 5                               # Number of columns (>= 1)
+grid_cols = 4                               # Number of columns (>= 1)
 grid_rows = 3                               # Number of rows (>= 1)
 # Left hand 4×3 (QYOU / CIAE / ',.;) — keeps right hand free for mouseless nav
-keys = "qyou=ciae-',.;/"
+keys = "ldpzhtnsmgfv"
 min_size_width = 1                          # Stop subdividing below this width (px)
 min_size_height = 1                         # Stop subdividing below this height (px)
 max_depth = 10                              # Maximum recursion levels (1–20)
@@ -106,25 +106,26 @@ duration_ms = 50                            # Recursive-grid animation duration 
 "z" = "action reset"
 
 # right hand: move (D=up T=down H=left N=right)
-"d" = "action move_mouse_relative --dx=0 --dy=-25"
-"t" = "action move_mouse_relative --dx=0 --dy=25"
-"h" = "action move_mouse_relative --dx=-25 --dy=0"
-"n" = "action move_mouse_relative --dx=25 --dy=0"
+"o" = "action move_mouse_relative --dx=0 --dy=-25"
 
-"Shift+D" = "action move_mouse_relative --dx=0 --dy=-5"
-"Shift+T" = "action move_mouse_relative --dx=0 --dy=5"
-"Shift+H" = "action move_mouse_relative --dx=-5 --dy=0"
-"Shift+N" = "action move_mouse_relative --dx=5 --dy=0"
+"a" = "action move_mouse_relative --dx=0 --dy=25"
+"i" = "action move_mouse_relative --dx=-25 --dy=0"
+"e" = "action move_mouse_relative --dx=25 --dy=0"
+
+"Shift+o" = "action move_mouse_relative --dx=0 --dy=-5"
+"Shift+a" = "action move_mouse_relative --dx=0 --dy=5"
+"Shift+i" = "action move_mouse_relative --dx=-5 --dy=0"
+"Shift+e" = "action move_mouse_relative --dx=5 --dy=0"
 
 # right hand: subgrid nudge (after cell selection)
-"m" = "action move_mouse_relative --dx=-10 --dy=0"
-"f" = "action move_mouse_relative --dx=10 --dy=0"
-"k" = "action move_mouse_relative --dx=0 --dy=-10"
-"j" = "action move_mouse_relative --dx=0 --dy=10"
+"," = "action move_mouse_relative --dx=-10 --dy=0"
+"." = "action move_mouse_relative --dx=10 --dy=0"
+";" = "action move_mouse_relative --dx=0 --dy=-10"
+"'" = "action move_mouse_relative --dx=0 --dy=10"
 
 "Space" = ["action left_click", "idle"]
 "Shift+Space" = "action left_click"
-"p" = "action middle_click"
+"Shift+r" = "action middle_click"
 "r" = "action right_click"
 
 "Ctrl+D" = "action scroll_up"
@@ -137,9 +138,7 @@ duration_ms = 50                            # Recursive-grid animation duration 
 "Ctrl+C" = "idle"
 
 "Shift+L" = "__disabled__"
-"Shift+R" = "__disabled__"
 "Shift+M" = "__disabled__"
-"Shift+I" = "__disabled__"
 "Shift+U" = "__disabled__"
 
 [recursive_grid.ui]
