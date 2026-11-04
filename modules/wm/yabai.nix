@@ -133,8 +133,20 @@ in
       system.activationScripts.postActivation.text = mkAfter ''
         TCCUTIL="${pkgs.tccutil-manage}/bin/tccutil-manage"
         YABAI="${pkgs.yabai}/bin/yabai"
+        SKHD="${config.services.skhd.package}/bin/skhd"
         echo "Granting Accessibility to yabai..."
         "$TCCUTIL" --insert "$YABAI" || true
+        # skhd needs the same grant for its event tap, and it is worse off than
+        # yabai: it never checks the result of CGEventTapCreate, so an ungranted
+        # binary just runs on with a NULL tap and logs nothing. Its keybindings
+        # are its children, so TCC blames skhd for screencapture too.
+        echo "Granting Accessibility and Screen Recording to skhd..."
+        "$TCCUTIL" --insert "$SKHD" || true
+        "$TCCUTIL" --service kTCCServiceScreenCapture --insert "$SKHD" || true
+        # This script runs after userLaunchd, so the agent started before its own
+        # grant existed. A new store path (any nixpkgs bump) restarts it with a
+        # dead tap, so restart it once the row is in.
+        launchctl kickstart -k "gui/$(id -u '${config.my.username}')/org.nixos.skhd" || true
         ${lib.optionalString config.modules.mouseless.enable ''
           echo "Granting Accessibility to mouseless..."
           "$TCCUTIL" --insert net.sonuscape.mouseless || true
