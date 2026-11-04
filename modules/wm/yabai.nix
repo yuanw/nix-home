@@ -147,6 +147,15 @@ in
         # grant existed. A new store path (any nixpkgs bump) restarts it with a
         # dead tap, so restart it once the row is in.
         launchctl kickstart -k "gui/$(id -u '${config.my.username}')/org.nixos.skhd" || true
+        ${lib.optionalString cfg.enableJankyborders ''
+          # borders also needs Accessibility, and it is silent about it the same
+          # way: ungranted it stays up, its AX queries just return nothing, so a
+          # new store path needs the restart too.
+          BORDERS="${config.services.jankyborders.package}/bin/borders"
+          echo "Granting Accessibility to jankyborders..."
+          "$TCCUTIL" --insert "$BORDERS" || true
+          launchctl kickstart -k "gui/$(id -u '${config.my.username}')/org.nixos.jankyborders" || true
+        ''}
         ${lib.optionalString config.modules.mouseless.enable ''
           echo "Granting Accessibility to mouseless..."
           "$TCCUTIL" --insert net.sonuscape.mouseless || true
