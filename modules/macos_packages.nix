@@ -4,7 +4,7 @@ with pkgs;
 [
   pinentry_mac
   #yt-dlp
-  #bandcamp-dl
+  bandcamp-dl
   ffmpeg
   duti
   # github-mcp-server is now in nixpkgs, removed from mcp-servers-nix overlay

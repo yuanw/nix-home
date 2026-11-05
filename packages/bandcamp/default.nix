@@ -3,50 +3,62 @@
   fetchFromGitHub,
   callPackage,
   setuptools,
-  poetry-core,
   lib,
 
+  beautifulsoup4,
   demjson3,
   mutagen,
   requests,
-  unicode-slugify,
+  requests-ratelimiter,
   urllib3,
 }:
 let
-  beautifulsoup4 = callPackage ./beautifulsoup4.nix { };
+  # nixpkgs dropped unicode-slugify; see ./unicode-slugify.nix
+  unicode-slugify = callPackage ./unicode-slugify.nix { };
 in
 buildPythonApplication rec {
   pname = "bandcamp-dl";
-  version = "0.0.17";
+  # no tag for it -- master of the maintained fork
+  version = "1.0.0.dev1";
   pyproject = true;
 
   src = fetchFromGitHub {
-    owner = "iheanyi";
+    # iheanyi/bandcamp-dl, this package's original home, has gone stale;
+    # Evolution0's fork is where the Bandcamp-scraping fixes land.
+    owner = "Evolution0";
     repo = pname;
-    #rev = "d7b4c4d6e7bfe365ee36514d6c608caf883e4476";
-    rev = "v${version}";
-    # hash = lib.fakeHash;
+    rev = "0bf086bc2431c0756630faafff10dee7b64b8b67";
 
-    hash = "sha256-PNyVEzwRMXE0AtTTg+JyWw6+FSuxobi3orXuxkG0kxw=";
+    hash = "sha256-QzZl10YHPvJPH7ufSJxF2xhNya2khgbhN93OFJAEUFg=";
   };
 
-  build-system = [ poetry-core ];
+  # nixpkgs has urllib3 2.7.0, the pyproject floor is 2.8.0; nothing here uses
+  # what the extra point added.
+  pythonRelaxDeps = [ "urllib3" ];
 
-  propagatedBuildInputs = [
-    setuptools
+  build-system = [ setuptools ];
+
+  # pyproject asks for setuptools>=84, nixpkgs has 83, and the check inside
+  # setuptools' build_meta kills the build on the pin.  The pin is about
+  # metadata handling, not about what this build needs, so drop the constraint
+  # rather than vendor a newer setuptools.
+  postPatch = ''
+    sed -i 's/setuptools>=84\.0\.0/setuptools/' pyproject.toml
+  '';
+
+  dependencies = [
     beautifulsoup4
     demjson3
     mutagen
     requests
+    requests-ratelimiter
     unicode-slugify
     urllib3
   ];
 
-  #  doCheck = false;
-
   meta = {
-    homepage = "https://github.com/iheanyi/bandcamp-dl";
+    homepage = "https://github.com/Evolution0/bandcamp-dl";
     description = "Download audio from bandcamp.com";
-    license = lib.licenses.publicDomain;
+    license = lib.licenses.unlicense;
   };
 }
