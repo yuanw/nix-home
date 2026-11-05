@@ -3,6 +3,8 @@
   lib,
   fetchurl,
   unzip,
+  versionCheckHook,
+  nix-update-script,
 }:
 stdenv.mkDerivation rec {
 
@@ -14,7 +16,15 @@ stdenv.mkDerivation rec {
     hash = "sha256-EfY83cm7P4VU7Zt2JjKhIM+nvuBePAnWVzSCPgnSTxA=";
   };
 
-  nativeBuildInputs = [ unzip ];
+  nativeBuildInputs = [
+    versionCheckHook
+    unzip
+  ];
+
+  doInstallCheck = true;
+
+  # nix-update -f packages/alerter alerter --version-prefix 'v' refreshes version + hash.
+  passthru.updateScript = nix-update-script { };
 
   # zip contains a single file with no subdirectory
   setSourceRoot = "sourceRoot=$(pwd)";
@@ -35,6 +45,9 @@ stdenv.mkDerivation rec {
     '';
     license = lib.licenses.mit;
     mainProgram = "alerter";
+    changelog = "https://github.com/vjeantet/alerter/releases/tag/v${version}";
+    sourceProvenance = with lib.sourceTypes; [ binaryNativeCode ];
+    # the released zip ships an arm64-only Mach-O, not a universal binary
     platforms = [ "aarch64-darwin" ];
   };
 }
