@@ -1,0 +1,76 @@
+#!/bin/sh
+#
+# Restore every repo's workmux agent windows after a tmux or machine restart.
+#
+# `workmux resurrect` reads the global agent-state files but only restores the
+# worktrees of the repository you run it in, so one call per repo is needed.
+# This groups the recorded agent workdirs by their repository and runs
+# `workmux resurrect` in each.
+#
+# Usage: workmux-resurrect-all [--dry-run] [--force]
+
+# The tmux server's PATH is whatever started it; keep the profile directories.
+PATH="$HOME/.nix-profile/bin:$HOME/.local/bin:/etc/profiles/per-user/$(id -un)/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin"
+export PATH
+
+state="${XDG_STATE_HOME:-$HOME/.local/state}/workmux"
+[ -d "$state" ] || exit 0
+
+dry_run=false
+force=false
+for arg in "$@"; do
+  case "$arg" in
+  --dry-run) dry_run=true ;;
+  --force) force=true ;;
+  *)
+    echo "workmux-resurrect-all: unknown argument: $arg" >&2
+    exit 2
+    ;;
+  esac
+done
+
+# The tmux hook fires on every attach; restore once per boot.
+# shortcut: no portable boot identity (neither /proc nor sysctl) means no stamp
+# and it re-runs on every attach.
+boot="$(cat /proc/sys/kernel/random/boot_id 2> /dev/null)"
+if [ -z "$boot" ] && command -v sysctl > /dev/null 2>&1; then
+  boot="$(sysctl -n kern.boottime 2> /dev/null | sed -nE 's/.*\{ *sec = ([0-9]+).*/mac-\1/p')"
+fi
+stamp="$state/last-resurrect-boot"
+if [ "$force" != true ] && [ -n "$boot" ] && [ "$(cat "$stamp" 2> /dev/null)" = "$boot" ]; then
+  exit 0
+fi
+
+# Keep the last run's output for debugging the attach-time hook.
+log="$state/resurrect.log"
+: > "$log"
+
+# agent states live in per-pane files and in the per-instance recovery manifest.
+workdirs="$(cat "$state"/agents/*.json "$state"/agent-recovery/*/*.json 2> /dev/null \
+  | jq -r '.workdir? // .entries[]?.state.workdir? // empty')"
+[ -n "$workdirs" ] || exit 0
+
+repos="$(printf '%s\n' "$workdirs" | while IFS= read -r dir; do
+  [ -n "$dir" ] && [ -d "$dir" ] || continue
+  git -C "$dir" worktree list --porcelain 2> /dev/null \
+    | awk '/^worktree /{print substr($0, 10); exit}'
+done | sort -u)"
+
+while IFS= read -r repo; do
+  [ -n "$repo" ] && [ -d "$repo" ] || continue
+  if [ "$dry_run" = true ]; then
+    out="$(cd "$repo" && workmux resurrect --dry-run 2>&1)"
+  else
+    out="$(cd "$repo" && workmux resurrect 2>&1)"
+  fi
+  out="$(printf '%s\n' "$out" | grep -v 'Nothing to restore\|unmatched state file')"
+  [ -n "$out" ] || continue
+  printf '== %s\n%s\n' "$repo" "$out" | tee -a "$log"
+done << EOF
+$repos
+EOF
+
+if [ "$dry_run" != true ] && [ -n "$boot" ]; then
+  mkdir -p "$state"
+  printf '%s\n' "$boot" > "$stamp"
+fi

@@ -12,6 +12,11 @@ let
   temacs = pkgs.writeShellScriptBin "temacs" ''(tmux has-session -t emacs && tmux switch-client -t emacs) || (tmux new-session -Ad -s emacs && tmux send-keys -t emacs "emacsclient -c -a 'emacs'" "C-m" )'';
   tkill = pkgs.writeShellScriptBin "tkill" "tmux list-sessions -F '#{?session_attached,,#{session_name}}' | sed '/^$/d' | fzf --reverse --header kill-sessions --preview 'tmux capture-pane -pt {}'  | xargs tmux kill-session -t";
 
+  # workmux resurrect is repo-scoped; this walks every repo with agent state.
+  workmuxResurrectAll = pkgs.writeShellScriptBin "workmux-resurrect-all" (
+    builtins.readFile ./workmux-resurrect-all
+  );
+
   # tmux-which-key integration
   tmuxWhichKeyYaml = builtins.readFile ./tmux-which-key.yaml;
 
@@ -93,9 +98,8 @@ with lib;
           tkill
           temacs
           workmux
-        ]
-
-        ;
+          workmuxResurrectAll
+        ];
       };
 
       # workmux writes this itself only when it is missing, and asks about the
@@ -182,7 +186,13 @@ with lib;
               "Toggle sidebar" s "run-shell 'workmux sidebar'" \
               "Next agent" n "run-shell 'workmux sidebar next'" \
               "Previous agent" p "run-shell 'workmux sidebar prev'" ${tmuxMenuSeperator} \
+              "Restore agents" r "display-popup -w 70% -h 60% -E \"${workmuxResurrectAll}/bin/workmux-resurrect-all --force\"" ${tmuxMenuSeperator} \
               Exit q detach
+
+            # After a machine or tmux-server restart, bring back the workmux
+            # agent windows. The script stamps the boot id, so later attaches
+            # are a no-op; its output goes to resurrect.log next to the state.
+            set-hook -g client-attached 'run-shell -b "${workmuxResurrectAll}/bin/workmux-resurrect-all"'
 
             # Cycle worktree agents without going through the menu
             bind-key C-j run-shell "workmux sidebar next"
