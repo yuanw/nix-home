@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# MIT (c) 2026 Preston Peranich -- copied verbatim from pkgs/rex-project-picker
+# in https://github.com/pperanich/dotfiles at 29ea77f4; see rex.nix for the wiring.
+set -euo pipefail
+
+scratch=$(mktemp -d "${TMPDIR:-/tmp}/rex-project-picker.XXXXXX")
+trap 'rm -rf -- "$scratch"' EXIT
+
+list_projects() {
+	local root depth marker
+	(($# > 0 && $# % 2 == 0)) || {
+		echo 'Expected ROOT DEPTH pairs' >&2
+		return 2
+	}
+	: >|"$scratch/projects"
+	while (($#)); do
+		root=$1 depth=$2
+		shift 2
+		if [[ ! $depth =~ ^[0-9]+$ || ${#depth} -gt 2 ]] || ((10#$depth > 32)); then
+			echo "Invalid project depth: $depth (expected 0..32)" >&2
+			return 2
+		fi
+		[[ -e $root ]] || continue
+		root=$(cd -- "$root" && pwd -P) || return
+		"${PROJECT_PICKER_FD:-fd}" --hidden --no-ignore --case-sensitive \
+			--absolute-path --type directory --type file --prune --print0 \
+			--max-depth "$((10#$depth + 1))" '^\.git$' "$root" >|"$scratch/markers" || return
+		while IFS= read -r -d '' marker; do
+			marker=${marker%/}
+			printf '%s\0' "${marker%/.git}" >>"$scratch/projects"
+		done <"$scratch/markers"
+	done
+	LC_ALL=C sort -zu "$scratch/projects"
+}
+
+pick() {
+	local rex_cli=$1 fzf_cli=$2 fd_cli=$3 client=$4 server=$5 selected status
+	shift 5
+	export PROJECT_PICKER_FD=$fd_cli
+	# A GUI-launched server may have a minimal PATH. These are stable profile paths.
+	export PATH="${rex_cli%/*}:${fzf_cli%/*}:${fd_cli%/*}:$PATH"
+	list_projects "$@" >|"$scratch/list" || return
+	[[ -s $scratch/list ]] || {
+		echo 'No projects found under the configured roots.' >&2
+		return 1
+	}
+	if FZF_DEFAULT_OPTS='' FZF_DEFAULT_OPTS_FILE='' "$fzf_cli" \
+		--read0 --print0 --sync --no-multi --scheme=path --layout=reverse --border=none \
+		--prompt='Project > ' --header='Enter: open project   Esc: cancel' \
+		--color='fg:#cdd6f4,bg:#1e1e2e,hl:#cba6f7,fg+:#cdd6f4,bg+:#313244,hl+:#a6e3a1,prompt:#cba6f7,pointer:#a6e3a1' \
+		--bind='ctrl-n:down,ctrl-p:up' <"$scratch/list" >|"$scratch/selected"; then
+		IFS= read -r -d '' selected <"$scratch/selected" || return
+	else
+		status=$?
+		case $status in 1 | 130) return 0 ;; *) return "$status" ;; esac
+	fi
+	local rex_args=(--autostart=false --color=never -C "$client")
+	[[ -z $server ]] || rex_args+=(-S "$server")
+	"$rex_cli" "${rex_args[@]}" 'do' rex_project_picker_open \
+		--session "${REX_SESSION:?Missing Rex popup session}" \
+		--block "${REX_BLOCK:?Missing Rex popup block}" "path=$selected"
+}
+
+case ${1:-popup} in
+list)
+	shift
+	list_projects "$@"
+	;;
+pick)
+	shift
+	if pick "$@"; then exit 0; else status=$?; fi
+	printf '\nProject picker failed (%s). Press Enter to close.\n' "$status" >&2
+	read -r _ || true
+	exit "$status"
+	;;
+popup)
+	(($# == 0)) || shift
+	rex_cli=$(command -v rex)
+	rex_args=(--autostart=false --color=never)
+	[[ -z ${REX_SERVER:-} ]] || rex_args+=(-S "$REX_SERVER")
+	[[ -z ${2:-${REX_CLIENT:-}} ]] || rex_args+=(-C "${2:-$REX_CLIENT}")
+	session=${1:-${REX_SESSION:-}}
+	[[ -n $session ]] || {
+		echo "Usage: $0 popup SESSION [APP_CLIENT]" >&2
+		exit 2
+	}
+	"$rex_cli" "${rex_args[@]}" 'do' rex_project_picker --session "$session"
+	;;
+*)
+	echo "Usage: $0 [popup SESSION [APP_CLIENT] | list [ROOT DEPTH ...]]" >&2
+	exit 2
+	;;
+esac
