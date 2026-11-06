@@ -1,0 +1,16 @@
+{
+  "server": {
+    "version": "0.0.1793741575-g1b6654",
+    "rev": "1b6654811346488b696ded8f3c7e6701c57242f1",
+    "supportHash": "sha256-MfxrlfzGXlWjQsEZc3Rd0G+HJ3XyrBrdMUdLUYUrO5M="
+  },
+  "app": {
+    "version": "0.1.0",
+    "build": "1823"
+  },
+  "hashes": {
+    "aarch64-darwin": "sha256-q27EdxTGJ1lSAD/ooXlqVv733VAVxE4dfkfDvYy5BeE=",
+    "aarch64-linux": "sha256-M5DRVYAu0eLp5PNnkqr9FcWn/5qny/pqeuXUeuCFThU=",
+    "x86_64-linux": "sha256-Eiq80ixleFIhhrsEB3kWJmV83McyfJx2+P1IdZhYLMs="
+  }
+}

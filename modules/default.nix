@@ -46,6 +46,7 @@
       ./speech2text/speak2text.nix
       ./speech2text/transcribe.nix
       ./terminal
+      ./terminal-multiplexer/rex.nix
       ./terminal-multiplexer/tmux.nix
       ./terminal-multiplexer/zellij.nix
       ./typing

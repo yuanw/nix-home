@@ -271,4 +271,9 @@ in
   # Re-adds pcp removed from nixpkgs (PR #495646)
   pcp = prev.callPackage ./pcp/package.nix { };
 
+  # Rex: terminal multiplexer with a native macOS client + Linux server.
+  # Pinned by packages/rex/sources.json (snapshot prerelease channel); refresh
+  # with the passthru.updateScript.  See modules/terminal-multiplexer/rex.nix.
+  rex = prev.callPackage ./rex/package.nix { };
+
 }

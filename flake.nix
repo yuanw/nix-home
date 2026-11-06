@@ -110,8 +110,13 @@
     # a nixpkgs bump to 2026-10-31.  Flip back to graham33 once #197 merges
     # upstream.
     dgx-spark.url = "github:yuanw/nixos-dgx-spark/pr-197-lock-bump";
+    # Pinned to 7408b8b (2026-07-29), the last rev before upstream added the
+    # enable-container-tests input as a relative path (path:./flags/...): Lix
+    # refuses to lock a non-root flake whose lock file carries a path node
+    # ("lock file contains mutable lock"), which fails `just update-all`.  Flip
+    # back to github:nixified-ai/flake once that flag is an immutable input.
     nixified-ai = {
-      url = "github:nixified-ai/flake";
+      url = "github:nixified-ai/flake/7408b8bca6c0043dee3b583093e8a5b79a7bda89";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     colmena.url = "github:zhaofengli/colmena";
