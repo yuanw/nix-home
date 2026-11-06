@@ -71,7 +71,7 @@ with lib;
 
     pickerKey = mkOption {
       type = types.str;
-      default = "ctr+n";
+      default = "ctrl+n>p";
       description = "Shortcut that opens the project picker.";
     };
   };
@@ -150,6 +150,12 @@ with lib;
       # Rex reads these at launch and rewrites the plist when it quits, so quit
       # Rex before darwin-rebuild or the write is lost.
       system.defaults.CustomUserPreferences."com.superlogical.rex" = {
+        # Remote Control is the gate on every client action, including the
+        # session.select the project picker queues to focus what it opened -- with
+        # it off the picker creates the session and then fails.  Anything that can
+        # reach the local server can then drive the app, which is what the CLI
+        # automation is for, but it is a wider door than the font settings above.
+        "rex.client.remoteControl" = true;
         # Must name an installed face exactly; the same value Alacritty uses.
         "Workspace.terminalFontName" = config.my.monoFont;
         # A Nix float -- nix-darwin throws on the string "16.0".
