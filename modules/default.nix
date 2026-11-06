@@ -74,6 +74,7 @@
       ./mouseless
       ./neru
       ./nix-casks.nix
+      ./terminal/codesign-darwin.nix
     ];
   };
 
