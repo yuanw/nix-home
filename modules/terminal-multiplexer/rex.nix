@@ -78,71 +78,90 @@ with lib;
 
   config = mkIf cfg.enable (
     {
-      home-manager.users.${config.my.username} = {
-        # rex plus the picker's own dependencies: picker.lua resolves each tool
-        # under the user profile (the macOS system prefixes only cover bash and
-        # pwd), so they have to be linked there rather than named in init.lua.
-        home.packages = [
-          pkgs.fd
-          pkgs.fzf
-          pkgs.rex
-        ];
+      home-manager.users.${config.my.username} =
+        hm@{ ... }:
+        {
+          # rex plus the picker's own dependencies: picker.lua resolves each tool
+          # under the user profile (the macOS system prefixes only cover bash and
+          # pwd), so they have to be linked there rather than named in init.lua.
+          home.packages = [
+            pkgs.fd
+            pkgs.fzf
+            pkgs.rex
+          ];
 
-        xdg.configFile = {
-          "rex/init.lua".text = initLua;
+          xdg.configFile = {
+            "rex/init.lua".text = initLua;
 
-          # picker.lua resolves its own directory and runs the helper from it, so
-          # the two must stay siblings.  bash takes the helper as an argument, so
-          # it needs no exec bit.
-          "rex/rex-project-picker/picker.lua".source = "${pickerSrc}/picker.lua";
-          "rex/rex-project-picker/rex-project-picker".source = "${pickerSrc}/rex-project-picker";
+            # picker.lua resolves its own directory and runs the helper from it, so
+            # the two must stay siblings.  bash takes the helper as an argument, so
+            # it needs no exec bit.
+            "rex/rex-project-picker/picker.lua".source = "${pickerSrc}/picker.lua";
+            "rex/rex-project-picker/rex-project-picker".source = "${pickerSrc}/rex-project-picker";
 
-          # The Ghostty Catppuccin Mocha palette.  Rex stores its chosen theme in
-          # the macOS app's preferences, so deployment alone changes nothing:
-          # import it once, then pick it in the theme picker
-          #   rex --autostart=false -C CLIENT do client.theme.import \
-          #     path="$HOME/.config/rex/themes/Catppuccin Mocha"
-          "rex/themes/Catppuccin Mocha".text = ''
-            palette = 0=#45475a
-            palette = 1=#f38ba8
-            palette = 2=#a6e3a1
-            palette = 3=#f9e2af
-            palette = 4=#89b4fa
-            palette = 5=#f5c2e7
-            palette = 6=#94e2d5
-            palette = 7=#bac2de
-            palette = 8=#585b70
-            palette = 9=#f7aec2
-            palette = 10=#c2ecbf
-            palette = 11=#fcd682
-            palette = 12=#aeccfc
-            palette = 13=#f398da
-            palette = 14=#b1eae1
-            palette = 15=#a6adc8
-            background = #1e1e2e
-            foreground = #cdd6f4
-            cursor-color = #f5e0dc
-            cursor-text = #1e1e2e
-            selection-background = #f5e0dc
-            selection-foreground = #1e1e2e
-          '';
+            # The Ghostty Catppuccin Mocha palette.  Rex stores its chosen theme in
+            # the macOS app's preferences, so deployment alone changes nothing:
+            # import it once, then pick it in the theme picker
+            #   rex --autostart=false -C CLIENT do client.theme.import \
+            #     path="$HOME/.config/rex/themes/Catppuccin Mocha"
+            "rex/themes/Catppuccin Mocha".text = ''
+              palette = 0=#45475a
+              palette = 1=#f38ba8
+              palette = 2=#a6e3a1
+              palette = 3=#f9e2af
+              palette = 4=#89b4fa
+              palette = 5=#f5c2e7
+              palette = 6=#94e2d5
+              palette = 7=#bac2de
+              palette = 8=#585b70
+              palette = 9=#f7aec2
+              palette = 10=#c2ecbf
+              palette = 11=#fcd682
+              palette = 12=#aeccfc
+              palette = 13=#f398da
+              palette = 14=#b1eae1
+              palette = 15=#a6adc8
+              background = #1e1e2e
+              foreground = #cdd6f4
+              cursor-color = #f5e0dc
+              cursor-text = #1e1e2e
+              selection-background = #f5e0dc
+              selection-foreground = #1e1e2e
+            '';
 
-          # The upstream Rex SSH guard, kept here as a file rather than installed
-          # by `rex terminfo setup` so it stays in the generation.  Nothing reads
-          # it yet: home-manager cannot take over the hand-written ~/.ssh/config,
-          # so add `Include ~/.config/rex/ssh_config` there by hand.
-          "rex/ssh_config".text = ''
-            # Remote programs usually know xterm-256color, but not xterm-rex.
-            # List exact hostnames that do have xterm-rex in
-            # ~/.config/rex/terminfo-hosts to opt them out of this fallback.
-            Match exec "/bin/sh -c '[ x$TERM = xxterm-rex ] && ! grep -qxF -- %h ~/.config/rex/terminfo-hosts 2>/dev/null'"
-              SetEnv TERM=xterm-256color
+            # The upstream Rex SSH guard, kept here as a file rather than installed
+            # by `rex terminfo setup` so it stays in the generation.  Nothing reads
+            # it yet: home-manager cannot take over the hand-written ~/.ssh/config,
+            # so add `Include ~/.config/rex/ssh_config` there by hand.
+            "rex/ssh_config".text = ''
+              # Remote programs usually know xterm-256color, but not xterm-rex.
+              # List exact hostnames that do have xterm-rex in
+              # ~/.config/rex/terminfo-hosts to opt them out of this fallback.
+              Match exec "/bin/sh -c '[ x$TERM = xxterm-rex ] && ! grep -qxF -- %h ~/.config/rex/terminfo-hosts 2>/dev/null'"
+                SetEnv TERM=xterm-256color
 
-            # An Include shares parsing context with its parent; do not leak this Match.
-            Match all
+              # An Include shares parsing context with its parent; do not leak this Match.
+              Match all
+            '';
+          };
+
+          # The agent skill and its hooks are not generation files -- rex writes
+          # ~/.agents/skills/rex and each agent's own settings file -- so they come
+          # from the CLI instead of xdg.configFile.  Setup is idempotent and reads
+          # its guide out of the binary it is called from, so this run is also what
+          # refreshes the skill when rex is upgraded.  --autostart keeps a switch
+          # from starting the Rex server.
+          home.activation.rexAgentSkill = hm.config.lib.dag.entryAfter [ "writeBoundary" ] ''
+            if [ -n "''${DRY_RUN:-}" ]; then
+              exit 0
+            fi
+            # rex finds an agent by its config directory or its program on $PATH,
+            # and the activation PATH is minimal, so spell out the user profile.
+            PATH=${lib.escapeShellArg "/etc/profiles/per-user/${config.my.username}/bin:/run/current-system/sw/bin:/usr/local/bin:/usr/bin:/bin"} \
+              ${lib.getExe' pkgs.rex "rex"} --autostart=false skill setup \
+              || echo "warning: 'rex skill setup' failed; run it by hand" >&2
           '';
         };
-      };
     }
     # optionalAttrs, not mkIf: this module is in myModules.common, and the
     # `system.defaults` option name alone fails evaluation on NixOS hosts.
