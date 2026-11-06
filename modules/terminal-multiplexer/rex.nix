@@ -57,6 +57,10 @@ with lib;
         });
       default = [
         {
+          path = "${config.my.homeDirectory}/org";
+          depth = 1;
+        }
+        {
           path = "${config.my.homeDirectory}/workspaces";
           # 2 so the picker also finds workmux worktrees under a repo.
           depth = 2;
@@ -67,7 +71,7 @@ with lib;
 
     pickerKey = mkOption {
       type = types.str;
-      default = "cmd+shift+k";
+      default = "ctr+n";
       description = "Shortcut that opens the project picker.";
     };
   };
