@@ -231,6 +231,9 @@
             # try the transcription scripts without switching the whole system
             transcribe = pkgs.transcribe;
             yt-dlp-librewolf = pkgs.yt-dlp-librewolf;
+            # Exposed so `just update-rex' can reach its passthru.updateScript
+            # (the pins live in packages/rex/sources.json).
+            rex = pkgs.rex;
             agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
               prompts = agentPrompts;
               tools.pi.enable = true;

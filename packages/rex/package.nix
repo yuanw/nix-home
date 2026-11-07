@@ -46,7 +46,8 @@ in
 # macOS also installs Rex Beta.app and rex-app, Linux is server-only upstream
 # Native builds also install Bash, Fish, and Zsh completions
 # Snapshot is upstream's rolling prerelease channel for Rex Beta
-# Run passthru.updateScript from the repo root to refresh every snapshot pin
+# Run passthru.updateScript (`just update-rex`) from the repo root to refresh
+# every snapshot pin
 stdenvNoCC.mkDerivation {
   pname = "rex";
   version = if isDarwin then "${appVersion}-${appBuild}" else serverVersion;
@@ -122,7 +123,7 @@ stdenvNoCC.mkDerivation {
 
   passthru = {
     inherit serverVersion appBuild support;
-    updateScript = lib.getExe (writeShellApplication {
+    updateScript = writeShellApplication {
       name = "update-rex";
       runtimeInputs = [
         coreutils
@@ -179,7 +180,7 @@ stdenvNoCC.mkDerivation {
         chmod --reference="$file" "$staged"
         mv "$staged" "$file"
       '';
-    });
+    };
   };
 
   meta = {

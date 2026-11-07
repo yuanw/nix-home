@@ -68,6 +68,17 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix tccutil --src-only
     @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
+    # Rex polls its own snapshot channel (blob.superlogical.com) and holds every
+    # pin in packages/rex/sources.json, so nix-update has nothing to rewrite;
+    # its passthru.updateScript does.  `just update-rex' runs the same thing.
+    @just update-rex
+
+# Refresh the Rex snapshot pins (server rev, macOS app build, all hashes) in
+# packages/rex/sources.json.  Runs from the repo root; the script rewrites the
+# file in one go only after every artifact hash prefetch succeeds.  Also runs as
+# the last step of `just nix-update'.
+update-rex:
+    @{{nix}} run .#rex.passthru.updateScript
 
 # Take the newest stable 1Password into packages/_1password-gui/sources.json,
 # so a host does not wait on nixpkgs to notice a release.  Idempotent: it

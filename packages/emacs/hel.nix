@@ -11,8 +11,8 @@
 }:
 
 let
-  version = "new_undo_system-unstable-2026-10-26";
-  rev = "4d971b14fbccacd04c8ec9290b694c8ad1bacac6";
+  version = "new_undo_system-unstable-2026-11-02";
+  rev = "005dbdf7802737a5e064a97de3b45dfd191d6ba2";
 in
 
 melpaBuild {
@@ -23,7 +23,7 @@ melpaBuild {
     owner = "helheim-emacs";
     repo = "hel";
     inherit rev;
-    sha256 = "sha256-UeHY9cekmjgaUiQiSFFRXCAYOvd195ry4ZYwOWqvTlg=";
+    sha256 = "sha256-GC6eCxtiVYG3qDO0bR4N4CZS/1QKrI7iEfBca3tx/og=";
   };
 
   packageRequires = [
