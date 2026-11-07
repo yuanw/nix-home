@@ -12,6 +12,12 @@
       (setq auto-dark-themes '((ef-owl) (ef-spring)))
       :config
       ${lib.optionalString pkgs.stdenv.hostPlatform.isDarwin "(setq auto-dark-allow-osascript t)"}
-      (auto-dark-mode 1))
+      ;; Faces are global, so Auto Dark can only be gated per Emacs instance,
+      ;; not per frame: a terminal-only `emacs -nw' starts unthemed; the daemon
+      ;; (which also serves `emacsclient -nw') and GUI frames keep it.
+      ;; shortcut: a tty-only instance that later opens a GUI frame stays
+      ;; unthemed.
+      (when (or (daemonp) (display-graphic-p))
+        (auto-dark-mode 1)))
   '';
 }
