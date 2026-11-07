@@ -56,6 +56,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
+    rex.enable = true;
     cursor.enable = true;
     herdr.enable = true;
     hunk.enable = true;
