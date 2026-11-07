@@ -9,6 +9,13 @@
   (add-to-list 'default-frame-alist parameter)
   (add-to-list 'initial-frame-alist parameter))
 
+;; On a text terminal the "toolbar" is really the menu bar line.  Tool bars
+;; do not exist there, and `menu-bar-mode' (still on after early-init)
+;; forces `menu-bar-lines' back to 1 on every frame, so clear it per tty
+;; frame instead of globally -- GUI frames keep their native menu bar.
+(add-hook 'tty-setup-hook
+          (lambda () (set-frame-parameter nil 'menu-bar-lines 0)))
+
 ;; Set up fonts early.
 ;; `my-mono-font' and `my-font' are defined from Nix in default.nix.
 ;;--------------------
