@@ -3,10 +3,15 @@
 (use-package direnv
   :functions (direnv--maybe-update-environment)
   :preface
+  ;; Not just Emacs: this is also the profile that provides `iets' and `direnv',
+  ;; and the .envrc's `use flake' fails (silently, exit 0) when they are off the
+  ;; PATH Emacs hands to `direnv export'.  Fall back to the running Emacs's own
+  ;; bin dir so the patch still runs when emacsclient is not on PATH at startup.
   (defconst emacs-binary-path
     (directory-file-name
      (file-name-directory
-      (executable-find "emacsclient"))))
+      (or (executable-find "emacsclient")
+          (expand-file-name "emacs" invocation-directory)))))
 
   (defun patch-direnv-environment (&rest _args)
     (let ((dir (file-name-as-directory emacs-binary-path)))
@@ -33,8 +38,12 @@
                  (not (file-exists-p dst)))
         (copy-file src dst t)
         (message "Copied .envrc to %s" target-dir)
-        (when (fboundp 'direnv-update-directory-environment)
-          (direnv-update-directory-environment target-dir)))))
+        ;; A new path is not in direnv's allow list, so the bare copy loads
+        ;; nothing.  The source .envrc is already allowed, and it updates the
+        ;; environment afterwards.
+        (when (fboundp 'direnv-allow)
+          (let ((default-directory target-dir))
+            (direnv-allow))))))
 
   (defun my-magit-worktree-after-create-copy-envrc (fn &rest args)
     (let* ((target (car args))
