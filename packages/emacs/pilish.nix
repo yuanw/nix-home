@@ -33,24 +33,14 @@ melpaBuild {
     markdown-table-wrap
   ];
 
-  # Every top-level .el that pilish.el requires at compile time must be listed
-  # here, or byte-compiling fails with "Cannot open load file".
+  # "*.el" rather than an explicit list: upstream keeps adding top-level files
+  # (pilish-conversations.el in 3.4.4 broke the build when it went unlisted) and
+  # nothing at the repo root is meant to stay out of the package.
   recipe = writeText "recipe" ''
     (pilish
      :repo "dnouri/pilish"
      :fetcher github
-     :files ("pilish.el"
-              "pilish-browse.el"
-              "pilish-core.el"
-              "pilish-evil.el"
-              "pilish-grammars.el"
-              "pilish-input.el"
-              "pilish-jsonl.el"
-              "pilish-menu.el"
-              "pilish-render.el"
-              "pilish-snapshot.el"
-              "pilish-table.el"
-              "pilish-ui.el"))
+     :files ("*.el"))
   '';
 
   meta = with lib; {
