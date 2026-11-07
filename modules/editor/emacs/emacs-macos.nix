@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 let
@@ -8,6 +9,12 @@ let
   # The Home Manager copy of Emacs.app keeps a stable path across rebuilds, so
   # macOS TCC grants (Full Disk Access, etc.) survive a generation change.
   emacsApp = "${config.my.homeDirectory}/Applications/Home Manager Apps/Emacs.app/Contents/MacOS/Emacs";
+  # alerter instead of `osascript -e 'display notification'`: it posts as a real
+  # sender app (--sender, default com.apple.Terminal) rather than as osascript,
+  # and --timeout bounds the wait -- alerter otherwise blocks until the alert is
+  # clicked or closed. --group makes a repeat replace the live one, which matters
+  # because KeepAlive re-runs this script.
+  alerter = "${pkgs.alerter}/bin/alerter";
 in
 with lib;
 {
@@ -26,7 +33,22 @@ with lib;
       ProgramArguments = [
         "/bin/zsh"
         "-c"
-        "{ osascript -e 'display notification \"Attempting to start Emacs...\" with title \"Emacs Launch\"'; [[ -s \"${config.my.homeDirectory}/.wk/profile\" ]] && source \"${config.my.homeDirectory}/.wk/profile\"; sock=\"$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server\"; /bin/wait4path \"${emacsApp}\" && { \"${emacsApp}\" --fg-daemon; if [ -S \"$sock\" ]; then osascript -e 'display notification \"Emacs has started.\" with title \"Emacs Launch\"'; else osascript -e 'display notification \"Failed to start Emacs.\" with title \"Emacs Launch\"' >&2; fi; } } &>> /tmp/emacs.log"
+        ''
+          notify() { ${alerter} --title "Emacs Launch" --group emacs-launch --timeout 5 --message "$1"; }
+          {
+            notify "Attempting to start Emacs..."
+            [[ -s "${config.my.homeDirectory}/.wk/profile" ]] && source "${config.my.homeDirectory}/.wk/profile"
+            sock="$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server"
+            /bin/wait4path "${emacsApp}" && {
+              "${emacsApp}" --fg-daemon
+              if [ -S "$sock" ]; then
+                notify "Emacs has started."
+              else
+                notify "Failed to start Emacs." >&2
+              fi
+            }
+          } &>> /tmp/emacs.log
+        ''
       ];
       StandardErrorPath = "/tmp/emacs-error.log";
       StandardOutPath = "/tmp/emacs.log";
