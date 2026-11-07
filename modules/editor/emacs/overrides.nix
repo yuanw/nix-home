@@ -245,17 +245,6 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
-  lean4-mode = (
-    pkgs.callPackage "${packagePath}/lean4-mode.nix" {
-      inherit (pkgs) fetchFromGitHub;
-      inherit (self)
-        melpaBuild
-        dash
-        lsp-mode
-        magit-section
-        ;
-    }
-  );
   ob-racket = (
     pkgs.callPackage "${packagePath}/ob-racket.nix" {
       inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;

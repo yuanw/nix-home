@@ -55,11 +55,6 @@ rec {
     inherit (pkgs) fetchFromGitHub;
   };
 
-  lean4-mode = pkgs.callPackage ./emacs/lean4-mode.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub writeText;
-  };
-
   ob-gptel = pkgs.callPackage ./emacs/ob-gptel.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;
