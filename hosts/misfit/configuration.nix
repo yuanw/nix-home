@@ -357,6 +357,39 @@
     Environment = "DOTNET_gcServer=0";
   };
 
+  # Open Subtitles plugin.  declarative-jellyfin's `plugins` option is dead
+  # code — no module reads it, and its README still says to install plugins
+  # imperatively — so unpack the official zip into the plugin dir instead.
+  # `preStart` runs as the unit User (jellyfin), and declarative-jellyfin's
+  # own ExecStartPre chowns the whole data dir afterwards, so no chown here.
+  #
+  # 24.0.0.0 is the last build for the 10.11 ABI (meta.json targetAbi
+  # 10.11.8.0); 25.0.0.0 targets jellyfin 12 and would fail the way TheTVDB
+  # did — see the pin note in ./default.nix.  Bumping the version means a new
+  # directory name here *and* deleting the old one from the data dir, or
+  # jellyfin loads both.  Jellyfin rewrites meta.json in place (status,
+  # autoUpdate); cp overwriting it is fine, it comes back as Active.
+  # The OpenSubtitles.com API key is UI-only state, set once in
+  # Dashboard → Plugins → Open Subtitles.
+  systemd.services.jellyfin.preStart =
+    let
+      # Spaced name, the layout jellyfin's own installer uses.
+      pluginDir = "${config.services.declarative-jellyfin.dataDir}/plugins/Open Subtitles_24.0.0.0";
+    in
+    ''
+      d='${pluginDir}'
+      mkdir -p "$d"
+      # cp preserves the store's read-only modes; only the owner (us) can undo them
+      if [ -d "$d" ]; then chmod -R u+w "$d"; fi
+      cp -aT ${
+        pkgs.fetchzip {
+          url = "https://repo.jellyfin.org/files/plugin/open-subtitles/open-subtitles_24.0.0.0.zip";
+          sha256 = "sha256-b6sgmgBlvhUAhFuq0p/EjB3604NGBkpS4NP33n1hfKc=";
+          stripRoot = false;
+        }
+      } "$d"
+    '';
+
   # The two Jellyfin library roots, group-writable for the humans only.
   # Without these, `mkdir '/data/Movies/Title (2021)'` fails for yuan and yuanw
   # (both roots were root:root 0755 since the dataset was created), so adding a
