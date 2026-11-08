@@ -36,6 +36,8 @@ let
 
     rex.bind(${builtins.toJSON cfg.pickerKey}, "rex_project_picker")
     rex.bind(${builtins.toJSON cfg.sessionPickerKey}, "session.switch")
+    rex.bind(${builtins.toJSON cfg.splitDownKey}, "pane.split.down")
+    rex.bind(${builtins.toJSON cfg.splitRightKey}, "pane.split.right")
   '';
 in
 with lib;
@@ -83,6 +85,18 @@ with lib;
       type = types.str;
       default = "ctrl+n>s";
       description = "Shortcut that opens Rex's own session switcher.";
+    };
+
+    splitDownKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>v";
+      description = "Shortcut that splits the focused pane downward.";
+    };
+
+    splitRightKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>h";
+      description = "Shortcut that splits the focused pane to the right.";
     };
   };
 
