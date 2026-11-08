@@ -14,6 +14,9 @@ let
   # stow it.  Copied from pkgs/rex-project-picker in
   # https://github.com/pperanich/dotfiles at 29ea77f4292ea8f0bb58b5a23bddeaefa4803536
   # (MIT); picker.lua carries the one local change it needed here.
+  #
+  # Switching sessions needs no picker of our own: the app ships one, so that key
+  # below only binds the client's session.switch action.
   pickerSrc = ./rex-project-picker;
 
   # builtins.toJSON gives Lua-compatible strings and numbers, but its objects use
@@ -32,6 +35,7 @@ let
     })
 
     rex.bind(${builtins.toJSON cfg.pickerKey}, "rex_project_picker")
+    rex.bind(${builtins.toJSON cfg.sessionPickerKey}, "session.switch")
   '';
 in
 with lib;
@@ -73,6 +77,12 @@ with lib;
       type = types.str;
       default = "ctrl+n>p";
       description = "Shortcut that opens the project picker.";
+    };
+
+    sessionPickerKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>s";
+      description = "Shortcut that opens Rex's own session switcher.";
     };
   };
 
