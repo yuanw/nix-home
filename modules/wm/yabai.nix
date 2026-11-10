@@ -176,6 +176,25 @@ in
         StandardOutPath = "/tmp/skhd.log";
         StandardErrorPath = "/tmp/skhd.log";
       };
+
+      # skhd never re-creates its CGEventTap after sleep/wake, and as noted
+      # above it never checks the result of CGEventTapCreate, so a tap lost
+      # across sleep leaves the binary up, silent and deaf to every binding.
+      # Nothing observable from the outside tells a live tap from a dead one,
+      # so re-exec the agent on a timer instead of waiting for a report.
+      # Cost: a key pressed inside the ~50ms restart window is dropped.
+      launchd.user.agents.skhd-watchdog = {
+        serviceConfig = {
+          ProgramArguments = [
+            "/bin/sh"
+            "-c"
+            "/bin/launchctl kickstart -k gui/$(id -u '${config.my.username}')/org.nixos.skhd"
+          ];
+          RunAtLoad = true;
+          # in secs
+          StartInterval = 900;
+        };
+      };
       launchd.user.agents.yabai.serviceConfig = {
         StandardOutPath = "/tmp/yabai.log";
         StandardErrorPath = "/tmp/yabai.log";
