@@ -197,8 +197,11 @@ with lib;
     # optionalAttrs, not mkIf: this module is in myModules.common, and the
     # `system.defaults` option name alone fails evaluation on NixOS hosts.
     // optionalAttrs isDarwin {
-      # Rex reads these at launch and rewrites the plist when it quits, so quit
-      # Rex before darwin-rebuild or the write is lost.
+      # Rex keeps these in memory and flushes the domain when it quits, so a
+      # rebuild with the app open has its write overwritten on quit: quit first,
+      # then rebuild, then relaunch.  Sessions live in the server, not the app, so
+      # quitting costs no running programs.
+      #   osascript -e 'quit app "Rex Beta"' && sudo darwin-rebuild switch --flake '.#mist' && open -a 'Rex Beta'
       system.defaults.CustomUserPreferences."com.superlogical.rex" = {
         # Remote Control is the gate on every client action, including the
         # session.select the project picker queues to focus what it opened -- with
