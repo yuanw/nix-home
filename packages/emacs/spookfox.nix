@@ -35,5 +35,13 @@ melpaBuild {
     :fetcher github)
   '';
 
+  # The installed lisp/*.el are 0.8.1 (`sfjsi-' names) but the byte-compiled
+  # .elc that comes out of the build are from an older spookfox
+  # (`spookfox-js-injection--' names, Emacs 31.1), and Emacs loads the .elc.
+  # Drop them so the .el that is actually shipped gets compiled on first load.
+  preFixup = ''
+    find "$out" -name '*.elc' -delete
+  '';
+
   packageRequires = [ websocket ];
 }
