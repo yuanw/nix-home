@@ -38,6 +38,7 @@ let
     rex.bind(${builtins.toJSON cfg.sessionPickerKey}, "session.switch")
     rex.bind(${builtins.toJSON cfg.splitDownKey}, "pane.split.down")
     rex.bind(${builtins.toJSON cfg.splitRightKey}, "pane.split.right")
+    rex.bind(${builtins.toJSON cfg.toggleBarKey}, "client.sidebar.toggle")
   '';
 in
 with lib;
@@ -97,6 +98,12 @@ with lib;
       type = types.str;
       default = "ctrl+n>h";
       description = "Shortcut that splits the focused pane to the right.";
+    };
+
+    toggleBarKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>t>s";
+      description = "Shortcut that hides or shows the tab bar.";
     };
   };
 
@@ -199,6 +206,10 @@ with lib;
         # reach the local server can then drive the app, which is what the CLI
         # automation is for, but it is a wider door than the font settings above.
         "rex.client.remoteControl" = true;
+        # Tabs down the left edge instead of across the top.  Shift-cmd-s only
+        # flips tabStyle, so on its own it lands on the right side of the screen.
+        "Workspace.tabStyle" = "vertical";
+        "Workspace.sidebarPosition" = "left";
         # Must name an installed face exactly; the same value Alacritty uses.
         "Workspace.terminalFontName" = config.my.monoFont;
         # A Nix float -- nix-darwin throws on the string "16.0".
