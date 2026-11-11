@@ -233,6 +233,12 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  spookfox = (
+    pkgs.callPackage "${packagePath}/spookfox.nix" {
+      inherit (pkgs) fetchFromGitHub writeText;
+      inherit (self) melpaBuild websocket;
+    }
+  );
   reader = (
     pkgs.callPackage "${packagePath}/emacs-reader.nix" {
       inherit (pkgs)

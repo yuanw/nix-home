@@ -167,7 +167,11 @@
     neru.enable = true;
     herdr.enable = true;
     browsers = {
-      librewolf.enable = true;
+      librewolf = {
+        enable = true;
+        # Adds the Spookfox add-on; features/spookfox.nix follows this flag.
+        spookfox.enable = true;
+      };
       defaultBrowser = "librewolf";
     };
     editors.emacs = {

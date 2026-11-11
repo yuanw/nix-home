@@ -21,6 +21,12 @@ in
       type = with types; nullOr package;
       default = pkgs.librewolf;
     };
+    spookfox = {
+      enable = mkEnableOption ''
+        Spookfox add-on, which bridges LibreWolf and Emacs over websockets
+        (see modules/editor/emacs/features/spookfox.nix)
+      '';
+    };
     darwinExtraPolicies = mkOption {
       type = types.attrs;
       default = { };

@@ -50,6 +50,11 @@ rec {
     inherit (pkgs) fetchFromGitHub writeText unstableGitUpdater;
   };
 
+  spookfox = pkgs.callPackage ./emacs/spookfox.nix {
+    melpaBuild = pkgs.stdenv.mkDerivation;
+    inherit (pkgs) fetchFromGitHub writeText;
+  };
+
   knockknock = pkgs.callPackage ./emacs/knockknock.nix {
     melpaBuild = pkgs.stdenv.mkDerivation;
     inherit (pkgs) fetchFromGitHub;

@@ -19,6 +19,7 @@ let
   browserCliFirefoxExtension = pkgs.callPackage ../../packages/browser-cli-firefox-extension.nix {
     inherit (micsSkills) browser-cli-extension;
   };
+  spookfoxExtension = pkgs.callPackage ../../packages/spookfox-firefox-extension.nix { };
   micsSkillsCfg = hm.config.programs.mics-skills or { };
   browserCliEnabled =
     (micsSkillsCfg.enable or false) && lib.elem "browser-cli" (micsSkillsCfg.skills or [ ]);
@@ -123,6 +124,9 @@ in
                 ]
                 ++ lib.optionals browserCliEnabled [
                   browserCliFirefoxExtension
+                ]
+                ++ lib.optionals cfg.spookfox.enable [
+                  spookfoxExtension
                 ]
                 ++ lib.optionals (hostname != "WK01174") [
                   onepassword-password-manager
