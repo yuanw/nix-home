@@ -12,17 +12,30 @@
 ;; (re)starts, click the Spookfox toolbar icon once to reconnect the add-on.
 ;;
 ;; Port of Sacha Chua's lisp/sacha-spookfox.el (sachac/.emacs.d), retargeted at
-;; the Spookfox 0.8.1 API: `spookfox-js-injection-eval-in-active-tab' is now
-;; `sfjsi-eval-in-active-tab', and `spookfox-init' / `spookfox-enabled-apps' are
-;; gone.  Keys hang off the C-c w prefix map; see `my/spookfox-prefix-map'.
+;; Spookfox 0.8.1, where `spookfox-init' and `spookfox-enabled-apps' are gone.
+;; Call the real names (`spookfox-js-injection-eval-in-active-tab'), not the
+;; `sfjsi-' ones you read in the source: spookfox-js-injection.el ends with a
+;; read-symbol-shorthands Local Variables block mapping `sfjsi-' to
+;; `spookfox-js-injection-', so the sfjsi-* symbols never exist at runtime.
+;; Keys hang off the C-c w prefix map; see `my/spookfox-prefix-map'.
 
 ;;; Code:
 
 (require 'cl-lib)
 (require 'seq)
 
-(defvar my/spookfox--started nil
-  "Non-nil once the Spookfox websockets server has been started here.")
+(defun my/spookfox--server-live-p ()
+  "Non-nil if a Spookfox websockets server is already listening.
+Catched by `my/spookfox-connect', which must not bind the port again: that
+would drop the add-on that is already talking to the existing server."
+  (or (and (boundp 'spookfox--server-process)
+           (process-live-p spookfox--server-process))
+      ;; The variable is nil after an `unload-feature' or a failed start, but
+      ;; the process can still be alive, so ask the process table too.
+      (seq-some (lambda (p)
+                  (and (eq 'listen (process-status p))
+                       (string-match-p "websocket server on port" (process-name p))))
+                (process-list))))
 
 (defun my/spookfox--load ()
   "Load Spookfox and its tabs and js-injection apps."
@@ -37,25 +50,24 @@ Click the add-on's toolbar icon afterwards if it does not reconnect by
 itself; `my/spookfox-status' reports whether it got through."
   (interactive)
   (my/spookfox--load)
-  (condition-case err
-      (progn
-        (spookfox-start-server)
-        (setq my/spookfox--started t)
-        (message "Spookfox listening on port %d -- click the add-on icon to connect"
-                 spookfox-server--port))
-    ;; Another Emacs (the daemon plus a one-off frame) already owns the port and
-    ;; the add-on is talking to that one, so this instance cannot serve.
-    (error
-     (setq my/spookfox--started nil)
-     (message "Spookfox: %s -- quit the other Emacs and run this again"
-              (error-message-string err)))))
+  (if (my/spookfox--server-live-p)
+      (message "Spookfox already listening on port %d -- click the add-on icon to connect"
+               spookfox-server--port)
+    (condition-case err
+        (progn
+          (spookfox-start-server)
+          (message "Spookfox listening on port %d -- click the add-on icon to connect"
+                   spookfox-server--port))
+      ;; Another Emacs (the daemon plus a one-off frame) owns the port and the
+      ;; add-on is talking to that one, so this instance cannot serve.
+      (error
+       (message "Spookfox: %s -- quit the other Emacs and run this again"
+                (error-message-string err))))))
 
 (defun my/spookfox--ensure-client ()
   "Make sure the server is up and a browser is connected, or bail out."
   (my/spookfox--load)
-  (unless (and my/spookfox--started
-               spookfox--server-process
-               (process-live-p spookfox--server-process))
+  (unless (my/spookfox--server-live-p)
     (my/spookfox-connect))
   (when (seq-empty-p spookfox--connected-clients)
     (user-error "No browser connected -- click the Spookfox add-on icon")))
@@ -66,8 +78,7 @@ itself; `my/spookfox-status' reports whether it got through."
   (interactive)
   (my/spookfox--load)
   (message "Spookfox: server %s, %d client(s) connected"
-           (if (and spookfox--server-process (process-live-p spookfox--server-process))
-               "up" "down")
+           (if (my/spookfox--server-live-p) "up" "down")
            (length spookfox--connected-clients)))
 
 (defun my/spookfox--eval-js (js)
@@ -76,7 +87,7 @@ Top-level arrays come back from `json-read' as vectors; flatten them to
 lists so callers can pattern-match.  Nested arrays stay vectors -- use
 `my/spookfox--->list' for those."
   (my/spookfox--ensure-client)
-  (let ((result (sfjsi-eval-in-active-tab js t)))
+  (let ((result (spookfox-js-injection-eval-in-active-tab js t)))
     (if (vectorp result) (append result nil) result)))
 
 (defun my/spookfox--->list (sequence)
@@ -164,6 +175,52 @@ Return the chosen (URL . TITLE)."
   "Page the active tab up, keeping focus in Emacs."
   (interactive)
   (my/spookfox--eval-js "window.scrollBy(0, -document.documentElement.clientHeight)"))
+
+;;;; Reading a specific tab (not just the front one)
+
+(defun my/spookfox--unwrap-result (result)
+  "Unwrap a tab-eval RESULT; the add-on wraps it in a one-element array."
+  (if (and (vectorp result) (= 1 (length result))) (aref result 0) result))
+
+;;;###autoload
+(defun my/spookfox-tabs ()
+  "Return the open tabs as a list of (ID URL TITLE)."
+  (interactive)
+  (my/spookfox--ensure-client)
+  (let ((tabs (mapcar (lambda (tab)
+                        (list (plist-get tab :id)
+                              (plist-get tab :url)
+                              (plist-get tab :title)))
+                      (spookfox--request-all-tabs))))
+    (if (called-interactively-p 'any)
+        (message "%s" (pp-to-string tabs))
+      tabs)))
+
+;;;###autoload
+(defun my/spookfox-eval-js-in-tab (pattern js)
+  "Evaluate JS in every open tab whose URL matches the regexp PATTERN.
+Unlike `my/spookfox--eval-js' this does not need the tab to be in front.
+Returns an alist of (URL . RESULT).  Note the 5 s reply window in
+`spookfox--poll-response': a slow page or a huge return value gives nil."
+  (interactive "sTab URL matches: \nsJavaScript: ")
+  (my/spookfox--ensure-client)
+  (mapcar (lambda (r)
+            (cons (plist-get (plist-get r :tab) :url)
+                  (my/spookfox--unwrap-result (plist-get r :result))))
+          (spookfox-js-injection-eval
+           js 'tab
+           (lambda (tab) (string-match-p pattern (or (plist-get tab :url) ""))))))
+
+;;;###autoload
+(defun my/spookfox-tab-text (pattern)
+  "Return the visible text of the first tab whose URL matches PATTERN."
+  (interactive "sTab URL matches: ")
+  (let ((hit (car (my/spookfox-eval-js-in-tab pattern "document.body.innerText"))))
+    (unless hit
+      (user-error "No open tab matches %S" pattern))
+    (if (called-interactively-p 'any)
+        (message "%s" (cdr hit))
+      (cdr hit))))
 
 ;;;; Sending code to the page
 

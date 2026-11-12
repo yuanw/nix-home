@@ -45,6 +45,24 @@
     (let ((mixed (vector (cons "a" "b") (vector "c" "d"))))
       (unless (equal (my/spookfox--->list mixed) '(("a" . "b") ("c" "d")))
         (push (format "-->list gave %S" (my/spookfox--->list mixed)) failures)))
+    ;; Tab-targeted reads key by URL and unwrap the add-on's one-element array.
+    (cl-letf (((symbol-function 'my/spookfox--ensure-client) (lambda () t))
+              ((symbol-function 'spookfox-js-injection-eval)
+               (lambda (js _context pred)
+                 (unless (funcall pred '(:url "https://a.example/x"))
+                   (push "tab predicate rejected a matching url" failures))
+                 (unless (string= js "document.body.innerText")
+                   (push (format "tab eval got %S" js) failures))
+                 (list (list :tab (list :id 1 :url "https://a.example/x")
+                             :result (vector "page text"))))))
+      (unless (equal (my/spookfox-eval-js-in-tab "a\\.example" "document.body.innerText")
+                     '(("https://a.example/x" . "page text")))
+        (push (format "eval-js-in-tab gave %S"
+                      (my/spookfox-eval-js-in-tab "a\\.example" "document.body.innerText"))
+              failures))
+      (unless (equal (my/spookfox-tab-text "a\\.example") "page text")
+        (push (format "tab-text gave %S" (my/spookfox-tab-text "a\\.example")) failures)))
+
     (if failures
         (mapconcat #'identity (nreverse failures) "\n")
       "my/spookfox: ok")))
