@@ -177,6 +177,7 @@ in
           # Skills, slash commands and AGENTS.md, from the shared prompt set.
           flakePrompt.prompts = import ../prompts {
             inherit pkgs lib;
+            inherit (inputs) flake-prompt janestreet-skills;
           };
 
           mcpServers = cfg.mcpServers;

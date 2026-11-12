@@ -748,6 +748,22 @@
         "type": "github"
       }
     },
+    "janestreet-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793728425,
+        "narHash": "sha256-bKGKDaK2pSJsp5uVMUQDcj8J+N9nX2fDdeU1DXM2qLw=",
+        "owner": "janestreet",
+        "repo": "agent_skills",
+        "rev": "7c6715c29548a3b39d4a9545c698ee4fd17a7213",
+        "type": "github"
+      },
+      "original": {
+        "owner": "janestreet",
+        "repo": "agent_skills",
+        "type": "github"
+      }
+    },
     "llm-agents": {
       "inputs": {
         "bun2nix": "bun2nix",
@@ -1450,6 +1466,7 @@
         "home-manager": "home-manager_2",
         "iets": "iets",
         "impermanence": "impermanence",
+        "janestreet-skills": "janestreet-skills",
         "llm-agents": "llm-agents",
         "mcp-servers-nix": "mcp-servers-nix",
         "mics-skills": "mics-skills",

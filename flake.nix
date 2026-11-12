@@ -18,6 +18,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Jane Street's agent skills, imported with flake-prompt's skillFromDir
+    # (see modules/coding-agents/prompts). Plain source tree, not a flake.
+    janestreet-skills = {
+      url = "github:janestreet/agent_skills";
+      flake = false;
+    };
+
     # Fork: adds the upstream skills to the open-code-review package.
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
@@ -200,6 +207,7 @@
           agentPrompts = import ./modules/coding-agents/prompts {
             inherit pkgs;
             lib = inputs.nixpkgs.lib;
+            inherit (inputs) flake-prompt janestreet-skills;
           };
         in
         {

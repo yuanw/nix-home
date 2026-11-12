@@ -1,6 +1,8 @@
 {
   lib,
   pkgs,
+  flake-prompt,
+  janestreet-skills,
   ...
 }:
 let
@@ -250,6 +252,11 @@ in
       "RESOURCES-FORMAT.md".text = builtins.readFile ./skills/teach/RESOURCES-FORMAT.md;
     };
   }
+
+  # Captured straight from upstream's SKILL.md: flake-prompt reads the name
+  # and description out of its frontmatter, so there is nothing to keep in sync
+  # here. `just update janestreet-skills' picks up upstream changes.
+  (flake-prompt.lib.skillFromDir { dir = "${janestreet-skills}/socratic-tutor"; })
 
   {
     type = "skill";
