@@ -58,7 +58,6 @@
     # };
     rex.enable = true;
     cursor.enable = true;
-    herdr.enable = true;
     hunk.enable = true;
     open-code-review = {
       enable = true;
@@ -106,7 +105,10 @@
         #"go"
       ];
     };
-    browsers.librewolf.enable = true;
+    browsers.librewolf = {
+      enable = true;
+      spookfox.enable = true;
+    };
     editors.emacs = {
       enable = true;
       enableService = true;

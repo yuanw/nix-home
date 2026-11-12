@@ -165,7 +165,6 @@
       # taps = [ "homebrew/core" "homebrew/cask" ];
     };
     neru.enable = true;
-    herdr.enable = true;
     browsers = {
       librewolf = {
         enable = true;
