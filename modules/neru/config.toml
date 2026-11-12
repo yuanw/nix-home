@@ -103,7 +103,7 @@ duration_ms = 50                            # Recursive-grid animation duration 
 "`" = "toggle-cursor-follow-selection"
 "Tab" = "toggle-cursor-follow-selection"
 "x" = "action move_mouse --center"
-"z" = "action reset"
+"q" = "action reset"
 
 # right hand: move (D=up T=down H=left N=right)
 "o" = "action move_mouse_relative --dx=0 --dy=-25"
