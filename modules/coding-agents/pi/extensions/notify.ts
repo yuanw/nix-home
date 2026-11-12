@@ -12,6 +12,10 @@
  *             ALACRITTY_WINDOW_ID is set
  *   Emacs   — vterm/term/eat/shell; uses knockknock.el via emacsclient
  *             when INSIDE_EMACS is set (falls back to native if unavailable)
+ *   Rex     — OSC 7501 program status, so a blocked permission-gate prompt
+ *             marks the tab and session picker (see rexStatus)
+ *
+ * Also pings you when permission-gate stops the agent to ask for approval.
  *
  * Toggle with /notify or start with --no-notify.
  *
@@ -104,6 +108,24 @@ function notify(title: string, body: string): void {
   }
 }
 
+/**
+ * Rex Program Status Protocol (OSC 7501). A `blocked:permission` record makes
+ * Rex mark the tab header and session picker and — when Rex is in the
+ * background — post a macOS notification (Settings > Notifications > Program
+ * Activity). The record lives until it is replaced or cleared, which is what
+ * a gate prompt is. Only Rex sets REX_SESSION; other terminals ignore OSC
+ * 7501. https://www.superlogical.com/rex/docs/build/program-status
+ */
+function rexStatus(pairs: string): void {
+  if (!process.env.REX_SESSION) return;
+  process.stdout.write(`\x1b]7501;${pairs}\x1b\\`);
+}
+
+/** msg is base64 so the message needs no escaping; it must stay one line. */
+function rexMsg(text: string): string {
+  return Buffer.from(sanitize(text), "utf8").toString("base64");
+}
+
 export default function (pi: ExtensionAPI) {
   let enabled = true;
   let startMs: number | null = null;
@@ -141,6 +163,23 @@ export default function (pi: ExtensionAPI) {
       );
     },
   });
+
+  // permission-gate announces its prompt on pi's event bus while the agent
+  // sits behind it. The names are copied from that extension's types.ts; it
+  // ships no importable package.
+  pi.events.on("permission-gate:waiting", (payload: unknown) => {
+    if (!enabled) return;
+    const labels =
+      (payload as { labels?: string } | undefined)?.labels ?? "dangerous command";
+    const project = basename(process.cwd());
+    notify(`Pi · ${project}`, `⚠️ Needs approval: ${labels}`);
+    rexStatus(
+      `state=blocked:kind=permission:app=pi:msg=${rexMsg(`permission-gate: ${labels}`)}`,
+    );
+  });
+
+  // Clear it whatever the answer was, or the tab reads "blocked" forever.
+  pi.events.on("permission-gate:resolved", () => rexStatus("state=clear"));
 
   pi.on("agent_start", async () => {
     startMs = Date.now();
