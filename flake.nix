@@ -74,6 +74,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-parts.follows = "flake-parts";
     };
+    # The library meant to replace the nima glue in modules/editor/emacs; see
+    # modules/editor/emacs/lib.nix.
+    nix-emacs-home = {
+      url = "github:yuanw/nix-emacs-home";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+      inputs.flake-parts.follows = "flake-parts";
+    };
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
