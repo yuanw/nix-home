@@ -112,6 +112,8 @@
       enableService = true;
       enableLatex = true;
       modalEditing = "hel";
+      # Try the nix-emacs-home library (modules/editor/emacs/lib.nix).
+      useNixEmacsHome = true;
     };
     # health.enable = true;
     dev = {
