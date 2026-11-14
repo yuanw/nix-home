@@ -157,7 +157,7 @@ with lib;
           // lib.optionalAttrs isDarwin {
             # The daemon's socket lives under the launchd per-user temp dir, but
             # nix-shell/direnv rewrite $TMPDIR, so emacsclient looked in the wrong
-            # place from herdr panes and dev shells. Pin the real path.
+            # place from tmux panes and dev shells. Pin the real path.
             EMACS_SOCKET_NAME = "$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server";
           };
         };

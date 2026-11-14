@@ -21,7 +21,6 @@ with pkgs;
   # names it gtimeout. Unprefixed coreutils would shadow BSD ls/date/du.
   (writeShellScriptBin "timeout" ''exec ${coreutils}/bin/timeout "$@"'')
   #sbcl
-  #claude-code-acp
   #ghostty-mac
   #calibre_mac
 ]

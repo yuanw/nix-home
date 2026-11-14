@@ -108,10 +108,6 @@
                 python3
                 ;
             };
-            claude-voice = pkgs.callPackage ./claude-voice.nix {
-              inherit (pkgs) curl;
-              inherit parakeet-mlx;
-            };
             choose-mac = pkgs.callPackage ./choose-mac.nix { };
             sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
             font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };

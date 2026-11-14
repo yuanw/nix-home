@@ -7,7 +7,6 @@
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
     ../../modules/tensorfold-zig.nix
-    ../../modules/red-snow.nix
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
     ../../modules/services/monitoring/pcp.nix

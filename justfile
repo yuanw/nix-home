@@ -120,7 +120,7 @@ remote-build HOST:
 remote-apply HOST:
     @just colmena-run apply {{HOST}}
 
-# kept so docs/redsnow-native-plan.org and muscle memory keep working
+# kept so muscle memory keeps working
 colmena-spark-build:
     @just remote-build dgx-spark
 

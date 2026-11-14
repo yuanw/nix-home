@@ -8,7 +8,6 @@ rec {
   choose-mac = pkgs.callPackage ./choose-mac.nix { };
   sf-symbols = pkgs.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = pkgs.callPackage ./font-hack-nerd-font.nix { };
-  claude-code-acp = pkgs.callPackage ./claude-code-acp.nix { };
   cursor-agent-acp = pkgs.callPackage ./cursor-agent-acp.nix { };
   pi-acp = pkgs.callPackage ./pi-acp.nix { };
   auto-save = pkgs.callPackage ./emacs/auto-save.nix {

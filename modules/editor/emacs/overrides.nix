@@ -169,17 +169,6 @@ self: _super:
         ;
     }
   );
-  herdr-el = (
-    pkgs.callPackage "${packagePath}/herdr-el.nix" {
-      inherit (pkgs) fetchFromGitHub;
-      inherit lib;
-      inherit (self)
-        trivialBuild
-        magit-section
-        ghostel
-        ;
-    }
-  );
   ask-mode = (
     pkgs.callPackage "${packagePath}/ask-mode" {
       inherit (pkgs) haskellPackages;

@@ -1,7 +1,7 @@
 # tensorfold-native — TensorFold's Zig CUDA engine, packaged natively
 # (packages/tensorfold-zig). Serves Qwen3.8 Flash Next from NVIDIA's FP4 QAD
-# checkpoint (nvidia/Qwen3.8-Flash-Next-FP4-Local) on :8888, beside RED-SNOW
-# (:8899); one model at a time on 128 GB unified memory. The recipe's earlier
+# checkpoint (nvidia/Qwen3.8-Flash-Next-FP4-Local) on :8888; one model at a
+# time on 128 GB unified memory. The recipe's earlier
 # INT4-AutoRound checkpoint still works: override modelId + modelRevision.
 #
 # Unlike the Python TensorFold there is no first-start JIT: the CUDA fatbins

@@ -9,20 +9,6 @@ let
     srt2txt = ./srt2txt.awk;
   };
 
-  # python313Packages scope extensions (see the entries below).
-  python313PackagesExtra = prev.python313Packages.overrideScope (
-    pfinal: _pprev: {
-      # vcruz305/exllamav3 @ 7c1636f (RED-SNOW's engine pin), AOT sm_121
-      # CUDA build — see packages/red-snow/default.nix.
-      exllamav3 = pfinal.callPackage ./red-snow { };
-    }
-  );
-
-  # RED-SNOW's stdlib /v1 server (the deployment repo's server/*.py)
-  redsnow-server = prev.callPackage ./red-snow/server.nix {
-    deploySrc = (import ./red-snow/src.nix { inherit (prev) fetchFromGitHub; }).deploySrc;
-  };
-
 in
 {
   installApplication =
@@ -158,7 +144,6 @@ in
         mainProgram = "agnix";
       };
     };
-  claude-code-acp = prev.callPackage ./claude-code-acp.nix { };
   chroma-mcp = prev.python3Packages.callPackage ./chroma-mcp.nix { };
   sketchybar-app-font = prev.callPackage ./sketchybar-app-font.nix { };
   tccutil-manage = prev.python3Packages.callPackage ./tccutil { };
@@ -222,18 +207,6 @@ in
   # sm121-vllm-nvfp4: SM121-optimized vLLM v0.24.0 NVFP4 KV Docker image
   # Builds from source (vLLM + FlashInfer patches) — ~60 min on DGX Spark
   sm121-vllm-nvfp4 = prev.callPackage ./sm121-vllm-nvfp4 { };
-
-  # exllamav3 (RED-SNOW's engine) lives in the python313Packages scope so
-  # python313.withPackages sees it, and is aliased at the top level.  Only
-  # makes sense against the dgx-spark host's pkgs, which set
-  # nixpkgs.config.cudaSupport — the flake's perSystem pkgs
-  # (lib/mk-pkgs.nix) do not, so building `.#packages.aarch64-linux.exllamav3`
-  # would pick a CPU-only torch.  Build it via
-  #   nix build .#nixosConfigurations.dgx-spark.pkgs.exllamav3
-  # or let colmena build it on the target (deployment.buildOnTarget).
-  python313Packages = python313PackagesExtra;
-  exllamav3 = python313PackagesExtra.exllamav3;
-  inherit redsnow-server; # bound in the let above
 
   # Performance Co-Pilot — system performance monitoring toolkit
   # Re-adds pcp removed from nixpkgs (PR #495646)
