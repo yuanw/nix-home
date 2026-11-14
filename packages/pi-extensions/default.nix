@@ -55,4 +55,5 @@ in
   pi-slow-mode = callExtension ./pi-slow-mode.nix;
   pi-permission-gate = callExtension ./pi-permission-gate.nix;
   pi-ponytail = asPiPackage (callExtension ./pi-ponytail.nix);
+  pi-better = asPiPackage (callExtension ./pi-better.nix);
 }
