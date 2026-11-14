@@ -44,7 +44,10 @@ let
           "https://raw.githubusercontent.com/pixeltris/TwitchAdSolutions/master/video-swap-new/video-swap-new-ublock-origin.js"
         ]
       ];
-      adminSettings = builtins.toJSON {
+      # Pass an object, not a JSON string: Firefox expands a policy string into a
+      # character-indexed object on the way to browser.storage.managed, which makes
+      # uBO's restoreAdminSettings silently apply nothing.
+      adminSettings = {
         userSettings = {
           advancedUserEnabled = true;
           cloudStorageEnabled = false;
