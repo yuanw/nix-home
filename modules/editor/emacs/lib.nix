@@ -13,19 +13,13 @@
 let
   cfg = config.modules.editors.emacs;
 
-  # Patches this config keeps out of nixpkgs' Emacs.
-  emacsPackage = cfg.pkg.overrideAttrs (prev: {
-    patches =
-      (lib.optionals pkgs.stdenv.isDarwin [
-        ./patches/system-appearance.patch
-        ./patches/fix-ns-x-colors.patch
-        ./patches/round-undecorated-frame.patch
-      ])
-      ++ prev.patches;
-  });
-
   # The packages this config keeps outside nixpkgs.  Long term each of them
   # belongs in the `overlay' of the feature that uses it.
+  #
+  # Emacs itself is patched in that overlay, not here: nix-emacs-home wraps
+  # `cfg.package.pkgs', and `overrideAttrs' keeps the old `passthru', so a patch
+  # added to `cfg.pkg' never reaches `withPackages' -- it still wraps the
+  # unpatched Emacs the stale package set points at.
   emacsOverlay = import ./overrides.nix {
     inherit pkgs lib;
     packagePath = ../../../packages/emacs;
@@ -54,11 +48,11 @@ in
 
         emacs = {
           enable = true;
-          package = emacsPackage;
+          package = cfg.pkg;
           featureDirs = [ ./features ];
           overlay = emacsOverlay;
 
-          service.enable = cfg.enableService && !pkgs.stdenv.isDarwin;
+          service.enable = cfg.enableService && !pkgs.stdenv.hostPlatform.isDarwin;
 
           earlyInitFile = ".emacs.d/early-init.el";
           earlyDefvar = {
@@ -71,7 +65,7 @@ in
               doc = "Proportional font family selected from Nix.";
             };
           };
-          earlyElisp = lib.optionalString pkgs.stdenv.isDarwin ''
+          earlyElisp = lib.optionalString pkgs.stdenv.hostPlatform.isDarwin ''
             ;; `undecorated-round' keeps rounded corners via the local patch, but
             ;; on current NS Emacs/macOS it can still leave a visible titlebar
             ;; area, so also set the built-in `undecorated' early.

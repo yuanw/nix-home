@@ -7,6 +7,20 @@
 self: _super:
 {
 
+  # Patches this config keeps out of nixpkgs' Emacs.  They have to go on the
+  # `emacs' inside the package scope, because that is the Emacs `withPackages'
+  # wraps; overriding `cfg.pkg' with `overrideAttrs' keeps the stale `passthru'
+  # package set and silently patches nothing.
+  emacs = _super.emacs.overrideAttrs (prev: {
+    patches =
+      (lib.optionals pkgs.stdenv.hostPlatform.isDarwin [
+        ./patches/system-appearance.patch
+        ./patches/fix-ns-x-colors.patch
+        ./patches/round-undecorated-frame.patch
+      ])
+      ++ (prev.patches or [ ]);
+  });
+
   gptel = (
     pkgs.callPackage "${packagePath}/gptel.nix" {
       inherit (pkgs)
