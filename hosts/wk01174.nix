@@ -113,7 +113,6 @@
       enable = true;
       enableService = true;
       enableLatex = true;
-      modalEditing = "hel";
     };
     # health.enable = true;
     dev = {

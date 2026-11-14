@@ -178,8 +178,6 @@
       enableLatex = false;
       enableService = true;
 
-      modalEditing = "hel";
-
     };
     # health.enable = true;
     #jellyfin.enable = true;

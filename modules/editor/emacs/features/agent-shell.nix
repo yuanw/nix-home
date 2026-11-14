@@ -1,6 +1,12 @@
 { pkgs, ... }:
 
 {
+  # Do not `(require)' these at startup: hel-collection's agent-shell mode file
+  # defines its leader keymaps after the `with-eval-after-load' that binds them,
+  # so loading that file with agent-shell already loaded dies on
+  # `hel-agent-shell-local-leader-map'.
+  requireEpkgs = false;
+
   epkgs = epkgs: [
     epkgs.agent-shell
     epkgs.agent-shell-knockknock
@@ -17,7 +23,9 @@
                  agent-shell-switch-buffer
                  agent-shell-send-dwim
                  agent-shell-send-region
-                 agent-shell-send-file)
+                 agent-shell-send-file
+                 ;; Not in the package's own autoloads, and tempel.el calls it.
+                 agent-shell-insert)
       :init
       (setq agent-shell-preferred-agent-config 'pi))
 

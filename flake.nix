@@ -69,9 +69,11 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nima = {
-      url = "github:yuanw/nima/set-and-vars";
+    # Builds the Emacs config; see modules/editor/emacs/lib.nix.
+    nix-emacs-home = {
+      url = "github:yuanw/nix-emacs-home";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
       inputs.flake-parts.follows = "flake-parts";
     };
     agenix = {

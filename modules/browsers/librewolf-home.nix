@@ -100,6 +100,8 @@ in
               "widget.use-xdg-desktop-portal.file-picker" = 1; # Use new gtk file picker instead of legacy one
             };
           })
+          # Same managed uBO settings on non-macOS hosts (defined in librewolf.nix).
+          cfg.darwinExtraPolicies
         ];
         profiles = {
           # ~/Library/Application Support/LibreWolf/Profiles/home
