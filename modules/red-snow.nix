@@ -26,7 +26,7 @@
 # First start: the download (hours on a LAN uplink) + a 4-6 min load;
 # "Native API listening" in the journal, then /v1 (chat, streaming,
 # tool calls) on :8899. One model at a time on 128 GB unified memory:
-# stop tensorfold before starting this one.
+# stop tensorfold-zig before starting this one.
 {
   config,
   pkgs,

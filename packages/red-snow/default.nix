@@ -54,7 +54,7 @@ let
 
   # CUDA_HOME for the AOT extension build: cpp_extension wants
   # bin/nvcc, include/cuda_runtime.h and the libraries under one root.
-  # Same merge as modules/tensorfold.nix (its JIT needed the same tree).
+  # Same merge as the retired Python TensorFold unit (its JIT needed the same tree).
   getAllOutputs = p: map (o: p.${o}) p.outputs;
   cudaHome = symlinkJoin {
     name = "cuda-merged-${cudaPackages.cudaMajorMinorVersion}";

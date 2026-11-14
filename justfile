@@ -68,7 +68,6 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-slow-mode --src-only --version=branch --override-filename ./packages/pi-extensions/pi-slow-mode.nix
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix tccutil --src-only
-    @nix-update -f ./packages/release.nix ds4 --src-only --version=branch
     # Rex polls its own snapshot channel (blob.superlogical.com) and holds every
     # pin in packages/rex/sources.json, so nix-update has nothing to rewrite;
     # its passthru.updateScript does.  `just update-rex' runs the same thing.
@@ -202,7 +201,7 @@ cache-build-one HOST:
 # The filter is the upstream CUDA and torch stack on purpose: those are the paths
 # nobody else has a copy of (magma alone is 3492 build steps, and the libnvshmem
 # patched for CUDA 13.2 in cuda-fixes.nix is in no public cache) and none of it is
-# our code.  Our own outputs — tensorfold's Zig engine, vllm-aeon — stay out
+# our code.  Our own outputs — tensorfold's Zig engine — stay out
 # because the cache is public.
 cache-push TARGET="dgx-spark" CACHE="dgx-spark-nixos":
     @set -e; \

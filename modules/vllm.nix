@@ -30,7 +30,7 @@ let
         ];
         default = "native";
         description = ''
-          Run the native vllm-aeon binary (native) or the AEON OCI image via
+          Run the native vLLM binary (native) or the AEON OCI image via
           podman + CDI (podman). For backend=podman the host `model` and
           speculative drafter paths are bind-mounted to /model and /drafter
           inside the container, so the serve args use those container paths.
@@ -280,7 +280,7 @@ let
       };
 
       # ── native backend ──
-      vllmBin = "${pkgs.vllm-aeon or pkgs.vllm}/bin/vllm";
+      vllmBin = "${pkgs.vllm}/bin/vllm";
       nativeExecStart = "${vllmBin} ${escapeShellArgs vllmArgs}";
 
       # ── podman backend ──

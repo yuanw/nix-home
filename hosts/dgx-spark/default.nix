@@ -6,8 +6,6 @@
     inputs.dgx-spark.nixosModules.dgx-spark
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
-    ../../modules/ds4.nix
-    ../../modules/tensorfold.nix
     ../../modules/tensorfold-zig.nix
     ../../modules/red-snow.nix
     ../../modules/vllm.nix
@@ -34,7 +32,7 @@
     inputs.nixified-ai.overlays.comfyui
     inputs.nixified-ai.overlays.models
     inputs.nixified-ai.overlays.fetchers
-    # Package overrides (flash-attn-4, comfyui)
+    # Package overrides (comfyui)
     (import ../../packages)
   ];
 

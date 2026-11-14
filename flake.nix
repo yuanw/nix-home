@@ -237,7 +237,6 @@
           # };
 
           packages = {
-            llama-benchy = pkgs.llama-benchy;
             # try the transcription scripts without switching the whole system
             transcribe = pkgs.transcribe;
             yt-dlp-librewolf = pkgs.yt-dlp-librewolf;

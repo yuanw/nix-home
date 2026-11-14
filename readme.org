@@ -114,7 +114,7 @@ nix flake update --recreate-lock-file
 #+END_SRC
 
 ** build on macos?
-~nix build .#yuan-mac~
+~nix build .#mist~
 *** switch ?
 ~./result/sw/bin/darwin-rebuild switch --flake .~
 ** How to rollback (require sudo)

@@ -6,7 +6,6 @@ This host configuration targets the [[https://www.nvidia.com/en-us/dgx/dgx-spark
 
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] for hardware support (NVIDIA kernel, GPU drivers, DGX Dashboard)
 - [[https://github.com/nix-community/disko][disko]] for declarative disk partitioning
-- [[https://github.com/yuanw/ds4][ds4]] — DS4 DeepSeek V4 Flash inference server
 
 * Disk Layout
 
@@ -98,31 +97,6 @@ The =hardware.dgx-spark= module (from =nixos-dgx-spark=) enables:
 - Flox binary cache for pre-built CUDA packages
 - Security hardening (=module_blacklist= for vulnerable kernel modules)
 
-* DS4 DeepSeek V4 Flash Inference Server
-
-The [[https://github.com/yuanw/ds4][ds4]] service runs the DeepSeek V4 Flash
-inference server as a systemd unit:
-
-- Service: =ds4-server= (systemd, user =ds4=, group =ds4=)
-- Default port: 8000 (open in firewall)
-- Data directory: =/var/lib/ds4=
-- Context size: 100k tokens
-- GPU access via =video= group
-
-To interact with the server:
-
-#+begin_src shell
-# Check status
-systemctl status ds4-server
-
-# View logs
-journalctl -u ds4-server -f
-
-# Chat via HTTP API
-curl http://dgx-spark:8000/v1/chat/completions \
-  -d '{"model":"deepseek-v4","messages":[{"role":"user","content":"Hello"}]}'
-#+end_src
-
 * Installation
 
 ** Prerequisites
@@ -182,25 +156,21 @@ sudo chown yuanw /etc/nixos
 git clone https://github.com/yuanw/nix-home.git /etc/nixos
 #+end_src
 
-* TensorFold Qwen3.8 Flash Next (native)
+* TensorFold Qwen3.8 Flash Next (native, Zig engine)
 
-Serves Vontra/Qwen3.8-Flash-Next-MLX-4bit-MTP through TensorFold v0.3.6.3
-built natively (packages/tensorfold, plus the deployment repo's nine
-site-packages patches) — no container. 5 streams x 262,144 tokens, int8
-KV, vision tower, port 8888.
+Serves =nvidia/Qwen3.8-Flash-Next-FP4-Local= (~96 GiB FP4 QAD checkpoint)
+through upstream TensorFold's *Zig* engine (=tensorfold-native=, branch
+zig-flashnext) built natively — =packages/tensorfold-zig=, no container. The
+CUDA fatbins and Triton AOT cubins are baked in, so there is no first-start
+JIT. 5 streams x 262,144 tokens, vision tower, port 8888.
 
-- Service: =tensorfold= (systemd, user =qwen38=, group =qwen38=,
-  manual start: =systemctl start tensorfold=; defined in
-  =modules/tensorfold.nix=, enabled in =hosts/dgx-spark/configuration.nix=)
-- First start downloads the ~106 GiB checkpoint into
-  =/var/lib/vllm/huggingface/hub= and JIT-compiles the CUDA kernels into
-  =/var/lib/qwen38-tensorfold/kernels/= (nvcc + ninja are on the unit's
-  PATH, CUDA_HOME is a merged CUDA 13.2 tree) — unlimited start timeout.
-- Torch is the CUDA-enabled nixpkgs build (cudaSupport + cudaCapabilities
-  12.0/12.1 on GB10), python313.
-- Regression tools: =nix run .#nixosConfigurations.dgx-spark.pkgs.tensorfold-tools= —
-  bench/needle/etc. from the [[https://github.com/yuanw/Qwen3.8-Flash-Next-Single-DGX-Spark-TensorFold][deployment repo]] against the container
-  baseline (62/90/107/119 tok/s at 1/2/4/5 streams).
+- Service: =tensorfold-zig= (systemd; defined in =modules/tensorfold-zig.nix=,
+  enabled in =hosts/dgx-spark/configuration.nix=; =autoStart=false=, so start
+  it with =systemctl start tensorfold-zig=)
+- First start downloads the checkpoint into =/var/lib/vllm/huggingface/hub=
+  (resumable); state lives in =/var/lib/tensorfold-zig=.
+- Tryout, benchmark numbers and the retired Python engine's history:
+  [[file:../../docs/tensorfold-zig-plan.org][docs/tensorfold-zig-plan.org]].
 
 * RED-SNOW-5.3-Flash 2.49bpw (native exllamav3)
 
@@ -217,7 +187,7 @@ port 8899. 262,144-token context, Q4 KV cache, MTP with 2 draft tokens.
 - First start downloads the checkpoint into =/var/lib/vllm/huggingface/hub=
   (resumable) then loads for 4-6 min; =journalctl -fu red-snow= until
   "Native API listening".
-- One model at a time on 128 GB unified memory: =systemctl stop tensorfold=
+- One model at a time on 128 GB unified memory: =systemctl stop tensorfold-zig=
   before starting it (and vice versa).
 - Smoke test: the deployment repo's =test.sh= is just curl against
   =http://dgx-spark:8899/v1/chat/completions=.
@@ -249,6 +219,5 @@ scratch (disko + nixos-anywhere). There is no tmpfs persistence layer to wipe.
 
 - [[https://github.com/graham33/nixos-dgx-spark][nixos-dgx-spark]] — hardware module and playbooks
 - [[https://github.com/nix-community/disko][disko]] — declarative disk partitioning
-- [[https://github.com/yuanw/ds4][ds4]] — DS4 inference server module
 http://dgx-spark.local:9090/metrics
 http://dgx-spark.local:11000/

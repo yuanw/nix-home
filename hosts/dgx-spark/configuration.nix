@@ -30,14 +30,16 @@
   # it ~20 °C for no measurable throughput loss, because MoE inference here
   # is HBM-bandwidth-bound, not clock-bound.
   # The lock is not persistent across reboots, so reapply it every boot, and
-  # ahead of any unit that touches the GPU. Add other GPU services to
-  # `before` when they appear (red-snow, tensorfold-zig).
+  # ahead of any unit that touches the GPU (tensorfold-zig, red-snow).
   # https://www.wildpines.ai/blog/your-dgx-spark-is-cooking-itself/
   systemd.services.gpu-clock-cap = {
     description = "Cap GPU SM clocks to 2200 MHz for thermal protection";
     after = [ "nvidia-persistenced.service" ];
     wantedBy = [ "multi-user.target" ];
-    before = [ "tensorfold.service" ];
+    before = [
+      "tensorfold-zig.service"
+      "red-snow.service"
+    ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -170,13 +172,12 @@
   };
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.cudaSupport = true;
-  # vLLM 0.16 has known CVEs (fixed in 0.23). Permit until vllm-aeon builds.
+  # vLLM 0.16 (nixpkgs) has known CVEs, fixed upstream in 0.23; only
+  # modules/vllm.nix's native fallback pulls it — this host serves through
+  # podman with the AEON OCI image.
   nixpkgs.config.permittedInsecurePackages = [
     "python3.13-vllm-0.16.0"
   ];
-
-  # ─── DS4 Server ─────────────────────────────────────────────────────
-  services.ds4.enable = false;
 
   # ─── Cockpit Web Manager ────────────────────────────────────────────
   services.cockpit-local.enable = true;
@@ -186,29 +187,7 @@
   services.pcp.enable = true;
 
   # ─── Firewall ───────────────────────────────────────────────────────
-  # (TensorFold's API port 8888 is opened by services.tensorfold.openFirewall)
-
-  # ─── TensorFold Inference (native Nix, no container) ───────────────
-  # Defined in modules/tensorfold.nix: packages/tensorfold (upstream +
-  # the deployment repo's single site-packages patch) on the CUDA-
-  # enabled nixpkgs torch, JIT kernels compiled on first start into
-  # stateDir/kernels. Serve args and TENSORFOLD_* env mirror the
-  # deployment recipe's defaults (scripts/config.sh @ 4c0dea8).
-  # First start (checkpoint download if missing + JIT kernels):
-  #   systemctl start tensorfold   # then: journalctl -fu tensorfold
-  # Regression tools live in environment.systemPackages (bench/needle/
-  # toolcheck/visioncheck); the container baseline table is in the
-  # deployment repo's README.
-  # The Python TensorFold (v0.6.1, Vontra MLX-4bit) is the *disabled*
-  # fallback: the Zig engine below won on simplicity at equal quality
-  # (Spark-Bench 81.7 vs 81.4). To revert, set enable = true here and
-  # `services.tensorfold-zig.enable = false`; both serve :8888, so the
-  # provider needs no change. See docs/tensorfold-zig-plan.org.
-  services.tensorfold = {
-    enable = false;
-    openFirewall = true;
-    environmentFile = config.age.secrets.hf-token.path;
-  };
+  # (TensorFold's API port 8888 is opened by the tensorfold-zig unit below)
 
   # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
   # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
@@ -229,8 +208,8 @@
     systemMemoryCache = true;
   };
 
-  # (the tensorfold state/kernels/HF-cache dir rules live in
-  # modules/tensorfold.nix; only the shared /var/lib/vllm parent stays)
+  # (the tensorfold-zig state dir rules live in
+  # modules/tensorfold-zig.nix; only the shared /var/lib/vllm parent stays)
   systemd.tmpfiles.rules = [
     "d /var/lib/vllm 0755 root root - -"
   ];
@@ -241,7 +220,7 @@
   # /v1 server (Weschera/RED-SNOW-5.3-Flash-2.49bpw-1x-DGX-Spark @
   # b96fac2). Serves on :8899 next to TensorFold's :8888 — but one
   # model at a time on 128 GB unified memory, so
-  # `systemctl stop tensorfold` first. The unit runs as root because
+  # `systemctl stop tensorfold-zig` first. The unit runs as root because
   # serve.sh's page-cache drops (GB10 undercounts file cache as free
   # unified memory) need it.
   # First start (checkpoint download if missing, then a 4-6 min load):
@@ -256,9 +235,9 @@
   };
 
   # Qwen3.8 is served from its HuggingFace repo ID through the native
-  # TensorFold service above, with /var/lib/vllm/huggingface as its HF cache. The
-  # declarative vllm-models downloader (written for the older vLLM
-  # wrapper) stays off so it cannot pull a second copy of the weights.
+  # TensorFold Zig service above, with /var/lib/vllm/huggingface as its HF
+  # cache. The declarative vllm-models downloader (written for the older
+  # vLLM wrapper) stays off so it cannot pull a second copy of the weights.
   services.vllm-models.enable = false;
 
   services.dgx-dashboard = {
@@ -302,10 +281,6 @@
     ethtool
     rdma-core
     fwupd
-    # Regression tools for the TensorFold service (bench/needle/toolcheck/
-    # visioncheck) — the container-vs-native performance gate runs through
-    # these; see the deployment repo's README for the baseline table.
-    tensorfold-tools
   ];
 
   # fwupd-refresh.service (fwupdmgr refresh) requires polkit auth and fails during

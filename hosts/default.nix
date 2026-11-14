@@ -193,8 +193,7 @@
           );
       in
       {
-        ci = configure "ci" "aarch64-darwin" ./yuan-mac.nix;
-        # yuanw = configure "yuanw" "x86_64-darwin" ./yuan-mac.nix;
+        ci = configure "ci" "aarch64-darwin" ./mist.nix;
         mist = configure "mist" "aarch64-darwin" ./mist.nix;
         WK01174 = configure "WK01174" "aarch64-darwin" ./wk01174.nix;
       };
@@ -206,8 +205,6 @@
       packages.misfit = self.nixosConfigurations.misfit.config.system.build.toplevel;
       packages.silver = self.nixosConfigurations.silver.config.system.build.toplevel;
       packages.dgx-spark = self.nixosConfigurations.dgx-spark.config.system.build.toplevel;
-      # darwinConfigurations.yuanw is disabled above; keep this in sync if you re-enable it.
-      # packages.yuanw = self.darwinConfigurations.yuanw.system;
       packages.ci = self.darwinConfigurations.ci.system;
       packages.wk01174 = self.darwinConfigurations.WK01174.system;
       packages.mist = self.darwinConfigurations.mist.system;

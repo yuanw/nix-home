@@ -159,12 +159,6 @@ rec {
     inherit agent-shell;
   };
 
-  magit-ai = pkgs.callPackage ./emacs/magit-ai.nix {
-    melpaBuild = pkgs.stdenv.mkDerivation;
-    inherit (pkgs) fetchFromGitHub;
-  };
-
-  cozempic = pkgs.python3Packages.callPackage ./cozempic { };
   chroma-mcp = pkgs.python3Packages.callPackage ./chroma-mcp.nix { };
   tccutil = pkgs.python3Packages.callPackage ./tccutil { };
   caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
@@ -179,5 +173,4 @@ rec {
   pi-permission-gate = pi-extensions-all.pi-permission-gate;
   pi-slow-mode = pi-extensions-all.pi-slow-mode;
   pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
-  ds4 = pkgs.callPackage ./ds4 { };
 }
