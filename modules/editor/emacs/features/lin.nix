@@ -2,6 +2,8 @@
   epkgs = epkgs: [ epkgs.lin ];
   elisp = ''
     (use-package lin
-      :commands (lin-global-mode lin-mode))
+      :hook (after-init . lin-global-mode)
+      :config
+      (setq lin-face 'lin-green))
   '';
 }

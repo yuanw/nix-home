@@ -84,7 +84,7 @@ with lib;
   };
 
   config = mkIf cfg.enable (mkMerge [
-    (mkIf (!isDarwin) {
+    (mkIf (!isDarwin && !cfg.useNixEmacsHome) {
       services.emacs = {
         enable = cfg.enableService;
         package = emacsPackage;
@@ -101,37 +101,23 @@ with lib;
         };
     })
 
+    # Everything below is the same whichever way Emacs is configured: the tools
+    # Emacs shells out to, the yasnippet snippets, the grammar checker config.
     {
       fonts.packages = [ pkgs.emacs-all-the-icons-fonts ];
-      # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
-      # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
-      # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
-      # the context of home-manager
+
       home-manager.users.${config.my.username} =
-        hm@{ pkgs, ... }:
+        hm@{ ... }:
         {
-          # Emacs is provided by `./nima.nix` and installed directly via
-          # `home.packages` below.  Do not enable Home Manager's Emacs
-          # wrapper/init generator, otherwise Emacs would be wrapped twice.
-          programs.emacs.enable = false;
-
           home = {
-            file.".emacs.d/early-init.el".text = import ./early-init.nix {
-              monoFont = config.my.monoFont;
-              font = config.my.font;
-              inherit isDarwin;
-            };
-
+            # https://www.reddit.com/r/NixOS/comments/vh2kf7/home_manager_mkoutofstoresymlink_issues/
+            # config.lib.file.mkOutOfStoreSymlink is provided by the home-manager module,
+            # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
+            # the context of home-manager
             file.".emacs.d/snippets".source =
               hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
+
             packages = with pkgs; [
-              emacsPackage
-              (pkgs.writeShellScriptBin "app-launcher" ''
-                ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
-              '')
-              (pkgs.writeShellScriptBin "org-capture" ''
-                ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
-              '')
               # git
               (ripgrep.override { withPCRE2 = true; })
               gnutls # for TLS connectivity
@@ -185,22 +171,45 @@ with lib;
               [*]
               BasedOnStyles = alex, Google, Microsoft, Joblint, proselint, write-good
             '';
-            # file.".emacs.d".source = emacsConfigPath;
           };
-          programs.zsh = {
-            sessionVariables = {
-              EDITOR = "${emacsclient}";
-              ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
-            }
-            // lib.optionalAttrs isDarwin {
-              # The daemon's socket lives under the launchd per-user temp dir, but
-              # nix-shell/direnv rewrite $TMPDIR, so emacsclient looked in the wrong
-              # place from herdr panes and dev shells. Pin the real path.
-              EMACS_SOCKET_NAME = "$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server";
-            };
 
+          programs.zsh.sessionVariables = {
+            ASPELL_CONF = "dict-dir ${aspell}/lib/aspell";
+          }
+          // lib.optionalAttrs isDarwin {
+            # The daemon's socket lives under the launchd per-user temp dir, but
+            # nix-shell/direnv rewrite $TMPDIR, so emacsclient looked in the wrong
+            # place from herdr panes and dev shells. Pin the real path.
+            EMACS_SOCKET_NAME = "$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server";
           };
         };
     }
+
+    # The Emacs itself, when nima configures it.  ./lib.nix does the same for
+    # the nix-emacs-home library.
+    (mkIf (!cfg.useNixEmacsHome) {
+      home-manager.users.${config.my.username} =
+        hm@{ ... }:
+        {
+          home = {
+            file.".emacs.d/early-init.el".text = import ./early-init.nix {
+              monoFont = config.my.monoFont;
+              font = config.my.font;
+              inherit isDarwin;
+            };
+            packages = [
+              emacsPackage
+              (pkgs.writeShellScriptBin "app-launcher" ''
+                ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
+              '')
+              (pkgs.writeShellScriptBin "org-capture" ''
+                ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
+              '')
+            ];
+          };
+
+          programs.zsh.sessionVariables.EDITOR = "${emacsclient}";
+        };
+    })
   ]);
 }

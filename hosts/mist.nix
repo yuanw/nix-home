@@ -177,7 +177,7 @@
       enable = true;
       enableLatex = false;
       enableService = true;
-
+      useNixEmacsHome = true;
       modalEditing = "hel";
 
     };

@@ -13,10 +13,8 @@
 
   users.users.${config.my.username}.uid = 501;
   home-manager.users.${config.my.username} = {
-    programs.git = {
-      extraConfig = {
-        github.user = "yuanw";
-      };
+    programs.git.settings = {
+      github.user = "yuanw";
     };
     home.packages = [ pkgs.qbittorrent ];
   };
@@ -42,6 +40,8 @@
       enable = true;
       enableService = true;
       enableLatex = false;
+      # Try the nix-emacs-home library (modules/editor/emacs/lib.nix).
+      useNixEmacsHome = true;
     };
 
     terminal.enable = true;

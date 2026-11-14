@@ -7,7 +7,6 @@
         vertico
         marginalia
         corfu
-        corfu-terminal
         cape
         ;
     };

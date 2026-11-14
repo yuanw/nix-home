@@ -41,6 +41,7 @@
       ./dev/scheme.nix
       ./dev/zig.nix
       ./editor/emacs
+      ./editor/emacs/lib.nix
       ./helix.nix
       ./settings.nix
       ./speech2text/speak2text.nix
