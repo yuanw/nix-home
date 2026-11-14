@@ -30,6 +30,16 @@ melpaBuild {
     dash
   ];
 
+  # Upstream defines the agent-shell leader keymaps after the
+  # `hel-collection-setup' form that binds them (still true on main), so
+  # loading that file when agent-shell is already loaded evaluates the
+  # bindings before the keymaps exist and dies with
+  # "void-variable hel-agent-shell-local-leader-map".  Defining them first
+  # makes the file load in any order.
+  # shortcut: local patch; if upstream reshuffles this file the patch stops
+  # applying and the build fails loudly on the next rev bump.
+  patches = [ ./hel-collection-agent-shell-order.patch ];
+
   recipe = writeText "recipe" ''
     (hel-collection
      :repo "helheim-emacs/hel-collection"

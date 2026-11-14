@@ -1,0 +1,76 @@
+--- a/modes/agent-shell/hel-collection-agent-shell.el
++++ b/modes/agent-shell/hel-collection-agent-shell.el
+@@ -46,6 +46,36 @@
+ 
+ ;;; Keybindings
+ 
++(defvar-keymap hel-agent-shell-local-leader-map
++  :doc "<local-leader> in agent-shell mode."
++  "RET"   '("set session mode" . agent-shell-set-session-mode)
++  "<tab>" '("cycle session mode" . agent-shell-cycle-session-mode)
++  ","     '("compose prompt" . agent-shell-prompt-compose)
++  "?"     '("help menu" . agent-shell-help-menu)
++  "l"     '("clear shell buffer" . agent-shell-clear-buffer)
++  "m"     '("set model" . agent-shell-set-session-model)
++  "v"     '("switch viewport/shell mode" . agent-shell-other-buffer)
++  "s"     '("send screenshot" . agent-shell-send-screenshot)
++  "!"     '("shell command" . agent-shell-insert-shell-command-output)
++  "p"     '("pending request add" . agent-shell-queue-request)
++  "P"     '("pending request remove" . agent-shell-remove-pending-request)
++  "t"     '("token usage" . agent-shell-show-usage))
++
++(defvar-keymap hel-agent-shell-viewport-view-local-leader-map
++  :doc "<local-leader> in agent-shell viewport mode."
++  :parent hel-agent-shell-local-leader-map
++  "<tab>" '("cycle session mode" . agent-shell-viewport-cycle-session-mode)
++  "RET"   '("set session mode" . agent-shell-viewport-set-session-mode)
++  "m"     '("set model" . agent-shell-viewport-set-session-model)
++  "?"     '("help menu" . agent-shell-viewport-help-menu))
++
++(defvar-keymap hel-agent-shell-viewport-edit-local-leader-map
++  :doc "<local-leader> in agent-shell compose buffer."
++  :parent hel-agent-shell-viewport-view-local-leader-map
++  ","     '("send prompt" . agent-shell-viewport-compose-send)
++  "q"     '("cancel" . agent-shell-viewport-compose-cancel)
++  "?"     '("help menu" . agent-shell-viewport-compose-help-menu))
++
+ (hel-collection-setup agent-shell
+   (:after-load
+     (:keymap agent-shell-mode-map
+@@ -103,36 +133,6 @@
+         "C-j" 'diff-hunk-next
+         "C-k" 'diff-hunk-prev))))
+ 
+-(defvar-keymap hel-agent-shell-local-leader-map
+-  :doc "<local-leader> in agent-shell mode."
+-  "RET"   '("set session mode" . agent-shell-set-session-mode)
+-  "<tab>" '("cycle session mode" . agent-shell-cycle-session-mode)
+-  ","     '("compose prompt" . agent-shell-prompt-compose)
+-  "?"     '("help menu" . agent-shell-help-menu)
+-  "l"     '("clear shell buffer" . agent-shell-clear-buffer)
+-  "m"     '("set model" . agent-shell-set-session-model)
+-  "v"     '("switch viewport/shell mode" . agent-shell-other-buffer)
+-  "s"     '("send screenshot" . agent-shell-send-screenshot)
+-  "!"     '("shell command" . agent-shell-insert-shell-command-output)
+-  "p"     '("pending request add" . agent-shell-queue-request)
+-  "P"     '("pending request remove" . agent-shell-remove-pending-request)
+-  "t"     '("token usage" . agent-shell-show-usage))
+-
+-(defvar-keymap hel-agent-shell-viewport-view-local-leader-map
+-  :doc "<local-leader> in agent-shell viewport mode."
+-  :parent hel-agent-shell-local-leader-map
+-  "<tab>" '("cycle session mode" . agent-shell-viewport-cycle-session-mode)
+-  "RET"   '("set session mode" . agent-shell-viewport-set-session-mode)
+-  "m"     '("set model" . agent-shell-viewport-set-session-model)
+-  "?"     '("help menu" . agent-shell-viewport-help-menu))
+-
+-(defvar-keymap hel-agent-shell-viewport-edit-local-leader-map
+-  :doc "<local-leader> in agent-shell compose buffer."
+-  :parent hel-agent-shell-viewport-view-local-leader-map
+-  ","     '("send prompt" . agent-shell-viewport-compose-send)
+-  "q"     '("cancel" . agent-shell-viewport-compose-cancel)
+-  "?"     '("help menu" . agent-shell-viewport-compose-help-menu))
+-
+ ;;; Commands
+ 
+ ;; C-j or ]] or zj
