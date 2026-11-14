@@ -39,7 +39,6 @@ let
           (lib.optionals pkgs.stdenv.isDarwin [
             ./patches/system-appearance.patch
             ./patches/fix-ns-x-colors.patch
-            ./patches/fix-ns-scroll-crash.patch
             ./patches/round-undecorated-frame.patch
           ])
           ++ prev.patches;
