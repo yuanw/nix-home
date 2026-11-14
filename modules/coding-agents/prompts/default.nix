@@ -1,8 +1,11 @@
 {
   lib,
-  pkgs,
   flake-prompt,
   janestreet-skills,
+  claude-prompts,
+  humanizer,
+  i-have-adhd,
+  emacs-skills,
   ...
 }:
 let
@@ -18,23 +21,21 @@ let
 
   skillBody = path: stripFrontmatter (builtins.readFile path);
 
-  claudeSkills = pkgs.claude-plugins;
-  emacsSkillsDir = claudeSkills.emacs-skills;
-
+  # The Emacs skills are captured from upstream's SKILL.md: its frontmatter
+  # gives the name and description, its body is the body, and skillFromDir
+  # ships the agent-skill-*.el next to it. `extra' replaces the captured
+  # frontmatter as a whole, because flake-prompt reads every scalar as a string
+  # while pi tests `disable-model-invocation' against a real true, so a captured
+  # one would render quoted and be ignored. `tools = null' drops the key
+  # (upstream omits it for that skill).
   emacsSkill =
-    {
-      name,
-      description,
-      extraFrontmatter ? { },
-      elisp ? null,
-    }:
-    {
-      type = "skill";
-      inherit name description extraFrontmatter;
-      body = skillBody "${emacsSkillsDir}/${name}/SKILL.md";
-    }
-    // lib.optionalAttrs (elisp != null) {
-      files."${elisp}".text = builtins.readFile "${emacsSkillsDir}/${name}/${elisp}";
+    name: extra:
+    flake-prompt.lib.skillFromDir {
+      dir = "${emacs-skills}/skills/${name}";
+      extraFrontmatter = {
+        tools = "Bash";
+      }
+      // extra;
     };
 
   orgAgendaTodoBody = ''
@@ -258,33 +259,43 @@ in
   # here. `just update janestreet-skills' picks up upstream changes.
   (flake-prompt.lib.skillFromDir { dir = "${janestreet-skills}/socratic-tutor"; })
 
-  {
-    type = "skill";
+  # A single markdown file, so the rest of that repo (its plugin manifests, docs
+  # and scripts) stays out of the skills directory. Upstream states its
+  # description as a YAML block scalar and its allowed-tools as a list;
+  # flake-prompt's parser reads single-line scalars only, so those two would
+  # come out as "|" and "" and are stated here instead.
+  (flake-prompt.lib.promptFromMarkdown {
     name = "humanizer";
+    source = humanizer + /SKILL.md;
     description = "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written.";
     extraFrontmatter = {
       version = "2.1.1";
     };
-    body = skillBody "${claudeSkills.humanizer}/SKILL.md";
-  }
+  })
 
-  {
-    type = "skill";
-    name = "caveman";
+  # From upstream's SKILL.md, like socratic-tutor above. The description is
+  # restated because upstream folds it over two lines and flake-prompt's
+  # frontmatter parser only reads single-line scalars, which would cut it off
+  # mid-sentence.
+  (flake-prompt.lib.skillFromDir {
+    dir = "${claude-prompts}/skills/caveman";
     description = "Compress and simplify prompts to preserve meaning while reducing use of context.";
-    body = skillBody "${claudeSkills.caveman}/SKILL.md";
-  }
+  })
 
-  {
-    type = "skill";
-    name = "i-have-adhd";
-    description = "Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, and make wins visible.";
+  # Upstream owns the name, description and body; the frontmatter is restated
+  # because a captured `disable-model-invocation' would be a string. The agents/
+  # files describe the same skill for other CLIs.
+  (flake-prompt.lib.skillFromDir {
+    dir = "${i-have-adhd}/skills/i-have-adhd";
     extraFrontmatter = {
       "disable-model-invocation" = true;
       license = "MIT";
     };
-    body = skillBody "${claudeSkills.i-have-adhd}/SKILL.md";
-  }
+    exclude = [
+      "agents/gemini.toml"
+      "agents/openai.yaml"
+    ];
+  })
 
   {
     type = "skill";
@@ -321,102 +332,25 @@ in
       builtins.readFile ./skills/org-agenda-pick/agent-skill-org-agenda.el;
   }
 
-  (emacsSkill {
-    name = "d2";
-    description = "Create a diagram from the current context using D2 and output the resulting image path.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-  })
+  (emacsSkill "d2" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "describe";
-    description = "Look up Emacs documentation via emacsclient.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-    elisp = "agent-skill-describe.el";
-  })
+  (emacsSkill "describe" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "dired";
-    description = "Open files from the latest interaction in an Emacs dired buffer via emacsclient.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-    elisp = "agent-skill-dired.el";
-  })
+  (emacsSkill "dired" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "emacsclient";
-    description = "Always use emacsclient instead of emacs. This applies to all Emacs operations: user requests, byte compilation, check-parens, running ERT tests, and any other elisp evaluation.";
-    extraFrontmatter = {
-      tools = "Bash";
-    };
-  })
+  (emacsSkill "emacsclient" { })
 
-  (emacsSkill {
-    name = "file-links";
-    description = "When referencing files, format them as markdown links with line numbers using GitHub-style #L syntax.";
-  })
+  (emacsSkill "file-links" { tools = null; })
 
-  (emacsSkill {
-    name = "gnuplot";
-    description = "Plot data from the current context using gnuplot and output the resulting image path.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-  })
+  (emacsSkill "gnuplot" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "highlight";
-    description = "Highlight relevant regions in one or more files in Emacs via emacsclient.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-    elisp = "agent-skill-highlight.el";
-  })
+  (emacsSkill "highlight" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "mermaid";
-    description = "Create a diagram from the current context using Mermaid and output the resulting image path.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-  })
+  (emacsSkill "mermaid" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "open";
-    description = "Open files from the latest interaction in Emacs buffers via emacsclient.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-    elisp = "agent-skill-open.el";
-  })
+  (emacsSkill "open" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "plantuml";
-    description = "Create a diagram from the current context using PlantUML and output the resulting image path.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-  })
+  (emacsSkill "plantuml" { disable-model-invocation = true; })
 
-  (emacsSkill {
-    name = "select";
-    description = "Open one or more files in Emacs and select a region relevant to the current discussion via emacsclient.";
-    extraFrontmatter = {
-      tools = "Bash";
-      "disable-model-invocation" = true;
-    };
-    elisp = "agent-skill-select.el";
-  })
+  (emacsSkill "select" { disable-model-invocation = true; })
 ]

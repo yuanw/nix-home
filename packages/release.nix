@@ -160,11 +160,6 @@ rec {
 
   chroma-mcp = pkgs.python3Packages.callPackage ./chroma-mcp.nix { };
   tccutil = pkgs.python3Packages.callPackage ./tccutil { };
-  caveman = (pkgs.callPackage ./claude-plugins { }).caveman;
-  claude-mem = (pkgs.callPackage ./claude-plugins { }).claude-mem;
-  emacs-skills = (pkgs.callPackage ./claude-plugins { }).emacs-skills;
-  humanizer = (pkgs.callPackage ./claude-plugins { }).humanizer;
-  i-have-adhd = (pkgs.callPackage ./claude-plugins { }).i-have-adhd;
   pi-cursor-agent = pkgs.callPackage ./pi-extensions/pi-cursor-agent { };
   pi-interactive-shell = pkgs.callPackage ./pi-extensions/pi-interactive-shell.nix { };
   # Need mkPiExtension from the extensions set, so borrow the built attrs.

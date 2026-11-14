@@ -25,6 +25,29 @@
       flake = false;
     };
 
+    # jwiegley's prompt collection. The caveman skill is imported the same way
+    # (see modules/coding-agents/prompts); `just update claude-prompts' bumps it.
+    claude-prompts = {
+      url = "github:jwiegley/claude-prompts";
+      flake = false;
+    };
+
+    # Single-skill and skill-collection repos, each read straight from the
+    # source tree by flake-prompt's skillFromDir (modules/coding-agents/prompts).
+    # `just update <name>' bumps one; no hashes to keep current.
+    humanizer = {
+      url = "github:blader/humanizer";
+      flake = false;
+    };
+    i-have-adhd = {
+      url = "github:ayghri/i-have-adhd";
+      flake = false;
+    };
+    emacs-skills = {
+      url = "github:xenodium/emacs-skills";
+      flake = false;
+    };
+
     # Fork: adds the upstream skills to the open-code-review package.
     llm-agents.url = "github:numtide/llm-agents.nix";
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
@@ -207,9 +230,15 @@
         { system, pkgs, ... }:
         let
           agentPrompts = import ./modules/coding-agents/prompts {
-            inherit pkgs;
             lib = inputs.nixpkgs.lib;
-            inherit (inputs) flake-prompt janestreet-skills;
+            inherit (inputs)
+              flake-prompt
+              janestreet-skills
+              claude-prompts
+              humanizer
+              i-have-adhd
+              emacs-skills
+              ;
           };
         in
         {

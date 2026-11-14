@@ -2,11 +2,11 @@
   config,
   lib,
   pkgs,
+  inputs,
   ...
 }:
 let
   cfg = config.modules.cursor;
-  claudePlugins = pkgs.callPackage ../../../packages/claude-plugins { };
 in
 {
   options.modules.cursor = {
@@ -18,14 +18,17 @@ in
       description = "Local directory of cursor skills linked recursively into ~/.cursor/skills/.";
     };
 
-    skillPackages = lib.mkOption {
-      type = lib.types.listOf lib.types.package;
-      default = with claudePlugins; [
-        caveman
-        humanizer
-        emacs-skills
-      ];
-      description = "Skill packages built with mkClaudeSkill. Each is linked into ~/.cursor/skills/<pname>/.";
+    skillDirs = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      # The same upstream SKILL.md files the prompt set captures with
+      # flake-prompt's skillFromDir; here they go to cursor as they are. The
+      # humanizer repo is a whole plugin, so only its SKILL.md is picked out.
+      default = {
+        caveman = inputs.claude-prompts + /skills/caveman;
+        humanizer = pkgs.writeTextDir "SKILL.md" (builtins.readFile (inputs.humanizer + /SKILL.md));
+        emacs-skills = inputs.emacs-skills + /skills;
+      };
+      description = "Skill directories, linked into ~/.cursor/skills/<name>/.";
     };
   };
 
@@ -40,16 +43,14 @@ in
         };
       })
 
-      (lib.mkIf (cfg.skillPackages != [ ]) {
-        home.file = lib.listToAttrs (
-          map (s: {
-            name = ".cursor/skills/${s.passthru.claudeSkill.pname}";
-            value = {
-              source = s;
-              recursive = true;
-            };
-          }) cfg.skillPackages
-        );
+      (lib.mkIf (cfg.skillDirs != { }) {
+        home.file = lib.mapAttrs' (
+          name: source:
+          lib.nameValuePair ".cursor/skills/${name}" {
+            inherit source;
+            recursive = true;
+          }
+        ) cfg.skillDirs;
       })
     ];
   };

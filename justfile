@@ -34,16 +34,12 @@ nix-update:
     @nix-update -f ./packages/release.nix agent-shell --src-only --version=branch
     @nix-update -f ./packages/release.nix acp --src-only --version=branch --override-filename ./packages/emacs/acp.nix
     @nix-update -f ./packages/release.nix auto-save --src-only --version=branch
-    @nix-update -f ./packages/release.nix caveman --src-only --version=branch
     @nix-update -f ./packages/release.nix cursor-agent-acp --src-only
     @nix-update -f ./packages/release.nix pi-acp --src-only --version=branch --override-filename ./packages/pi-acp.nix
     @nix-update -f ./packages/release.nix consult-omni --src-only --version=branch
-    @nix-update -f ./packages/release.nix emacs-skills --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-agent --src-only --version=branch
     @nix-update -f ./packages/release.nix gptel-quick --src-only --version=branch
-    @nix-update -f ./packages/release.nix humanizer --src-only --version=branch
-    @nix-update -f ./packages/release.nix i-have-adhd --src-only --version=branch
     @nix-update -f ./packages/release.nix hurl-mode --src-only --version=branch
     @nix-update -f ./packages/release.nix hel --src-only --version=branch --override-filename ./packages/emacs/hel.nix
     @nix-update -f ./packages/release.nix hel-leader --src-only --version=branch --override-filename ./packages/emacs/hel-leader.nix

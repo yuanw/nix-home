@@ -99,6 +99,22 @@
         "type": "github"
       }
     },
+    "claude-prompts": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1790551182,
+        "narHash": "sha256-OOhfy3cPCSmvwhKN7kQB6gm/vtntwNtMrw50fm5oJME=",
+        "owner": "jwiegley",
+        "repo": "claude-prompts",
+        "rev": "eaf24a7808a01cd294562aa78c66ab83e98de823",
+        "type": "github"
+      },
+      "original": {
+        "owner": "jwiegley",
+        "repo": "claude-prompts",
+        "type": "github"
+      }
+    },
     "colmena": {
       "inputs": {
         "nix-github-actions": "nix-github-actions",
@@ -263,6 +279,22 @@
       "original": {
         "owner": "nix-community",
         "repo": "emacs-overlay",
+        "type": "github"
+      }
+    },
+    "emacs-skills": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1784658101,
+        "narHash": "sha256-ZWikhVPlgTw5TqgXU8pCZSRPvnSAxHCqnqgiZvAuV+8=",
+        "owner": "xenodium",
+        "repo": "emacs-skills",
+        "rev": "a158238bd630ebe68f57fb9caf99e984e757ca4f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "xenodium",
+        "repo": "emacs-skills",
         "type": "github"
       }
     },
@@ -668,6 +700,38 @@
       "original": {
         "owner": "nix-community",
         "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "humanizer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794274464,
+        "narHash": "sha256-brVRFNvqMttKMZdlxrgmU01VOlxbyU6zQ8zd6qT4eZ8=",
+        "owner": "blader",
+        "repo": "humanizer",
+        "rev": "b48c832f0f809c1b5658edbb838c2521b72f2413",
+        "type": "github"
+      },
+      "original": {
+        "owner": "blader",
+        "repo": "humanizer",
+        "type": "github"
+      }
+    },
+    "i-have-adhd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791734634,
+        "narHash": "sha256-GTqrnZxQvzo/ogAuUrffkOaMK1BYm/4rAZsnfmDt7DU=",
+        "owner": "ayghri",
+        "repo": "i-have-adhd",
+        "rev": "1ecea1993b7fce257ffbd686c070948b5e07eda6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ayghri",
+        "repo": "i-have-adhd",
         "type": "github"
       }
     },
@@ -1402,17 +1466,21 @@
         "agenix": "agenix",
         "betterfox": "betterfox",
         "catppuccin": "catppuccin",
+        "claude-prompts": "claude-prompts",
         "colmena": "colmena",
         "declarative-jellyfin": "declarative-jellyfin",
         "dgx-spark": "dgx-spark",
         "direnv-instant": "direnv-instant",
         "disko": "disko_2",
         "emacs": "emacs",
+        "emacs-skills": "emacs-skills",
         "flake-parts": "flake-parts_6",
         "flake-prompt": "flake-prompt",
         "git-hooks": "git-hooks",
         "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
+        "humanizer": "humanizer",
+        "i-have-adhd": "i-have-adhd",
         "iets": "iets",
         "impermanence": "impermanence",
         "janestreet-skills": "janestreet-skills",
