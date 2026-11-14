@@ -18,13 +18,6 @@ let
       ds.en
     ])
   );
-  emacsclient = "${emacsPackage}/bin/emacsclient -c -a '${emacsPackage}/bin/emacs'";
-  emacsPackage = import ./nima.nix {
-    inherit pkgs lib;
-    myConfig = config.my;
-    emacsConfig = cfg;
-    nixConfig = config;
-  };
 in
 with lib;
 {
@@ -58,39 +51,24 @@ with lib;
       default = false;
     };
 
-    enableAider = mkOption {
-      type = types.bool;
-      default = false;
-    };
-    enableCopilot = mkOption {
-      type = types.bool;
-      default = false;
-    };
-
     modalEditing = mkOption {
       type = types.enum [
         "none"
-        "meow"
         "hel"
       ];
-      default = "meow";
+      default = "hel";
       description = ''
         Modal editing layer for Emacs.
         - "none": no modal editing
-        - "meow": Meow modal editor
         - "hel": Helix emulation layer
+
+        A further layer (say meow) needs a feature file in ./features before it
+        can be listed here.
       '';
     };
   };
 
   config = mkIf cfg.enable (mkMerge [
-    (mkIf (!isDarwin && !cfg.useNixEmacsHome) {
-      services.emacs = {
-        enable = cfg.enableService;
-        package = emacsPackage;
-      };
-    })
-
     (mkIf cfg.enableLatex {
       home-manager.users.${config.my.username} =
         { pkgs, ... }:
@@ -184,32 +162,5 @@ with lib;
           };
         };
     }
-
-    # The Emacs itself, when nima configures it.  ./lib.nix does the same for
-    # the nix-emacs-home library.
-    (mkIf (!cfg.useNixEmacsHome) {
-      home-manager.users.${config.my.username} =
-        hm@{ ... }:
-        {
-          home = {
-            file.".emacs.d/early-init.el".text = import ./early-init.nix {
-              monoFont = config.my.monoFont;
-              font = config.my.font;
-              inherit isDarwin;
-            };
-            packages = [
-              emacsPackage
-              (pkgs.writeShellScriptBin "app-launcher" ''
-                ${emacsPackage}/bin/emacsclient --eval "(consult-omni-app-launcher)"
-              '')
-              (pkgs.writeShellScriptBin "org-capture" ''
-                ${emacsPackage}/bin/emacsclient -n -e '(yequake-toggle "org-capture")'
-              '')
-            ];
-          };
-
-          programs.zsh.sessionVariables.EDITOR = "${emacsclient}";
-        };
-    })
   ]);
 }

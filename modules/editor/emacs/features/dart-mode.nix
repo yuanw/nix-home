@@ -1,7 +1,7 @@
 { nixConfig, ... }:
 
-# `nixConfig` is the whole home-manager/darwin config handed in via nima's
-# `_module.args` (the special `config` arg is nima's own, so we alias it).
+# `nixConfig` is the whole home-manager/darwin config, handed in through
+# `_module.args' in ../lib.nix (the special `config' arg is the feature's own).
 let
   config = nixConfig;
 in

@@ -1,6 +1,8 @@
-{ ... }:
+{ modalEditing, ... }:
 
 {
+  enable = modalEditing == "hel";
+
   epkgs = epkgs: [
     epkgs.hel
     epkgs.hel-leader

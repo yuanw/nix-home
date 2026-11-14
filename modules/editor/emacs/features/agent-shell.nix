@@ -1,6 +1,12 @@
 { pkgs, ... }:
 
 {
+  # Do not `(require)' these at startup: hel-collection's agent-shell mode file
+  # defines its leader keymaps after the `with-eval-after-load' that binds them,
+  # so loading that file with agent-shell already loaded dies on
+  # `hel-agent-shell-local-leader-map'.
+  requireEpkgs = false;
+
   epkgs = epkgs: [
     epkgs.agent-shell
     epkgs.agent-shell-knockknock

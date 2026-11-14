@@ -9,14 +9,10 @@ let
   # The Home Manager copy of Emacs.app keeps a stable path across rebuilds, so
   # macOS TCC grants (Full Disk Access, etc.) survive a generation change.
   emacsApp = "${config.my.homeDirectory}/Applications/Home Manager Apps/Emacs.app/Contents/MacOS/Emacs";
-  # The daemon is configured and byte-compiled into this package, so its store
-  # path is what says "the config changed".  Not used to launch Emacs.
-  emacsPackage = import ./nima.nix {
-    inherit pkgs lib;
-    myConfig = config.my;
-    emacsConfig = cfg;
-    nixConfig = config;
-  };
+  # The daemon is configured and byte-compiled into the Emacs the library
+  # installs, so its store path is what says "the config changed".  Not used to
+  # launch Emacs.
+  emacsPackage = config.home-manager.users.${config.my.username}.emacs.finalPackage;
   # alerter instead of `osascript -e 'display notification'`: it posts as a real
   # sender app (--sender, default com.apple.Terminal) rather than as osascript,
   # and --timeout bounds the wait -- alerter otherwise blocks until the alert is

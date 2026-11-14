@@ -69,13 +69,7 @@
       url = "github:nix-community/emacs-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nima = {
-      url = "github:yuanw/nima/set-and-vars";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-parts.follows = "flake-parts";
-    };
-    # The library meant to replace the nima glue in modules/editor/emacs; see
-    # modules/editor/emacs/lib.nix.
+    # Builds the Emacs config; see modules/editor/emacs/lib.nix.
     nix-emacs-home = {
       url = "github:yuanw/nix-emacs-home";
       inputs.nixpkgs.follows = "nixpkgs";

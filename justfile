@@ -231,15 +231,15 @@ switch:
         if systemctl is-enabled --quiet emacs.service 2>/dev/null; then sudo systemctl try-restart emacs.service; fi; \
     fi
 
-# print the generated nima default.el content
-nima-emacs-print-config:
+# print the init file nix-emacs-home generates for this host
+emacs-print-config:
     @set -e; \
     if [ "$(uname)" = "Darwin" ]; then \
         host_expr='flake.darwinConfigurations."{{host}}"'; \
     else \
         host_expr='flake.nixosConfigurations."{{lowercase(host)}}"'; \
     fi; \
-    {{nix}} eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; pkgs = host.pkgs; nima = import {{justfile_directory()}}/modules/editor/emacs/nima.nix { inherit pkgs; myConfig = host.config.my; emacsConfig = host.config.modules.editors.emacs; nixConfig = host.config; rawOutput = true; }; in nima.config.defaultEl.content"
+    {{nix}} eval --impure --raw --expr "let flake = builtins.getFlake \"path:{{justfile_directory()}}\"; host = ${host_expr}; hm = builtins.getAttr host.config.my.username host.config.home-manager.users; in hm.emacs.initContent"
 
 
 # build devshell + system and push both closures to cachix

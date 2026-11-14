@@ -48,7 +48,6 @@ in
 
       [
         inputs.emacs.overlay
-        inputs.nima.overlays.default
         inputs.nur.overlays.default
         inputs.mcp-servers-nix.overlays.default
         inputs.llm-agents.overlays.shared-nixpkgs

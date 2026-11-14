@@ -8,7 +8,7 @@
   ];
 
   elisp = ''
-    ;; nima concatenates feature Elisp directly, unlike the old Home Manager
+    ;; The library concatenates feature Elisp directly, unlike the Home Manager
     ;; `use-package' generator.  Require the local package first so the
     ;; prot-modeline faces, variables, and VC helpers are defined before we set
     ;; `mode-line-format'.  Without this, the modeline can miss colors and git
@@ -40,11 +40,11 @@
 
     ;; Start Keycast at startup.  The old Home Manager config did this from
     ;; postlude.el with `(keycast-header-line-mode)', so keep the same visible
-    ;; header-line behaviour in the nima setup.
+    ;; header-line behaviour in this setup.
     (use-package keycast
       :after prot-modeline
-      ;; `:commands' made this deferred in the nima-generated config, so none
-      ;; of the setup ran until a keycast mode was invoked manually.
+      ;; `:commands' alone defers this, so none of the setup ran until a keycast
+      ;; mode was invoked manually.
       :demand t
       :commands (keycast-mode-line-mode
                  keycast-header-line-mode

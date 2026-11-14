@@ -40,8 +40,6 @@
       enable = true;
       enableService = true;
       enableLatex = false;
-      # Try the nix-emacs-home library (modules/editor/emacs/lib.nix).
-      useNixEmacsHome = true;
     };
 
     terminal.enable = true;
