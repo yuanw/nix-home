@@ -968,11 +968,11 @@
         "treefmt-nix": "treefmt-nix_6"
       },
       "locked": {
-        "lastModified": 1794577254,
-        "narHash": "sha256-UOoQK61O/LX4oicoXYO5zjiTd3Ofa9FsbZz/xEbDigI=",
+        "lastModified": 1794659318,
+        "narHash": "sha256-6bTUTv0fYTNlmCYJzjdoIPbV/E2cE5wdxPDTsj5ICFI=",
         "owner": "yuanw",
         "repo": "nix-emacs-home",
-        "rev": "e9ae2a8d851cd740e3d726963c4f39d187785c95",
+        "rev": "14954c3886c735c9b630e1831f2c840bb44378fb",
         "type": "github"
       },
       "original": {

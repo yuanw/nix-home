@@ -17,7 +17,9 @@
                  agent-shell-switch-buffer
                  agent-shell-send-dwim
                  agent-shell-send-region
-                 agent-shell-send-file)
+                 agent-shell-send-file
+                 ;; Not in the package's own autoloads, and tempel.el calls it.
+                 agent-shell-insert)
       :init
       (setq agent-shell-preferred-agent-config 'pi))
 
