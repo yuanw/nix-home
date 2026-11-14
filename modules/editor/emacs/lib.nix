@@ -29,10 +29,6 @@ let
   emacsOverlay = import ./overrides.nix {
     inherit pkgs lib;
     packagePath = ../../../packages/emacs;
-    emacsGhostel = import ./ghostel.nix {
-      inherit pkgs;
-      isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
-    };
   };
 in
 {

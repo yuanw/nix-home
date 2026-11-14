@@ -2,7 +2,6 @@
   pkgs,
   lib,
   packagePath,
-  emacsGhostel,
 }:
 
 self: _super:
@@ -258,4 +257,11 @@ self: _super:
     packageRequires = [ self.prot-common ];
   };
 }
-// (emacsGhostel.emacsOverrides self _super)
+// (
+  (import ./ghostel.nix {
+    inherit pkgs;
+    isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
+  }).emacsOverrides
+    self
+    _super
+)
