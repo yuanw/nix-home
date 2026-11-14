@@ -13,6 +13,31 @@ let
   cfg = config.modules.browsers.librewolf;
   inherit (pkgs.stdenv.hostPlatform) isDarwin;
   profilesPath = if isDarwin then "Library/Application Support/LibreWolf/Profiles" else ".librewolf";
+
+  # uBO reads only these managed-storage keys (adminSettings / toOverwrite /
+  # userSettings / toAdd) -- see µb.restoreAdminSettings in uBO's js/storage.js,
+  # so a policy must nest the settings under adminSettings as JSON.
+  # ublock-quick-fixes is left out on purpose: its YouTube anti-abuse scriptlets
+  # (serverContract / trusted-edit-inbound-object on attestationRequest) make
+  # YouTube reject the stream with ec.auth "This content isn't available".
+  ublockAdminPolicies = {
+    "3rdparty".Extensions."uBlock0@raymondhill.net".adminSettings = builtins.toJSON {
+      selectedFilterLists = [
+        "user-filters"
+        "ublock-filters"
+        "ublock-badware"
+        "ublock-privacy"
+        "ublock-unbreak"
+        "easylist"
+        "easyprivacy"
+        "LegitimateURLShortener"
+        "adguard-spyware-url"
+        "urlhaus-1"
+        "curben-phishing"
+        "plowe-0"
+      ];
+    };
+  };
 in
 {
   options.modules.browsers.librewolf = {
@@ -104,6 +129,7 @@ in
       };
     })
     (mkIf cfg.enable {
+      modules.browsers.librewolf.darwinExtraPolicies = ublockAdminPolicies;
       home-manager.users.${config.my.username} =
         hm@{ pkgs, osConfig, ... }:
         import ./librewolf-home.nix {
