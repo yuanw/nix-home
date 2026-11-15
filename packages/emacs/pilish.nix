@@ -17,13 +17,13 @@
 
 melpaBuild {
   pname = "pilish";
-  version = "3.4.4-unstable-2026-11-07";
+  version = "3.4.5-unstable-2026-11-15";
 
   src = fetchFromGitHub {
     owner = "dnouri";
     repo = "pilish";
-    rev = "309fd210007a9493bb01f2cf248ae47277df2e46";
-    sha256 = "sha256-v0G5Mh8ui7WliLyPXT4FZ1H/k8UAbYV9d3QU8cRj/nY=";
+    rev = "16da4b4fb20c7027da383ac95cf666ec65ec85cc";
+    sha256 = "sha256-v1K2TAYStNO9nHp2dGlop/4N5qf83yKVixsFV44ZJco=";
   };
 
   packageRequires = [
