@@ -223,13 +223,12 @@
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
-    # jellyfin-init `cat`s this to read the admin password hash, and it runs as
-    # the unit's User (jellyfin), not root — agenix's default root:root 0600
-    # makes that cat fail, the ERR trap fires, and the server never starts.
-    jellyfin-admin = {
-      file = ../../secrets/jellyfin-admin.age;
-      owner = config.services.jellyfin.user;
-    };
+    # Jellarr's Jellyfin API key — the same value as `pass jellyfin/apiKey`,
+    # which the /Library/Refresh calls already use. The old jellyfin-admin
+    # secret (a Jellyfin password *hash* that only declarative-jellyfin's init
+    # read) is unwired now; the .age file stays in secrets/ until jellarr's
+    # `users` can take the admin user over, which needs the plaintext instead.
+    jellarr-api-key.file = ../../secrets/jellarr-api-key.age;
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
@@ -269,21 +268,16 @@
   };
 
   # only meaningful while jellyfin is enabled (see below)
-  users.users.${config.services.jellyfin.user} =
-    pkgs.lib.mkIf config.services.declarative-jellyfin.enable
-      {
-        extraGroups = [
-          "video"
-          "render"
-        ];
-      };
+  users.users.${config.services.jellyfin.user} = pkgs.lib.mkIf config.services.jellyfin.enable {
+    extraGroups = [
+      "video"
+      "render"
+    ];
+  };
 
-  # Jellyfin. Upstream 12.x broke declarative-jellyfin, so we pin 10.11.x via
-  # the overlay in ./default.nix. The 12.x startup memory regression made
-  # declarative-jellyfin's init (which boots the server once for DB migrations
-  # before touching the DB) OOM-loop the box at ~27G RSS, so the unit now runs
-  # inside a memory cgroup instead of trusting the kernel to be fair.
-  # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
+  # Jellyfin — the server from nixpkgs, the configuration from Jellarr below.
+  # The 10.11.x pin in ./default.nix is now about the plugin ABI, not about the
+  # config engine.
   #
   # Pin trap: plugins installed while 12.x ran are still in the data dir and
   # are ABI-incompatible with 10.11.x. TheTVDB_19.0.0.0 threw
@@ -292,59 +286,79 @@
   # /var/lib/jellyfin/plugins.disabled (not declarative: nixpkgs has no
   # plugin-install option here). Reinstall a 10.11-compatible build, or delete
   # it for good, before dropping this pin.
-  services.declarative-jellyfin = {
+  services.jellyfin = {
     enable = true;
     group = "data";
-    system = {
-      serverName = "My Declarative Jellyfin Server";
+  };
 
-      isStartupWizardCompleted = true;
+  # Jellarr applies the rest of the server configuration through Jellyfin's own
+  # REST API (https://github.com/venkyr77/jellarr). It replaced
+  # declarative-jellyfin, which wrote system.xml and jellyfin.db directly,
+  # stopped and restarted the server several times per activation,
+  # reimplemented Jellyfin's user-UUID generation in bash, and hard-asserted on
+  # any Jellyfin version it had not been taught — that assertion is what forced
+  # the pin, and the migration it ran at every activation is what the memory
+  # cgroup below was added to contain.
+  #
+  # Jellarr only writes what it is given, so the rest of this host's UI state
+  # stays as set. What is therefore *not* declared, each for a concrete reason:
+  #   * serverName ("My Declarative Jellyfin Server") and UICulture = "en" —
+  #     no option exists for either in jellarr's schema
+  #   * the Movies library's metadataFetchers/imageFetchers (TMDb + OMDB) — its
+  #     libraryOptions carries pathInfos and nothing else
+  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and
+  #     secrets/jellyfin-admin.age holds a hash, so declaring it needs a new
+  #     secret first. Until then nothing here can re-create or reset that user.
+  #   * the Open Subtitles plugin, still a reviewed fetchzip in the preStart
+  #     below rather than a repo install of whatever is latest
+  services.jellarr = {
+    enable = true;
+    # JELLARR_API_KEY. systemd reads EnvironmentFile as root before dropping to
+    # the service user, so agenix's default root:root 0600 is enough — unlike
+    # the old jellyfin-init `cat`, which needed an owner override.
+    environmentFile = config.age.secrets.jellarr-api-key.path;
+    config = {
+      version = 1;
+      base_url = "http://localhost:8096";
+      startup.completeStartupWizard = true;
       # use hardware acceleration for trickplay image generation
-      trickplayOptions = {
+      system.trickplayOptions = {
         enableHwAcceleration = true;
         enableHwEncoding = true;
       };
-      UICulture = "en";
-    };
-    libraries = {
-      Movies = {
-        enabled = true;
-        contentType = "movies";
-        pathInfos = [ "/data/Movies" ];
-        typeOptions.Movies = {
-          metadataFetchers = [
-            "The Open Movie Database"
-            "TheMovieDb"
-          ];
-          imageFetchers = [
-            "The Open Movie Database"
-            "TheMovieDb"
-          ];
-        };
-      };
-      Shows = {
-        enabled = true;
-        contentType = "tvshows";
-        pathInfos = [ "/data/Shows" ];
-      };
-
-    };
-
-    users = {
-      yuanw = {
-        mutable = false;
-        hashedPasswordFile = config.age.secrets.jellyfin-admin.path;
-        permissions = {
-          isAdministrator = true;
-        };
-      };
+      # The seed tree /data/torrents is deliberately not a library — it would
+      # get release-group directory names scraped. Titles are hardlinked in.
+      library.virtualFolders = [
+        {
+          name = "Movies";
+          collectionType = "movies";
+          libraryOptions.pathInfos = [ { path = "/data/Movies"; } ];
+        }
+        {
+          name = "Shows";
+          collectionType = "tvshows";
+          libraryOptions.pathInfos = [ { path = "/data/Shows"; } ];
+        }
+      ];
     };
   };
+
+  # The module only wires a daily timer (Persistent = true), so activation alone
+  # would not converge anything and a fresh timer can wait a day. The oneshot is
+  # cheap when the server is already in sync, and its preStart polls
+  # /System/Info/Public for up to 120s, so it tolerates Jellyfin still booting.
+  systemd.services.jellarr.wantedBy = [ "multi-user.target" ];
 
   # Contain jellyfin's startup: MemoryHigh throttles the runaway migration run
   # into swap (16G zvol) instead of letting it page through home-assistant and
   # caddy; MemoryMax is the last-resort ceiling. Tune via MEMORY_HIGH once
   # misfit's real RSS headroom is measured.
+  #
+  # Why it exists: the 12.x startup regression made declarative-jellyfin's init
+  # (which booted the server once for DB migrations before touching them) OOM-
+  # loop the box at ~27G RSS — https://github.com/Sveske-Juice/declarative-
+  # jellyfin/issues/32. Nothing runs that init any more, so this is now belt and
+  # braces; keep it until the 12.x behaviour is measured on this box.
   systemd.services.jellyfin.serviceConfig = {
     MemoryHigh = "6G";
     MemoryMax = "8G";
@@ -357,11 +371,12 @@
     Environment = "DOTNET_gcServer=0";
   };
 
-  # Open Subtitles plugin.  declarative-jellyfin's `plugins` option is dead
-  # code — no module reads it, and its README still says to install plugins
-  # imperatively — so unpack the official zip into the plugin dir instead.
-  # `preStart` runs as the unit User (jellyfin), and declarative-jellyfin's
-  # own ExecStartPre chowns the whole data dir afterwards, so no chown here.
+  # Open Subtitles plugin.  jellarr *can* install plugins (`plugins = [ { name
+  # = "Open Subtitles"; } ]` plus system.pluginRepositories), but that takes
+  # whatever the repository lists as current, and this build is pinned to the
+  # server ABI — so the reviewed zip stays here.
+  # `preStart` runs as the unit User (jellyfin), which is what ends up owning
+  # the directory and files created below.
   #
   # 24.0.0.0 is the last build for the 10.11 ABI (meta.json targetAbi
   # 10.11.8.0); 25.0.0.0 targets jellyfin 12 and would fail the way TheTVDB
@@ -374,7 +389,7 @@
   systemd.services.jellyfin.preStart =
     let
       # Spaced name, the layout jellyfin's own installer uses.
-      pluginDir = "${config.services.declarative-jellyfin.dataDir}/plugins/Open Subtitles_24.0.0.0";
+      pluginDir = "${config.services.jellyfin.dataDir}/plugins/Open Subtitles_24.0.0.0";
     in
     ''
       d='${pluginDir}'

@@ -43,6 +43,14 @@ in
     yuanw_mist
     misfit
   ];
+  # Jellarr's Jellyfin API key, handed to the service as JELLARR_API_KEY via
+  # services.jellarr.environmentFile (hosts/misfit/configuration.nix). Same
+  # value as `pass jellyfin/apiKey`, which the /Library/Refresh calls use.
+  # The .age holds a credential that grants full control of the media server.
+  "jellarr-api-key.age".publicKeys = [
+    yuanw_mist
+    misfit
+  ];
   # HealthSave Observatory .env: DB_PASSWORD + API_KEY, consumed by
   # modules/healthsave-observatory.nix as a podman --env-file.
   "healthsave-env.age".publicKeys = users ++ [ misfit ];
