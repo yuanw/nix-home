@@ -39,10 +39,9 @@ in
     yuanw_mist
     misfit
   ];
-  "jellyfin-admin.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
+  # jellyfin-admin.age deleted 2026-11-15: it held only a Jellyfin password *hash*
+  # that declarative-jellyfin's init used to read, nothing wired it after the move
+  # to jellarr, and jellarr would need the plaintext anyway. Its rule went with it.
   # Jellarr's Jellyfin API key as a systemd EnvironmentFile — the file holds one
   # `JELLARR_API_KEY=<key>` line, not the bare key, and that is the same value
   # `pass jellyfin/apiKey` gives the /Library/Refresh calls. Measured on the
