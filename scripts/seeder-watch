@@ -1,0 +1,91 @@
+#!/bin/sh
+# Seeder reachability watch. Two checks that have no owner today
+# (docs/misfit-torrent.org, "things that rot silently"):
+#
+#   1. the ISP's dynamic WAN address  — if it rotates, the manual port mapping in
+#      the SaskTel gateway and the board's DNAT still point at misfit, but the
+#      outside world has lost the port.
+#   2. that same mapping, from outside — it is Nix-less state in an ISP device, so
+#      it disappears if SaskTel reprovisions and nothing in this repo would notice.
+#
+# Alert goes to ntfy (topic in $SEEDER_WATCH_TOPIC, an EnvironmentFile secret).
+# Alerts fire on *transitions* plus the egress-IP change, never on a steady state,
+# so a dead mapping is announced once instead of every run.
+#
+# misfit has no python3 and no jq (measured), so the JSON is scraped with sed.
+set -eu
+
+STATE_DIR="${STATE_DIR:-/var/lib/seeder-watch}"
+TORRENT_PORT="${TORRENT_PORT:-50000}"
+IP_ECHO="${IP_ECHO:-https://api.ipify.org}"
+CHECK_HOST="${CHECK_HOST:-https://check-host.net}"
+PROBE_TIMEOUT="${PROBE_TIMEOUT:-40}"
+
+# check-host.net serves HTML unless the request asks for JSON — the first runs got
+# an HTML page, found no request_id, and "failed" by alerting about the checker.
+ch_curl() { curl -s --max-time 20 -A "seeder-watch/1.0" -H "Accept: application/json" "$@"; }
+
+notify() {
+  if [ -z "${SEEDER_WATCH_TOPIC:-}" ]; then
+    echo "seeder-watch: no topic, not alerting: $*" >&2
+    return 0
+  fi
+  # Title via headers keeps the body one line on the phone.
+  curl -s --max-time 20 -o /dev/null \
+    -H "X-Title: misfit seeder watch" -H "X-Priority: high" \
+    -d "$*" "https://ntfy.sh/$SEEDER_WATCH_TOPIC" || true
+}
+
+mkdir -p "$STATE_DIR"
+
+# --- 1. egress address -------------------------------------------------------
+ip=$(curl -s --max-time 20 "$IP_ECHO" || true)
+case "$ip" in
+  *[!0-9.]* | "")
+    notify "egress IP check FAILED (no answer from $IP_ECHO)"
+    ;;
+  *)
+    prev=$(cat "$STATE_DIR/egress" 2>/dev/null || echo "")
+    if [ -z "$prev" ]; then
+      echo "seeder-watch: seeding baseline egress = $ip"
+    elif [ "$prev" != "$ip" ]; then
+      notify "egress IP changed $prev -> $ip; re-check the gateway port mapping for $TORRENT_PORT"
+    else
+      echo "seeder-watch: egress unchanged ($ip)"
+    fi
+    printf '%s\n' "$ip" >"$STATE_DIR/egress"
+    ;;
+esac
+
+# --- 2. is the port still reachable from the internet? ----------------------
+# The requester can be anywhere — check-host.net's own nodes do the connecting,
+# which is what makes this an off-LAN vantage without an off-LAN host.
+rid=$(ch_curl "$CHECK_HOST/check-tcp?host=$ip%3A$TORRENT_PORT" |
+  sed -n 's/.*"request_id":"\([^"]*\)".*/\1/p')
+if [ -z "$rid" ]; then
+  notify "reachability probe could not start (no request_id from $CHECK_HOST)"
+  exit 0
+fi
+
+waited=0
+connected=0
+while [ "$waited" -lt "$PROBE_TIMEOUT" ]; do
+  sleep 5
+  waited=$((waited + 5))
+  res=$(ch_curl "$CHECK_HOST/check-result/$rid" || echo "")
+  connected=$(printf '%s' "$res" | grep -o '"address":"[0-9.]*"' | wc -l | tr -d ' ')
+  pending=$(printf '%s' "$res" | grep -c 'null' || true)
+  if [ "$pending" = "0" ]; then break; fi
+done
+
+echo "seeder-watch: $connected nodes reached $ip:$TORRENT_PORT (report $CHECK_HOST/check-report/$rid)"
+prev_ok=$(cat "$STATE_DIR/reachable" 2>/dev/null || echo "")
+if [ "$connected" -gt 0 ]; then
+  if [ "$prev_ok" = "dead" ]; then notify "port $TORRENT_PORT reachable again ($connected nodes)"; fi
+  echo ok >"$STATE_DIR/reachable"
+else
+  if [ "$prev_ok" != "dead" ]; then
+    notify "port $TORRENT_PORT unreachable from the internet — the gateway mapping is gone. Report: $CHECK_HOST/check-report/$rid"
+  fi
+  echo dead >"$STATE_DIR/reachable"
+fi

@@ -116,11 +116,16 @@
       url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    declarative-jellyfin = {
-      url = "github:Sveske-Juice/declarative-jellyfin";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.treefmt-nix.follows = "treefmt-nix";
-    };
+    # Declarative Jellyfin config over the REST API; replaced
+    # Sveske-Juice/declarative-jellyfin, which wrote system.xml and the SQLite
+    # DB directly and asserted on Jellyfin versions it had not been taught
+    # (that assertion is what forced the 10.11.x pin on misfit).
+    #
+    # Deliberately NOT `inputs.nixpkgs.follows`: the input's nixpkgs plays no
+    # part in our build anyway — its module does `pkgs.callPackage ../package.nix {}`
+    # with *our* pkgs, so the Node/pnpm versions that build jellarr are ours
+    # either way. Following ours would only repin its checks.
+    jellarr.url = "github:venkyr77/jellarr";
     impermanence.url = "github:nix-community/impermanence";
     nix-casks = {
       url = "github:atahanyorganci/nix-casks/archive";

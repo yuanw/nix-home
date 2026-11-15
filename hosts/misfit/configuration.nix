@@ -223,13 +223,12 @@
 
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
-    # jellyfin-init `cat`s this to read the admin password hash, and it runs as
-    # the unit's User (jellyfin), not root — agenix's default root:root 0600
-    # makes that cat fail, the ERR trap fires, and the server never starts.
-    jellyfin-admin = {
-      file = ../../secrets/jellyfin-admin.age;
-      owner = config.services.jellyfin.user;
-    };
+    # Jellarr's Jellyfin API key — the same value as `pass jellyfin/apiKey`,
+    # which the /Library/Refresh calls already use. The old jellyfin-admin
+    # secret (a Jellyfin password *hash* that only declarative-jellyfin's init
+    # read) is unwired now; the .age file stays in secrets/ until jellarr's
+    # `users` can take the admin user over, which needs the plaintext instead.
+    jellarr-api-key.file = ../../secrets/jellarr-api-key.age;
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
@@ -269,21 +268,16 @@
   };
 
   # only meaningful while jellyfin is enabled (see below)
-  users.users.${config.services.jellyfin.user} =
-    pkgs.lib.mkIf config.services.declarative-jellyfin.enable
-      {
-        extraGroups = [
-          "video"
-          "render"
-        ];
-      };
+  users.users.${config.services.jellyfin.user} = pkgs.lib.mkIf config.services.jellyfin.enable {
+    extraGroups = [
+      "video"
+      "render"
+    ];
+  };
 
-  # Jellyfin. Upstream 12.x broke declarative-jellyfin, so we pin 10.11.x via
-  # the overlay in ./default.nix. The 12.x startup memory regression made
-  # declarative-jellyfin's init (which boots the server once for DB migrations
-  # before touching the DB) OOM-loop the box at ~27G RSS, so the unit now runs
-  # inside a memory cgroup instead of trusting the kernel to be fair.
-  # https://github.com/Sveske-Juice/declarative-jellyfin/issues/32
+  # Jellyfin — the server from nixpkgs, the configuration from Jellarr below.
+  # The 10.11.x pin in ./default.nix is now about the plugin ABI, not about the
+  # config engine.
   #
   # Pin trap: plugins installed while 12.x ran are still in the data dir and
   # are ABI-incompatible with 10.11.x. TheTVDB_19.0.0.0 threw
@@ -292,52 +286,128 @@
   # /var/lib/jellyfin/plugins.disabled (not declarative: nixpkgs has no
   # plugin-install option here). Reinstall a 10.11-compatible build, or delete
   # it for good, before dropping this pin.
-  services.declarative-jellyfin = {
+  services.jellyfin = {
     enable = true;
     group = "data";
-    system = {
-      serverName = "My Declarative Jellyfin Server";
+  };
 
-      isStartupWizardCompleted = true;
+  # Jellarr applies the rest of the server configuration through Jellyfin's own
+  # REST API (https://github.com/venkyr77/jellarr). It replaced
+  # declarative-jellyfin, which wrote system.xml and jellyfin.db directly,
+  # stopped and restarted the server several times per activation,
+  # reimplemented Jellyfin's user-UUID generation in bash, and hard-asserted on
+  # any Jellyfin version it had not been taught — that assertion is what forced
+  # the pin, and the migration it ran at every activation is what the memory
+  # cgroup below was added to contain.
+  #
+  # Jellarr only writes what it is given, so the rest of this host's UI state
+  # stays as set. What is therefore *not* declared, each for a concrete reason:
+  #   * serverName ("My Declarative Jellyfin Server") and UICulture = "en" —
+  #     no option exists for either in jellarr's schema
+  #   * the Movies library's metadataFetchers/imageFetchers (TMDb + OMDB) — its
+  #     libraryOptions carries pathInfos and nothing else
+  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and
+  #     secrets/jellyfin-admin.age holds a hash, so declaring it needs a new
+  #     secret first. Until then nothing here can re-create or reset that user.
+  #   * the Open Subtitles plugin, still a reviewed fetchzip in the preStart
+  #     below rather than a repo install of whatever is latest
+  services.jellarr = {
+    enable = true;
+    # JELLARR_API_KEY. The secret is an EnvironmentFile, so its content is a
+    # `JELLARR_API_KEY=<key>` line — a bare key parses to no assignment at all
+    # and the unit exits with `Error: JELLARR_API_KEY required` (measured on the
+    # first activation, 2026-11-14). systemd reads EnvironmentFile as root before
+    # switching users, so agenix's default root:root 0600 is enough — unlike the
+    # old jellyfin-init `cat`, which needed an owner override.
+    environmentFile = config.age.secrets.jellarr-api-key.path;
+    config = {
+      version = 1;
+      base_url = "http://localhost:8096";
+      startup.completeStartupWizard = true;
       # use hardware acceleration for trickplay image generation
-      trickplayOptions = {
+      system.trickplayOptions = {
         enableHwAcceleration = true;
         enableHwEncoding = true;
       };
-      UICulture = "en";
+      # The seed tree /data/torrents is deliberately not a library — it would
+      # get release-group directory names scraped. Titles are hardlinked in.
+      library.virtualFolders = [
+        {
+          name = "Movies";
+          collectionType = "movies";
+          libraryOptions.pathInfos = [ { path = "/data/Movies"; } ];
+        }
+        {
+          name = "Shows";
+          collectionType = "tvshows";
+          libraryOptions.pathInfos = [ { path = "/data/Shows"; } ];
+        }
+      ];
     };
-    libraries = {
-      Movies = {
-        enabled = true;
-        contentType = "movies";
-        pathInfos = [ "/data/Movies" ];
-        typeOptions.Movies = {
-          metadataFetchers = [
-            "The Open Movie Database"
-            "TheMovieDb"
-          ];
-          imageFetchers = [
-            "The Open Movie Database"
-            "TheMovieDb"
-          ];
-        };
-      };
-      Shows = {
-        enabled = true;
-        contentType = "tvshows";
-        pathInfos = [ "/data/Shows" ];
-      };
+  };
 
+  # The module only wires a daily timer (Persistent = true), so activation alone
+  # would not converge anything and a fresh timer can wait a day. The oneshot is
+  # cheap when the server is already in sync.
+  systemd.services.jellarr.wantedBy = [ "multi-user.target" ];
+
+  # …but it races Jellyfin, and the module's own readiness probe is too weak:
+  # it polls /System/Info/Public, which answers as soon as Kestrel binds, while
+  # core startup takes another ~4s ("Core startup complete") and every admin
+  # endpoint answers 503 until then. Measured on the first activation: jellarr
+  # ran about a second after jellyfin's ExecStart and died at `GET
+  # /System/Configuration failed: 503`. Retry until the server is really up,
+  # and keep the start limit out of the way so a slow boot cannot strand the
+  # unit in failed state before the daily timer would have run anyway.
+  systemd.services.jellarr.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+  };
+  systemd.services.jellarr.unitConfig.StartLimitIntervalSec = 0;
+
+  # The two checks nobody owns today (docs/misfit-torrent.org, "things that rot
+  # silently"): the ISP's dynamic WAN address, and the port mapping in the SaskTel
+  # device that nothing in this repo can see. Evidence for why it is worth having:
+  # on 2026-11-14 both were run by hand six times in one session.
+  #
+  # Runs as root on purpose — the ntfy topic is the only credential and it lives in
+  # a 0400 root file, which is worth more than the marginal hardening of a
+  # DynamicUser that would then need the topic world-readable. It makes no inbound
+  # listener and talks outbound to api.ipify.org, check-host.net and ntfy.sh only.
+  #
+  # State goes in /var/lib/private, not /var/lib/seeder-watch: the former is on the
+  # =/persist= list (proven across the 20:36 reboot today), so the "alert on
+  # transition, not on steady state" memory survives a rollback. Without that, every
+  # cold boot would re-announce a dead mapping.
+  age.secrets.seeder-watch-topic.file = ../../secrets/seeder-watch-topic.age;
+
+  systemd.services.seeder-watch = {
+    serviceConfig = {
+      Type = "oneshot";
+      EnvironmentFile = config.age.secrets.seeder-watch-topic.path;
+      # writeShellScript's PATH is coreutils+gnugrep+gnused+gawk only — the first
+      # run died at “curl: command not found” on all four calls — so curl's bin dir
+      # is prepended inside the generated script instead of relying on the unit
+      # inheriting a login PATH (and `writeShellScript` takes no `path` argument at
+      # this nixpkgs rev: applying one fails with “attempt to call something which
+      # is not a function but a set”).
+      ExecStart = "${pkgs.writeShellScript "seeder-watch" ''
+        export PATH=${pkgs.lib.makeBinPath [ pkgs.curl ]}:$PATH
+        ${builtins.readFile ../../scripts/seeder-watch}
+      ''}";
+      Environment = [ "STATE_DIR=/var/lib/private/seeder-watch" ];
     };
+  };
 
-    users = {
-      yuanw = {
-        mutable = false;
-        hashedPasswordFile = config.age.secrets.jellyfin-admin.path;
-        permissions = {
-          isAdministrator = true;
-        };
-      };
+  # Four probes a day is enough to learn about a reprovisioning within hours, and
+  # check-host.net is a free third-party service: 24 TCP probes/day across its
+  # nodes is polite, a poller every few minutes would not be.
+  systemd.timers.seeder-watch = {
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "*-*-* 00/6:15";
+      Persistent = true;
+      RandomizedDelaySec = "15m";
     };
   };
 
@@ -345,6 +415,12 @@
   # into swap (16G zvol) instead of letting it page through home-assistant and
   # caddy; MemoryMax is the last-resort ceiling. Tune via MEMORY_HIGH once
   # misfit's real RSS headroom is measured.
+  #
+  # Why it exists: the 12.x startup regression made declarative-jellyfin's init
+  # (which booted the server once for DB migrations before touching them) OOM-
+  # loop the box at ~27G RSS — https://github.com/Sveske-Juice/declarative-
+  # jellyfin/issues/32. Nothing runs that init any more, so this is now belt and
+  # braces; keep it until the 12.x behaviour is measured on this box.
   systemd.services.jellyfin.serviceConfig = {
     MemoryHigh = "6G";
     MemoryMax = "8G";
@@ -357,11 +433,12 @@
     Environment = "DOTNET_gcServer=0";
   };
 
-  # Open Subtitles plugin.  declarative-jellyfin's `plugins` option is dead
-  # code — no module reads it, and its README still says to install plugins
-  # imperatively — so unpack the official zip into the plugin dir instead.
-  # `preStart` runs as the unit User (jellyfin), and declarative-jellyfin's
-  # own ExecStartPre chowns the whole data dir afterwards, so no chown here.
+  # Open Subtitles plugin.  jellarr *can* install plugins (`plugins = [ { name
+  # = "Open Subtitles"; } ]` plus system.pluginRepositories), but that takes
+  # whatever the repository lists as current, and this build is pinned to the
+  # server ABI — so the reviewed zip stays here.
+  # `preStart` runs as the unit User (jellyfin), which is what ends up owning
+  # the directory and files created below.
   #
   # 24.0.0.0 is the last build for the 10.11 ABI (meta.json targetAbi
   # 10.11.8.0); 25.0.0.0 targets jellyfin 12 and would fail the way TheTVDB
@@ -374,7 +451,7 @@
   systemd.services.jellyfin.preStart =
     let
       # Spaced name, the layout jellyfin's own installer uses.
-      pluginDir = "${config.services.declarative-jellyfin.dataDir}/plugins/Open Subtitles_24.0.0.0";
+      pluginDir = "${config.services.jellyfin.dataDir}/plugins/Open Subtitles_24.0.0.0";
     in
     ''
       d='${pluginDir}'
@@ -388,6 +465,14 @@
           stripRoot = false;
         }
       } "$d"
+      # After, not only before: cp -a copies the store's 0444 onto the files, and
+      # jellyfin rewrites meta.json (status, autoUpdate) as it loads the plugin.
+      # With that mode it threw UnauthorizedAccessException on meta.json and took
+      # the whole server down — "[FTL] Main: Error while starting server", every
+      # activation, and the unit still reads active because the process stays up.
+      # declarative-jellyfin's ExecStartPre (chmod -R 750 over the data dir) used
+      # to undo this behind our back; nothing does now.
+      chmod -R u+w "$d"
     '';
 
   # The two Jellyfin library roots, group-writable for the humans only.
@@ -406,6 +491,34 @@
     "d /data/Movies 2775 root users - -"
     "d /data/Shows 2775 root users - -"
   ];
+
+  # Prowlarr — the search layer for the seeder (plan: nix-home-private/docs/
+  # misfit-torrent.org, Phase 4). Without it every grab still starts in a
+  # browser.
+  #
+  # Public on purpose, unlike the qBittorrent seeder in the private repo: the
+  # Nix here holds no credential. Indexers, their API keys and the qBittorrent
+  # download-client entry (127.0.0.1:8080, the Phase 2 user and password) are
+  # UI-only state in Prowlarr's own DB. `settings` is free-form INI and lands
+  # world-readable in the store, so anything secret goes through
+  # `environmentFiles` as PROWLARR__SECTION__KEY=value lines instead.
+  services.prowlarr = {
+    enable = true;
+    # openFirewall stays at its default false: the servarr UI has no auth out
+    # of the box, and a closed 9696 means reaching it as
+    #   ssh -N -L 9696:localhost:9696 misfit
+    # Prowlarr -> qBittorrent is loopback (127.0.0.1:8080), which never touches
+    # the firewall. Reopen only if a phone has to drive the UI.
+  };
+
+  # DynamicUser + StateDirectory put the real tree at /var/lib/private/prowlarr,
+  # and /var/lib/private is already in the /persist list above — so unlike the
+  # seeder's /var/lib/qBittorrent this needs no entry. Unverified: the reboot
+  # proof (indexers and the qBittorrent credential survive) is still owed.
+
+  # Not by default. One line, added the first time an indexer answers 503 or a
+  # Cloudflare interstitial:
+  # services.flaresolverr.enable = true;   # Prowlarr reaches it on 127.0.0.1:8191
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -485,6 +598,19 @@
       wget
       vim
       git
+      # The scan an import needs once a hardlink lands — the last step of the
+      # search→grab→ln flow (docs/misfit-torrent.org, "search last mile").
+      # Packaged the house way (scripts/ + writeShellScriptBin, as hosts/mist.nix
+      # does for pi-review). Only the secret path is interpolated, so renaming the
+      # secret fails at eval time instead of quietly answering 401 mid-import; the
+      # port is not a Nix option at this rev (8096 appears only as a firewall
+      # default — Jellyfin keeps it in its own DB), so the script defaults to
+      # loopback:8096 and takes JELLYFIN_URL if that ever changes. Run as root:
+      # the key file is 0600.
+      (pkgs.writeShellScriptBin "jellyfin-rescan" ''
+        export KEY_FILE='${config.age.secrets.jellarr-api-key.path}'
+        ${builtins.readFile ../../scripts/jellyfin-rescan}
+      '')
     ];
     shells = [ pkgs.zsh ];
   };
