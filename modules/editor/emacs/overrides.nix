@@ -105,6 +105,43 @@ self: _super:
       inherit (self) melpaBuild;
     }
   );
+  # The ETAF stack (ecss -> ebox -> etaf -> etaf-ui -> etaf-pi).  None of them
+  # are in nixpkgs' Emacs package set, so the whole chain is kept here.
+  ecss = (
+    pkgs.callPackage "${packagePath}/ecss.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self) melpaBuild;
+    }
+  );
+  ebox = (
+    pkgs.callPackage "${packagePath}/ebox.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self) melpaBuild ecss;
+    }
+  );
+  etaf = (
+    pkgs.callPackage "${packagePath}/etaf.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self) melpaBuild ebox ecss;
+    }
+  );
+  etaf-ui = (
+    pkgs.callPackage "${packagePath}/etaf-ui.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self) melpaBuild ebox etaf;
+    }
+  );
+  etaf-pi = (
+    pkgs.callPackage "${packagePath}/etaf-pi.nix" {
+      inherit (pkgs) fetchFromGitHub;
+      inherit lib;
+      inherit (self) melpaBuild etaf etaf-ui;
+    }
+  );
   moonbit-mode = (
     pkgs.callPackage "${packagePath}/moonbit-mode.nix" {
       inherit (pkgs) fetchFromGitHub;
