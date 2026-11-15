@@ -407,6 +407,34 @@
     "d /data/Shows 2775 root users - -"
   ];
 
+  # Prowlarr — the search layer for the seeder (plan: nix-home-private/docs/
+  # misfit-torrent.org, Phase 4). Without it every grab still starts in a
+  # browser.
+  #
+  # Public on purpose, unlike the qBittorrent seeder in the private repo: the
+  # Nix here holds no credential. Indexers, their API keys and the qBittorrent
+  # download-client entry (127.0.0.1:8080, the Phase 2 user and password) are
+  # UI-only state in Prowlarr's own DB. `settings` is free-form INI and lands
+  # world-readable in the store, so anything secret goes through
+  # `environmentFiles` as PROWLARR__SECTION__KEY=value lines instead.
+  services.prowlarr = {
+    enable = true;
+    # openFirewall stays at its default false: the servarr UI has no auth out
+    # of the box, and a closed 9696 means reaching it as
+    #   ssh -N -L 9696:localhost:9696 misfit
+    # Prowlarr -> qBittorrent is loopback (127.0.0.1:8080), which never touches
+    # the firewall. Reopen only if a phone has to drive the UI.
+  };
+
+  # DynamicUser + StateDirectory put the real tree at /var/lib/private/prowlarr,
+  # and /var/lib/private is already in the /persist list above — so unlike the
+  # seeder's /var/lib/qBittorrent this needs no entry. Unverified: the reboot
+  # proof (indexers and the qBittorrent credential survive) is still owed.
+
+  # Not by default. One line, added the first time an indexer answers 503 or a
+  # Cloudflare interstitial:
+  # services.flaresolverr.enable = true;   # Prowlarr reaches it on 127.0.0.1:8191
+
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";
