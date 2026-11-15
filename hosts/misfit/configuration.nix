@@ -348,9 +348,22 @@
 
   # The module only wires a daily timer (Persistent = true), so activation alone
   # would not converge anything and a fresh timer can wait a day. The oneshot is
-  # cheap when the server is already in sync, and its preStart polls
-  # /System/Info/Public for up to 120s, so it tolerates Jellyfin still booting.
+  # cheap when the server is already in sync.
   systemd.services.jellarr.wantedBy = [ "multi-user.target" ];
+
+  # …but it races Jellyfin, and the module's own readiness probe is too weak:
+  # it polls /System/Info/Public, which answers as soon as Kestrel binds, while
+  # core startup takes another ~4s ("Core startup complete") and every admin
+  # endpoint answers 503 until then. Measured on the first activation: jellarr
+  # ran about a second after jellyfin's ExecStart and died at `GET
+  # /System/Configuration failed: 503`. Retry until the server is really up,
+  # and keep the start limit out of the way so a slow boot cannot strand the
+  # unit in failed state before the daily timer would have run anyway.
+  systemd.services.jellarr.serviceConfig = {
+    Restart = "on-failure";
+    RestartSec = "10s";
+  };
+  systemd.services.jellarr.unitConfig.StartLimitIntervalSec = 0;
 
   # Contain jellyfin's startup: MemoryHigh throttles the runaway migration run
   # into swap (16G zvol) instead of letting it page through home-assistant and
