@@ -392,7 +392,7 @@
       # this nixpkgs rev: applying one fails with “attempt to call something which
       # is not a function but a set”).
       ExecStart = "${pkgs.writeShellScript "seeder-watch" ''
-        export PATH=${lib.makeBinPath [ pkgs.curl ]}:$PATH
+        export PATH=${pkgs.lib.makeBinPath [ pkgs.curl ]}:$PATH
         ${builtins.readFile ../../scripts/seeder-watch}
       ''}";
       Environment = [ "STATE_DIR=/var/lib/private/seeder-watch" ];
