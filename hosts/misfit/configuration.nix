@@ -386,11 +386,15 @@
       Type = "oneshot";
       EnvironmentFile = config.age.secrets.seeder-watch-topic.path;
       # writeShellScript's PATH is coreutils+gnugrep+gnused+gawk only — the first
-      # run died at “curl: command not found” on all four calls, so curl is added
-      # explicitly rather than assuming the service inherits a shell PATH.
-      ExecStart = "${pkgs.writeShellScript "seeder-watch" (builtins.readFile ../../scripts/seeder-watch) {
-        path = [ pkgs.curl ];
-      }}";
+      # run died at “curl: command not found” on all four calls — so curl's bin dir
+      # is prepended inside the generated script instead of relying on the unit
+      # inheriting a login PATH (and `writeShellScript` takes no `path` argument at
+      # this nixpkgs rev: applying one fails with “attempt to call something which
+      # is not a function but a set”).
+      ExecStart = "${pkgs.writeShellScript "seeder-watch" ''
+        export PATH=${lib.makeBinPath [ pkgs.curl ]}:$PATH
+        ${builtins.readFile ../../scripts/seeder-watch}
+      ''}";
       Environment = [ "STATE_DIR=/var/lib/private/seeder-watch" ];
     };
   };
