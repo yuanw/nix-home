@@ -53,6 +53,15 @@ in
     yuanw_mist
     misfit
   ];
+  # The ntfy topic the seeder watch posts to (scripts/seeder-watch). The topic is
+  # the only credential — ntfy.sh has no accounts — so knowing it means reading the
+  # alerts. That is why it is agenix'd rather than written into configuration.nix,
+  # and why alert bodies carry an IP and a port and nothing secret. Also a
+  # systemd EnvironmentFile, same shape as the key above.
+  "seeder-watch-topic.age".publicKeys = [
+    yuanw_mist
+    misfit
+  ];
   # HealthSave Observatory .env: DB_PASSWORD + API_KEY, consumed by
   # modules/healthsave-observatory.nix as a podman --env-file.
   "healthsave-env.age".publicKeys = users ++ [ misfit ];
