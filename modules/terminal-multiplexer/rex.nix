@@ -34,11 +34,72 @@ let
       roots = { ${rootsLua} },
     })
 
+    -- The ctrl+n>e binding below hands a pane to Emacs.  It needs only server
+    -- calls plus emacsclient, so -- unlike the picker's session.select -- it
+    -- works with Remote Control off.  The Emacs half is
+    -- `rex-gt-open-pane-directory' in modules/editor/emacs/packages/rex-gt.el,
+    -- which opens the directory it is given in Dired.
+    local function pane_directory(session_id, block_id)
+      local process = rex.call("block.method", {
+        session_id = session_id,
+        block_id = block_id,
+        method = "process",
+      })
+      local cwd = process and process.foreground and process.foreground.cwd
+      if cwd then
+        return cwd
+      end
+      -- Nothing readable to inspect (a root shell, say), so fall back to the
+      -- directory the shell reported with OSC 7.  A path on another host is
+      -- not ours to open here.
+      local pwd = rex.call("block.method", {
+        session_id = session_id,
+        block_id = block_id,
+        method = "pwd",
+      })
+      local path = pwd and pwd.pwd
+      if type(path) ~= "string" then
+        return nil
+      end
+      -- `and` keeps only the first return value, so match outside the guard.
+      local host, encoded = path:match("^file://([^/]*)(/.*)$")
+      if not encoded or (host ~= "" and host ~= "localhost") then
+        return nil
+      end
+      return (encoded:gsub("%%(%x%x)", function(hex) return string.char(tonumber(hex, 16)) end))
+    end
+
+    rex.action({
+      name = "rex_open_in_emacs",
+      title = "Open Pane in Emacs",
+      run = function(ctx)
+        assert(ctx.session_id, "Open this from a Rex session")
+        local view = rex.call("session.view", {session_id = ctx.session_id})
+        local where, block_id
+        for _, window in ipairs(view.windows or {}) do
+          if window.window_id == view.active_window_id then
+            where = (view.label or ctx.session_id) .. "/" .. (window.label or "")
+            block_id = window.focused_block_id
+          end
+        end
+        assert(block_id, "This session has no focused pane")
+        local directory = pane_directory(ctx.session_id, block_id)
+        assert(directory, "This pane reports no working directory")
+        local reply = rex.exec({ "emacsclient", "-n", "-e",
+          "(rex-gt-open-pane-directory " .. rex.json.encode(directory)
+            .. " " .. rex.json.encode(where) .. ")" }, { timeout = 10 })
+        if not reply.ok then
+          error("Emacs did not answer: " .. (reply.stderr or "emacsclient failed"), 0)
+        end
+      end,
+    })
+
     rex.bind(${builtins.toJSON cfg.pickerKey}, "rex_project_picker")
     rex.bind(${builtins.toJSON cfg.sessionPickerKey}, "session.switch")
     rex.bind(${builtins.toJSON cfg.splitDownKey}, "pane.split.down")
     rex.bind(${builtins.toJSON cfg.splitRightKey}, "pane.split.right")
     rex.bind(${builtins.toJSON cfg.toggleBarKey}, "client.sidebar.toggle")
+    rex.bind(${builtins.toJSON cfg.openInEmacsKey}, "rex_open_in_emacs")
   '';
 in
 with lib;
@@ -104,6 +165,16 @@ with lib;
       type = types.str;
       default = "ctrl+n>t>s";
       description = "Shortcut that hides or shows the tab bar.";
+    };
+
+    openInEmacsKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>e";
+      description = ''
+        Shortcut that opens the focused pane's working directory in Emacs.
+        Needs `modules.editors.emacs.enable' on this host, since the action
+        calls emacsclient and the Elisp it evaluates lives in that module.
+      '';
     };
   };
 
