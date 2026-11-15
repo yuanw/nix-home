@@ -406,6 +406,14 @@
           stripRoot = false;
         }
       } "$d"
+      # After, not only before: cp -a copies the store's 0444 onto the files, and
+      # jellyfin rewrites meta.json (status, autoUpdate) as it loads the plugin.
+      # With that mode it threw UnauthorizedAccessException on meta.json and took
+      # the whole server down — "[FTL] Main: Error while starting server", every
+      # activation, and the unit still reads active because the process stays up.
+      # declarative-jellyfin's ExecStartPre (chmod -R 750 over the data dir) used
+      # to undo this behind our back; nothing does now.
+      chmod -R u+w "$d"
     '';
 
   # The two Jellyfin library roots, group-writable for the humans only.
