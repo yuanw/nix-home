@@ -1,0 +1,38 @@
+#!/bin/sh
+# Trigger a Jellyfin library scan over the local API.
+#
+# Run as root: the API key comes from the same agenix file jellarr uses, which is
+# 0600 root. Never pass the key on the command line — it would sit in the process
+# list and in shell history.
+#
+# The key is a single line of the form JELLARR_API_KEY=<key> because
+# services.jellarr.environmentFile is a systemd EnvironmentFile, not a bare secret.
+set -eu
+
+KEY_FILE="${KEY_FILE:-/run/agenix/jellarr-api-key}"
+JELLYFIN_URL="${JELLYFIN_URL:-http://127.0.0.1:8096}"
+
+if [ ! -r "$KEY_FILE" ]; then
+  echo "jellyfin-rescan: cannot read $KEY_FILE — run it as root" >&2
+  exit 1
+fi
+
+key=$(sed -n 's/^JELLARR_API_KEY=//p' "$KEY_FILE" | head -1)
+if [ -z "$key" ]; then
+  echo "jellyfin-rescan: no JELLARR_API_KEY= line in $KEY_FILE" >&2
+  exit 1
+fi
+
+code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+  -H "X-Emby-Token: $key" \
+  "$JELLYFIN_URL/Library/Refresh")
+
+echo "jellyfin-rescan: POST $JELLYFIN_URL/Library/Refresh -> $code"
+case "$code" in
+  2*) exit 0 ;;
+  *)
+    echo "jellyfin-rescan: expected 2xx; check 'systemctl status jellyfin' and" >&2
+    echo "                 'journalctl -u jellyfin' (503 = core startup not done)" >&2
+    exit 1
+    ;;
+esac

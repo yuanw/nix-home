@@ -552,6 +552,19 @@
       wget
       vim
       git
+      # The scan an import needs once a hardlink lands — the last step of the
+      # search→grab→ln flow (docs/misfit-torrent.org, "search last mile").
+      # Packaged the house way (scripts/ + writeShellScriptBin, as hosts/mist.nix
+      # does for pi-review). Only the secret path is interpolated, so renaming the
+      # secret fails at eval time instead of quietly answering 401 mid-import; the
+      # port is not a Nix option at this rev (8096 appears only as a firewall
+      # default — Jellyfin keeps it in its own DB), so the script defaults to
+      # loopback:8096 and takes JELLYFIN_URL if that ever changes. Run as root:
+      # the key file is 0600.
+      (pkgs.writeShellScriptBin "jellyfin-rescan" ''
+        export KEY_FILE='${config.age.secrets.jellarr-api-key.path}'
+        ${builtins.readFile ../../scripts/jellyfin-rescan}
+      '')
     ];
     shells = [ pkgs.zsh ];
   };
