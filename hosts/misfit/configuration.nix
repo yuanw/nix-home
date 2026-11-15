@@ -313,9 +313,12 @@
   #     below rather than a repo install of whatever is latest
   services.jellarr = {
     enable = true;
-    # JELLARR_API_KEY. systemd reads EnvironmentFile as root before dropping to
-    # the service user, so agenix's default root:root 0600 is enough — unlike
-    # the old jellyfin-init `cat`, which needed an owner override.
+    # JELLARR_API_KEY. The secret is an EnvironmentFile, so its content is a
+    # `JELLARR_API_KEY=<key>` line — a bare key parses to no assignment at all
+    # and the unit exits with `Error: JELLARR_API_KEY required` (measured on the
+    # first activation, 2026-11-14). systemd reads EnvironmentFile as root before
+    # switching users, so agenix's default root:root 0600 is enough — unlike the
+    # old jellyfin-init `cat`, which needed an owner override.
     environmentFile = config.age.secrets.jellarr-api-key.path;
     config = {
       version = 1;

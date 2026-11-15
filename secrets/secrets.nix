@@ -43,9 +43,11 @@ in
     yuanw_mist
     misfit
   ];
-  # Jellarr's Jellyfin API key, handed to the service as JELLARR_API_KEY via
-  # services.jellarr.environmentFile (hosts/misfit/configuration.nix). Same
-  # value as `pass jellyfin/apiKey`, which the /Library/Refresh calls use.
+  # Jellarr's Jellyfin API key as a systemd EnvironmentFile — the file holds one
+  # `JELLARR_API_KEY=<key>` line, not the bare key, and that is the same value
+  # `pass jellyfin/apiKey` gives the /Library/Refresh calls. Measured on the
+  # first activation: with the bare key systemd parsed no assignment and the
+  # unit died at `Error: JELLARR_API_KEY required`.
   # The .age holds a credential that grants full control of the media server.
   "jellarr-api-key.age".publicKeys = [
     yuanw_mist
