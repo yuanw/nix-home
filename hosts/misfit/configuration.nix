@@ -224,10 +224,11 @@
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
     # Jellarr's Jellyfin API key — the same value as `pass jellyfin/apiKey`,
-    # which the /Library/Refresh calls already use. The old jellyfin-admin
-    # secret (a Jellyfin password *hash* that only declarative-jellyfin's init
-    # read) is unwired now; the .age file stays in secrets/ until jellarr's
-    # `users` can take the admin user over, which needs the plaintext instead.
+    # which the /Library/Refresh calls already use. The old jellyfin-admin secret
+    # (a Jellyfin password *hash* that only declarative-jellyfin's init read) was
+    # deleted 2026-11-15: nothing wired it after the move to jellarr, and jellarr's
+    # `users` would need the plaintext regardless, so it could never have taken the
+    # admin account back.
     jellarr-api-key.file = ../../secrets/jellarr-api-key.age;
     hass = {
       file = ../../secrets/hass.age;
@@ -306,9 +307,10 @@
   #     no option exists for either in jellarr's schema
   #   * the Movies library's metadataFetchers/imageFetchers (TMDb + OMDB) — its
   #     libraryOptions carries pathInfos and nothing else
-  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and
-  #     secrets/jellyfin-admin.age holds a hash, so declaring it needs a new
-  #     secret first. Until then nothing here can re-create or reset that user.
+  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and the
+  #     old secrets/jellyfin-admin.age held only a hash (deleted 2026-11-15), so
+  #     declaring it needs a new secret first. Until then nothing here can
+  #     re-create or reset that user.
   #   * the Open Subtitles plugin, still a reviewed fetchzip in the preStart
   #     below rather than a repo install of whatever is latest
   services.jellarr = {
