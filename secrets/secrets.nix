@@ -42,33 +42,6 @@ in
     yuanw_mist
     misfit
   ];
-
-  "namecheap.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
-  # jellyfin-admin.age deleted 2026-11-15: it held only a Jellyfin password *hash*
-  # that declarative-jellyfin's init used to read, nothing wired it after the move
-  # to jellarr, and jellarr would need the plaintext anyway. Its rule went with it.
-  # Jellarr's Jellyfin API key as a systemd EnvironmentFile — the file holds one
-  # `JELLARR_API_KEY=<key>` line, not the bare key, and that is the same value
-  # `pass jellyfin/apiKey` gives the /Library/Refresh calls. Measured on the
-  # first activation: with the bare key systemd parsed no assignment and the
-  # unit died at `Error: JELLARR_API_KEY required`.
-  # The .age holds a credential that grants full control of the media server.
-  "jellarr-api-key.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
-  # The ntfy topic the seeder watch posts to (scripts/seeder-watch). The topic is
-  # the only credential — ntfy.sh has no accounts — so knowing it means reading the
-  # alerts. That is why it is agenix'd rather than written into configuration.nix,
-  # and why alert bodies carry an IP and a port and nothing secret. Also a
-  # systemd EnvironmentFile, same shape as the key above.
-  "seeder-watch-topic.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
   # HealthSave Observatory .env: DB_PASSWORD + API_KEY, consumed by
   # modules/healthsave-observatory.nix as a podman --env-file.
   "healthsave-env.age".publicKeys = users ++ [ misfit ];
