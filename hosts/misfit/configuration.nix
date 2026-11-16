@@ -559,7 +559,25 @@
       # and its password belongs in `pass`, never here.
       #
       # API automation is unaffected either way: X-Api-Key still authorizes /api/*.
-      authentication = "external";
+      # "forms" = the login page. Not "external", even though that is the default and
+      # sounds like the right answer for a reverse-proxied app.
+      #
+      # With "external" and no account, there is no login route at all: the request to
+      # /api/v1/login is served by the API-key scheme and challenged, so every attempt
+      # 401s no matter what password you send. Measured — the hash in the database
+      # matched the password exactly (pbkdf2-sha512, 10000 iterations, 32-byte key) and
+      # the log still said "ApiKeyAuthenticationHandler: AuthenticationScheme: API was
+      # challenged". "forms" is what registers the login page and its handler.
+      #
+      # This has to be set here, not just picked in the UI: nixpkgs passes it as the
+      # PROWLARR__SERVER__AUTHENTICATION environment variable, which outranks whatever
+      # the General settings form writes. Pick it in the UI, it appears to take, and the
+      # next restart silently reverts to whatever this line says.
+      #
+      # The account itself cannot be declarative — users live in prowlarr.db, and
+      # Prowlarr refuses to serve its UI without one — so it is created once in the
+      # browser and its password lives in pass:prowlarr/admin-password, never here.
+      authentication = "forms";
     };
   };
 

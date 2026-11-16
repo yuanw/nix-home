@@ -95,21 +95,13 @@
       "prowlarr.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
-          # Caddy-side credential, because the servarr UI has no account of its own
-          # that Nix can declare (users live in prowlarr.db, while settings.* only
-          # writes config.xml). Prowlarr is bound to 127.0.0.1 and sees Caddy as its
-          # only client, so it never prompts; this is the gate.
-          #
-          # bcrypt verifier from `pass show prowlarr/caddy-password`, hashed with the
-          # box's own caddy binary (`caddy hash-password`). Uncrackable at 32 random
-          # chars, so unlike the qBittorrent PBKDF2 hash it is safe to commit — that
-          # one guards a human-chosen password and stays in agenix. Rotate with:
-          #   pass generate -f prowlarr/caddy-password 32
-          # and re-hash into this line.
-          basic_auth {
-            yuan $2a$14$kkI06jx9dIZPecxSuB5WfOSbOcwqDv.Ma4ewSvPgoeFWl3Q01xdEa
-          }
-
+          # No basic_auth here. Prowlarr has its own account now (Settings -> General
+          # -> Authentication Method "Forms (Login Page)"), so the credential lives in
+          # the app that actually enforces it and the user is prompted once, not twice.
+          # Keep this vhost free of a second gate: it would only add a prompt in front
+          # of a login screen, and Prowlarr's own auth is what protects indexers and
+          # download clients. Belt-and-braces option if the app login is ever removed:
+          # put basic_auth back, using the bcrypt verifier of pass:prowlarr/caddy-password.
           reverse_proxy localhost:9696
         '';
       };
