@@ -358,16 +358,16 @@ in
   # pstack's comment-hater subagent, captured from cursor/plugins: its
   # frontmatter gives name and description, its body is the persona. Declared
   # as an agent because that is what upstream ships; Pi has no subagent
-  # format, so flake-prompt degrades it to a skill. `disableModelInvocation'
-  # keeps it off the model's own skill selection — the persona spends its time
-  # deleting comments, so it should only be adopted when asked for, with
-  # `/skill:comment-sicko'. Cursor reads the same upstream file straight into
-  # ~/.cursor/agents (modules/coding-agents/cursor). `just update
-  # cursor-plugins' bumps both.
+  # format, so flake-prompt degrades it to a skill. It stays model-invocable
+  # (no `disableModelInvocation'): Pi advertises its name, description and
+  # path in every session's system prompt and reads the persona only when a
+  # task matches — the same description-based delegation Cursor does for its
+  # subagent. `/skill:comment-sicko' forces it. Cursor reads the same upstream
+  # file straight into ~/.cursor/agents (modules/coding-agents/cursor). `just
+  # update cursor-plugins' bumps both.
   (flake-prompt.lib.promptFromMarkdown {
     type = "agent";
     name = "comment-sicko";
     source = cursor-plugins + /pstack/agents/comment-sicko.md;
-    disableModelInvocation = true;
   })
 ]
