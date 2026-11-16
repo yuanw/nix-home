@@ -47,6 +47,13 @@
       url = "github:xenodium/emacs-skills";
       flake = false;
     };
+    # Cursor's own plugin repo. Only pstack's agents/ is read from it, as an
+    # flake-prompt agent (modules/coding-agents/prompts) and as a Cursor
+    # subagent under ~/.cursor/agents (modules/coding-agents/cursor).
+    cursor-plugins = {
+      url = "github:cursor/plugins";
+      flake = false;
+    };
 
     # Fork: adds the upstream skills to the open-code-review package.
     llm-agents.url = "github:numtide/llm-agents.nix";
@@ -243,6 +250,7 @@
               humanizer
               i-have-adhd
               emacs-skills
+              cursor-plugins
               ;
           };
         in

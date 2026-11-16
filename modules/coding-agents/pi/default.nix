@@ -186,6 +186,7 @@ in
               humanizer
               i-have-adhd
               emacs-skills
+              cursor-plugins
               ;
           };
 

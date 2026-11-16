@@ -151,6 +151,22 @@
         "type": "github"
       }
     },
+    "cursor-plugins": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794713777,
+        "narHash": "sha256-fXXJRZnQZlTfOemfJgC0zSMxsfcvxRhGo21T09/6xic=",
+        "owner": "cursor",
+        "repo": "plugins",
+        "rev": "bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cursor",
+        "repo": "plugins",
+        "type": "github"
+      }
+    },
     "dgx-spark": {
       "inputs": {
         "disko": "disko",
@@ -1468,6 +1484,7 @@
         "catppuccin": "catppuccin",
         "claude-prompts": "claude-prompts",
         "colmena": "colmena",
+        "cursor-plugins": "cursor-plugins",
         "dgx-spark": "dgx-spark",
         "direnv-instant": "direnv-instant",
         "disko": "disko_2",
