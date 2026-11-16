@@ -95,6 +95,21 @@
       "prowlarr.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
+          # Caddy-side credential, because the servarr UI has no account of its own
+          # that Nix can declare (users live in prowlarr.db, while settings.* only
+          # writes config.xml). Prowlarr is bound to 127.0.0.1 and sees Caddy as its
+          # only client, so it never prompts; this is the gate.
+          #
+          # bcrypt verifier from `pass show prowlarr/caddy-password`, hashed with the
+          # box's own caddy binary (`caddy hash-password`). Uncrackable at 32 random
+          # chars, so unlike the qBittorrent PBKDF2 hash it is safe to commit — that
+          # one guards a human-chosen password and stays in agenix. Rotate with:
+          #   pass generate -f prowlarr/caddy-password 32
+          # and re-hash into this line.
+          basic_auth {
+            yuan $2a$14$kkI06jx9dIZPecxSuB5WfOSbOcwqDv.Ma4ewSvPgoeFWl3Q01xdEa
+          }
+
           reverse_proxy localhost:9696
         '';
       };

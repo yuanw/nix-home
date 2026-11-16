@@ -543,6 +543,23 @@
       # Honor X-Forwarded-For from Caddy, or every request looks like it came from
       # 127.0.0.1 and the logs are useless.
       isProxied = true;
+      # "external" — the default, stated so the reason is on the record.
+      #
+      # This cannot be "none" even though Caddy in front of it already authenticates.
+      # Prowlarr's UI refuses to run without its own account: with authentication
+      # disabled it serves a forced setup page ("To prevent remote access without
+      # authentication, Prowlarr now requires authentication to be enabled") instead
+      # of the Indexers view. Verified in a browser, not inferred from a config key.
+      #
+      # And the account itself cannot be declarative: users live in prowlarr.db, while
+      # everything above only reaches config.xml (via PROWLARR__SERVER__* environment
+      # variables, which is why config.xml still reads <BindAddress>* while the socket
+      # is 127.0.0.1 — check the socket and the env, not that file). So the account is
+      # created exactly once in the browser, like the indexers and the download client,
+      # and its password belongs in `pass`, never here.
+      #
+      # API automation is unaffected either way: X-Api-Key still authorizes /api/*.
+      authentication = "external";
     };
   };
 
