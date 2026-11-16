@@ -509,6 +509,7 @@
   # addresses are what Mullvad's own API assigned to this device.
   my.mullvad = {
     enable = true;
+    seederUid = 989; # id -u qbittorrent — static (DynamicUser=no), and the unit re-checks it
     privateKeyFile = config.age.secrets.mullvad-wg-key.path;
     address = [
       "10.76.14.202/32"
