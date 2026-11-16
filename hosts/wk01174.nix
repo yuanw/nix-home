@@ -57,6 +57,7 @@
     #   supportLocalVirtualBuilder = true;
     # };
     rex.enable = true;
+    h.enable = true;
     cursor.enable = true;
     hunk.enable = true;
     open-code-review = {

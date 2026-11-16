@@ -33,23 +33,64 @@ list_projects() {
 	LC_ALL=C sort -zu "$scratch/projects"
 }
 
+# Resolve a typed spec the way `h` does: a repo name, <owner>/<repo>, or a git URL.
+# h prints the resolved path on stdout, the clone on stderr, and aborts (after
+# echoing the cwd) when it cannot resolve, so the status decides and only the last
+# stdout line is trusted.  Kept as its own subcommand so it can be tested without
+# a terminal for fzf.
+resolve_spec() {
+	local code_root=$1 h_cli=$2 spec=$3 path
+	[[ -n $spec ]] || {
+		echo 'Type a repo name, owner/repo or git URL first.' >&2
+		return 2
+	}
+	[[ -n $code_root && -n $h_cli ]] || {
+		echo 'Cloning is not configured: no code root and h path were passed.' >&2
+		return 2
+	}
+	path=$("$h_cli" --resolve "$code_root" "$spec") || {
+		echo "h could not resolve '$spec'." >&2
+		return 1
+	}
+	path=${path##*$'\n'}
+	[[ -n $path ]] || {
+		echo "h returned no path for '$spec'." >&2
+		return 1
+	}
+	printf '%s\n' "$path"
+}
+
 pick() {
-	local rex_cli=$1 fzf_cli=$2 fd_cli=$3 client=$4 server=$5 selected status
-	shift 5
+	local rex_cli=$1 fzf_cli=$2 fd_cli=$3 client=$4 server=$5 code_root=$6 h_cli=$7
+	local selected status key
+	shift 7
 	export PROJECT_PICKER_FD=$fd_cli
 	# A GUI-launched server may have a minimal PATH. These are stable profile paths.
 	export PATH="${rex_cli%/*}:${fzf_cli%/*}:${fd_cli%/*}:$PATH"
+	[[ -z $h_cli ]] || export PATH="${h_cli%/*}:$PATH"
 	list_projects "$@" >|"$scratch/list" || return
 	[[ -s $scratch/list ]] || {
 		echo 'No projects found under the configured roots.' >&2
 		return 1
 	}
+	# Ctrl-O opens what was typed rather than what is highlighted, so the query is
+	# mirrored to a file on every keystroke and h resolves it afterwards -- cloning
+	# the repo when it is a fresh owner/repo or URL.  shortcut: the query is
+	# substituted into a shell command, so a query holding a comma may make fzf
+	# reject that binding; move it behind --listen if that ever bites.
+	: >|"$scratch/query"
 	if FZF_DEFAULT_OPTS='' FZF_DEFAULT_OPTS_FILE='' "$fzf_cli" \
 		--read0 --print0 --sync --no-multi --scheme=path --layout=reverse --border=none \
-		--prompt='Project > ' --header='Enter: open project   Esc: cancel' \
+		--prompt='Project > ' \
+		--header='Enter: open project   Ctrl-O: open typed owner/repo or URL (clones it)   Esc: cancel' \
 		--color='fg:#cdd6f4,bg:#1e1e2e,hl:#cba6f7,fg+:#cdd6f4,bg+:#313244,hl+:#a6e3a1,prompt:#cba6f7,pointer:#a6e3a1' \
-		--bind='ctrl-n:down,ctrl-p:up' <"$scratch/list" >|"$scratch/selected"; then
-		IFS= read -r -d '' selected <"$scratch/selected" || return
+		--expect=ctrl-o \
+		--bind="change:execute-silent(printf %s {q} > '$scratch/query'),ctrl-n:down,ctrl-p:up" <"$scratch/list" >|"$scratch/selected"; then
+		# With --expect, the first record is the key that closed fzf.
+		{ IFS= read -r -d '' key || return; IFS= read -r -d '' selected || selected=; } <"$scratch/selected"
+		if [[ $key == ctrl-o ]]; then
+			selected=$(resolve_spec "$code_root" "$h_cli" "$(<"$scratch/query")") || return
+		fi
 	else
 		status=$?
 		case $status in 1 | 130) return 0 ;; *) return "$status" ;; esac
@@ -65,6 +106,10 @@ case ${1:-popup} in
 list)
 	shift
 	list_projects "$@"
+	;;
+resolve)
+	shift
+	resolve_spec "$@"
 	;;
 pick)
 	shift
@@ -87,7 +132,7 @@ popup)
 	"$rex_cli" "${rex_args[@]}" 'do' rex_project_picker --session "$session"
 	;;
 *)
-	echo "Usage: $0 [popup SESSION [APP_CLIENT] | list [ROOT DEPTH ...]]" >&2
+	echo "Usage: $0 [popup SESSION [APP_CLIENT] | list [ROOT DEPTH ...] | resolve CODE_ROOT H TERM]" >&2
 	exit 2
 	;;
 esac

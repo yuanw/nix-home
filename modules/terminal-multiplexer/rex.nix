@@ -13,7 +13,8 @@ let
   # next to this module and deploys as plain files, the way the source dotfiles
   # stow it.  Copied from pkgs/rex-project-picker in
   # https://github.com/pperanich/dotfiles at 29ea77f4292ea8f0bb58b5a23bddeaefa4803536
-  # (MIT); picker.lua carries the one local change it needed here.
+  # (MIT); picker.lua carries the local changes it needed here -- a "/bin" tool
+  # prefix and the h wiring behind its Ctrl-O clone binding.
   #
   # Switching sessions needs no picker of our own: the app ships one, so that key
   # below only binds the client's session.switch action.
@@ -32,6 +33,7 @@ let
 
     picker.setup({
       roots = { ${rootsLua} },
+      codeRoot = ${builtins.toJSON cfg.codeRoot},
     })
 
     -- The ctrl+n>e binding below hands a pane to Emacs.  It needs only server
@@ -138,6 +140,17 @@ with lib;
         }
       ];
       description = "Roots the project picker walks.";
+    };
+
+    codeRoot = mkOption {
+      type = types.str;
+      default = config.modules.h.codeRoot;
+      description = ''
+        Root `h' (github.com/zimbatm/h) resolves against when the picker's Ctrl-O
+        binding is handed a repo name, an owner/repo or a git URL, cloning it
+        first when it is missing.  Shares modules.h.codeRoot so the two layouts
+        cannot drift apart.
+      '';
     };
 
     pickerKey = mkOption {

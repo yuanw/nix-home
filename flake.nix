@@ -11,6 +11,14 @@
 
     iets.url = "github:numtide/iets";
 
+    # Project jumper (modules/terminal/h.nix): `h <name>` finds a repo by name,
+    # `h <owner>/<repo>` and `h <url>` name <codeRoot>/<host>/<owner>/<repo> and
+    # clone it when it is missing.  The workspace tree is laid out for it.
+    h = {
+      url = "github:zimbatm/h";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     mics-skills.url = "github:Mic92/mics-skills";
 
     flake-prompt = {

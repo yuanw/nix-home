@@ -1,6 +1,7 @@
 -- MIT (c) 2026 Preston Peranich -- from pkgs/rex-project-picker in
--- https://github.com/pperanich/dotfiles at 29ea77f4, with one local change (the
--- "/bin" tool prefix below).  See rex.nix for how it is deployed.
+-- https://github.com/pperanich/dotfiles at 29ea77f4, with local changes: the
+-- "/bin" tool prefix, and the codeRoot/h arguments that back the Ctrl-O clone
+-- binding.  See rex.nix for how it is deployed.
 local terminal = "com.superlogical.terminal"
 local directory = debug.getinfo(1, "S").source:gsub("^@", ""):match("^(.*)/")
 local options
@@ -27,6 +28,13 @@ local function tool(name)
 		end
 	end
 	error("rex-project-picker requires " .. name .. " in your Nix profile (or set tools." .. name .. ")", 0)
+end
+
+-- h is optional here: the picker lists projects without it, and Ctrl-O then
+-- reports that cloning is not configured.  Keep it out of tool()'s hard error.
+local function optional_tool(name)
+	local ok, path = pcall(tool, name)
+	return ok and path or ""
 end
 
 local function checked(result, err)
@@ -77,6 +85,11 @@ local function setup(config)
 				tool("fd"),
 				client,
 				ctx.server or "",
+				-- Ctrl-O resolves a typed owner/repo or URL through h against this root,
+				-- cloning it first.  Both are positional for the helper; either one
+				-- empty turns the binding off with a message.
+				options.codeRoot or "",
+				optional_tool("h"),
 			}
 			for _, root in ipairs(options.roots) do
 				command[#command + 1] = root.path

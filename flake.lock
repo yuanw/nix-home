@@ -568,6 +568,26 @@
         "type": "github"
       }
     },
+    "h": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1763629741,
+        "narHash": "sha256-Iv+BqM6AF7wD5yyFSvA5pkG2yfQrNp6aBFV1OCUom5c=",
+        "owner": "zimbatm",
+        "repo": "h",
+        "rev": "87b5bbada8e612574386e0ebc8f0ea371000938a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zimbatm",
+        "repo": "h",
+        "type": "github"
+      }
+    },
     "haskell-flake": {
       "locked": {
         "lastModified": 1792682085,
@@ -1493,6 +1513,7 @@
         "flake-parts": "flake-parts_5",
         "flake-prompt": "flake-prompt",
         "git-hooks": "git-hooks",
+        "h": "h",
         "haskell-flake": "haskell-flake",
         "home-manager": "home-manager_2",
         "humanizer": "humanizer",
