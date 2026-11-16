@@ -230,6 +230,10 @@
     # `users` would need the plaintext regardless, so it could never have taken the
     # admin account back.
     jellarr-api-key.file = ../../secrets/jellarr-api-key.age;
+    # WireGuard private key for the seeder's Mullvad exit. The account number is
+    # not in here and never was — the device is registered, and the peer key is
+    # Mullvad's public relay key, so this file is the only secret involved.
+    mullvad-wg-key.file = ../../secrets/mullvad-wg-key.age;
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
@@ -493,6 +497,26 @@
     "d /data/Movies 2775 root users - -"
     "d /data/Shows 2775 root users - -"
   ];
+
+  # Mullvad, scoped to the seeder's uid — Phase 5 of nix-home-private/docs/
+  # misfit-torrent.org. Read that page before changing this: Mullvad removed port
+  # forwarding in 2023, so this buys outbound privacy and gives up inbound peers
+  # (qBittorrent will report `connection_status: firewalled`). That is the deal, not
+  # a bug to chase. Everything else on the box keeps leaving via the home IP.
+  #
+  # Values come from measurement, not guesswork: us-sea-wg-401 is the lowest-RTT
+  # relay from misfit (~25ms vs ~32ms Toronto, probed 2026-11-15), and the tunnel
+  # addresses are what Mullvad's own API assigned to this device.
+  my.mullvad = {
+    enable = true;
+    privateKeyFile = config.age.secrets.mullvad-wg-key.path;
+    address = [
+      "10.76.14.202/32"
+      "fc00:bbbb:bbbb:bb01::d:ec9/128"
+    ];
+    relayHost = "23.234.80.2";
+    relayPublicKey = "wRvkGNE3N2UklxKajU06gbBJ3Bg7KmhZsU7a5HIFBw8=";
+  };
 
   # Prowlarr — the search layer for the seeder (plan: nix-home-private/docs/
   # misfit-torrent.org, Phase 4). Without it every grab still starts in a

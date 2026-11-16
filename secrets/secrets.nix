@@ -35,6 +35,14 @@ in
     yuanw_mist
     misfit
   ];
+  # WireGuard private key for the seeder's Mullvad exit (us-sea-wg-401).
+  # Public by design: the counterpart public key is Mullvad's relay key, and the
+  # account number never appears in any of this — the device is already registered.
+  "mullvad-wg-key.age".publicKeys = [
+    yuanw_mist
+    misfit
+  ];
+
   "namecheap.age".publicKeys = [
     yuanw_mist
     misfit
