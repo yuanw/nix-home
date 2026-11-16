@@ -106,6 +106,60 @@
         '';
       };
 
+      # qBittorrent's WebUI. The daemon lives in the `seeder` network namespace
+      # (modules/mullvad.nix), so it is NOT reachable on localhost — this address is the
+      # veth peer inside that namespace, which the host can route to via sd-h. Using
+      # localhost here would proxy to nothing: the namespace's loopback is its own, and
+      # that dead localhost is exactly what proved qbittorrent had really moved.
+      #
+      # No basic_auth, same reasoning as prowlarr.yuanw.me: the WebUI has its own login
+      # (user yuan, password in pass:misfit/qbittorrent/password; its PBKDF2 verifier is
+      # the confidentiality boundary in modules/arr.nix, which is why that file is
+      # private). A second prompt in front of a login screen buys nothing.
+      #
+      # The danger specific to qBittorrent: WebUI\auth_ip_whitelist lets listed source
+      # addresses log in with no credentials at all, and behind a reverse proxy every
+      # browser arrives as Caddy. Default whitelist is 127.0.0.1/32, ::1/128 and
+      # 192.168.0.0/16, and Caddy connects from the host-side veth 10.240.0.1 — not in
+      # that list, so the login is enforced. If that setting is ever widened, this vhost
+      # becomes an unauthenticated remote control over the torrent daemon, and an
+      # attacker could point add-torrent save paths anywhere the qbittorrent user writes.
+      # Verified by test, not by reading the default: unauthenticated
+      # GET /api/v2/app/version through this vhost must answer 403.
+      #
+      # CSRF: qBittorrent checks Origin/Referer against Host, and Caddy forwards Host
+      # unchanged, so a browser at https://qbittorrent.yuanw.me matches. Scripted API
+      # calls must send Referer/Origin for http://10.240.0.2:8080/ instead.
+      # qBittorrent's WebUI. The daemon lives in the `seeder` network namespace
+      # (modules/mullvad.nix), so it is NOT reachable on localhost — this address is the
+      # veth peer inside that namespace, which the host routes to via sd-h. Proxying to
+      # localhost here would reach nothing: loopback inside the namespace is its own, and
+      # that dead localhost is exactly what proved qbittorrent had really moved.
+      #
+      # No basic_auth, same reasoning as prowlarr.yuanw.me: the WebUI has its own login
+      # (user yuan, password in pass:misfit/qbittorrent/password; the PBKDF2 verifier in
+      # modules/arr.nix is the confidentiality boundary, which is why that file is
+      # private). A second prompt in front of a login screen buys nothing.
+      #
+      # The risk specific to qBittorrent: WebUI\auth_ip_whitelist lets listed source
+      # addresses in with no credentials at all, and behind a reverse proxy every browser
+      # arrives as Caddy. The default list is 127.0.0.1/32, ::1/128 and 192.168.0.0/16;
+      # Caddy connects from the host-side veth 10.240.0.1, which is not on it, so the
+      # login is enforced. Widen that setting and this vhost becomes an unauthenticated
+      # remote control over the torrent daemon — including choosing where add-torrent
+      # writes. So it is verified by test, not by trusting a default: unauthenticated
+      # GET /api/v2/app/version through this vhost must answer 403.
+      #
+      # CSRF: qBittorrent compares Origin/Referer against Host, and Caddy forwards Host
+      # unchanged, so a browser at this hostname matches. Scripted API calls are the ones
+      # that must send Referer/Origin for http://10.240.0.2:8080/ by hand.
+      "qbittorrent.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy 10.240.0.2:8080
+        '';
+      };
+
       "agh.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
