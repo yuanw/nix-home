@@ -530,11 +530,20 @@
   # `environmentFiles` as PROWLARR__SECTION__KEY=value lines instead.
   services.prowlarr = {
     enable = true;
-    # openFirewall stays at its default false: the servarr UI has no auth out
-    # of the box, and a closed 9696 means reaching it as
-    #   ssh -N -L 9696:localhost:9696 misfit
-    # Prowlarr -> qBittorrent is loopback (127.0.0.1:8080), which never touches
-    # the firewall. Reopen only if a phone has to drive the UI.
+    # openFirewall stays at its default false. Two ways in, neither through 9696:
+    #   ssh -N -L 9696:localhost:9696 misfit   (API/scripts, no TLS)
+    #   https://prowlarr.yuanw.me              (Caddy, modules/caddy.nix)
+    #
+    # Bound to loopback on purpose. Out of the box Prowlarr listens on *:9696 with
+    # no authentication, so the closed firewall rule was the *only* thing between a
+    # LAN host and an arr UI that can edit indexers and download clients. Binding it
+    # means Caddy on 127.0.0.1 is the only reachable path.
+    settings.server = {
+      bindAddress = "localhost";
+      # Honor X-Forwarded-For from Caddy, or every request looks like it came from
+      # 127.0.0.1 and the logs are useless.
+      isProxied = true;
+    };
   };
 
   # DynamicUser + StateDirectory put the real tree at /var/lib/private/prowlarr,
