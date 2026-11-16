@@ -130,8 +130,11 @@ with lib;
         }
         {
           path = "${config.my.homeDirectory}/workspaces";
-          # 2 so the picker also finds workmux worktrees under a repo.
-          depth = 2;
+          # 3 for the workspaces/<host>/<owner>/<repo> layout `h` expects (see
+          # github.com/zimbatm/h).  A repo's linked worktrees sit beside it in the
+          # same owner dir, so they need no extra level.  Clones nested inside a
+          # repo (the events-idl vendored copies) fall past this depth on purpose.
+          depth = 3;
         }
       ];
       description = "Roots the project picker walks.";
