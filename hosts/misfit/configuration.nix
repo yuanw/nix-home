@@ -371,52 +371,6 @@
   };
   systemd.services.jellarr.unitConfig.StartLimitIntervalSec = 0;
 
-  # The two checks nobody owns today (docs/misfit-torrent.org, "things that rot
-  # silently"): the ISP's dynamic WAN address, and the port mapping in the SaskTel
-  # device that nothing in this repo can see. Evidence for why it is worth having:
-  # on 2026-11-14 both were run by hand six times in one session.
-  #
-  # Runs as root on purpose — the ntfy topic is the only credential and it lives in
-  # a 0400 root file, which is worth more than the marginal hardening of a
-  # DynamicUser that would then need the topic world-readable. It makes no inbound
-  # listener and talks outbound to api.ipify.org, check-host.net and ntfy.sh only.
-  #
-  # State goes in /var/lib/private, not /var/lib/seeder-watch: the former is on the
-  # =/persist= list (proven across the 20:36 reboot today), so the "alert on
-  # transition, not on steady state" memory survives a rollback. Without that, every
-  # cold boot would re-announce a dead mapping.
-  age.secrets.seeder-watch-topic.file = ../../secrets/seeder-watch-topic.age;
-
-  systemd.services.seeder-watch = {
-    serviceConfig = {
-      Type = "oneshot";
-      EnvironmentFile = config.age.secrets.seeder-watch-topic.path;
-      # writeShellScript's PATH is coreutils+gnugrep+gnused+gawk only — the first
-      # run died at “curl: command not found” on all four calls — so curl's bin dir
-      # is prepended inside the generated script instead of relying on the unit
-      # inheriting a login PATH (and `writeShellScript` takes no `path` argument at
-      # this nixpkgs rev: applying one fails with “attempt to call something which
-      # is not a function but a set”).
-      ExecStart = "${pkgs.writeShellScript "seeder-watch" ''
-        export PATH=${pkgs.lib.makeBinPath [ pkgs.curl ]}:$PATH
-        ${builtins.readFile ../../scripts/seeder-watch}
-      ''}";
-      Environment = [ "STATE_DIR=/var/lib/private/seeder-watch" ];
-    };
-  };
-
-  # Four probes a day is enough to learn about a reprovisioning within hours, and
-  # check-host.net is a free third-party service: 24 TCP probes/day across its
-  # nodes is polite, a poller every few minutes would not be.
-  systemd.timers.seeder-watch = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 00/6:15";
-      Persistent = true;
-      RandomizedDelaySec = "15m";
-    };
-  };
-
   # Contain jellyfin's startup: MemoryHigh throttles the runaway migration run
   # into swap (16G zvol) instead of letting it page through home-assistant and
   # caddy; MemoryMax is the last-resort ceiling. Tune via MEMORY_HIGH once
