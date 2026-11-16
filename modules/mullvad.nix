@@ -185,6 +185,14 @@ in
             echo "mullvad-split-tunnel: ${cfg.user} is uid ''${actual}, config says ${toString cfg.seederUid} — refusing to install a kill switch that would not match" >&2
             exit 1
           fi
+          # A bad/absent private key does NOT fail the wireguard units: the interface
+          # is created keyless, never handshakes, and every unit still reports green
+          # while the kill switch silently black-holes the seeder. Measured the hard
+          # way, so check for it here where a failure is loud.
+          if [ -z "''$(${pkgs.wireguard-tools}/bin/wg show mullvad private-key)" ]; then
+            echo "mullvad-split-tunnel: interface 'mullvad' has no private key — agenix secret is wrong or unreadable, and the kill switch would only cut the seeder off" >&2
+            exit 1
+          fi
           ${pkgs.iproute2}/bin/ip rule del fwmark ${mark} table ${table} 2>/dev/null || true
           ${pkgs.iproute2}/bin/ip rule add fwmark ${mark} table ${table} priority 100
           ${pkgs.nftables}/bin/nft -f ${rules}
