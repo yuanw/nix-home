@@ -85,6 +85,20 @@
       # travels over TLS -- the direct http://192.168.1.1:3000 path still exists
       # for any LAN host. No DNS change: the board's =.yuanw.me= wildcard already
       # lands any name on misfit.
+      # Prowlarr's UI. Same LAN-only caveat as the entries above — the servarr UI
+      # has no authentication of its own, so this is only as private as DNS makes
+      # it. That is survivable only because services.prowlarr.settings.server.bindAddress
+      # is "localhost" (hosts/misfit/configuration.nix): if that ever flips back to
+      # "*", 9696 becomes directly reachable and unauthenticated.
+      # Prowlarr's own UI needs no path rewriting, but isProxied = true is required
+      # or its logs/CSRF treat every request as coming from 127.0.0.1.
+      "prowlarr.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy localhost:9696
+        '';
+      };
+
       "agh.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
