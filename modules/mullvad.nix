@@ -6,207 +6,176 @@
 }:
 let
   cfg = config.my.mullvad;
-  inherit (lib)
-    mkEnableOption
-    mkOption
-    mkIf
-    types
-    md
-    ;
 
-  # The mark that pulls the seeder into the tunnel. Distinct from anything the
-  # WireGuard backend uses, so the tunnel's own handshake keeps using the main
-  # table and can never recurse into itself.
-  mark = "0xaa";
-  # Numeric, not "mullvad": the kernel only resolves table *names* that appear in
-  # /etc/iproute2/rt_tables, which on NixOS carries no custom entries — a name here
-  # made the peer unit die with `"table" value is invalid`.
-  table = "100";
-
-  rules = pkgs.writeText "mullvad-split.nft" ''
-    table inet mullvad_split {
-      # Locally generated packets from the seeder's uid get the mark; the policy
-      # rule below then sends marked traffic to table "${table}", which is where the
-      # WireGuard interface puts its default route. Marking is by uid, so this can
-      # never touch Jellyfin, hass, caddy or your own shell — different uid, the
-      # rule is not even evaluated for them.
-      # `mark` is a reserved keyword in nft 1.1.7 — naming the chain that fails the
-      # whole file with a cascade of unrelated syntax errors.
-      chain mangle_out {
-        type filter hook output priority -150; policy accept;
-        meta skuid ${toString cfg.seederUid} meta mark set ${mark}
-      }
-
-      # Kill switch. NOT Mullvad's documented one: their wg-quick recipe REJECTs
-      # every OUTPUT packet not leaving via the tunnel for *every* uid, which on
-      # this box would take down Jellyfin, hass and your SSH session the moment the
-      # tunnel wobbled. Scoped to the seeder's uid instead.
-      chain kill {
-        type filter hook output priority 0; policy accept;
-        # Everyone else is none of our business.
-        meta skuid != ${toString cfg.seederUid} accept
-        # Already inside the tunnel.
-        oifname "mullvad" accept
-        # Replies. Without this the WebUI on :8080 dies too — its answers are
-        # locally-generated packets from this same uid, so a naive drop locks you
-        # out of the client you are trying to protect.
-        ct state established,related accept
-        # The tunnel's own handshake, so a dead tunnel can never stay dead.
-        ip daddr ${cfg.relayHost} udp dport ${toString cfg.relayPort} accept
-        oifname "lo" accept
-        # Drop the rest: no egress for the seeder outside the tunnel, DNS included.
-        meta skuid ${toString cfg.seederUid} drop
-      }
-
-      # DNS. The seeder resolves tracker hostnames through the system resolver,
-      # which on this box means the router's AdGuard Home and then the ISP — i.e.
-      # the payload is encrypted and your ISP still learns every tracker you dial.
-      # DNAT that uid's DNS into the tunnel to Mullvad's resolver instead (nft's `redirect`
-      # means "to me" and takes a service name, not an address — `dnat to` is the
-      # statement that actually sends it somewhere else),
-      # without touching anyone else's resolution (hass LAN discovery depends on it).
-      chain dns {
-        type nat hook output priority -100; policy accept;
-        meta skuid ${toString cfg.seederUid} udp dport 53 dnat ip to 10.64.0.1:53
-        meta skuid ${toString cfg.seederUid} tcp dport 53 dnat ip to 10.64.0.1:53
-      }
-    }
-  '';
+  ns = "seeder";
+  vethHost = "sd-h";
+  vethNs = "sd-s";
+  netA = "10.240.0.1";
+  netB = "10.240.0.2";
+  netCidr = "10.240.0.0/24";
+  mullvadDns = "10.64.0.1";
 in
 {
   options.my.mullvad = {
-    enable = mkEnableOption "a uid-scoped Mullvad WireGuard exit for the seeder";
+    enable = lib.mkEnableOption ''
+      a Mullvad WireGuard exit that only the seeder can see — qBittorrent runs in
+      its own network namespace with the tunnel inside it, so "no tunnel" means "no
+      route", which is the only kill switch that has ever actually worked
+    '';
 
-    user = mkOption {
-      type = types.str;
-      default = "qbittorrent";
-      description = md ''
-        The only account whose traffic is tunnelled. Its uid must be **static**:
-        a `DynamicUser` gets a fresh uid every start, the `meta skuid` matches
-        would stop matching, and the kill switch would silently stop protecting
-        while everything still looked healthy.
-      '';
-    };
-
-    seederUid = mkOption {
-      type = types.ints.unsigned;
-      description = md ''
-        Numeric uid to tunnel. Spelled out rather than read from
-        `config.users.users.${cfg.user}.uid`, which is undefined at eval time because
-        the qbittorrent module lets `useradd` allocate it — interpolating that gave an
-        empty string and a syntactically broken ruleset. `ExecStart` refuses to
-        install anything if this disagrees with `id -u` at start.
-      '';
-    };
-
-    privateKeyFile = mkOption {
-      type = types.str;
+    privateKeyFile = lib.mkOption {
+      type = lib.types.str;
       description = "Path to the WireGuard private key (an agenix path).";
     };
 
-    address = mkOption {
-      type = types.listOf types.str;
+    address = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
       description = ''
-        Tunnel addresses Mullvad assigned to this device, in CIDR form. Returned by
-        `POST https://api.mullvad.net/wg` with `account` + `pubkey`; not chosen
-        locally, so a re-registered device means a new value here.
+        Tunnel addresses Mullvad assigned to this device, CIDR form, from
+        `POST https://api.mullvad.net/wg` with `account` + `pubkey`. Not chosen
+        locally: re-registering the device means a new value here.
       '';
     };
 
-    relayHost = mkOption {
-      type = types.str;
+    relayHost = lib.mkOption {
+      type = lib.types.str;
       description = "IPv4 of the Mullvad relay. Picked by RTT, not by default.";
     };
 
-    relayPort = mkOption {
-      type = types.port;
+    relayPort = lib.mkOption {
+      type = lib.types.port;
       default = 51820;
     };
 
-    relayPublicKey = mkOption {
-      type = types.str;
+    relayPublicKey = lib.mkOption {
+      type = lib.types.str;
       description = "The relay's WireGuard public key, from api.mullvad.net.";
-    };
-
-    killSwitch = mkOption {
-      type = types.bool;
-      default = true;
-      description = ''
-        Drop the seeder's traffic when the tunnel is down. Off means a dropped
-        tunnel silently reseeds from the home IP, which is the failure this whole
-        phase exists to prevent.
-      '';
     };
   };
 
-  config = mkIf cfg.enable {
-    networking.wireguard.interfaces.mullvad = {
-      ips = cfg.address;
-      privateKeyFile = cfg.privateKeyFile;
+  config = lib.mkIf cfg.enable {
+    boot.kernelModules = [ "wireguard" ];
+    environment.systemPackages = [ pkgs.wireguard-tools ];
 
-      # The default here is "main", which would install a default route for the
-      # whole box and take Jellyfin, hass and your SSH session through Norway.
-      # A named table means only fwmarked traffic ever reaches these routes.
-      table = table;
+    # The namespace's only path to the relay is through here: the WireGuard
+    # *outer* packets are forwarded by the host, so forwarding has to be on.
+    boot.kernel.sysctl."net.ipv4.ip_forward" = 1;
 
-      peers = [
-        {
-          publicKey = cfg.relayPublicKey;
-          endpoint = "${cfg.relayHost}:${toString cfg.relayPort}";
-          # Broad, because nothing is routed here except marked traffic.
-          allowedIPs = [
-            "0.0.0.0/0"
-            "::/0"
-          ];
-          # The seeder idles between handshakes; keep the NAT mapping alive.
-          persistentKeepalive = 25;
-        }
-      ];
-    };
-
-    systemd.services.mullvad-split-tunnel = {
-      after = [ "wireguard-mullvad.service" ];
-      requires = [ "wireguard-mullvad.service" ];
+    # One oneshot owns every piece of namespace state, and tears all of it down on
+    # stop, so `systemctl stop` returns the box to the pre-Phase-5 shape with no
+    # leftover links, routes or NAT rules.
+    systemd.services.seeder-netns = {
+      before = [ "qbittorrent.service" ];
       wantedBy = [ "multi-user.target" ];
-      # Rules and routes are kernel state, not unit state: re-apply on every start
-      # so a reboot or a re-deploy cannot leave the box half-wired.
+      # NetworkManager churns links; make sure it cannot win a race against us.
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        # Absolute paths rather than a PATH gamble: this unit has to work when it is
-        # the thing the box depends on, and a oneshot with no PATH in scope failing
-        # at boot is exactly the silent-leak scenario the kill switch exists for.
-        ExecStart = pkgs.writeShellScript "mullvad-split-up" ''
-          # Cross-check the hardcoded uid against reality before installing rules. A
-          # drifted uid would leave every `meta skuid` matching nothing: the seeder
-          # leaks and all units still report green.
-          actual=$(${pkgs.coreutils}/bin/id -u ${cfg.user})
-          if [ "''${actual}" != "${toString cfg.seederUid}" ]; then
-            echo "mullvad-split-tunnel: ${cfg.user} is uid ''${actual}, config says ${toString cfg.seederUid} — refusing to install a kill switch that would not match" >&2
-            exit 1
-          fi
-          # A bad/absent private key does NOT fail the wireguard units: the interface
-          # is created keyless, never handshakes, and every unit still reports green
-          # while the kill switch silently black-holes the seeder. Measured the hard
-          # way, so check for it here where a failure is loud.
-          if [ -z "''$(${pkgs.wireguard-tools}/bin/wg show mullvad private-key)" ]; then
-            echo "mullvad-split-tunnel: interface 'mullvad' has no private key — agenix secret is wrong or unreadable, and the kill switch would only cut the seeder off" >&2
-            exit 1
-          fi
-          ${pkgs.iproute2}/bin/ip rule del fwmark ${mark} table ${table} 2>/dev/null || true
-          ${pkgs.iproute2}/bin/ip rule add fwmark ${mark} table ${table} priority 100
-          ${pkgs.nftables}/bin/nft -f ${rules}
-        '';
-        ExecStop = pkgs.writeShellScript "mullvad-split-down" ''
-          ${pkgs.nftables}/bin/nft delete table inet mullvad_split 2>/dev/null || true
-          ${pkgs.iproute2}/bin/ip rule del fwmark ${mark} table ${table} 2>/dev/null || true
-        '';
       };
+
+      script = ''
+        set -e
+        ip=${pkgs.iproute2}/bin/ip
+        wg=${pkgs.wireguard-tools}/bin/wg
+        nft=${pkgs.nftables}/bin/nft
+
+        # --- namespace -------------------------------------------------------
+        $ip netns add ${ns} 2>/dev/null || true
+        $ip link del ${vethHost} 2>/dev/null || true
+        $ip link add ${vethHost} type veth peer name ${vethNs}
+        $ip link set ${vethNs} netns ${ns}
+
+        # --- inside the namespace -------------------------------------------
+        # Everything below runs where qBittorrent will run. Note there is NO
+        # default route via the veth: the only default is the tunnel, so a dead
+        # tunnel is a black hole rather than a leak. That structural absence is
+        # the kill switch — no firewall rules carrying that responsibility.
+        $ip netns exec ${ns} ${pkgs.bash}/bin/bash -c '
+          set -e
+          ip=${pkgs.iproute2}/bin/ip
+          wg=${pkgs.wireguard-tools}/bin/wg
+          nft=${pkgs.nftables}/bin/nft
+
+          $ip link set lo up
+          $ip link set ${vethNs} up
+          $ip addr add ${netB}/24 dev ${vethNs}
+
+          $ip link add dev mullvad type wireguard
+          $ip addr add ${builtins.head cfg.address} dev mullvad
+          ${lib.optionalString (
+            builtins.length cfg.address > 1
+          ) "$ip addr add ${builtins.elemAt cfg.address 1} dev mullvad"}
+          $ip link set mullvad up
+
+          $wg set mullvad private-key ${cfg.privateKeyFile}
+          $wg set mullvad peer ${cfg.relayPublicKey} \
+            endpoint ${cfg.relayHost}:${toString cfg.relayPort} \
+            allowed-ips 0.0.0.0/0 \
+            persistent-keepalive 25
+
+          $ip route replace default dev mullvad
+          # …and the one exception: the relay itself must reach the host, or the
+          # tunnel can never carry its own handshake.
+          $ip route replace ${cfg.relayHost}/32 via ${netA} dev ${vethNs}
+
+          # Tracker and peer DNS belongs to Mullvad inside the tunnel; without
+          # this the payload is encrypted while the ISP still learns every
+          # hostname the seeder resolves.
+          $nft add table ip seeder_dns 2>/dev/null || true
+          $nft add chain ip seeder_dns out "{ type nat hook output priority -100; policy accept; }"
+          $nft add rule ip seeder_dns out udp dport 53 dnat ip to ${mullvadDns}:53
+          $nft add rule ip seeder_dns out tcp dport 53 dnat ip to ${mullvadDns}:53
+        '
+
+        # --- host side -------------------------------------------------------
+        $ip addr add ${netA}/24 dev ${vethHost}
+        $ip link set ${vethHost} up
+        $ip -6 addr add fe80::1/64 dev ${vethHost} 2>/dev/null || true
+
+        # Only the WireGuard outer packets ever reach the host, so this MASQUERADE
+        # covers exactly one flow: the tunnel's own UDP to the relay. The inner
+        # torrent packets are consumed by the tunnel device inside the namespace.
+        $nft add table ip seeder_nat 2>/dev/null || true
+        $nft add chain ip seeder_nat postrouting "{ type nat hook postrouting priority 100; policy accept; }" 2>/dev/null || true
+        $nft add rule ip seeder_nat postrouting ip saddr ${netCidr} oifname != "${vethHost}" masquerade
+
+        # NixOS forwards nothing by default; let the namespace's traffic through.
+        $nft add table inet seeder_fwd 2>/dev/null || true
+        $nft add chain inet seeder_fwd forward "{ type filter hook forward priority 0; policy drop; }" 2>/dev/null || true
+        $nft add rule inet seeder_fwd forward iifname "${vethHost}" ip saddr ${netCidr} accept
+        $nft add rule inet seeder_fwd forward oifname "${vethHost}" ct state established,related accept
+      '';
+
+      serviceConfig.ExecStop = pkgs.writeShellScript "seeder-netns-down" ''
+        ${pkgs.iproute2}/bin/ip netns del ${ns} 2>/dev/null || true
+        ${pkgs.iproute2}/bin/ip link del ${vethHost} 2>/dev/null || true
+        ${pkgs.nftables}/bin/nft delete table ip seeder_nat 2>/dev/null || true
+        ${pkgs.nftables}/bin/nft delete table inet seeder_fwd 2>/dev/null || true
+        # The DNS table lives in the namespace, so deleting the namespace takes it.
+      '';
     };
 
-    # The seeder should come up after the wiring, not before it, so its first
-    # tracker lookups are already inside the tunnel.
-    systemd.services.qbittorrent.after = [ "mullvad-split-tunnel.service" ];
-    systemd.services.qbittorrent.requires = [ "mullvad-split-tunnel.service" ];
+    # The seeder lives in the namespace. This is what makes the whole thing work:
+    # it is the same trick as `network_mode: service:gluetun` in the docker-compose
+    # stacks, and it exists because nftables cannot re-route an already-routed
+    # locally-generated packet — `meta mark set` in the output hook stamps the
+    # packet but never changes where it goes. Measured on this box: 291 packets
+    # marked, zero of them entering the tunnel.
+    systemd.services.qbittorrent = {
+      after = [ "seeder-netns.service" ];
+      requires = [ "seeder-netns.service" ];
+      # [Service], not [Unit] — it is a systemd.exec(5) setting. In [Unit] systemd
+      # logs "Unknown key 'NetworkNamespacePath' in section [Unit], ignoring" and
+      # runs the service in the host namespace, which looks exactly like a working
+      # tunnel while the seeder leaks. Verified with `systemctl show -p
+      # NetworkNamespacePath` and by comparing /proc/<pid>/ns/net against the inode
+      # of /run/netns/seeder.
+      serviceConfig.NetworkNamespacePath = "/run/netns/${ns}";
+      # The unit gets the namespace's loopback as "localhost", so the WebUI is
+      # reached from the host at ${netB}:8080 — which is also what Prowlarr's
+      # download-client entry has to say now.
+    };
   };
 }
