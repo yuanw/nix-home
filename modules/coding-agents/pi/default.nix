@@ -9,7 +9,6 @@ let
   cfg = config.modules.pi;
   user = config.my.username;
   home = config.my.homeDirectory;
-  workspace = config.my.workspaceDirectory;
   agentConfigDir = ".pi/agent";
 
   # Where each programs.pi.extensions.<name> comes from. pi-flake packages
@@ -220,7 +219,7 @@ in
 
         home.file = lib.optionalAttrs permissionGateEnabled {
           ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-            hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+            hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/coding-agents/pi/permission-gate-rules.ts";
         };
       };
   };

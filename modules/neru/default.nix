@@ -118,7 +118,7 @@ in
       hm@{ ... }:
       {
         xdg.configFile."neru/config.toml".source =
-          hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/neru/config.toml";
+          hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/neru/config.toml";
       };
   };
 }
