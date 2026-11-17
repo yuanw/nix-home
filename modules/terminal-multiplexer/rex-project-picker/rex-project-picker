@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# MIT (c) 2026 Preston Peranich -- copied verbatim from pkgs/rex-project-picker
+# MIT (c) 2026 Preston Peranich -- copied from pkgs/rex-project-picker
 # in https://github.com/pperanich/dotfiles at 29ea77f4; see rex.nix for the wiring.
+# Local change: Ctrl-O is read from fzf's --expect output rather than gated on its
+# exit status, because fzf exits 1 -- like a cancel -- when the query matched nothing,
+# which is how every not-yet-cloned repo arrives.
 set -euo pipefail
 
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/rex-project-picker.XXXXXX")
@@ -79,20 +82,25 @@ pick() {
 	# substituted into a shell command, so a query holding a comma may make fzf
 	# reject that binding; move it behind --listen if that ever bites.
 	: >|"$scratch/query"
-	if FZF_DEFAULT_OPTS='' FZF_DEFAULT_OPTS_FILE='' "$fzf_cli" \
+	status=0
+	FZF_DEFAULT_OPTS='' FZF_DEFAULT_OPTS_FILE='' "$fzf_cli" \
 		--read0 --print0 --sync --no-multi --scheme=path --layout=reverse --border=none \
 		--prompt='Project > ' \
 		--header='Enter: open project   Ctrl-O: open typed owner/repo or URL (clones it)   Esc: cancel' \
 		--color='fg:#cdd6f4,bg:#1e1e2e,hl:#cba6f7,fg+:#cdd6f4,bg+:#313244,hl+:#a6e3a1,prompt:#cba6f7,pointer:#a6e3a1' \
 		--expect=ctrl-o \
-		--bind="change:execute-silent(printf %s {q} > '$scratch/query'),ctrl-n:down,ctrl-p:up" <"$scratch/list" >|"$scratch/selected"; then
-		# With --expect, the first record is the key that closed fzf.
-		{ IFS= read -r -d '' key || return; IFS= read -r -d '' selected || selected=; } <"$scratch/selected"
-		if [[ $key == ctrl-o ]]; then
-			selected=$(resolve_spec "$code_root" "$h_cli" "$(<"$scratch/query")") || return
-		fi
-	else
+		--bind="change:execute-silent(printf %s {q} > '$scratch/query'),ctrl-n:down,ctrl-p:up" <"$scratch/list" >|"$scratch/selected" ||
 		status=$?
+	# With --expect, the first record is the key that closed fzf.  fzf exits 1 when the
+	# query matched nothing -- the normal state for a repo that is not cloned yet -- and
+	# still prints that key, so the key decides and the status only has to spot cancels.
+	{
+		IFS= read -r -d '' key || key=
+		IFS= read -r -d '' selected || selected=
+	} <"$scratch/selected"
+	if [[ $key == ctrl-o ]]; then
+		selected=$(resolve_spec "$code_root" "$h_cli" "$(<"$scratch/query")") || return
+	elif ((status != 0)); then
 		case $status in 1 | 130) return 0 ;; *) return "$status" ;; esac
 	fi
 	local rex_args=(--autostart=false --color=never -C "$client")
