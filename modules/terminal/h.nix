@@ -1,16 +1,28 @@
 # `h`, the project jumper (https://github.com/zimbatm/h).
 #
-# `h <name>` walks the code root for a directory of that name (deepest match wins,
-# nothing below depth 3); `h <owner>/<repo>` and `h <url>` name a path
-# <codeRoot>/<host>/<owner>/<repo> and clone it when it is missing.  The whole
-# ~/workspaces tree is laid out in exactly that shape, which is also why
-# `modules.rex.projectRoots` keeps its depth at 3 -- see
-# modules/terminal-multiplexer/rex.nix.
+# This is upstream's `homeModules.default' (its README's "With home-manager"
+# section) restated, because importing that module here fails: it defines
+# `programs.zsh.initExtra', which the pinned home-manager has since removed
+# ("Use `programs.zsh.initContent' instead."), and a removed-option definition
+# aborts the whole evaluation.  Everything else is kept as upstream writes it --
+# the package, `codeRoot', the bash hook -- with the zsh hook moved onto the
+# option that exists today.  Fish is skipped: no host enables it.
 #
-# Upstream's `homeModules.default` is deliberately not imported.  It installs the
-# bare derivation, whose `#!/usr/bin/env ruby` shebang looks Ruby up on PATH, and
-# the picker popup launches with a stripped environment; the wrapper below pins
-# Ruby and git instead of hoping they are reachable.
+# Upstream cannot know about this machine's zsh setup: home-manager's oh-my-zsh
+# `history' plugin defines `alias h=history', and an alias both shadows the
+# function at the prompt and makes zsh refuse to define it ("defining function
+# based on alias"), so the unalias has to come before the eval -- in that order,
+# inside the same block.  `history', `hl', `hs' and `hsi' from the plugin stay.
+#
+# The workspace tree is laid out as <codeRoot>/<host>/<owner>/<repo>, which is
+# what `h' resolves and clones into -- and what the rex project picker's Ctrl-O
+# binding and projectRoots depth are built around (modules/terminal-multiplexer/
+# rex.nix).
+#
+# The package is a Ruby script with a `#!/usr/bin/env ruby' shebang and no Ruby
+# dependency.  shortcut: it runs on macOS's /usr/bin/ruby, which is on PATH both
+# in a login shell and in the Rex popup; if Apple ever drops it, add pkgs.ruby to
+# home.packages below.
 {
   config,
   lib,
@@ -21,16 +33,10 @@
 with lib;
 let
   cfg = config.modules.h;
-  hGem = inputs.h.packages.${pkgs.stdenv.hostPlatform.system}.default;
-  h = pkgs.runCommand "h" { buildInputs = [ pkgs.makeWrapper ]; } ''
-    makeWrapper ${lib.getExe' hGem "h"} $out/bin/h \
-      --prefix PATH : ${
-        lib.makeBinPath [
-          pkgs.ruby
-          pkgs.git
-        ]
-      }
-  '';
+  hPkg = inputs.h.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # Upstream's hook, verbatim apart from the explicit binary path.  Double-quoted
+  # so the apostrophe in lib.getExe' can never be read as a string delimiter.
+  hook = "eval \"$(${lib.getExe' hPkg "h"} --setup ${escapeShellArg cfg.codeRoot})\"";
 in
 {
   options.modules.h = {
@@ -39,23 +45,19 @@ in
     codeRoot = mkOption {
       type = types.str;
       default = "${config.my.homeDirectory}/${config.my.workspaceDirectory}";
-      description = "Directory holding <host>/<owner>/<repo>; h clones missing repos into it.";
+      description = "Directory holding <host>/<owner>/<repo>; h clones missing repos into it. Upstream calls this programs.h.codeRoot.";
     };
   };
 
   config = mkIf cfg.enable {
     home-manager.users.${config.my.username} = {
-      home.packages = [ h ];
+      home.packages = [ hPkg ];
 
-      # initContent at mkAfter lands at the very end of .zshrc -- after
-      # `source $ZSH/oh-my-zsh.sh', which is where oh-my-zsh's `history' plugin
-      # defines `alias h=history'.  Aliases expand before functions are looked up,
-      # so dropping this one alias is what lets h's function through; `history',
-      # `hl', `hs' and `hsi' from that plugin are untouched.  Bash gets no hook:
-      # it is off on darwin.
+      programs.bash.initExtra = hook;
+
       programs.zsh.initContent = mkAfter ''
-        eval "$(${lib.getExe h} --setup ${escapeShellArg cfg.codeRoot})"
         unalias h 2>/dev/null || true
+        ${hook}
       '';
     };
   };
