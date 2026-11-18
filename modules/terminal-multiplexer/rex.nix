@@ -214,7 +214,8 @@ with lib;
 
             # picker.lua resolves its own directory and runs the helper from it, so
             # the two must stay siblings.  bash takes the helper as an argument, so
-            # it needs no exec bit.
+            # it needs no exec bit.  picker-selfcheck.lua is a dev-only check, so it
+            # is deliberately not listed here.
             "rex/rex-project-picker/picker.lua".source = "${pickerSrc}/picker.lua";
             "rex/rex-project-picker/rex-project-picker".source = "${pickerSrc}/rex-project-picker";
 

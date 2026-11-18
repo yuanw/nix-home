@@ -142,6 +142,22 @@ local function setup(config)
 		return { session_id = match.session_id, window_id = match.window_id, reused = reused, path = path }
 	end
 
+	-- fd separates paths with NULs, so a path may hold a newline.  Splitting by hand
+	-- rather than gmatch: a pattern holding a literal NUL is invalid in Lua 5.1,
+	-- which is the dialect Rex's config engine speaks.
+	local function split_nul(text)
+		local paths, start, length = {}, 1, #text
+		for index = 1, length + 1 do
+			if index == length + 1 or text:byte(index) == 0 then
+				if index > start then
+					paths[#paths + 1] = text:sub(start, index - 1)
+				end
+				start = index + 1
+			end
+		end
+		return paths
+	end
+
 	-- fd finds the .git markers; the config engine's Lua has no directory walk, so
 	-- the helper does the finding and prints the paths separated by NULs.
 	local function project_items()
@@ -158,15 +174,13 @@ local function setup(config)
 			error("List projects: " .. (found.stderr ~= "" and found.stderr or "fd exited " .. tostring(found.code)), 0)
 		end
 		local items = {}
-		for path in (found.stdout .. "\0"):gmatch("([^\0]*)\0") do
-			if path ~= "" then
-				items[#items + 1] = {
-					id = path,
-					title = path:match("([^/]+)$"),
-					subtitle = path:match("^(.*)/"),
-					icon = "folder",
-				}
-			end
+		for _, path in ipairs(split_nul(found.stdout)) do
+			items[#items + 1] = {
+				id = path,
+				title = path:match("([^/]+)$"),
+				subtitle = path:match("^(.*)/"),
+				icon = "folder",
+			}
 		end
 		-- A prompt holds at most 2000 items.  Naming the count beats Rex rejecting
 		-- the call, and points at the fix.

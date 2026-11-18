@@ -15,8 +15,8 @@
 # inside the same block.  `history', `hl', `hs' and `hsi' from the plugin stay.
 #
 # The workspace tree is laid out as <codeRoot>/<host>/<owner>/<repo>, which is
-# what `h' resolves and clones into -- and what the rex project picker's Ctrl-O
-# binding and projectRoots depth are built around (modules/terminal-multiplexer/
+# what `h' resolves and clones into -- and what the rex project picker's typed
+# answer and projectRoots depth are built around (modules/terminal-multiplexer/
 # rex.nix).
 #
 # The package is a Ruby script with a `#!/usr/bin/env ruby' shebang and no Ruby
