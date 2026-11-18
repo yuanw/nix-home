@@ -9,12 +9,12 @@ let
   cfg = config.modules.rex;
 
   # Rex's whole config surface is one init.lua plus what it loads.  The project
-  # picker -- Lua in Rex's engine plus a bash helper driving fd and fzf -- lives
-  # next to this module and deploys as plain files, the way the source dotfiles
-  # stow it.  Copied from pkgs/rex-project-picker in
+  # picker -- Lua in Rex's engine plus a bash helper driving fd -- lives next to
+  # this module and deploys as plain files, the way the source dotfiles stow it.
+  # Copied from pkgs/rex-project-picker in
   # https://github.com/pperanich/dotfiles at 29ea77f4292ea8f0bb58b5a23bddeaefa4803536
   # (MIT); picker.lua carries the local changes it needed here -- a "/bin" tool
-  # prefix and the h wiring behind its Ctrl-O clone binding.
+  # prefix, and Rex's palette (rex.ui.pick) instead of upstream's fzf popup.
   #
   # Switching sessions needs no picker of our own: the app ships one, so that key
   # below only binds the client's session.switch action.
@@ -146,10 +146,10 @@ with lib;
       type = types.str;
       default = config.modules.h.codeRoot;
       description = ''
-        Root `h' (github.com/zimbatm/h) resolves against when the picker's Ctrl-O
-        binding is handed a repo name, an owner/repo or a git URL, cloning it
-        first when it is missing.  Shares modules.h.codeRoot so the two layouts
-        cannot drift apart.
+        Root `h' (github.com/zimbatm/h) resolves against when the picker's palette
+        is handed a repo name, an owner/repo or a git URL, cloning it first when it
+        is missing.  Shares modules.h.codeRoot so the two layouts cannot drift
+        apart.
       '';
     };
 
@@ -202,9 +202,10 @@ with lib;
           # rex plus the picker's own dependencies: picker.lua resolves each tool
           # under the user profile (the macOS system prefixes only cover bash and
           # pwd), so they have to be linked there rather than named in init.lua.
+          # fzf needs no entry -- the palette replaced it -- and h comes from
+          # modules.h.
           home.packages = [
             pkgs.fd
-            pkgs.fzf
             pkgs.rex
           ];
 

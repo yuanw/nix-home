@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# MIT (c) 2026 Preston Peranich -- copied from pkgs/rex-project-picker
-# in https://github.com/pperanich/dotfiles at 29ea77f4; see rex.nix for the wiring.
-# Local change: Ctrl-O is read from fzf's --expect output rather than gated on its
-# exit status, because fzf exits 1 -- like a cancel -- when the query matched nothing,
-# which is how every not-yet-cloned repo arrives.
+# MIT (c) 2026 Preston Peranich -- from pkgs/rex-project-picker in
+# https://github.com/pperanich/dotfiles at 29ea77f4.  Upstream's fzf popup lives
+# in picker.lua as a rex.ui.pick palette prompt now, so this helper is only the
+# two pieces that need a shell: finding .git markers with fd, and asking h to
+# resolve a typed spec.  picker.lua calls both through rex.exec.
 set -euo pipefail
 
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/rex-project-picker.XXXXXX")
@@ -33,14 +33,15 @@ list_projects() {
 			printf '%s\0' "${marker%/.git}" >>"$scratch/projects"
 		done <"$scratch/markers"
 	done
+	# Sort and dedupe here so picker.lua can hand every path to rex.ui.pick as an
+	# id, which rejects duplicates.
 	LC_ALL=C sort -zu "$scratch/projects"
 }
 
 # Resolve a typed spec the way `h` does: a repo name, <owner>/<repo>, or a git URL.
 # h prints the resolved path on stdout, the clone on stderr, and aborts (after
 # echoing the cwd) when it cannot resolve, so the status decides and only the last
-# stdout line is trusted.  Kept as its own subcommand so it can be tested without
-# a terminal for fzf.
+# stdout line is trusted.
 resolve_spec() {
 	local code_root=$1 h_cli=$2 spec=$3 path
 	[[ -n $spec ]] || {
@@ -63,54 +64,7 @@ resolve_spec() {
 	printf '%s\n' "$path"
 }
 
-pick() {
-	local rex_cli=$1 fzf_cli=$2 fd_cli=$3 client=$4 server=$5 code_root=$6 h_cli=$7
-	local selected status key
-	shift 7
-	export PROJECT_PICKER_FD=$fd_cli
-	# A GUI-launched server may have a minimal PATH. These are stable profile paths.
-	export PATH="${rex_cli%/*}:${fzf_cli%/*}:${fd_cli%/*}:$PATH"
-	[[ -z $h_cli ]] || export PATH="${h_cli%/*}:$PATH"
-	list_projects "$@" >|"$scratch/list" || return
-	[[ -s $scratch/list ]] || {
-		echo 'No projects found under the configured roots.' >&2
-		return 1
-	}
-	# Ctrl-O opens what was typed rather than what is highlighted, so the query is
-	# mirrored to a file on every keystroke and h resolves it afterwards -- cloning
-	# the repo when it is a fresh owner/repo or URL.  shortcut: the query is
-	# substituted into a shell command, so a query holding a comma may make fzf
-	# reject that binding; move it behind --listen if that ever bites.
-	: >|"$scratch/query"
-	status=0
-	FZF_DEFAULT_OPTS='' FZF_DEFAULT_OPTS_FILE='' "$fzf_cli" \
-		--read0 --print0 --sync --no-multi --scheme=path --layout=reverse --border=none \
-		--prompt='Project > ' \
-		--header='Enter: open project   Ctrl-O: open typed owner/repo or URL (clones it)   Esc: cancel' \
-		--color='fg:#cdd6f4,bg:#1e1e2e,hl:#cba6f7,fg+:#cdd6f4,bg+:#313244,hl+:#a6e3a1,prompt:#cba6f7,pointer:#a6e3a1' \
-		--expect=ctrl-o \
-		--bind="change:execute-silent(printf %s {q} > '$scratch/query'),ctrl-n:down,ctrl-p:up" <"$scratch/list" >|"$scratch/selected" ||
-		status=$?
-	# With --expect, the first record is the key that closed fzf.  fzf exits 1 when the
-	# query matched nothing -- the normal state for a repo that is not cloned yet -- and
-	# still prints that key, so the key decides and the status only has to spot cancels.
-	{
-		IFS= read -r -d '' key || key=
-		IFS= read -r -d '' selected || selected=
-	} <"$scratch/selected"
-	if [[ $key == ctrl-o ]]; then
-		selected=$(resolve_spec "$code_root" "$h_cli" "$(<"$scratch/query")") || return
-	elif ((status != 0)); then
-		case $status in 1 | 130) return 0 ;; *) return "$status" ;; esac
-	fi
-	local rex_args=(--autostart=false --color=never -C "$client")
-	[[ -z $server ]] || rex_args+=(-S "$server")
-	"$rex_cli" "${rex_args[@]}" 'do' rex_project_picker_open \
-		--session "${REX_SESSION:?Missing Rex popup session}" \
-		--block "${REX_BLOCK:?Missing Rex popup block}" "path=$selected"
-}
-
-case ${1:-popup} in
+case ${1:-} in
 list)
 	shift
 	list_projects "$@"
@@ -119,28 +73,8 @@ resolve)
 	shift
 	resolve_spec "$@"
 	;;
-pick)
-	shift
-	if pick "$@"; then exit 0; else status=$?; fi
-	printf '\nProject picker failed (%s). Press Enter to close.\n' "$status" >&2
-	read -r _ || true
-	exit "$status"
-	;;
-popup)
-	(($# == 0)) || shift
-	rex_cli=$(command -v rex)
-	rex_args=(--autostart=false --color=never)
-	[[ -z ${REX_SERVER:-} ]] || rex_args+=(-S "$REX_SERVER")
-	[[ -z ${2:-${REX_CLIENT:-}} ]] || rex_args+=(-C "${2:-$REX_CLIENT}")
-	session=${1:-${REX_SESSION:-}}
-	[[ -n $session ]] || {
-		echo "Usage: $0 popup SESSION [APP_CLIENT]" >&2
-		exit 2
-	}
-	"$rex_cli" "${rex_args[@]}" 'do' rex_project_picker --session "$session"
-	;;
 *)
-	echo "Usage: $0 [popup SESSION [APP_CLIENT] | list [ROOT DEPTH ...] | resolve CODE_ROOT H TERM]" >&2
+	echo "Usage: $0 [list [ROOT DEPTH ...] | resolve CODE_ROOT H SPEC]" >&2
 	exit 2
 	;;
 esac
