@@ -43,7 +43,7 @@ let
   };
 in
 # nix run .#rex -- ... exposes the CLI on both platforms
-# macOS also installs Rex Beta.app and rex-app, Linux is server-only upstream
+# macOS also installs Rex.app and rex-app, Linux is server-only upstream
 # Native builds also install Bash, Fish, and Zsh completions
 # Snapshot is upstream's rolling prerelease channel for Rex Beta
 # Run passthru.updateScript (`just update-rex`) from the repo root to refresh
@@ -77,8 +77,8 @@ stdenvNoCC.mkDerivation {
       if isDarwin then
         ''
           mkdir -p "$out/Applications"
-          cp -R "Rex Beta/Rex Beta.app" "$out/Applications/"
-          app="$out/Applications/Rex Beta.app/Contents"
+          cp -R "Rex/Rex.app" "$out/Applications/"
+          app="$out/Applications/Rex.app/Contents"
           makeWrapper "$app/Helpers/Rex Server.rex/Contents/MacOS/rex" "$out/bin/rex"
           makeWrapper "$app/MacOS/Rex" "$out/bin/rex-app"
         ''

@@ -77,7 +77,7 @@ two apps (a laptop and a Mac mini, say) are connected at once."
   :type '(choice (const :tag "Let Rex choose" nil) string)
   :group 'rex-gt)
 
-(defcustom rex-gt-app-name "Rex Beta"
+(defcustom rex-gt-app-name "Rex"
   "macOS application to raise after focusing a pane, nil to leave alone.
 Only consulted where `osascript' exists."
   :type '(choice (const :tag "Do not raise an app" nil) string)

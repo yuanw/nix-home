@@ -288,7 +288,7 @@ with lib;
       # rebuild with the app open has its write overwritten on quit: quit first,
       # then rebuild, then relaunch.  Sessions live in the server, not the app, so
       # quitting costs no running programs.
-      #   osascript -e 'quit app "Rex Beta"' && sudo darwin-rebuild switch --flake '.#mist' && open -a 'Rex Beta'
+      #   osascript -e 'quit app "Rex"' && sudo darwin-rebuild switch --flake '.#mist' && open -a 'Rex'
       system.defaults.CustomUserPreferences."com.superlogical.rex" = {
         # Remote Control is the gate on every client action, including the
         # session.select the project picker queues to focus what it opened -- with
