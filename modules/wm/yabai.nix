@@ -18,8 +18,9 @@ let
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
   defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
-  alacrittyApp = "~/Applications/Home\\ Manager\\ Apps/Alacritty.app";
-  herdrCmd = "${config.modules.herdr.package}/bin/${config.modules.herdr.command}";
+  # LaunchServices does not reliably know the Home Manager bundles by name, so
+  # `open -a' takes the path (same reason as modules/editor/emacs/features/postlude.el).
+  rexApp = "~/Applications/Home\\ Manager\\ Apps/Rex.app";
   # it is nice to reference pkgs full path
   laucherConfig = ''
     shift + ctrl + alt - e: ${emacsClient}
@@ -33,8 +34,8 @@ let
                             ${pkgs.sketchybar}/bin/sketchybar --reload && osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
     # lock screen
     shift + ctrl + alt - l: pmset displaysleepnow
-    # start Herdr
-    shift + ctrl + alt - h: open -n -a ${alacrittyApp} --args -e ${herdrCmd}
+    # bring up Rex (sessions live in the rex server, so this only needs to wake the app)
+    shift + ctrl + alt - h: open -a ${rexApp}
     shift + ctrl + alt - y : choose-pass
     # take screenshot
     shift + ctrl + alt - s: screencapture -ic
