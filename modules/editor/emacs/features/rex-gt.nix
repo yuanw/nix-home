@@ -16,7 +16,18 @@
 
   epkgs = epkgs: [ epkgs.rex-gt ];
 
-  # Every command carries a `;;;###autoload' cookie, so the library stays off
-  # the startup path; jump in with M-x rex-gt-tab-manager.
+  # trivialBuild ships no loaddefs, so `:commands' is what makes M-x see them.
+  elisp = ''
+    (use-package rex-gt
+      :commands
+      (rex-gt-tab-manager
+       rex-gt-go
+       rex-gt-capture
+       rex-gt-new-tab
+       rex-gt-focus-app
+       rex-gt-open-pane-directory))
+  '';
+
+  # The commands above autoload it, and Rex's key calls it through emacsclient.
   requireEpkgs = false;
 }

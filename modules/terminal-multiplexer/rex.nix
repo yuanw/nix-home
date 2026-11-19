@@ -87,9 +87,12 @@ let
         assert(block_id, "This session has no focused pane")
         local directory = pane_directory(ctx.session_id, block_id)
         assert(directory, "This pane reports no working directory")
+        -- `require' first: trivialBuild ships rex-gt with no loaddefs, so the
+        -- command is void until something loads the library.
         local reply = rex.exec({ "emacsclient", "-n", "-e",
-          "(rex-gt-open-pane-directory " .. rex.json.encode(directory)
-            .. " " .. rex.json.encode(where) .. ")" }, { timeout = 10 })
+          "(progn (require 'rex-gt) (rex-gt-open-pane-directory "
+            .. rex.json.encode(directory)
+            .. " " .. rex.json.encode(where) .. "))" }, { timeout = 10 })
         if not reply.ok then
           error("Emacs did not answer: " .. (reply.stderr or "emacsclient failed"), 0)
         end
