@@ -170,4 +170,14 @@ pick_answer = { "/home/me/workspaces/github.com/me/gone" }
 git_handles_open = false
 check("reports a directory with no .git", errors_with(rex.actions.rex_project_picker.run, "no .git marker"))
 
+-- An older Rex server has no palette at all; the action names the missing API
+-- rather than dying on a nil index, and does so before it shells out to fd.
+reset()
+found = { ok = false, stderr = "fd should not run" }
+local ui = rex.ui
+rex.ui = nil
+check("names the missing palette API", errors_with(rex.actions.rex_project_picker.run, "rex.ui.pick"))
+check("refuses before asking fd", last("exec", "list") == nil)
+rex.ui = ui
+
 print("picker-selfcheck: all checks passed")

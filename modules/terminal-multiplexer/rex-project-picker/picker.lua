@@ -217,6 +217,10 @@ local function setup(config)
 			-- The palette asks every connected app and the first answer wins, so this
 			-- needs no client of its own and no round trip back through the CLI.
 			-- Keep it out of pcall: rex.ui.pick refuses to ask from one.
+			-- Rex only grew rex.ui.pick recently, so an old server build (what a stale
+			-- server process usually means) would otherwise die indexing nil.
+			assert(rex.ui and rex.ui.pick,
+				"Rex has no palette (rex.ui.pick): the running server is too old, restart it with 'rex server stop'")
 			local choice, why, detail = rex.ui.pick({
 				title = "Open project",
 				placeholder = "Filter projects",
