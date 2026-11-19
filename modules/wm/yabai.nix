@@ -26,7 +26,6 @@ let
     shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
     shift + ctrl + alt - o: org-capture
     shift + ctrl + alt - f :${defaultBrowserCmd}
-    shift + ctrl + alt - t : open -n -a ${alacrittyApp} --args -e ${pkgs.tmux}/bin/tmux new-session -A -s main
     shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
