@@ -219,8 +219,10 @@ local function setup(config)
 			-- Keep it out of pcall: rex.ui.pick refuses to ask from one.
 			-- Rex only grew rex.ui.pick recently, so an old server build (what a stale
 			-- server process usually means) would otherwise die indexing nil.
-			assert(rex.ui and rex.ui.pick,
-				"Rex has no palette (rex.ui.pick): the running server is too old, restart it with 'rex server stop'")
+			assert(rex.ui and rex.ui.pick, "Rex has no palette (rex.ui.pick): the running server predates it. "
+				.. "'rex server status' prints its version.  The server Rex runs is the one it installed under "
+				.. "~/Library/Application Support/com.superlogical.rex/RexServer/Versions, so install Rex's update and "
+				.. "relaunch the app before stopping the server -- 'rex server stop' alone starts the same old build.")
 			local choice, why, detail = rex.ui.pick({
 				title = "Open project",
 				placeholder = "Filter projects",

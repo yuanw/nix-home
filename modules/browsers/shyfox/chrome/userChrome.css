@@ -27,3 +27,22 @@ welp, get flashed everytime */
 .browserContainer {
     background: #ffffff !important;
 }
+
+/* the findbar floats over that white content area, so it must not inherit
+the dark --toolbar-bgcolor that ShyFox uses for its background */
+findbar {
+    --tb-col: rgba(250, 250, 250, 0.95) !important;
+    color-scheme: light !important;
+    color: #1c1b22 !important;
+}
+
+findbar .findbar-textbox {
+    background-color: #ffffff !important;
+    color: #1c1b22 !important;
+}
+
+findbar .findbar-closebutton,
+findbar .findbar-find-next,
+findbar .findbar-find-previous {
+    fill: #1c1b22 !important;
+}
