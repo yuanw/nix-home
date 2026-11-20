@@ -10,14 +10,14 @@
 
 melpaBuild {
   pname = "gptel";
-  version = "0.9.9.6-unstable-2026-11-14";
+  version = "0.9.9.6-unstable-2026-11-17";
 
   src = fetchFromGitHub {
     owner = "karthink";
     repo = "gptel";
-    rev = "1ce9cd8aba6dd65b8f8b437523399a7a577d91d1";
+    rev = "0b0aad0b19f8f0bc86ea8cfb1dbe2f02b4ea43de";
     #sha256 = lib.fakeSha256;
-    sha256 = "sha256-Bw6dZDQa2Mu8+/47MaOHKGxkOIzVQtaccemzwoA3DxQ=";
+    sha256 = "sha256-QH+hLcY9P0geOKjGb+aOwtlgUl/i5b5WNGBOaFpbbio=";
   };
 
   packageRequires = [
