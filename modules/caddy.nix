@@ -160,21 +160,19 @@
         '';
       };
 
-      # The arr stack's UIs.  Same shape as prowlarr.yuanw.me and the same three
-      # reasons, so they are stated once here instead of three times:
+      # The arr stack's two UIs that have a login worth publishing.  Same shape as
+      # prowlarr.yuanw.me and the same three reasons, so they are stated once:
       #
       #   * the upstream binds to 127.0.0.1 (services.*.settings.server.bindAddress
       #     in hosts/misfit/configuration.nix) and no firewall rule exists for
-      #     7878/8989/6767, so this vhost is the only way in from anywhere else;
+      #     7878/8989, so this vhost is the only way in from anywhere else;
       #   * no basic_auth — each app has its own login (username yuan, password in
       #     pass:radarr/admin-password / pass:sonarr/admin-password, both declared
       #     through agenix rather than clicked in the UI), and a prompt in front of
       #     a login screen buys nothing;
-      #   * the apps are told they are proxied (isProxied / Bazarr behind it) or
-      #     their CSRF check and logs treat every browser as 127.0.0.1.
-      #
-      # Bazarr keeps its own session cookie; unlike Prowlarr it has no API-key
-      # bypass to worry about being published.
+      #   * the apps are told they are proxied (settings.server.isProxied) or their
+      #     CSRF check rejects the login POST and their logs call every browser
+      #     127.0.0.1.
       "radarr.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
@@ -189,12 +187,14 @@
         '';
       };
 
-      "bazarr.yuanw.me" = {
-        useACMEHost = "yuanw.me";
-        extraConfig = ''
-          reverse_proxy localhost:6767
-        '';
-      };
+      # No bazarr.yuanw.me, deliberately.  Bazarr's local login is opt-in and its
+      # config says `auth: {type: null, username: '', password: ''}` as shipped
+      # (measured in /var/lib/bazarr/config/config.yaml), so a vhost here would
+      # publish a subtitle daemon whose settings page — including the Radarr and
+      # Sonarr connection fields — answers to anyone who can resolve the name.
+      # Its own UI is rarely needed now that its configuration is declarative
+      # (services.bazarr above); when it is, use a tunnel and no new listener:
+      #   ssh -N -L 6767:127.0.0.1:6767 misfit    ->  http://localhost:6767
 
       "agh.yuanw.me" = {
         useACMEHost = "yuanw.me";
