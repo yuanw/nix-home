@@ -25,6 +25,7 @@ let
     interactive-shell = pkgs.pi-extensions.pi-interactive-shell;
     permission-gate = pkgs.pi-extensions.pi-permission-gate;
     ponytail = pkgs.pi-extensions.pi-ponytail;
+    prompt-sections = ./extensions/prompt-sections.ts;
     slow-mode = pkgs.pi-extensions.pi-slow-mode;
     subagents = pkgs.pi-extensions.pi-subagents;
   };
@@ -90,7 +91,8 @@ in
       example = lib.literalExpression ''
         {
           # defaults already enable notify, custom-footer, slow-mode,
-          # permission-gate, interactive-shell, ponytail, and better
+          # permission-gate, interactive-shell, ponytail, prompt-sections,
+          # and better
           cursor-agent.enable = true;
           subagents.enable = true;
           web-fetch.enable = true;
@@ -99,8 +101,8 @@ in
       description = ''
         Passed to programs.pi.extensions. By default enables notify,
         custom-footer, slow-mode, permission-gate, interactive-shell, ponytail,
-        and better. Set `<name>.enable = false` to opt out, or enable extras
-        such as cursor-agent / subagents / web-fetch / direnv.
+        prompt-sections, and better. Set `<name>.enable = false` to opt out, or
+        enable extras such as cursor-agent / subagents / web-fetch / direnv.
       '';
     };
 
@@ -150,6 +152,28 @@ in
       '';
       description = "Passed to programs.pi.rawSkills.";
     };
+
+    promptSections = lib.mkOption {
+      type = lib.types.attrsOf (
+        lib.types.oneOf [
+          lib.types.package
+          lib.types.path
+          lib.types.str
+        ]
+      );
+      default = { };
+      example = lib.literalExpression ''
+        { comment-sicko = inputs.cursor-plugins + /pstack/agents/comment-sicko.md; }
+      '';
+      description = ''
+        Markdown prompts the prompt-sections extension injects as named
+        system-prompt sections. Each entry is written to
+        `${agentConfigDir}/prompts/<name>.md`, and the filename becomes the
+        section tag. A plain file is injected from session start; a file with
+        frontmatter `on: false` ships switched off and `/prompts <name>`
+        turns it on for the session.
+      '';
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -161,6 +185,7 @@ in
       permission-gate.enable = lib.mkDefault true;
       interactive-shell.enable = lib.mkDefault true;
       ponytail.enable = lib.mkDefault true;
+      prompt-sections.enable = lib.mkDefault true;
       better.enable = lib.mkDefault true;
     };
 
@@ -234,10 +259,14 @@ in
           };
         };
 
-        home.file = lib.optionalAttrs permissionGateEnabled {
-          ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-            hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/coding-agents/pi/permission-gate-rules.ts";
-        };
+        home.file =
+          lib.optionalAttrs permissionGateEnabled {
+            ".config/pi-agent-extensions/permission-gate/rules.ts".source =
+              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/coding-agents/pi/permission-gate-rules.ts";
+          }
+          // lib.mapAttrs' (
+            name: source: lib.nameValuePair "${agentConfigDir}/prompts/${name}.md" { inherit source; }
+          ) cfg.promptSections;
       };
   };
 }
