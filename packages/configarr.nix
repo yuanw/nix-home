@@ -30,7 +30,7 @@ stdenv.mkDerivation (finalAttrs: {
 
   src = fetchurl {
     url = "https://github.com/raydak-labs/configarr/releases/download/v${finalAttrs.version}/configarr-linux-x64.tar.xz";
-    hash = "sha256-1wcfcrbf1708yj5vrbs7sww580nsg7cwf4sb3f6467kx0szc6770";
+    hash = "sha256-4BzDvgZ9HkOMG0sTx9l52gJUONdHr7yL9Aic4FZmjvE=";
   };
 
   nativeBuildInputs = [ autoPatchelfHook ];

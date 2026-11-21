@@ -76,4 +76,17 @@ in
   # cachix/dgx-spark-nixos.  The cache is public, so this grants write only, and
   # rotating it is just a new token — no path hashes depend on it.
   "cachix-auth-token.age".publicKeys = [ silver ];
+
+  # The arr stack (nix-home-private/docs/misfit-arr.org).  Two shapes on purpose:
+  # *-auth.age are systemd EnvironmentFile bodies (`RADARR__AUTH__PASSWORD=…`,
+  # `RADARR__AUTH__APIKEY=…`) for the servarr units, and the API-key values are
+  # *also* what configarr reads — its unit loads the same two files, so the
+  # profile syncer authenticates with exactly what the apps accept.
+  # *-api-key.age are the bare keys, for Bazarr's `_secret` (LoadCredential),
+  # whose jq pass takes a file's whole content as the value.  Rotate a key by
+  # editing BOTH files: `agenix -e` each one.
+  "radarr-auth.age".publicKeys = users ++ [ misfit ];
+  "sonarr-auth.age".publicKeys = users ++ [ misfit ];
+  "radarr-api-key.age".publicKeys = users ++ [ misfit ];
+  "sonarr-api-key.age".publicKeys = users ++ [ misfit ];
 }
