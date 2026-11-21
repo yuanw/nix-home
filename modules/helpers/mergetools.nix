@@ -44,9 +44,13 @@ let
             "yaml"
             "json"
             "ini"
+            "toml"
           ];
           default = "json";
-          description = "Format of the target file";
+          description = ''
+            Format of the target file. A "toml" target is merged through yq, and
+            its patch stays JSON (see getContent).
+          '';
         };
         force = mkOption {
           type = types.bool;
@@ -69,15 +73,36 @@ let
 
   activeTasks = filterAttrs (_n: v: v.enable) cfg;
 
-  # Generate content based on format
+  # Generate content based on format.
+  #
+  # A TOML target gets a JSON patch: yq picks the parser for load(PATCH) from the
+  # patch file name, and the ".nix-managed" name given below has no extension it
+  # recognises, so it falls back to YAML -- a superset of JSON and not of TOML.
+  # Only the target is read and written as TOML (see getMergeCmdStr), and the
+  # .nix-managed reference file for a TOML target is JSON for the same reason.
   getContent =
     task:
-    if task.format == "json" then
+    if task.format == "json" || task.format == "toml" then
       builtins.toJSON task.settings
     else if task.format == "yaml" then
       generators.toYAML { } task.settings
     else
       generators.toINI { } task.settings;
+
+  # Format the patch content above is actually in, which is what names the
+  # writeText fallback below -- yq sniffs that name too.
+  patchFormat = task: if task.format == "toml" then "json" else task.format;
+
+  # Content for a target that does not exist yet: the patch verbatim, except for
+  # a TOML target, whose patch is JSON. No -p json there: yq's JSON parser turns
+  # 4.0 into 4 and OmniWM's decoder wants the float, while its default YAML
+  # parser (a superset of JSON) keeps the type.
+  getInitCmdStr =
+    task:
+    if task.format == "toml" then
+      ''${pkgs.yq-go}/bin/yq -o toml -P "." "$PATCH" > "$TARGET"''
+    else
+      ''cp "$PATCH" "$TARGET"'';
 
   # Merge into $MERGE_TMP (caller copies the real target into MERGE_TMP first so
   # symlinks are dereferenced and the result replaces the target as a writable file).
@@ -88,6 +113,11 @@ let
       ''${pkgs.yq-go}/bin/yq -i -o json -P --indent 2 ". *= load(\"$PATCH\")" "$MERGE_TMP"''
     else if task.format == "yaml" then
       ''${pkgs.yq-go}/bin/yq -i -oy -P ". *= load(\"$PATCH\")" "$MERGE_TMP"''
+    else if task.format == "toml" then
+      # The re-parse is the guard, not decoration: a writer that produced
+      # something unreadable would otherwise land on a target OmniWM validates as
+      # a unit and falls back to defaults on (settings.toml.corrupt).
+      ''(${pkgs.yq-go}/bin/yq -i -p toml -o toml -P ". *= load(\"$PATCH\")" "$MERGE_TMP" && ${pkgs.yq-go}/bin/yq -p toml -o json "." "$MERGE_TMP" > /dev/null)''
     else
       ''${pkgs.crudini}/bin/crudini --merge "$MERGE_TMP" < "$PATCH"'';
 in
@@ -126,7 +156,7 @@ in
           if task.generateReference then
             if dir == "." then "$HOME/.${base}.nix-managed" else "$HOME/${dir}/.${base}.nix-managed"
           else
-            "${pkgs.writeText "${name}-patch.${task.format}" (getContent task)}";
+            "${pkgs.writeText "${name}-patch.${patchFormat task}" (getContent task)}";
       in
       lib.hm.dag.entryAfter [ "writeBoundary" ] ''
         TARGET="${task.target}"
@@ -147,15 +177,21 @@ in
 
             if [ ! -f "$TARGET" ]; then
               echo "mergetools: Initializing missing config from patch: $TARGET"
-              cp "$PATCH" "$TARGET"
+              ${getInitCmdStr task}
               chmod u+rw "$TARGET"
             else
               echo "mergetools: Merging Nix managed config into: $TARGET"
               MERGE_TMP="$(mktemp)"
               cat "$TARGET" > "$MERGE_TMP"
-              ${getMergeCmdStr task}
-              chmod u+rw "$MERGE_TMP"
-              mv -f "$MERGE_TMP" "$TARGET"
+              # Never mv a merge that failed: MERGE_TMP still holds the old
+              # content, so writing it would pass a broken merge off as done.
+              if ${getMergeCmdStr task}; then
+                chmod u+rw "$MERGE_TMP"
+                mv -f "$MERGE_TMP" "$TARGET"
+              else
+                echo "mergetools: merge failed, leaving $TARGET alone"
+                rm -f "$MERGE_TMP"
+              fi
             fi
           fi
         else

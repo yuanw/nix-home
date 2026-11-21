@@ -109,12 +109,22 @@ in
     home-manager.users.${username} = {
       home.packages = launcher.packages ++ [ pkgs.omniwm ];
 
-      # OmniWM rewrites settings.toml from its Settings window and replaces the
-      # symlink with a regular file, so force re-links the tracked template on
-      # the next switch instead of failing with a clobber error.
-      xdg.configFile."omniwm/settings.toml" = {
-        source = ./omniwm/settings.toml;
+      # OmniWM owns this file: its Settings window rewrites settings.toml, so the
+      # path has to be a regular file OmniWM can write, not a symlink back to the
+      # store that the next switch clobbers (force re-linked the template and the
+      # GUI edits made since were simply gone). mergetools merges the document
+      # below into whatever is there instead: the keys we declare win, keys only
+      # OmniWM writes (new schema keys after an upgrade, state it adds) survive,
+      # and a symlinked or read-only target is materialised to a writable file.
+      # Backups land next to the target as settings.toml.backup.<ts> and
+      # ~/.config/omniwm/.settings.toml.nix-managed shows what Nix forces.
+      #
+      # The template stays the whole document -- see the comment at its top.
+      mergetools.omniwm-settings = {
+        target = "${config.my.homeDirectory}/.config/omniwm/settings.toml";
+        format = "toml";
         force = true;
+        settings = builtins.fromTOML (builtins.readFile ./omniwm/settings.toml);
       };
     };
 

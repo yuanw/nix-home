@@ -1,4 +1,7 @@
-# OmniWM settings, managed by modules/wm/omniwm.nix.
+# OmniWM settings, merged into ~/.config/omniwm/settings.toml by
+# modules/wm/omniwm.nix (mergetools). Values only -- the merge reads the file
+# OmniWM wrote and layers the values below onto it with yq, so comments here do
+# not reach the live file.
 #
 # The whole document is here on purpose: OmniWM validates settings.toml as a
 # unit, so a partial file is rejected outright and it starts on defaults (see
@@ -6,9 +9,9 @@
 # itself, with the values below edited in place -- add values, do not delete
 # keys, and diff against a freshly generated one after an OmniWM upgrade.
 #
-# OmniWM's Settings window rewrites this file and replaces the symlink, so this
-# template is the source of truth: mirror GUI changes back here, and a
-# home-manager switch re-links it (force).
+# Unlike the symlink this replaced, the live file stays OmniWM's: keys it adds
+# (a new schema after an upgrade) survive a switch, keys named here win, so
+# mirror GUI changes you want to keep back into this file.
 
 schemaVersion = 5
 
