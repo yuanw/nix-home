@@ -695,8 +695,16 @@
     settings = {
       general = {
         port = 6767;
+        # Both keys, because the socket is what decides and it disagreed at first:
+        # `bind_address` alone left it listening on 0.0.0.0:6767 (measured with
+        # ss -ltnp), with `ip: '*'` still in the config it wrote.  `ip` is the one
+        # the server binds; `bind_address` is what the rest of the app reads.
         bind_address = "127.0.0.1";
+        ip = "127.0.0.1";
       };
+      # The nested shape is Bazarr's own: the numbered entries are what it writes
+      # back to config.yaml (radarr.radarr1.{ip,port,apikey}) and the unnumbered
+      # ones beside them are legacy, left empty on purpose.
       sonarr.sonarr1 = {
         ip = "127.0.0.1";
         port = 8989;
