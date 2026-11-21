@@ -22,13 +22,14 @@ let
   omni = args: "${pkgs.omniwm}/bin/omniwmctl command ${args}";
   launcher = import ./skhd-launcher.nix { inherit config pkgs; };
 
-  # The workspace trio modules/wm/skhdrc had: focus, send, send and follow.
+  # The workspace trio modules/wm/skhdrc had: focus, send, send and follow, for
+  # the six workspaces modules/wm/omniwm/settings.toml declares.
   workspaceKeys = lib.concatStringsSep "\n" (
     builtins.map (n: ''
       cmd - ${n} : ${omni "switch-workspace ${n}"}
       shift + cmd - ${n} : ${omni "move-to-workspace ${n}"}
       ctrl + cmd - ${n} : ${omni "move-to-workspace ${n}"} && ${omni "switch-workspace ${n}"}
-    '') (map toString (lib.range 1 9))
+    '') (map toString (lib.range 1 6))
   );
 
   wmConfig = ''
