@@ -168,6 +168,17 @@ in
       # still prompts (and Screen Recording for Overview thumbnails stays a
       # manual grant): a TCC row for a notarized app without its code
       # requirement is not always honoured.
+      # nix-darwin owns the plists it declares and emits a pass that unloads and
+      # deletes the ones the new build no longer has, but that pass left all
+      # three yabai-era agents behind here (plists still on disk, processes
+      # still up) -- and it never kills a KeepAlive process it stopped managing
+      # anyway. Tear the old stack down explicitly; flipping back to
+      # modules.wm.yabai re-creates all three.
+      for agent in org.nixos.yabai org.nixos.jankyborders org.nixos.sketchybar; do
+        launchctl bootout "gui/$(id -u '${username}')/$agent" || true
+        rm -f ~${username}/Library/LaunchAgents/"$agent".plist
+      done
+
       TCCUTIL="${pkgs.tccutil-manage}/bin/tccutil-manage"
       echo "Granting Accessibility and Input Monitoring to OmniWM..."
       "$TCCUTIL" --insert com.barut.OmniWM || true
