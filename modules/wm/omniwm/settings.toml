@@ -16,7 +16,7 @@
 schemaVersion = 5
 
 [appearance]
-mode = "dark"
+mode = "automatic"
 tabRailAppIcons = false
 
 [borders]
@@ -199,8 +199,8 @@ programs = []
 widgets = []
 
 [shellPermissions.services]
-lyrics = true
-weather = true
+lyrics = false
+weather = false
 
 [statusBar]
 showAppNames = false
