@@ -62,6 +62,7 @@
       ./wm/xmonad.nix
     ];
     darwin.imports = [
+      ./launchd.nix
       ./browsers/librewolf-darwin.nix
       ./browsers/browser-cli-darwin.nix
       ./browsers/ladybird.nix

@@ -238,5 +238,18 @@ in
       };
     })
 
+    # The agents this module owns when yabai is off. nix-darwin leaves an agent
+    # it no longer declares running, and its plist is load -w, so a leftover
+    # returns at the next login: yabai tiling the same windows as
+    # modules/wm/omniwm.nix, a second set of borders, sketchybar querying a
+    # yabai that is gone. See modules/launchd.nix.
+    (mkIf (!cfg.enable) {
+      modules.launchd.userAgentsToRemove = [
+        "org.nixos.yabai"
+        "org.nixos.jankyborders"
+        "org.nixos.sketchybar"
+      ];
+    })
+
   ];
 }
