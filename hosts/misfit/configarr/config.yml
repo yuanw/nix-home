@@ -1,0 +1,38 @@
+# Configarr's instance config — read by configarr.service on misfit
+# (hosts/misfit/configuration.nix), which points CONFIG_LOCATION here.
+#
+# Plan and the choice of profiles: nix-home-private/docs/misfit-arr.org
+# (decision 4).  Custom formats are the TRaSH-Guides ones at their own scores;
+# nothing here overrides a score, so a guide change lands on the next timer run.
+#
+# Credentials come from the environment, not from this file: `!env` reads the
+# variables the unit's EnvironmentFile (= the two agenix auth files, the same
+# ones the apps themselves start with) exports.  So this file can stay public.
+
+trashGuideUrl: https://github.com/TRaSH-Guides/Guides
+
+radarr:
+  misfit:
+    base_url: http://127.0.0.1:7878
+    api_key: !env RADARR__AUTH__APIKEY
+    quality_definition:
+      type: movie
+    include:
+      # HD Bluray + WEB (1080p): the profile the library actually wants — a
+      # house with one Jellyfin server and a 674 GB dataset is not chasing
+      # remuxes.  Change these three lines together, they are one profile.
+      - template: radarr-quality-definition-movie
+      - template: radarr-quality-profile-hd-bluray-web
+      - template: radarr-custom-formats-hd-bluray-web
+
+sonarr:
+  misfit:
+    base_url: http://127.0.0.1:8989
+    api_key: !env SONARR__AUTH__APIKEY
+    quality_definition:
+      type: series
+    include:
+      # WEB-1080p, the Sonarr counterpart of the choice above.
+      - template: sonarr-quality-definition-series
+      - template: sonarr-v4-quality-profile-web-1080p
+      - template: sonarr-v4-custom-formats-web-1080p

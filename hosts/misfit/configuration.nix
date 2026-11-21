@@ -244,6 +244,15 @@
     # env files under /run/healthsave — the containers never need this file
     healthsave-env.file = ../../secrets/healthsave-env.age;
 
+    # The arr stack.  All four are read by systemd as root — as EnvironmentFile
+    # for the servarr units and for configarr, and through Bazarr's
+    # LoadCredential — so agenix's default 0600 root:root is right and no
+    # service ever needs one.  (*-api-key are the bare keys for Bazarr; *-auth
+    # are `NAME=value` bodies.  See secrets/secrets.nix for why both exist.)
+    radarr-auth.file = ../../secrets/radarr-auth.age;
+    sonarr-auth.file = ../../secrets/sonarr-auth.age;
+    radarr-api-key.file = ../../secrets/radarr-api-key.age;
+    sonarr-api-key.file = ../../secrets/sonarr-api-key.age;
   };
 
   security.acme = {
@@ -642,6 +651,130 @@
     settings.server = {
       bindAddress = "localhost";
       isProxied = true;
+    };
+  };
+
+  # Authentication, and why it is here rather than clicked in the UI.
+  #
+  # Both apps are past the point where the servarr UIs had a user table: there
+  # is no /api/v3/user on either (measured — 404 with an admin API key, while
+  # /api/v3/system/backup answers 200 with the same key), so an account is not
+  # state in the app's DB the way Prowlarr's is.  It is one username and one
+  # password in the app's config, which means it *can* be declarative, and the
+  # password reaches it the way every other servarr secret does: an
+  # EnvironmentFile, never `settings` (which is world-readable store content).
+  #
+  # "forms" for the same reason Prowlarr ended there: with the default
+  # "external" and no reverse-proxy header to trust, nothing authenticates.  The
+  # keys are the app's own config names uppercased into SERVARR__SECTION__KEY,
+  # which is how nixpkgs renders `settings` (servarr/settings-options.nix:60);
+  # verified by an unauthenticated request returning 401 and a logged-in one
+  # returning 200, not by reading config.xml — which omits any key equal to its
+  # default and so shows no <Auth> block at all.
+  services.radarr.settings.auth = {
+    method = "forms";
+    required = "enabled";
+    username = "yuan";
+  };
+  services.sonarr.settings.auth = {
+    method = "forms";
+    required = "enabled";
+    username = "yuan";
+  };
+  services.radarr.environmentFiles = [ config.age.secrets.radarr-auth.path ];
+  services.sonarr.environmentFiles = [ config.age.secrets.sonarr-auth.path ];
+
+  # Subtitles.  The only app of the four whose module has a real secret channel
+  # (`_secret` → LoadCredential → a jq pass into DYNACONF_*, bazarr.nix:36-70),
+  # so unlike the others it is fully declarative — but the *names* below are its
+  # own config.yaml keys and the module declares none of them (freeform type):
+  # verified against the file it writes on first start, because an unknown
+  # DYNACONF_* name is ignored rather than rejected.
+  services.bazarr = {
+    enable = true;
+    settings = {
+      general = {
+        port = 6767;
+        bind_address = "127.0.0.1";
+      };
+      sonarr.sonarr1 = {
+        ip = "127.0.0.1";
+        port = 8989;
+        apikey._secret = config.age.secrets.sonarr-api-key.path;
+      };
+      radarr.radarr1 = {
+        ip = "127.0.0.1";
+        port = 7878;
+        apikey._secret = config.age.secrets.radarr-api-key.path;
+      };
+    };
+  };
+
+  # configarr — TRaSH-Guides custom formats, quality definitions and profiles
+  # into the two apps.  A oneshot on a timer, not a daemon: it converges and
+  # exits, which is also what makes it safe to run by hand while debugging
+  # (DRY_RUN=true is the dry-run switch; it takes no CLI flags at all).
+  #
+  # The package is ours (packages/configarr.nix) because nixpkgs has no
+  # configarr; the unit is ours because nothing ships one.
+  environment.etc."configarr/config.yml".source = ./configarr/config.yml;
+
+  systemd.services.configarr = {
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      # Where it clones TRaSH-Guides and the recyclarr template repo — src/env.ts
+      # puts them at $ROOT_PATH/repos, so ROOT_PATH has to be the writable one.
+      # /var/lib/private is on the /persist list, so the clones survive a boot;
+      # losing them would only cost a re-clone.
+      StateDirectory = "configarr";
+      WorkingDirectory = "/var/lib/configarr";
+      Environment = [
+        "ROOT_PATH=/var/lib/configarr"
+        "CONFIG_LOCATION=/etc/configarr/config.yml"
+        "LOG_LEVEL=info"
+        # The binary shells out to git (simple-git), and a service's PATH is not
+        # the interactive one.  Named explicitly rather than trusted: the failure
+        # this avoids is a green run that synced nothing but the log.
+        "PATH=${
+          pkgs.lib.makeBinPath [
+            pkgs.git
+            pkgs.coreutils
+          ]
+        }"
+      ];
+      # The same two files the apps start with, which is how config.yml's
+      # `!env RADARR__AUTH__APIKEY` resolves.  It also hands configarr the two
+      # passwords it does not need — systemd read them as root either way, and
+      # splitting the files again to avoid that buys a fourth secret to rotate.
+      EnvironmentFile = [
+        config.age.secrets.radarr-auth.path
+        config.age.secrets.sonarr-auth.path
+      ];
+      # callPackage, not pkgs.configarr: the packages/ overlay is only
+      # applied to silver, asche and dgx-spark (hosts/colmena.nix:18,23) — misfit
+      # gets its packages from the plain hive nixpkgs.
+      ExecStart = "${pkgs.callPackage ../../packages/configarr.nix { }}/bin/configarr";
+      # No network sandbox: it clones two GitHub repos and talks to two local
+      # apps.  Everything else of the usual hardening set is inert for a
+      # oneshot that writes only its StateDirectory.
+      NoNewPrivileges = true;
+      ProtectHome = true;
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ReadWritePaths = [ "/var/lib/configarr" ];
+    };
+  };
+
+  systemd.timers.configarr = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "configarr.service" ];
+    timerConfig = {
+      # Daily, like recyclarr's default.  Cheap (two GitHub clones + a few
+      # hundred API calls) and the guides move more often than a week.
+      OnCalendar = "*-*-* 04:15:00";
+      Persistent = true;
+      RandomizedDelaySec = "10m";
     };
   };
 

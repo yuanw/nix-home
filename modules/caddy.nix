@@ -160,6 +160,42 @@
         '';
       };
 
+      # The arr stack's UIs.  Same shape as prowlarr.yuanw.me and the same three
+      # reasons, so they are stated once here instead of three times:
+      #
+      #   * the upstream binds to 127.0.0.1 (services.*.settings.server.bindAddress
+      #     in hosts/misfit/configuration.nix) and no firewall rule exists for
+      #     7878/8989/6767, so this vhost is the only way in from anywhere else;
+      #   * no basic_auth — each app has its own login (username yuan, password in
+      #     pass:radarr/admin-password / pass:sonarr/admin-password, both declared
+      #     through agenix rather than clicked in the UI), and a prompt in front of
+      #     a login screen buys nothing;
+      #   * the apps are told they are proxied (isProxied / Bazarr behind it) or
+      #     their CSRF check and logs treat every browser as 127.0.0.1.
+      #
+      # Bazarr keeps its own session cookie; unlike Prowlarr it has no API-key
+      # bypass to worry about being published.
+      "radarr.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy localhost:7878
+        '';
+      };
+
+      "sonarr.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy localhost:8989
+        '';
+      };
+
+      "bazarr.yuanw.me" = {
+        useACMEHost = "yuanw.me";
+        extraConfig = ''
+          reverse_proxy localhost:6767
+        '';
+      };
+
       "agh.yuanw.me" = {
         useACMEHost = "yuanw.me";
         extraConfig = ''
