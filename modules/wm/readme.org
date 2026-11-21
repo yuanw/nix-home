@@ -39,6 +39,14 @@ refuses both.
 - Settings live in modules/wm/omniwm/settings.toml. OmniWM's Settings window
   rewrites that file and drops the symlink, so a GUI change survives only until
   the next switch: mirror it into the template.
+- That file is the ~schemaVersion = 5~ document OmniWM wrote itself, ~1200~
+  lines of it. Validation is all-or-nothing, so a trimmed file is refused whole
+  (the rejected bytes go to ~/.config/omniwm/settings.toml.corrupt and the WM
+  starts on defaults, ~ipcEnabled~ among them -- which is why ~omniwmctl~
+  answers ~transport_failure~). Change values, never delete keys; after an
+  OmniWM upgrade delete the file, let the app write a fresh one, re-apply the
+  values. ~omniwmctl ping~ and ~omniwmctl query workspaces~ are the two checks
+  that say whether the file loaded.
 - Needs macOS 26+ on Apple Silicon, Mission Control ~Displays have separate
   Spaces~ on, and Accessibility plus Input Monitoring grants (the activation
   script inserts them, first launch still prompts).
