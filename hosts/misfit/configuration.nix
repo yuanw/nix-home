@@ -824,6 +824,97 @@
     };
   };
 
+  # ─── The arr stack: Radarr, Sonarr, Bazarr, configarr ─────────────────────
+  #
+  # Plan: nix-home-private/docs/misfit-arr.org — read it before changing any of
+  # this. The phases, the acceptance measurements and the reasoning live there;
+  # this block carries what cannot be re-derived from it.
+  #
+  # The shape: Prowlarr searches, qBittorrent grabs into /data/torrents, Radarr
+  # and Sonarr hardlink the result into the Jellyfin library and notify it. What
+  # is *not* here is what each app keeps in its own DB — the admin account, the
+  # qBittorrent download client (http://10.240.0.2:8080, because the daemon has
+  # had no host loopback since Phase 5 of the torrent plan), the Prowlarr app
+  # entries — same split as services.prowlarr above.
+
+  # One group for everything the importers must write: the seed tree (a hardlink
+  # out of it needs READ *and* WRITE on the source file under
+  # fs.protected_hardlinks, and Radarr unlinks from it when a download fails) and
+  # the two library roots (they mkdir in them).
+  #
+  # Not `data`: jellyfin's primary gid is `data` (services.jellyfin.group), so a
+  # group-writable library would hand a network-facing web server the ability to
+  # delete the whole media library. Not `users` either — that is the human group
+  # holding yuan and yuanw, and four daemons in it is the same mistake aimed the
+  # other way. `jellyfin` joins nothing: it reads everything world-readable, the
+  # way it already reads the 1746 files that predate all of this.
+  users.groups.media = { };
+
+  # The nixpkgs modules create these users (User=/Group=, not DynamicUser), so
+  # declaring membership here merges with their definitions. Deliberately not
+  # done for a user no module creates: `users.users.yuanw` is the lesson — an
+  # account with isNormalUser/group unset fails the build.
+  users.users.radarr.extraGroups = [ "media" ];
+  users.users.sonarr.extraGroups = [ "media" ];
+
+  # Both servarr units hard-set UMask = "0022" (servarr/radarr.nix:96). With the
+  # setgid library roots below that would make every title directory Radarr
+  # creates 0755, and then Bazarr cannot write a .srt into it — so the umask is
+  # part of the group model, not a cosmetic choice. mkForce because the module
+  # sets the key rather than leaving it at its default.
+  systemd.services.radarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+  systemd.services.sonarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+
+  # The activation that *introduces* a persistence mount is the one tmpfiles
+  # misses — systemd-tmpfiles-setup ran at the previous boot, when no such mount
+  # existed, and leaves a root-owned directory behind. That cost a whole deploy
+  # of the seeder (nix-home-private/modules/arr.nix explains it for
+  # /var/lib/qBittorrent), so the two new state trees do not repeat the
+  # discovery. Every level is named: `install -d -o X -g X a/b/c` chowns only the
+  # operand it is handed, and a root-owned parent stops mkpath() cold.
+  systemd.services.radarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o radarr -g radarr"
+    + " /var/lib/radarr /var/lib/radarr/.config /var/lib/radarr/.config/Radarr";
+  systemd.services.sonarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o sonarr -g sonarr"
+    + " /var/lib/sonarr /var/lib/sonarr/.config /var/lib/sonarr/.config/NzbDrone";
+
+  # Replaces the module's RequiresMountsFor (a plain list — setting it here
+  # overwrites it), so the data directory is named as well as /data. An importer
+  # that starts before /data is mounted writes its library into the root dataset
+  # and nobody notices until the pool is full.
+  systemd.services.radarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/radarr"
+  ];
+  systemd.services.sonarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/sonarr"
+  ];
+
+  services.radarr = {
+    enable = true;
+    # Loopback, and openFirewall stays false: these UIs edit download clients and
+    # move files, so the bind is the gate. Unlike Prowlarr this is not yet the
+    # whole story — there is no account in the app until it is created, so
+    # nothing may be published until `authentication` is set below (see the
+    # services.prowlarr block for what "external with no user" actually means).
+    settings.server = {
+      bindAddress = "localhost";
+      # Honour X-Forwarded-For from Caddy; without it every request is logged as
+      # 127.0.0.1 and the CSRF check has nothing to compare.
+      isProxied = true;
+    };
+  };
+
+  services.sonarr = {
+    enable = true;
+    settings.server = {
+      bindAddress = "localhost";
+      isProxied = true;
+    };
+  };
+
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
   # services.xserver.xkb.options = "eurosign:e,caps:escape";

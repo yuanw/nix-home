@@ -1,6 +1,7 @@
 # Configarr — the TRaSH-Guides syncer for Radarr/Sonarr (custom formats, quality
 # definitions, quality profiles).  Planned in
 # nix-home-private/docs/misfit-arr.org [[#configarr]]; it is *not* in nixpkgs, so
+<<<<<<< HEAD
 # this file is the whole reason a configarr derivation exists here.
 #
 # Upstream distributes per-platform `bun build --compile` executables (see its
@@ -65,6 +66,48 @@ stdenv.mkDerivation (finalAttrs: {
       "${glibc}" "$out" > $out/bin/configarr
     chmod 755 $out/bin/configarr
 
+||||||| parent of 59d8b09f (misfit: Radarr and Sonarr, and the group that lets them import)
+=======
+# this file is the whole reason `pkgs.configarr` exists.
+#
+# Upstream ships no source-buildable artifact for us to compile: the repo is a
+# pnpm/TypeScript app whose only distribution is a Docker image and per-platform
+# tarballs.  The release asset is a single self-contained Node executable, so the
+# packaging here is a fetch plus a patchelf — `file` on the downloaded asset says
+# "ELF 64-bit LSB executable, x86-64, dynamically linked (interpreter
+# /lib64/ld-linux-x86-64.so.2), GLIBC_2.2.5+", which is exactly what
+# autoPatchelfHook is for.
+#
+# Two things the unit in hosts/misfit/configuration.nix has to carry because the
+# binary cannot: `git` on PATH (it clones TRaSH-Guides and the recyclarr template
+# repo with simple-git, i.e. it shells out — the strings carry "Failed to spawn
+# git process"), and a writable working directory (src/env.ts puts its cloned
+# repos at $ROOT_PATH/repos, ROOT_PATH defaulting to the cwd).  It takes no CLI
+# flags at all: every knob is an environment variable (CONFIG_LOCATION,
+# SECRETS_LOCATION, DRY_RUN, LOG_LEVEL — read off src/env.ts at v1.39.2).
+{
+  lib,
+  stdenv,
+  fetchurl,
+  autoPatchelfHook,
+}:
+stdenv.mkDerivation (finalAttrs: {
+  pname = "configarr";
+  version = "1.39.2";
+
+  src = fetchurl {
+    url = "https://github.com/raydak-labs/configarr/releases/download/v${finalAttrs.version}/configarr-linux-x64.tar.xz";
+    hash = "sha256-1wcfcrbf1708yj5vrbs7sww580nsg7cwf4sb3f6467kx0szc6770";
+  };
+
+  nativeBuildInputs = [ autoPatchelfHook ];
+
+  # The tarball holds one executable and its source map; the map is a debugging
+  # artifact of upstream's bundling step and 4 MB of closure we do not run.
+  installPhase = ''
+    runHook preInstall
+    install -Dm755 configarr $out/bin/configarr
+>>>>>>> 59d8b09f (misfit: Radarr and Sonarr, and the group that lets them import)
     runHook postInstall
   '';
 
