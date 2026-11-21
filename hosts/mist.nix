@@ -153,6 +153,10 @@
         web-fetch.enable = true;
         cursor-agent.enable = true;
       };
+      # Ships off (`on: false`); `/prompts ambition` turns it on for a session.
+      promptSections = {
+        ambition = ../modules/coding-agents/pi/prompts/ambition.md;
+      };
     };
     secrets.agenix = {
       enable = true;

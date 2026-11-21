@@ -131,7 +131,7 @@ export default function promptSections(pi: ExtensionAPI) {
       const name = String(args || "").trim().toLowerCase();
 
       if (!name) {
-        const summary = sections.map((s) => `${s.on ? "○" : "·"} ${s.name}`).join("\n");
+        const summary = sections.map((s) => `${states[s.name] ? "●" : "○"} ${s.name}`).join("\n");
         ctx?.ui?.notify?.(summary ? `Prompt sections (${dir}):\n${summary}` : `No prompt sections in ${dir}.`, "info");
         return;
       }
