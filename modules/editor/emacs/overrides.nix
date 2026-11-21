@@ -310,7 +310,7 @@ self: _super:
 }
 // (
   (import ./ghostel.nix {
-    inherit pkgs;
+    inherit pkgs lib;
     isDarwin = pkgs.stdenv.hostPlatform.isDarwin;
   }).emacsOverrides
     self
