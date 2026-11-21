@@ -56,6 +56,86 @@ enabled = true
 # sketchybar is off with yabai, so keep the CPU/mem item OmniWM can draw.
 systemStatsButton = true
 
+# Spell the nine workspaces out: the built-in set is pinned to layoutType niri,
+# so without this block general.defaultLayoutType above is ignored. "default"
+# hands that choice back to the one knob. Ids and the 6/7 secondary assignment
+# (shown ❤️/🚀) are OmniWM's own defaults, kept stable so the Settings window
+# and the persisted window restore catalog keep matching them.
+# https://github.com/OmniNull/OmniWM/blob/main/Sources/OmniWM/Core/Config/BuiltInSettingsDefaults.swift
+[[workspaces]]
+id = "AD36F001-C57E-41A5-AC1D-DF5249D007F0"
+name = "1"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "454CECD4-5E9D-4ED1-95D7-979D48817F5F"
+name = "2"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "BEB842B5-E894-4791-9FD1-397C3CDD3538"
+name = "3"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "248AA883-2261-4D45-943C-79C0E46A232B"
+name = "4"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "8B8C45D6-CE9E-41D9-BD50-BE4989D5E3DE"
+name = "5"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "5953F2BF-A378-4266-91B2-287174C4FA4D"
+name = "6"
+displayName = "❤️"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "secondary"
+
+[[workspaces]]
+id = "A7D5E104-6985-4516-8ED5-07F144F2A33D"
+name = "7"
+displayName = "🚀"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "secondary"
+
+[[workspaces]]
+id = "0E18F6B0-345A-4078-8B21-33641F07A861"
+name = "8"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
+[[workspaces]]
+id = "8D4D711C-2B2F-4FEC-86BF-FA952037738A"
+name = "9"
+layoutType = "default"
+
+[workspaces.monitorAssignment]
+type = "main"
+
 # yabai's `manage=off' rules.
 [[appRules]]
 bundleId = "com.apple.systempreferences"
