@@ -218,8 +218,9 @@
       enable = true;
     };
     wm = {
-      yabai.enable = true;
-      yabai.enableJankyborders = true;
+      # OmniWM trial. Revert with yabai.enable = true and
+      # yabai.enableJankyborders = true (the two cannot both be on).
+      omniwm.enable = true;
     };
   };
 }

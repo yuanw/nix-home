@@ -69,6 +69,7 @@
       ./brew.nix
       ./health.nix
       ./editor/emacs/emacs-macos.nix
+      ./wm/omniwm.nix
       ./wm/yabai.nix
       ./login-items.nix
       ./macintosh.nix

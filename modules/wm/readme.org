@@ -27,5 +27,25 @@ System Preference -> Lock Screen ->
 - https://github.com/shaunsingh/nix-darwin-dotfiles
 - https://github.com/julian-heng/yabai-config
 - https://github.com/peel/dotfiles/blob/master/setup/darwin/wm.nix
+** OmniWM instead of yabai
+[[https://github.com/OmniNull/OmniWM][OmniWM]] (modules/wm/omniwm.nix) tiles, draws its own workspace bar and its own
+focused-window border, so enabling it takes ~services.yabai~, ~services.sketchybar~
+and ~services.jankyborders~ off with it. Enable one WM or the other; an assertion
+refuses both.
+
+- Layout keys stay in skhd (the chords modules/wm/skhdrc gave yabai) and call
+  ~omniwmctl~ over IPC. OmniWM's own hotkeys stay on as well (~Option + arrows~,
+  ~Option + 1-9~).
+- Settings live in modules/wm/omniwm/settings.toml. OmniWM's Settings window
+  rewrites that file and drops the symlink, so a GUI change survives only until
+  the next switch: mirror it into the template.
+- Needs macOS 26+ on Apple Silicon, Mission Control ~Displays have separate
+  Spaces~ on, and Accessibility plus Input Monitoring grants (the activation
+  script inserts them, first launch still prompts).
+- Not carried over: workspace create/destroy (~cmd + alt - w~ lost its meaning),
+  the ~shift + ctrl - a/s/w/d~ floating nudge, and ~cmd - 0~ for a tenth
+  workspace. Pointer move/resize comes from OmniWM's gesture settings instead of
+  yabai's ~fn~ modifier bindings.
+
 * NixOS
 xmonad + xmobar

@@ -1,0 +1,67 @@
+# OmniWM settings, managed by modules/wm/omniwm.nix.
+#
+# OmniWM's Settings window rewrites this file (and replaces the symlink with a
+# regular file), so the template is the source of truth: mirror any GUI change
+# you want to keep back here, and `home-manager switch' re-links it (force).
+#
+# No schemaVersion on purpose. A file that declares a schemaVersion must be
+# complete or OmniWM rejects the whole thing and starts on defaults; a
+# version-less file goes through the legacy upgrade path, which fills in the
+# default for every key this template leaves out. Keep new keys few.
+
+[general]
+# yabai's bsp layout; Option+Shift+L toggles a workspace to niri.
+defaultLayoutType = "dwindle"
+# The skhd bindings in modules/wm/omniwm.nix drive the layout through omniwmctl.
+ipcEnabled = true
+updateChecksEnabled = false
+
+[focus]
+followsMouse = true
+# yabai focus_follows_mouse = autoraise
+raiseOnMouseFocus = true
+# yabai mouse_follows_focus = on
+moveMouseToFocusedWindow = true
+followsWindowToMonitor = true
+
+[gaps]
+# yabai window_gap = 10; the outer gaps stay 0 because the workspace bar
+# reserves its own layout space.
+size = 10.0
+
+[gaps.outer]
+top = 0.0
+bottom = 0.0
+left = 0.0
+right = 0.0
+
+[dwindle]
+# 1.0 is the equal split yabai's split_ratio = 0.50 gave.
+defaultSplitRatio = 1.0
+useGlobalGaps = true
+
+# Replaces services.jankyborders (active_color = 0xff7793d1).
+[borders]
+enabled = true
+width = 4.0
+
+[borders.color]
+red = 0.467
+green = 0.576
+blue = 0.82
+alpha = 1.0
+
+[workspaceBar]
+enabled = true
+# sketchybar is off with yabai, so keep the CPU/mem item OmniWM can draw.
+systemStatsButton = true
+
+# yabai's `manage=off' rules.
+[[appRules]]
+bundleId = "com.apple.systempreferences"
+layout = "float"
+
+[[appRules]]
+bundleId = ""
+appNameSubstring = "mono-stretchly"
+layout = "float"
