@@ -68,14 +68,14 @@ top = 0.0
 [general]
 animationSpeed = 1.0
 animationsEnabled = true
-defaultLayoutType = "dwindle"
+defaultLayoutType = "niri"
 hotkeysEnabled = true
 hyperKeyModifiers = "Control+Option+Shift+Command"
 ipcEnabled = true
 preventSleepEnabled = false
 systemHyperTrigger = "None"
 updateChecksEnabled = false
-workspaceAutoBackAndForth = false
+workspaceAutoBackAndForth = true
 
 [gestures]
 adoptNativeMoveAcrossDisplays = false
@@ -1273,3 +1273,28 @@ name = "6"
 [workspaces.monitorAssignment]
 type = "main"
 
+[[workspaces]]
+displayName = "7"
+id = "AFD55307-4EA6-4931-8250-3602143F5A32"
+layoutType = "niri"
+name = "7"
+
+[workspaces.monitorAssignment]
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
+name = "LG HDR 4K"
+
+[[workspaces]]
+displayName = "8"
+id = "7A4AC69C-3DFB-422F-9392-180C694AB21A"
+layoutType = "niri"
+name = "8"
+
+[workspaces.monitorAssignment]
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
+name = "BenQ RD280U"

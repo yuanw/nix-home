@@ -22,14 +22,19 @@ let
   omni = args: "${pkgs.omniwm}/bin/omniwmctl command ${args}";
   launcher = import ./skhd-launcher.nix { inherit config pkgs; };
 
+  # The template doubles as the record of how many workspaces there are, so the
+  # skhd chords below cannot drift from it the way a hardcoded count did when a
+  # seventh workspace appeared in the GUI.
+  wmSettings = builtins.fromTOML (builtins.readFile ./omniwm/settings.toml);
+
   # The workspace trio modules/wm/skhdrc had: focus, send, send and follow, for
-  # the six workspaces modules/wm/omniwm/settings.toml declares.
+  # each workspace the settings template declares.
   workspaceKeys = lib.concatStringsSep "\n" (
-    builtins.map (n: ''
-      cmd - ${n} : ${omni "switch-workspace ${n}"}
-      shift + cmd - ${n} : ${omni "move-to-workspace ${n}"}
-      ctrl + cmd - ${n} : ${omni "move-to-workspace ${n}"} && ${omni "switch-workspace ${n}"}
-    '') (map toString (lib.range 1 6))
+    builtins.map (w: ''
+      cmd - ${w.name} : ${omni "switch-workspace ${w.name}"}
+      shift + cmd - ${w.name} : ${omni "move-to-workspace ${w.name}"}
+      ctrl + cmd - ${w.name} : ${omni "move-to-workspace ${w.name}"} && ${omni "switch-workspace ${w.name}"}
+    '') wmSettings.workspaces
   );
 
   wmConfig = ''
@@ -124,7 +129,7 @@ in
         target = "${config.my.homeDirectory}/.config/omniwm/settings.toml";
         format = "toml";
         force = true;
-        settings = builtins.fromTOML (builtins.readFile ./omniwm/settings.toml);
+        settings = wmSettings;
       };
     };
 
