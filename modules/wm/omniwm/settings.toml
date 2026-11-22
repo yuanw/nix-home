@@ -1226,38 +1226,59 @@ binding = "Unassigned"
 id = "toggleShellWidget.workspaces"
 
 [[workspaces]]
+displayName = "1"
 id = "AD36F001-C57E-41A5-AC1D-DF5249D007F0"
 layoutType = "dwindle"
 name = "1"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
+name = "BenQ RD280U"
 
 [[workspaces]]
+displayName = "2"
 id = "454CECD4-5E9D-4ED1-95D7-979D48817F5F"
 layoutType = "dwindle"
 name = "2"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
+name = "BenQ RD280U"
 
 [[workspaces]]
+displayName = "3"
 id = "BEB842B5-E894-4791-9FD1-397C3CDD3538"
 layoutType = "dwindle"
 name = "3"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
+name = "LG HDR 4K"
 
 [[workspaces]]
+displayName = "4"
 id = "248AA883-2261-4D45-943C-79C0E46A232B"
 layoutType = "dwindle"
 name = "4"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
+name = "LG HDR 4K"
 
 [[workspaces]]
+displayName = "5"
 id = "8B8C45D6-CE9E-41D9-BD50-BE4989D5E3DE"
 layoutType = "dwindle"
 name = "5"
@@ -1266,6 +1287,7 @@ name = "5"
 type = "main"
 
 [[workspaces]]
+displayName = "6"
 id = "5953F2BF-A378-4266-91B2-287174C4FA4D"
 layoutType = "dwindle"
 name = "6"

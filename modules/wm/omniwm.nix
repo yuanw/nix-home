@@ -28,13 +28,14 @@ let
   wmSettings = builtins.fromTOML (builtins.readFile ./omniwm/settings.toml);
 
   # The workspace trio modules/wm/skhdrc had: focus, send, send and follow, for
-  # each workspace the settings template declares.
+  # each workspace the settings template declares. omniwmctl takes the 1-based
+  # position, not the workspace name, so the count is all this reads from it.
   workspaceKeys = lib.concatStringsSep "\n" (
-    builtins.map (w: ''
-      cmd - ${w.name} : ${omni "switch-workspace ${w.name}"}
-      shift + cmd - ${w.name} : ${omni "move-to-workspace ${w.name}"}
-      ctrl + cmd - ${w.name} : ${omni "move-to-workspace ${w.name}"} && ${omni "switch-workspace ${w.name}"}
-    '') wmSettings.workspaces
+    builtins.map (n: ''
+      cmd - ${n} : ${omni "switch-workspace ${n}"}
+      shift + cmd - ${n} : ${omni "move-to-workspace ${n}"}
+      ctrl + cmd - ${n} : ${omni "move-to-workspace ${n}"} && ${omni "switch-workspace ${n}"}
+    '') (builtins.genList (i: toString (i + 1)) (builtins.length wmSettings.workspaces))
   );
 
   wmConfig = ''
