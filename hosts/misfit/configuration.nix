@@ -274,8 +274,9 @@
       # and the cert quietly expires.  Drop this when renewOpts gets the flag:
       # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/security/acme/default.nix#L329
       extraLegoRenewFlags = [ "--ari-disable" ];
-      #dnsPropagationCheck = false;
-      dnsPropagationCheck = true;
+      # Upstream split dnsPropagationCheck in two; the old single check was the
+      # recursive one against dnsResolver, which the new option defaults to off.
+      dnsRecursivePropagationCheck = true;
       #webroot = "/var/lib/acme";
       environmentFile = config.age.secrets.namecheap.path;
     };
