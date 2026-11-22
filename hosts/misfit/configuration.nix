@@ -604,6 +604,20 @@
   systemd.services.radarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
   systemd.services.sonarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
 
+  # `media` has to be the *primary* group, not a supplementary one. Both units
+  # run with PrivateUsers = true, and a private user namespace maps only the
+  # unit's own uid and gid: radarr's Groups list reads `275 984` while its
+  # gid_map maps only 0 and 275, so 984 is a number that names no group the
+  # kernel can ever match. Measured on misfit with setpriv, once per side of the
+  # boundary — without media in the credential, `mkdir /data/Movies/<title>` is
+  # EACCES and `ln` of a seed file is EPERM, which is nothing importing at all;
+  # with it, the directory comes out `radarr:media` setgid as intended. The same
+  # applies to the seeder's group in nix-home-private/modules/arr.nix, and
+  # UMask 0002 above is what leaves the files 0664/2775 rather than 0644/0755.
+  # mkForce again: the servarr module assigns serviceConfig.Group itself.
+  systemd.services.radarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+  systemd.services.sonarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+
   # The activation that *introduces* a persistence mount is the one tmpfiles
   # misses — systemd-tmpfiles-setup ran at the previous boot, when no such mount
   # existed, and leaves a root-owned directory behind. That cost a whole deploy
