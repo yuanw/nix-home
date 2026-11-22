@@ -96,12 +96,16 @@ in
     );
 
     # Drop stale bridge processes left behind when the extension disconnects.
+    # Do NOT rm the socket: the bridge is a long-lived LibreWolf child, and if
+    # it outlives the kill it keeps listening on the now-unlinked inode, so
+    # every CLI call fails with "Cannot connect" until LibreWolf respawns it.
+    # A stale file is safe to leave — bridge.start() unlinks it before binding.
+    # LibreWolf respawns the bridge (~5s) and it rebinds a fresh socket.
     home.activation.resetBrowserCliBridge = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       if [ -n "''${DRY_RUN:-}" ]; then
         exit 0
       fi
       pkill -f '[b]rowser-cli-server' 2>/dev/null || true
-      rm -f "${runtimeDir}/browser-cli.sock"
     '';
   };
 }

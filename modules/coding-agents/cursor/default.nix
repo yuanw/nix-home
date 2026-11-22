@@ -30,6 +30,18 @@ in
       };
       description = "Skill directories, linked into ~/.cursor/skills/<name>/.";
     };
+
+    agentFiles = lib.mkOption {
+      type = lib.types.attrsOf lib.types.path;
+      # Cursor's user-level subagents, linked straight from the source repo:
+      # flake-prompt has no cursor backend, so it cannot render this one. The
+      # same pstack agent reaches Pi as a degraded skill (the prompt set in
+      # modules/coding-agents/prompts).
+      default = {
+        comment-sicko = inputs.cursor-plugins + /pstack/agents/comment-sicko.md;
+      };
+      description = "Subagent markdown files, linked into ~/.cursor/agents/<name>.md.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -51,6 +63,15 @@ in
             recursive = true;
           }
         ) cfg.skillDirs;
+      })
+
+      (lib.mkIf (cfg.agentFiles != { }) {
+        home.file = lib.mapAttrs' (
+          name: source:
+          lib.nameValuePair ".cursor/agents/${name}.md" {
+            inherit source;
+          }
+        ) cfg.agentFiles;
       })
     ];
   };

@@ -47,9 +47,21 @@ with lib;
         ''
           notify() { ${alerter} --title "Emacs Launch" --group emacs-launch --timeout 5 --message "$1"; }
           {
-            notify "Attempting to start Emacs..."
             [[ -s "${config.my.homeDirectory}/.wk/profile" ]] && source "${config.my.homeDirectory}/.wk/profile"
             sock="$(getconf DARWIN_USER_TEMP_DIR)emacs$(id -u)/server"
+            client="${emacsPackage}/bin/emacsclient"
+            # A second Emacs can never take the socket: if something already
+            # answers there (a hand-started `emacs', or the daemon KeepAlive is
+            # racing with), `--fg-daemon' reloads the whole config, fails
+            # server-start and exits -- and KeepAlive relaunches it forever.
+            # Wait for that server to go away instead of burning a boot per try.
+            # The log line is what tells a wait apart from a hung start.
+            # `-a ""' so emacsclient never launches ALTERNATE_EDITOR as a side effect.
+            if "$client" -a "" -e nil >/dev/null 2>&1; then
+              echo "$(date): Emacs server already answers on $sock, waiting for it to exit."
+              while "$client" -a "" -e nil >/dev/null 2>&1; do sleep 30; done
+            fi
+            notify "Attempting to start Emacs..."
             /bin/wait4path "${emacsApp}" && {
               "${emacsApp}" --fg-daemon
               if [ -S "$sock" ]; then

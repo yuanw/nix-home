@@ -11,18 +11,21 @@ fi
 ORG="$1"
 REPO="$2"
 WORKSPACE_DIR="$HOME/workspaces"
+# Repos live two levels down, under the host and then the org, the way `h`
+# (github.com/zimbatm/h) resolves `h <org>/<repo>`.
+TARGET_DIR="$WORKSPACE_DIR/github.com/$ORG"
 REPO_URL="https://github.com/${ORG}/${REPO}.git"
 
-mkdir -p "$WORKSPACE_DIR"
+mkdir -p "$TARGET_DIR"
 
-cd "$WORKSPACE_DIR"
+cd "$TARGET_DIR"
 
 if [ -d "$REPO" ]; then
-    echo "Repository $REPO already exists in $WORKSPACE_DIR"
+    echo "Repository $REPO already exists in $TARGET_DIR"
     exit 1
 fi
 
-echo "Cloning $REPO_URL to $WORKSPACE_DIR/$REPO"
+echo "Cloning $REPO_URL to $TARGET_DIR/$REPO"
 git clone "$REPO_URL"
 
-echo "Successfully cloned $REPO to $WORKSPACE_DIR/$REPO"
+echo "Successfully cloned $REPO to $TARGET_DIR/$REPO"

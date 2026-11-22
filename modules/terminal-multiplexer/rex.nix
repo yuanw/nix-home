@@ -9,11 +9,12 @@ let
   cfg = config.modules.rex;
 
   # Rex's whole config surface is one init.lua plus what it loads.  The project
-  # picker -- Lua in Rex's engine plus a bash helper driving fd and fzf -- lives
-  # next to this module and deploys as plain files, the way the source dotfiles
-  # stow it.  Copied from pkgs/rex-project-picker in
+  # picker -- Lua in Rex's engine plus a bash helper driving fd -- lives next to
+  # this module and deploys as plain files, the way the source dotfiles stow it.
+  # Copied from pkgs/rex-project-picker in
   # https://github.com/pperanich/dotfiles at 29ea77f4292ea8f0bb58b5a23bddeaefa4803536
-  # (MIT); picker.lua carries the one local change it needed here.
+  # (MIT); picker.lua carries the local changes it needed here -- a "/bin" tool
+  # prefix, and Rex's palette (rex.ui.pick) instead of upstream's fzf popup.
   #
   # Switching sessions needs no picker of our own: the app ships one, so that key
   # below only binds the client's session.switch action.
@@ -32,6 +33,70 @@ let
 
     picker.setup({
       roots = { ${rootsLua} },
+      codeRoot = ${builtins.toJSON cfg.codeRoot},
+    })
+
+    -- The ctrl+n>e binding below hands a pane to Emacs.  It needs only server
+    -- calls plus emacsclient, so -- unlike the picker's session.select -- it
+    -- works with Remote Control off.  The Emacs half is
+    -- `rex-gt-open-pane-directory' in modules/editor/emacs/packages/rex-gt.el,
+    -- which opens the directory it is given in Dired.
+    local function pane_directory(session_id, block_id)
+      local process = rex.call("block.method", {
+        session_id = session_id,
+        block_id = block_id,
+        method = "process",
+      })
+      local cwd = process and process.foreground and process.foreground.cwd
+      if cwd then
+        return cwd
+      end
+      -- Nothing readable to inspect (a root shell, say), so fall back to the
+      -- directory the shell reported with OSC 7.  A path on another host is
+      -- not ours to open here.
+      local pwd = rex.call("block.method", {
+        session_id = session_id,
+        block_id = block_id,
+        method = "pwd",
+      })
+      local path = pwd and pwd.pwd
+      if type(path) ~= "string" then
+        return nil
+      end
+      -- `and` keeps only the first return value, so match outside the guard.
+      local host, encoded = path:match("^file://([^/]*)(/.*)$")
+      if not encoded or (host ~= "" and host ~= "localhost") then
+        return nil
+      end
+      return (encoded:gsub("%%(%x%x)", function(hex) return string.char(tonumber(hex, 16)) end))
+    end
+
+    rex.action({
+      name = "rex_open_in_emacs",
+      title = "Open Pane in Emacs",
+      run = function(ctx)
+        assert(ctx.session_id, "Open this from a Rex session")
+        local view = rex.call("session.view", {session_id = ctx.session_id})
+        local where, block_id
+        for _, window in ipairs(view.windows or {}) do
+          if window.window_id == view.active_window_id then
+            where = (view.label or ctx.session_id) .. "/" .. (window.label or "")
+            block_id = window.focused_block_id
+          end
+        end
+        assert(block_id, "This session has no focused pane")
+        local directory = pane_directory(ctx.session_id, block_id)
+        assert(directory, "This pane reports no working directory")
+        -- `require' first: trivialBuild ships rex-gt with no loaddefs, so the
+        -- command is void until something loads the library.
+        local reply = rex.exec({ "emacsclient", "-n", "-e",
+          "(progn (require 'rex-gt) (rex-gt-open-pane-directory "
+            .. rex.json.encode(directory)
+            .. " " .. rex.json.encode(where) .. "))" }, { timeout = 10 })
+        if not reply.ok then
+          error("Emacs did not answer: " .. (reply.stderr or "emacsclient failed"), 0)
+        end
+      end,
     })
 
     rex.bind(${builtins.toJSON cfg.pickerKey}, "rex_project_picker")
@@ -39,6 +104,7 @@ let
     rex.bind(${builtins.toJSON cfg.splitDownKey}, "pane.split.down")
     rex.bind(${builtins.toJSON cfg.splitRightKey}, "pane.split.right")
     rex.bind(${builtins.toJSON cfg.toggleBarKey}, "client.sidebar.toggle")
+    rex.bind(${builtins.toJSON cfg.openInEmacsKey}, "rex_open_in_emacs")
   '';
 in
 with lib;
@@ -69,11 +135,25 @@ with lib;
         }
         {
           path = "${config.my.homeDirectory}/workspaces";
-          # 2 so the picker also finds workmux worktrees under a repo.
-          depth = 2;
+          # 3 for the workspaces/<host>/<owner>/<repo> layout `h` expects (see
+          # github.com/zimbatm/h).  A repo's linked worktrees sit beside it in the
+          # same owner dir, so they need no extra level.  Clones nested inside a
+          # repo (the events-idl vendored copies) fall past this depth on purpose.
+          depth = 3;
         }
       ];
       description = "Roots the project picker walks.";
+    };
+
+    codeRoot = mkOption {
+      type = types.str;
+      default = config.modules.h.codeRoot;
+      description = ''
+        Root `h' (github.com/zimbatm/h) resolves against when the picker's palette
+        is handed a repo name, an owner/repo or a git URL, cloning it first when it
+        is missing.  Shares modules.h.codeRoot so the two layouts cannot drift
+        apart.
+      '';
     };
 
     pickerKey = mkOption {
@@ -105,6 +185,16 @@ with lib;
       default = "ctrl+n>t>s";
       description = "Shortcut that hides or shows the tab bar.";
     };
+
+    openInEmacsKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>e";
+      description = ''
+        Shortcut that opens the focused pane's working directory in Emacs.
+        Needs `modules.editors.emacs.enable' on this host, since the action
+        calls emacsclient and the Elisp it evaluates lives in that module.
+      '';
+    };
   };
 
   config = mkIf cfg.enable (
@@ -115,9 +205,10 @@ with lib;
           # rex plus the picker's own dependencies: picker.lua resolves each tool
           # under the user profile (the macOS system prefixes only cover bash and
           # pwd), so they have to be linked there rather than named in init.lua.
+          # fzf needs no entry -- the palette replaced it -- and h comes from
+          # modules.h.
           home.packages = [
             pkgs.fd
-            pkgs.fzf
             pkgs.rex
           ];
 
@@ -126,7 +217,8 @@ with lib;
 
             # picker.lua resolves its own directory and runs the helper from it, so
             # the two must stay siblings.  bash takes the helper as an argument, so
-            # it needs no exec bit.
+            # it needs no exec bit.  picker-selfcheck.lua is a dev-only check, so it
+            # is deliberately not listed here.
             "rex/rex-project-picker/picker.lua".source = "${pickerSrc}/picker.lua";
             "rex/rex-project-picker/rex-project-picker".source = "${pickerSrc}/rex-project-picker";
 
@@ -201,7 +293,7 @@ with lib;
       # rebuild with the app open has its write overwritten on quit: quit first,
       # then rebuild, then relaunch.  Sessions live in the server, not the app, so
       # quitting costs no running programs.
-      #   osascript -e 'quit app "Rex Beta"' && sudo darwin-rebuild switch --flake '.#mist' && open -a 'Rex Beta'
+      #   osascript -e 'quit app "Rex"' && sudo darwin-rebuild switch --flake '.#mist' && open -a 'Rex'
       system.defaults.CustomUserPreferences."com.superlogical.rex" = {
         # Remote Control is the gate on every client action, including the
         # session.select the project picker queues to focus what it opened -- with

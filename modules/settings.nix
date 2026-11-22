@@ -1,4 +1,8 @@
-{ lib, ... }:
+{
+  lib,
+  config,
+  ...
+}:
 
 with lib;
 
@@ -40,6 +44,12 @@ in
       gpgKey = mkOptStr "BF2ADAA2A98F45E7";
       homeDirectory = mkOptStr "/Users/yuanwang";
       workspaceDirectory = mkOptStr "workspace";
+      # Where this checkout sits on disk.  The out-of-store symlinks (neru's
+      # config, the Emacs snippets, the pi permission-gate rules) point into it so
+      # editing those files needs no rebuild, which also means they break when the
+      # repo moves -- as it did when the workspace gained a <host>/<owner> level.
+      # A move is now one line here.
+      nixHomeDirectory = mkOptStr "${config.my.homeDirectory}/${config.my.workspaceDirectory}/github.com/yuanw/nix-home";
       packages = mkOption {
         type = types.listOf types.package;
         default = [ ];

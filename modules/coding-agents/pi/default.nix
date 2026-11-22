@@ -9,7 +9,6 @@ let
   cfg = config.modules.pi;
   user = config.my.username;
   home = config.my.homeDirectory;
-  workspace = config.my.workspaceDirectory;
   agentConfigDir = ".pi/agent";
 
   # Where each programs.pi.extensions.<name> comes from. pi-flake packages
@@ -90,16 +89,16 @@ in
       example = lib.literalExpression ''
         {
           # defaults already enable notify, custom-footer, slow-mode,
-          # permission-gate, interactive-shell, and ponytail
+          # permission-gate, interactive-shell, ponytail, and better
           cursor-agent.enable = true;
           web-fetch.enable = true;
         }
       '';
       description = ''
         Passed to programs.pi.extensions. By default enables notify,
-        custom-footer, slow-mode, permission-gate, interactive-shell, and
-        ponytail. Set `<name>.enable = false` to opt out, or enable extras
-        such as cursor-agent / web-fetch / direnv.
+        custom-footer, slow-mode, permission-gate, interactive-shell,
+        ponytail, and better. Set `<name>.enable = false` to opt out, or
+        enable extras such as cursor-agent / web-fetch / direnv.
       '';
     };
 
@@ -146,6 +145,7 @@ in
       permission-gate.enable = lib.mkDefault true;
       interactive-shell.enable = lib.mkDefault true;
       ponytail.enable = lib.mkDefault true;
+      better.enable = lib.mkDefault true;
     };
 
     home-manager.users.${user} =
@@ -185,6 +185,7 @@ in
               humanizer
               i-have-adhd
               emacs-skills
+              cursor-plugins
               ;
           };
 
@@ -218,7 +219,7 @@ in
 
         home.file = lib.optionalAttrs permissionGateEnabled {
           ".config/pi-agent-extensions/permission-gate/rules.ts".source =
-            hm.config.lib.file.mkOutOfStoreSymlink "${home}/${workspace}/nix-home/modules/coding-agents/pi/permission-gate-rules.ts";
+            hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/coding-agents/pi/permission-gate-rules.ts";
         };
       };
   };

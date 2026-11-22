@@ -13,7 +13,7 @@
 
 let
   pname = "spookfox";
-  version = "0.8.1";
+  version = "0.8.1-unstable-2026-02-18";
 in
 melpaBuild {
   inherit pname version;

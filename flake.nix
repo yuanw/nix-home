@@ -11,6 +11,14 @@
 
     iets.url = "github:numtide/iets";
 
+    # Project jumper (modules/terminal/h.nix): `h <name>` finds a repo by name,
+    # `h <owner>/<repo>` and `h <url>` name <codeRoot>/<host>/<owner>/<repo> and
+    # clone it when it is missing.  The workspace tree is laid out for it.
+    h = {
+      url = "github:zimbatm/h";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     mics-skills.url = "github:Mic92/mics-skills";
 
     flake-prompt = {
@@ -45,6 +53,13 @@
     };
     emacs-skills = {
       url = "github:xenodium/emacs-skills";
+      flake = false;
+    };
+    # Cursor's own plugin repo. Only pstack's agents/ is read from it, as an
+    # flake-prompt agent (modules/coding-agents/prompts) and as a Cursor
+    # subagent under ~/.cursor/agents (modules/coding-agents/cursor).
+    cursor-plugins = {
+      url = "github:cursor/plugins";
       flake = false;
     };
 
@@ -243,6 +258,7 @@
               humanizer
               i-have-adhd
               emacs-skills
+              cursor-plugins
               ;
           };
         in

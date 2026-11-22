@@ -93,7 +93,7 @@ with lib;
             # but it appears { config, pkgs, ...}: at the top of users/nic/default.nix is not running in
             # the context of home-manager
             file.".emacs.d/snippets".source =
-              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.homeDirectory}/${config.my.workspaceDirectory}/nix-home/modules/editor/emacs/snippets";
+              hm.config.lib.file.mkOutOfStoreSymlink "${config.my.nixHomeDirectory}/modules/editor/emacs/snippets";
 
             packages = with pkgs; [
               # git

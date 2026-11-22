@@ -133,6 +133,7 @@
   # .bin outside the Nix store is not GC'd, so name it here once it is down).
   modules = {
     rex.enable = true;
+    h.enable = true;
     _1password.enable = true;
     transcribe = {
       enable = true;
