@@ -559,9 +559,21 @@
   # seeder's /var/lib/qBittorrent this needs no entry. Unverified: the reboot
   # proof (indexers and the qBittorrent credential survive) is still owed.
 
-  # Not by default. One line, added the first time an indexer answers 503 or a
-  # Cloudflare interstitial:
-  # services.flaresolverr.enable = true;   # Prowlarr reaches it on 127.0.0.1:8191
+  # Indexer-solving proxy for Cloudflare-protected indexers. Prowlarr is its only
+  # consumer (Radarr/Sonarr never call it), and Prowlarr runs on the host, so the
+  # URL it stores is http://127.0.0.1:8191 — same host, no namespace hop.
+  #
+  # The module's whole option set is enable/package/port/openFirewall. Two things
+  # it does *not* offer: a bind address (FlareSolverr listens on 0.0.0.0 and only
+  # PORT is passed) and any authentication. So openFirewall must stay false — an
+  # exposed FlareSolverr fetches arbitrary URLs for whoever asks, which is an open
+  # SSRF proxy. Confirm from off-box rather than trusting this comment:
+  #   nc -zvw2 misfit.lan 8191      # must fail
+  #
+  # Stateless, so nothing here needs a /persistSave directory. The closure drags in
+  # chromium + xvfb; nixpkgs patches both binaries into src/utils.py, so unlike the
+  # Docker image it never downloads a driver at runtime.
+  services.flaresolverr.enable = true;
 
   # ─── The arr stack: Radarr, Sonarr, Bazarr, configarr ─────────────────────
   #
