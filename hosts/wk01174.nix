@@ -91,7 +91,14 @@
         pkgs.pi-extensions.pi-interactive-shell
       ];
     };
-    browsers.defaultBrowser = "librewolf";
+    browsers = {
+      librewolf = {
+        enable = true;
+        spookfox.enable = true;
+      };
+      ladybird.enable = true;
+      defaultBrowser = "librewolf";
+    };
     secrets.agenix = {
       enable = true;
     };
