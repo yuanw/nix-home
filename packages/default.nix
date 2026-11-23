@@ -216,4 +216,10 @@ in
   # with the passthru.updateScript.  See modules/terminal-multiplexer/rex.nix.
   rex = prev.callPackage ./rex/package.nix { };
 
+  # Ladybird browser from upstream's notarized macOS dmg, pinned in
+  # packages/ladybird/sources.json (refresh: `just update-ladybird').  Named
+  # -bin so nixpkgs' from-source `ladybird' stays reachable.
+  # See modules/browsers/ladybird.nix.
+  ladybird-bin = prev.callPackage ./ladybird/package.nix { };
+
 }

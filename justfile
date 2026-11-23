@@ -67,6 +67,9 @@ nix-update:
     # pin in packages/rex/sources.json, so nix-update has nothing to rewrite;
     # its passthru.updateScript does.  `just update-rex' runs the same thing.
     @just update-rex
+    # Same shape for the Ladybird dmg (version + sha256 from
+    # download.ladybird.org/releases.json).
+    @just update-ladybird
 
 # Refresh the Rex snapshot pins (server rev, macOS app build, all hashes) in
 # packages/rex/sources.json.  Runs from the repo root; the script rewrites the
@@ -74,6 +77,12 @@ nix-update:
 # the last step of `just nix-update'.
 update-rex:
     @{{nix}} run .#rex.passthru.updateScript
+
+# Refresh the Ladybird pin (version + dmg sha256, both read from upstream's
+# release manifest, so nothing is downloaded) in packages/ladybird/sources.json.
+# See modules/browsers/ladybird.nix.
+update-ladybird:
+    @{{nix}} run .#ladybird-bin.passthru.updateScript
 
 # Take the newest stable 1Password into packages/_1password-gui/sources.json,
 # so a host does not wait on nixpkgs to notice a release.  Idempotent: it

@@ -172,6 +172,9 @@
         # Adds the Spookfox add-on; features/spookfox.nix follows this flag.
         spookfox.enable = true;
       };
+      # Second browser: the upstream macOS dmg (modules/browsers/ladybird.nix).
+      # defaultBrowser stays librewolf, so duti/yabai/Emacs still use it.
+      ladybird.enable = true;
       defaultBrowser = "librewolf";
     };
     editors.emacs = {

@@ -293,6 +293,8 @@
             # Exposed so `just update-rex' can reach its passthru.updateScript
             # (the pins live in packages/rex/sources.json).
             rex = pkgs.rex;
+            # Same for Ladybird's dmg pin (packages/ladybird/sources.json).
+            ladybird-bin = pkgs.ladybird-bin;
             agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
               prompts = agentPrompts;
               tools.pi.enable = true;

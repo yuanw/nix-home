@@ -12,17 +12,12 @@ let
   appDisplayNames = {
     librewolf = "LibreWolf";
     chromium = "Chromium";
+    ladybird = "Ladybird";
     safari = "Safari";
   };
 
-  pkgFor =
-    browser:
-    if browser == "librewolf" then
-      config.modules.browsers.librewolf.pkg or null
-    else if browser == "chromium" then
-      config.modules.browsers.chromium.pkg or null
-    else
-      null;
+  # Safari has no module of its own, so `or null' covers the missing subtree.
+  pkgFor = browser: config.modules.browsers.${browser}.pkg or null;
 
   darwinAppName = appDisplayNames.${cfg.defaultBrowser};
 
@@ -48,6 +43,7 @@ in
       type = lib.types.enum [
         "librewolf"
         "chromium"
+        "ladybird"
         "safari"
       ];
       default = "librewolf";

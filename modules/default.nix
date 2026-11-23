@@ -64,6 +64,7 @@
     darwin.imports = [
       ./browsers/librewolf-darwin.nix
       ./browsers/browser-cli-darwin.nix
+      ./browsers/ladybird.nix
       ./coding-agents/hermes-agent-darwin.nix
       ./brew.nix
       ./health.nix
