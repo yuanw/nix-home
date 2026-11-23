@@ -1447,11 +1447,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791860356,
-        "narHash": "sha256-fDO/2cgthCpFKT1C2fJFPv1tJoDeNwuqWAmcmqbZ1oY=",
+        "lastModified": 1795456267,
+        "narHash": "sha256-yBQJz9q4ohnY2oczfb5wyXNpPZtio/lOAQe2B2jmJU4=",
         "owner": "yuanw",
         "repo": "pi-flake",
-        "rev": "43f632e109718e533436e094ebe2fc65456780b3",
+        "rev": "4fdf51fb23559d3ced6921ee539a52870c91eab4",
         "type": "github"
       },
       "original": {

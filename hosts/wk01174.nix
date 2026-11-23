@@ -85,6 +85,8 @@
       defaultProvider = "anthropic";
       defaultModel = "claude-opus-5";
       extensions.cursor-agent.enable = true;
+      # Cursor's agent shares Pi's mcpServers through ~/.cursor/mcp.json.
+      linkCursorMcp = true;
       rawSkills = [
         pkgs.pi-extensions.pi-interactive-shell
       ];

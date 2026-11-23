@@ -120,6 +120,20 @@ in
       '';
     };
 
+    # Cursor's agent reads ~/.cursor/mcp.json, not Pi's agent dir, so the same
+    # mcpServers have to be linked there for it to see them.
+    linkCursorMcp = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      example = lib.literalExpression "true";
+      description = ''
+        Passed to programs.pi.linkCursorMcp: pi-flake also symlinks the
+        generated mcp.json to `~/.cursor/mcp.json`. That copy leaves out Pi's own
+        keys (`exposure`, `toolExposure`, `description`, `type`) and servers set
+        `enabled = false`.
+      '';
+    };
+
     rawSkills = lib.mkOption {
       type = lib.types.listOf (
         lib.types.oneOf [
@@ -190,6 +204,7 @@ in
           };
 
           mcpServers = cfg.mcpServers;
+          linkCursorMcp = cfg.linkCursorMcp;
           environment.variables = {
             PI_TELEMETRY = lib.mkDefault "0";
             PI_CODING_AGENT_DIR = agentConfigPath;
