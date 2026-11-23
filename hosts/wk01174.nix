@@ -115,10 +115,6 @@
         #"go"
       ];
     };
-    browsers.librewolf = {
-      enable = true;
-      spookfox.enable = true;
-    };
     editors.emacs = {
       enable = true;
       enableService = true;
