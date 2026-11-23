@@ -1067,11 +1067,11 @@
     "nix-home-private": {
       "flake": false,
       "locked": {
-        "lastModified": 1795038478,
-        "narHash": "sha256-x0u8zv7bkw2EhxU4Op/Anck0Ar0nXQzrZ2gf4AUxj8E=",
+        "lastModified": 1795463142,
+        "narHash": "sha256-hI1mitlUNYMMK35HGMLtKnJfHxcoupUzQhLoqrep+3M=",
         "ref": "refs/heads/arr",
-        "rev": "9bf198a1d638ece4b5083fef612602ef3af28505",
-        "revCount": 86,
+        "rev": "35ebe9c3541537499cdbcb4dc80a0fd0c78a3e58",
+        "revCount": 100,
         "type": "git",
         "url": "https://github.com/yuanw/nix-home-private"
       },
