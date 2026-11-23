@@ -631,6 +631,17 @@
   systemd.services.radarr.serviceConfig.Group = pkgs.lib.mkForce "media";
   systemd.services.sonarr.serviceConfig.Group = pkgs.lib.mkForce "media";
 
+  # Bazarr needs the same treatment, and it is the app the plan least suspected:
+  # it is not in `media` at all, so it could not write one subtitle anywhere in
+  # the library (measured 2026-11-22 — `Groups: 983`, gid_map maps only 0 and 983,
+  # and `touch` as bazarr in a 2775 root:media title dir is EACCES). Its unit runs
+  # PrivateUsers = true too, so the `extraGroups` line the plan sketched would not
+  # have helped: a supplementary 984 is a number the namespace maps to no group.
+  # mkForce for the same reason as the pair above — bazarr.nix assigns the group.
+  # UMask deliberately stays at the module's 0022: Bazarr's files want 0644, which
+  # is what lets jellyfin read them without joining anything.
+  systemd.services.bazarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+
   # The activation that *introduces* a persistence mount is the one tmpfiles
   # misses — systemd-tmpfiles-setup ran at the previous boot, when no such mount
   # existed, and leaves a root-owned directory behind. That cost a whole deploy
