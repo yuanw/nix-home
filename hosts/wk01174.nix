@@ -85,6 +85,7 @@
       defaultProvider = "anthropic";
       defaultModel = "claude-opus-5";
       extensions.cursor-agent.enable = true;
+      extensions.subagents.enable = true;
       # Cursor's agent shares Pi's mcpServers through ~/.cursor/mcp.json.
       linkCursorMcp = true;
       rawSkills = [
@@ -122,21 +123,13 @@
     };
     # health.enable = true;
     dev = {
-      # agda.enable = true;
-      # ask.enable = true;
       dart.enable = true;
       java.enable = true;
       gcloud.enable = true;
       go.enable = true;
       playwright.enable = true;
       podman.enable = true;
-      #scheme.enable = true;
-      #haskell.enable = true;
-      # lean.enable = true;
-      idris2.enable = false;
       python.enable = true;
-      zig.enable = false;
-      racket.enable = false;
       kotlin.enable = true;
     };
     tmux = {

@@ -26,6 +26,7 @@ let
     permission-gate = pkgs.pi-extensions.pi-permission-gate;
     ponytail = pkgs.pi-extensions.pi-ponytail;
     slow-mode = pkgs.pi-extensions.pi-slow-mode;
+    subagents = pkgs.pi-extensions.pi-subagents;
   };
   agentConfigPath = "${home}/${agentConfigDir}";
 in
@@ -91,14 +92,15 @@ in
           # defaults already enable notify, custom-footer, slow-mode,
           # permission-gate, interactive-shell, ponytail, and better
           cursor-agent.enable = true;
+          subagents.enable = true;
           web-fetch.enable = true;
         }
       '';
       description = ''
         Passed to programs.pi.extensions. By default enables notify,
-        custom-footer, slow-mode, permission-gate, interactive-shell,
-        ponytail, and better. Set `<name>.enable = false` to opt out, or
-        enable extras such as cursor-agent / web-fetch / direnv.
+        custom-footer, slow-mode, permission-gate, interactive-shell, ponytail,
+        and better. Set `<name>.enable = false` to opt out, or enable extras
+        such as cursor-agent / subagents / web-fetch / direnv.
       '';
     };
 

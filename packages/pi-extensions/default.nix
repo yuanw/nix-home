@@ -56,4 +56,5 @@ in
   pi-permission-gate = callExtension ./pi-permission-gate.nix;
   pi-ponytail = asPiPackage (callExtension ./pi-ponytail.nix);
   pi-better = asPiPackage (callExtension ./pi-better.nix);
+  pi-subagents = asPiPackage (callExtension ./pi-subagents.nix);
 }

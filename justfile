@@ -62,6 +62,7 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-permission-gate --src-only --version=branch --override-filename ./packages/pi-extensions/pi-permission-gate.nix
     @nix-update -f ./packages/release.nix pi-slow-mode --src-only --version=branch --override-filename ./packages/pi-extensions/pi-slow-mode.nix
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
+    @nix-update -f ./packages/release.nix pi-subagents --override-filename ./packages/pi-extensions/pi-subagents.nix --version-regex 'v(.*)'
     @nix-update -f ./packages/release.nix tccutil --src-only
     # Rex polls its own snapshot channel (blob.superlogical.com) and holds every
     # pin in packages/rex/sources.json, so nix-update has nothing to rewrite;
