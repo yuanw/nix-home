@@ -115,6 +115,16 @@ in
     home-manager.users.${username} = {
       home.packages = launcher.packages ++ [ pkgs.omniwm ];
 
+      # The GitHub inbox button, ported from modules/wm/sketchybar/plugins/github.sh
+      # (its gh + python pair becomes omniwm.http calls; see
+      # modules/wm/omniwm/widgets/github/init.luau). The top-level shell/widgets
+      # folder serves every profile -- still add it to a lane in Settings >
+      # Styles & Widgets > Bar, and put a notifications-scope token in the
+      # widget's own options, which OmniWM saves under [widgets.github] in the
+      # profile's shell.toml. Editing these files retargets the symlink, and a
+      # widget that moves asks to allow api.github.com again.
+      xdg.configFile."omniwm/shell/widgets/github".source = ./omniwm/widgets/github;
+
       # OmniWM owns this file: its Settings window rewrites settings.toml, so the
       # path has to be a regular file OmniWM can write, not a symlink back to the
       # store that the next switch clobbers (force re-linked the template and the
