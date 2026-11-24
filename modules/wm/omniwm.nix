@@ -102,6 +102,18 @@ in
 {
   options.modules.wm.omniwm = {
     enable = lib.mkEnableOption "OmniWM";
+
+    githubInbox = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Refresh the GitHub bar widget's inbox by running gh on a launchd timer.";
+    };
+
+    githubInboxInterval = lib.mkOption {
+      type = lib.types.port;
+      default = 120;
+      description = "Seconds between GitHub inbox refreshes.";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -116,13 +128,11 @@ in
       home.packages = launcher.packages ++ [ pkgs.omniwm ];
 
       # The GitHub inbox button, ported from modules/wm/sketchybar/plugins/github.sh
-      # (its gh + python pair becomes omniwm.http calls; see
-      # modules/wm/omniwm/widgets/github/init.luau). The top-level shell/widgets
-      # folder serves every profile -- still add it to a lane in Settings >
-      # Styles & Widgets > Bar, and put a notifications-scope token in the
-      # widget's own options, which OmniWM saves under [widgets.github] in the
-      # profile's shell.toml. Editing these files retargets the symlink, and a
-      # widget that moves asks to allow api.github.com again.
+      # (see modules/wm/omniwm/widgets/github). It reads what the
+      # omniwm-github-inbox agent publishes, so there is no token to give OmniWM
+      # and no host to allow -- gh still does the auth, as it did for sketchybar.
+      # The top-level shell/widgets folder serves every profile; add it to a lane
+      # in Settings > Styles & Widgets > Bar.
       xdg.configFile."omniwm/shell/widgets/github".source = ./omniwm/widgets/github;
 
       # OmniWM owns this file: its Settings window rewrites settings.toml, so the
@@ -173,6 +183,35 @@ in
         RunAtLoad = true;
         # in secs
         StartInterval = 900;
+      };
+    };
+
+    # The GitHub widget renders what this agent publishes; a Luau widget cannot
+    # start a program, so gh runs here instead -- the same pair of programs the
+    # sketchybar plugin drove, github-notifications-filter.py shared with it, so
+    # the dismissed-thread log comes along too. launchd gives no PATH, and the
+    # skhd lesson above applies: name the programs it needs.
+    launchd.user.agents.omniwm-github-inbox = lib.mkIf cfg.githubInbox {
+      serviceConfig = {
+        ProgramArguments = [
+          "/bin/sh"
+          "${./omniwm/github-inbox.sh}"
+        ];
+        EnvironmentVariables = {
+          PATH = lib.makeBinPath [
+            pkgs.gh
+            pkgs.git
+            pkgs.jq
+            pkgs.python3
+            pkgs.omniwm
+          ];
+          FILTER = "${./sketchybar/plugins/github-notifications-filter.py}";
+          GITHUB_NOTIFICATIONS_LOG_DIR = "${config.my.homeDirectory}/.local/state/omniwm";
+        };
+        RunAtLoad = true;
+        StartInterval = cfg.githubInboxInterval;
+        StandardOutPath = "/tmp/omniwm-github-inbox.log";
+        StandardErrorPath = "/tmp/omniwm-github-inbox.log";
       };
     };
 

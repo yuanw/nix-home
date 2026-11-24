@@ -1,209 +1,63 @@
--- A GitHub inbox on the workspace bar: the unread count on the button, the
--- threads in a popout, and a row that opens its page. The port of
--- modules/wm/sketchybar/plugins/github.sh and github-notifications-filter.py.
+-- The GitHub inbox button: the unread count on the bar, the threads in a
+-- popout, and a row that opens its page. The port of
+-- modules/wm/sketchybar/plugins/github.sh.
 --
--- The Luau shell starts no programs, so where that pair shelled out to gh and
--- python this polls api.github.com with omniwm.http. settings.toml beside this
--- file declares that host and the three options: the token, the poll interval,
--- and whether pull requests that are already closed get marked read.
+-- No token and no network permission here. modules/wm/omniwm/github-inbox.sh
+-- runs gh and github-notifications-filter.py on a launchd timer, the way that
+-- plugin ran them itself, and publishes the result with `omniwmctl shell set`;
+-- the host gives every widget what it published as ctx.data.vars[KEY], and a
+-- change to it is what repaints the button.
 
 local look = require("../lib/look")
 local notify = require("@self/notify") -- @self/, not ./: from init.luau ./ is one folder up
 
 local NAME = "github" -- this folder's name; "shell toggle" closes this popout
-local API = "https://api.github.com"
-local PER_PAGE = 100
-local MAX_THREADS = 300
-local MAX_LOOKUPS = 30 -- pull request state checks per poll, the shared budget is six requests
+local KEY = "github-inbox" -- the key github-inbox.sh publishes
 local MAX_ROWS = 12
 local COUNT_COLOR = "#8aadf4" -- BLUE, modules/wm/sketchybar/colors.sh
 local ALERT_COLOR = "#ed8796" -- RED, the colour a breaking title painted the bell
 
-local poll
-
-local function settings(ctx)
-    return ctx.data.settings or {}
-end
-
-local function headers(token)
-    return {
-        ["Authorization"] = "Bearer " .. token,
-        Accept = "application/vnd.github+json",
-        ["X-GitHub-Api-Version"] = "2022-11-28",
-    }
-end
-
--- JSON GETs, with an admitted failure reported to the same callback so every
--- caller handles one shape.
-local function get(token, url, maxBytes, callback)
-    local _, rejected = omniwm.http({
-        url = url,
-        headers = headers(token),
-        response = "json",
-        maxBytes = maxBytes,
-        timeout = 30,
-    }, callback)
-    if rejected then
-        callback({ ok = false, status = 0, headers = {}, error = rejected })
-    end
-end
-
-local function dismiss(ctx, token, thread)
-    if not settings(ctx).dismissClosed or type(thread.url) ~= "string" then
-        return
-    end
-    local _, rejected = omniwm.http({
-        url = thread.url,
-        method = "PATCH",
-        headers = headers(token),
-        body = '{"read":true}',
-        timeout = 30,
-    }, function() end)
-    if rejected then
-        omniwm.log("github: could not mark a thread read: " .. tostring(rejected))
-    end
-end
-
-local function fetchInbox(token, page, threads, done)
-    get(token, API .. "/notifications?per_page=" .. PER_PAGE .. "&page=" .. page, 1048576, function(result)
-        local batch = result.ok and type(result.json) == "table" and result.json or nil
-        if not batch then
-            done(nil, result.error or ("GitHub returned " .. tostring(result.status)))
-            return
-        end
-        for index = 1, #batch do
-            threads[#threads + 1] = batch[index]
-        end
-        if #batch == PER_PAGE and #threads < MAX_THREADS then
-            fetchInbox(token, page + 1, threads, done)
-        else
-            done(threads, nil)
-        end
-    end)
-end
-
--- Drop the threads the python filter dropped -- a team mention on a pull
--- request, and a pull request that is no longer open -- after marking them
--- read, and keep the rest as rows. One state check runs at a time, so the six
--- outstanding requests a widget may have stay free for the inbox itself.
-local function liveRows(ctx, token, threads, done)
-    local items = {}
-    local index = 0
-    local lookups = 0
-    local function settle(thread, pull)
-        if notify.decide(thread, pull and pull.state) == "dismiss" then
-            dismiss(ctx, token, thread)
-        else
-            items[#items + 1] = notify.row(thread, pull)
-        end
-    end
-    local step
-    step = function()
-        while index < #threads do
-            index += 1
-            local thread = threads[index]
-            local subject = type(thread.subject) == "table" and thread.subject or {}
-            local stateCheck = subject.type == "PullRequest"
-                and thread.reason ~= "team_mention"
-                and lookups < MAX_LOOKUPS
-                and type(subject.url) == "string"
-            if stateCheck then
-                lookups += 1
-                get(token, subject.url, 262144, function(result)
-                    local pull = result.ok and type(result.json) == "table" and result.json or nil
-                    settle(thread, pull)
-                    step()
-                end)
-                return
-            end
-            settle(thread, nil)
-        end
-        done(items)
-    end
-    step()
-end
-
-local function schedule(ctx)
+-- Decode once per published value and remember the count, so the renders that
+-- follow a repaint do not decode it again or bounce the bell twice. View hooks
+-- must not start work, so this only reads what the host handed over.
+local function inbox(ctx)
     local state = ctx.state
-    local seconds = math.clamp(tonumber(settings(ctx).interval) or 120, 30, 3600)
-    local timer, rejected = omniwm.after(seconds, function()
-        state.timer = nil
-        poll(ctx)
-    end)
-    state.timer = timer
-    if not timer then
-        state.error = "Polling paused: " .. tostring(rejected)
+    local raw = ctx.data.vars[KEY]
+    if state.items ~= nil and raw == state.raw then
+        return state
     end
-end
-
-poll = function(ctx)
-    local state = ctx.state
-    -- arm the next tick first: a poll whose callback never arrives must not be
-    -- the last one this widget runs
-    schedule(ctx)
-    if state.busy then
-        return
+    state.raw = raw
+    state.items = {}
+    state.count = 0
+    state.error = if raw == nil then "Waiting for the first inbox update" else "The published inbox is not JSON"
+    local payload = if type(raw) == "string" then json.decode(raw) else nil
+    if type(payload) ~= "table" then
+        return state
     end
-    local token = settings(ctx).token
-    if type(token) ~= "string" or token == "" then
-        state.items = nil
-        state.error = "Set a GitHub token in this widget's options"
-        return
-    end
-    state.busy = true
-    fetchInbox(token, 1, {}, function(threads, failure)
-        if not threads then
-            state.busy = false
-            state.error = failure
-            return
+    state.items = notify.rows(payload)
+    state.count = tonumber(payload.n) or #state.items
+    state.error = if type(payload.e) == "string" and payload.e ~= "" then payload.e else nil
+    state.important = false
+    for _, item in state.items do
+        if item.important then
+            state.important = true
         end
-        liveRows(ctx, token, threads, function(items)
-            local before = state.items and #state.items or 0
-            state.items = items
-            state.important = false
-            for _, item in items do
-                if item.important then
-                    state.important = true
-                end
-            end
-            state.error = nil
-            state.busy = false
-            if #items > before then
-                -- a new pulse key is the bell bounce the plugin animated
-                state.pulse = (state.pulse or 0) + 1
-            end
-        end)
-    end)
-end
-
--- The popout's button: poll now instead of waiting for the timer, which the
--- next poll replaces anyway.
-local function refresh(ctx)
-    local state = ctx.state
-    if state.busy then
-        return
     end
-    if state.timer then
-        state.timer:cancel()
-        state.timer = nil
+    if state.count > (state.watched or 0) then
+        -- a new pulse key is the bell bounce the plugin animated
+        state.pulse = (state.pulse or 0) + 1
     end
-    poll(ctx)
-end
-
-function trigger(ctx, event)
-    if event.source == "host" then
-        poll(ctx)
-    end
+    state.watched = state.count
+    return state
 end
 
 function render(ctx)
-    local state = ctx.state
+    local state = inbox(ctx)
     local scale = look.scale(ctx)
-    local count = state.items and #state.items or 0
     local glyph = look.glyph{
-        name = if count > 0 then "bell.badge.fill" else "bell",
+        name = if state.count > 0 then "bell.badge.fill" else "bell",
         size = 14 * scale,
-        color = if state.important then ALERT_COLOR elseif count > 0 then COUNT_COLOR else nil,
+        color = if state.important then ALERT_COLOR elseif state.count > 0 then COUNT_COLOR else nil,
     }
     if state.pulse then
         glyph.pulse = {
@@ -216,7 +70,7 @@ function render(ctx)
         onClick = ui.popout,
         help = "GitHub notifications",
         glyph,
-        look.text{ text = tostring(count), size = 13 * scale, reserve = "88" },
+        look.text{ text = tostring(state.count), size = 13 * scale, reserve = "88" },
     })
 end
 
@@ -239,18 +93,13 @@ local function threadRow(item, width)
 end
 
 function popout(ctx)
-    local state = ctx.state
+    local state = inbox(ctx)
     local width = look.panelWidth(NAME)
-    local items = state.items or {}
-    local reload = if state.busy then nil else function()
-        refresh(ctx)
-    end
     local rows = { w = width }
     rows[#rows + 1] = ui.row{
         w = width - 28,
         gap = 6,
         look.text{ text = "GitHub", style = "bold", grow = 1 },
-        look.button("arrow.clockwise", reload),
     }
     if state.error then
         rows[#rows + 1] = look.text{
@@ -260,19 +109,19 @@ function popout(ctx)
             maxWidth = width - 28,
         }
     end
-    if #items == 0 and not state.busy then
+    if #state.items == 0 then
         rows[#rows + 1] = look.text{
             text = "No new notifications",
             size = 12,
             color = "secondaryForeground",
         }
     end
-    for index = 1, math.min(#items, MAX_ROWS) do
-        rows[#rows + 1] = threadRow(items[index], width - 28)
+    for index = 1, math.min(#state.items, MAX_ROWS) do
+        rows[#rows + 1] = threadRow(state.items[index], width - 28)
     end
-    if #items > MAX_ROWS then
+    if state.count > #state.items then
         rows[#rows + 1] = look.text{
-            text = string.format("%d more in your inbox", #items - MAX_ROWS),
+            text = string.format("%d more in your inbox", state.count - #state.items),
             size = 11,
             color = "secondaryForeground",
         }

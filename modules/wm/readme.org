@@ -60,14 +60,16 @@ refuses both.
   the reason (~heuristicReasons=disabledFullscreenButton~ here).
 - The GitHub inbox button is the port of
   modules/wm/sketchybar/plugins/github.sh (modules/wm/omniwm/widgets/github).
-  The Luau shell runs no programs, so ~gh~ and github-notifications-filter.py
-  became ~omniwm.http~ calls to ~api.github.com~, a host the widget's own
-  ~settings.toml~ declares and the first request asks to allow. Nix owns the
-  widget folder as a home-manager ~xdg.configFile~ entry; place it on a lane in
-  Settings > Styles & Widgets > Bar and put a ~notifications~ scope token in
-  the widget's options, which OmniWM saves under
-  ~[widgets.github]~ of the profile's shell.toml rather than in the store.
-  ~nix build .#checks.aarch64-darwin.github-widget~ runs its assertions.
+  A Luau widget cannot start a program, so the ~gh~ and
+  github-notifications-filter.py pair runs in the ~omniwm-github-inbox~ launchd
+  agent instead (modules/wm/omniwm/github-inbox.sh; the filter is shared with
+  sketchybar, so its dismissed-thread log now lands in
+  ~/.local/state/omniwm). It publishes the JSON with ~omniwmctl shell set
+  github-inbox~ and the widget renders ~ctx.data.vars~, so there is no token in
+  OmniWM and no host to allow -- ~gh~ still does the auth. ~omniwmctl~ caps a
+  value at 4 KiB, which trims the rows the popout shows but not the count on
+  the bell. ~omniwmctl query shell-widgets~ and /tmp/omniwm-github-inbox.log
+  say which half went stale.
 - Not carried over: workspace create/destroy (~cmd + alt - w~ lost its meaning),
   the ~shift + ctrl - a/s/w/d~ floating nudge, and ~cmd - 0~ for a tenth
   workspace. Pointer move/resize comes from OmniWM's gesture settings instead of
