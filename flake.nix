@@ -9,6 +9,16 @@
 
     direnv-instant.url = "github:Mic92/direnv-instant";
 
+    # Faster nix-collect-garbage / nix-store --optimise; its darwin module
+    # replaces the hand-rolled launchd GC daemons (modules/macintosh.nix).
+    #
+    # Deliberately NOT `inputs.nixpkgs.follows': the module callPackages its
+    # package.nix with *our* pkgs, so the two binaries come from our nixpkgs
+    # whichever way this is pinned; the input's own nixpkgs-unstable only feeds
+    # its checks, which we never evaluate.  Following ours would just repin
+    # something we do not build.
+    fast-nix-gc.url = "github:Mic92/fast-nix-gc";
+
     iets.url = "github:numtide/iets";
 
     # Project jumper (modules/terminal/h.nix): `h <name>` finds a repo by name,

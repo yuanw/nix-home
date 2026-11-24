@@ -23,10 +23,11 @@
     homeDirectory = "/Users/yuanwang";
   };
 
-  # nix-gc / nix-store --optimise freeze this machine under load; run manually if needed
-  launchd.daemons.nix-gc.serviceConfig.Disabled = true;
-  launchd.daemons.nix-store-optimise.serviceConfig.Disabled = true;
-  launchd.user.agents.user-nix-gc.serviceConfig.Disabled = true;
+  # GC / store dedup run on the Sunday schedule set in modules/macintosh.nix.
+  # They were disabled here for years because the stock nix-collect-garbage and
+  # nix-store --optimise froze this machine under load; if the fast ones do it
+  # again, put `launchd.daemons.fast-nix-{gc,optimise}.serviceConfig.Disabled =
+  # true;` back.
   #curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix | sh -s -- repair sequoia --move-existing-users
   ids.uids.nixbld = 350;
   ids.gids.nixbld = 30000;

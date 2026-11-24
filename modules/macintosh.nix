@@ -9,13 +9,10 @@
 
 with pkgs.stdenv;
 with lib;
-let
-  nixPackage =
-    if config.nix.enable && config.nix.package != null then config.nix.package else pkgs.nix;
-in
 {
   imports = [
     inputs.agenix.darwinModules.age
+    inputs.fast-nix-gc.darwinModules.default
     # inputs.home-manager.darwinModules.home-manager
   ];
   networking.hostName = config.my.hostname;
@@ -124,65 +121,77 @@ in
       ;
   };
 
-  launchd.daemons.nix-gc = {
-    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-    serviceConfig = {
-      RunAtLoad = false;
-      KeepAlive = false;
-      StartCalendarInterval = [
-        {
-          Weekday = 0;
-          Hour = 14;
-          Minute = 0;
-        }
-      ];
-      StandardErrorPath = "/tmp/daemons-nix-gc.log";
-      StandardOutPath = "/tmp/daemons-nix-gc.log";
-    };
+  # GC and store dedup are the fast-nix-gc daemons (github:Mic92/fast-nix-gc):
+  # one pass over ValidPaths/Refs into an adjacency list instead of a SQLite
+  # query per store path, parallel deletion and hardlinking.  They replace the
+  # hand-rolled `nix-collect-garbage'/`nix-store --optimise' daemons, and the
+  # user agent that used to delete the user's own generations: the binary reads
+  # the SQLite DB and unlinks /nix/store paths directly rather than asking the
+  # daemon, so it only works as root -- both jobs now run in the one root
+  # daemon, which is also why gcRootsDirs and XDG_STATE_HOME below are needed.
+  services.fast-nix-gc = {
+    enable = true;
+    # `automatic' is left off repo-wide and the schedule is set on the plist
+    # below instead: the module asserts nix.enable whenever automatic is on,
+    # and mist/ci install nix themselves (hosts/mist.nix: nix.enable = false),
+    # so one `automatic = true' here would fail to build those two hosts.
+    # StartCalendarInterval is all `automatic' sets, so the plist is identical
+    # either way -- and the binary needs nix on PATH only to read
+    # keep-outputs/keep-derivations, which the module's PATH fallback
+    # (/nix/var/nix/profiles/default/bin) covers for an installer-managed nix.
+    deleteOlderThan = "3d";
+    # The binary scans the state-dir gcroots and profiles only -- what lives
+    # under /nix/var/nix -- while a `nix-store --gc' run by the user also
+    # treats $XDG_STATE_HOME/nix/{gcroots,profiles} as roots.  That is where
+    # ~/.nix-profile and the prefetch-work-sources pins live, and
+    # scripts/prefetch-work-sources.sh relies on those pins surviving a GC, so
+    # pass them: root's root set is then a superset of the user's.
+    # shortcut: a dry run here found the same 23326 dead paths with and
+    # without these two dirs (everything in them is also reachable through
+    # gcroots/auto links and open files), so this is insurance, not a fix for
+    # something seen broken.  Re-run `fast-nix-gc --dry-run' as root after
+    # changing where this user's roots live.
+    gcRootsDirs = [
+      "${config.my.homeDirectory}/.local/state/nix/profiles"
+      "${config.my.homeDirectory}/.local/state/nix/gcroots"
+    ];
   };
 
-  launchd.daemons.nix-store-optimise = {
-    command = "${nixPackage}/bin/nix-store --optimise";
-    serviceConfig = {
-      RunAtLoad = false;
-      KeepAlive = false;
-      StartCalendarInterval = [
-        {
-          Weekday = 0;
-          Hour = 15;
-          Minute = 0;
-        }
-      ];
-      StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
-      StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
-    };
+  # Which generations to delete comes from state-dir/profiles plus
+  # $XDG_STATE_HOME/nix/profiles.  Under launchd HOME is /var/root and
+  # XDG_STATE_HOME is unset, so without this only root's profiles age out and
+  # every user generation -- kept as a root by gcRootsDirs above -- would pin
+  # its closure in the store forever.
+  #
+  # The module writes no logs, and launchd's default (os_log) is not where the
+  # previous GC daemons were read, so keep the same /tmp files.
+  launchd.daemons.fast-nix-gc.serviceConfig = {
+    StartCalendarInterval = [
+      {
+        Weekday = 0;
+        Hour = 14;
+        Minute = 0;
+      }
+    ];
+    EnvironmentVariables.XDG_STATE_HOME = "${config.my.homeDirectory}/.local/state";
+    StandardErrorPath = "/tmp/daemons-nix-gc.log";
+    StandardOutPath = "/tmp/daemons-nix-gc.log";
   };
 
-  #   environment.etc."sudoers.d/nix-collect-garbage".source = pkgs.runCommand "sudoers-nix-collect-garbage" {} ''
-  #   YABAI_BIN="${nixPackage}/bin/nix-collect-garbage"
-  #   SHASUM=$(sha256sum "$YABAI_BIN" | cut -d' ' -f1)
-  #   cat <<EOF >"$out"
-  #   %admin ALL=(root) NOPASSWD: sha256:$SHASUM $YABAI_BIN --delete-older-than 3d
-  #   EOF
-  # '';
+  services.fast-nix-optimise = {
+    enable = true;
+  };
 
-  launchd.user.agents.user-nix-gc = {
-    command = "${nixPackage}/bin/nix-collect-garbage --delete-older-than 3d";
-    environment.NIX_REMOTE = "daemon";
-    serviceConfig = {
-      RunAtLoad = false;
-      KeepAlive = false;
-      ProcessType = "Background";
-      StartCalendarInterval = [
-        {
-          Weekday = 0;
-          Hour = 14;
-          Minute = 30;
-        }
-      ];
-      StandardErrorPath = "/tmp/user-nix-gc.log";
-      StandardOutPath = "/tmp/user-nix-gc.log";
-    };
+  launchd.daemons.fast-nix-optimise.serviceConfig = {
+    StartCalendarInterval = [
+      {
+        Weekday = 0;
+        Hour = 15;
+        Minute = 0;
+      }
+    ];
+    StandardErrorPath = "/tmp/daemons-nix-store-optimise.log";
+    StandardOutPath = "/tmp/daemons-nix-store-optimise.log";
   };
 
   # `just switch` needs root (darwin-rebuild refuses to activate as a normal
