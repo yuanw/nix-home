@@ -349,6 +349,15 @@ appNameSubstring = "mono-stretchly"
 bundleId = ""
 id = "6F2D9E77-3C1B-4F0A-9E5D-2B7A4C8E1D63"
 layout = "float"
+
+# Rex disables its window's green full-screen button (it does full screen its own
+# way), and OmniWM's auto policy reads that as "no tiling wanted"
+# (heuristicReasons=disabledFullscreenButton), so its windows come up floating.
+[[appRules]]
+bundleId = "com.superlogical.rex"
+id = "4D61FB08-5BEA-4C3F-8E3B-C1A228A91987"
+layout = "tile"
+
 [[hotkeys]]
 binding = "Unassigned"
 id = "toggleScratchpad.1"
