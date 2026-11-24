@@ -267,6 +267,12 @@ pkgs.runCommand "github-widget-tests"
     test "$(jq -r '.i | length' small.json)" = 1
     test "$(jq -r '.i[0].t' small.json)" = "Update flake.lock"
     test "$(jq -r '.i[0].r' small.json)" = "yuanw/nix-home"
+    test "$(jq -r '.u | type' small.json)" = "number"
+    # the same inbox twice must still be a change, or the host hands it to nobody
+    FILTER=filter_small.py PUBLISHED=$PWD/again.json sh ./github-inbox.sh
+    sleep 1
+    FILTER=filter_small.py PUBLISHED=$PWD/later.json sh ./github-inbox.sh
+    test "$(cat again.json)" != "$(cat later.json)"
     test "$(jq -r '.i[0].p' small.json)" = "https://github.com/yuanw/nix-home/pull/7"
     test "$(jq -r '.i[0].s' small.json)" = "https://api.github.com/repos/yuanw/nix-home/pulls/7"
 

@@ -18,20 +18,25 @@ LC_ALL=C
 KEY=github-inbox
 # omniwmctl drops a value over 4096 bytes (IPCShellRequest.valueLimit); rows
 # are trimmed until the JSON fits, and "n" keeps the real count for the bell.
+# "u" is the publish time: the host only hands a var to the widgets when the
+# value actually changed, so an unchanged inbox would otherwise never reach a
+# widget that appeared after the last change -- after an OmniWM restart, say.
 MAX_BYTES=3900
 ROWS=12
 TITLE=120
 
 fail() {
-	exec omniwmctl shell set "$KEY" '{"n":0,"i":[],"e":"gh api notifications failed"}'
+	exec omniwmctl shell set "$KEY" \
+		"{\"n\":0,\"u\":$(date +%s),\"i\":[],\"e\":\"gh api notifications failed\"}"
 }
 
 if ! threads=$(python3 "$FILTER" 2>/dev/null) || ! printf '%s' "$threads" | jq -e 'type == "array"' >/dev/null 2>&1; then
 	fail
 fi
 
-json=$(printf '%s' "$threads" | jq -c --argjson rows "$ROWS" --argjson title "$TITLE" '
-    {n: length} + {i: [.[:$rows][] | {
+json=$(printf '%s' "$threads" | jq -c --argjson rows "$ROWS" --argjson title "$TITLE" \
+	--argjson now "$(date +%s)" '
+    {n: length, u: $now} + {i: [.[:$rows][] | {
         r: (.repository.full_name // .repository.name // ""),
         h: (.repository.html_url // ""),
         t: ((.subject.title // "")[0:$title]),
