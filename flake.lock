@@ -177,16 +177,15 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1793474499,
-        "narHash": "sha256-gtYZd5RcbwyDq4wOv4SO18FtZKorlI4HGT5FoMJRfkI=",
-        "owner": "yuanw",
+        "lastModified": 1795266903,
+        "narHash": "sha256-SsMytOAZsg8+x+Y5E/2oLoxUPBxpeJxjP8jHXp+2PZk=",
+        "owner": "graham33",
         "repo": "nixos-dgx-spark",
-        "rev": "e4fbc0bcd82c0e235729ea4d9665c158b9f0ea1c",
+        "rev": "6fa95b30510a8869739d66557f1a1b56a317cdde",
         "type": "github"
       },
       "original": {
-        "owner": "yuanw",
-        "ref": "pr-197-lock-bump",
+        "owner": "graham33",
         "repo": "nixos-dgx-spark",
         "type": "github"
       }
@@ -1249,6 +1248,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-spark": {
+      "locked": {
+        "lastModified": 1794712667,
+        "narHash": "sha256-B6AQ2VtT3tE9r6zACpS9jiRReHomC6MJ/w6uj0fnp9E=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "58a4d239dccd46a77c2f17f668cde8abd883a87b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "58a4d239dccd",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-stable": {
       "locked": {
         "lastModified": 1795137884,
@@ -1594,6 +1609,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_12",
         "nixpkgs-master": "nixpkgs-master",
+        "nixpkgs-spark": "nixpkgs-spark",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nur": "nur",
         "pi-flake": "pi-flake",

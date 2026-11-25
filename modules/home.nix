@@ -196,11 +196,9 @@ hm@{ pkgs, ... }:
           name = config.my.username;
         };
         credential = {
-          helper =
-            if pkgs.stdenvNoCC.hostPlatform.isDarwin then
-              "osxkeychain"
-            else
-              "!${pkgs.gh}/bin/gh auth git-credential";
+          # gh's token lives in the keychain as a *generic* password, which the
+          # osxkeychain helper (internet passwords only) cannot find.
+          helper = "!${pkgs.gh}/bin/gh auth git-credential";
           useHttpPath = true;
         };
       };

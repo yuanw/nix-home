@@ -175,6 +175,10 @@ in
   };
 
   tensorfold-zig = prev.callPackage ./tensorfold-zig { };
+  # Inkling 2 Mini's native CUDA engine (TensorFold PR #4441 + the
+  # Inkling-2-Mini-DGX-Spark-TensorFold recipe patches), one rank on the
+  # Spark's 128 GiB; served by modules/inkling2.nix.
+  tensorfold-inkling2 = prev.callPackage ./tensorfold-inkling2 { };
 
   ffmpeg-full = prev.ffmpeg-full.override { withWhisper = false; };
 

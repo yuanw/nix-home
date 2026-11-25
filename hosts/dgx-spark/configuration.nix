@@ -30,13 +30,16 @@
   # it ~20 °C for no measurable throughput loss, because MoE inference here
   # is HBM-bandwidth-bound, not clock-bound.
   # The lock is not persistent across reboots, so reapply it every boot, and
-  # ahead of any unit that touches the GPU (tensorfold-zig).
+  # ahead of any unit that touches the GPU (tensorfold-zig, inkling2-mini-tf).
   # https://www.wildpines.ai/blog/your-dgx-spark-is-cooking-itself/
   systemd.services.gpu-clock-cap = {
     description = "Cap GPU SM clocks to 2200 MHz for thermal protection";
     after = [ "nvidia-persistenced.service" ];
     wantedBy = [ "multi-user.target" ];
-    before = [ "tensorfold-zig.service" ];
+    before = [
+      "tensorfold-zig.service"
+      "inkling2-mini-tf.service"
+    ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
@@ -96,8 +99,14 @@
     # cap what a *single* drv does to the box.  Without `cores` the first CUDA
     # drv spawned 20 nvcc + 20 ptxas (load 38) and ate the headroom the model
     # needs, which is how a cache warm turns into an OOM.
-    max-jobs = 1;
-    cores = 8;
+    #
+    # The Qwen3.8 model that tuned these numbers (86 G RSS) is retired; Inkling
+    # 2 Mini loads ~27 GiB and the engine keeps TENSORFOLD_MEMORY_RESERVE_GIB
+    # free, so 2 jobs × 12 cores fits the 40 G build cgroup below even with the
+    # model resident.  The memory cap (not max-jobs/cores) is what keeps a build
+    # from OOM-killing the model — leave it alone.
+    max-jobs = 2;
+    cores = 12;
     trusted-users = [
       "root"
       "yuanw"
@@ -180,29 +189,33 @@
   services.cockpit-local.enable = true;
   services.cockpit-local.enableGpu = true;
 
+  # Direct :9090 access should also match the reverse-proxy hostname.
+  services.cockpit-local.certExtraDnsNames = [ "cockpit.yuanw.me" ];
+
   # ─── PCP (Performance Co-Pilot) — required by cockpit
   services.pcp.enable = true;
 
   # ─── Firewall ───────────────────────────────────────────────────────
-  # (TensorFold's API port 8888 is opened by the tensorfold-zig unit below)
+  # (TensorFold's API port 8888 is opened by the inkling2 unit below)
 
-  # ─── TensorFold Zig (tensorfold-native) ─────────────────────────
-  # modules/tensorfold-zig.nix + packages/tensorfold-zig: upstream
-  # TensorFold's Zig engine (branch zig-flashnext) packaged natively,
-  # serving Qwen3.8 Flash Next from NVIDIA's FP4 QAD checkpoint
-  # (nvidia/Qwen3.8-Flash-Next-FP4-Local, ~96 GiB: the unit downloads it on
-  # first start) on :8888. The CUDA fatbins + Triton AOT cubins are baked in
-  # (no first-start JIT). The former INT4-AutoRound checkpoint (~122 GiB) is
-  # still in the HF cache; prune it by hand if the disk needs the space.
-  # Plan: docs/tensorfold-zig-plan.org
-  services.tensorfold-zig = {
+  # ─── Inkling 2 Mini (tensorfold-native, PR #4441) ────────────────
+  # modules/inkling2.nix + packages/tensorfold-inkling2: the
+  # Inkling-2-Mini-DGX-Spark-TensorFold recipe's engine packaged natively —
+  # TensorFold at Jürgen Schmied's Inkling 2 Mini CUDA head (PR #4441,
+  # dc2ca8a1) plus the recipe's patches 0001–0018 — serving
+  # thinkingmachines/Inkling-2-Mini (26.4B MoE, ModelOpt NVFP4/MXFP8,
+  # ~19 GiB) on :8888 with the DFlash2 block-diffusion drafter.
+  #
+  # The Qwen3.8-Flash-Next server (services.tensorfold-zig) is OFF: 128 GiB of
+  # unified memory fits one model at a time, and this unit Conflicts with it, so
+  # starting Inkling 2 Mini stops Qwen even if it is still resident (and
+  # `systemctl start tensorfold-zig` stops Inkling instead). To go back to
+  # Qwen3.8, flip the two enable flags (and the Qwen checkpoint stays cached).
+  services.tensorfold-zig.enable = false;
+  services.inkling2 = {
     enable = true;
     openFirewall = true;
     environmentFile = config.age.secrets.hf-token.path;
-    # Recipe patch 0010 (issue #33): keep the ATS-locked system-memory caches and
-    # native VMM rings, instead of the keeper pool, so steady load does not emit
-    # NV_ERR_NO_MEMORY. ringCache stays available but off.
-    systemMemoryCache = true;
   };
 
   # (the tensorfold-zig state dir rules live in

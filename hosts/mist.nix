@@ -148,10 +148,14 @@
     pi = {
       enable = true;
       defaultProvider = "dgx-spark";
-      defaultModel = "Qwen3.8-Flash-Next";
+      defaultModel = "Inkling-2-Mini";
       extensions = {
         web-fetch.enable = true;
         cursor-agent.enable = true;
+      };
+      # Ships off (`on: false`); `/prompts ambition` turns it on for a session.
+      promptSections = {
+        ambition = ../modules/coding-agents/pi/prompts/ambition.md;
       };
     };
     secrets.agenix = {
@@ -218,8 +222,9 @@
       enable = true;
     };
     wm = {
-      yabai.enable = true;
-      yabai.enableJankyborders = true;
+      # OmniWM trial. Revert with yabai.enable = true and
+      # yabai.enableJankyborders = true (the two cannot both be on).
+      omniwm.enable = true;
     };
   };
 }

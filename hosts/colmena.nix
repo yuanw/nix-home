@@ -17,7 +17,9 @@ in
           config.allowUnfree = true;
           overlays = [ (import ../packages) ];
         };
-        dgx-spark = import inputs.nixpkgs {
+        # nixpkgs-spark: graham33/nixos-dgx-spark's pin (see flake.nix) — the
+        # shared unstable can no longer build linux-7.0.14-nvidia.
+        dgx-spark = import inputs.nixpkgs-spark {
           localSystem.system = "aarch64-linux";
           config.allowUnfree = true;
           overlays = [ (import ../packages) ];

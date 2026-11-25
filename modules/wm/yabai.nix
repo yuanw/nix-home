@@ -13,37 +13,16 @@
 with lib;
 let
   cfg = config.modules.wm.yabai;
-  emacsEveryWhere = ''emacsclient --eval "(emacs-everywhere)"'';
-  emacsClient = "emacsclient -c -a 'emacs'";
+  launcher = import ./skhd-launcher.nix { inherit config pkgs; };
   # to escape $ propertly, config uses that create fsspace
   moveConfig = builtins.readFile ./skhdrc;
-  defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
-  # LaunchServices does not reliably know the Home Manager bundles by name, so
-  # `open -a' takes the path (same reason as modules/editor/emacs/features/postlude.el).
-  rexApp = "~/Applications/Home\\ Manager\\ Apps/Rex.app";
   # it is nice to reference pkgs full path
-  laucherConfig = ''
-    shift + ctrl + alt - e: ${emacsClient}
-    shift + ctrl + alt + cmd - e: ${emacsEveryWhere}
-    shift + ctrl + alt - o: org-capture
-    shift + ctrl + alt - f :${defaultBrowserCmd}
-    shift + ctrl + alt - v: osascript -e 'tell application "Viscosity" to connect "work"'
+  reloadConfig = ''
     # reload skhd configuration
     shift + ctrl + alt - r: pkill yabai && \
                             ${pkgs.skhd}/bin/skhd -r && \
                             ${pkgs.sketchybar}/bin/sketchybar --reload && osascript -e 'display notification  "restart yabai and reload sketchybar skhd"'
-    # lock screen
-    shift + ctrl + alt - l: pmset displaysleepnow
-    # bring up Rex (sessions live in the rex server, so this only needs to wake the app)
-    shift + ctrl + alt - h: open -a ${rexApp}
-    shift + ctrl + alt - y : choose-pass
-    # take screenshot
-    shift + ctrl + alt - s: screencapture -ic
-    shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
-    shift + ctrl + alt - c: screencapture /tmp/$(date +%s).png
-    cmd - space: app-launcher
   '';
-
 in
 {
   options.modules.wm.yabai = {
@@ -81,14 +60,7 @@ in
             };
           };
         };
-        home.packages = [
-          pkgs.choose-mac
-          (pkgs.writeShellScriptBin "choose-pass" ''
-            find $HOME/.password-store -type f -name '*.gpg' | \
-               sed "s|.*/\.password-store/||; s|\.gpg$||" | \
-               choose | \
-               xargs -r -I{} pass show -c {}
-          '')
+        home.packages = launcher.packages ++ [
           (pkgs.writeShellScriptBin "yabai-next-window" ''
             #
             # yabai-next-window
@@ -165,8 +137,9 @@ in
       services.skhd = {
         enable = true;
         skhdConfig = ''
-          # laucher configurations
-          ${laucherConfig}
+          # launcher chords shared with modules/wm/omniwm.nix
+          ${launcher.config}
+          ${reloadConfig}
           # movement configurations
           ${moveConfig}
         '';
@@ -263,6 +236,19 @@ in
           yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
         '';
       };
+    })
+
+    # The agents this module owns when yabai is off. nix-darwin leaves an agent
+    # it no longer declares running, and its plist is load -w, so a leftover
+    # returns at the next login: yabai tiling the same windows as
+    # modules/wm/omniwm.nix, a second set of borders, sketchybar querying a
+    # yabai that is gone. See modules/launchd.nix.
+    (mkIf (!cfg.enable) {
+      modules.launchd.userAgentsToRemove = [
+        "org.nixos.yabai"
+        "org.nixos.jankyborders"
+        "org.nixos.sketchybar"
+      ];
     })
 
   ];

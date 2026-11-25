@@ -27,5 +27,53 @@ System Preference -> Lock Screen ->
 - https://github.com/shaunsingh/nix-darwin-dotfiles
 - https://github.com/julian-heng/yabai-config
 - https://github.com/peel/dotfiles/blob/master/setup/darwin/wm.nix
+** OmniWM instead of yabai
+[[https://github.com/OmniNull/OmniWM][OmniWM]] (modules/wm/omniwm.nix) tiles, draws its own workspace bar and its own
+focused-window border, so enabling it takes ~services.yabai~, ~services.sketchybar~
+and ~services.jankyborders~ off with it. Enable one WM or the other; an assertion
+refuses both.
+
+- Layout keys stay in skhd (the chords modules/wm/skhdrc gave yabai) and call
+  ~omniwmctl~ over IPC. OmniWM's own hotkeys stay on as well (~Option + arrows~,
+  ~Option + 1-9~).
+- Settings live in modules/wm/omniwm/settings.toml. OmniWM's Settings window
+  rewrites that file and drops the symlink, so a GUI change survives only until
+  the next switch: mirror it into the template.
+- That file is the ~schemaVersion = 5~ document OmniWM wrote itself, ~1200~
+  lines of it. Validation is all-or-nothing, so a trimmed file is refused whole
+  (the rejected bytes go to ~/.config/omniwm/settings.toml.corrupt and the WM
+  starts on defaults, ~ipcEnabled~ among them -- which is why ~omniwmctl~
+  answers ~transport_failure~). Change values, never delete keys; after an
+  OmniWM upgrade delete the file, let the app write a fresh one, re-apply the
+  values. ~omniwmctl ping~ and ~omniwmctl query workspaces~ are the two checks
+  that say whether the file loaded.
+- Needs macOS 26+ on Apple Silicon, Mission Control ~Displays have separate
+  Spaces~ on, and Accessibility plus Input Monitoring grants (the activation
+  script inserts them, first launch still prompts).
+- Rex (modules/terminal-multiplexer/rex.nix) windows came up ~floating~ and took
+  no layout command: Rex disables the green full-screen button, which OmniWM's
+  auto policy reads as the app opting out of tiling. The ~com.superlogical.rex~
+  ~appRules~ entry in modules/wm/omniwm/settings.toml forces ~layout = "tile"~.
+  ~omniwmctl query windows --fields app,mode,layout-reason~ shows the mode, and
+  ~omniwmctl capture start trace~ / ~capture stop~ writes a log under
+  ~/.local/state/omniwm/diagnostics whose ~Focused Window Decision~ block names
+  the reason (~heuristicReasons=disabledFullscreenButton~ here).
+- The GitHub inbox button is the port of
+  modules/wm/sketchybar/plugins/github.sh (modules/wm/omniwm/widgets/github).
+  A Luau widget cannot start a program, so the ~gh~ and
+  github-notifications-filter.py pair runs in the ~omniwm-github-inbox~ launchd
+  agent instead (modules/wm/omniwm/github-inbox.sh; the filter is shared with
+  sketchybar, so its dismissed-thread log now lands in
+  ~/.local/state/omniwm). It publishes the JSON with ~omniwmctl shell set
+  github-inbox~ and the widget renders ~ctx.data.vars~, so there is no token in
+  OmniWM and no host to allow -- ~gh~ still does the auth. ~omniwmctl~ caps a
+  value at 4 KiB, which trims the rows the popout shows but not the count on
+  the bell. ~omniwmctl query shell-widgets~ and /tmp/omniwm-github-inbox.log
+  say which half went stale.
+- Not carried over: workspace create/destroy (~cmd + alt - w~ lost its meaning),
+  the ~shift + ctrl - a/s/w/d~ floating nudge, and ~cmd - 0~ for a tenth
+  workspace. Pointer move/resize comes from OmniWM's gesture settings instead of
+  yabai's ~fn~ modifier bindings.
+
 * NixOS
 xmonad + xmobar

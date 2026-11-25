@@ -54,6 +54,18 @@ in
         explicitly.
       '';
     };
+
+    certExtraDnsNames = mkOption {
+      type = types.listOf types.str;
+      default = [ ];
+      description = ''
+        Extra DNS names to add as SANs in the self-signed TLS certificate
+        Cockpit uses when accessed directly (e.g. --port / :9090). They are
+        merged with `localhost`, the hostname and `$hostname.local`. Add
+        reverse-proxy hostnames here. Browsers will still flag the cert as
+        self-signed, but no longer as a name mismatch.
+      '';
+    };
   };
 
   config = mkIf cfg.enable {
@@ -87,6 +99,59 @@ in
 
     # cockpit-session needs cockpit-bridge in PATH (nixpkgs module no longer adds it)
     environment.systemPackages = [ pkgs.cockpit ];
+
+    # Stable self-signed cert for direct :${cfg.port} access. cockpit-certificate-ensure
+    # uses this filename when no cert exists with default SANs (localhost/127.0.0.1 only),
+    # which makes browsers reject the direct URL as a name mismatch. Pre-create it once
+    # with real SANs (hostname + .local + certExtraDnsNames); it persists across reboots.
+    systemd.services."cockpit-cert" = {
+      description = "Ensure persistent Cockpit TLS certificate";
+      wantedBy = [ "cockpit.service" ];
+      before = [ "cockpit.service" ];
+      serviceConfig.Type = "oneshot";
+      path = [
+        pkgs.openssl
+        pkgs.coreutils
+      ];
+      script =
+        let
+          dns = [
+            "localhost"
+            config.networking.hostName
+            "${config.networking.hostName}.local"
+          ]
+          ++ cfg.certExtraDnsNames;
+          san = lib.concatStringsSep "," (map (d: "DNS:${d}") dns ++ [ "IP:127.0.0.1" ]);
+        in
+        ''
+          dir=/etc/cockpit/ws-certs.d
+          mkdir -p "$dir"
+          if [ ! -e "$dir/0-self-signed.cert" ]; then
+            echo "generating persistent cockpit TLS certificate"
+            openssl req -x509 -newkey rsa:3072 -nodes \
+              -keyout "$dir/0-self-signed.key" \
+              -out "$dir/0-self-signed.cert" \
+              -days 3650 \
+              -subj "/CN=${config.networking.hostName}" \
+              -addext "subjectAltName=${san}" 2>/dev/null
+            chmod 600 "$dir/0-self-signed.key"
+            chmod 644 "$dir/0-self-signed.cert"
+          fi
+        '';
+    };
+
+    # Run the web service persistently instead of the per-connection socket churn that
+    # wedged the session socket (silent drops after login) and caused the switch-time
+    # "Dependency failed for Cockpit Web Service". Self-heal crashes. Order after the
+    # DynamicUser providers that own the /run/cockpit runtime dirs at switch.
+    systemd.services.cockpit = {
+      wantedBy = [ "multi-user.target" ];
+      after = [
+        "cockpit-wsinstance-socket-user.service"
+        "cockpit-session-socket-user.service"
+      ];
+      serviceConfig.Restart = "on-failure";
+    };
 
     # cockpit-gpu manifest.json checks /usr/bin/nvidia-smi via path-exists
     # condition. Create the symlink via systemd tmpfiles since /usr/bin is
