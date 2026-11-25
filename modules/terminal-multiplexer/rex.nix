@@ -20,6 +20,32 @@ let
   # below only binds the client's session.switch action.
   pickerSrc = ./rex-project-picker;
 
+  # Focus Emacs and Rex through the WM.  omniwm-focus-app is installed by
+  # modules/wm/omniwm.nix, so these only exist when that module is enabled.
+  focusLua = lib.optionalString config.modules.wm.omniwm.enable ''
+    local function focus_app(app)
+      local reply = rex.exec({ "omniwm-focus-app", app }, { timeout = 10 })
+      if not reply.ok then
+        error("omniwm-focus-app failed: " .. (reply.stderr or "unknown error"), 0)
+      end
+    end
+
+    rex.action({
+      name = "focus_emacs",
+      title = "Focus Emacs",
+      run = function() focus_app("Emacs") end,
+    })
+
+    rex.action({
+      name = "focus_rex",
+      title = "Focus Rex",
+      run = function() focus_app("Rex") end,
+    })
+
+    rex.bind(${builtins.toJSON cfg.focusEmacsKey}, "focus_emacs")
+    rex.bind(${builtins.toJSON cfg.focusRexKey}, "focus_rex")
+  '';
+
   # builtins.toJSON gives Lua-compatible strings and numbers, but its objects use
   # ":" where Lua wants "=", so the root entries are laid out by hand.
   rootsLua = lib.concatMapStringsSep ", " (
@@ -113,6 +139,7 @@ let
     rex.bind(${builtins.toJSON cfg.splitRightKey}, "pane.split.right")
     rex.bind(${builtins.toJSON cfg.toggleBarKey}, "client.sidebar.toggle")
     rex.bind(${builtins.toJSON cfg.openInEmacsKey}, "rex_open_in_emacs")
+    ${focusLua}
   '';
 in
 with lib;
@@ -201,6 +228,26 @@ with lib;
         Shortcut that opens the focused pane's working directory in Emacs.
         Needs `modules.editors.emacs.enable' on this host, since the action
         calls emacsclient and the Elisp it evaluates lives in that module.
+      '';
+    };
+
+    focusEmacsKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>f";
+      description = ''
+        Shortcut that focuses the Emacs window in the WM.
+        Needs `modules.wm.omniwm.enable' on this host, since the action
+        calls omniwm-focus-app from that module.
+      '';
+    };
+
+    focusRexKey = mkOption {
+      type = types.str;
+      default = "ctrl+n>r";
+      description = ''
+        Shortcut that focuses the Rex window in the WM.
+        Needs `modules.wm.omniwm.enable' on this host, since the action
+        calls omniwm-focus-app from that module.
       '';
     };
   };

@@ -22,6 +22,25 @@ let
   omni = args: "${pkgs.omniwm}/bin/omniwmctl command ${args}";
   launcher = import ./skhd-launcher.nix { inherit config pkgs; };
 
+  # Focus an app: find its window in the WM and raise it.  Rex's Lua actions
+  # call this by name to focus Emacs and Rex; the query-then-focus pair lives
+  # in one place instead of being re-derived per caller.
+  focusApp = pkgs.writeShellScriptBin "omniwm-focus-app" ''
+    set -e
+    app="$1"
+    if [ -z "$app" ]; then
+      echo "usage: omniwm-focus-app <app-name>" >&2
+      exit 2
+    fi
+    id="$(${pkgs.omniwm}/bin/omniwmctl query windows --app "$app" --format json \
+      | ${pkgs.jq}/bin/jq -r '.result.payload.windows[0].id // empty')"
+    if [ -z "$id" ]; then
+      echo "omniwm-focus-app: no window for $app" >&2
+      exit 1
+    fi
+    exec ${pkgs.omniwm}/bin/omniwmctl window focus "$id"
+  '';
+
   # The template doubles as the record of how many workspaces there are, so the
   # skhd chords below cannot drift from it the way a hardcoded count did when a
   # seventh workspace appeared in the GUI.
@@ -202,7 +221,10 @@ in
     ];
 
     home-manager.users.${username} = {
-      home.packages = launcher.packages ++ [ pkgs.omniwm ];
+      home.packages = launcher.packages ++ [
+        pkgs.omniwm
+        focusApp
+      ];
 
       # The GitHub inbox button, ported from modules/wm/sketchybar/plugins/github.sh
       # (see modules/wm/omniwm/widgets/github). It reads what the
