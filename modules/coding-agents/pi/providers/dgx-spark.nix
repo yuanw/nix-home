@@ -39,7 +39,11 @@
     supportsStore = false;
     thinkingFormat = "chat-template";
     chatTemplateKwargs = {
-      reasoning_effort = "$thinking.effort";
+      # pi substitutes $var objects only; the "$thinking.effort" string form
+      # is passed through verbatim (pi 1.6.0), which TensorFold rejects.
+      reasoning_effort = {
+        "$var" = "thinking.effort";
+      };
     };
     # The engine parses replies into reasoning_content/text/tool calls; replay
     # assistant messages with the reasoning field present.
