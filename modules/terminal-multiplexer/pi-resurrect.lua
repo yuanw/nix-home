@@ -603,6 +603,35 @@ local function my_uid()
   return uid
 end
 
+-- The state file keys entries by block ID, but a server restart restores
+-- sessions with new block IDs, so the recorded ID names a block that does
+-- not exist. Resolve the entry's real pane through its session: a block at
+-- the recorded working directory, or the session's only block. Returns the
+-- live block ID and its process, or nil.
+local function live_pane(e, block_id)
+  local proc = bcall("process", e.rex_session_id, block_id)
+  if proc then return block_id, proc end
+  local blocks = scall("session.list_blocks", e.rex_session_id)
+  if not blocks then return nil end
+  local matched
+  local only
+  for _, b in ipairs(blocks.blocks or {}) do
+    local p = bcall("process", e.rex_session_id, b.block_id)
+    if p then
+      if not only then only = { block_id = b.block_id, proc = p } end
+      if e.cwd ~= nil and p.foreground and p.foreground.cwd == e.cwd then
+        if matched then return nil end -- two panes match: refuse to guess
+        matched = { block_id = b.block_id, proc = p }
+      end
+    end
+  end
+  if matched then return matched.block_id, matched.proc end
+  if #(blocks.blocks or {}) == 1 and only then
+    return only.block_id, only.proc
+  end
+  return nil
+end
+
 -- Resume the agent of each entry in its pane. `how.include_gone` also
 -- resumes agents that had already left their pane. `how.dry` types nothing.
 local function restore(state, opts, how)
@@ -615,6 +644,8 @@ local function restore(state, opts, how)
 
   for _, block_id in ipairs(block_ids) do
     local e = state.entries[block_id]
+    local live_id, proc = live_pane(e, block_id)
+    if live_id then block_id = live_id end
     local res = {
       block_id = block_id,
       agent = e.agent,
@@ -625,7 +656,6 @@ local function restore(state, opts, how)
 
     -- Rex restores a pane in the directory it was in, so the pane's own
     -- directory is used when it can be read, and no `cd` is typed.
-    local proc = bcall("process", e.rex_session_id, block_id)
     local pane_cwd = proc and proc.foreground and proc.foreground.cwd
     local cmd, why = resume_command(opts, e, pane_cwd)
     res.command = cmd
@@ -928,7 +958,9 @@ function M.setup(user_opts)
     args = { all = "boolean?", dry = "boolean?" },
     run = function(_, args)
       args = args or {}
-      return run_cli(opts, { cmd = "restore", all = args.all, dry = args.dry, opts = opts })
+      -- A gone agent is exactly what a restart leaves at a shell prompt, so
+      -- it is resumed unless the caller rules it out.
+      return run_cli(opts, { cmd = "restore", all = args.all ~= false, dry = args.dry, opts = opts })
     end,
   }
 
@@ -973,7 +1005,7 @@ if MODNAME == nil and rex.args ~= nil then
     end
     return summary(opts, state)
   elseif cmd == "restore" then
-    return restore(load_state(opts), opts, { include_gone = a.all, dry = a.dry })
+    return restore(load_state(opts), opts, { include_gone = a.all ~= false, dry = a.dry })
   elseif cmd == "stop" then
     local pid = daemon_pid(opts)
     if not pid then return "the tracker is not running" end

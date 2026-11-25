@@ -146,7 +146,7 @@ in
 
     githubInboxInterval = lib.mkOption {
       type = lib.types.port;
-      default = 120;
+      default = 60;
       description = "Seconds between GitHub inbox refreshes.";
     };
 
