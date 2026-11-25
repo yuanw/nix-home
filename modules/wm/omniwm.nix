@@ -27,6 +27,41 @@ let
   # seventh workspace appeared in the GUI.
   wmSettings = builtins.fromTOML (builtins.readFile ./omniwm/settings.toml);
 
+  # The template pins workspaces to displays by displayUUID, which is only
+  # valid for the machine whose displays it was generated on. A host that sets
+  # workspaceMonitors gets its own per-workspace assignments layered on top of
+  # the template's workspaces; unset, the template is used as-is.
+  monitorAssignment =
+    a:
+    if a.type == "main" then
+      { type = "main"; }
+    else
+      {
+        type = "specificDisplay";
+        output = {
+          displayUUID = a.uuid;
+          name = a.name;
+        };
+      };
+
+  finalSettings =
+    if
+      cfg.workspaceMonitors == null
+      || builtins.length cfg.workspaceMonitors != builtins.length wmSettings.workspaces
+    then
+      wmSettings
+    else
+      wmSettings
+      // {
+        workspaces = map (
+          i:
+          builtins.elemAt wmSettings.workspaces i
+          // {
+            monitorAssignment = monitorAssignment (builtins.elemAt cfg.workspaceMonitors i);
+          }
+        ) (builtins.genList (i: i) (builtins.length wmSettings.workspaces));
+      };
+
   # The workspace trio modules/wm/skhdrc had: focus, send, send and follow, for
   # each workspace the settings template declares. omniwmctl takes the 1-based
   # position, not the workspace name, so the count is all this reads from it.
@@ -114,6 +149,36 @@ in
       default = 120;
       description = "Seconds between GitHub inbox refreshes.";
     };
+
+    workspaceMonitors = lib.mkOption {
+      type = lib.types.nullOr (
+        lib.types.listOf (
+          lib.types.submodule {
+            options = {
+              type = lib.mkOption {
+                type = lib.types.enum [
+                  "main"
+                  "specificDisplay"
+                ];
+                default = "main";
+              };
+              name = lib.mkOption {
+                type = lib.types.str;
+                default = "";
+                description = "Display name as OmniWM reports it, e.g. \"BenQ RD280U\".";
+              };
+              uuid = lib.mkOption {
+                type = lib.types.str;
+                default = "";
+                description = "Display UUID from `omniwmctl query displays --fields uuid`.";
+              };
+            };
+          }
+        )
+      );
+      default = null;
+      description = "Per-workspace monitor assignment, in settings.toml template order. Null keeps the template's own displayUUID assignments (valid only for the host it was generated on).";
+    };
   };
 
   config = lib.mkIf cfg.enable {
@@ -121,6 +186,18 @@ in
       {
         assertion = !config.modules.wm.yabai.enable;
         message = "modules.wm.omniwm and modules.wm.yabai cannot both be enabled: two window managers cannot tile the same windows.";
+      }
+      {
+        assertion =
+          cfg.workspaceMonitors == null
+          || builtins.length cfg.workspaceMonitors == builtins.length wmSettings.workspaces;
+        message = "modules.wm.omniwm.workspaceMonitors must list one entry per workspace in modules/wm/omniwm/settings.toml (${toString (builtins.length wmSettings.workspaces)}).";
+      }
+      {
+        assertion =
+          cfg.workspaceMonitors == null
+          || lib.all (a: a.type == "main" || (a.name != "" && a.uuid != "")) cfg.workspaceMonitors;
+        message = "modules.wm.omniwm.workspaceMonitors entries with type \"specificDisplay\" need name and uuid (see `omniwmctl query displays --fields name,uuid`).";
       }
     ];
 
@@ -150,7 +227,7 @@ in
         target = "${config.my.homeDirectory}/.config/omniwm/settings.toml";
         format = "toml";
         force = true;
-        settings = wmSettings;
+        settings = finalSettings;
       };
     };
 

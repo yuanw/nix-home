@@ -143,7 +143,45 @@
     wm = {
       # yabai.enable = true;
       # yabai.enableJankyborders = true;
-      omniwm.enable = true;
+      omniwm = {
+        enable = true;
+        # Display UUIDs from `omniwmctl query displays --fields name,uuid`,
+        # not the shared template's (it was generated on another machine).
+        workspaceMonitors = [
+          {
+            type = "specificDisplay";
+            name = "BenQ RD280U";
+            uuid = "3172B827-C508-4860-8A0A-CFD93AE75BAA";
+          } # 1
+          {
+            type = "specificDisplay";
+            name = "BenQ RD280U";
+            uuid = "3172B827-C508-4860-8A0A-CFD93AE75BAA";
+          } # 2
+          {
+            type = "specificDisplay";
+            name = "LG HDR 4K";
+            uuid = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626";
+          } # 3
+          {
+            type = "specificDisplay";
+            name = "LG HDR 4K";
+            uuid = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626";
+          } # 4
+          { type = "main"; } # 5
+          { type = "main"; } # 6
+          {
+            type = "specificDisplay";
+            name = "LG HDR 4K";
+            uuid = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626";
+          } # 7
+          {
+            type = "specificDisplay";
+            name = "BenQ RD280U";
+            uuid = "3172B827-C508-4860-8A0A-CFD93AE75BAA";
+          } # 8
+        ];
+      };
     };
 
     work = {
