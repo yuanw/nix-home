@@ -44,6 +44,9 @@ let
   cfg = config.services.inkling2;
 
   # nvcc + CUDA runtime/CCCL headers + the libs the binary loads at runtime.
+  # The cublas-family packages are multi-output: the shared libs (incl.
+  # libcublasLt.so.13, which the engine dlopens for vision and projections)
+  # live in the `lib` output, not the default one.
   cudaHome = pkgs.symlinkJoin {
     name = "cuda-merged-${pkgs.cudaPackages.cudaMajorMinorVersion}";
     paths = with pkgs.cudaPackages; [
@@ -53,10 +56,10 @@ let
       cuda_cccl
       cuda_nvrtc
       cuda_nvtx
-      libcublas
-      libcurand
-      libcusparse
-      libcusolver
+      libcublas.lib
+      libcurand.lib
+      libcusparse.lib
+      libcusolver.lib
     ];
   };
 
