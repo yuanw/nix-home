@@ -99,8 +99,14 @@
     # cap what a *single* drv does to the box.  Without `cores` the first CUDA
     # drv spawned 20 nvcc + 20 ptxas (load 38) and ate the headroom the model
     # needs, which is how a cache warm turns into an OOM.
-    max-jobs = 1;
-    cores = 8;
+    #
+    # The Qwen3.8 model that tuned these numbers (86 G RSS) is retired; Inkling
+    # 2 Mini loads ~27 GiB and the engine keeps TENSORFOLD_MEMORY_RESERVE_GIB
+    # free, so 2 jobs × 12 cores fits the 40 G build cgroup below even with the
+    # model resident.  The memory cap (not max-jobs/cores) is what keeps a build
+    # from OOM-killing the model — leave it alone.
+    max-jobs = 2;
+    cores = 12;
     trusted-users = [
       "root"
       "yuanw"
