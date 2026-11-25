@@ -100,10 +100,16 @@ let
   # The engine reads an exact version string out of these binaries and refuses
   # any other release, so they are built from the recipe's pinned tarballs,
   # not nixpkgs' (libjpeg-turbo 3.1.4.1, libwebp 1.6.0).
+  # cmake in nativeBuildInputs would activate stdenv's cmake hook; the hook and
+  # this manual -S . -B build fight (the hook's second configure fails), so the
+  # hooks are off and both codecs configure/build/install themselves.
   jpegCodec = stdenv.mkDerivation {
     pname = "libturbojpeg-pinned";
     version = "3.1.4.1";
     src = jpegSrc;
+    dontUseCmakeConfigure = true;
+    dontUseCmakeBuild = true;
+    dontUseCmakeInstall = true;
     nativeBuildInputs = [ cmake ];
     buildPhase = ''
       cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DENABLE_SHARED=ON -DENABLE_STATIC=OFF -DWITH_TURBOJPEG=ON
@@ -119,6 +125,9 @@ let
     pname = "libwebpdecoder-pinned";
     version = "1.6.0";
     src = webpSrc;
+    dontUseCmakeConfigure = true;
+    dontUseCmakeBuild = true;
+    dontUseCmakeInstall = true;
     nativeBuildInputs = [ cmake ];
     buildPhase = ''
       cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON \
@@ -153,14 +162,12 @@ stdenv.mkDerivation (_finalAttrs: {
       git apply "$p"
     done
     # `zig build grammar` demands the xgrammar checkout sit at its pinned tag
-    # (git describe --tags --exact-match); fetchgit leaves no tags, so name
-    # this commit (harmless when a .git with the rev is already there).
-    (cd ${xgrammarSrc} && git init -q . 2>/dev/null || true
-     git tag v0.2.8 2>/dev/null || {
-       git add -A
-       git -c user.email=build@localhost -c user.name=build commit -qm xgrammar
-       git tag v0.2.8
-     })
+    # (git describe --tags --exact-match). The store copy is read-only, so work
+    # on a writable copy and name its commit v0.2.8.
+    cp -r ${xgrammarSrc} "$TMPDIR/xgrammar"
+    (cd "$TMPDIR/xgrammar" && git init -q . && git add -A && \
+     git -c user.email=build@localhost -c user.name=build commit -qm xgrammar && \
+     git tag v0.2.8)
   '';
 
   buildPhase = ''
@@ -191,7 +198,7 @@ stdenv.mkDerivation (_finalAttrs: {
     # libtfgrammar.so (structured output, required tool calls) from the patched
     # tree's tf_grammar.cc over xgrammar v0.2.8 (patch 0013 turns xgrammar's own
     # compile cache off — a v0.2.8 bug).
-    ${zig}/zig build grammar -Dxgrammar=${xgrammarSrc} -Doptimize=ReleaseFast \
+    ${zig}/zig build grammar -Dxgrammar="$TMPDIR/xgrammar" -Doptimize=ReleaseFast \
       -j"$NIX_BUILD_CORES" --prefix "$out"
 
     test -x "$out/native/bin/tensorfold-native"
@@ -204,6 +211,7 @@ stdenv.mkDerivation (_finalAttrs: {
     runHook preInstall
     # The codecs sit in the binary's ../lib, where the vision tower dlopens
     # them (TENSORFOLD_LIBTURBOJPEG / TENSORFOLD_LIBWEBP override the path).
+    mkdir -p "$out/native/lib"
     cp -a ${jpegCodec}/libturbojpeg.so.0* "$out/native/lib/"
     cp -a ${webpCodec}/libwebpdecoder.so.3* "$out/native/lib/"
     # A plain name for ad-hoc runs; the NixOS unit uses the native/ path.
