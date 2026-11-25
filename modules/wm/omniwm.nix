@@ -200,6 +200,7 @@ in
         EnvironmentVariables = {
           PATH = lib.makeBinPath [
             pkgs.gh
+            pkgs.coreutils
             pkgs.git
             pkgs.jq
             pkgs.python3
