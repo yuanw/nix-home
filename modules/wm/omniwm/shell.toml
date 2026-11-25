@@ -1,0 +1,11 @@
+# Managed by modules/wm/omniwm.nix (mergetools): merged into
+# ~/.config/omniwm/shell/shell.toml, same shape and caveats as settings.toml --
+# the whole document here, keys named here win, keys only in the live file
+# (GUI edits to other lanes) survive. Mirror GUI changes you want to keep here.
+
+[profiles]
+
+[profiles.default]
+center = ["active-window"]
+leading = ["apple-menu", "app-menu", "omniwm", "workspaces", "scratchpads"]
+trailing = ["volume", "wifi", "battery-details", "control-center", "system-stats", "clock", "github"]

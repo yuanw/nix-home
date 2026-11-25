@@ -229,6 +229,15 @@ in
         force = true;
         settings = finalSettings;
       };
+
+      # Same approach for the shell profile lanes (the bar): OmniWM rewrites
+      # this file too, so merge in place instead of symlinking.
+      mergetools.omniwm-shell = {
+        target = "${config.my.homeDirectory}/.config/omniwm/shell/shell.toml";
+        format = "toml";
+        force = true;
+        settings = builtins.fromTOML (builtins.readFile ./omniwm/shell.toml);
+      };
     };
 
     services.skhd = {
