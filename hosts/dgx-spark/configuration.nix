@@ -189,6 +189,9 @@
   services.cockpit-local.enable = true;
   services.cockpit-local.enableGpu = true;
 
+  # Direct :9090 access should also match the reverse-proxy hostname.
+  services.cockpit-local.certExtraDnsNames = [ "cockpit.yuanw.me" ];
+
   # ─── PCP (Performance Co-Pilot) — required by cockpit
   services.pcp.enable = true;
 
