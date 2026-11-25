@@ -6,6 +6,7 @@
     inputs.dgx-spark.nixosModules.dgx-spark
     inputs.disko.nixosModules.disko
     ../../modules/cockpit.nix
+    ../../modules/inkling2.nix
     ../../modules/tensorfold-zig.nix
     ../../modules/vllm.nix
     ../../modules/vllm-models.nix
