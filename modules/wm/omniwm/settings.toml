@@ -47,17 +47,17 @@ useGlobalGaps = true
 [focus]
 crossesMonitorAtEdge = false
 edgeNavigationInterval = 1.5
-followsMouse = true
-# Inactive-workspace windows are parked in global coords that overlap other
-# displays (LibreWolf on WS2 sat at x=-1911 over the LG). With this false,
-# moving the mouse onto Slack on WS3 also hit that parked frame, raised the
-# window, and OmniWM rehomed it onto WS3.
+# Off: with three displays, inactive tiles are parked in global coords that
+# overlap other monitors. Focus-follows-mouse then raises them and OmniWM's
+# floating/monitor transfer path drops Rex/LibreWolf onto the focused display
+# (usually the LG / Slack workspace). Click-to-focus only.
+followsMouse = false
 followsMouseOnlyFullyVisible = true
-followsWindowToMonitor = true
+followsWindowToMonitor = false
 lockModifier = "off"
 moveCrossesMonitorAtEdge = false
-moveMouseToFocusedWindow = true
-raiseOnMouseFocus = true
+moveMouseToFocusedWindow = false
+raiseOnMouseFocus = false
 
 [gaps]
 fullscreenUsesOuterGaps = false
@@ -363,9 +363,12 @@ id = "4D61FB08-5BEA-4C3F-8E3B-C1A228A91987"
 assignToWorkspace = "1"
 layout = "tile"
 
-# Pin browser / chat to their monitors (WS2 BenQ, WS3 LG). LibreWolf also
-# forced to tile: if it floats, OmniWM's FloatingTransfers rehomes it onto
-# whichever display you focus next, which is how it ended up stacked with Slack.
+# Pin browser / chat / editor to their monitors (WS2 BenQ, WS3 LG, WS6 BenQ).
+# Force tile: if a window floats, FloatingTransfers rehomes it onto whichever
+# display you focus next (BenQ apps landing on the LG Slack workspace).
+# This is a band-aid — the real fix is a corner-only macOS display staircase
+# (OmniWM Settings → Monitors setup guide); edge-sharing layouts park inactive
+# BenQ windows on top of the LG in global coordinates.
 [[appRules]]
 bundleId = "org.nixos.librewolf"
 id = "9E5F0D5B-B984-4863-ADBD-131BCEE99FE3"
@@ -376,6 +379,12 @@ layout = "tile"
 bundleId = "com.tinyspeck.slackmacgap"
 id = "2CB194B9-C90F-48E5-A03F-0E433A10DF55"
 assignToWorkspace = "3"
+
+[[appRules]]
+bundleId = "org.gnu.Emacs"
+id = "041C6545-478E-4564-A1E6-1D022AE09FE4"
+assignToWorkspace = "6"
+layout = "tile"
 
 [[hotkeys]]
 binding = "Unassigned"

@@ -50,6 +50,13 @@ refuses both.
 - Needs macOS 26+ on Apple Silicon, Mission Control ~Displays have separate
   Spaces~ on, and Accessibility plus Input Monitoring grants (the activation
   script inserts them, first launch still prompts).
+- Multi-monitor: macOS Display arrangement must be a *corner-only staircase*
+  (OmniWM Settings → Monitors setup guide), not edge-sharing left-to-right.
+  Edge-adjacent layouts park inactive-workspace windows on top of the
+  neighbouring display; OmniWM then adopts them as floating onto that
+  display's workspace (BenQ apps "jump" onto the LG). Desk topology for
+  focus/move lives in OmniWM's separate Routing Arrangement, not in the
+  macOS map.
 - Rex (modules/terminal-multiplexer/rex.nix) windows came up ~floating~ and took
   no layout command: Rex disables the green full-screen button, which OmniWM's
   auto policy reads as the app opting out of tiling. The ~com.superlogical.rex~

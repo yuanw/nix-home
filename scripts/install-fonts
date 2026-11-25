@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 # Install all fonts found in a directory (recursively) into ~/Library/Fonts.
 #
-# Variable fonts are instantiated at wght=359 first (fonttools varLib.mutator)
-# and the instance is installed as <name>-wght359.ttf; anything that is not
-# variable (static fonts) is copied as-is.
+# Variable fonts are instantiated at the given weight (fonttools varLib.mutator)
+# and the instance is installed as <name>-wght<weight>.ttf; anything that is
+# not variable (static fonts) is copied as-is.
 #
-# Usage: install-fonts <font-dir>
+# Usage: install-fonts <font-dir> [weight]   (default weight: 359)
 #
 # Requires fonttools in PATH (nix package wraps it; ad hoc: `nix-shell -p fonttools`).
 
 set -euo pipefail
 
-src="${1:?usage: install-fonts <font-dir>}"
+src="${1:?usage: install-fonts <font-dir> [weight]}"
+wght="${2:-359}"
+[[ "$wght" =~ ^[0-9]+$ ]] || { echo "weight must be an integer: $wght" >&2; exit 1; }
 [ -d "$src" ] || { echo "not a directory: $src" >&2; exit 1; }
 command -v fonttools >/dev/null || { echo "fonttools not found in PATH" >&2; exit 1; }
 
@@ -25,9 +27,9 @@ trap 'rm -rf "$tmpdir"' EXIT
 while IFS= read -r -d '' f; do
   base="$(basename "$f")"
   out="$tmpdir/instance.ttf"
-  if fonttools varLib.mutator "$f" wght=359 -o "$out" >/dev/null 2>&1; then
-    cp -v "$out" "$dest/${base%.*}-wght359.ttf"
-    echo "instantiated $base (wght=359)"
+  if fonttools varLib.mutator "$f" wght="$wght" -o "$out" >/dev/null 2>&1; then
+    cp -v "$out" "$dest/${base%.*}-wght${wght}.ttf"
+    echo "instantiated $base (wght=$wght)"
   else
     echo "not a variable font, installing as-is: $base"
     cp -v "$f" "$dest/$base"
