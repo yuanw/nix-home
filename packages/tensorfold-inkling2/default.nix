@@ -199,9 +199,13 @@ stdenv.mkDerivation (_finalAttrs: {
 
     # libtfgrammar.so (structured output, required tool calls) from the patched
     # tree's tf_grammar.cc over xgrammar v0.2.8 (patch 0013 turns xgrammar's own
-    # compile cache off — a v0.2.8 bug).
-    ${zig}/zig build grammar -Dxgrammar="$TMPDIR/xgrammar" -Doptimize=ReleaseFast \
-      -j"$NIX_BUILD_CORES" --prefix "$out"
+    # compile cache off — a v0.2.8 bug). The sandbox has no glibc to detect, so
+    # zig's native target resolves to musl and libc++ then fails on musl's
+    # bits/alltypes.h; the container build detected glibc instead — -gnu forces
+    # zig's bundled glibc headers (the engine's own build stays `native`, whose
+    # binary is glibc-NEEDED anyway; postFixup sets its loader).
+    ${zig}/zig build grammar -Dxgrammar="$TMPDIR/xgrammar" -Dtarget=aarch64-linux-gnu \
+      -Doptimize=ReleaseFast -j"$NIX_BUILD_CORES" --prefix "$out"
 
     test -x "$out/native/bin/tensorfold-native"
     test -s "$out/native/lib/libtfgrammar.so"
