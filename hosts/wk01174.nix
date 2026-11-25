@@ -114,7 +114,6 @@
       ];
       brews = [
         "redis"
-        #"go"
       ];
     };
     editors.emacs = {
@@ -142,8 +141,9 @@
       enable = true;
     };
     wm = {
-      yabai.enable = true;
-      yabai.enableJankyborders = true;
+      # yabai.enable = true;
+      # yabai.enableJankyborders = true;
+      omniwm.enable = true;
     };
 
     work = {
