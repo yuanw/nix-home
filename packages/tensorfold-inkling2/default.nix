@@ -162,9 +162,11 @@ stdenv.mkDerivation (_finalAttrs: {
       git apply "$p"
     done
     # `zig build grammar` demands the xgrammar checkout sit at its pinned tag
-    # (git describe --tags --exact-match). The store copy is read-only, so work
-    # on a writable copy and name its commit v0.2.8.
+    # (git describe --tags --exact-match). cp -r keeps the store path's 0555
+    # mode, so chmod the copy writable before git can init it, and name its
+    # commit v0.2.8.
     cp -r ${xgrammarSrc} "$TMPDIR/xgrammar"
+    chmod -R u+w "$TMPDIR/xgrammar"
     (cd "$TMPDIR/xgrammar" && git init -q . && git add -A && \
      git -c user.email=build@localhost -c user.name=build commit -qm xgrammar && \
      git tag v0.2.8)
