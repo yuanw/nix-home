@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Install all fonts found in a directory (recursively) into ~/Library/Fonts.
+#
+# Variable fonts are instantiated at wght=359 first (fonttools varLib.mutator)
+# and the instance is installed as <name>-wght359.ttf; anything that is not
+# variable (static fonts) is copied as-is.
+#
+# Usage: install-fonts <font-dir>
+#
+# Requires fonttools in PATH (nix package wraps it; ad hoc: `nix-shell -p fonttools`).
+
+set -euo pipefail
+
+src="${1:?usage: install-fonts <font-dir>}"
+[ -d "$src" ] || { echo "not a directory: $src" >&2; exit 1; }
+command -v fonttools >/dev/null || { echo "fonttools not found in PATH" >&2; exit 1; }
+
+dest="$HOME/Library/Fonts"
+mkdir -p "$dest"
+
+count=0
+tmpdir="$(mktemp -d)"
+trap 'rm -rf "$tmpdir"' EXIT
+
+while IFS= read -r -d '' f; do
+  base="$(basename "$f")"
+  out="$tmpdir/instance.ttf"
+  if fonttools varLib.mutator "$f" wght=359 -o "$out" >/dev/null 2>&1; then
+    cp -v "$out" "$dest/${base%.*}-wght359.ttf"
+    echo "instantiated $base (wght=359)"
+  else
+    echo "not a variable font, installing as-is: $base"
+    cp -v "$f" "$dest/$base"
+  fi
+  count=$((count + 1))
+done < <(find "$src" -type f \( -iname '*.ttf' -o -iname '*.otf' -o -iname '*.ttc' -o -iname '*.otc' \) -print0)
+
+[ "$count" -gt 0 ] || { echo "no font files found under $src" >&2; exit 1; }
+echo "Installed $count font file(s) to $dest"

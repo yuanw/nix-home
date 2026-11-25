@@ -152,6 +152,20 @@ in
   proton-vpn-cli = prev.python3Packages.callPackage ./proton-vpn-cli { };
   sf-symbols = prev.callPackage ./sf_symbols.nix { };
   font-hack-nerd-font = prev.callPackage ./font-hack-nerd-font.nix { };
+  install-fonts =
+    prev.runCommand "install-fonts"
+      {
+        nativeBuildInputs = [ prev.makeWrapper ];
+        meta = with prev.lib; {
+          description = "Install fonts from a directory (variable fonts instantiated at wght=359) into ~/Library/Fonts";
+          platforms = platforms.darwin;
+        };
+      }
+      ''
+        mkdir -p $out/bin
+        makeWrapper ${prev.writeShellScriptBin "install-fonts" (builtins.readFile ../scripts/install-fonts)}/bin/install-fonts $out/bin/install-fonts \
+          --prefix PATH : ${prev.lib.makeBinPath [ prev.fonttools ]}
+      '';
   # ical-buddy = prev.callPackage ./ical-buddy.nix { };
   sketchybar-cpu-helper = prev.callPackage ./sketchybar-cpu-helper { };
   mermaid-cli-wrapped = prev.callPackage ./mermaid-cli-wrapped.nix { };

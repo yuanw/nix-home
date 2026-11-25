@@ -309,6 +309,7 @@
           packages = {
             # try the transcription scripts without switching the whole system
             transcribe = pkgs.transcribe;
+            install-fonts = pkgs.install-fonts;
             yt-dlp-librewolf = pkgs.yt-dlp-librewolf;
             # Exposed so `just update-rex' can reach its passthru.updateScript
             # (the pins live in packages/rex/sources.json).
