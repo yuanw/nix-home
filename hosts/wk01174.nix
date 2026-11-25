@@ -180,6 +180,11 @@
             name = "BenQ RD280U";
             uuid = "3172B827-C508-4860-8A0A-CFD93AE75BAA";
           } # 8
+          {
+            type = "specificDisplay";
+            name = "Built-in Retina Display";
+            uuid = "37D8832A-2D66-02CA-B9F7-8F30A301B230";
+          } # 9
         ];
       };
     };

@@ -48,7 +48,11 @@ useGlobalGaps = true
 crossesMonitorAtEdge = false
 edgeNavigationInterval = 1.5
 followsMouse = true
-followsMouseOnlyFullyVisible = false
+# Inactive-workspace windows are parked in global coords that overlap other
+# displays (LibreWolf on WS2 sat at x=-1911 over the LG). With this false,
+# moving the mouse onto Slack on WS3 also hit that parked frame, raised the
+# window, and OmniWM rehomed it onto WS3.
+followsMouseOnlyFullyVisible = true
 followsWindowToMonitor = true
 lockModifier = "off"
 moveCrossesMonitorAtEdge = false
@@ -356,6 +360,7 @@ layout = "float"
 [[appRules]]
 bundleId = "com.superlogical.rex"
 id = "4D61FB08-5BEA-4C3F-8E3B-C1A228A91987"
+assignToWorkspace = "1"
 layout = "tile"
 
 # Pin browser / chat to their monitors (WS2 BenQ, WS3 LG). LibreWolf also
@@ -517,11 +522,11 @@ binding = "Unassigned"
 id = "moveToWorkspace.7"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Option+9"
 id = "switchWorkspace.8"
 
 [[hotkeys]]
-binding = "Unassigned"
+binding = "Option+Shift+9"
 id = "moveToWorkspace.8"
 
 [[hotkeys]]
@@ -1343,3 +1348,14 @@ type = "specificDisplay"
 [workspaces.monitorAssignment.output]
 displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
 name = "BenQ RD280U"
+
+# Laptop panel: every connected display needs a workspace or OmniWM rehomes
+# floating windows onto whichever display you focus (LibreWolf → Slack on LG).
+[[workspaces]]
+displayName = "9"
+id = "1A5CF78C-6195-493F-BC45-47F30047CFFB"
+layoutType = "dwindle"
+name = "9"
+
+[workspaces.monitorAssignment]
+type = "main"
