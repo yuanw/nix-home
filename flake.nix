@@ -5,6 +5,16 @@
     nixpkgs-stable.url = "github:nixos/nixpkgs/nixos-26.05";
     nixpkgs-master.url = "github:nixos/nixpkgs/master";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # The DGX Spark node builds its closure against this nixpkgs, not the
+    # shared nixpkgs above: the current unstable pin can no longer build
+    # linux-7.0.14-nvidia (kernel tools fail on glibc's __u128 in
+    # asm/sigcontext.h — NixOS/nixpkgs#580678/#581990 fix one path, the
+    # nvidia-modules rebuild hits another). This is graham33/nixos-dgx-spark's
+    # pin (its flake.lock, 2026-11-14), which his Spark deployment builds from.
+    # Bump/drop when unstable builds the kernel+nvidia again.
+    nixpkgs-spark = {
+      url = "github:NixOS/nixpkgs/58a4d239dccd";
+    };
     nixos-hardware.url = "github:NixOS/nixos-hardware/master";
 
     direnv-instant.url = "github:Mic92/direnv-instant";
