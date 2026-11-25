@@ -167,11 +167,11 @@
     preservation = {
       url = "github:nix-community/preservation";
     };
-    # Fork of graham33/nixos-dgx-spark carrying upstream PR #197 (flake.lock
-    # bump, plus the cython/initrd overrides that bump made obsolete) on top of
-    # a nixpkgs bump to 2026-10-31.  Flip back to graham33 once #197 merges
-    # upstream.
-    dgx-spark.url = "github:yuanw/nixos-dgx-spark/pr-197-lock-bump";
+    # graham33's DGX Spark module (upstream now: PR #197, the fork's reason to
+    # exist, merged 2026-11). Its nvidia kernel adds tools_128bit_types, which
+    # the nixpkgs-unstable of Nov 2026 needs to build resolve_btfids on arm64
+    # (glibc's __u128 in asm/sigcontext.h).
+    dgx-spark.url = "github:graham33/nixos-dgx-spark";
     # Pinned to 7408b8b (2026-07-29), the last rev before upstream added the
     # enable-container-tests input as a relative path (path:./flags/...): Lix
     # refuses to lock a non-root flake whose lock file carries a path node

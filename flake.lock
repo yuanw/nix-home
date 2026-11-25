@@ -177,16 +177,15 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1793474499,
-        "narHash": "sha256-gtYZd5RcbwyDq4wOv4SO18FtZKorlI4HGT5FoMJRfkI=",
-        "owner": "yuanw",
+        "lastModified": 1795266903,
+        "narHash": "sha256-SsMytOAZsg8+x+Y5E/2oLoxUPBxpeJxjP8jHXp+2PZk=",
+        "owner": "graham33",
         "repo": "nixos-dgx-spark",
-        "rev": "e4fbc0bcd82c0e235729ea4d9665c158b9f0ea1c",
+        "rev": "6fa95b30510a8869739d66557f1a1b56a317cdde",
         "type": "github"
       },
       "original": {
-        "owner": "yuanw",
-        "ref": "pr-197-lock-bump",
+        "owner": "graham33",
         "repo": "nixos-dgx-spark",
         "type": "github"
       }
