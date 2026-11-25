@@ -148,7 +148,7 @@
     pi = {
       enable = true;
       defaultProvider = "dgx-spark";
-      defaultModel = "Qwen3.8-Flash-Next";
+      defaultModel = "Inkling-2-Mini";
       extensions = {
         web-fetch.enable = true;
         cursor-agent.enable = true;
