@@ -358,6 +358,20 @@ bundleId = "com.superlogical.rex"
 id = "4D61FB08-5BEA-4C3F-8E3B-C1A228A91987"
 layout = "tile"
 
+# Pin browser / chat to their monitors (WS2 BenQ, WS3 LG). LibreWolf also
+# forced to tile: if it floats, OmniWM's FloatingTransfers rehomes it onto
+# whichever display you focus next, which is how it ended up stacked with Slack.
+[[appRules]]
+bundleId = "org.nixos.librewolf"
+id = "9E5F0D5B-B984-4863-ADBD-131BCEE99FE3"
+assignToWorkspace = "2"
+layout = "tile"
+
+[[appRules]]
+bundleId = "com.tinyspeck.slackmacgap"
+id = "2CB194B9-C90F-48E5-A03F-0E433A10DF55"
+assignToWorkspace = "3"
+
 [[hotkeys]]
 binding = "Unassigned"
 id = "toggleScratchpad.1"
