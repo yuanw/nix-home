@@ -11,6 +11,7 @@
       ./browsers/librewolf.nix
       ./browsers/tor.nix
       ./catppuccin.nix
+      ./coding-agents/antigravity-cli.nix
       ./coding-agents/cursor
       ./coding-agents/forge.nix
       ./coding-agents/herdr

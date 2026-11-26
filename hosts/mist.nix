@@ -191,6 +191,9 @@
       python.enable = true;
     };
 
+    antigravity-cli = {
+      enable = true;
+    };
     hermes-agent = {
       enable = false;
       enableGateway = false;
