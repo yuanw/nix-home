@@ -140,7 +140,7 @@
       kotlin.enable = true;
     };
     tmux = {
-      enable = true;
+      enable = false;
       mainWorkspaceDir = "$HOME/workspaces";
       whichKey.enable = true;
     };
