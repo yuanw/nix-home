@@ -47,11 +47,9 @@ useGlobalGaps = true
 [focus]
 crossesMonitorAtEdge = false
 edgeNavigationInterval = 1.5
-# Off: with three displays, inactive tiles are parked in global coords that
-# overlap other monitors. Focus-follows-mouse then raises them and OmniWM's
-# floating/monitor transfer path drops Rex/LibreWolf onto the focused display
-# (usually the LG / Slack workspace). Click-to-focus only.
-followsMouse = false
+# On, but gated by followsMouseOnlyFullyVisible so parked/overlapping
+# inactive tiles (three-display layout) don't get raised and hijack transfers.
+followsMouse = true
 followsMouseOnlyFullyVisible = true
 followsWindowToMonitor = false
 lockModifier = "off"
