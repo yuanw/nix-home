@@ -261,17 +261,11 @@ in
   (flake-prompt.lib.skillFromDir { dir = "${janestreet-skills}/socratic-tutor"; })
 
   # A single markdown file, so the rest of that repo (its plugin manifests, docs
-  # and scripts) stays out of the skills directory. Upstream states its
-  # description as a YAML block scalar and its allowed-tools as a list;
-  # flake-prompt's parser reads single-line scalars only, so those two would
-  # come out as "|" and "" and are stated here instead.
+  # and scripts) stays out of the skills directory. flake-prompt reads name,
+  # description (a YAML block scalar) and metadata straight out of the
+  # frontmatter, so nothing needs to be restated here.
   (flake-prompt.lib.promptFromMarkdown {
-    name = "humanizer";
     source = humanizer + /SKILL.md;
-    description = "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written.";
-    extraFrontmatter = {
-      version = "2.1.1";
-    };
   })
 
   # From upstream's SKILL.md, like socratic-tutor above. The description is
