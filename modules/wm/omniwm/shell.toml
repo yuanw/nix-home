@@ -9,3 +9,6 @@
 center = ["active-window"]
 leading = ["apple-menu", "app-menu", "omniwm", "workspaces", "scratchpads"]
 trailing = ["volume", "wifi", "battery-details", "control-center", "system-stats", "clock", "github"]
+
+[profiles.default.workspaceBar]
+position = "right"
