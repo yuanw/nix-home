@@ -47,9 +47,7 @@ useGlobalGaps = true
 [focus]
 crossesMonitorAtEdge = false
 edgeNavigationInterval = 1.5
-# On, but gated by followsMouseOnlyFullyVisible so parked/overlapping
-# inactive tiles (three-display layout) don't get raised and hijack transfers.
-followsMouse = true
+followsMouse = false
 followsMouseOnlyFullyVisible = true
 followsWindowToMonitor = false
 lockModifier = "off"
@@ -189,8 +187,28 @@ provider = "ghostty"
 widthPercent = 50.0
 
 [routing]
-arrangements = []
-mode = "macOS"
+mode = "custom"
+
+[[routing.arrangements]]
+id = "61A02F02-0D89-4EA3-96E2-7EDAF6ED65D8"
+
+[[routing.arrangements.monitors]]
+gridColumn = 1
+gridRow = 0
+monitorDisplayUUID = "3172B827-C508-4860-8A0A-CFD93AE75BAA"
+monitorName = "BenQ RD280U"
+
+[[routing.arrangements.monitors]]
+gridColumn = 0
+gridRow = 0
+monitorDisplayUUID = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626"
+monitorName = "LG HDR 4K"
+
+[[routing.arrangements.monitors]]
+gridColumn = 2
+gridRow = 0
+monitorDisplayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+monitorName = "Built-in Retina Display"
 
 [scratchpads]
 
@@ -338,7 +356,6 @@ id = "552FB77D-BF0E-4737-90A6-B5BC6986C579"
 minHeight = 320.0
 minWidth = 660.0
 
-
 [[appRules]]
 bundleId = "com.apple.systempreferences"
 id = "1C64F561-8A2C-43B4-8D7D-3E11D5C7F931"
@@ -352,36 +369,27 @@ bundleId = ""
 id = "6F2D9E77-3C1B-4F0A-9E5D-2B7A4C8E1D63"
 layout = "float"
 
-# Rex disables its window's green full-screen button (it does full screen its own
-# way), and OmniWM's auto policy reads that as "no tiling wanted"
-# (heuristicReasons=disabledFullscreenButton), so its windows come up floating.
 [[appRules]]
+assignToWorkspace = "1"
 bundleId = "com.superlogical.rex"
 id = "4D61FB08-5BEA-4C3F-8E3B-C1A228A91987"
-assignToWorkspace = "1"
 layout = "tile"
 
-# Pin browser / chat / editor to their monitors (WS2 BenQ, WS3 LG, WS6 BenQ).
-# Force tile: if a window floats, FloatingTransfers rehomes it onto whichever
-# display you focus next (BenQ apps landing on the LG Slack workspace).
-# This is a band-aid — the real fix is a corner-only macOS display staircase
-# (OmniWM Settings → Monitors setup guide); edge-sharing layouts park inactive
-# BenQ windows on top of the LG in global coordinates.
 [[appRules]]
+assignToWorkspace = "2"
 bundleId = "org.nixos.librewolf"
 id = "9E5F0D5B-B984-4863-ADBD-131BCEE99FE3"
-assignToWorkspace = "2"
 layout = "tile"
 
 [[appRules]]
+assignToWorkspace = "3"
 bundleId = "com.tinyspeck.slackmacgap"
 id = "2CB194B9-C90F-48E5-A03F-0E433A10DF55"
-assignToWorkspace = "3"
 
 [[appRules]]
-bundleId = "org.gnu.Emacs"
-id = "041C6545-478E-4564-A1E6-1D022AE09FE4"
 assignToWorkspace = "6"
+bundleId = "org.gnu.Emacs"
+id = "A4D7196F-00E7-422C-85DF-0EB4D458051F"
 layout = "tile"
 
 [[hotkeys]]
@@ -1234,15 +1242,11 @@ id = "toggleShellWidget.control-center"
 
 [[hotkeys]]
 binding = "Unassigned"
+id = "toggleShellWidget.github"
+
+[[hotkeys]]
+binding = "Unassigned"
 id = "toggleShellWidget.hidden-bar"
-
-[[hotkeys]]
-binding = "Unassigned"
-id = "toggleShellWidget.media"
-
-[[hotkeys]]
-binding = "Unassigned"
-id = "toggleShellWidget.notifications"
 
 [[hotkeys]]
 binding = "Unassigned"
@@ -1270,7 +1274,7 @@ name = "1"
 type = "specificDisplay"
 
 [workspaces.monitorAssignment.output]
-displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
+displayUUID = "3172B827-C508-4860-8A0A-CFD93AE75BAA"
 name = "BenQ RD280U"
 
 [[workspaces]]
@@ -1283,7 +1287,7 @@ name = "2"
 type = "specificDisplay"
 
 [workspaces.monitorAssignment.output]
-displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
+displayUUID = "3172B827-C508-4860-8A0A-CFD93AE75BAA"
 name = "BenQ RD280U"
 
 [[workspaces]]
@@ -1296,8 +1300,8 @@ name = "3"
 type = "specificDisplay"
 
 [workspaces.monitorAssignment.output]
-displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
-name = "LG HDR 4K"
+displayUUID = "3172B827-C508-4860-8A0A-CFD93AE75BAA"
+name = "BenQ RD280U"
 
 [[workspaces]]
 displayName = "4"
@@ -1309,7 +1313,7 @@ name = "4"
 type = "specificDisplay"
 
 [workspaces.monitorAssignment.output]
-displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
+displayUUID = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626"
 name = "LG HDR 4K"
 
 [[workspaces]]
@@ -1319,7 +1323,11 @@ layoutType = "dwindle"
 name = "5"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626"
+name = "LG HDR 4K"
 
 [[workspaces]]
 displayName = "6"
@@ -1328,7 +1336,11 @@ layoutType = "dwindle"
 name = "6"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "specificDisplay"
+
+[workspaces.monitorAssignment.output]
+displayUUID = "5DCA26DC-CFAC-4ABF-A744-20D0047BE626"
+name = "LG HDR 4K"
 
 [[workspaces]]
 displayName = "7"
@@ -1340,8 +1352,8 @@ name = "7"
 type = "specificDisplay"
 
 [workspaces.monitorAssignment.output]
-displayUUID = "4CDD5A40-BABC-4FB8-9177-F6BA59EAF875"
-name = "LG HDR 4K"
+displayUUID = "37D8832A-2D66-02CA-B9F7-8F30A301B230"
+name = "Built-in Retina Display"
 
 [[workspaces]]
 displayName = "8"
@@ -1350,14 +1362,8 @@ layoutType = "niri"
 name = "8"
 
 [workspaces.monitorAssignment]
-type = "specificDisplay"
+type = "tertiary"
 
-[workspaces.monitorAssignment.output]
-displayUUID = "E79DC7CE-58C8-402D-B752-57C328C777AA"
-name = "BenQ RD280U"
-
-# Laptop panel: every connected display needs a workspace or OmniWM rehomes
-# floating windows onto whichever display you focus (LibreWolf → Slack on LG).
 [[workspaces]]
 displayName = "9"
 id = "1A5CF78C-6195-493F-BC45-47F30047CFFB"
@@ -1365,4 +1371,4 @@ layoutType = "dwindle"
 name = "9"
 
 [workspaces.monitorAssignment]
-type = "main"
+type = "tertiary"
