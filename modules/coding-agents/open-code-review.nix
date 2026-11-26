@@ -48,6 +48,7 @@ in
         {
           package = cfg.package;
           subdir = "share/skills/open-code-review";
+          skillDirs = [ ".pi/agent/skills" ];
           names = [
             "open-code-review"
             "open-code-review-delegate"
