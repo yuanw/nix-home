@@ -28,11 +28,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795722262,
-        "narHash": "sha256-j8zDo8j6IoRoqa+VRPxrLXiHe1b90ZvGZOGvwnFlchI=",
+        "lastModified": 1795722769,
+        "narHash": "sha256-AlZwzgoldS5NfXOz5o7cVPu3brn+bzTWRG+j6gwWUbM=",
         "owner": "yuanwang-wf",
         "repo": "agent-bundle",
-        "rev": "168e48cf5505c7128454a82ef903d4c0d5c17868",
+        "rev": "ee41bba9ff0dbea635b4d31a80677d364ed94881",
         "type": "github"
       },
       "original": {
