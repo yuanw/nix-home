@@ -49,6 +49,7 @@
                 sharedModules = [
                   inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
+                  inputs.agent-bundle.homeManagerModules.default
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
                   inputs.flake-prompt.homeManagerModules.default
@@ -153,6 +154,7 @@
                 sharedModules = [
                   inputs.betterfox.homeModules.betterfox
                   inputs.catppuccin.homeModules.catppuccin
+                  inputs.agent-bundle.homeManagerModules.default
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
                   inputs.flake-prompt.homeManagerModules.default

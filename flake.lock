@@ -20,6 +20,27 @@
         "type": "github"
       }
     },
+    "agent-bundle": {
+      "inputs": {
+        "home-manager": "home-manager",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795720258,
+        "narHash": "sha256-l7J87oB8vFSpSfi1FPMRLO7jBFl+LfjwISZfT4M6FHM=",
+        "owner": "yuanwang-wf",
+        "repo": "agent-bundle",
+        "rev": "eaf61ff98d0189a2635444c5fb71daaca88b745f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "yuanwang-wf",
+        "repo": "agent-bundle",
+        "type": "github"
+      }
+    },
     "betterfox": {
       "inputs": {
         "flake-parts": [
@@ -568,7 +589,7 @@
     },
     "flake-prompt": {
       "inputs": {
-        "home-manager": "home-manager",
+        "home-manager": "home-manager_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -691,6 +712,27 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "agent-bundle",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795706770,
+        "narHash": "sha256-C1x4TKbpiWX5lRsTQFwok5te55luUM76u1d8CjplXgI=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "5ef710576b9282ff6ae21b86b9316df393592cce",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "home-manager_2": {
+      "inputs": {
+        "nixpkgs": [
           "flake-prompt",
           "nixpkgs"
         ]
@@ -709,7 +751,7 @@
         "type": "github"
       }
     },
-    "home-manager_2": {
+    "home-manager_3": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -729,7 +771,7 @@
         "type": "github"
       }
     },
-    "home-manager_3": {
+    "home-manager_4": {
       "inputs": {
         "nixpkgs": [
           "impermanence",
@@ -750,7 +792,7 @@
         "type": "github"
       }
     },
-    "home-manager_4": {
+    "home-manager_5": {
       "inputs": {
         "nixpkgs": [
           "meridian",
@@ -824,7 +866,7 @@
     },
     "impermanence": {
       "inputs": {
-        "home-manager": "home-manager_3",
+        "home-manager": "home-manager_4",
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
@@ -938,7 +980,7 @@
     "meridian": {
       "inputs": {
         "flake-parts": "flake-parts_8",
-        "home-manager": "home-manager_4",
+        "home-manager": "home-manager_5",
         "nixpkgs": "nixpkgs_9",
         "systems": "systems_5"
       },
@@ -1688,6 +1730,7 @@
     "root": {
       "inputs": {
         "agenix": "agenix",
+        "agent-bundle": "agent-bundle",
         "betterfox": "betterfox",
         "catppuccin": "catppuccin",
         "claude-prompts": "claude-prompts",
@@ -1704,7 +1747,7 @@
         "git-hooks": "git-hooks",
         "h": "h",
         "haskell-flake": "haskell-flake",
-        "home-manager": "home-manager_2",
+        "home-manager": "home-manager_3",
         "humanizer": "humanizer",
         "i-have-adhd": "i-have-adhd",
         "iets": "iets",

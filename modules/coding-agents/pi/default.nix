@@ -204,6 +204,11 @@ in
         ];
       in
       {
+        programs.agent-bundle = {
+          enable = true;
+          tools = [ "pi" ];
+        };
+
         programs.mics-skills = {
           enable = true;
           package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};

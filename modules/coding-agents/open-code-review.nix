@@ -41,13 +41,20 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # The ocr package ships both upstream skills; hand them to Pi.
-    modules.pi.rawSkills = map (skill: "${cfg.package}/share/skills/open-code-review/${skill}") [
-      "open-code-review"
-      "open-code-review-delegate"
-    ];
-
     home-manager.users.${config.my.username} = {
+      # The ocr package ships both upstream skills; link them into the skills dir
+      # via agent-bundle (per-skill links — same mechanism as mics-skills).
+      programs.agent-bundle.packageSkills = [
+        {
+          package = cfg.package;
+          subdir = "share/skills/open-code-review";
+          names = [
+            "open-code-review"
+            "open-code-review-delegate"
+          ];
+        }
+      ];
+
       home.packages = [ cfg.package ];
 
       mergetools = lib.mkIf (cfg.settings != { }) {

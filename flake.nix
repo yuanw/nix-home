@@ -41,6 +41,14 @@
 
     mics-skills.url = "github:Mic92/mics-skills";
 
+    # Own standalone repo: skills + MCP servers for pi and cursor, linked
+    # per-skill into the same dirs as flake-prompt (per-skill links, not a
+    # per-dir recursion), so the two coexist in .pi/agent/skills.
+    agent-bundle = {
+      url = "github:yuanwang-wf/agent-bundle";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     flake-prompt = {
       url = "gitlab:fresheyeball/flake-prompt";
       inputs.nixpkgs.follows = "nixpkgs";
