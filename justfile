@@ -63,6 +63,8 @@ nix-update:
     @nix-update -f ./packages/release.nix pi-slow-mode --src-only --version=branch --override-filename ./packages/pi-extensions/pi-slow-mode.nix
     @nix-update -f ./packages/release.nix pi-ponytail --src-only --version=branch
     @nix-update -f ./packages/release.nix pi-subagents --override-filename ./packages/pi-extensions/pi-subagents.nix --version-regex 'v(.*)'
+    # Vendored lock: bump version/src; also refresh npmDepsHash. If production deps change, regenerate packages/pi-extensions/pi-antigravity.package-lock.json first.
+    @nix-update -f ./packages/release.nix pi-antigravity --src-only --version=branch --override-filename ./packages/pi-extensions/pi-antigravity.nix
     @nix-update -f ./packages/release.nix tccutil --src-only
     # Rex polls its own snapshot channel (blob.superlogical.com) and holds every
     # pin in packages/rex/sources.json, so nix-update has nothing to rewrite;

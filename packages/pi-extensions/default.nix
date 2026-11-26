@@ -57,4 +57,5 @@ in
   pi-ponytail = asPiPackage (callExtension ./pi-ponytail.nix);
   pi-better = asPiPackage (callExtension ./pi-better.nix);
   pi-subagents = asPiPackage (callExtension ./pi-subagents.nix);
+  pi-antigravity = asPiPackage (callExtension ./pi-antigravity.nix);
 }

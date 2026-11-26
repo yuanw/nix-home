@@ -249,14 +249,14 @@ in
 
     visionMaxImages = mkOption {
       type = types.nullOr types.ints.positive;
-      default = null;
-      description = "Images a request may carry (engine default 4, up to 100).";
+      default = 50;
+      description = "Images a request may carry across the full message history (engine default 4, up to 100; null leaves the engine default).";
     };
 
     visionImageTokens = mkOption {
       type = types.nullOr types.ints.positive;
-      default = null;
-      description = "An image's token budget (engine default 4,096).";
+      default = 16384;
+      description = "Visual-token budget a request's images share (engine default 4,096; null leaves the engine default).";
     };
 
     attnFp8 = mkOption {

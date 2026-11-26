@@ -169,4 +169,5 @@ rec {
   pi-ponytail = pkgs.callPackage ./pi-extensions/pi-ponytail.nix { };
   pi-better = pkgs.callPackage ./pi-extensions/pi-better.nix { };
   pi-subagents = pkgs.callPackage ./pi-extensions/pi-subagents.nix { };
+  pi-antigravity = pkgs.callPackage ./pi-extensions/pi-antigravity.nix { };
 }
