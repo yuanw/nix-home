@@ -85,7 +85,6 @@ with lib;
         {
           package = workmux;
           subdir = "share/skills/workmux";
-          skillDirs = [ ".pi/agent/skills" ];
           names = [
             "workmux"
             "worktree"
