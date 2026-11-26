@@ -2,7 +2,6 @@
   lib,
   agent-bundle,
   janestreet-skills,
-  claude-prompts,
   humanizer,
   i-have-adhd,
   emacs-skills,
@@ -239,23 +238,6 @@ in
     body = skillBody ./skills/grilling/SKILL.md;
   }
 
-  {
-    type = "skill";
-    name = "teach";
-    description = "Teach the user a new skill or concept, within this workspace.";
-    extraFrontmatter = {
-      "disable-model-invocation" = true;
-      "argument-hint" = "What would you like to learn about?";
-    };
-    body = skillBody ./skills/teach/SKILL.md;
-    files = {
-      "GLOSSARY-FORMAT.md".text = builtins.readFile ./skills/teach/GLOSSARY-FORMAT.md;
-      "LEARNING-RECORD-FORMAT.md".text = builtins.readFile ./skills/teach/LEARNING-RECORD-FORMAT.md;
-      "MISSION-FORMAT.md".text = builtins.readFile ./skills/teach/MISSION-FORMAT.md;
-      "RESOURCES-FORMAT.md".text = builtins.readFile ./skills/teach/RESOURCES-FORMAT.md;
-    };
-  }
-
   # Captured straight from upstream's SKILL.md: agent-bundle reads the name
   # and description out of its frontmatter, so there is nothing to keep in sync
   # here. `just update janestreet-skills' picks up upstream changes.
@@ -267,12 +249,6 @@ in
   # frontmatter, so nothing needs to be restated here.
   (agent-bundle.promptFromMarkdown {
     source = humanizer + /SKILL.md;
-  })
-
-  # Captured from upstream's SKILL.md, like socratic-tutor above — the
-  # description wraps over two lines and the parser folds it into one.
-  (agent-bundle.skillFromDir {
-    dir = "${claude-prompts}/skills/caveman";
   })
 
   # Upstream owns the name, description and body; the frontmatter is restated

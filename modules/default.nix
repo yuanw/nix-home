@@ -15,6 +15,7 @@
       ./coding-agents/cursor
       ./coding-agents/hermes-agent.nix
       ./coding-agents/hunk.nix
+      ./coding-agents/mics-skills.nix
       ./coding-agents/open-code-review.nix
       ./coding-agents/pi
       ./common.nix

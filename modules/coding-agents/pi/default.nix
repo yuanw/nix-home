@@ -38,9 +38,9 @@ in
       Pi coding agent via pi-flake (programs.pi).
 
       This module enables the pi-flake Home Manager integration and small
-      nix-home glue (permission-gate rules, mics-skills). Host knobs
-      (defaultProvider, extensions, mcpServers, rawSkills, …) are declared here
-      and passed through to programs.pi.
+      nix-home glue (permission-gate rules). Host knobs (defaultProvider,
+      extensions, mcpServers, rawSkills, …) are declared here and passed
+      through to programs.pi.
     '';
 
     # Escape hatch for other nix-darwin modules (e.g. browser-cli) that must
@@ -197,11 +197,6 @@ in
       }@hm:
       let
         permissionGateEnabled = cfg.extensions.permission-gate.enable or false;
-        micsSkillNames = [
-          "browser-cli"
-          "kagi-search"
-          "screenshot-cli"
-        ];
       in
       {
         programs.agent-bundle = {
@@ -223,15 +218,6 @@ in
               cursor-plugins
               ;
           };
-        };
-
-        programs.mics-skills = {
-          enable = true;
-          package = inputs.mics-skills.packages.${pkgs.stdenv.hostPlatform.system};
-          skills = micsSkillNames;
-          skillDirs = [
-            "${agentConfigDir}/skills"
-          ];
         };
 
         programs.pi = {
