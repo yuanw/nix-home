@@ -207,6 +207,25 @@ in
         programs.agent-bundle = {
           enable = true;
           tools = [ "pi" ];
+
+          # Prompt skills are pi-only: the cursor module owns .cursor/skills
+          # (raw source links) and leaves the merged skillDirs alone.
+          skillDirs = [ ".pi/agent/skills" ];
+
+          # The shared prompt set: skills (and one degraded agent) rendered
+          # by agent-bundle and linked into the pi skills dir.
+          prompts = import ../prompts {
+            inherit lib;
+            agent-bundle = inputs.agent-bundle.lib;
+            inherit (inputs)
+              janestreet-skills
+              claude-prompts
+              humanizer
+              i-have-adhd
+              emacs-skills
+              cursor-plugins
+              ;
+          };
         };
 
         programs.mics-skills = {
@@ -221,20 +240,6 @@ in
         programs.pi = {
           enable = true;
           package = lib.mkDefault inputs.pi.packages.${pkgs.stdenv.hostPlatform.system}.default;
-
-          # Skills, slash commands and AGENTS.md, from the shared prompt set.
-          flakePrompt.prompts = import ../prompts {
-            inherit lib;
-            inherit (inputs)
-              flake-prompt
-              janestreet-skills
-              claude-prompts
-              humanizer
-              i-have-adhd
-              emacs-skills
-              cursor-plugins
-              ;
-          };
 
           mcpServers = cfg.mcpServers;
           linkCursorMcp = cfg.linkCursorMcp;

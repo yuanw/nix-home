@@ -52,7 +52,6 @@
                   inputs.agent-bundle.homeManagerModules.default
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
-                  inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   inputs.pi-flake.homeModules.default
                   (import ../modules/helpers/mergetools.nix)
@@ -157,7 +156,6 @@
                   inputs.agent-bundle.homeManagerModules.default
                   inputs.direnv-instant.homeModules.direnv-instant
                   inputs.mics-skills.homeModules.default
-                  inputs.flake-prompt.homeManagerModules.default
                   inputs.mcp-servers-nix.homeManagerModules.default
                   inputs.pi-flake.homeModules.default
                   (import ../modules/helpers/mergetools.nix)

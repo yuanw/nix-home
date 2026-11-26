@@ -15,7 +15,7 @@ in
     agentFiles = lib.mkOption {
       type = lib.types.attrsOf lib.types.path;
       # Cursor's user-level subagents, linked straight from the source repo:
-      # flake-prompt has no cursor backend, so it cannot render this one. The
+      # agent-bundle has no subagent type, so it cannot render this one. The
       # same pstack agent reaches Pi as a degraded skill (the prompt set in
       # modules/coding-agents/prompts).
       default = {
@@ -32,7 +32,7 @@ in
       # Cursor-side skills, linked as raw source trees via agent-bundle.
       # Scoped to .cursor/skills: the pi side owns .pi/agent/skills. The
       # cursor module keeps the upstream skills as they are, same shape as
-      # flake-prompt's skillFromDir capture for pi.
+      # agent-bundle's skillFromDir capture for pi.
       {
         programs.agent-bundle = {
           tools = [ "cursor" ];
