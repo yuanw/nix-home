@@ -9,6 +9,10 @@
     "gemini-3.8-flash-low"
     "gemini-3.8-flash-medium"
     "gemini-3.8-flash-high"
+    "gemini-4-neon-low"
+    "gemini-4-neon-medium"
+    "gemini-4-neon-high"
+    "gemini-4-neon-xhigh"
   ],
 }:
 let
