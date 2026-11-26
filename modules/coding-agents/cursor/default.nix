@@ -48,6 +48,10 @@ in
     home-manager.users.${config.my.username} = lib.mkMerge [
       { home.packages = [ (lib.lowPrio pkgs.llm-agents.cursor-agent) ]; }
 
+      # Own the cursor half of agent-bundle (skills + mcp.json). Merged with the
+      # tools list the pi module sets, so the bundle covers both targets.
+      { programs.agent-bundle.tools = [ "cursor" ]; }
+
       (lib.mkIf (cfg.skillsDir != null) {
         home.file.".cursor/skills" = {
           source = cfg.skillsDir;
