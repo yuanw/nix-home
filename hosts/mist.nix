@@ -151,6 +151,7 @@
       defaultModel = "Inkling-2-Mini";
       extensions = {
         web-fetch.enable = true;
+        antigravity.enable = true;
       };
       # Ships off (`on: false`); `/prompts ambition` turns it on for a session.
       promptSections = {

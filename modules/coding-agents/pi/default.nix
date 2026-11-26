@@ -21,6 +21,7 @@ let
     notify = ./extensions/notify.ts;
     web-fetch = ./extensions/web-fetch.ts;
     better = pkgs.pi-extensions.pi-better;
+    antigravity = pkgs.pi-extensions.pi-antigravity;
     cursor-agent = pkgs.pi-extensions.pi-cursor-agent;
     interactive-shell = pkgs.pi-extensions.pi-interactive-shell;
     permission-gate = pkgs.pi-extensions.pi-permission-gate;

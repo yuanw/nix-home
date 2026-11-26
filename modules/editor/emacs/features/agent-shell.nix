@@ -1,5 +1,19 @@
-{ pkgs, ... }:
+{
+  pkgs,
+  nixConfig,
+  lib,
+  ...
+}:
 
+# Antigravity's `agy` binary comes from the antigravity-cli module (gated on
+# `modules.antigravity-cli.enable`); follow the spookfox.nix pattern of reading
+# that through `nixConfig` and only wiring the feature up where it exists.
+let
+  enableAntigravity = lib.attrByPath [ "modules" "antigravity-cli" "enable" ] false nixConfig;
+  # Only referenced (and only forced) inside the interpolated block below, so
+  # hosts without the antigravity-cli module never evaluate the package.
+  agy = lib.attrByPath [ "modules" "antigravity-cli" "package" ] null nixConfig;
+in
 {
   # Do not `(require)' these at startup: hel-collection's agent-shell mode file
   # defines its leader keymaps after the `with-eval-after-load' that binds them,
@@ -42,5 +56,13 @@
     (use-package agent-shell-manager
       :after agent-shell
       :commands (agent-shell-manager-toggle))
+
+    ${lib.optionalString enableAntigravity ''
+      (use-package agent-shell-antigravity
+        :after agent-shell
+        :commands (agent-shell-antigravity-start-agent)
+        :init
+        (setq agent-shell-antigravity-acp-command '("${agy}/bin/agy" "acp")))
+    ''}
   '';
 }
