@@ -68,6 +68,7 @@
       ./browsers/browser-cli-darwin.nix
       ./browsers/ladybird.nix
       ./coding-agents/hermes-agent-darwin.nix
+      ./coding-agents/meridian-darwin.nix
       ./brew.nix
       ./health.nix
       ./editor/emacs/emacs-macos.nix

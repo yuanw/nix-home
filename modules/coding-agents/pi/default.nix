@@ -255,9 +255,15 @@ in
           # Extension-registered ones (e.g. cursor-agent via pi-cursor-agent)
           # must not get an empty stub — Pi rejects `providers.<name>: {}` with
           # "must specify baseUrl, headers, compat, modelOverrides, or models".
-          providers = lib.optionalAttrs cfg.localModel {
-            dgx-spark = import ./providers/dgx-spark.nix;
-          };
+          providers =
+            lib.optionalAttrs cfg.localModel {
+              dgx-spark = import ./providers/dgx-spark.nix;
+            }
+            // lib.optionalAttrs (config.modules.meridian.enable or false) {
+              "meridian-agy" = import ./providers/meridian-agy.nix {
+                port = config.modules.meridian.port or 3457;
+              };
+            };
         };
 
         home.file =

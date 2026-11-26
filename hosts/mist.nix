@@ -195,6 +195,9 @@
     antigravity-cli = {
       enable = true;
     };
+    meridian = {
+      enable = true;
+    };
     hermes-agent = {
       enable = false;
       enableGateway = false;

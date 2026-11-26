@@ -169,6 +169,12 @@
       inputs.flake-parts.follows = "flake-parts";
     };
     nix-darwin-login-items.url = "github:yuanw/nix-darwin-login-items";
+    # Meridian — local API bridge for Claude and the Antigravity (agy) backend.
+    # The package builds with OUR nixpkgs (global allowUnfree in
+    # lib/mk-pkgs.nix covers its unfree claude-code dep), imported directly
+    # from the flake's package.nix — the hm module ships a systemd unit only,
+    # so darwin runs the launchd agent in modules/coding-agents/meridian-darwin.nix.
+    meridian.url = "github:rynfar/meridian";
     neru = {
       url = "github:y3owk1n/neru";
       inputs.nixpkgs.follows = "nixpkgs";
