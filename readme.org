@@ -13,18 +13,18 @@ The goal for this repo is to declaratively configure MacOS and Linux system usin
 feel free to take what you like.
 
 * Current MacOS setup
-| Shell    | zsh + starship            |
-| WM       | yabai + skhd + sketchybar |
-| Terminal | Alacritty + tmux          |
-| Editor   | Emacs + helix             |
-| Browser  | Librewolf                 |
+| Shell    | zsh + starship |
+| WM       | OmniWM         |
+| Terminal | Rex            |
+| Editor   | Emacs          |
+| Browser  | Librewolf      |
 
 * Current Nixos setup
 | Shell    | zsh + starship   |
 | WM       | xmonad + xmobar  |
 | Terminal | Alacritty + tmux |
 | Editor   | Emacs + helix    |
-| Browser  | Librewolf                    |
+| Browser  | Librewolf        |
 
 * Inspirations
 
