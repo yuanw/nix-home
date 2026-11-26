@@ -29,30 +29,12 @@ in
     home-manager.users.${config.my.username} = lib.mkMerge [
       { home.packages = [ (lib.lowPrio pkgs.llm-agents.cursor-agent) ]; }
 
-      # Cursor-side skills, linked as raw source trees via agent-bundle.
-      # Scoped to .cursor/skills: the pi side owns .pi/agent/skills. The
-      # cursor module keeps the upstream skills as they are, same shape as
-      # agent-bundle's skillFromDir capture for pi.
       {
+        # The prompt set is rendered into every enabled tool's skills dir
+        # by agent-bundle (see modules/coding-agents/pi). cursor contributes
+        # its own tools entry; .cursor/agents keeps the subagent link above.
         programs.agent-bundle = {
           tools = [ "cursor" ];
-          skillSources = [
-            {
-              name = "caveman";
-              source = inputs.claude-prompts + /skills/caveman;
-              skillDirs = [ ".cursor/skills" ];
-            }
-            {
-              name = "humanizer";
-              source = pkgs.writeTextDir "SKILL.md" (builtins.readFile (inputs.humanizer + /SKILL.md));
-              skillDirs = [ ".cursor/skills" ];
-            }
-            {
-              name = "emacs-skills";
-              source = inputs.emacs-skills + /skills;
-              skillDirs = [ ".cursor/skills" ];
-            }
-          ];
         };
       }
 

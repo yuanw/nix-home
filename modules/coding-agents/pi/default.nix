@@ -208,12 +208,9 @@ in
           enable = true;
           tools = [ "pi" ];
 
-          # Prompt skills are pi-only: the cursor module owns .cursor/skills
-          # (raw source links) and leaves the merged skillDirs alone.
-          skillDirs = [ ".pi/agent/skills" ];
-
           # The shared prompt set: skills (and one degraded agent) rendered
-          # by agent-bundle and linked into the pi skills dir.
+          # by agent-bundle and linked into every enabled tool's skills dir
+          # (pi and cursor), the same shape flake-prompt uses.
           prompts = import ../prompts {
             inherit lib;
             agent-bundle = inputs.agent-bundle.lib;
