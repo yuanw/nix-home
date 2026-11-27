@@ -94,8 +94,14 @@ in
       "http://${config.networking.hostName}:${toString cfg.port}"
     ];
 
-    # Allow unencrypted HTTP on LAN (no self-signed cert warnings)
-    services.cockpit.settings.WebService.AllowUnencrypted = mkDefault true;
+    # Allow unencrypted HTTP on LAN and trust Caddy's forwarded headers so
+    # cockpit emits wss:// in Content-Security-Policy (otherwise browsers block
+    # wss://cockpit.yuanw.me/cockpit/socket after login).
+    services.cockpit.settings.WebService = {
+      AllowUnencrypted = mkDefault true;
+      ProtocolHeader = mkDefault "X-Forwarded-Proto";
+      ForwardedForHeader = mkDefault "X-Forwarded-For";
+    };
 
     # cockpit-session needs cockpit-bridge in PATH (nixpkgs module no longer adds it)
     environment.systemPackages = [ pkgs.cockpit ];
