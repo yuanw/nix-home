@@ -16,6 +16,7 @@
       :commands (org-download-yank org-download-clipboard)
       :config
       (setq org-download-method 'directory)
+      (setq org-download-directory (expand-file-name "org/denote/screenshots" (getenv "HOME")))
       (add-hook 'dired-mode-hook #'org-download-enable))
   '';
 }
