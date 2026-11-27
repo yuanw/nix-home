@@ -85,10 +85,13 @@
 
     # Fork: adds the upstream skills to the open-code-review package.
     llm-agents.url = "github:numtide/llm-agents.nix";
+    # Track Pi main directly for unreleased features; switch back to pkgs.llm-agents.pi once released.
+    pi = {
+      url = "github:earendil-works/pi";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
-    # servers and extension packages. Follows this repo's nixpkgs/flake-prompt
-    # and the llm-agents already used for pkgs.llm-agents.pi, so Pi stays one
-    # derivation across the two flakes.
+    # servers and extension packages.
     pi-flake = {
       url = "github:yuanw/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";

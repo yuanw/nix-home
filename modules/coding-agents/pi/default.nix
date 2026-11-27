@@ -215,7 +215,7 @@ in
 
         programs.pi = {
           enable = true;
-          package = lib.mkDefault pkgs.llm-agents.pi;
+          package = lib.mkDefault inputs.pi.packages.${pkgs.stdenv.hostPlatform.system}.default;
 
           # Skills, slash commands and AGENTS.md, from the shared prompt set.
           flakePrompt.prompts = import ../prompts {

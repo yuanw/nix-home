@@ -1265,6 +1265,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-darwin-x64": {
+      "locked": {
+        "lastModified": 1788334797,
+        "narHash": "sha256-nskSa8kDimM7F0VFSP8IdoSNo4G0vKzOtxwvOFpoGDI=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "c19db427a1fdfc7591c0b0baeb4665dcef2c61da",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-26.05-darwin",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1790477367,
@@ -1582,6 +1598,27 @@
         "type": "github"
       }
     },
+    "pi": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-darwin-x64": "nixpkgs-darwin-x64"
+      },
+      "locked": {
+        "lastModified": 1795736907,
+        "narHash": "sha256-g2St+SnRGSOwn9H0hZ5qy9AN+iPFYwPOiyGlIMBAgbc=",
+        "owner": "earendil-works",
+        "repo": "pi",
+        "rev": "145785f0d7afe78237533dea6bc5e270d6f314df",
+        "type": "github"
+      },
+      "original": {
+        "owner": "earendil-works",
+        "repo": "pi",
+        "type": "github"
+      }
+    },
     "pi-flake": {
       "inputs": {
         "flake-prompt": [
@@ -1692,6 +1729,7 @@
         "nixpkgs-spark": "nixpkgs-spark",
         "nixpkgs-stable": "nixpkgs-stable_2",
         "nur": "nur",
+        "pi": "pi",
         "pi-flake": "pi-flake",
         "preservation": "preservation",
         "treefmt-nix": "treefmt-nix_7"
