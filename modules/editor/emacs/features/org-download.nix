@@ -12,7 +12,6 @@
 
   elisp = ''
     (use-package org-download
-      :after org
       :commands (org-download-yank org-download-clipboard)
       :config
       (setq org-download-method 'directory)
