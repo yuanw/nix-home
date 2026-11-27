@@ -44,7 +44,7 @@
     # Own standalone repo: skills + MCP servers for pi and cursor, linked
     # per-skill into .pi/agent/skills.
     agent-bundle = {
-      url = "github:yuanwang-wf/agent-bundle";
+      url = "github:yuanw/agent-bundle";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
