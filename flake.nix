@@ -55,13 +55,6 @@
       flake = false;
     };
 
-    # jwiegley's prompt collection. The caveman skill is imported the same way
-    # (see modules/coding-agents/prompts); `just update claude-prompts' bumps it.
-    claude-prompts = {
-      url = "github:jwiegley/claude-prompts";
-      flake = false;
-    };
-
     # Single-skill and skill-collection repos, each read straight from the
     # source tree by agent-bundle's skillFromDir (modules/coding-agents/prompts).
     # `just update <name>' bumps one; no hashes to keep current.
@@ -286,7 +279,6 @@
             agent-bundle = inputs.agent-bundle.lib;
             inherit (inputs)
               janestreet-skills
-              claude-prompts
               humanizer
               i-have-adhd
               emacs-skills

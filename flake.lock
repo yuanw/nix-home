@@ -120,22 +120,6 @@
         "type": "github"
       }
     },
-    "claude-prompts": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1790551182,
-        "narHash": "sha256-OOhfy3cPCSmvwhKN7kQB6gm/vtntwNtMrw50fm5oJME=",
-        "owner": "jwiegley",
-        "repo": "claude-prompts",
-        "rev": "eaf24a7808a01cd294562aa78c66ab83e98de823",
-        "type": "github"
-      },
-      "original": {
-        "owner": "jwiegley",
-        "repo": "claude-prompts",
-        "type": "github"
-      }
-    },
     "colmena": {
       "inputs": {
         "nix-github-actions": "nix-github-actions",
@@ -1746,7 +1730,6 @@
         "agent-bundle": "agent-bundle",
         "betterfox": "betterfox",
         "catppuccin": "catppuccin",
-        "claude-prompts": "claude-prompts",
         "colmena": "colmena",
         "cursor-plugins": "cursor-plugins",
         "dgx-spark": "dgx-spark",

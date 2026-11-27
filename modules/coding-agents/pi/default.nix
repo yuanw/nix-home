@@ -211,7 +211,6 @@ in
             agent-bundle = inputs.agent-bundle.lib;
             inherit (inputs)
               janestreet-skills
-              claude-prompts
               humanizer
               i-have-adhd
               emacs-skills
