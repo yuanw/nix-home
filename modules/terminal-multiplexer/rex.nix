@@ -133,14 +133,6 @@ let
       command = { "pi", "--session", rex.match.uuid },
     })
 
-    -- pi-resurrect remembers which pi session each pane holds and, after the
-    -- Rex server restarts, types `pi --session <id>` back into every pane that
-    -- is sitting at a shell prompt.  Loading it starts a background tracker,
-    -- which watches the panes and reads pi's session files under
-    -- ~/.pi/agent/sessions; the three `Pi Resurrect:` actions report on it.
-    local resurrect = dofile(config_home .. "/rex/pi-resurrect.lua")
-    resurrect.setup({})
-
     rex.bind(${builtins.toJSON cfg.pickerKey}, "rex_project_picker")
     rex.bind(${builtins.toJSON cfg.sessionPickerKey}, "session.switch")
     rex.bind(${builtins.toJSON cfg.splitDownKey}, "pane.split.down")
@@ -284,14 +276,6 @@ with lib;
             # is deliberately not listed here.
             "rex/rex-project-picker/picker.lua".source = "${pickerSrc}/picker.lua";
             "rex/rex-project-picker/rex-project-picker".source = "${pickerSrc}/rex-project-picker";
-
-            # One file, two roles, the way rex-resurrect ships it: loaded by
-            # init.lua above for its actions and its tracker, and run directly
-            # (`rex do ~/.config/rex/pi-resurrect.lua cmd=status|scan|restore|
-            # stop|selftest|daemon`) as the tracker and its one-shot commands.
-            # Adapted from github.com/ekristen/rex-resurrect at a1e41e2 for pi
-            # alone -- upstream tracks claude, codex and copilot instead.
-            "rex/pi-resurrect.lua".source = ./pi-resurrect.lua;
 
             # The Ghostty Catppuccin Mocha palette.  Rex stores its chosen theme in
             # the macOS app's preferences, so deployment alone changes nothing:
