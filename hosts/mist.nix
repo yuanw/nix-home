@@ -145,7 +145,13 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
-    mics-skills.enable = true;
+    mics-skills = {
+      enable = true;
+      skillDirs = [
+        ".pi/agent/skills"
+        ".gemini/config/skills"
+      ];
+    };
     pi = {
       enable = true;
       defaultProvider = "dgx-spark";
