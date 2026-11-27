@@ -157,7 +157,7 @@ in
       {
         nativeBuildInputs = [ prev.makeWrapper ];
         meta = with prev.lib; {
-          description = "Install fonts from a directory (variable fonts instantiated at wght=359) into ~/Library/Fonts";
+          description = "Install fonts from a directory (VFs → *-instance.ttf at wght=359 via varLib.instancer; never installs live VFs) into ~/Library/Fonts";
           platforms = platforms.darwin;
         };
       }

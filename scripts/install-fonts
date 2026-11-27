@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
-# Install all fonts found in a directory (recursively) into ~/Library/Fonts.
+# Install fonts from a directory into ~/Library/Fonts.
 #
-# Variable fonts are instantiated at the given weight (fonttools varLib.mutator)
-# and the instance is installed as <name>-wght<weight>.ttf; anything that is
-# not variable (static fonts) is copied as-is.
+# Matches the PragmataPro workflow in
+# org/denote/20241230T151418--customize-pragmatapro-font__software.org:
+#
+#   fonttools varLib.instancer FONT.ttf wght=359   # → FONT-instance.ttf
+#
+# - Variable fonts (have an `fvar` table) are instantiated at wght (default 359)
+#   via fonttools varLib.instancer and installed as <stem>-instance.ttf.
+# - Static fonts are copied as-is.
+# - Live variable fonts are NEVER installed (that broke Emacs NS font matching
+#   when a raw 0.904 VF sat next to instances under the same family name).
+# - Already-built instances (*-instance.ttf / *-wght*.ttf) are copied, not
+#   re-instanced.
 #
 # Usage: install-fonts <font-dir> [weight]   (default weight: 359)
 #
@@ -24,15 +33,41 @@ count=0
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
+is_variable_font() {
+  # True if the font still has an fvar table (live VF).
+  fonttools ttx -l "$1" 2>/dev/null | grep -Eq '[[:space:]]fvar[[:space:]]'
+}
+
 while IFS= read -r -d '' f; do
   base="$(basename "$f")"
-  out="$tmpdir/instance.ttf"
-  if fonttools varLib.mutator "$f" wght="$wght" -o "$out" >/dev/null 2>&1; then
-    cp -v "$out" "$dest/${base%.*}-wght${wght}.ttf"
-    echo "instantiated $base (wght=$wght)"
-  else
-    echo "not a variable font, installing as-is: $base"
+  stem="${base%.*}"
+  ext="${base##*.}"
+
+  # Already an instance from this script or from plain `varLib.mutator` /
+  # `varLib.instancer` default naming — install the file, do not re-instance.
+  if [[ "$stem" == *-instance || "$stem" == *-wght* ]]; then
+    if is_variable_font "$f"; then
+      echo "skip (still variable despite instance-like name): $base" >&2
+      continue
+    fi
     cp -v "$f" "$dest/$base"
+    echo "copied instance $base"
+    count=$((count + 1))
+    continue
+  fi
+
+  if is_variable_font "$f"; then
+    out="$tmpdir/${stem}-instance.ttf"
+    # Prefer instancer over deprecated varLib.mutator (fonttools ≥4 warns).
+    if ! fonttools varLib.instancer "$f" "wght=$wght" -o "$out"; then
+      echo "error: failed to instantiate $base (wght=$wght); not installing live VF" >&2
+      exit 1
+    fi
+    cp -v "$out" "$dest/${stem}-instance.ttf"
+    echo "instantiated $base (wght=$wght) → ${stem}-instance.ttf"
+  else
+    cp -v "$f" "$dest/$base"
+    echo "copied static $base"
   fi
   count=$((count + 1))
 done < <(find "$src" -type f \( -iname '*.ttf' -o -iname '*.otf' -o -iname '*.ttc' -o -iname '*.otc' \) -print0)
