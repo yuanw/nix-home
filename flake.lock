@@ -1211,11 +1211,11 @@
     "nix-home-private": {
       "flake": false,
       "locked": {
-        "lastModified": 1795724779,
-        "narHash": "sha256-iXmvt2XMOphZ2g7YU3XV9iW+D5MvL3xdmbObJFV5Hx4=",
+        "lastModified": 1795735901,
+        "narHash": "sha256-2DkoBV+EaKSO57pVW9l47l7yAH9GVxhy3vCVDIv6jTw=",
         "ref": "refs/heads/arr",
-        "rev": "34f0ff3f7f62068128fedddc602a940e0a8e978d",
-        "revCount": 101,
+        "rev": "fee8704f293bd4e37a33b396d3fbae9d656a8f28",
+        "revCount": 102,
         "type": "git",
         "url": "https://github.com/yuanw/nix-home-private"
       },
