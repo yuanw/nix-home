@@ -217,10 +217,6 @@
         ];
       };
     };
-    tmux = {
-      enable = true;
-      mainWorkspaceDir = "$HOME/workspaces";
-    };
     terminal = {
       enable = true;
     };
