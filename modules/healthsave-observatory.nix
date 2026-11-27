@@ -59,7 +59,7 @@ let
   timescaledbPinned = pkgs.postgresql_16.withPackages (ps: [
     (ps.timescaledb.overrideAttrs (
       _final: _prev: {
-        version = "2.31.0";
+        version = "2.32.0";
         # The pin re-triggers nixpkgs' "is this still broken on pg19?" maintainer
         # warning; pg16 never was, and the version is ours to choose now.
         meta = _prev.meta // {
@@ -68,8 +68,8 @@ let
         src = pkgs.fetchFromGitHub {
           owner = "timescale";
           repo = "timescaledb";
-          tag = "2.31.0";
-          hash = "sha256-2FReZOAwzpZyjhcsg6f2figfsyWME5J69dq0rPjakqQ=";
+          tag = "2.32.0";
+          hash = "sha256-tOXMk+bRBKEf78TrRPpuMHQZLM2ahq8oyypNuSV/MaE=";
         };
       }
     ))
