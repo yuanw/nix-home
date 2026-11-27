@@ -125,6 +125,14 @@ let
       end,
     })
 
+    -- Trust pi's native OSC 7577 program-resume reports (`pi --session <uuid>`).
+    -- Omitting `flags` matches Rex's built-in codex/opencode rules so flags
+    -- like `--continue` or `--model` don't block resume; pi started with
+    -- restriction flags (e.g. `--tools`, `--no-extensions`) won't match.
+    rex.set("resume.trust.pi", {
+      command = { "pi", "--session", rex.match.uuid },
+    })
+
     -- pi-resurrect remembers which pi session each pane holds and, after the
     -- Rex server restarts, types `pi --session <id>` back into every pane that
     -- is sitting at a shell prompt.  Loading it starts a background tracker,
