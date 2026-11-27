@@ -120,8 +120,8 @@
   modules = {
 
     ai.enableOllama = true;
+    mics-skills.enable = true;
     pi.enable = true;
-    herdr.enable = true;
     secrets.agenix = {
       enable = true;
     };

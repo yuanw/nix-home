@@ -1,8 +1,7 @@
 {
   lib,
-  flake-prompt,
+  agent-bundle,
   janestreet-skills,
-  claude-prompts,
   humanizer,
   i-have-adhd,
   emacs-skills,
@@ -25,13 +24,14 @@ let
   # The Emacs skills are captured from upstream's SKILL.md: its frontmatter
   # gives the name and description, its body is the body, and skillFromDir
   # ships the agent-skill-*.el next to it. `extra' replaces the captured
-  # frontmatter as a whole, because flake-prompt reads every scalar as a string
-  # while pi tests `disable-model-invocation' against a real true, so a captured
-  # one would render quoted and be ignored. `tools = null' drops the key
-  # (upstream omits it for that skill).
+  # frontmatter as a whole: `tools = "Bash"` rides along (upstream omits it in
+  # `file-links' — there `tools = null' drops the key), and pi wants
+  # `disable-model-invocation' as a real true even though the capture parses
+  # it as one — the explicit form keeps the rendered SKILL.md identical to
+  # the previous rendering.
   emacsSkill =
     name: extra:
-    flake-prompt.lib.skillFromDir {
+    agent-bundle.skillFromDir {
       dir = "${emacs-skills}/skills/${name}";
       extraFrontmatter = {
         tools = "Bash";
@@ -238,55 +238,24 @@ in
     body = skillBody ./skills/grilling/SKILL.md;
   }
 
-  {
-    type = "skill";
-    name = "teach";
-    description = "Teach the user a new skill or concept, within this workspace.";
-    extraFrontmatter = {
-      "disable-model-invocation" = true;
-      "argument-hint" = "What would you like to learn about?";
-    };
-    body = skillBody ./skills/teach/SKILL.md;
-    files = {
-      "GLOSSARY-FORMAT.md".text = builtins.readFile ./skills/teach/GLOSSARY-FORMAT.md;
-      "LEARNING-RECORD-FORMAT.md".text = builtins.readFile ./skills/teach/LEARNING-RECORD-FORMAT.md;
-      "MISSION-FORMAT.md".text = builtins.readFile ./skills/teach/MISSION-FORMAT.md;
-      "RESOURCES-FORMAT.md".text = builtins.readFile ./skills/teach/RESOURCES-FORMAT.md;
-    };
-  }
-
-  # Captured straight from upstream's SKILL.md: flake-prompt reads the name
+  # Captured straight from upstream's SKILL.md: agent-bundle reads the name
   # and description out of its frontmatter, so there is nothing to keep in sync
   # here. `just update janestreet-skills' picks up upstream changes.
-  (flake-prompt.lib.skillFromDir { dir = "${janestreet-skills}/socratic-tutor"; })
+  (agent-bundle.skillFromDir { dir = "${janestreet-skills}/socratic-tutor"; })
 
   # A single markdown file, so the rest of that repo (its plugin manifests, docs
-  # and scripts) stays out of the skills directory. Upstream states its
-  # description as a YAML block scalar and its allowed-tools as a list;
-  # flake-prompt's parser reads single-line scalars only, so those two would
-  # come out as "|" and "" and are stated here instead.
-  (flake-prompt.lib.promptFromMarkdown {
-    name = "humanizer";
+  # and scripts) stays out of the skills directory. agent-bundle reads name,
+  # description (a YAML block scalar) and metadata straight out of the
+  # frontmatter, so nothing needs to be restated here.
+  (agent-bundle.promptFromMarkdown {
     source = humanizer + /SKILL.md;
-    description = "Remove signs of AI-generated writing from text. Use when editing or reviewing text to make it sound more natural and human-written.";
-    extraFrontmatter = {
-      version = "2.1.1";
-    };
-  })
-
-  # From upstream's SKILL.md, like socratic-tutor above. The description is
-  # restated because upstream folds it over two lines and flake-prompt's
-  # frontmatter parser only reads single-line scalars, which would cut it off
-  # mid-sentence.
-  (flake-prompt.lib.skillFromDir {
-    dir = "${claude-prompts}/skills/caveman";
-    description = "Compress and simplify prompts to preserve meaning while reducing use of context.";
   })
 
   # Upstream owns the name, description and body; the frontmatter is restated
-  # because a captured `disable-model-invocation' would be a string. The agents/
-  # files describe the same skill for other CLIs.
-  (flake-prompt.lib.skillFromDir {
+  # (disable-model-invocation as a real true, license) because the explicit
+  # form keeps the rendered SKILL.md identical to the previous rendering. The
+  # agents/ files describe the same skill for other CLIs.
+  (agent-bundle.skillFromDir {
     dir = "${i-have-adhd}/skills/i-have-adhd";
     extraFrontmatter = {
       "disable-model-invocation" = true;
@@ -358,14 +327,14 @@ in
   # pstack's comment-hater subagent, captured from cursor/plugins: its
   # frontmatter gives name and description, its body is the persona. Declared
   # as an agent because that is what upstream ships; Pi has no subagent
-  # format, so flake-prompt degrades it to a skill. It stays model-invocable
+  # format, so agent-bundle degrades it to a skill. It stays model-invocable
   # (no `disableModelInvocation'): Pi advertises its name, description and
   # path in every session's system prompt and reads the persona only when a
   # task matches — the same description-based delegation Cursor does for its
   # subagent. `/skill:comment-sicko' forces it. Cursor reads the same upstream
   # file straight into ~/.cursor/agents (modules/coding-agents/cursor). `just
   # update cursor-plugins' bumps both.
-  (flake-prompt.lib.promptFromMarkdown {
+  (agent-bundle.promptFromMarkdown {
     type = "agent";
     name = "comment-sicko";
     source = cursor-plugins + /pstack/agents/comment-sicko.md;

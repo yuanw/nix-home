@@ -81,6 +81,13 @@
       parakeetServerPort = 5092; # ← default, optional
     };
     transcribe.enable = true; # → transcribe, yt-dlp-librewolf
+    mics-skills = {
+      enable = true;
+      skillDirs = [
+        ".pi/agent/skills"
+        ".cursor/skills"
+      ];
+    };
     pi = {
       enable = true;
       defaultProvider = "anthropic";
@@ -133,7 +140,7 @@
       kotlin.enable = true;
     };
     tmux = {
-      enable = true;
+      enable = false;
       mainWorkspaceDir = "$HOME/workspaces";
       whichKey.enable = true;
     };

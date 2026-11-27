@@ -70,18 +70,6 @@ with lib;
   };
 
   config = mkIf cfg.enable {
-    # The skills `workmux setup --skills` would install are already in the package
-    # output (installAgentSkills); hand them to Pi the way the herdr and
-    # open-code-review modules hand over theirs.
-    modules.pi.rawSkills = map (skill: "${workmux}/share/skills/workmux/${skill}") [
-      "workmux"
-      "worktree"
-      "coordinator"
-      "merge"
-      "rebase"
-      "open-pr"
-    ];
-
     # Status tracking (the working/waiting/done icons in window names and the
     # sidebar) needs pi's extension, which is the other half of `workmux setup`.
     modules.pi.extensions.workmux-status = {
@@ -90,6 +78,25 @@ with lib;
     };
 
     home-manager.users.${config.my.username} = {
+      # The skills `workmux setup --skills` would install are already in the package
+      # output (installAgentSkills); link them into the skills dir via
+      # agent-bundle instead of handing paths to Pi.
+      programs.agent-bundle.packageSkills = [
+        {
+          package = workmux;
+          subdir = "share/skills/workmux";
+          skillDirs = [ ".pi/agent/skills" ];
+          names = [
+            "workmux"
+            "worktree"
+            "coordinator"
+            "merge"
+            "rebase"
+            "open-pr"
+          ];
+        }
+      ];
+
       home = {
         file."reiryoku.svg".source = ../../pictures/reiryoku.svg;
         packages = [

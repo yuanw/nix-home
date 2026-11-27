@@ -41,27 +41,22 @@
 
     mics-skills.url = "github:Mic92/mics-skills";
 
-    flake-prompt = {
-      url = "gitlab:fresheyeball/flake-prompt";
+    # Own standalone repo: skills + MCP servers for pi and cursor, linked
+    # per-skill into .pi/agent/skills.
+    agent-bundle = {
+      url = "github:yuanwang-wf/agent-bundle";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Jane Street's agent skills, imported with flake-prompt's skillFromDir
+    # Jane Street's agent skills, imported with agent-bundle's skillFromDir
     # (see modules/coding-agents/prompts). Plain source tree, not a flake.
     janestreet-skills = {
       url = "github:janestreet/agent_skills";
       flake = false;
     };
 
-    # jwiegley's prompt collection. The caveman skill is imported the same way
-    # (see modules/coding-agents/prompts); `just update claude-prompts' bumps it.
-    claude-prompts = {
-      url = "github:jwiegley/claude-prompts";
-      flake = false;
-    };
-
     # Single-skill and skill-collection repos, each read straight from the
-    # source tree by flake-prompt's skillFromDir (modules/coding-agents/prompts).
+    # source tree by agent-bundle's skillFromDir (modules/coding-agents/prompts).
     # `just update <name>' bumps one; no hashes to keep current.
     humanizer = {
       url = "github:blader/humanizer";
@@ -76,7 +71,7 @@
       flake = false;
     };
     # Cursor's own plugin repo. Only pstack's agents/ is read from it, as an
-    # flake-prompt agent (modules/coding-agents/prompts) and as a Cursor
+    # agent-bundle agent (modules/coding-agents/prompts) and as a Cursor
     # subagent under ~/.cursor/agents (modules/coding-agents/cursor).
     cursor-plugins = {
       url = "github:cursor/plugins";
@@ -90,12 +85,13 @@
       url = "github:earendil-works/pi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Declarative Pi configuration (programs.pi): flake-prompt skills, MCP
-    # servers and extension packages.
+    # Declarative Pi configuration (programs.pi): MCP servers, extension
+    # packages and settings. Follows this repo's nixpkgs and the llm-agents
+    # already used for pkgs.llm-agents.pi, so Pi stays one derivation across
+    # the two flakes. Skills come from the agent-bundle module.
     pi-flake = {
       url = "github:yuanw/pi-flake";
       inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-prompt.follows = "flake-prompt";
       inputs.llm-agents.follows = "llm-agents";
       inputs.home-manager.follows = "home-manager";
     };
@@ -280,10 +276,9 @@
         let
           agentPrompts = import ./modules/coding-agents/prompts {
             lib = inputs.nixpkgs.lib;
+            agent-bundle = inputs.agent-bundle.lib;
             inherit (inputs)
-              flake-prompt
               janestreet-skills
-              claude-prompts
               humanizer
               i-have-adhd
               emacs-skills
@@ -325,9 +320,10 @@
             rex = pkgs.rex;
             # Same for Ladybird's dmg pin (packages/ladybird/sources.json).
             ladybird-bin = pkgs.ladybird-bin;
-            agent-prompts = inputs.flake-prompt.lib.mkPromptsPackage pkgs {
+            agent-prompts = inputs.agent-bundle.lib.mkAgentBundlePackage pkgs {
+              name = "agent-prompts";
               prompts = agentPrompts;
-              tools.pi.enable = true;
+              tools = [ "pi" ];
             };
           }
           // (

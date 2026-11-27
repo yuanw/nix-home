@@ -145,6 +145,7 @@
     #   enable = true;
     #   supportLocalVirtualBuilder = true;
     # };
+    mics-skills.enable = true;
     pi = {
       enable = true;
       defaultProvider = "dgx-spark";
