@@ -1,4 +1,4 @@
-# Pinned sources for the native Inkling 2 Mini engine (yuanw/MiaAI-Lab's
+# Pinned sources for the native Inkling 2 Mini engine (MiaAI-Lab's
 # Inkling-2-Mini-DGX-Spark-TensorFold recipe, packaged without the container).
 #
 # - src: TensorFold at Jürgen Schmied's Inkling 2 Mini CUDA head, PR #4441
@@ -8,7 +8,7 @@
 #   for this engine (and found three load/logic bugs), so the recipe is built
 #   on the faster head instead. dc2ca8a1 refuses --drafter/--vision by name;
 #   the recipe patches below add the DSpark/DFlash2 drafters and vision.
-# - recipeSrc: the recipe repo: patches/*.patch (0001–0018) applied in order,
+# - recipeSrc: the recipe repo: patches/*.patch (0001–0030) applied in order,
 #   the same set prepare.sh applies.
 # - zigSrc: Zig 0.17.0 for aarch64-linux (the .zig-version pin; byte-identical
 #   to the tarball packages/tensorfold-zig ships — shared via that src.nix).
@@ -35,10 +35,10 @@
   };
 
   recipeSrc = fetchFromGitHub {
-    owner = "yuanw";
+    owner = "MiaAI-Lab";
     repo = "Inkling-2-Mini-DGX-Spark-TensorFold";
-    rev = "9e3cf20b76e0140bebbbe6ed13f6e3a00e881f12"; # main: patches 0001–0018 (DFlash2 drafter by default)
-    hash = "sha256-Itx/7TDsn8uo0m2x81Og7BqvI0xLpnaJpgl97pVEcoo=";
+    rev = "3b210d1fc6a6a040f99add7119c0a7d78f82468c"; # main: patches 0001–0030 (speed3, prefill fusions, 8192 chunks)
+    hash = "sha256-JyYIK+WtTS0WEv6WbDQFQQ0ysyNJGzXhT8sT1h3e8oM=";
   };
 
   xgrammarSrc = fetchgit {

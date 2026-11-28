@@ -111,14 +111,55 @@ with lib;
   #home-manager.backupFileExtension = "backup";
   # home-manager.useGlobalPkgs = true;
   # home-manager.useUserPackages = false;
-  home-manager.users.${config.my.username} = import ./home.nix {
-    inherit
-      inputs
-      pkgs
-      lib
-      config
-      inputs'
-      ;
+  home-manager.users.${config.my.username} = {
+    imports = [
+      (import ./home.nix {
+        inherit
+          inputs
+          pkgs
+          lib
+          config
+          inputs'
+          ;
+      })
+      (
+        hm@{ ... }:
+        {
+          # Disable Spotlight's macOS symbolic hotkeys globally (Spotlight
+          # indexing is already turned off in postActivation above).
+          #
+          # Default bindings in com.apple.symbolichotkeys -> AppleSymbolicHotKeys:
+          #   64: Show Spotlight search     (Cmd+Space;     32=' ', 49=kVK_Space, 1048576=Cmd)
+          #   65: Show Finder search window (Opt+Cmd+Space; 32=' ', 49=kVK_Space, 1572864=Opt+Cmd)
+          #
+          # Uses `defaults write -dict-add` instead of nix-darwin's
+          # `system.defaults.CustomUserPreferences."com.apple.symbolichotkeys"`
+          # because CustomUserPreferences emits `defaults write ... <plist>`
+          # which replaces the entire AppleSymbolicHotKeys dict and wipes every
+          # other custom macOS shortcut. Runs before `setupLaunchAgents` so
+          # Spotlight releases Cmd+Space before launchers (e.g. Vicinae) register
+          # their global hotkeys.
+          #
+          # Refs:
+          #   https://github.com/nix-darwin/nix-darwin/issues/518
+          #   https://github.com/nix-darwin/nix-darwin/blob/15abb8c98f336cd8bd840d71059adebabe60bf04/modules/system/defaults-write.nix#L9
+          #   https://github.com/diimdeep/dotfiles/blob/master/osx/configure/hotkeys.sh
+          #   https://zameermanji.com/blog/2021/6/8/applying-com-apple-symbolichotkeys-changes-instantaneously/
+          home.activation.disableSpotlightHotkeys = hm.config.lib.dag.entryBefore [ "setupLaunchAgents" ] ''
+            if [ -n "''${DRY_RUN:-}" ]; then
+              exit 0
+            fi
+            # 64: Show Spotlight search (default: Cmd+Space)
+            /usr/bin/defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 \
+              '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>'
+            # 65: Show Finder search window (default: Opt+Cmd+Space)
+            /usr/bin/defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 65 \
+              '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1572864</integer></array><key>type</key><string>standard</string></dict></dict>'
+            /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
+          '';
+        }
+      )
+    ];
   };
 
   # GC and store dedup are the fast-nix-gc daemons (github:Mic92/fast-nix-gc):

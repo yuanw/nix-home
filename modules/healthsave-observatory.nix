@@ -46,6 +46,35 @@ let
   # releases (the assertion below ties that release to the image tag).
   observatorySrc = healthsavePkg.src;
 
+  # Pinned, not `ps.timescaledb`.  TimescaleDB's loader dlopens
+  # $libdir/timescaledb-<version in pg_extension>, so the version the server ships
+  # may never run ahead of the version the catalog holds: when nixpkgs rolled
+  # 2.31.0 -> 2.32.0, every session in a timescaledb database died on
+  # `could not access file "$libdir/timescaledb-2.31.0"`, postgresql-setup's
+  # `psql -d postgres` probe retried forever and activation hung (misfit,
+  # 2026-11-22).  Upstream pins its own db to timescale/timescaledb:2.17.2-pg16,
+  # so nothing asks for the newest release.  Bump by hand, and run
+  # `ALTER EXTENSION timescaledb UPDATE;` on the cluster before this lands.
+  # shortcut: holds an old extension release, so TSL CVEs need watching by hand.
+  timescaledbPinned = pkgs.postgresql_16.withPackages (ps: [
+    (ps.timescaledb.overrideAttrs (
+      _final: _prev: {
+        version = "2.32.0";
+        # The pin re-triggers nixpkgs' "is this still broken on pg19?" maintainer
+        # warning; pg16 never was, and the version is ours to choose now.
+        meta = _prev.meta // {
+          broken = false;
+        };
+        src = pkgs.fetchFromGitHub {
+          owner = "timescale";
+          repo = "timescaledb";
+          tag = "2.32.0";
+          hash = "sha256-tOXMk+bRBKEf78TrRPpuMHQZLM2ahq8oyypNuSV/MaE=";
+        };
+      }
+    ))
+  ]);
+
   dbUser = "healthsave";
   dbName = "healthsave";
 
@@ -195,7 +224,9 @@ in
       # package set.  `withPackages`, not `pkgs.timescaledb` directly: the latter is
       # the bare extension and has no `psqlSchema`, which the postgresql module
       # reads (measured: "attribute 'psqlSchema' missing").
-      package = pkgs.postgresql_16.withPackages (ps: [ ps.timescaledb ]);
+      # Pinned above rather than `ps.timescaledb`, so a nixpkgs bump cannot
+      # orphan the cluster's catalog version.
+      package = timescaledbPinned;
 
       # In place on the 62 MB the container left behind: same PG major (16), so the
       # cluster opens where it was and the plan's dump/restore step collapsed to a

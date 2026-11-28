@@ -189,9 +189,6 @@
   services.cockpit-local.enable = true;
   services.cockpit-local.enableGpu = true;
 
-  # Direct :9090 access should also match the reverse-proxy hostname.
-  services.cockpit-local.certExtraDnsNames = [ "cockpit.yuanw.me" ];
-
   # ─── PCP (Performance Co-Pilot) — required by cockpit
   services.pcp.enable = true;
 
@@ -202,7 +199,7 @@
   # modules/inkling2.nix + packages/tensorfold-inkling2: the
   # Inkling-2-Mini-DGX-Spark-TensorFold recipe's engine packaged natively —
   # TensorFold at Jürgen Schmied's Inkling 2 Mini CUDA head (PR #4441,
-  # dc2ca8a1) plus the recipe's patches 0001–0018 — serving
+  # dc2ca8a1) plus the recipe's patches 0001–0030 — serving
   # thinkingmachines/Inkling-2-Mini (26.4B MoE, ModelOpt NVFP4/MXFP8,
   # ~19 GiB) on :8888 with the DFlash2 block-diffusion drafter.
   #

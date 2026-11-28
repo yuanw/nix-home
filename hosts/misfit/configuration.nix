@@ -224,11 +224,16 @@
   age.secrets = {
     namecheap.file = ../../secrets/namecheap.age;
     # Jellarr's Jellyfin API key — the same value as `pass jellyfin/apiKey`,
-    # which the /Library/Refresh calls already use. The old jellyfin-admin
-    # secret (a Jellyfin password *hash* that only declarative-jellyfin's init
-    # read) is unwired now; the .age file stays in secrets/ until jellarr's
-    # `users` can take the admin user over, which needs the plaintext instead.
+    # which the /Library/Refresh calls already use. The old jellyfin-admin secret
+    # (a Jellyfin password *hash* that only declarative-jellyfin's init read) was
+    # deleted 2026-11-15: nothing wired it after the move to jellarr, and jellarr's
+    # `users` would need the plaintext regardless, so it could never have taken the
+    # admin account back.
     jellarr-api-key.file = ../../secrets/jellarr-api-key.age;
+    # WireGuard private key for the seeder's Mullvad exit. The account number is
+    # not in here and never was — the device is registered, and the peer key is
+    # Mullvad's public relay key, so this file is the only secret involved.
+    mullvad-wg-key.file = ../../secrets/mullvad-wg-key.age;
     hass = {
       file = ../../secrets/hass.age;
       path = "${config.services.home-assistant.configDir}/secrets.yaml";
@@ -239,6 +244,15 @@
     # env files under /run/healthsave — the containers never need this file
     healthsave-env.file = ../../secrets/healthsave-env.age;
 
+    # The arr stack.  All four are read by systemd as root — as EnvironmentFile
+    # for the servarr units and for configarr, and through Bazarr's
+    # LoadCredential — so agenix's default 0600 root:root is right and no
+    # service ever needs one.  (*-api-key are the bare keys for Bazarr; *-auth
+    # are `NAME=value` bodies.  See secrets/secrets.nix for why both exist.)
+    radarr-auth.file = ../../secrets/radarr-auth.age;
+    sonarr-auth.file = ../../secrets/sonarr-auth.age;
+    radarr-api-key.file = ../../secrets/radarr-api-key.age;
+    sonarr-api-key.file = ../../secrets/sonarr-api-key.age;
   };
 
   security.acme = {
@@ -260,8 +274,9 @@
       # and the cert quietly expires.  Drop this when renewOpts gets the flag:
       # https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/security/acme/default.nix#L329
       extraLegoRenewFlags = [ "--ari-disable" ];
-      #dnsPropagationCheck = false;
-      dnsPropagationCheck = true;
+      # Upstream split dnsPropagationCheck in two; the old single check was the
+      # recursive one against dnsResolver, which the new option defaults to off.
+      dnsRecursivePropagationCheck = true;
       #webroot = "/var/lib/acme";
       environmentFile = config.age.secrets.namecheap.path;
     };
@@ -306,9 +321,10 @@
   #     no option exists for either in jellarr's schema
   #   * the Movies library's metadataFetchers/imageFetchers (TMDb + OMDB) — its
   #     libraryOptions carries pathInfos and nothing else
-  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and
-  #     secrets/jellyfin-admin.age holds a hash, so declaring it needs a new
-  #     secret first. Until then nothing here can re-create or reset that user.
+  #   * the admin user `yuanw`: jellarr takes a *plaintext* password file and the
+  #     old secrets/jellyfin-admin.age held only a hash (deleted 2026-11-15), so
+  #     declaring it needs a new secret first. Until then nothing here can
+  #     re-create or reset that user.
   #   * the Open Subtitles plugin, still a reviewed fetchzip in the preStart
   #     below rather than a repo install of whatever is latest
   services.jellarr = {
@@ -364,52 +380,6 @@
     RestartSec = "10s";
   };
   systemd.services.jellarr.unitConfig.StartLimitIntervalSec = 0;
-
-  # The two checks nobody owns today (docs/misfit-torrent.org, "things that rot
-  # silently"): the ISP's dynamic WAN address, and the port mapping in the SaskTel
-  # device that nothing in this repo can see. Evidence for why it is worth having:
-  # on 2026-11-14 both were run by hand six times in one session.
-  #
-  # Runs as root on purpose — the ntfy topic is the only credential and it lives in
-  # a 0400 root file, which is worth more than the marginal hardening of a
-  # DynamicUser that would then need the topic world-readable. It makes no inbound
-  # listener and talks outbound to api.ipify.org, check-host.net and ntfy.sh only.
-  #
-  # State goes in /var/lib/private, not /var/lib/seeder-watch: the former is on the
-  # =/persist= list (proven across the 20:36 reboot today), so the "alert on
-  # transition, not on steady state" memory survives a rollback. Without that, every
-  # cold boot would re-announce a dead mapping.
-  age.secrets.seeder-watch-topic.file = ../../secrets/seeder-watch-topic.age;
-
-  systemd.services.seeder-watch = {
-    serviceConfig = {
-      Type = "oneshot";
-      EnvironmentFile = config.age.secrets.seeder-watch-topic.path;
-      # writeShellScript's PATH is coreutils+gnugrep+gnused+gawk only — the first
-      # run died at “curl: command not found” on all four calls — so curl's bin dir
-      # is prepended inside the generated script instead of relying on the unit
-      # inheriting a login PATH (and `writeShellScript` takes no `path` argument at
-      # this nixpkgs rev: applying one fails with “attempt to call something which
-      # is not a function but a set”).
-      ExecStart = "${pkgs.writeShellScript "seeder-watch" ''
-        export PATH=${pkgs.lib.makeBinPath [ pkgs.curl ]}:$PATH
-        ${builtins.readFile ../../scripts/seeder-watch}
-      ''}";
-      Environment = [ "STATE_DIR=/var/lib/private/seeder-watch" ];
-    };
-  };
-
-  # Four probes a day is enough to learn about a reprovisioning within hours, and
-  # check-host.net is a free third-party service: 24 TCP probes/day across its
-  # nodes is polite, a poller every few minutes would not be.
-  systemd.timers.seeder-watch = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "*-*-* 00/6:15";
-      Persistent = true;
-      RandomizedDelaySec = "15m";
-    };
-  };
 
   # Contain jellyfin's startup: MemoryHigh throttles the runaway migration run
   # into swap (16G zvol) instead of letting it page through home-assistant and
@@ -488,9 +458,39 @@
   # primary group. Existing content is left alone — it is yuanw:users 0644 and
   # Jellyfin reads it world-readable, so nothing needs a chgrp -R.
   systemd.tmpfiles.rules = [
-    "d /data/Movies 2775 root users - -"
-    "d /data/Shows 2775 root users - -"
+    # 2775 + group `media` (users.groups.media below, and the plan's [[#group]]):
+    # Radarr/Sonarr create the title directories here, and the setgid bit is what
+    # lets a title dir inherit `media` instead of the importer's primary group.
+    # The comment that chose `users` over `data` in 2026-10-31 still holds for
+    # the part it argued — jellyfin must not be able to write the library — and
+    # `media` keeps that property while adding the importers.
+    #
+    # No chgrp -R of the existing content: the 1746 files stay yuanw:users 0644,
+    # which jellyfin reads world-readable as it always has. Where an importer
+    # needs to touch one of those titles, chgrp that title's directory, then.
+    "d /data/Movies 2775 root media - -"
+    "d /data/Shows 2775 root media - -"
   ];
+
+  # Mullvad, scoped to the seeder's uid — Phase 5 of nix-home-private/docs/
+  # misfit-torrent.org. Read that page before changing this: Mullvad removed port
+  # forwarding in 2023, so this buys outbound privacy and gives up inbound peers
+  # (qBittorrent will report `connection_status: firewalled`). That is the deal, not
+  # a bug to chase. Everything else on the box keeps leaving via the home IP.
+  #
+  # Values come from measurement, not guesswork: us-sea-wg-401 is the lowest-RTT
+  # relay from misfit (~25ms vs ~32ms Toronto, probed 2026-11-15), and the tunnel
+  # addresses are what Mullvad's own API assigned to this device.
+  my.mullvad = {
+    enable = true;
+    privateKeyFile = config.age.secrets.mullvad-wg-key.path;
+    address = [
+      "10.68.193.171/32"
+      "fc00:bbbb:bbbb:bb01::5:c1aa/128"
+    ];
+    relayHost = "23.234.80.2";
+    relayPublicKey = "wRvkGNE3N2UklxKajU06gbBJ3Bg7KmhZsU7a5HIFBw8=";
+  };
 
   # Prowlarr — the search layer for the seeder (plan: nix-home-private/docs/
   # misfit-torrent.org, Phase 4). Without it every grab still starts in a
@@ -504,11 +504,55 @@
   # `environmentFiles` as PROWLARR__SECTION__KEY=value lines instead.
   services.prowlarr = {
     enable = true;
-    # openFirewall stays at its default false: the servarr UI has no auth out
-    # of the box, and a closed 9696 means reaching it as
-    #   ssh -N -L 9696:localhost:9696 misfit
-    # Prowlarr -> qBittorrent is loopback (127.0.0.1:8080), which never touches
-    # the firewall. Reopen only if a phone has to drive the UI.
+    # openFirewall stays at its default false. Two ways in, neither through 9696:
+    #   ssh -N -L 9696:localhost:9696 misfit   (API/scripts, no TLS)
+    #   https://prowlarr.yuanw.me              (Caddy, modules/caddy.nix)
+    #
+    # Bound to loopback on purpose. Out of the box Prowlarr listens on *:9696 with
+    # no authentication, so the closed firewall rule was the *only* thing between a
+    # LAN host and an arr UI that can edit indexers and download clients. Binding it
+    # means Caddy on 127.0.0.1 is the only reachable path.
+    settings.server = {
+      bindAddress = "localhost";
+      # Honor X-Forwarded-For from Caddy, or every request looks like it came from
+      # 127.0.0.1 and the logs are useless.
+      isProxied = true;
+      # "external" — the default, stated so the reason is on the record.
+      #
+      # This cannot be "none" even though Caddy in front of it already authenticates.
+      # Prowlarr's UI refuses to run without its own account: with authentication
+      # disabled it serves a forced setup page ("To prevent remote access without
+      # authentication, Prowlarr now requires authentication to be enabled") instead
+      # of the Indexers view. Verified in a browser, not inferred from a config key.
+      #
+      # And the account itself cannot be declarative: users live in prowlarr.db, while
+      # everything above only reaches config.xml (via PROWLARR__SERVER__* environment
+      # variables, which is why config.xml still reads <BindAddress>* while the socket
+      # is 127.0.0.1 — check the socket and the env, not that file). So the account is
+      # created exactly once in the browser, like the indexers and the download client,
+      # and its password belongs in `pass`, never here.
+      #
+      # API automation is unaffected either way: X-Api-Key still authorizes /api/*.
+      # "forms" = the login page. Not "external", even though that is the default and
+      # sounds like the right answer for a reverse-proxied app.
+      #
+      # With "external" and no account, there is no login route at all: the request to
+      # /api/v1/login is served by the API-key scheme and challenged, so every attempt
+      # 401s no matter what password you send. Measured — the hash in the database
+      # matched the password exactly (pbkdf2-sha512, 10000 iterations, 32-byte key) and
+      # the log still said "ApiKeyAuthenticationHandler: AuthenticationScheme: API was
+      # challenged". "forms" is what registers the login page and its handler.
+      #
+      # This has to be set here, not just picked in the UI: nixpkgs passes it as the
+      # PROWLARR__SERVER__AUTHENTICATION environment variable, which outranks whatever
+      # the General settings form writes. Pick it in the UI, it appears to take, and the
+      # next restart silently reverts to whatever this line says.
+      #
+      # The account itself cannot be declarative — users live in prowlarr.db, and
+      # Prowlarr refuses to serve its UI without one — so it is created once in the
+      # browser and its password lives in pass:prowlarr/admin-password, never here.
+      authentication = "forms";
+    };
   };
 
   # DynamicUser + StateDirectory put the real tree at /var/lib/private/prowlarr,
@@ -516,9 +560,360 @@
   # seeder's /var/lib/qBittorrent this needs no entry. Unverified: the reboot
   # proof (indexers and the qBittorrent credential survive) is still owed.
 
-  # Not by default. One line, added the first time an indexer answers 503 or a
-  # Cloudflare interstitial:
-  # services.flaresolverr.enable = true;   # Prowlarr reaches it on 127.0.0.1:8191
+  # Indexer-solving proxy for Cloudflare-protected indexers. Prowlarr is its only
+  # consumer (Radarr/Sonarr never call it), and Prowlarr runs on the host, so the
+  # URL it stores is http://127.0.0.1:8191 — same host, no namespace hop.
+  #
+  # The module's whole option set is enable/package/port/openFirewall. Two things
+  # it does *not* offer: a bind address (FlareSolverr listens on 0.0.0.0 and only
+  # PORT is passed) and any authentication. So openFirewall must stay false — an
+  # exposed FlareSolverr fetches arbitrary URLs for whoever asks, which is an open
+  # SSRF proxy. Confirm from off-box rather than trusting this comment:
+  #   nc -zvw2 misfit.lan 8191      # must fail
+  #
+  # Stateless, so nothing here needs a /persistSave directory. The closure drags in
+  # chromium + xvfb; nixpkgs patches both binaries into src/utils.py, so unlike the
+  # Docker image it never downloads a driver at runtime.
+  services.flaresolverr.enable = true;
+
+  # ─── The arr stack: Radarr, Sonarr, Bazarr, configarr ─────────────────────
+  #
+  # Plan: nix-home-private/docs/misfit-arr.org — read it before changing any of
+  # this. The phases, the acceptance measurements and the reasoning live there;
+  # this block carries what cannot be re-derived from it.
+  #
+  # The shape: Prowlarr searches, qBittorrent grabs into /data/torrents, Radarr
+  # and Sonarr hardlink the result into the Jellyfin library and notify it. What
+  # is *not* here is what each app keeps in its own DB — the admin account, the
+  # qBittorrent download client (http://10.240.0.2:8080, because the daemon has
+  # had no host loopback since Phase 5 of the torrent plan), the Prowlarr app
+  # entries — same split as services.prowlarr above.
+
+  # One group for everything the importers must write: the seed tree (a hardlink
+  # out of it needs READ *and* WRITE on the source file under
+  # fs.protected_hardlinks, and Radarr unlinks from it when a download fails) and
+  # the two library roots (they mkdir in them).
+  #
+  # Not `data`: jellyfin's primary gid is `data` (services.jellyfin.group), so a
+  # group-writable library would hand a network-facing web server the ability to
+  # delete the whole media library. Not `users` either — that is the human group
+  # holding yuan and yuanw, and four daemons in it is the same mistake aimed the
+  # other way. `jellyfin` joins nothing: it reads everything world-readable, the
+  # way it already reads the 1746 files that predate all of this.
+  users.groups.media = { };
+
+  # The nixpkgs modules create these users (User=/Group=, not DynamicUser), so
+  # declaring membership here merges with their definitions. Deliberately not
+  # done for a user no module creates: `users.users.yuanw` is the lesson — an
+  # account with isNormalUser/group unset fails the build.
+  users.users.radarr.extraGroups = [ "media" ];
+  users.users.sonarr.extraGroups = [ "media" ];
+
+  # Both servarr units hard-set UMask = "0022" (servarr/radarr.nix:96). With the
+  # setgid library roots below that would make every title directory Radarr
+  # creates 0755, and then Bazarr cannot write a .srt into it — so the umask is
+  # part of the group model, not a cosmetic choice. mkForce because the module
+  # sets the key rather than leaving it at its default.
+  systemd.services.radarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+  systemd.services.sonarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+
+  # `media` has to be the *primary* group, not a supplementary one. Both units
+  # run with PrivateUsers = true, and a private user namespace maps only the
+  # unit's own uid and gid: radarr's Groups list reads `275 984` while its
+  # gid_map maps only 0 and 275, so 984 is a number that names no group the
+  # kernel can ever match. Measured on misfit with setpriv, once per side of the
+  # boundary — without media in the credential, `mkdir /data/Movies/<title>` is
+  # EACCES and `ln` of a seed file is EPERM, which is nothing importing at all;
+  # with it, the directory comes out `radarr:media` setgid as intended. The same
+  # applies to the seeder's group in nix-home-private/modules/arr.nix, and
+  # UMask 0002 above is what leaves the files 0664/2775 rather than 0644/0755.
+  # mkForce again: the servarr module assigns serviceConfig.Group itself.
+  systemd.services.radarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+  systemd.services.sonarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+
+  # Bazarr needs the same treatment, and it is the app the plan least suspected:
+  # it is not in `media` at all, so it could not write one subtitle anywhere in
+  # the library (measured 2026-11-22 — `Groups: 983`, gid_map maps only 0 and 983,
+  # and `touch` as bazarr in a 2775 root:media title dir is EACCES). Its unit runs
+  # PrivateUsers = true too, so the `extraGroups` line the plan sketched would not
+  # have helped: a supplementary 984 is a number the namespace maps to no group.
+  # mkForce for the same reason as the pair above — bazarr.nix assigns the group.
+  # UMask deliberately stays at the module's 0022: Bazarr's files want 0644, which
+  # is what lets jellyfin read them without joining anything.
+  systemd.services.bazarr.serviceConfig.Group = pkgs.lib.mkForce "media";
+
+  # The activation that *introduces* a persistence mount is the one tmpfiles
+  # misses — systemd-tmpfiles-setup ran at the previous boot, when no such mount
+  # existed, and leaves a root-owned directory behind. That cost a whole deploy
+  # of the seeder (nix-home-private/modules/arr.nix explains it for
+  # /var/lib/qBittorrent), so the two new state trees do not repeat the
+  # discovery. Every level is named: `install -d -o X -g X a/b/c` chowns only the
+  # operand it is handed, and a root-owned parent stops mkpath() cold.
+  systemd.services.radarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o radarr -g radarr"
+    + " /var/lib/radarr /var/lib/radarr/.config /var/lib/radarr/.config/Radarr";
+  systemd.services.sonarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o sonarr -g sonarr"
+    + " /var/lib/sonarr /var/lib/sonarr/.config /var/lib/sonarr/.config/NzbDrone";
+
+  # Replaces the module's RequiresMountsFor (a plain list — setting it here
+  # overwrites it), so the data directory is named as well as /data. An importer
+  # that starts before /data is mounted writes its library into the root dataset
+  # and nobody notices until the pool is full.
+  systemd.services.radarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/radarr"
+  ];
+  systemd.services.sonarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/sonarr"
+  ];
+
+  services.radarr = {
+    enable = true;
+    # Loopback, and openFirewall stays false: these UIs edit download clients and
+    # move files, so the bind is the gate. Unlike Prowlarr this is not yet the
+    # whole story — there is no account in the app until it is created, so
+    # nothing may be published until `authentication` is set below (see the
+    # services.prowlarr block for what "external with no user" actually means).
+    settings.server = {
+      bindAddress = "localhost";
+      # Honour X-Forwarded-For from Caddy; without it every request is logged as
+      # 127.0.0.1 and the CSRF check has nothing to compare.
+      isProxied = true;
+    };
+  };
+
+  services.sonarr = {
+    enable = true;
+    settings.server = {
+      bindAddress = "localhost";
+      isProxied = true;
+    };
+  };
+
+  # Authentication, and why it is here rather than clicked in the UI.
+  #
+  # Both apps are past the point where the servarr UIs had a user table: there
+  # is no /api/v3/user on either (measured — 404 with an admin API key, while
+  # /api/v3/system/backup answers 200 with the same key), so an account is not
+  # state in the app's DB the way Prowlarr's is.  It is one username and one
+  # password in the app's config, which means it *can* be declarative, and the
+  # password reaches it the way every other servarr secret does: an
+  # EnvironmentFile, never `settings` (which is world-readable store content).
+  #
+  # "forms" for the same reason Prowlarr ended there: with the default
+  # "external" and no reverse-proxy header to trust, nothing authenticates.  The
+  # keys are the app's own config names uppercased into SERVARR__SECTION__KEY,
+  # which is how nixpkgs renders `settings` (servarr/settings-options.nix:60);
+  # verified by an unauthenticated request returning 401 and a logged-in one
+  # returning 200, not by reading config.xml — which omits any key equal to its
+  # default and so shows no <Auth> block at all.
+  services.radarr.settings.auth = {
+    method = "forms";
+    required = "enabled";
+    username = "yuan";
+  };
+  services.sonarr.settings.auth = {
+    method = "forms";
+    required = "enabled";
+    username = "yuan";
+  };
+  services.radarr.environmentFiles = [ config.age.secrets.radarr-auth.path ];
+  services.sonarr.environmentFiles = [ config.age.secrets.sonarr-auth.path ];
+
+  # Subtitles.  The only app of the four whose module has a real secret channel
+  # (`_secret` → LoadCredential → a jq pass into DYNACONF_*, bazarr.nix:36-70),
+  # so unlike the others it is fully declarative — but the *names* below are its
+  # own config.yaml keys and the module declares none of them (freeform type):
+  # verified against the file it writes on first start, because an unknown
+  # DYNACONF_* name is ignored rather than rejected.
+  services.bazarr = {
+    enable = true;
+    settings = {
+      general = {
+        port = 6767;
+        # Both keys, because the socket is what decides and it disagreed at first:
+        # `bind_address` alone left it listening on 0.0.0.0:6767 (measured with
+        # ss -ltnp), with `ip: '*'` still in the config it wrote.  `ip` is the one
+        # the server binds; `bind_address` is what the rest of the app reads.
+        bind_address = "127.0.0.1";
+        ip = "127.0.0.1";
+      };
+      # The nested shape is Bazarr's own: the numbered entries are what it writes
+      # back to config.yaml (radarr.radarr1.{ip,port,apikey}) and the unnumbered
+      # ones beside them are legacy, left empty on purpose.
+      sonarr.sonarr1 = {
+        ip = "127.0.0.1";
+        port = 8989;
+        apikey._secret = config.age.secrets.sonarr-api-key.path;
+      };
+      radarr.radarr1 = {
+        ip = "127.0.0.1";
+        port = 7878;
+        apikey._secret = config.age.secrets.radarr-api-key.path;
+      };
+    };
+  };
+
+  # configarr — TRaSH-Guides custom formats, quality definitions and profiles
+  # into the two apps.  A oneshot on a timer, not a daemon: it converges and
+  # exits, which is also what makes it safe to run by hand while debugging
+  # (DRY_RUN=true is the dry-run switch; it takes no CLI flags at all).
+  #
+  # The package is ours (packages/configarr.nix) because nixpkgs has no
+  # configarr; the unit is ours because nothing ships one.
+  environment.etc."configarr/config.yml".source = ./configarr/config.yml;
+
+  systemd.services.configarr = {
+    serviceConfig = {
+      Type = "oneshot";
+      DynamicUser = true;
+      # Where it clones TRaSH-Guides and the recyclarr template repo — src/env.ts
+      # puts them at $ROOT_PATH/repos, so ROOT_PATH has to be the writable one.
+      # /var/lib/private is on the /persist list, so the clones survive a boot;
+      # losing them would only cost a re-clone.
+      StateDirectory = "configarr";
+      WorkingDirectory = "/var/lib/configarr";
+      Environment = [
+        "ROOT_PATH=/var/lib/configarr"
+        "CONFIG_LOCATION=/etc/configarr/config.yml"
+        "LOG_LEVEL=info"
+        # The binary shells out to git (simple-git), and a service's PATH is not
+        # the interactive one.  Named explicitly rather than trusted: the failure
+        # this avoids is a green run that synced nothing but the log.
+        "PATH=${
+          pkgs.lib.makeBinPath [
+            pkgs.git
+            pkgs.coreutils
+          ]
+        }"
+      ];
+      # The same two files the apps start with, which is how config.yml's
+      # `!env RADARR__AUTH__APIKEY` resolves.  It also hands configarr the two
+      # passwords it does not need — systemd read them as root either way, and
+      # splitting the files again to avoid that buys a fourth secret to rotate.
+      EnvironmentFile = [
+        config.age.secrets.radarr-auth.path
+        config.age.secrets.sonarr-auth.path
+      ];
+      # callPackage, not pkgs.configarr: the packages/ overlay is only
+      # applied to silver, asche and dgx-spark (hosts/colmena.nix:18,23) — misfit
+      # gets its packages from the plain hive nixpkgs.
+      ExecStart = "${pkgs.callPackage ../../packages/configarr.nix { }}/bin/configarr";
+      # No network sandbox: it clones two GitHub repos and talks to two local
+      # apps.  Everything else of the usual hardening set is inert for a
+      # oneshot that writes only its StateDirectory.
+      NoNewPrivileges = true;
+      ProtectHome = true;
+      PrivateTmp = true;
+      ProtectSystem = "strict";
+      ReadWritePaths = [ "/var/lib/configarr" ];
+    };
+  };
+
+  systemd.timers.configarr = {
+    wantedBy = [ "timers.target" ];
+    partOf = [ "configarr.service" ];
+    timerConfig = {
+      # Daily, like recyclarr's default.  Cheap (two GitHub clones + a few
+      # hundred API calls) and the guides move more often than a week.
+      OnCalendar = "*-*-* 04:15:00";
+      Persistent = true;
+      RandomizedDelaySec = "10m";
+    };
+  };
+
+  # ─── The arr stack: Radarr, Sonarr, Bazarr, configarr ─────────────────────
+  #
+  # Plan: nix-home-private/docs/misfit-arr.org — read it before changing any of
+  # this. The phases, the acceptance measurements and the reasoning live there;
+  # this block carries what cannot be re-derived from it.
+  #
+  # The shape: Prowlarr searches, qBittorrent grabs into /data/torrents, Radarr
+  # and Sonarr hardlink the result into the Jellyfin library and notify it. What
+  # is *not* here is what each app keeps in its own DB — the admin account, the
+  # qBittorrent download client (http://10.240.0.2:8080, because the daemon has
+  # had no host loopback since Phase 5 of the torrent plan), the Prowlarr app
+  # entries — same split as services.prowlarr above.
+
+  # One group for everything the importers must write: the seed tree (a hardlink
+  # out of it needs READ *and* WRITE on the source file under
+  # fs.protected_hardlinks, and Radarr unlinks from it when a download fails) and
+  # the two library roots (they mkdir in them).
+  #
+  # Not `data`: jellyfin's primary gid is `data` (services.jellyfin.group), so a
+  # group-writable library would hand a network-facing web server the ability to
+  # delete the whole media library. Not `users` either — that is the human group
+  # holding yuan and yuanw, and four daemons in it is the same mistake aimed the
+  # other way. `jellyfin` joins nothing: it reads everything world-readable, the
+  # way it already reads the 1746 files that predate all of this.
+  users.groups.media = { };
+
+  # The nixpkgs modules create these users (User=/Group=, not DynamicUser), so
+  # declaring membership here merges with their definitions. Deliberately not
+  # done for a user no module creates: `users.users.yuanw` is the lesson — an
+  # account with isNormalUser/group unset fails the build.
+  users.users.radarr.extraGroups = [ "media" ];
+  users.users.sonarr.extraGroups = [ "media" ];
+
+  # Both servarr units hard-set UMask = "0022" (servarr/radarr.nix:96). With the
+  # setgid library roots below that would make every title directory Radarr
+  # creates 0755, and then Bazarr cannot write a .srt into it — so the umask is
+  # part of the group model, not a cosmetic choice. mkForce because the module
+  # sets the key rather than leaving it at its default.
+  systemd.services.radarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+  systemd.services.sonarr.serviceConfig.UMask = pkgs.lib.mkForce "0002";
+
+  # The activation that *introduces* a persistence mount is the one tmpfiles
+  # misses — systemd-tmpfiles-setup ran at the previous boot, when no such mount
+  # existed, and leaves a root-owned directory behind. That cost a whole deploy
+  # of the seeder (nix-home-private/modules/arr.nix explains it for
+  # /var/lib/qBittorrent), so the two new state trees do not repeat the
+  # discovery. Every level is named: `install -d -o X -g X a/b/c` chowns only the
+  # operand it is handed, and a root-owned parent stops mkpath() cold.
+  systemd.services.radarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o radarr -g radarr"
+    + " /var/lib/radarr /var/lib/radarr/.config /var/lib/radarr/.config/Radarr";
+  systemd.services.sonarr.serviceConfig.ExecStartPre =
+    "+${pkgs.coreutils}/bin/install -d -m700 -o sonarr -g sonarr"
+    + " /var/lib/sonarr /var/lib/sonarr/.config /var/lib/sonarr/.config/NzbDrone";
+
+  # Replaces the module's RequiresMountsFor (a plain list — setting it here
+  # overwrites it), so the data directory is named as well as /data. An importer
+  # that starts before /data is mounted writes its library into the root dataset
+  # and nobody notices until the pool is full.
+  systemd.services.radarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/radarr"
+  ];
+  systemd.services.sonarr.unitConfig.RequiresMountsFor = [
+    "/data"
+    "/var/lib/sonarr"
+  ];
+
+  services.radarr = {
+    enable = true;
+    # Loopback, and openFirewall stays false: these UIs edit download clients and
+    # move files, so the bind is the gate. Unlike Prowlarr this is not yet the
+    # whole story — there is no account in the app until it is created, so
+    # nothing may be published until `authentication` is set below (see the
+    # services.prowlarr block for what "external with no user" actually means).
+    settings.server = {
+      bindAddress = "localhost";
+      # Honour X-Forwarded-For from Caddy; without it every request is logged as
+      # 127.0.0.1 and the CSRF check has nothing to compare.
+      isProxied = true;
+    };
+  };
+
+  services.sonarr = {
+    enable = true;
+    settings.server = {
+      bindAddress = "localhost";
+      isProxied = true;
+    };
+  };
 
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
@@ -578,6 +973,9 @@
       "wheel"
       "data"
       "docker"
+      # the seed tree + library roots (users.groups.media, and the arr-stack
+      # block above): keeps the manual `ln` path working without sudo
+      "media"
     ]; # Enable ‘sudo’ for the user.
     packages = with pkgs; [
       tree
@@ -718,6 +1116,15 @@
       "/var/lib/hass"
       "/var/lib/jellyfin"
       "/var/lib/isponsorblocktv"
+      # The arr stack's state. These modules use User=/Group= + tmpfiles, not
+      # DynamicUser + StateDirectory, so /var/lib/private does not cover them and
+      # an omitted entry means the @blank rollback silently returns them to a
+      # first-run wizard (the seeder's /var/lib/qBittorrent is the precedent, in
+      # nix-home-private/modules/arr.nix). /var/lib/bazarr is listed before
+      # Bazarr is enabled because the entry is free and the absence is not.
+      "/var/lib/radarr"
+      "/var/lib/sonarr"
+      "/var/lib/bazarr"
       "/etc/secrets"
     ];
   };

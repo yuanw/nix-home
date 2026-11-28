@@ -226,6 +226,11 @@
     terminal = {
       enable = true;
     };
+    vicinae = {
+      enable = true;
+      passExtension.enable = true;
+      settings.global_shortcuts.toggle = "cmd+space";
+    };
     wm = {
       # OmniWM trial. Revert with yabai.enable = true and
       # yabai.enableJankyborders = true (the two cannot both be on).

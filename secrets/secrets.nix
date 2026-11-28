@@ -35,30 +35,10 @@ in
     yuanw_mist
     misfit
   ];
-  "namecheap.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
-  "jellyfin-admin.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
-  # Jellarr's Jellyfin API key as a systemd EnvironmentFile — the file holds one
-  # `JELLARR_API_KEY=<key>` line, not the bare key, and that is the same value
-  # `pass jellyfin/apiKey` gives the /Library/Refresh calls. Measured on the
-  # first activation: with the bare key systemd parsed no assignment and the
-  # unit died at `Error: JELLARR_API_KEY required`.
-  # The .age holds a credential that grants full control of the media server.
-  "jellarr-api-key.age".publicKeys = [
-    yuanw_mist
-    misfit
-  ];
-  # The ntfy topic the seeder watch posts to (scripts/seeder-watch). The topic is
-  # the only credential — ntfy.sh has no accounts — so knowing it means reading the
-  # alerts. That is why it is agenix'd rather than written into configuration.nix,
-  # and why alert bodies carry an IP and a port and nothing secret. Also a
-  # systemd EnvironmentFile, same shape as the key above.
-  "seeder-watch-topic.age".publicKeys = [
+  # WireGuard private key for the seeder's Mullvad exit (us-sea-wg-401).
+  # Public by design: the counterpart public key is Mullvad's relay key, and the
+  # account number never appears in any of this — the device is already registered.
+  "mullvad-wg-key.age".publicKeys = [
     yuanw_mist
     misfit
   ];
@@ -96,4 +76,17 @@ in
   # cachix/dgx-spark-nixos.  The cache is public, so this grants write only, and
   # rotating it is just a new token — no path hashes depend on it.
   "cachix-auth-token.age".publicKeys = [ silver ];
+
+  # The arr stack (nix-home-private/docs/misfit-arr.org).  Two shapes on purpose:
+  # *-auth.age are systemd EnvironmentFile bodies (`RADARR__AUTH__PASSWORD=…`,
+  # `RADARR__AUTH__APIKEY=…`) for the servarr units, and the API-key values are
+  # *also* what configarr reads — its unit loads the same two files, so the
+  # profile syncer authenticates with exactly what the apps accept.
+  # *-api-key.age are the bare keys, for Bazarr's `_secret` (LoadCredential),
+  # whose jq pass takes a file's whole content as the value.  Rotate a key by
+  # editing BOTH files: `agenix -e` each one.
+  "radarr-auth.age".publicKeys = users ++ [ misfit ];
+  "sonarr-auth.age".publicKeys = users ++ [ misfit ];
+  "radarr-api-key.age".publicKeys = users ++ [ misfit ];
+  "sonarr-api-key.age".publicKeys = users ++ [ misfit ];
 }

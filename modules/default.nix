@@ -51,6 +51,7 @@
       ./terminal-multiplexer/tmux.nix
       ./terminal-multiplexer/zellij.nix
       ./typing
+      ./vicinae
     ];
 
     linux.imports = [
