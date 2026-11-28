@@ -8,13 +8,13 @@
   ...
 }:
 let
-  version = "0.15.0";
+  version = "0.16.0-unstable-2026-11-27";
 
   src = fetchFromGitHub {
     owner = "Rahularya01";
     repo = "pi-antigravity";
-    rev = "67706dd5fcc0a710f69f89412a6867673c58a684";
-    hash = "sha256-V6w95IHGPDFRIiIBpv67e0jXtoZcJx2Jr3cIuTTv8gY=";
+    rev = "09c16ae49b6bcc9c93171e4b9ffdae2bd2fefedf";
+    hash = "sha256-mT+PSs+J2PsGC+ZPSMPLndbs17F6PBrKinXZLOocqlw=";
   };
 
   # Upstream declares peer deps on the Pi packages (provided by the host Pi
