@@ -32,9 +32,10 @@ let
     ]);
 
   extensionPkgs = inputs.vicinae-extensions.packages.${pkgs.stdenv.hostPlatform.system};
-  resolvedExtensions = map (
-    ext: if builtins.isString ext then extensionPkgs.${ext} else ext
-  ) cfg.extensions;
+  passCopyExtension = import ./extensions/pass-copy { inherit lib pkgs; };
+  resolvedExtensions =
+    map (ext: if builtins.isString ext then extensionPkgs.${ext} else ext) cfg.extensions
+    ++ lib.optional cfg.passExtension.enable passCopyExtension;
 in
 {
   imports = lib.optionals isNixOS [ inputs.vicinae.nixosModules.default ];
@@ -97,6 +98,11 @@ in
       default = true;
       description = "Install the Chrome/Chromium native messaging host for the Vicinae browser extension.";
     };
+
+    passExtension.enable = lib.mkEnableOption ''
+      local pass-copy Vicinae extension (select GNU pass entries and copy to
+      clipboard via `pass -c`)
+    '';
 
     systemd = {
       enable = lib.mkOption {

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/vicinaehq/vicinae/refs/heads/main/extra/schemas/extension.json",
+  "name": "pass-copy",
+  "title": "Pass",
+  "description": "Search GNU pass entries and copy passwords to the clipboard with pass -c",
+  "categories": ["Security"],
+  "license": "MIT",
+  "platforms": ["Linux", "macOS"],
+  "author": "yuanw",
+  "icon": "extension_icon.svg",
+  "commands": [
+    {
+      "name": "pass-copy",
+      "title": "Pass",
+      "subtitle": "Copy password with pass -c",
+      "description": "Select a GNU pass entry and copy its password to the clipboard with pass -c",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "passwordStoreDir",
+      "type": "textfield",
+      "title": "Password Store Directory",
+      "description": "Override PASSWORD_STORE_DIR (defaults to $PASSWORD_STORE_DIR or ~/.password-store)",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "passBinary",
+      "type": "textfield",
+      "title": "Pass Binary",
+      "description": "Override the path to the pass executable (defaults to Nix-bundled pass)",
+      "default": "",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@vicinae/api": "^0.22.2"
+  }
+}
