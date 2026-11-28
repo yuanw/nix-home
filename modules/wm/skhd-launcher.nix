@@ -9,6 +9,7 @@ let
   emacsEveryWhere = ''emacsclient --eval "(emacs-everywhere)"'';
   emacsClient = "emacsclient -c -a 'emacs'";
   defaultBrowserCmd = config.modules.browsers.darwinLaunchCmd;
+  appLauncherCmd = if config.modules.vicinae.enable then "vicinae toggle" else "app-launcher";
   # LaunchServices does not reliably know the Home Manager bundles by name, so
   # `open -a' takes the path (same reason as modules/editor/emacs/features/postlude.el).
   rexApp = "~/Applications/Home\\ Manager\\ Apps/Rex.app";
@@ -29,11 +30,11 @@ in
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
     shift + ctrl + alt - c: screencapture /tmp/$(date +%s).png
-    cmd - space: app-launcher
+    cmd - space: ${appLauncherCmd}
   '';
 
   # choose-pass reads the store through choose; app-launcher comes from
-  # modules/editor/emacs/lib.nix.
+  # modules/editor/emacs/lib.nix (used when modules.vicinae.enable is false).
   packages = [
     pkgs.choose-mac
     (pkgs.writeShellScriptBin "choose-pass" ''
