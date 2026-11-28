@@ -3,25 +3,15 @@
 with pkgs;
 [
   pinentry_mac
-  #yt-dlp
   bandcamp-dl
   ffmpeg
   duti
-  # github-mcp-server is now in nixpkgs, removed from mcp-servers-nix overlay
-  # The overlay returns an empty-file placeholder that breaks buildEnv
-  # TODO: Re-enable once overlay is updated or use pkgs.github-mcp-server directly
-  # github-mcp-server
-
-  #mcp-server-fetch
   slackdump
-  #mcp-server-filesystem
-  kanata-with-cmd
   defaultbrowser
   install-fonts
   # macOS has no `timeout`, and coreutils-prefixed (modules/packages.nix) only
   # names it gtimeout. Unprefixed coreutils would shadow BSD ls/date/du.
   (writeShellScriptBin "timeout" ''exec ${coreutils}/bin/timeout "$@"'')
   #sbcl
-  #ghostty-mac
   #calibre_mac
 ]
