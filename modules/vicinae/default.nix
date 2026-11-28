@@ -36,6 +36,42 @@ let
   resolvedExtensions =
     map (ext: if builtins.isString ext then extensionPkgs.${ext} else ext) cfg.extensions
     ++ lib.optional cfg.passExtension.enable passCopyExtension;
+
+  # Mirror upstream's package resolution so the LibreWolf native messaging host
+  # points at the exact vicinae-browser-link binary installed by programs.vicinae.
+  vicinaeSystem = pkgs.stdenv.hostPlatform.system;
+  localAIEnabled =
+    if cfg.localAI.enable != null then
+      cfg.localAI.enable
+    else
+      let
+        model = lib.attrByPath [ "providers" "dictation" "preferences" "model" ] "" cfg.settings;
+      in
+      builtins.isString model && lib.hasPrefix "local:" model;
+  vicinaeBasePkg =
+    if localAIEnabled then
+      inputs.vicinae.packages.${vicinaeSystem}.with-local-ai
+    else
+      inputs.vicinae.packages.${vicinaeSystem}.default;
+  vicinaeSoulverPkg = inputs.vicinae.lib.${vicinaeSystem}.withSoulver vicinaeBasePkg;
+  vicinaePkg =
+    if cfg.package != null then
+      cfg.package
+    else if cfg.enableSoulver && vicinaeSoulverPkg != null then
+      vicinaeSoulverPkg
+    else
+      vicinaeBasePkg;
+  vicinaeNativeMessagingHost =
+    pkgs.writeTextDir "lib/mozilla/native-messaging-hosts/com.vicinae.vicinae.json"
+      (
+        builtins.toJSON {
+          name = "com.vicinae.vicinae";
+          description = "Vicinae Native Messaging Host";
+          path = "${vicinaePkg}/libexec/vicinae/vicinae-browser-link";
+          type = "stdio";
+          allowed_extensions = [ "firefox@vicinae.com" ];
+        }
+      );
 in
 {
   imports = lib.optionals isNixOS [ inputs.vicinae.nixosModules.default ];
@@ -91,6 +127,12 @@ in
       type = lib.types.bool;
       default = true;
       description = "Install the Firefox native messaging host for the Vicinae browser extension.";
+    };
+
+    enableLibrewolfIntegration = lib.mkOption {
+      type = lib.types.bool;
+      default = true;
+      description = "Install the LibreWolf native messaging host for the Vicinae browser extension.";
     };
 
     enableChromeIntegration = lib.mkOption {
@@ -197,7 +239,9 @@ in
 
     settings = lib.mkOption {
       inherit (jsonFormat) type;
-      default = { };
+      default = {
+        providers.enabled = false;
+      };
       example = lib.literalExpression ''
         {
           close_on_focus_loss = true;
@@ -253,6 +297,12 @@ in
       };
 
       home-manager.users.${config.my.username} = {
+        # Upstream vicinae's HM module only wires Firefox and Chrome; mirror
+        # Home Manager's built-in module for LibreWolf native messaging.
+        mozilla.librewolfNativeMessagingHosts = lib.mkIf cfg.enableLibrewolfIntegration [
+          vicinaeNativeMessagingHost
+        ];
+
         programs.vicinae = {
           enable = true;
           package = cfg.package;
