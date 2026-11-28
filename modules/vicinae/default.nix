@@ -95,7 +95,7 @@ in
 
     enableChromeIntegration = lib.mkOption {
       type = lib.types.bool;
-      default = true;
+      default = false;
       description = "Install the Chrome/Chromium native messaging host for the Vicinae browser extension.";
     };
 
@@ -251,7 +251,7 @@ in
           extensions = resolvedExtensions;
           themes = cfg.themes;
           settingOverrides = cfg.settingOverrides;
-          settings = cfg.settings;
+          settings = lib.recursiveUpdate { telemetry.system_info = false; } cfg.settings;
           systemd = lib.mkIf isNixOS {
             enable = cfg.systemd.enable;
             autoStart = cfg.systemd.autoStart;
