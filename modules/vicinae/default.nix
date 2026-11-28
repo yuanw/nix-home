@@ -240,6 +240,18 @@ in
     })
 
     (lib.mkIf cfg.enable {
+      # Layered over ~/.config/vicinae/settings.json via VICINAE_OVERRIDES so
+      # these win over GUI changes; hosts can override any key via
+      # `modules.vicinae.settings`.
+      modules.vicinae.settings = {
+        close_on_focus_loss = lib.mkDefault true;
+        pop_to_root_on_close = lib.mkDefault true;
+
+        # Updates come through the flake lock, not Vicinae's own updater.
+        updates.show_notice = lib.mkDefault false;
+        telemetry.system_info = lib.mkDefault false;
+      };
+
       home-manager.users.${config.my.username} = {
         programs.vicinae = {
           enable = true;
@@ -251,7 +263,7 @@ in
           extensions = resolvedExtensions;
           themes = cfg.themes;
           settingOverrides = cfg.settingOverrides;
-          settings = lib.recursiveUpdate { telemetry.system_info = false; } cfg.settings;
+          settings = cfg.settings;
           systemd = lib.mkIf isNixOS {
             enable = cfg.systemd.enable;
             autoStart = cfg.systemd.autoStart;
