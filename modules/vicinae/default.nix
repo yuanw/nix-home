@@ -72,6 +72,14 @@ let
           allowed_extensions = [ "firefox@vicinae.com" ];
         }
       );
+
+  toggleShortcut = lib.toLower (lib.attrByPath [ "global_shortcuts" "toggle" ] "" cfg.settings);
+  claimsCmdSpace = builtins.elem toggleShortcut [
+    "cmd+space"
+    "command+space"
+    "ctrl+space"
+    "control+space"
+  ];
 in
 {
   imports = lib.optionals isNixOS [ inputs.vicinae.nixosModules.default ];
@@ -296,40 +304,67 @@ in
         telemetry.system_info = lib.mkDefault false;
       };
 
-      home-manager.users.${config.my.username} = {
-        # Upstream vicinae's HM module only wires Firefox and Chrome; mirror
-        # Home Manager's built-in module for LibreWolf native messaging.
-        mozilla.librewolfNativeMessagingHosts = lib.mkIf cfg.enableLibrewolfIntegration [
-          vicinaeNativeMessagingHost
-        ];
+      home-manager.users.${config.my.username} =
+        hm@{ ... }:
+        {
+          # Upstream vicinae's HM module only wires Firefox and Chrome; mirror
+          # Home Manager's built-in module for LibreWolf native messaging.
+          mozilla.librewolfNativeMessagingHosts = lib.mkIf cfg.enableLibrewolfIntegration [
+            vicinaeNativeMessagingHost
+          ];
 
-        programs.vicinae = {
-          enable = true;
-          package = cfg.package;
-          enableNumen = cfg.enableNumen;
-          enableSoulver = cfg.enableSoulver;
-          enableFirefoxIntegration = cfg.enableFirefoxIntegration;
-          enableChromeIntegration = cfg.enableChromeIntegration;
-          extensions = resolvedExtensions;
-          themes = cfg.themes;
-          settingOverrides = cfg.settingOverrides;
-          settings = cfg.settings;
-          systemd = lib.mkIf isNixOS {
-            enable = cfg.systemd.enable;
-            autoStart = cfg.systemd.autoStart;
-            target = cfg.systemd.target;
-            environment = cfg.systemd.environment;
+          # Free Cmd+Space from Spotlight (symbolic hotkey 64) before launchd
+          # starts Vicinae so Carbon's RegisterEventHotKey succeeds without a
+          # conflict. Uses PlistBuddy so all other symbolic hotkeys stay intact.
+          home.activation.vicinaeDisableSpotlightShortcut = lib.mkIf (isDarwin && claimsCmdSpace) (
+            hm.config.lib.dag.entryBefore [ "setupLaunchAgents" ] ''
+              if [ -n "''${DRY_RUN:-}" ]; then
+                exit 0
+              fi
+              plist="$HOME/Library/Preferences/com.apple.symbolichotkeys.plist"
+              if /usr/libexec/PlistBuddy -c "Print :AppleSymbolicHotKeys:64:enabled" "$plist" >/dev/null 2>&1; then
+                /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:64:enabled false" "$plist"
+              else
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64 dict" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:enabled bool false" "$plist"
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value dict" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:type string standard" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters array" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:0 integer 32" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:1 integer 49" "$plist" 2>/dev/null || true
+                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:2 integer 1048576" "$plist" 2>/dev/null || true
+              fi
+              /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
+            ''
+          );
+
+          programs.vicinae = {
+            enable = true;
+            package = cfg.package;
+            enableNumen = cfg.enableNumen;
+            enableSoulver = cfg.enableSoulver;
+            enableFirefoxIntegration = cfg.enableFirefoxIntegration;
+            enableChromeIntegration = cfg.enableChromeIntegration;
+            extensions = resolvedExtensions;
+            themes = cfg.themes;
+            settingOverrides = cfg.settingOverrides;
+            settings = cfg.settings;
+            systemd = lib.mkIf isNixOS {
+              enable = cfg.systemd.enable;
+              autoStart = cfg.systemd.autoStart;
+              target = cfg.systemd.target;
+              environment = cfg.systemd.environment;
+            };
+            launchd = lib.mkIf isDarwin {
+              enable = cfg.launchd.enable;
+              autoStart = cfg.launchd.autoStart;
+              environment = cfg.launchd.environment;
+            };
+          }
+          // lib.optionalAttrs (cfg.localAI.enable != null) {
+            localAI.enable = cfg.localAI.enable;
           };
-          launchd = lib.mkIf isDarwin {
-            enable = cfg.launchd.enable;
-            autoStart = cfg.launchd.autoStart;
-            environment = cfg.launchd.environment;
-          };
-        }
-        // lib.optionalAttrs (cfg.localAI.enable != null) {
-          localAI.enable = cfg.localAI.enable;
         };
-      };
     })
   ];
 }
