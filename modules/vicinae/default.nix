@@ -315,25 +315,17 @@ in
 
           # Free Cmd+Space from Spotlight (symbolic hotkey 64) before launchd
           # starts Vicinae so Carbon's RegisterEventHotKey succeeds without a
-          # conflict. Uses PlistBuddy so all other symbolic hotkeys stay intact.
+          # conflict. Uses `defaults write -dict-add` (not nix-darwin's
+          # CustomUserPreferences, which replaces the whole AppleSymbolicHotKeys
+          # dict and wipes other macOS shortcuts, and not PlistBuddy, which
+          # bypasses cfprefsd).
           home.activation.vicinaeDisableSpotlightShortcut = lib.mkIf (isDarwin && claimsCmdSpace) (
             hm.config.lib.dag.entryBefore [ "setupLaunchAgents" ] ''
               if [ -n "''${DRY_RUN:-}" ]; then
                 exit 0
               fi
-              plist="$HOME/Library/Preferences/com.apple.symbolichotkeys.plist"
-              if /usr/libexec/PlistBuddy -c "Print :AppleSymbolicHotKeys:64:enabled" "$plist" >/dev/null 2>&1; then
-                /usr/libexec/PlistBuddy -c "Set :AppleSymbolicHotKeys:64:enabled false" "$plist"
-              else
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64 dict" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:enabled bool false" "$plist"
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value dict" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:type string standard" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters array" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:0 integer 32" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:1 integer 49" "$plist" 2>/dev/null || true
-                /usr/libexec/PlistBuddy -c "Add :AppleSymbolicHotKeys:64:value:parameters:2 integer 1048576" "$plist" 2>/dev/null || true
-              fi
+              /usr/bin/defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 \
+                '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>'
               /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
             ''
           );
