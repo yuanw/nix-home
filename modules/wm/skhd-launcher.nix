@@ -30,7 +30,7 @@ in
     shift + ctrl + alt - s: screencapture -ic
     shift + ctrl + alt - i: screencapture -i /tmp/$(date +%s).png
     shift + ctrl + alt - c: screencapture /tmp/$(date +%s).png
-    cmd - space: ${appLauncherCmd}
+    #cmd - space: ${appLauncherCmd}
   '';
 
   # choose-pass reads the store through choose; app-launcher comes from
