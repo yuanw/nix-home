@@ -1,6 +1,6 @@
 # Inkling 2 Mini — served natively on the DGX Spark by TensorFold PR #4441's
 # CUDA engine (packages/tensorfold-inkling2: dc2ca8a1 + the
-# Inkling-2-Mini-DGX-Spark-TensorFold recipe's patches 0001–0018). One model
+# Inkling-2-Mini-DGX-Spark-TensorFold recipe's patches 0001–0030). One model
 # at a time on the Spark's 128 GiB, so this unit Conflicts with
 # services.tensorfold-zig (the Qwen3.8-Flash-Next server): starting Inkling
 # stops Qwen, and `systemctl start tensorfold-zig` afterwards stops Inkling.
@@ -271,6 +271,12 @@ in
       description = "TF_INKLING2_PREFILL_TC=1: Blackwell native FP4/MXFP8 prefill tensor cores (0 for exact bf16 MMA).";
     };
 
+    attnFp8Tc = mkOption {
+      type = types.bool;
+      default = true;
+      description = "TF_INKLING2_ATTN_FP8_TC=1: FP8 tensor-core prompt attention projections (0 for exact bf16 activations; decode stays bf16).";
+    };
+
     reasoningField = mkOption {
       type = types.nullOr (
         types.enum [
@@ -337,6 +343,7 @@ in
         TENSORFOLD_MEMORY_RESERVE_GIB = toString cfg.memoryReserveGib;
         TF_INKLING2_ATTN_FP8 = if cfg.attnFp8 then "1" else "0";
         TF_INKLING2_PREFILL_TC = if cfg.prefillTc then "1" else "0";
+        TF_INKLING2_ATTN_FP8_TC = if cfg.attnFp8Tc then "1" else "0";
       }
       // optionalAttrs (cfg.reasoningField != null) {
         TF_REASONING_FIELD = cfg.reasoningField;

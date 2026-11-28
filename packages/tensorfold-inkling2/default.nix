@@ -1,6 +1,6 @@
 # tensorfold-native built from TensorFold PR #4441 (jschmied's Inkling 2 Mini
-# CUDA engine, dc2ca8a1) plus the recipe's patches 0001–0018, natively — the
-# container build of yuanw/Inkling-2-Mini-DGX-Spark-TensorFold replicated
+# CUDA engine, dc2ca8a1) plus the recipe's patches 0001–0030, natively — the
+# container build of MiaAI-Lab/Inkling-2-Mini-DGX-Spark-TensorFold replicated
 # without Docker:
 #
 #   zig build -Dnvcc=… -Doptimize=fast -Dnative-fp-decode=true fatbins native
