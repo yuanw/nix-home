@@ -18,6 +18,7 @@ let
     "https://numtide.cachix.org"
     "https://cache.numtide.com"
     "https://cache.zw3rk.com"
+    "https://vicinae.cachix.org"
   ];
   # Silver goes first, but its position is cosmetic: harmonia serves at
   # priority 10 and cache.nixos.org at 40, so it wins wherever it is listed.
@@ -35,6 +36,7 @@ let
     "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
     # https://cache.zw3rk.com
     "loony-tools:pr9m4BkM/5/eSTZlkQyRt57Jz7OMBxNSUiMC4FkcNfk="
+    "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
   ];
 
   # Silver is a substituter but deliberately NOT a trusted-substituter: every

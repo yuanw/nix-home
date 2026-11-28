@@ -178,6 +178,16 @@
       url = "github:y3owk1n/neru";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Vicinae desktop launcher (https://docs.vicinae.com/nixos).
+    #
+    # Deliberately NOT `inputs.nixpkgs.follows = "nixpkgs"`: Vicinae's Cachix
+    # cache (https://vicinae.cachix.org) is built against the flake's own
+    # nixpkgs pin; following ours causes a cache miss and builds from source.
+    vicinae.url = "github:vicinaehq/vicinae";
+    vicinae-extensions = {
+      url = "github:vicinaehq/extensions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     preservation = {
       url = "github:nix-community/preservation";
@@ -265,9 +275,13 @@
       flake = {
         nixConfig = {
           extra-experimental-features = [ "pipe-operator" ];
-          extra-substituters = [ "https://cache.numtide.com" ];
+          extra-substituters = [
+            "https://cache.numtide.com"
+            "https://vicinae.cachix.org"
+          ];
           extra-trusted-public-keys = [
             "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+            "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
           ];
         };
       };

@@ -77,6 +77,7 @@ in
             inputs.mics-skills.homeModules.default
             inputs.mcp-servers-nix.homeManagerModules.default
             inputs.pi-flake.homeModules.default
+            inputs.vicinae.homeManagerModules.default
             (import ../modules/helpers/mergetools.nix)
           ];
           backupFileExtension = "hm-bak";
@@ -122,6 +123,7 @@ in
             inputs.direnv-instant.homeModules.direnv-instant
             inputs.mics-skills.homeModules.default
             inputs.mcp-servers-nix.homeManagerModules.default
+            inputs.vicinae.homeManagerModules.default
           ];
           backupFileExtension = "hm-bak";
           extraSpecialArgs = { inherit inputs; };
