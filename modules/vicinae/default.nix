@@ -72,14 +72,6 @@ let
           allowed_extensions = [ "firefox@vicinae.com" ];
         }
       );
-
-  toggleShortcut = lib.toLower (lib.attrByPath [ "global_shortcuts" "toggle" ] "" cfg.settings);
-  claimsCmdSpace = builtins.elem toggleShortcut [
-    "cmd+space"
-    "command+space"
-    "ctrl+space"
-    "control+space"
-  ];
 in
 {
   imports = lib.optionals isNixOS [ inputs.vicinae.nixosModules.default ];
@@ -304,59 +296,40 @@ in
         telemetry.system_info = lib.mkDefault false;
       };
 
-      home-manager.users.${config.my.username} =
-        hm@{ ... }:
-        {
-          # Upstream vicinae's HM module only wires Firefox and Chrome; mirror
-          # Home Manager's built-in module for LibreWolf native messaging.
-          mozilla.librewolfNativeMessagingHosts = lib.mkIf cfg.enableLibrewolfIntegration [
-            vicinaeNativeMessagingHost
-          ];
+      home-manager.users.${config.my.username} = {
+        # Upstream vicinae's HM module only wires Firefox and Chrome; mirror
+        # Home Manager's built-in module for LibreWolf native messaging.
+        mozilla.librewolfNativeMessagingHosts = lib.mkIf cfg.enableLibrewolfIntegration [
+          vicinaeNativeMessagingHost
+        ];
 
-          # Free Cmd+Space from Spotlight (symbolic hotkey 64) before launchd
-          # starts Vicinae so Carbon's RegisterEventHotKey succeeds without a
-          # conflict. Uses `defaults write -dict-add` (not nix-darwin's
-          # CustomUserPreferences, which replaces the whole AppleSymbolicHotKeys
-          # dict and wipes other macOS shortcuts, and not PlistBuddy, which
-          # bypasses cfprefsd).
-          home.activation.vicinaeDisableSpotlightShortcut = lib.mkIf (isDarwin && claimsCmdSpace) (
-            hm.config.lib.dag.entryBefore [ "setupLaunchAgents" ] ''
-              if [ -n "''${DRY_RUN:-}" ]; then
-                exit 0
-              fi
-              /usr/bin/defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 64 \
-                '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>'
-              /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u || true
-            ''
-          );
-
-          programs.vicinae = {
-            enable = true;
-            package = cfg.package;
-            enableNumen = cfg.enableNumen;
-            enableSoulver = cfg.enableSoulver;
-            enableFirefoxIntegration = cfg.enableFirefoxIntegration;
-            enableChromeIntegration = cfg.enableChromeIntegration;
-            extensions = resolvedExtensions;
-            themes = cfg.themes;
-            settingOverrides = cfg.settingOverrides;
-            settings = cfg.settings;
-            systemd = lib.mkIf isNixOS {
-              enable = cfg.systemd.enable;
-              autoStart = cfg.systemd.autoStart;
-              target = cfg.systemd.target;
-              environment = cfg.systemd.environment;
-            };
-            launchd = lib.mkIf isDarwin {
-              enable = cfg.launchd.enable;
-              autoStart = cfg.launchd.autoStart;
-              environment = cfg.launchd.environment;
-            };
-          }
-          // lib.optionalAttrs (cfg.localAI.enable != null) {
-            localAI.enable = cfg.localAI.enable;
+        programs.vicinae = {
+          enable = true;
+          package = cfg.package;
+          enableNumen = cfg.enableNumen;
+          enableSoulver = cfg.enableSoulver;
+          enableFirefoxIntegration = cfg.enableFirefoxIntegration;
+          enableChromeIntegration = cfg.enableChromeIntegration;
+          extensions = resolvedExtensions;
+          themes = cfg.themes;
+          settingOverrides = cfg.settingOverrides;
+          settings = cfg.settings;
+          systemd = lib.mkIf isNixOS {
+            enable = cfg.systemd.enable;
+            autoStart = cfg.systemd.autoStart;
+            target = cfg.systemd.target;
+            environment = cfg.systemd.environment;
           };
+          launchd = lib.mkIf isDarwin {
+            enable = cfg.launchd.enable;
+            autoStart = cfg.launchd.autoStart;
+            environment = cfg.launchd.environment;
+          };
+        }
+        // lib.optionalAttrs (cfg.localAI.enable != null) {
+          localAI.enable = cfg.localAI.enable;
         };
+      };
     })
   ];
 }
